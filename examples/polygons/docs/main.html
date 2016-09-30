@@ -52,21 +52,21 @@
 
   <span class="hljs-keyword">var</span> query = utils.getQuery();
   <span class="hljs-keyword">var</span> map = geo.map({
-    node: <span class="hljs-string">'#map'</span>,
-    center: {
-      x: <span class="hljs-number">-88.0</span>,
-      y: <span class="hljs-number">29</span>
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-88.0</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>
     },
-    zoom: <span class="hljs-number">4</span>
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">4</span>
   });
   <span class="hljs-keyword">if</span> (query.map !== <span class="hljs-string">'false'</span>) {
     map.createLayer(<span class="hljs-string">'osm'</span>);
   }
   <span class="hljs-keyword">var</span> layer = map.createLayer(<span class="hljs-string">'feature'</span>, {
-    renderer: query.renderer ? (query.renderer === <span class="hljs-string">'html'</span> ? <span class="hljs-literal">null</span> : query.renderer) : <span class="hljs-literal">undefined</span>,
-    features: query.renderer ? <span class="hljs-literal">undefined</span> : [<span class="hljs-string">'polygon'</span>]
+    <span class="hljs-attr">renderer</span>: query.renderer ? (query.renderer === <span class="hljs-string">'html'</span> ? <span class="hljs-literal">null</span> : query.renderer) : <span class="hljs-literal">undefined</span>,
+    <span class="hljs-attr">features</span>: query.renderer ? <span class="hljs-literal">undefined</span> : [<span class="hljs-string">'polygon'</span>]
   });
-  <span class="hljs-keyword">var</span> polygons = layer.createFeature(<span class="hljs-string">'polygon'</span>, {selectionAPI: <span class="hljs-literal">true</span>});
+  <span class="hljs-keyword">var</span> polygons = layer.createFeature(<span class="hljs-string">'polygon'</span>, {<span class="hljs-attr">selectionAPI</span>: <span class="hljs-literal">true</span>});
   <span class="hljs-keyword">var</span> hoverColor = query.hover || <span class="hljs-string">'blue'</span>;
   <span class="hljs-keyword">var</span> polyColor = query.color ? geo.util.convertColor(query.color) : <span class="hljs-literal">undefined</span>;
   $.getJSON(query.url || <span class="hljs-string">'../../data/land_polygons.json'</span>).done(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
@@ -77,24 +77,24 @@
       })
       */</span>
       .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
-        <span class="hljs-keyword">return</span> {x: d[<span class="hljs-number">0</span>], y: d[<span class="hljs-number">1</span>]};
+        <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: d[<span class="hljs-number">0</span>], <span class="hljs-attr">y</span>: d[<span class="hljs-number">1</span>]};
       })
       .data(data)
       .style({
-        uniformPolygon: <span class="hljs-literal">true</span>,
-        fillOpacity: query.opacity ? <span class="hljs-built_in">parseFloat</span>(query.opacity) : <span class="hljs-number">0.5</span>,
-        fillColor: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, idx, poly, polyidx</span>) </span>{
+        <span class="hljs-attr">uniformPolygon</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">fillOpacity</span>: query.opacity ? <span class="hljs-built_in">parseFloat</span>(query.opacity) : <span class="hljs-number">0.5</span>,
+        <span class="hljs-attr">fillColor</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, idx, poly, polyidx</span>) </span>{
           <span class="hljs-keyword">return</span> poly.hover ? hoverColor : (polyColor ? polyColor : {
-            r: (polyidx % <span class="hljs-number">256</span>) / <span class="hljs-number">255</span>,
-            g: polyidx / (data.length - <span class="hljs-number">1</span>),
-            b: <span class="hljs-number">0.25</span>
+            <span class="hljs-attr">r</span>: (polyidx % <span class="hljs-number">256</span>) / <span class="hljs-number">255</span>,
+            <span class="hljs-attr">g</span>: polyidx / (data.length - <span class="hljs-number">1</span>),
+            <span class="hljs-attr">b</span>: <span class="hljs-number">0.25</span>
           });
         },
-        stroke: query.stroke !== <span class="hljs-string">'false'</span> ? <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">poly, polyidx</span>) </span>{
+        <span class="hljs-attr">stroke</span>: query.stroke !== <span class="hljs-string">'false'</span> ? <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">poly, polyidx</span>) </span>{
           <span class="hljs-keyword">return</span> poly.hover;
         } : <span class="hljs-literal">false</span>,
-        strokeWidth: query.strokeWidth ? <span class="hljs-built_in">parseFloat</span>(query.strokeWidth) : <span class="hljs-number">1</span>,
-        strokeColor: {r: <span class="hljs-number">0</span>, g: <span class="hljs-number">0</span>, b: <span class="hljs-number">0</span>}
+        <span class="hljs-attr">strokeWidth</span>: query.strokeWidth ? <span class="hljs-built_in">parseFloat</span>(query.strokeWidth) : <span class="hljs-number">1</span>,
+        <span class="hljs-attr">strokeColor</span>: {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>}
       })
       .geoOn(geo.event.feature.mouseover, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
         <span class="hljs-keyword">if</span> (!evt.data.hover) {

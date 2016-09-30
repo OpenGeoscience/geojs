@@ -13,6 +13,23 @@ var exampleUtils = {
         return this;
       }.bind({}))[0];
     return query;
+  },
+
+  /* Encode a dictionary of parameters to the query string, setting the window
+   * location and history.  This will also remove undefined values from the
+   * set properites of params.
+   *
+   * @param {object} params: the query parameters as a dictionary.
+   */
+  setQuery: function (params) {
+    $.each(params, function (key, value) {
+      if (value === undefined) {
+        delete params[key];
+      }
+    });
+    var newurl = window.location.protocol + '//' + window.location.host +
+        window.location.pathname + '?' + $.param(params);
+    window.history.replaceState(params, '', newurl);
   }
 };
 

@@ -54,11 +54,11 @@
     <span class="hljs-keyword">var</span> contour = layer.createFeature(<span class="hljs-string">'contour'</span>)
       .data(data.position || data.values)
       .style({
-        opacity: <span class="hljs-number">0.75</span>
+        <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.75</span>
       })
       .contour({
-        gridWidth: data.gridWidth,
-        gridHeight: data.gridHeight,
+        <span class="hljs-attr">gridWidth</span>: data.gridWidth,
+        <span class="hljs-attr">gridHeight</span>: data.gridHeight,
         <span class="hljs-comment">/* The color range doesn't have to be linear:
         rangeValues: [0, 25, 50, 75, 100, 125, 250, 500, 750, 2000],
          */</span>
@@ -73,9 +73,9 @@
       });
     <span class="hljs-keyword">if</span> (data.position) {
       contour
-      .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> {x: d.x, y: d.y, z: d.z}; })
+      .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: d.x, <span class="hljs-attr">y</span>: d.y, <span class="hljs-attr">z</span>: d.z}; })
       .style({
-        value: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d.z &gt; <span class="hljs-number">-9999</span> ? d.z : <span class="hljs-literal">null</span>; }
+        <span class="hljs-attr">value</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d.z &gt; <span class="hljs-number">-9999</span> ? d.z : <span class="hljs-literal">null</span>; }
         <span class="hljs-comment">/* You can get better contours if you set a minimum value and set
          * sea locations to a small negative number:
         value: function (d) { return d.z &gt; -9999 ? d.z : -10; }
@@ -84,12 +84,12 @@
     } <span class="hljs-keyword">else</span> {
       contour
       .style({
-        value: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d &gt; <span class="hljs-number">-9999</span> ? d : <span class="hljs-literal">null</span>; }
+        <span class="hljs-attr">value</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d &gt; <span class="hljs-number">-9999</span> ? d : <span class="hljs-literal">null</span>; }
       })
       .contour({
         <span class="hljs-comment">/* The geometry can be specified using 0-point coordinates and deltas
          * since it is a regular grid. */</span>
-        x0: data.x0, y0: data.y0, dx: data.dx, dy: data.dy
+        x0: data.x0, <span class="hljs-attr">y0</span>: data.y0, <span class="hljs-attr">dx</span>: data.dx, <span class="hljs-attr">dy</span>: data.dy
       });
     }
     <span class="hljs-keyword">return</span> contour;
@@ -109,12 +109,12 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
-    node: <span class="hljs-string">'#map'</span>,
-    center: {
-      x: <span class="hljs-number">-157.965</span>,
-      y: <span class="hljs-number">21.482</span>
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-157.965</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">21.482</span>
     },
-    zoom: <span class="hljs-number">10</span>
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">10</span>
   });</pre></div></div>
             
         </li>
@@ -150,7 +150,7 @@
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> contourLayer = map.createLayer(
     <span class="hljs-string">'feature'</span>,
     {
-      features: [<span class="hljs-string">'contour'</span>]
+      <span class="hljs-attr">features</span>: [<span class="hljs-string">'contour'</span>]
     }
   );</pre></div></div>
             
@@ -168,15 +168,15 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  $.ajax({
-    url: <span class="hljs-string">'../../data/oahu.json'</span>,
-    success: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+    <span class="hljs-attr">url</span>: <span class="hljs-string">'../../data/oahu.json'</span>,
+    <span class="hljs-attr">success</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
       <span class="hljs-keyword">var</span> contour = makeContour(data, contourLayer);
       contour.draw();
       <span class="hljs-comment">/* After 10 second, load a denser data set */</span>
       <span class="hljs-built_in">window</span>.setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
         $.ajax({
-          url: <span class="hljs-string">'../../data/oahu-dense.json'</span>,
-          success: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'../../data/oahu-dense.json'</span>,
+          <span class="hljs-attr">success</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
             contourLayer.deleteFeature(contour);
             contour = makeContour(data, contourLayer, contour);
             contour.draw();

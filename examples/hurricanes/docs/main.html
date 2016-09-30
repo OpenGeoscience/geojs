@@ -223,7 +223,7 @@
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">makeHistogram</span>(<span class="hljs-params">data</span>) </span>{
-    <span class="hljs-keyword">var</span> margin = {top: <span class="hljs-number">45</span>, right: <span class="hljs-number">10</span>, left: <span class="hljs-number">10</span>, bottom: <span class="hljs-number">30</span>};
+    <span class="hljs-keyword">var</span> margin = {<span class="hljs-attr">top</span>: <span class="hljs-number">45</span>, <span class="hljs-attr">right</span>: <span class="hljs-number">10</span>, <span class="hljs-attr">left</span>: <span class="hljs-number">10</span>, <span class="hljs-attr">bottom</span>: <span class="hljs-number">30</span>};
     <span class="hljs-keyword">var</span> mapHeight = map.node().height() - <span class="hljs-number">15</span>;
     <span class="hljs-keyword">var</span> width = <span class="hljs-number">300</span>;
     <span class="hljs-keyword">var</span> height = <span class="hljs-number">100</span>;
@@ -334,13 +334,13 @@
       .line(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
         <span class="hljs-keyword">return</span> d3.range(d.time.length).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">i</span>) </span>{
           <span class="hljs-keyword">return</span> {
-            x: d.longitude[i],
-            y: d.latitude[i],
-            t: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(d.time[i]),
-            w: d.wind[i],
-            p: d.pressure[i],
-            d: d.dist2land[i],
-            c: category(d.pressure[i])
+            <span class="hljs-attr">x</span>: d.longitude[i],
+            <span class="hljs-attr">y</span>: d.latitude[i],
+            <span class="hljs-attr">t</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(d.time[i]),
+            <span class="hljs-attr">w</span>: d.wind[i],
+            <span class="hljs-attr">p</span>: d.pressure[i],
+            <span class="hljs-attr">d</span>: d.dist2land[i],
+            <span class="hljs-attr">c</span>: category(d.pressure[i])
           };
         });
       })
@@ -397,12 +397,12 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  map = geo.map({
-    node: <span class="hljs-string">'#map'</span>,
-    center: {
-      x: <span class="hljs-number">0</span>,
-      y: <span class="hljs-number">0</span>
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>
     },
-    zoom: <span class="hljs-number">3</span>
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">3</span>
   });</pre></div></div>
             
         </li>
@@ -433,7 +433,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  layer = map.createLayer(<span class="hljs-string">'feature'</span>, {features: [geo.lineFeature.capabilities.multicolor]});</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  layer = map.createLayer(<span class="hljs-string">'feature'</span>, {<span class="hljs-attr">features</span>: [geo.lineFeature.capabilities.multicolor]});</pre></div></div>
             
         </li>
         
@@ -448,7 +448,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  feature = layer.createFeature(<span class="hljs-string">'line'</span>, {selectionAPI: <span class="hljs-literal">true</span>});</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  feature = layer.createFeature(<span class="hljs-string">'line'</span>, {<span class="hljs-attr">selectionAPI</span>: <span class="hljs-literal">true</span>});</pre></div></div>
             
         </li>
         
@@ -464,55 +464,55 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  ui = map.createLayer(<span class="hljs-string">'ui'</span>);
-  ui.createWidget(<span class="hljs-string">'legend'</span>, {position: {right: <span class="hljs-number">20</span>, top: <span class="hljs-number">10</span>}})
+  ui.createWidget(<span class="hljs-string">'legend'</span>, {<span class="hljs-attr">position</span>: {<span class="hljs-attr">right</span>: <span class="hljs-number">20</span>, <span class="hljs-attr">top</span>: <span class="hljs-number">10</span>}})
     .categories([
       {
-        name: <span class="hljs-string">'Category 5'</span>,
-        style: {
-          strokeColor: cscale(<span class="hljs-number">5</span>),
-          strokeWidth: <span class="hljs-number">3</span>
+        <span class="hljs-attr">name</span>: <span class="hljs-string">'Category 5'</span>,
+        <span class="hljs-attr">style</span>: {
+          <span class="hljs-attr">strokeColor</span>: cscale(<span class="hljs-number">5</span>),
+          <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">3</span>
         },
-        type: <span class="hljs-string">'line'</span>
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'line'</span>
       },
       {
-        name: <span class="hljs-string">'Category 4'</span>,
-        style: {
-          strokeColor: cscale(<span class="hljs-number">4</span>),
-          strokeWidth: <span class="hljs-number">3</span>
+        <span class="hljs-attr">name</span>: <span class="hljs-string">'Category 4'</span>,
+        <span class="hljs-attr">style</span>: {
+          <span class="hljs-attr">strokeColor</span>: cscale(<span class="hljs-number">4</span>),
+          <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">3</span>
         },
-        type: <span class="hljs-string">'line'</span>
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'line'</span>
       },
       {
-        name: <span class="hljs-string">'Category 3'</span>,
-        style: {
-          strokeColor: cscale(<span class="hljs-number">3</span>),
-          strokeWidth: <span class="hljs-number">3</span>
+        <span class="hljs-attr">name</span>: <span class="hljs-string">'Category 3'</span>,
+        <span class="hljs-attr">style</span>: {
+          <span class="hljs-attr">strokeColor</span>: cscale(<span class="hljs-number">3</span>),
+          <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">3</span>
         },
-        type: <span class="hljs-string">'line'</span>
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'line'</span>
       },
       {
-        name: <span class="hljs-string">'Category 2'</span>,
-        style: {
-          strokeColor: cscale(<span class="hljs-number">2</span>),
-          strokeWidth: <span class="hljs-number">3</span>
+        <span class="hljs-attr">name</span>: <span class="hljs-string">'Category 2'</span>,
+        <span class="hljs-attr">style</span>: {
+          <span class="hljs-attr">strokeColor</span>: cscale(<span class="hljs-number">2</span>),
+          <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">3</span>
         },
-        type: <span class="hljs-string">'line'</span>
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'line'</span>
       },
       {
-        name: <span class="hljs-string">'Category 1'</span>,
-        style: {
-          strokeColor: cscale(<span class="hljs-number">1</span>),
-          strokeWidth: <span class="hljs-number">3</span>
+        <span class="hljs-attr">name</span>: <span class="hljs-string">'Category 1'</span>,
+        <span class="hljs-attr">style</span>: {
+          <span class="hljs-attr">strokeColor</span>: cscale(<span class="hljs-number">1</span>),
+          <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">3</span>
         },
-        type: <span class="hljs-string">'line'</span>
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'line'</span>
       },
       {
-        name: <span class="hljs-string">'Other'</span>,
-        style: {
-          strokeColor: cscale(<span class="hljs-number">0</span>),
-          strokeWidth: <span class="hljs-number">3</span>
+        <span class="hljs-attr">name</span>: <span class="hljs-string">'Other'</span>,
+        <span class="hljs-attr">style</span>: {
+          <span class="hljs-attr">strokeColor</span>: cscale(<span class="hljs-number">0</span>),
+          <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">3</span>
         },
-        type: <span class="hljs-string">'line'</span>
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'line'</span>
       }
     ]);
 
@@ -533,8 +533,8 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  $.ajax({
-    url: <span class="hljs-string">'../../data/hurricanes.json'</span>,
-    success: draw
+    <span class="hljs-attr">url</span>: <span class="hljs-string">'../../data/hurricanes.json'</span>,
+    <span class="hljs-attr">success</span>: draw
   });
 
   $(<span class="hljs-built_in">window</span>).resize(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{

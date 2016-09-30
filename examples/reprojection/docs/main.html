@@ -93,7 +93,7 @@ regular.</p>
 
   $.when(
     <span class="hljs-comment">/* Fetch projections */</span>
-    $.ajax({url: <span class="hljs-string">'proj.json'</span>}).done(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) </span>{
+    $.ajax({<span class="hljs-attr">url</span>: <span class="hljs-string">'proj.json'</span>}).done(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) </span>{
       $(<span class="hljs-string">'#map-gcs option'</span>).slice(<span class="hljs-number">1</span>).remove();
       resp.sort(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">a, b</span>) </span>{
         <span class="hljs-keyword">var</span> sa = a.name.split(<span class="hljs-string">':'</span>), sb = b.name.split(<span class="hljs-string">':'</span>);
@@ -110,7 +110,7 @@ regular.</p>
         <span class="hljs-keyword">if</span> (proj.bounds) {
           gcsBounds[proj.name] = proj.bounds;
         }
-        <span class="hljs-keyword">var</span> opt = $(<span class="hljs-string">'&lt;option/&gt;'</span>).attr({value: proj.name}).text(
+        <span class="hljs-keyword">var</span> opt = $(<span class="hljs-string">'&lt;option/&gt;'</span>).attr({<span class="hljs-attr">value</span>: proj.name}).text(
             proj.name + <span class="hljs-string">' - '</span> + proj.desc);
         $(<span class="hljs-string">'#map-gcs'</span>).append(opt);
       });
@@ -124,7 +124,7 @@ regular.</p>
         }
       });
       $(<span class="hljs-string">'#map-gcs option'</span>).eq(pos).before($(<span class="hljs-string">'&lt;option/&gt;'</span>).attr(
-          {value: <span class="hljs-string">'EPSG:3857'</span>}).text(<span class="hljs-string">'--------'</span>));</pre></div></div>
+          {<span class="hljs-attr">value</span>: <span class="hljs-string">'EPSG:3857'</span>}).text(<span class="hljs-string">'--------'</span>));</pre></div></div>
             
         </li>
         
@@ -144,7 +144,7 @@ see all of the projection options, disable the following line:</p>
     }),
 
     <span class="hljs-comment">/* Fetch cities */</span>
-    $.ajax({url: <span class="hljs-string">'capitals.json'</span>}).done(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) </span>{
+    $.ajax({<span class="hljs-attr">url</span>: <span class="hljs-string">'capitals.json'</span>}).done(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) </span>{
       capitals = resp;
     })
 
@@ -213,7 +213,7 @@ see all of the projection options, disable the following line:</p>
     $(<span class="hljs-string">'#controls'</span>).on(<span class="hljs-string">'change'</span>, change_controls);
 
     <span class="hljs-keyword">var</span> range = geo.transform.transformCoordinates(
-        <span class="hljs-string">'EPSG:4326'</span>, <span class="hljs-string">'EPSG:3857'</span>, [{x: <span class="hljs-number">-180</span>, y: <span class="hljs-number">0</span>}, {x: <span class="hljs-number">180</span>, y: <span class="hljs-number">0</span>}]);</pre></div></div>
+        <span class="hljs-string">'EPSG:4326'</span>, <span class="hljs-string">'EPSG:3857'</span>, [{<span class="hljs-attr">x</span>: <span class="hljs-number">-180</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>}, {<span class="hljs-attr">x</span>: <span class="hljs-number">180</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>}]);</pre></div></div>
             
         </li>
         
@@ -231,15 +231,15 @@ zoom level</p>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> gcs = query.gcs || <span class="hljs-string">'EPSG:3857'</span>;
     <span class="hljs-keyword">var</span> mapParams = {
-      node: <span class="hljs-string">'#map'</span>,
-      center: {x: <span class="hljs-number">0</span>, y: <span class="hljs-number">0</span>},
-      zoom: <span class="hljs-number">2</span>,
-      gcs: gcsTable[gcs],
-      unitsPerPixel: (range[<span class="hljs-number">1</span>].x - range[<span class="hljs-number">0</span>].x) / <span class="hljs-number">256</span>,
-      clampBoundsX: <span class="hljs-literal">false</span>,
-      clampBoundsY: <span class="hljs-literal">false</span>,
-      clampZoom: <span class="hljs-literal">false</span>,
-      discreteZoom: <span class="hljs-literal">false</span>
+      <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+      <span class="hljs-attr">center</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>},
+      <span class="hljs-attr">zoom</span>: <span class="hljs-number">2</span>,
+      <span class="hljs-attr">gcs</span>: gcsTable[gcs],
+      <span class="hljs-attr">unitsPerPixel</span>: (range[<span class="hljs-number">1</span>].x - range[<span class="hljs-number">0</span>].x) / <span class="hljs-number">256</span>,
+      <span class="hljs-attr">clampBoundsX</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">clampBoundsY</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">clampZoom</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">discreteZoom</span>: <span class="hljs-literal">false</span>
     };
     <span class="hljs-keyword">if</span> (gcsBounds[gcs]) {
       mapParams.maxBounds = gcsBounds[gcs];
@@ -259,15 +259,15 @@ zoom level</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> layerParams = {
-      features: [geo.quadFeature.capabilities.imageFull],
-      zIndex: <span class="hljs-number">0</span>,
-      gcs: <span class="hljs-string">'EPSG:3857'</span>,
-      attribution: $(<span class="hljs-string">'#url-list [value="'</span> + $(<span class="hljs-string">'#layer-url'</span>).val() + <span class="hljs-string">'"]'</span>).attr(
+      <span class="hljs-attr">features</span>: [geo.quadFeature.capabilities.imageFull],
+      <span class="hljs-attr">zIndex</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">gcs</span>: <span class="hljs-string">'EPSG:3857'</span>,
+      <span class="hljs-attr">attribution</span>: $(<span class="hljs-string">'#url-list [value="'</span> + $(<span class="hljs-string">'#layer-url'</span>).val() + <span class="hljs-string">'"]'</span>).attr(
           <span class="hljs-string">'credit'</span>),
-      minLevel: <span class="hljs-number">4</span>,
-      keepLower: <span class="hljs-literal">true</span>,
-      wrapX: <span class="hljs-literal">false</span>,
-      wrapY: <span class="hljs-literal">false</span>
+      <span class="hljs-attr">minLevel</span>: <span class="hljs-number">4</span>,
+      <span class="hljs-attr">keepLower</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">wrapX</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">wrapY</span>: <span class="hljs-literal">false</span>
     };</pre></div></div>
             
         </li>
@@ -332,8 +332,8 @@ zoom level</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> uiLayer = map.createLayer(<span class="hljs-string">'ui'</span>, {zIndex: <span class="hljs-number">2</span>});
-    <span class="hljs-keyword">var</span> tooltip = uiLayer.createWidget(<span class="hljs-string">'dom'</span>, {position: {x: <span class="hljs-number">0</span>, y: <span class="hljs-number">0</span>}});
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> uiLayer = map.createLayer(<span class="hljs-string">'ui'</span>, {<span class="hljs-attr">zIndex</span>: <span class="hljs-number">2</span>});
+    <span class="hljs-keyword">var</span> tooltip = uiLayer.createWidget(<span class="hljs-string">'dom'</span>, {<span class="hljs-attr">position</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>}});
     <span class="hljs-keyword">var</span> tooltipElem = $(tooltip.canvas()).attr(<span class="hljs-string">'id'</span>, <span class="hljs-string">'tooltip'</span>).addClass(
         <span class="hljs-string">'hidden'</span>);</pre></div></div>
             
@@ -350,33 +350,33 @@ zoom level</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> pointLayer = map.createLayer(<span class="hljs-string">'feature'</span>, {renderer: <span class="hljs-string">'vgl'</span>, zIndex: <span class="hljs-number">1</span>});
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> pointLayer = map.createLayer(<span class="hljs-string">'feature'</span>, {<span class="hljs-attr">renderer</span>: <span class="hljs-string">'vgl'</span>, <span class="hljs-attr">zIndex</span>: <span class="hljs-number">1</span>});
     <span class="hljs-keyword">var</span> pointFeature = pointLayer
       .createFeature(<span class="hljs-string">'point'</span>, {
-        selectionAPI: <span class="hljs-literal">true</span>,
-        style: {
-          fillColor: <span class="hljs-string">'#8080FF'</span>,
-          fillOpacity: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d.opacity ? d.opacity : <span class="hljs-number">0.25</span>; },
-          strokeColor: <span class="hljs-string">'black'</span>,
-          strokeOpacity: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+        <span class="hljs-attr">selectionAPI</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">style</span>: {
+          <span class="hljs-attr">fillColor</span>: <span class="hljs-string">'#8080FF'</span>,
+          <span class="hljs-attr">fillOpacity</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d.opacity ? d.opacity : <span class="hljs-number">0.25</span>; },
+          <span class="hljs-attr">strokeColor</span>: <span class="hljs-string">'black'</span>,
+          <span class="hljs-attr">strokeOpacity</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
             <span class="hljs-keyword">return</span> d.strokeOpacity ? d.strokeOpacity : <span class="hljs-number">0.25</span>;
           }
         },
-        visible: query.capitals !== <span class="hljs-string">'false'</span>
+        <span class="hljs-attr">visible</span>: query.capitals !== <span class="hljs-string">'false'</span>
       })
       .data(capitals)
       .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
-        <span class="hljs-keyword">return</span> {x: d.longitude, y: d.latitude};
+        <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: d.longitude, <span class="hljs-attr">y</span>: d.latitude};
       })
       .geoOn(geo.event.feature.mouseclick, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
-        pointLayer.map().center({x: evt.data.longitude, y: evt.data.latitude});
+        pointLayer.map().center({<span class="hljs-attr">x</span>: evt.data.longitude, <span class="hljs-attr">y</span>: evt.data.latitude});
       })
       .geoOn(geo.event.feature.mouseover, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
         evt.data.opacity = <span class="hljs-number">0.5</span>;
         evt.data.strokeOpacity = <span class="hljs-number">1</span>;
         <span class="hljs-keyword">this</span>.modified();
         <span class="hljs-keyword">this</span>.draw();
-        tooltip.position({x: evt.data.longitude, y: evt.data.latitude});
+        tooltip.position({<span class="hljs-attr">x</span>: evt.data.longitude, <span class="hljs-attr">y</span>: evt.data.latitude});
         tooltipElem.text(evt.data.city);
         tooltipElem.removeClass(<span class="hljs-string">'hidden'</span>);
       })

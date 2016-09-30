@@ -35,34 +35,34 @@
 <span class="hljs-meta">  'use strict'</span>;
 
   <span class="hljs-keyword">var</span> map = geo.map({
-    node: <span class="hljs-string">'#map'</span>,
-    center: {
-      x: <span class="hljs-number">-98</span>,
-      y: <span class="hljs-number">39</span>
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-98</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">39</span>
     },
-    zoom: <span class="hljs-number">3</span>
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">3</span>
   });
   <span class="hljs-keyword">var</span> layer, heatmap, points, datapoints;
 
   <span class="hljs-keyword">var</span> layerOptions = {
-    features: [<span class="hljs-string">'heatmap'</span>],
-    opacity: <span class="hljs-number">0.75</span>
+    <span class="hljs-attr">features</span>: [<span class="hljs-string">'heatmap'</span>],
+    <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.75</span>
   };
   <span class="hljs-keyword">var</span> heatmapOptions = {
-    binned: <span class="hljs-string">'auto'</span>,
-    minIntensity: <span class="hljs-literal">null</span>,
-    maxIntensity: <span class="hljs-literal">null</span>,
-    style: {
-      blurRadius: <span class="hljs-number">15</span>,
-      color: {
-        <span class="hljs-number">0.00</span>: {r: <span class="hljs-number">0</span>, g: <span class="hljs-number">0</span>, b: <span class="hljs-number">0</span>, a: <span class="hljs-number">0.0</span>},
-        <span class="hljs-number">0.25</span>: {r: <span class="hljs-number">0</span>, g: <span class="hljs-number">1</span>, b: <span class="hljs-number">0</span>, a: <span class="hljs-number">0.5</span>},
-        <span class="hljs-number">0.50</span>: {r: <span class="hljs-number">1</span>, g: <span class="hljs-number">1</span>, b: <span class="hljs-number">0</span>, a: <span class="hljs-number">0.8</span>},
-        <span class="hljs-number">1.00</span>: {r: <span class="hljs-number">1</span>, g: <span class="hljs-number">0</span>, b: <span class="hljs-number">0</span>, a: <span class="hljs-number">1.0</span>}
+    <span class="hljs-attr">binned</span>: <span class="hljs-string">'auto'</span>,
+    <span class="hljs-attr">minIntensity</span>: <span class="hljs-literal">null</span>,
+    <span class="hljs-attr">maxIntensity</span>: <span class="hljs-literal">null</span>,
+    <span class="hljs-attr">style</span>: {
+      <span class="hljs-attr">blurRadius</span>: <span class="hljs-number">15</span>,
+      <span class="hljs-attr">color</span>: {
+        <span class="hljs-number">0.00</span>: {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">0.0</span>},
+        <span class="hljs-number">0.25</span>: {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">0.5</span>},
+        <span class="hljs-number">0.50</span>: {<span class="hljs-attr">r</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">0.8</span>},
+        <span class="hljs-number">1.00</span>: {<span class="hljs-attr">r</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">1.0</span>}
       },
-      radius: <span class="hljs-number">25</span>
+      <span class="hljs-attr">radius</span>: <span class="hljs-number">25</span>
     },
-    updateDelay: <span class="hljs-number">50</span>
+    <span class="hljs-attr">updateDelay</span>: <span class="hljs-number">50</span>
   };</pre></div></div>
             
         </li>
@@ -102,13 +102,13 @@
       <span class="hljs-keyword">case</span> <span class="hljs-string">'gradient'</span>:
         <span class="hljs-keyword">var</span> parts = value.split(<span class="hljs-string">','</span>).map(<span class="hljs-built_in">parseFloat</span>);
         <span class="hljs-keyword">if</span> (parts.length &gt;= <span class="hljs-number">5</span>) {
-          <span class="hljs-keyword">var</span> gradient = {<span class="hljs-number">0</span>: {r: <span class="hljs-number">0</span>, g: <span class="hljs-number">0</span>, b: <span class="hljs-number">0</span>, a: <span class="hljs-number">0</span>}};
+          <span class="hljs-keyword">var</span> gradient = {<span class="hljs-number">0</span>: {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">0</span>}};
           <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; parts.length - <span class="hljs-number">4</span>; i += <span class="hljs-number">5</span>) {
             gradient[parts[i]] = {
-              r: parts[i + <span class="hljs-number">1</span>] / <span class="hljs-number">255</span>,
-              g: parts[i + <span class="hljs-number">2</span>] / <span class="hljs-number">255</span>,
-              b: parts[i + <span class="hljs-number">3</span>] / <span class="hljs-number">255</span>,
-              a: parts[i + <span class="hljs-number">4</span>]
+              <span class="hljs-attr">r</span>: parts[i + <span class="hljs-number">1</span>] / <span class="hljs-number">255</span>,
+              <span class="hljs-attr">g</span>: parts[i + <span class="hljs-number">2</span>] / <span class="hljs-number">255</span>,
+              <span class="hljs-attr">b</span>: parts[i + <span class="hljs-number">3</span>] / <span class="hljs-number">255</span>,
+              <span class="hljs-attr">a</span>: parts[i + <span class="hljs-number">4</span>]
             };
           }
           heatmapOptions.style.color = gradient;
@@ -180,7 +180,7 @@
     <span class="hljs-keyword">var</span> dataset = $(<span class="hljs-string">'#dataset'</span>).val(),
         url = <span class="hljs-string">'../../data/'</span> + $(<span class="hljs-string">'#dataset option:selected'</span>).attr(<span class="hljs-string">'url'</span>);
     $.ajax(url, {
-      success: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) </span>{
+      <span class="hljs-attr">success</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) </span>{
         <span class="hljs-built_in">window</span>.heatmap.datapoints = <span class="hljs-literal">null</span>;
         <span class="hljs-keyword">var</span> rows;
         <span class="hljs-keyword">switch</span> (dataset) {
@@ -296,10 +296,10 @@
             <span class="hljs-keyword">continue</span>;
           }
           gradient[gradkey] = {
-            r: <span class="hljs-built_in">parseInt</span>($(<span class="hljs-string">'#gradR'</span> + idx).val() || <span class="hljs-number">0</span>) / <span class="hljs-number">255</span>,
-            g: <span class="hljs-built_in">parseInt</span>($(<span class="hljs-string">'#gradG'</span> + idx).val() || <span class="hljs-number">0</span>) / <span class="hljs-number">255</span>,
-            b: <span class="hljs-built_in">parseInt</span>($(<span class="hljs-string">'#gradB'</span> + idx).val() || <span class="hljs-number">0</span>) / <span class="hljs-number">255</span>,
-            a: <span class="hljs-built_in">parseFloat</span>($(<span class="hljs-string">'#gradA'</span> + idx).val() || <span class="hljs-number">0</span>)
+            <span class="hljs-attr">r</span>: <span class="hljs-built_in">parseInt</span>($(<span class="hljs-string">'#gradR'</span> + idx).val() || <span class="hljs-number">0</span>) / <span class="hljs-number">255</span>,
+            <span class="hljs-attr">g</span>: <span class="hljs-built_in">parseInt</span>($(<span class="hljs-string">'#gradG'</span> + idx).val() || <span class="hljs-number">0</span>) / <span class="hljs-number">255</span>,
+            <span class="hljs-attr">b</span>: <span class="hljs-built_in">parseInt</span>($(<span class="hljs-string">'#gradB'</span> + idx).val() || <span class="hljs-number">0</span>) / <span class="hljs-number">255</span>,
+            <span class="hljs-attr">a</span>: <span class="hljs-built_in">parseFloat</span>($(<span class="hljs-string">'#gradA'</span> + idx).val() || <span class="hljs-number">0</span>)
           };
         }
         <span class="hljs-keyword">if</span> (!(<span class="hljs-number">0</span> <span class="hljs-keyword">in</span> gradient &amp;&amp; <span class="hljs-number">1</span> <span class="hljs-keyword">in</span> gradient)) {
@@ -372,16 +372,16 @@
       <span class="hljs-keyword">return</span> d[<span class="hljs-number">0</span>];
     })
     .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
-      <span class="hljs-keyword">return</span> {x: d[<span class="hljs-number">2</span>], y: d[<span class="hljs-number">1</span>]};
+      <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: d[<span class="hljs-number">2</span>], <span class="hljs-attr">y</span>: d[<span class="hljs-number">1</span>]};
     });
   <span class="hljs-comment">/* Make some values available in the global context so curious people can
    * play with them. */</span>
   <span class="hljs-built_in">window</span>.heatmap = {
-    map: map,
-    layer: layer,
-    layerOptions: layerOptions,
-    heatmap: heatmap,
-    heatmapOptions: heatmapOptions
+    <span class="hljs-attr">map</span>: map,
+    <span class="hljs-attr">layer</span>: layer,
+    <span class="hljs-attr">layerOptions</span>: layerOptions,
+    <span class="hljs-attr">heatmap</span>: heatmap,
+    <span class="hljs-attr">heatmapOptions</span>: heatmapOptions
   };
 
   fetch_data();

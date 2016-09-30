@@ -66,8 +66,8 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> {
-      layer: layer,
-      svg: layer.canvas()
+      <span class="hljs-attr">layer</span>: layer,
+      <span class="hljs-attr">svg</span>: layer.canvas()
     };
   }</pre></div></div>
             
@@ -85,7 +85,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">topLayer</span>(<span class="hljs-params">map</span>) </span>{
-    <span class="hljs-keyword">var</span> obj = getSvgLayer(map, {sticky: <span class="hljs-literal">false</span>});</pre></div></div>
+    <span class="hljs-keyword">var</span> obj = getSvgLayer(map, {<span class="hljs-attr">sticky</span>: <span class="hljs-literal">false</span>});</pre></div></div>
             
         </li>
         
@@ -124,12 +124,12 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
-    node: <span class="hljs-string">'#map'</span>,
-    center: {
-      x: <span class="hljs-number">-98.0</span>,
-      y: <span class="hljs-number">39.5</span>
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-98.0</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">39.5</span>
     },
-    zoom: <span class="hljs-number">4</span>
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">4</span>
   });</pre></div></div>
             
         </li>
@@ -176,7 +176,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> info = getSvgLayer(map, {sticky: <span class="hljs-literal">false</span>}).svg
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> info = getSvgLayer(map, {<span class="hljs-attr">sticky</span>: <span class="hljs-literal">false</span>}).svg
     .append(<span class="hljs-string">'text'</span>)
       .attr(<span class="hljs-string">'x'</span>, <span class="hljs-number">30</span>)
       .attr(<span class="hljs-string">'y'</span>, <span class="hljs-number">30</span>)

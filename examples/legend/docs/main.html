@@ -48,8 +48,8 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
-    node: <span class="hljs-string">'#map'</span>,
-    zoom: <span class="hljs-number">3</span>
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">3</span>
   });</pre></div></div>
             
         </li>
@@ -96,9 +96,9 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> legend = ui.createWidget(<span class="hljs-string">'legend'</span>, {
-    position: {
-      right: <span class="hljs-number">20</span>,
-      top: <span class="hljs-number">10</span>
+    <span class="hljs-attr">position</span>: {
+      <span class="hljs-attr">right</span>: <span class="hljs-number">20</span>,
+      <span class="hljs-attr">top</span>: <span class="hljs-number">10</span>
     }
   });</pre></div></div>
             
@@ -137,64 +137,64 @@ properties as feature styles (fill is ignored for lines):</p>
             
             <div class="content"><div class='highlight'><pre>  legend.categories([
     {
-      name: <span class="hljs-string">'Basic red point'</span>,
-      style: {
-        fillColor: <span class="hljs-string">'red'</span>,
-        stroke: <span class="hljs-literal">false</span>
+      <span class="hljs-attr">name</span>: <span class="hljs-string">'Basic red point'</span>,
+      <span class="hljs-attr">style</span>: {
+        <span class="hljs-attr">fillColor</span>: <span class="hljs-string">'red'</span>,
+        <span class="hljs-attr">stroke</span>: <span class="hljs-literal">false</span>
       },
-      type: <span class="hljs-string">'point'</span>
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'point'</span>
     },
     {
-      name: <span class="hljs-string">'Blue point with black stroke'</span>,
-      style: {
-        fillColor: <span class="hljs-string">'blue'</span>,
-        stroke: <span class="hljs-literal">true</span>,
-        strokeColor: <span class="hljs-string">'black'</span>
+      <span class="hljs-attr">name</span>: <span class="hljs-string">'Blue point with black stroke'</span>,
+      <span class="hljs-attr">style</span>: {
+        <span class="hljs-attr">fillColor</span>: <span class="hljs-string">'blue'</span>,
+        <span class="hljs-attr">stroke</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">strokeColor</span>: <span class="hljs-string">'black'</span>
       },
-      type: <span class="hljs-string">'point'</span>
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'point'</span>
     },
     {
-      name: <span class="hljs-string">'Point with wide green stroke'</span>,
-      style: {
-        fill: <span class="hljs-literal">false</span>,
-        stroke: <span class="hljs-literal">true</span>,
-        strokeColor: <span class="hljs-string">'green'</span>,
-        strokeWidth: <span class="hljs-number">3.5</span>
+      <span class="hljs-attr">name</span>: <span class="hljs-string">'Point with wide green stroke'</span>,
+      <span class="hljs-attr">style</span>: {
+        <span class="hljs-attr">fill</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">stroke</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">strokeColor</span>: <span class="hljs-string">'green'</span>,
+        <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">3.5</span>
       },
-      type: <span class="hljs-string">'point'</span>
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'point'</span>
     },
     {
-      name: <span class="hljs-string">'Semi-transparent point'</span>,
-      style: {
-        fillColor: <span class="hljs-string">'black'</span>,
-        fillOpacity: <span class="hljs-number">0.5</span>,
-        strokeColor: <span class="hljs-string">'black'</span>
+      <span class="hljs-attr">name</span>: <span class="hljs-string">'Semi-transparent point'</span>,
+      <span class="hljs-attr">style</span>: {
+        <span class="hljs-attr">fillColor</span>: <span class="hljs-string">'black'</span>,
+        <span class="hljs-attr">fillOpacity</span>: <span class="hljs-number">0.5</span>,
+        <span class="hljs-attr">strokeColor</span>: <span class="hljs-string">'black'</span>
       },
-      type: <span class="hljs-string">'point'</span>
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'point'</span>
     },
     {
-      name: <span class="hljs-string">'Line with wide green stroke'</span>,
-      style: {
-        strokeColor: <span class="hljs-string">'green'</span>,
-        strokeWidth: <span class="hljs-number">5</span>,
-        strokeOpacity: <span class="hljs-number">0.75</span>
+      <span class="hljs-attr">name</span>: <span class="hljs-string">'Line with wide green stroke'</span>,
+      <span class="hljs-attr">style</span>: {
+        <span class="hljs-attr">strokeColor</span>: <span class="hljs-string">'green'</span>,
+        <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">5</span>,
+        <span class="hljs-attr">strokeOpacity</span>: <span class="hljs-number">0.75</span>
       },
-      type: <span class="hljs-string">'line'</span>
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'line'</span>
     },
     {
-      name: <span class="hljs-string">'Line with thin black stroke'</span>,
-      style: {
-        strokeColor: <span class="hljs-string">'black'</span>,
-        strokeWidth: <span class="hljs-number">1</span>
+      <span class="hljs-attr">name</span>: <span class="hljs-string">'Line with thin black stroke'</span>,
+      <span class="hljs-attr">style</span>: {
+        <span class="hljs-attr">strokeColor</span>: <span class="hljs-string">'black'</span>,
+        <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">1</span>
       },
-      type: <span class="hljs-string">'line'</span>
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'line'</span>
     },
     {
-      name: <span class="hljs-string">'Generic label type'</span>,
-      style: {
-        strokeColor: <span class="hljs-string">'black'</span>,
-        fillColor: <span class="hljs-string">'magenta'</span>,
-        fillOpacity: <span class="hljs-number">0.5</span>
+      <span class="hljs-attr">name</span>: <span class="hljs-string">'Generic label type'</span>,
+      <span class="hljs-attr">style</span>: {
+        <span class="hljs-attr">strokeColor</span>: <span class="hljs-string">'black'</span>,
+        <span class="hljs-attr">fillColor</span>: <span class="hljs-string">'magenta'</span>,
+        <span class="hljs-attr">fillOpacity</span>: <span class="hljs-number">0.5</span>
       }
     }
   ]);

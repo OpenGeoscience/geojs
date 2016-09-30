@@ -48,21 +48,21 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  palette: <span class="hljs-string">'YlGn'</span>,
-  selectedNum: <span class="hljs-string">'3'</span>,
-  type: <span class="hljs-string">'continuous'</span>,
-  min: <span class="hljs-string">'0'</span>,
-  max: <span class="hljs-string">'300'</span>,
-  name: <span class="hljs-string">'usgs:ned'</span>,
-  sld: <span class="hljs-string">''</span>,
-  projection: <span class="hljs-string">'EPSG:3785'</span>
+  <span class="hljs-attr">selectedNum</span>: <span class="hljs-string">'3'</span>,
+  <span class="hljs-attr">type</span>: <span class="hljs-string">'continuous'</span>,
+  <span class="hljs-attr">min</span>: <span class="hljs-string">'0'</span>,
+  <span class="hljs-attr">max</span>: <span class="hljs-string">'300'</span>,
+  <span class="hljs-attr">name</span>: <span class="hljs-string">'usgs:ned'</span>,
+  <span class="hljs-attr">sld</span>: <span class="hljs-string">''</span>,
+  <span class="hljs-attr">projection</span>: <span class="hljs-string">'EPSG:3785'</span>
 };
 
 <span class="hljs-keyword">var</span> layerViewer = {
-  renderPalettes: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-attr">renderPalettes</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">var</span> paletteArray = <span class="hljs-built_in">Object</span>.keys(colorbrewer);
     utility.populateDropdown(<span class="hljs-string">'#palette'</span>, paletteArray);
   },
-  renderWidget: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">layer</span>) </span>{</pre></div></div>
+  <span class="hljs-attr">renderWidget</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">layer</span>) </span>{</pre></div></div>
             
         </li>
         
@@ -135,7 +135,7 @@
 };
 
 <span class="hljs-keyword">var</span> layerController = {
-  syncLayer: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">layer</span>) </span>{</pre></div></div>
+  <span class="hljs-attr">syncLayer</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">layer</span>) </span>{</pre></div></div>
             
         </li>
         
@@ -170,7 +170,7 @@
       .val();
     layer.sld = <span class="hljs-keyword">this</span>.generateSld(layer);
   },
-  generateSld: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">layer</span>) </span>{</pre></div></div>
+  <span class="hljs-attr">generateSld</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">layer</span>) </span>{</pre></div></div>
             
         </li>
         
@@ -223,11 +223,11 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
-    node: <span class="hljs-string">'#map'</span>,
-    zoom: <span class="hljs-number">8</span>,
-    center: {
-      x: <span class="hljs-number">-76.0</span>,
-      y: <span class="hljs-number">39</span>
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">8</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-76.0</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">39</span>
     }
   });</pre></div></div>
             
@@ -371,7 +371,7 @@
           .html(<span class="hljs-keyword">this</span>));
     });
   },
-  generateSequence: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">start, stop, count</span>) </span>{</pre></div></div>
+  <span class="hljs-attr">generateSequence</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">start, stop, count</span>) </span>{</pre></div></div>
             
         </li>
         
@@ -394,7 +394,7 @@ stop and count variables</p>
     }
     <span class="hljs-keyword">return</span> sequence;
   },
-  getPalette: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, count</span>) </span>{</pre></div></div>
+  <span class="hljs-attr">getPalette</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, count</span>) </span>{</pre></div></div>
             
         </li>
         
@@ -411,7 +411,7 @@ stop and count variables</p>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> colorbrewer[name][count];
   },
-  createMapEntry: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">xml, color, value, opacity</span>) </span>{</pre></div></div>
+  <span class="hljs-attr">createMapEntry</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">xml, color, value, opacity</span>) </span>{</pre></div></div>
             
         </li>
         
@@ -430,12 +430,12 @@ stop and count variables</p>
       .find(<span class="hljs-string">'ColorMap'</span>)
       .append($(<span class="hljs-string">'&lt;ColorMapEntry&gt;'</span>, xml)
         .attr({
-          color: color,
-          quantity: value,
-          opacity: opacity
+          <span class="hljs-attr">color</span>: color,
+          <span class="hljs-attr">quantity</span>: value,
+          <span class="hljs-attr">opacity</span>: opacity
         }));
   },
-  generateXml: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, count, values, palette, type</span>) </span>{</pre></div></div>
+  <span class="hljs-attr">generateXml</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, count, values, palette, type</span>) </span>{</pre></div></div>
             
         </li>
         
@@ -510,7 +510,7 @@ stop and count variables</p>
 
     <span class="hljs-keyword">return</span> xmlString;
   },
-  createWMSLayer: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">map, sld, projection, layer_name</span>) </span>{</pre></div></div>
+  <span class="hljs-attr">createWMSLayer</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">map, sld, projection, layer_name</span>) </span>{</pre></div></div>
             
         </li>
         
@@ -526,8 +526,8 @@ stop and count variables</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> wms = map.createLayer(<span class="hljs-string">'osm'</span>, {
-      keepLower: <span class="hljs-literal">false</span>,
-      attribution: <span class="hljs-literal">null</span>
+      <span class="hljs-attr">keepLower</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">attribution</span>: <span class="hljs-literal">null</span>
     });
 
     wms.url(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">x, y, zoom</span>) </span>{</pre></div></div>
@@ -546,9 +546,9 @@ stop and count variables</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> bb = wms.gcsTileBounds({
-        x: x,
-        y: y,
-        level: zoom
+        <span class="hljs-attr">x</span>: x,
+        <span class="hljs-attr">y</span>: y,
+        <span class="hljs-attr">level</span>: zoom
       }, projection);
       <span class="hljs-keyword">var</span> bbox_mercator = bb.left + <span class="hljs-string">','</span> + bb.bottom + <span class="hljs-string">','</span> +
         bb.right + <span class="hljs-string">','</span> + bb.top;</pre></div></div>

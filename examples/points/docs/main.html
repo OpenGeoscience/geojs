@@ -67,13 +67,13 @@ optional mouse handling API.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> layer.createFeature(<span class="hljs-string">'point'</span>, {selectionAPI: <span class="hljs-literal">true</span>})
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> layer.createFeature(<span class="hljs-string">'point'</span>, {<span class="hljs-attr">selectionAPI</span>: <span class="hljs-literal">true</span>})
       .data(data)                                               <span class="hljs-comment">// bind data</span>
-        .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> {x: d.x, y: d.y}; })    <span class="hljs-comment">// position accessor</span>
+        .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: d.x, <span class="hljs-attr">y</span>: d.y}; })    <span class="hljs-comment">// position accessor</span>
         .style(<span class="hljs-string">'radius'</span>, <span class="hljs-number">100</span>)                                   <span class="hljs-comment">// circle radius</span>
         .style(<span class="hljs-string">'fillColor'</span>, color)
         .style(<span class="hljs-string">'fillOpacity'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d.opacity; })
-        .style(<span class="hljs-string">'strokeColor'</span>, {r: <span class="hljs-number">0</span>, g: <span class="hljs-number">0</span>, b: <span class="hljs-number">0</span>})
+        .style(<span class="hljs-string">'strokeColor'</span>, {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>})
         .style(<span class="hljs-string">'strokeWidth'</span>, <span class="hljs-number">2</span>)</pre></div></div>
             
         </li>
@@ -135,12 +135,12 @@ properties.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
-    node: <span class="hljs-string">'#map'</span>,
-    center: {
-      x: <span class="hljs-number">-98.0</span>,
-      y: <span class="hljs-number">39.5</span>
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-98.0</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">39.5</span>
     },
-    zoom: <span class="hljs-number">4.9</span>
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">4.9</span>
   });</pre></div></div>
             
         </li>
@@ -159,7 +159,7 @@ properties.</p>
             <div class="content"><div class='highlight'><pre>  map.createLayer(
     <span class="hljs-string">'osm'</span>,
     {
-      url: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-attr">url</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-string">'white.jpg'</span>;
       }
     }
@@ -181,7 +181,7 @@ properties.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> vglLayer = map.createLayer(
     <span class="hljs-string">'feature'</span>,
     {
-      renderer: <span class="hljs-string">'vgl'</span>
+      <span class="hljs-attr">renderer</span>: <span class="hljs-string">'vgl'</span>
     }
   );</pre></div></div>
             
@@ -201,7 +201,7 @@ properties.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> svgLayer = map.createLayer(
     <span class="hljs-string">'feature'</span>,
     {
-      renderer: <span class="hljs-string">'d3'</span>
+      <span class="hljs-attr">renderer</span>: <span class="hljs-string">'d3'</span>
     }
   );</pre></div></div>
             
@@ -236,7 +236,7 @@ properties.</p>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> data = d3.range(<span class="hljs-number">2</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">i</span>) </span>{
     <span class="hljs-keyword">return</span> {
-      x: <span class="hljs-number">-95</span>,             <span class="hljs-comment">// longitude</span>
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-95</span>,             <span class="hljs-comment">// longitude</span>
       y: <span class="hljs-number">39.5</span> + <span class="hljs-number">4.5</span> * i,  <span class="hljs-comment">// latitude</span>
       c: vglColor,        <span class="hljs-comment">// fill color</span>
       opacity: <span class="hljs-number">0.1</span>        <span class="hljs-comment">// fill opacity</span>
@@ -259,7 +259,7 @@ properties.</p>
             
             <div class="content"><div class='highlight'><pre>  data = d3.range(<span class="hljs-number">2</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">i</span>) </span>{
     <span class="hljs-keyword">return</span> {
-      x: <span class="hljs-number">-101</span>,            <span class="hljs-comment">// longitude</span>
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-101</span>,            <span class="hljs-comment">// longitude</span>
       y: <span class="hljs-number">39.5</span> + <span class="hljs-number">4.5</span> * i,  <span class="hljs-comment">// latitude</span>
       c: svgColor,        <span class="hljs-comment">// fill color</span>
       opacity: <span class="hljs-number">0.1</span>        <span class="hljs-comment">// fill opacity</span>

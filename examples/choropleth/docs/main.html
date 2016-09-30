@@ -74,12 +74,12 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
-    node: <span class="hljs-string">'#map'</span>,
-    center: {
-      x: <span class="hljs-number">-75.965</span>,
-      y: <span class="hljs-number">39.482</span>
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-75.965</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">39.482</span>
     },
-    zoom: <span class="hljs-number">4</span>
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">4</span>
   });</pre></div></div>
             
         </li>
@@ -117,7 +117,7 @@ render {renderer: ‘vgl’} or for a layer that supports our feature
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> choroplethLayer = map.createLayer(
     <span class="hljs-string">'feature'</span>,
     {
-      features: [<span class="hljs-string">'choropleth'</span>]
+      <span class="hljs-attr">features</span>: [<span class="hljs-string">'choropleth'</span>]
     }
   );</pre></div></div>
             
@@ -135,9 +135,9 @@ render {renderer: ‘vgl’} or for a layer that supports our feature
             </div>
             
             <div class="content"><div class='highlight'><pre>  $.ajax({
-    url: <span class="hljs-string">'states.json'</span>,
-    dataType: <span class="hljs-string">'json'</span>,
-    success: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">geoData</span>) </span>{
+    <span class="hljs-attr">url</span>: <span class="hljs-string">'states.json'</span>,
+    <span class="hljs-attr">dataType</span>: <span class="hljs-string">'json'</span>,
+    <span class="hljs-attr">success</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">geoData</span>) </span>{
 
       <span class="hljs-keyword">var</span> mockScalarData = geoData
           .features
@@ -157,8 +157,8 @@ render {renderer: ‘vgl’} or for a layer that supports our feature
             </div>
             
             <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">return</span> {
-              value: <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">10</span>,
-              id: feature.properties.GEO_ID
+              <span class="hljs-attr">value</span>: <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">10</span>,
+              <span class="hljs-attr">id</span>: feature.properties.GEO_ID
             };
           });
 
@@ -170,8 +170,8 @@ render {renderer: ‘vgl’} or for a layer that supports our feature
             .features
             .map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">feature</span>) </span>{
               <span class="hljs-keyword">return</span> {
-                value: <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">10</span>,
-                id: feature.properties.GEO_ID
+                <span class="hljs-attr">value</span>: <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">10</span>,
+                <span class="hljs-attr">id</span>: feature.properties.GEO_ID
               };
             });
 

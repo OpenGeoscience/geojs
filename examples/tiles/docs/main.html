@@ -201,13 +201,13 @@ zoom level</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> mapParams = {
-    node: <span class="hljs-string">'#map'</span>,
-    center: {
-      x: <span class="hljs-number">-98.0</span>,
-      y: <span class="hljs-number">39.5</span>
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-98.0</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">39.5</span>
     },
-    maxBounds: {},
-    zoom: query.zoom !== <span class="hljs-literal">undefined</span> ? <span class="hljs-built_in">parseFloat</span>(query.zoom) : <span class="hljs-number">3</span>
+    <span class="hljs-attr">maxBounds</span>: {},
+    <span class="hljs-attr">zoom</span>: query.zoom !== <span class="hljs-literal">undefined</span> ? <span class="hljs-built_in">parseFloat</span>(query.zoom) : <span class="hljs-number">3</span>
   };</pre></div></div>
             
         </li>
@@ -224,12 +224,12 @@ zoom level</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> layerParams = {
-    renderer: query.renderer &amp;&amp; query.renderer !== <span class="hljs-string">'default'</span> ? query.renderer : <span class="hljs-literal">undefined</span>,
-    opacity: query.opacity || <span class="hljs-string">'1'</span>,
+    <span class="hljs-attr">renderer</span>: query.renderer &amp;&amp; query.renderer !== <span class="hljs-string">'default'</span> ? query.renderer : <span class="hljs-literal">undefined</span>,
+    <span class="hljs-attr">opacity</span>: query.opacity || <span class="hljs-string">'1'</span>,
     <span class="hljs-comment">/* Always use a larger cache so if keepLower is changed, we still have a
      * big enough cache. */</span>
     cacheSize: <span class="hljs-number">600</span>,
-    attribution: $(<span class="hljs-string">'#url-list [value="'</span> + $(<span class="hljs-string">'#layer-url'</span>).val() + <span class="hljs-string">'"]'</span>).attr(
+    <span class="hljs-attr">attribution</span>: $(<span class="hljs-string">'#url-list [value="'</span> + $(<span class="hljs-string">'#layer-url'</span>).val() + <span class="hljs-string">'"]'</span>).attr(
         <span class="hljs-string">'credit'</span>)
   };
   <span class="hljs-keyword">if</span> (layerParams.renderer === <span class="hljs-string">'null'</span> || layerParams.renderer === <span class="hljs-string">'html'</span>) {
@@ -249,8 +249,8 @@ zoom level</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> springEnabled = {spring: {enabled: <span class="hljs-literal">true</span>, springConstant: <span class="hljs-number">0.00005</span>}},
-      springDisabled = {spring: {enabled: <span class="hljs-literal">false</span>}};</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> springEnabled = {<span class="hljs-attr">spring</span>: {<span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">springConstant</span>: <span class="hljs-number">0.00005</span>}},
+      springDisabled = {<span class="hljs-attr">spring</span>: {<span class="hljs-attr">enabled</span>: <span class="hljs-literal">false</span>}};</pre></div></div>
             
         </li>
         
@@ -320,23 +320,27 @@ the lower-right.</p>
     mapParams.ingcs = <span class="hljs-string">'+proj=longlat +axis=esu'</span>;
     mapParams.gcs = <span class="hljs-string">'+proj=longlat +axis=enu'</span>;
     <span class="hljs-comment">/* mapParams.ingcs = mapParams.gcs = ''; */</span>
-    mapParams.maxBounds = {left: <span class="hljs-number">0</span>, top: <span class="hljs-number">0</span>, right: w, bottom: h};
-    mapParams.center = {x: w / <span class="hljs-number">2</span>, y: h / <span class="hljs-number">2</span>};
+    mapParams.maxBounds = {<span class="hljs-attr">left</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">top</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">right</span>: w, <span class="hljs-attr">bottom</span>: h};
+    mapParams.center = {<span class="hljs-attr">x</span>: w / <span class="hljs-number">2</span>, <span class="hljs-attr">y</span>: h / <span class="hljs-number">2</span>};
     mapParams.max = <span class="hljs-built_in">Math</span>.ceil(<span class="hljs-built_in">Math</span>.log(<span class="hljs-built_in">Math</span>.max(w, h) / <span class="hljs-number">256</span>) / <span class="hljs-built_in">Math</span>.log(<span class="hljs-number">2</span>));
     mapParams.clampBoundsX = mapParams.clampBoundsY = <span class="hljs-literal">true</span>;
     layerParams.maxLevel = mapParams.max;
     layerParams.wrapX = layerParams.wrapY = <span class="hljs-literal">false</span>;
     layerParams.tileOffset = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-      <span class="hljs-keyword">return</span> {x: <span class="hljs-number">0</span>, y: <span class="hljs-number">0</span>};
+      <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>};
     };
     layerParams.attribution = <span class="hljs-string">''</span>;
     layerParams.tileRounding = <span class="hljs-built_in">Math</span>.ceil;
     layerParams.tilesAtZoom = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">level</span>) </span>{
       <span class="hljs-keyword">var</span> scale = <span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2</span>, layerParams.maxLevel - level);
       <span class="hljs-keyword">return</span> {
-        x: <span class="hljs-built_in">Math</span>.ceil(w / (layerParams.tileWidth || <span class="hljs-number">256</span>) / scale),
-        y: <span class="hljs-built_in">Math</span>.ceil(h / (layerParams.tileHeight || <span class="hljs-number">256</span>) / scale)
+        <span class="hljs-attr">x</span>: <span class="hljs-built_in">Math</span>.ceil(w / (layerParams.tileWidth || <span class="hljs-number">256</span>) / scale),
+        <span class="hljs-attr">y</span>: <span class="hljs-built_in">Math</span>.ceil(h / (layerParams.tileHeight || <span class="hljs-number">256</span>) / scale)
       };
+    };
+    layerParams.tilesMaxBounds = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">level</span>) </span>{
+      <span class="hljs-keyword">var</span> scale = <span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2</span>, layerParams.maxLevel - level);
+      <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: <span class="hljs-built_in">Math</span>.floor(w / scale), <span class="hljs-attr">y</span>: <span class="hljs-built_in">Math</span>.floor(h / scale)};
     };
   }</pre></div></div>
             
@@ -457,10 +461,10 @@ maximum zoom</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  $.each({
-    clampBoundsX: <span class="hljs-string">'clampBoundsX'</span>,
-    clampBoundsY: <span class="hljs-string">'clampBoundsY'</span>,
-    clampZoom: <span class="hljs-string">'clampZoom'</span>,
-    discrete: <span class="hljs-string">'discreteZoom'</span>
+    <span class="hljs-attr">clampBoundsX</span>: <span class="hljs-string">'clampBoundsX'</span>,
+    <span class="hljs-attr">clampBoundsY</span>: <span class="hljs-string">'clampBoundsY'</span>,
+    <span class="hljs-attr">clampZoom</span>: <span class="hljs-string">'clampZoom'</span>,
+    <span class="hljs-attr">discrete</span>: <span class="hljs-string">'discreteZoom'</span>
   }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">qkey, mkey</span>) </span>{
     <span class="hljs-keyword">if</span> (query[qkey] !== <span class="hljs-literal">undefined</span>) {
       mapParams[mkey] = query[qkey] === <span class="hljs-string">'true'</span>;
@@ -481,9 +485,9 @@ maximum zoom</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  $.each({
-    lower: <span class="hljs-string">'keepLower'</span>,
-    wrapX: <span class="hljs-string">'wrapX'</span>,
-    wrapY: <span class="hljs-string">'wrapY'</span>
+    <span class="hljs-attr">lower</span>: <span class="hljs-string">'keepLower'</span>,
+    <span class="hljs-attr">wrapX</span>: <span class="hljs-string">'wrapX'</span>,
+    <span class="hljs-attr">wrapY</span>: <span class="hljs-string">'wrapY'</span>
   }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">qkey, lkey</span>) </span>{
     <span class="hljs-keyword">if</span> (query[qkey] !== <span class="hljs-literal">undefined</span>) {
       layerParams[lkey] = query[qkey] === <span class="hljs-string">'true'</span>;
@@ -554,9 +558,9 @@ parameters</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> zoomAnimationDefault = map.interactor().options().zoomAnimation,
-      zoomAnimationEnabled = {zoomAnimation: $.extend(
-        {}, zoomAnimationDefault, {enabled: <span class="hljs-literal">true</span>})},
-      zoomAnimationDisabled = {zoomAnimation: {enabled: <span class="hljs-literal">false</span>}};
+      zoomAnimationEnabled = {<span class="hljs-attr">zoomAnimation</span>: $.extend(
+        {}, zoomAnimationDefault, {<span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>})},
+      zoomAnimationDisabled = {<span class="hljs-attr">zoomAnimation</span>: {<span class="hljs-attr">enabled</span>: <span class="hljs-literal">false</span>}};
   map.interactor().options(query.animateZoom !== <span class="hljs-string">'false'</span> ?
     zoomAnimationEnabled : zoomAnimationDisabled);</pre></div></div>
             

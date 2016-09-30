@@ -62,9 +62,9 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
-    node: <span class="hljs-string">'#map'</span>,
-    zoom: <span class="hljs-number">6</span>,
-    center: {x: <span class="hljs-number">28.9550</span>, y: <span class="hljs-number">41.0136</span>}
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">6</span>,
+    <span class="hljs-attr">center</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">28.9550</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">41.0136</span>}
   });
 
   <span class="hljs-keyword">var</span> query = utils.getQuery();
@@ -87,7 +87,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  map.createLayer(<span class="hljs-string">'osm'</span>, {
-    renderer: query.renderer ? (query.renderer === <span class="hljs-string">'html'</span> ? <span class="hljs-literal">null</span> : query.renderer) : <span class="hljs-literal">undefined</span>
+    <span class="hljs-attr">renderer</span>: query.renderer ? (query.renderer === <span class="hljs-string">'html'</span> ? <span class="hljs-literal">null</span> : query.renderer) : <span class="hljs-literal">undefined</span>
   });</pre></div></div>
             
         </li>
@@ -105,16 +105,16 @@
             
             <div class="content"><div class='highlight'><pre>  $(<span class="hljs-string">'#pan-to-london'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     map.transition({
-      center: {x: <span class="hljs-number">-0.1275</span>, y: <span class="hljs-number">51.5072</span>},
-      duration: <span class="hljs-number">2000</span>
+      <span class="hljs-attr">center</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-0.1275</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">51.5072</span>},
+      <span class="hljs-attr">duration</span>: <span class="hljs-number">2000</span>
     });
   });
 
   $(<span class="hljs-string">'#elastic-to-moscow'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     map.transition({
-      center: {x: <span class="hljs-number">37.6167</span>, y: <span class="hljs-number">55.7500</span>},
-      duration: <span class="hljs-number">2000</span>,
-      ease: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">t</span>) </span>{
+      <span class="hljs-attr">center</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">37.6167</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">55.7500</span>},
+      <span class="hljs-attr">duration</span>: <span class="hljs-number">2000</span>,
+      <span class="hljs-attr">ease</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">t</span>) </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2.0</span>, <span class="hljs-number">-10.0</span> * t) * <span class="hljs-built_in">Math</span>.sin((t - <span class="hljs-number">0.075</span>) * (<span class="hljs-number">2.0</span> * <span class="hljs-built_in">Math</span>.PI) / <span class="hljs-number">0.3</span>) + <span class="hljs-number">1.0</span>;
       }
     });
@@ -122,9 +122,9 @@
 
   $(<span class="hljs-string">'#bounce-to-istanbul'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     map.transition({
-      center: {x: <span class="hljs-number">28.9550</span>, y: <span class="hljs-number">41.0136</span>},
-      duration: <span class="hljs-number">2000</span>,
-      ease: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">t</span>) </span>{
+      <span class="hljs-attr">center</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">28.9550</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">41.0136</span>},
+      <span class="hljs-attr">duration</span>: <span class="hljs-number">2000</span>,
+      <span class="hljs-attr">ease</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">t</span>) </span>{
         <span class="hljs-keyword">var</span> r = <span class="hljs-number">2.75</span>;
         <span class="hljs-keyword">var</span> s = <span class="hljs-number">7.5625</span>;
         <span class="hljs-keyword">if</span> (t &lt; <span class="hljs-number">1.0</span> / r) {
@@ -146,17 +146,17 @@
 
   $(<span class="hljs-string">'#fly-to-bern'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     map.transition({
-      center: {x: <span class="hljs-number">7.4500</span>, y: <span class="hljs-number">46.9500</span>},
-      duration: <span class="hljs-number">2000</span>,
-      interp: d3.interpolateZoom
+      <span class="hljs-attr">center</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">7.4500</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">46.9500</span>},
+      <span class="hljs-attr">duration</span>: <span class="hljs-number">2000</span>,
+      <span class="hljs-attr">interp</span>: d3.interpolateZoom
     });
   });
 
   $(<span class="hljs-string">'#spin-to-budapest'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     map.transition({
-      center: {x: <span class="hljs-number">19.0514</span>, y: <span class="hljs-number">47.4925</span>},
-      rotation: <span class="hljs-built_in">Math</span>.PI * <span class="hljs-number">2</span>,
-      duration: <span class="hljs-number">2000</span>
+      <span class="hljs-attr">center</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">19.0514</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">47.4925</span>},
+      <span class="hljs-attr">rotation</span>: <span class="hljs-built_in">Math</span>.PI * <span class="hljs-number">2</span>,
+      <span class="hljs-attr">duration</span>: <span class="hljs-number">2000</span>
     });
   });
 
@@ -185,8 +185,8 @@
         <span class="hljs-string">'&lt;div class="modal-body"/&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;'</span>
       );
       <span class="hljs-keyword">var</span> report = {
-        count: res.count, max: res.max, above_threshold: res.above_threshold,
-        subcalls: res.subcalls, stddev: res.stddev, average: res.average
+        <span class="hljs-attr">count</span>: res.count, <span class="hljs-attr">max</span>: res.max, <span class="hljs-attr">above_threshold</span>: res.above_threshold,
+        <span class="hljs-attr">subcalls</span>: res.subcalls, <span class="hljs-attr">stddev</span>: res.stddev, <span class="hljs-attr">average</span>: res.average
       };
       $(<span class="hljs-string">'.modal-body'</span>, modal).append($(<span class="hljs-string">'&lt;div/&gt;'</span>).text(
         <span class="hljs-built_in">JSON</span>.stringify(report, <span class="hljs-literal">undefined</span>, <span class="hljs-number">2</span>)));

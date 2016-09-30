@@ -28,6 +28,7 @@
         <article>
             <pre class="prettyprint source linenums"><code>var inherit = require('./inherit');
 var object = require('./object');
+var util = require('./util');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -50,8 +51,10 @@ var mapInteractor = function (args) {
 
   var $ = require('jquery');
   var geo_event = require('./event');
+  var geo_action = require('./action');
   var throttle = require('./util').throttle;
   var debounce = require('./util').debounce;
+  var actionMatch = require('./util').actionMatch;
   var quadFeature = require('./quadFeature');
 
   var m_options = args || {},
@@ -64,20 +67,11 @@ var mapInteractor = function (args) {
       m_selectionLayer = null,
       m_selectionQuad,
       m_paused = false,
+      // if m_clickMaybe is not false, it contains the x, y, and buttons that
+      // were present when the mouse down event occurred.
       m_clickMaybe = false,
+      m_clickMaybeTimeout,
       m_callZoom = function () {};
-
-  // Helper method to decide if the current button/modifiers match a set of
-  // conditions.
-  // button: 'left' | 'right' | 'middle'
-  // modifiers: [ 'alt' | 'meta' | 'ctrl' | 'shift' ]
-  function eventMatch(button, modifiers) {
-    return (button === 'wheel' || m_mouse.buttons[button]) &amp;&amp;
-      (!!m_mouse.modifiers.alt) === (!!modifiers.alt) &amp;&amp;
-      (!!m_mouse.modifiers.meta) === (!!modifiers.meta) &amp;&amp;
-      (!!m_mouse.modifiers.shift) === (!!modifiers.shift) &amp;&amp;
-      (!!m_mouse.modifiers.ctrl) === (!!modifiers.ctrl);
-  }
 
   // Helper method to calculate the speed from a velocity
   function calcSpeed(v) {
@@ -92,45 +86,94 @@ var mapInteractor = function (args) {
     {
       throttle: 30,
       discreteZoom: false,
-      panMoveButton: 'left',
-      panMoveModifiers: {},
-      zoomMoveButton: 'right',
-      zoomMoveModifiers: {},
-      rotateMoveButton: 'left',
-      rotateMoveModifiers: {ctrl: true},
-      panWheelEnabled: false,
-      panWheelModifiers: {},
-      zoomWheelEnabled: true,
-      zoomWheelModifiers: {},
-      rotateWheelEnabled: true,
-      rotateWheelModifiers: {ctrl: true},
+
+      /* There should only be one action with any specific combination of event
+       * and modifiers.  When that event and modifiers occur, the specified
+       * action is triggered.  The event and modifiers fields can either be a
+       * simple string or an object with multiple entries with each entry set
+       * to true, false, or undefined.  If an object, all values that are
+       * truthy must match, all values that are false must not match, and all
+       * other values that are falsy are ignored.
+       *   Available actions:
+       * see geo_action list
+       *   Available events:
+       * left, right, middle, wheel
+       *   Available modifiers:
+       * shift, ctrl, alt, meta
+       *   Useful fields:
+       * action: the name of the action.  Multiple events may trigger the same
+       *    action.
+       * input: the name of the input or an object with input names for keys
+       *    and boolean values that indicates the combination of events that
+       *    trigger this action.
+       * modifiers: the name of a modifier or an object with modifier names for
+       *    keys and boolean values that indicates the combination of modifiers
+       *    that trigger this action.
+       * selectionRectangle: truthy if a selection rectangle should be shown
+       *    during the action.  This can be the name of an event that will be
+       *    triggered when the selection is complete.
+       * name: a string that can be used to reference this action.
+       * owner: a string that can be used to reference this action.
+       */
+      actions: [{
+        action: geo_action.pan,
+        input: 'left',
+        modifiers: {shift: false, ctrl: false}
+      }, {
+        action: geo_action.zoom,
+        input: 'right',
+        modifiers: {shift: false, ctrl: false}
+      }, {
+        action: geo_action.zoom,
+        input: 'wheel',
+        modifiers: {shift: false, ctrl: false}
+      }, {
+        action: geo_action.rotate,
+        input: 'left',
+        modifiers: {shift: false, ctrl: true}
+      }, {
+        action: geo_action.rotate,
+        input: 'wheel',
+        modifiers: {shift: false, ctrl: true}
+      }, {
+        action: geo_action.select,
+        input: 'left',
+        modifiers: {shift: true, ctrl: true},
+        selectionRectangle: geo_event.select
+      }, {
+        action: geo_action.zoomselect,
+        input: 'left',
+        modifiers: {shift: true, ctrl: false},
+        selectionRectangle: geo_event.zoomselect
+      }, {
+        action: geo_action.unzoomselect,
+        input: 'right',
+        modifiers: {shift: true, ctrl: false},
+        selectionRectangle: geo_event.unzoomselect
+      }],
+
+      click: {
+        enabled: true,
+        buttons: {left: true, right: true, middle: true},
+        duration: 0,
+        cancelOnMove: true
+      },
+
       wheelScaleX: 1,
       wheelScaleY: 1,
       zoomScale: 1,
       rotateWheelScale: 6 * Math.PI / 180,
-      selectionButton: 'left',
-      selectionModifiers: {shift: true, ctrl: true},
-      zoomSelectionButton: 'left',
-      zoomSelectionModifiers: {shift: true},
-      unzoomSelectionButton: 'right',
-      unzoomSelectionModifiers: {shift: true},
       momentum: {
         enabled: true,
         maxSpeed: 2.5,
         minSpeed: 0.01,
         stopTime: 250,
         drag: 0.01,
-        actions: ['pan', 'zoom']
+        actions: [geo_action.pan, geo_action.zoom]
       },
       spring: {
         enabled: false,
         springConstant: 0.00005
-      },
-      click: {
-        enabled: true,
-        buttons: {left: true, right: true, middle: true},
-        duration: 0,
-        cancelOnMove: true
       },
       zoomAnimation: {
         enabled: true,
@@ -151,41 +194,8 @@ var mapInteractor = function (args) {
   //   // with the given delay.  The default debounce interval is 400 ms.
   //   discreteZoom: boolean | number > 0
   //
-  //   // button that must be pressed to initiate a pan on mousedown
-  //   panMoveButton: 'right' | 'left' | 'middle'
-  //
-  //   // modifier keys that must be pressed to initiate a pan on mousemove
-  //   panMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
-  //
-  //   // button that must be pressed to initiate a zoom on mousedown
-  //   zoomMoveButton: 'right' | 'left' | 'middle'
-  //
-  //   // modifier keys that must be pressed to initiate a zoom on mousemove
-  //   zoomMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
-  //
-  //   // button that must be pressed to initiate a rotate on mousedown
-  //   rotateMoveButton: 'right' | 'left' | 'middle'
-  //
-  //   // modifier keys that must be pressed to initiate a rotate on mousemove
-  //   rotateMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
-  //
-  //   // enable or disable panning with the mouse wheel
-  //   panWheelEnabled: true | false
-  //
-  //   // modifier keys that must be pressed to trigger a pan on wheel
-  //   panWheelModifiers: {...}
-  //
-  //   // enable or disable zooming with the mouse wheel
-  //   zoomWheelEnabled: true | false
-  //
-  //   // modifier keys that must be pressed to trigger a zoom on wheel
-  //   zoomWheelModifiers: {...}
-  //
-  //   // enable or disable rotation with the mouse wheel
-  //   rotateWheelEnabled: true | false
-  //
-  //   // modifier keys that must be pressed to trigger a rotate on wheel
-  //   rotateWheelModifiers: {...}
+  //   // A list of available actions.  See above
+  //   actions: []
   //
   //   // wheel scale factor to change the magnitude of wheel interactions
   //   wheelScaleX: 1
@@ -197,12 +207,6 @@ var mapInteractor = function (args) {
   //   // scale factor to change the magnitude of wheel rotation interactions
   //   rotateWheelScale: 1
   //
-  //   // button that must be pressed to enable drag selection
-  //    selectionButton: 'right' | 'left' | 'middle'
-  //
-  //   // keyboard modifiers that must be pressed to initiate a selection
-  //   selectionModifiers: {...}
-  //
   //   // enable momentum when panning
   //   momentum: {
   //     enabled: true | false,
@@ -211,7 +215,8 @@ var mapInteractor = function (args) {
   //     stopTime: number, // if the mouse hasn't moved for this many
   //                       // milliseconds, don't apply momentum
   //     drag: number, // drag coefficient
-  //     actions: ['pan', 'zoom']  // actions on which to apply momentum
+  //     actions: [geo_action.pan, geo_action.zoom]
+  //                                      // actions on which to apply momentum
   //   }
   //
   //   // enable spring clamping to screen edges to enforce clamping
@@ -366,32 +371,32 @@ var mapInteractor = function (args) {
   //
   // i.e.
   //  {
-  //    'action': 'pan',      // an ongoing pan event
+  //    'action': geo_action.pan,   // an ongoing pan event
   //    'origin': {...},      // mouse object at the start of the action
   //    'delta': {x: *, y: *} // mouse movement since action start
   //                          // not including the current event
   //  }
   //
   //  {
-  //    'action': 'zoom',  // an ongoing zoom event
+  //    'action': geo_action.zoom,  // an ongoing zoom event
   //    ...
   //  }
   //
   //  {
-  //    'action': 'rotate',   // an ongoing rotate event
+  //    'action': geo_action.rotate,  // an ongoing rotate event
   //    'origin': {...},      // mouse object at the start of the action
   //    'delta': {x: *, y: *} // mouse movement since action start
   //                          // not including the current event
   //  }
   //
   //  {
-  //    'acton': 'select',
+  //    'acton': geo_action.select,
   //    'origin': {...},
   //    'delta': {x: *, y: *}
   //  }
   //
   //  {
-  //    'action': 'momentum',
+  //    'action': geo_action.momentum,
   //    'origin': {...},
   //    'handler': function () { }, // called in animation loop
   //    'timer': animate loop timer
@@ -436,12 +441,10 @@ var mapInteractor = function (args) {
     $node.on('mouseup.geojs', m_this._handleMouseUp);
     // Disable dragging images and such
     $node.on('dragstart', function () { return false; });
-    if (m_options.panMoveButton === 'right' ||
-        m_options.zoomMoveButton === 'right' ||
-        m_options.rotateMoveButton === 'right' ||
-        m_options.selectionButton === 'right' ||
-        m_options.zoomSelectionButton === 'right' ||
-        m_options.unzoomSelectionButton === 'right') {
+    util.adjustActions(m_options.actions);
+    if (m_options.actions.some(function (action) {
+      return action.input.right;
+    })) {
       $node.on('contextmenu.geojs', function () { return false; });
     }
     return m_this;
@@ -525,11 +528,12 @@ var mapInteractor = function (args) {
     };
     try {
       m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
+      m_mouse.mapgcs = m_this.map().displayToGcs(m_mouse.map, null);
     } catch (e) {
       // catch georeferencing problems and move on
       // needed for handling the map before the base layer
       // is attached
-      m_mouse.geo = null;
+      m_mouse.geo = m_mouse.mapgcs = null;
     }
   };
 
@@ -639,9 +643,23 @@ var mapInteractor = function (args) {
       if (!keepQueue) {
         m_queue = {};
       }
-      m_state = {};
+      clearState();
     }
     return out;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set the value of whether a click is possible.  Cancel any outstanding
+   * timer for this process.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._setClickMaybe = function (value) {
+    m_clickMaybe = value;
+    if (m_clickMaybeTimeout) {
+      window.clearTimeout(m_clickMaybeTimeout);
+      m_clickMaybeTimeout = null;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -650,7 +668,7 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseDown = function (evt) {
-    var action = null;
+    var action, actionRecord;
 
     if (m_paused) {
       return;
@@ -664,30 +682,26 @@ var mapInteractor = function (args) {
         (!m_mouse.buttons.left || m_options.click.buttons.left) &amp;&amp;
         (!m_mouse.buttons.right || m_options.click.buttons.right) &amp;&amp;
         (!m_mouse.buttons.middle || m_options.click.buttons.middle)) {
-      m_clickMaybe = true;
+      m_this._setClickMaybe({
+        x: m_mouse.page.x,
+        y: m_mouse.page.y,
+        buttons: $.extend({}, m_mouse.buttons)
+      });
       if (m_options.click.duration > 0) {
-        window.setTimeout(function () {
+        m_clickMaybeTimeout = window.setTimeout(function () {
           m_clickMaybe = false;
+          m_clickMaybeTimeout = null;
         }, m_options.click.duration);
       }
     }
-    if (eventMatch(m_options.panMoveButton, m_options.panMoveModifiers)) {
-      action = 'pan';
-    } else if (eventMatch(m_options.zoomMoveButton, m_options.zoomMoveModifiers)) {
-      action = 'zoom';
-    } else if (eventMatch(m_options.rotateMoveButton, m_options.rotateMoveModifiers)) {
-      action = 'rotate';
-    } else if (eventMatch(m_options.selectionButton, m_options.selectionModifiers)) {
-      action = 'select';
-    } else if (eventMatch(m_options.zoomSelectionButton, m_options.zoomSelectionModifiers)) {
-      action = 'zoomselect';
-    } else if (eventMatch(m_options.unzoomSelectionButton, m_options.unzoomSelectionModifiers)) {
-      action = 'unzoomselect';
-    }
+    actionRecord = actionMatch(m_mouse.buttons, m_mouse.modifiers,
+                              m_options.actions);
+    action = (actionRecord || {}).action;
 
     // cancel transitions and momentum on click
-    m_this.map().transitionCancel('_handleMouseDown.' + action);
-    m_this.cancel('momentum');
+    m_this.map().transitionCancel(
+        '_handleMouseDown' + (action ? '.' + action : ''));
+    m_this.cancel(geo_action.momentum);
 
     m_mouse.velocity = {
       x: 0,
@@ -703,11 +717,12 @@ var mapInteractor = function (args) {
       // store the state object
       m_state = {
         action: action,
+        actionRecord: actionRecord,
         origin: $.extend(true, {}, m_mouse),
         delta: {x: 0, y: 0}
       };
 
-      if (action === 'select' || action === 'zoomselect' || action === 'unzoomselect') {
+      if (actionRecord.selectionRectangle) {
         // Make sure the old selection layer is gone.
         if (m_selectionLayer) {
           m_selectionLayer.clear();
@@ -724,6 +739,8 @@ var mapInteractor = function (args) {
         });
         m_this.map().geoTrigger(geo_event.brushstart, m_this._getSelection());
       }
+      m_this.map().geoTrigger(geo_event.actiondown, {
+        state: m_this.state(), mouse: m_this.mouse(), event: evt});
 
       // bind temporary handlers to document
       if (m_options.throttle > 0) {
@@ -738,6 +755,7 @@ var mapInteractor = function (args) {
         $(document).on('mousemove.geojs', m_this._handleMouseMoveDocument);
       }
       $(document).on('mouseup.geojs', m_this._handleMouseUpDocument);
+      m_state.boundDocumentHandlers = true;
     }
 
   };
@@ -753,14 +771,14 @@ var mapInteractor = function (args) {
       return;
     }
 
-    if (m_state.action) {
+    if (m_state.boundDocumentHandlers) {
       // If currently performing a navigation action, the mouse
       // coordinates will be captured by the document handler.
       return;
     }
 
-    if (m_options.click.cancelOnMove) {
-      m_clickMaybe = false;
+    if (m_options.click.cancelOnMove &amp;&amp; m_clickMaybe) {
+      m_this._setClickMaybe(false);
     }
 
     m_this._getMousePosition(evt);
@@ -795,8 +813,11 @@ var mapInteractor = function (args) {
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
-    if (m_options.click.cancelOnMove) {
-      m_clickMaybe = false;
+    /* Only cancel possible clicks on move if we actually moved */
+    if (m_options.click.cancelOnMove &amp;&amp; (m_clickMaybe.x === undefined ||
+        m_mouse.page.x !== m_clickMaybe.x ||
+        m_mouse.page.y !== m_clickMaybe.y)) {
+      m_this._setClickMaybe(false);
     }
     if (m_clickMaybe) {
       return;
@@ -815,11 +836,11 @@ var mapInteractor = function (args) {
     m_state.delta.x += dx;
     m_state.delta.y += dy;
 
-    if (m_state.action === 'pan') {
-      m_this.map().pan({x: dx, y: dy});
-    } else if (m_state.action === 'zoom') {
+    if (m_state.action === geo_action.pan) {
+      m_this.map().pan({x: dx, y: dy}, undefined, 'limited');
+    } else if (m_state.action === geo_action.zoom) {
       m_callZoom(-dy * m_options.zoomScale / 120, m_state);
-    } else if (m_state.action === 'rotate') {
+    } else if (m_state.action === geo_action.rotate) {
       var cx, cy;
       if (m_state.origin.rotation === undefined) {
         cx = m_state.origin.map.x - m_this.map().size().width / 2;
@@ -829,15 +850,25 @@ var mapInteractor = function (args) {
       cx = m_mouse.map.x - m_this.map().size().width / 2;
       cy = m_mouse.map.y - m_this.map().size().height / 2;
       m_this.map().rotation(m_state.origin.rotation + Math.atan2(cy, cx));
-    } else if (m_state.action === 'select' || m_state.action === 'zoomselect' || m_state.action === 'unzoomselect') {
+    } else if (m_state.actionRecord.selectionRectangle) {
       // Get the bounds of the current selection
       selectionObj = m_this._getSelection();
       m_this.map().geoTrigger(geo_event.brush, selectionObj);
     }
+    m_this.map().geoTrigger(geo_event.actionmove, {
+      state: m_this.state(), mouse: m_this.mouse(), event: evt});
 
     // Prevent default to stop text selection in particular
     evt.preventDefault();
   };
+
+  /**
+   * Clear the action state, but remember if we have bound document handlers.
+   * @private
+   */
+  function clearState() {
+    m_state = {boundDocumentHandlers: m_state.boundDocumentHandlers};
+  }
 
   /**
    * Use interactor options to modify the mouse velocity by momentum
@@ -922,7 +953,8 @@ var mapInteractor = function (args) {
    * recenter.
    *
    * @private
-   * @param {string} action Either 'zoomselect' or 'unzoomselect'.
+   * @param {string} action Either geo_action.zoomselect or
+   *    geo_action.unzoomselect.
    * @param {object} lowerLeft the x and y coordinates of the lower left corner
    *    of the zoom rectangle.
    * @param {object} upperRight the x and y coordinates of the upper right
@@ -930,7 +962,7 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._zoomFromSelection = function (action, lowerLeft, upperRight) {
-    if (action !== 'zoomselect' &amp;&amp; action !== 'unzoomselect') {
+    if (action !== geo_action.zoomselect &amp;&amp; action !== geo_action.unzoomselect) {
       return;
     }
     if (lowerLeft.x === upperRight.x || lowerLeft.y === upperRight.y) {
@@ -948,7 +980,7 @@ var mapInteractor = function (args) {
       x: Math.abs((upperRight.x - lowerLeft.x) / mapsize.width),
       y: Math.abs((upperRight.y - lowerLeft.y) / mapsize.height)
     };
-    if (action === 'zoomselect') {
+    if (action === geo_action.zoomselect) {
       center = map.displayToGcs({
         x: (lowerLeft.x + upperRight.x) / 2,
         y: (lowerLeft.y + upperRight.y) / 2
@@ -970,7 +1002,7 @@ var mapInteractor = function (args) {
       zoom = Math.floor(zoom);
     }
     map.zoom(zoom);
-    if (action === 'zoomselect') {
+    if (action === geo_action.zoomselect) {
       map.center(center, null);
     } else {
       var newcenter = map.gcsToDisplay(center, null);
@@ -997,18 +1029,19 @@ var mapInteractor = function (args) {
     // cancel queued interactions
     m_queue = {};
 
-    m_clickMaybe = false;
+    m_this._setClickMaybe(false);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
     // unbind temporary handlers on document
     $(document).off('.geojs');
+    m_state.boundDocumentHandlers = false;
 
     if (m_mouse.buttons.right) {
       evt.preventDefault();
     }
 
-    if (m_state.action === 'select' || m_state.action === 'zoomselect' || m_state.action === 'unzoomselect') {
+    if (m_state.actionRecord &amp;&amp; m_state.actionRecord.selectionRectangle) {
       m_this._getMousePosition(evt);
       selectionObj = m_this._getSelection();
 
@@ -1018,24 +1051,32 @@ var mapInteractor = function (args) {
       m_selectionQuad = null;
 
       m_this.map().geoTrigger(geo_event.brushend, selectionObj);
-      m_this.map().geoTrigger(geo_event[m_state.action], selectionObj);
+      if (m_state.actionRecord.selectionRectangle !== true) {
+        m_this.map().geoTrigger(m_state.actionRecord.selectionRectangle,
+                                selectionObj);
+      }
       m_this._zoomFromSelection(m_state.action, selectionObj.display.lowerLeft,
                                 selectionObj.display.upperRight);
+      m_this.map().geoTrigger(geo_event.actionselection, {
+        state: m_this.state(), mouse: m_this.mouse(), event: evt,
+        lowerLeft: selectionObj.display.lowerLeft,
+        upperRight: selectionObj.display.upperRight});
     }
+    m_this.map().geoTrigger(geo_event.actionup, {
+      state: m_this.state(), mouse: m_this.mouse(), event: evt});
 
     // reset the interactor state
     oldAction = m_state.action;
-    m_state = {};
+    clearState();
 
     // if momentum is enabled, start the action here
     if (m_options.momentum.enabled &amp;&amp;
             $.inArray(oldAction, m_options.momentum.actions) >= 0) {
-
       var t = (new Date()).valueOf();
       var dt = t - m_mouse.time + m_mouse.deltaTime;
       if (t - m_mouse.time &lt; m_options.momentum.stopTime) {
-        m_mouse.velocity.x = m_mouse.velocity.x * m_mouse.deltaTime / dt;
-        m_mouse.velocity.y = m_mouse.velocity.y * m_mouse.deltaTime / dt;
+        m_mouse.velocity.x *= m_mouse.deltaTime / dt;
+        m_mouse.velocity.y *= m_mouse.deltaTime / dt;
         m_mouse.deltaTime = dt;
       } else {
         m_mouse.velocity.x = m_mouse.velocity.y = 0;
@@ -1050,10 +1091,11 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseUp = function (evt) {
-
     if (m_paused) {
       return;
     }
+
+    m_this._getMouseButton(evt);
 
     if (m_clickMaybe) {
       m_this._handleMouseClick(evt);
@@ -1070,20 +1112,31 @@ var mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseClick = function (evt) {
 
+    /* Cancel a selection if it is occurring */
+    if (m_state.actionRecord &amp;&amp; m_state.actionRecord.selectionRectangle) {
+      m_selectionLayer.clear();
+      m_this.map().deleteLayer(m_selectionLayer);
+      m_selectionLayer = null;
+      m_selectionQuad = null;
+      m_state.action = m_state.actionRecord = null;
+    }
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
     // cancel any ongoing pan action
-    m_this.cancel('pan');
+    m_this.cancel(geo_action.pan);
 
     // unbind temporary handlers on document
     $(document).off('.geojs');
+    m_state.boundDocumentHandlers = false;
+    // add information about the button state to the event information
+    var details = m_this.mouse();
+    details.buttonsDown = m_clickMaybe.buttons;
 
     // reset click detector variable
-    m_clickMaybe = false;
-
+    m_this._setClickMaybe(false);
     // fire a click event
-    m_this.map().geoTrigger(geo_event.mouseclick, m_this.mouse());
+    m_this.map().geoTrigger(geo_event.mouseclick, details);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1094,12 +1147,12 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function debounced_zoom() {
-    var deltaZ = 0, delay = 400, direction, startZoom, targetZoom;
+    var deltaZ = 0, delay = 400, origin, startZoom, targetZoom;
 
-    function accum(dz, dir) {
+    function accum(dz, org) {
       var map = m_this.map(), zoom;
 
-      direction = dir;
+      origin = $.extend(true, {}, org);
       deltaZ += dz;
       if (targetZoom === undefined) {
         startZoom = targetZoom = map.zoom();
@@ -1117,7 +1170,7 @@ var mapInteractor = function (args) {
         // value
         deltaZ = deltaZ + map.zoom() - zoom;
 
-        map.zoom(zoom, direction);
+        map.zoom(zoom, origin);
       }
 
     }
@@ -1133,16 +1186,17 @@ var mapInteractor = function (args) {
               zoom = startZoom + (targetZoom > startZoom ? 1 : -1);
             }
           }
-          map.transitionCancel('debounced_zoom.zoom');
+          map.transitionCancel('debounced_zoom.' + geo_action.zoom);
           map.transition({
             zoom: zoom,
-            zoomOrigin: direction,
+            zoomOrigin: origin,
             duration: m_options.zoomAnimation.duration,
             ease: m_options.zoomAnimation.ease,
             done: function (status) {
               status = status || {};
+              var zoomRE = new RegExp('\\.' + geo_action.zoom + '$');
               if (!status.next &amp;&amp; (!status.cancel ||
-                  ('' + status.source).search(/\.zoom$/) &lt; 0)) {
+                  ('' + status.source).search(zoomRE) &lt; 0)) {
                 targetZoom = undefined;
               }
               /* If we were animating the zoom, if the zoom is continuous, just
@@ -1151,7 +1205,7 @@ var mapInteractor = function (args) {
                * the next action is further zooming. */
               if (m_options.discreteZoom &amp;&amp; status.cancel &amp;&amp;
                   status.transition &amp;&amp; status.transition.end &amp;&amp;
-                  ('' + status.source).search(/\.zoom$/) &lt; 0) {
+                  ('' + status.source).search(zoomRE) &lt; 0) {
                 map.zoom(status.transition.end.zoom,
                          status.transition.end.zoomOrigin);
               }
@@ -1163,7 +1217,7 @@ var mapInteractor = function (args) {
             // round off the zoom to an integer and throw away the rest
             zoom = Math.round(zoom);
           }
-          map.zoom(zoom, direction);
+          map.zoom(zoom, origin);
         }
       }
       deltaZ = 0;
@@ -1176,12 +1230,12 @@ var mapInteractor = function (args) {
             !m_options.zoomAnimation.enabled) {
       return debounce(delay, false, apply, accum);
     } else {
-      return function (dz, dir) {
+      return function (dz, org) {
         if (!dz &amp;&amp; targetZoom === undefined) {
           return;
         }
-        accum(dz, dir);
-        apply(dz, dir);
+        accum(dz, org);
+        apply(dz, org);
       };
     }
   }
@@ -1237,7 +1291,7 @@ var mapInteractor = function (args) {
     }
 
     function wheel(evt) {
-      var zoomFactor, action;
+      var zoomFactor, action, actionRecord;
 
       // If the current queue doesn't match the queue passed in as an argument,
       // assume it was cancelled and do nothing.
@@ -1247,42 +1301,40 @@ var mapInteractor = function (args) {
 
       // perform the map navigation event
       m_this._getMouseModifiers(evt);
-      if (m_options.panWheelEnabled &amp;&amp;
-          eventMatch('wheel', m_options.panWheelModifiers)) {
-        action = 'pan';
-      } else if (m_options.zoomWheelEnabled &amp;&amp;
-                 eventMatch('wheel', m_options.zoomWheelModifiers)) {
-        action = 'zoom';
-      } else if (m_options.rotateWheelEnabled &amp;&amp;
-                 eventMatch('wheel', m_options.rotateWheelModifiers)) {
-        action = 'rotate';
-      }
+
+      actionRecord = actionMatch({wheel: true}, m_mouse.modifiers,
+                                m_options.actions);
+      action = (actionRecord || {}).action;
+
       if (action) {
         // if we were moving because of momentum or a transition, cancel it and
         // recompute where the mouse action is occuring.
         var recompute = m_this.map().transitionCancel('wheel.' + action);
-        recompute |= m_this.cancel('momentum', true);
+        recompute |= m_this.cancel(geo_action.momentum, true);
         if (recompute) {
           m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
+          m_mouse.mapgcs = m_this.map().displayToGcs(m_mouse.map, null);
         }
         switch (action) {
-          case 'pan':
+          case geo_action.pan:
             m_this.map().pan({
               x: m_queue.scroll.x,
               y: m_queue.scroll.y
-            });
+            }, undefined, 'limited');
             break;
-          case 'zoom':
+          case geo_action.zoom:
             zoomFactor = -m_queue.scroll.y;
             m_callZoom(zoomFactor, m_mouse);
             break;
-          case 'rotate':
+          case geo_action.rotate:
             m_this.map().rotation(
                 m_this.map().rotation() +
                 m_queue.scroll.y * m_options.rotateWheelScale,
                 m_mouse);
             break;
         }
+        m_this.map().geoTrigger(geo_event.actionwheel, {
+          state: m_this.state(), mouse: m_this.mouse(), event: evt});
       }
 
       // reset the queue
@@ -1316,7 +1368,7 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.springBack = function (initialVelocity, origAction) {
-    if (m_state.action === 'momentum') {
+    if (m_state.action === geo_action.momentum) {
       return;
     }
     if (!initialVelocity) {
@@ -1326,31 +1378,32 @@ var mapInteractor = function (args) {
       };
     }
     m_state.origAction = origAction;
-    m_state.action = 'momentum';
+    m_state.action = geo_action.momentum;
     m_state.origin = m_this.mouse();
+    m_state.momentum = m_this.mouse();
     m_state.start = new Date();
     m_state.handler = function () {
       var v, s, last, dt;
 
-      // Not sure the correct way to do this.  We need the delta t for the
-      // next time step...  Maybe use a better interpolator and the time
-      // parameter from requestAnimationFrame.
-      dt = Math.min(m_mouse.deltaTime, 30);
-      if (m_state.action !== 'momentum' ||
+      if (m_state.action !== geo_action.momentum ||
           !m_this.map() ||
           m_this.map().transition()) {
         // cancel if a new action was performed
         return;
       }
+      // Not sure the correct way to do this.  We need the delta t for the
+      // next time step...  Maybe use a better interpolator and the time
+      // parameter from requestAnimationFrame.
+      dt = Math.min(m_state.momentum.deltaTime, 30);
 
       last = m_state.start.valueOf();
       m_state.start = new Date();
 
-      v = modifyVelocity(m_mouse.velocity, m_state.start - last);
+      v = modifyVelocity(m_state.momentum.velocity, m_state.start - last);
 
       // stop panning when the speed is below the threshold
       if (!v) {
-        m_state = {};
+        clearState();
         return;
       }
 
@@ -1365,19 +1418,19 @@ var mapInteractor = function (args) {
         v.x = 0;
         v.y = 0;
       }
-      m_mouse.velocity.x = v.x;
-      m_mouse.velocity.y = v.y;
+      m_state.momentum.velocity.x = v.x;
+      m_state.momentum.velocity.y = v.y;
 
       switch (m_state.origAction) {
-        case 'zoom':
-          var dy = m_mouse.velocity.y * dt;
+        case geo_action.zoom:
+          var dy = m_state.momentum.velocity.y * dt;
           m_callZoom(-dy * m_options.zoomScale / 120, m_state);
           break;
         default:
           m_this.map().pan({
-            x: m_mouse.velocity.x * dt,
-            y: m_mouse.velocity.y * dt
-          });
+            x: m_state.momentum.velocity.x * dt,
+            y: m_state.momentum.velocity.y * dt
+          }, undefined, 'limited');
           break;
       }
 
@@ -1453,6 +1506,66 @@ var mapInteractor = function (args) {
     return m_this;
   };
 
+  /**
+   * Add an action to the list of handled actions.
+   *
+   * @param {object} action: an object defining the action.  This must have
+   *    action and input properties, and may have modifiers, name, and owner.
+   *    Use action, name, and owner to make this entry distinct if it will need
+   *    to be removed later.
+   * @param {boolean} toEnd: the action is added at the beginning of the
+   *    actions list unless toEnd is true.  Earlier actions prevent later
+   *    actions with the similar input and modifiers.
+   */
+  this.addAction = function (action, toEnd) {
+    if (!action || !action.action || !action.input) {
+      return;
+    }
+    util.addAction(m_options.actions, action, toEnd);
+    if (m_options.map &amp;&amp; m_options.actions.some(function (action) {
+      return action.input.right;
+    })) {
+      $node.off('contextmenu.geojs');
+      $node.on('contextmenu.geojs', function () { return false; });
+    }
+  };
+
+  /**
+   * Check if an action is in the actions list.  An action matches if the
+   * action, name, and owner match.  A null or undefined value will match all
+   * actions.  If using an action object, this is the same as passing
+   * (action.action, action.name, action.owner).
+   *
+   * @param {object|string} action Either an action object or the name of an
+   *    action.
+   * @param {string} name Optional name associated with the action.
+   * @param {string} owner Optional owner associated with the action.
+   * @return action the first matching action or null.
+   */
+  this.hasAction = function (action, name, owner) {
+    return util.hasAction(m_options.actions, action, name, owner);
+  };
+
+  /**
+   * Remove all matching actions.  Actions are matched as with hasAction.
+   *
+   * @param {object|string} action Either an action object or the name of an
+   *    action.
+   * @param {string} name Optional name associated with the action.
+   * @param {string} owner Optional owner associated with the action.
+   * @return numRemoved the number of actions that were removed.
+   */
+  this.removeAction = function (action, name, owner) {
+    var removed = util.removeAction(
+        m_options.actions, action, name, owner);
+    if (m_options.map &amp;&amp; !m_options.actions.some(function (action) {
+      return action.input.right;
+    })) {
+      $node.off('contextmenu.geojs');
+    }
+    return removed;
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Simulate a DOM mouse event on connected map.
@@ -1519,10 +1632,10 @@ var mapInteractor = function (args) {
         }
       }
     );
+    $node.trigger(evt);
     if (type.indexOf('.geojs') >= 0) {
       $(document).trigger(evt);
     }
-    $node.trigger(evt);
   };
   this._connectEvents();
   return this;
@@ -1540,13 +1653,13 @@ module.exports = mapInteractor;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="geo.module_util.html">geo.util</a></li></ul><h3>Classes</h3><ul><li><a href="geo.camera.html">geo.camera</a></li><li><a href="geo.canvas.heatmapFeature.html">geo.canvas.heatmapFeature</a></li><li><a href="geo.canvas.object.html">geo.canvas.object</a></li><li><a href="geo.canvas.quadFeature.html">geo.canvas.quadFeature</a></li><li><a href="geo.canvas.renderer.html">geo.canvas.renderer</a></li><li><a href="geo.choroplethFeature.html">geo.choroplethFeature</a></li><li><a href="geo.clock.html">geo.clock</a></li><li><a href="geo.contourFeature.html">geo.contourFeature</a></li><li><a href="geo.d3.graphFeature.html">geo.d3.graphFeature</a></li><li><a href="geo.d3.lineFeature.html">geo.d3.lineFeature</a></li><li><a href="geo.d3.object.html">geo.d3.object</a></li><li><a href="geo.d3.pathFeature.html">geo.d3.pathFeature</a></li><li><a href="geo.d3.pointFeature.html">geo.d3.pointFeature</a></li><li><a href="geo.d3.quadFeature.html">geo.d3.quadFeature</a></li><li><a href="geo.d3.renderer.html">geo.d3.renderer</a></li><li><a href="geo.d3.vectorFeature.html">geo.d3.vectorFeature</a></li><li><a href="geo.domRenderer.html">geo.domRenderer</a></li><li><a href="geo.feature.html">geo.feature</a></li><li><a href="geo.featureLayer.html">geo.featureLayer</a></li><li><a href="geo.fetchQueue.html">geo.fetchQueue</a></li><li><a href="geo.fileReader.html">geo.fileReader</a></li><li><a href="geo.geomFeature.html">geo.geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">geo.gl.choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">geo.gl.contourFeature</a></li><li><a href="geo.gl.ellipsoid.html">geo.gl.ellipsoid</a></li><li><a href="geo.gl.geomFeature.html">geo.gl.geomFeature</a></li><li><a href="geo.gl.lineFeature.html">geo.gl.lineFeature</a></li><li><a href="geo.gl.object.html">geo.gl.object</a></li><li><a href="geo.gl.pointFeature.html">geo.gl.pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">geo.gl.polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">geo.gl.quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">geo.gl.vglRenderer</a></li><li><a href="geo.greaphFeature.html">geo.greaphFeature</a></li><li><a href="geo.gui.legendWidget.html">geo.gui.legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">geo.gui.sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">geo.gui.svgWidget</a></li><li><a href="geo.gui.uiLayer.html">geo.gui.uiLayer</a></li><li><a href="geo.gui.widget.html">geo.gui.widget</a></li><li><a href="geo.heatmapFeature.html">geo.heatmapFeature</a></li><li><a href="geo.imageTile.html">geo.imageTile</a></li><li><a href="geo.jsonReader.html">geo.jsonReader</a></li><li><a href="geo.layer.html">geo.layer</a></li><li><a href="geo.lineFeature.html">geo.lineFeature</a></li><li><a href="geo.map.html">geo.map</a></li><li><a href="geo.mapInteractor.html">geo.mapInteractor</a></li><li><a href="geo.object.html">geo.object</a></li><li><a href="geo.osmLayer.html">geo.osmLayer</a></li><li><a href="geo.pathFeature.html">geo.pathFeature</a></li><li><a href="geo.pointFeature.html">geo.pointFeature</a></li><li><a href="geo.polygonFeature.html">geo.polygonFeature</a></li><li><a href="geo.quadFeature.html">geo.quadFeature</a></li><li><a href="geo.renderer.html">geo.renderer</a></li><li><a href="geo.sceneObject.html">geo.sceneObject</a></li><li><a href="geo.tile.html">geo.tile</a></li><li><a href="geo.tileCache.html">geo.tileCache</a></li><li><a href="geo.tileLayer.html">geo.tileLayer</a></li><li><a href="geo.timestamp.html">geo.timestamp</a></li><li><a href="geo.transform.html">geo.transform</a></li><li><a href="geo.util.ClusterGroup.html">geo.util.ClusterGroup</a></li><li><a href="geo.vectorFeature.html">geo.vectorFeature</a></li></ul><h3>Namespaces</h3><ul><li><a href="-_anonymous_-geo.util.html"><anonymous>~geo.util</a></li><li><a href="geo.canvas.html">geo.canvas</a></li><li><a href="geo.d3.html">geo.d3</a></li><li><a href="geo.event.html">geo.event</a></li><li><a href="geo.event.camera.html">geo.event.camera</a></li><li><a href="geo.event.feature.html">geo.event.feature</a></li><li><a href="geo.gl.html">geo.gl</a></li><li><a href="geo.gui.html">geo.gui</a></li><li><a href="geo_event.clock.html">geo_event.clock</a></li></ul><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#__render">__render</a></li><li><a href="global.html#_addPolygonFeature">_addPolygonFeature</a></li><li><a href="global.html#_animatePan">_animatePan</a></li><li><a href="global.html#_appendChild">_appendChild</a></li><li><a href="global.html#_bindMouseHandlers">_bindMouseHandlers</a></li><li><a href="global.html#_boundingBox">_boundingBox</a></li><li><a href="global.html#_build">_build</a></li><li><a href="global.html#_checkForStroke">_checkForStroke</a></li><li><a href="global.html#_clusterData">_clusterData</a></li><li><a href="global.html#_colorize">_colorize</a></li><li><a href="global.html#_computeGradient">_computeGradient</a></li><li><a href="global.html#_connectEvents">_connectEvents</a></li><li><a href="global.html#_createCanvas">_createCanvas</a></li><li><a href="global.html#_createCircle">_createCircle</a></li><li><a href="global.html#_createFeature">_createFeature</a></li><li><a href="global.html#_definitions">_definitions</a></li><li><a href="global.html#_deleteFeature">_deleteFeature</a></li><li><a href="global.html#_disconnectEvents">_disconnectEvents</a></li><li><a href="global.html#_drawFeatures">_drawFeatures</a></li><li><a href="global.html#_exit">_exit</a></li><li><a href="global.html#_feature">_feature</a></li><li><a href="global.html#_featureArray">_featureArray</a></li><li><a href="global.html#_featureToPolygons">_featureToPolygons</a></li><li><a href="global.html#_forward">_forward</a></li><li><a href="global.html#_generateQuads">_generateQuads</a></li><li><a href="global.html#_generateScale">_generateScale</a></li><li><a href="global.html#_getArrayBuffer">_getArrayBuffer</a></li><li><a href="global.html#_getLoopData">_getLoopData</a></li><li><a href="global.html#_getMouseButton">_getMouseButton</a></li><li><a href="global.html#_getMouseModifiers">_getMouseModifiers</a></li><li><a href="global.html#_getMousePosition">_getMousePosition</a></li><li><a href="global.html#_getString">_getString</a></li><li><a href="global.html#_handleBrush">_handleBrush</a></li><li><a href="global.html#_handleBrushend">_handleBrushend</a></li><li><a href="global.html#_handleDoubleClick">_handleDoubleClick</a></li><li><a href="global.html#_handleMouseClick">_handleMouseClick</a></li><li><a href="global.html#_handleMouseclick">_handleMouseclick</a></li><li><a href="global.html#_handleMouseDown">_handleMouseDown</a></li><li><a href="global.html#_handleMousemove">_handleMousemove</a></li><li><a href="global.html#_handleMouseMove">_handleMouseMove</a></li><li><a href="global.html#_handleMouseMoveDocument">_handleMouseMoveDocument</a></li><li><a href="global.html#_handleMouseUp">_handleMouseUp</a></li><li><a href="global.html#_handleMouseUpDocument">_handleMouseUpDocument</a></li><li><a href="global.html#_handleMouseWheel">_handleMouseWheel</a></li><li><a href="global.html#_handleZoom">_handleZoom</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_inverse">_inverse</a></li><li><a href="global.html#_objectListAdd">_objectListAdd</a></li><li><a href="global.html#_objectListEnd">_objectListEnd</a></li><li><a href="global.html#_objectListGet">_objectListGet</a></li><li><a href="global.html#_objectListStart">_objectListStart</a></li><li><a href="global.html#_position">_position</a></li><li><a href="global.html#_positionToQuad">_positionToQuad</a></li><li><a href="global.html#_removeFeature">_removeFeature</a></li><li><a href="global.html#_render">_render</a></li><li><a href="global.html#_renderBinnedData">_renderBinnedData</a></li><li><a href="global.html#_renderColorQuads">_renderColorQuads</a></li><li><a href="global.html#_renderFrame">_renderFrame</a></li><li><a href="global.html#_renderImageQuads">_renderImageQuads</a></li><li><a href="global.html#_renderOnCanvas">_renderOnCanvas</a></li><li><a href="global.html#_renderPoints">_renderPoints</a></li><li><a href="global.html#_resize">_resize</a></li><li><a href="global.html#_style">_style</a></li><li><a href="global.html#_unbindMouseHandlers">_unbindMouseHandlers</a></li><li><a href="global.html#_update">_update</a></li><li><a href="global.html#_updateRangeTree">_updateRangeTree</a></li><li><a href="global.html#_updateTextures">_updateTextures</a></li><li><a href="global.html#_wipePolygons">_wipePolygons</a></li><li><a href="global.html#active">active</a></li><li><a href="global.html#actors">actors</a></li><li><a href="global.html#addChild">addChild</a></li><li><a href="global.html#addPromise">addPromise</a></li><li><a href="global.html#allowRotation">allowRotation</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#attribution">attribution</a></li><li><a href="global.html#bin">bin</a></li><li><a href="global.html#binned">binned</a></li><li><a href="global.html#bounds">bounds</a></li><li><a href="global.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li><li><a href="global.html#boxSearch">boxSearch</a></li><li><a href="global.html#buildTime">buildTime</a></li><li><a href="global.html#camera">camera</a></li><li><a href="global.html#cancel">cancel</a></li><li><a href="global.html#canRead">canRead</a></li><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#center">center</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#choropleth">choropleth</a></li><li><a href="global.html#clampBoundsX">clampBoundsX</a></li><li><a href="global.html#clampBoundsY">clampBoundsY</a></li><li><a href="global.html#clampZoom">clampZoom</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clock">clock</a></li><li><a href="global.html#clustering">clustering</a></li><li><a href="global.html#computeGeodeticSurfaceNormal">computeGeodeticSurfaceNormal</a></li><li><a href="global.html#contextRenderer">contextRenderer</a></li><li><a href="global.html#contour">contour</a></li><li><a href="global.html#createChoropleth">createChoropleth</a></li><li><a href="global.html#createContours">createContours</a></li><li><a href="global.html#createFeature">createFeature</a></li><li><a href="global.html#createLayer">createLayer</a></li><li><a href="global.html#createWidget">createWidget</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#dataTime">dataTime</a></li><li><a href="global.html#deleteFeature">deleteFeature</a></li><li><a href="global.html#deleteLayer">deleteLayer</a></li><li><a href="global.html#deleteWidget">deleteWidget</a></li><li><a href="global.html#delta">delta</a></li><li><a href="global.html#destroy">destroy</a></li><li><a href="global.html#discreteZoom">discreteZoom</a></li><li><a href="global.html#displayToGcs">displayToGcs</a></li><li><a href="global.html#displayToWorld">displayToWorld</a></li><li><a href="global.html#draw">draw</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#exit">exit</a></li><li><a href="global.html#featureGcsToDisplay">featureGcsToDisplay</a></li><li><a href="global.html#features">features</a></li><li><a href="global.html#featureVertices">featureVertices</a></li><li><a href="global.html#fileReader">fileReader</a></li><li><a href="global.html#forward">forward</a></li><li><a href="global.html#framerate">framerate</a></li><li><a href="global.html#fromLocal">fromLocal</a></li><li><a href="global.html#gcs">gcs</a></li><li><a href="global.html#gcsPosition">gcsPosition</a></li><li><a href="global.html#gcsToDisplay">gcsToDisplay</a></li><li><a href="global.html#gcsToWorld">gcsToWorld</a></li><li><a href="global.html#geometry">geometry</a></li><li><a href="global.html#geoOff">geoOff</a></li><li><a href="global.html#geoOn">geoOn</a></li><li><a href="global.html#geoTrigger">geoTrigger</a></li><li><a href="global.html#globals">globals</a></li><li><a href="global.html#height">height</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#ingcs">ingcs</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#intensity">intensity</a></li><li><a href="global.html#interactor">interactor</a></li><li><a href="global.html#inverse">inverse</a></li><li><a href="global.html#isInViewport">isInViewport</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#layer">layer</a></li><li><a href="global.html#layers">layers</a></li><li><a href="global.html#line">line</a></li><li><a href="global.html#linkFeatures">linkFeatures</a></li><li><a href="global.html#links">links</a></li><li><a href="global.html#loop">loop</a></li><li><a href="global.html#map">map</a></li><li><a href="global.html#maximumRadius">maximumRadius</a></li><li><a href="global.html#maxIntensity">maxIntensity</a></li><li><a href="global.html#minimumRadius">minimumRadius</a></li><li><a href="global.html#minIntensity">minIntensity</a></li><li><a href="global.html#modified">modified</a></li><li><a href="global.html#mouse">mouse</a></li><li><a href="global.html#moveDown">moveDown</a></li><li><a href="global.html#moveToBottom">moveToBottom</a></li><li><a href="global.html#moveToTop">moveToTop</a></li><li><a href="global.html#moveUp">moveUp</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#node">node</a></li><li><a href="global.html#nodeFeature">nodeFeature</a></li><li><a href="global.html#nodes">nodes</a></li><li><a href="global.html#now">now</a></li><li><a href="global.html#object">object</a></li><li><a href="global.html#onIdle">onIdle</a></li><li><a href="global.html#opacity">opacity</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#origin">origin</a></li><li><a href="global.html#pan">pan</a></li><li><a href="global.html#parent">parent</a></li><li><a href="global.html#parentCanvas">parentCanvas</a></li><li><a href="global.html#pause">pause</a></li><li><a href="global.html#pointSearch">pointSearch</a></li><li><a href="global.html#position">position</a></li><li><a href="global.html#radii">radii</a></li><li><a href="global.html#radiiSquared">radiiSquared</a></li><li><a href="global.html#read">read</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#renderer">renderer</a></li><li><a href="global.html#rendererName">rendererName</a></li><li><a href="global.html#reposition">reposition</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#resize">resize</a></li><li><a href="global.html#rotatedSize">rotatedSize</a></li><li><a href="global.html#rotation">rotation</a></li><li><a href="global.html#scalar">scalar</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#scaleFactor">scaleFactor</a></li><li><a href="global.html#select">select</a></li><li><a href="global.html#selectionAPI">selectionAPI</a></li><li><a href="global.html#simulateEvent">simulateEvent</a></li><li><a href="global.html#size">size</a></li><li><a href="global.html#source">source</a></li><li><a href="global.html#springBack">springBack</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#state">state</a></li><li><a href="global.html#step">step</a></li><li><a href="global.html#stepBackward">stepBackward</a></li><li><a href="global.html#stepForward">stepForward</a></li><li><a href="global.html#sticky">sticky</a></li><li><a href="global.html#style">style</a></li><li><a href="global.html#target">target</a></li><li><a href="global.html#toLocal">toLocal</a></li><li><a href="global.html#transformGeometry">transformGeometry</a></li><li><a href="global.html#transformPoint">transformPoint</a></li><li><a href="global.html#transition">transition</a></li><li><a href="global.html#transitionCancel">transitionCancel</a></li><li><a href="global.html#unitsPerPixel">unitsPerPixel</a></li><li><a href="global.html#updateAttribution">updateAttribution</a></li><li><a href="global.html#updateDelay">updateDelay</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#verticesPerFeature">verticesPerFeature</a></li><li><a href="global.html#visible">visible</a></li><li><a href="global.html#width">width</a></li><li><a href="global.html#worldToDisplay">worldToDisplay</a></li><li><a href="global.html#worldToGcs">worldToGcs</a></li><li><a href="global.html#zIndex">zIndex</a></li><li><a href="global.html#zoom">zoom</a></li><li><a href="global.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li><li><a href="global.html#zoomRange">zoomRange</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="geo.module_util.html">geo.util</a></li></ul><h3>Classes</h3><ul><li><a href="geo.annotation.html">geo.annotation</a></li><li><a href="geo.annotationLayer.html">geo.annotationLayer</a></li><li><a href="geo.camera.html">geo.camera</a></li><li><a href="geo.canvas.heatmapFeature.html">geo.canvas.heatmapFeature</a></li><li><a href="geo.canvas.object.html">geo.canvas.object</a></li><li><a href="geo.canvas.quadFeature.html">geo.canvas.quadFeature</a></li><li><a href="geo.canvas.renderer.html">geo.canvas.renderer</a></li><li><a href="geo.choroplethFeature.html">geo.choroplethFeature</a></li><li><a href="geo.clock.html">geo.clock</a></li><li><a href="geo.contourFeature.html">geo.contourFeature</a></li><li><a href="geo.d3.graphFeature.html">geo.d3.graphFeature</a></li><li><a href="geo.d3.lineFeature.html">geo.d3.lineFeature</a></li><li><a href="geo.d3.object.html">geo.d3.object</a></li><li><a href="geo.d3.pathFeature.html">geo.d3.pathFeature</a></li><li><a href="geo.d3.pointFeature.html">geo.d3.pointFeature</a></li><li><a href="geo.d3.quadFeature.html">geo.d3.quadFeature</a></li><li><a href="geo.d3.renderer.html">geo.d3.renderer</a></li><li><a href="geo.d3.vectorFeature.html">geo.d3.vectorFeature</a></li><li><a href="geo.domRenderer.html">geo.domRenderer</a></li><li><a href="geo.feature.html">geo.feature</a></li><li><a href="geo.featureLayer.html">geo.featureLayer</a></li><li><a href="geo.fetchQueue.html">geo.fetchQueue</a></li><li><a href="geo.fileReader.html">geo.fileReader</a></li><li><a href="geo.geomFeature.html">geo.geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">geo.gl.choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">geo.gl.contourFeature</a></li><li><a href="geo.gl.ellipsoid.html">geo.gl.ellipsoid</a></li><li><a href="geo.gl.geomFeature.html">geo.gl.geomFeature</a></li><li><a href="geo.gl.lineFeature.html">geo.gl.lineFeature</a></li><li><a href="geo.gl.object.html">geo.gl.object</a></li><li><a href="geo.gl.pointFeature.html">geo.gl.pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">geo.gl.polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">geo.gl.quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">geo.gl.vglRenderer</a></li><li><a href="geo.greaphFeature.html">geo.greaphFeature</a></li><li><a href="geo.gui.legendWidget.html">geo.gui.legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">geo.gui.sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">geo.gui.svgWidget</a></li><li><a href="geo.gui.uiLayer.html">geo.gui.uiLayer</a></li><li><a href="geo.gui.widget.html">geo.gui.widget</a></li><li><a href="geo.heatmapFeature.html">geo.heatmapFeature</a></li><li><a href="geo.imageTile.html">geo.imageTile</a></li><li><a href="geo.jsonReader.html">geo.jsonReader</a></li><li><a href="geo.layer.html">geo.layer</a></li><li><a href="geo.lineFeature.html">geo.lineFeature</a></li><li><a href="geo.map.html">geo.map</a></li><li><a href="geo.mapInteractor.html">geo.mapInteractor</a></li><li><a href="geo.object.html">geo.object</a></li><li><a href="geo.osmLayer.html">geo.osmLayer</a></li><li><a href="geo.pathFeature.html">geo.pathFeature</a></li><li><a href="geo.pointFeature.html">geo.pointFeature</a></li><li><a href="geo.polygonFeature.html">geo.polygonFeature</a></li><li><a href="geo.quadFeature.html">geo.quadFeature</a></li><li><a href="geo.renderer.html">geo.renderer</a></li><li><a href="geo.sceneObject.html">geo.sceneObject</a></li><li><a href="geo.tile.html">geo.tile</a></li><li><a href="geo.tileCache.html">geo.tileCache</a></li><li><a href="geo.tileLayer.html">geo.tileLayer</a></li><li><a href="geo.timestamp.html">geo.timestamp</a></li><li><a href="geo.transform.html">geo.transform</a></li><li><a href="geo.util.ClusterGroup.html">geo.util.ClusterGroup</a></li><li><a href="geo.vectorFeature.html">geo.vectorFeature</a></li></ul><h3>Namespaces</h3><ul><li><a href="-_anonymous_-geo.util.html"><anonymous>~geo.util</a></li><li><a href="geo.canvas.html">geo.canvas</a></li><li><a href="geo.d3.html">geo.d3</a></li><li><a href="geo.event.html">geo.event</a></li><li><a href="geo.event.annotation.html">geo.event.annotation</a></li><li><a href="geo.event.camera.html">geo.event.camera</a></li><li><a href="geo.event.feature.html">geo.event.feature</a></li><li><a href="geo.gl.html">geo.gl</a></li><li><a href="geo.gui.html">geo.gui</a></li><li><a href="geo_event.clock.html">geo_event.clock</a></li></ul><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#__render">__render</a></li><li><a href="global.html#_addPolygonFeature">_addPolygonFeature</a></li><li><a href="global.html#_animatePan">_animatePan</a></li><li><a href="global.html#_appendChild">_appendChild</a></li><li><a href="global.html#_bindMouseHandlers">_bindMouseHandlers</a></li><li><a href="global.html#_boundingBox">_boundingBox</a></li><li><a href="global.html#_build">_build</a></li><li><a href="global.html#_checkForStroke">_checkForStroke</a></li><li><a href="global.html#_clusterData">_clusterData</a></li><li><a href="global.html#_colorize">_colorize</a></li><li><a href="global.html#_computeGradient">_computeGradient</a></li><li><a href="global.html#_connectEvents">_connectEvents</a></li><li><a href="global.html#_coordinates">_coordinates</a></li><li><a href="global.html#_createCanvas">_createCanvas</a></li><li><a href="global.html#_createCircle">_createCircle</a></li><li><a href="global.html#_createFeature">_createFeature</a></li><li><a href="global.html#_definitions">_definitions</a></li><li><a href="global.html#_deleteFeature">_deleteFeature</a></li><li><a href="global.html#_disconnectEvents">_disconnectEvents</a></li><li><a href="global.html#_drawFeatures">_drawFeatures</a></li><li><a href="global.html#_exit">_exit</a></li><li><a href="global.html#_feature">_feature</a></li><li><a href="global.html#_featureArray">_featureArray</a></li><li><a href="global.html#_featureToPolygons">_featureToPolygons</a></li><li><a href="global.html#_forward">_forward</a></li><li><a href="global.html#_generateQuads">_generateQuads</a></li><li><a href="global.html#_generateScale">_generateScale</a></li><li><a href="global.html#_getArrayBuffer">_getArrayBuffer</a></li><li><a href="global.html#_getLoopData">_getLoopData</a></li><li><a href="global.html#_getMouseButton">_getMouseButton</a></li><li><a href="global.html#_getMouseModifiers">_getMouseModifiers</a></li><li><a href="global.html#_getMousePosition">_getMousePosition</a></li><li><a href="global.html#_getString">_getString</a></li><li><a href="global.html#_handleBrush">_handleBrush</a></li><li><a href="global.html#_handleBrushend">_handleBrushend</a></li><li><a href="global.html#_handleDoubleClick">_handleDoubleClick</a></li><li><a href="global.html#_handleMouseClick">_handleMouseClick</a></li><li><a href="global.html#_handleMouseclick">_handleMouseclick</a></li><li><a href="global.html#_handleMouseDown">_handleMouseDown</a></li><li><a href="global.html#_handleMousemove">_handleMousemove</a></li><li><a href="global.html#_handleMouseMove">_handleMouseMove</a></li><li><a href="global.html#_handleMouseMoveDocument">_handleMouseMoveDocument</a></li><li><a href="global.html#_handleMouseUp">_handleMouseUp</a></li><li><a href="global.html#_handleMouseUpDocument">_handleMouseUpDocument</a></li><li><a href="global.html#_handleMouseWheel">_handleMouseWheel</a></li><li><a href="global.html#_handleZoom">_handleZoom</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_inverse">_inverse</a></li><li><a href="global.html#_objectListAdd">_objectListAdd</a></li><li><a href="global.html#_objectListEnd">_objectListEnd</a></li><li><a href="global.html#_objectListGet">_objectListGet</a></li><li><a href="global.html#_objectListStart">_objectListStart</a></li><li><a href="global.html#_position">_position</a></li><li><a href="global.html#_positionToQuad">_positionToQuad</a></li><li><a href="global.html#_processSelection">_processSelection</a></li><li><a href="global.html#_removeFeature">_removeFeature</a></li><li><a href="global.html#_render">_render</a></li><li><a href="global.html#_renderBinnedData">_renderBinnedData</a></li><li><a href="global.html#_renderColorQuads">_renderColorQuads</a></li><li><a href="global.html#_renderFrame">_renderFrame</a></li><li><a href="global.html#_renderImageQuads">_renderImageQuads</a></li><li><a href="global.html#_renderOnCanvas">_renderOnCanvas</a></li><li><a href="global.html#_renderPoints">_renderPoints</a></li><li><a href="global.html#_resize">_resize</a></li><li><a href="global.html#_setClickMaybe">_setClickMaybe</a></li><li><a href="global.html#_style">_style</a></li><li><a href="global.html#_unbindMouseHandlers">_unbindMouseHandlers</a></li><li><a href="global.html#_update">_update</a></li><li><a href="global.html#_updateRangeTree">_updateRangeTree</a></li><li><a href="global.html#_updateTextures">_updateTextures</a></li><li><a href="global.html#_wipePolygons">_wipePolygons</a></li><li><a href="global.html#active">active</a></li><li><a href="global.html#actors">actors</a></li><li><a href="global.html#addAction">addAction</a></li><li><a href="global.html#addAnnotation">addAnnotation</a></li><li><a href="global.html#addChild">addChild</a></li><li><a href="global.html#addPromise">addPromise</a></li><li><a href="global.html#allowRotation">allowRotation</a></li><li><a href="global.html#annotationById">annotationById</a></li><li><a href="global.html#annotations">annotations</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#attribution">attribution</a></li><li><a href="global.html#bin">bin</a></li><li><a href="global.html#binned">binned</a></li><li><a href="global.html#bounds">bounds</a></li><li><a href="global.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li><li><a href="global.html#boxSearch">boxSearch</a></li><li><a href="global.html#buildTime">buildTime</a></li><li><a href="global.html#camera">camera</a></li><li><a href="global.html#cancel">cancel</a></li><li><a href="global.html#canRead">canRead</a></li><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#center">center</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#choropleth">choropleth</a></li><li><a href="global.html#clampBoundsX">clampBoundsX</a></li><li><a href="global.html#clampBoundsY">clampBoundsY</a></li><li><a href="global.html#clampZoom">clampZoom</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clock">clock</a></li><li><a href="global.html#clustering">clustering</a></li><li><a href="global.html#computeGeodeticSurfaceNormal">computeGeodeticSurfaceNormal</a></li><li><a href="global.html#contextRenderer">contextRenderer</a></li><li><a href="global.html#contour">contour</a></li><li><a href="global.html#coordinates">coordinates</a></li><li><a href="global.html#createChoropleth">createChoropleth</a></li><li><a href="global.html#createContours">createContours</a></li><li><a href="global.html#createFeature">createFeature</a></li><li><a href="global.html#createLayer">createLayer</a></li><li><a href="global.html#createWidget">createWidget</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#dataTime">dataTime</a></li><li><a href="global.html#deleteFeature">deleteFeature</a></li><li><a href="global.html#deleteLayer">deleteLayer</a></li><li><a href="global.html#deleteWidget">deleteWidget</a></li><li><a href="global.html#delta">delta</a></li><li><a href="global.html#destroy">destroy</a></li><li><a href="global.html#discreteZoom">discreteZoom</a></li><li><a href="global.html#displayDistance">displayDistance</a></li><li><a href="global.html#displayToGcs">displayToGcs</a></li><li><a href="global.html#displayToWorld">displayToWorld</a></li><li><a href="global.html#draw">draw</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#exit">exit</a></li><li><a href="global.html#featureGcsToDisplay">featureGcsToDisplay</a></li><li><a href="global.html#features">features</a></li><li><a href="global.html#featureVertices">featureVertices</a></li><li><a href="global.html#fileReader">fileReader</a></li><li><a href="global.html#forward">forward</a></li><li><a href="global.html#framerate">framerate</a></li><li><a href="global.html#fromLocal">fromLocal</a></li><li><a href="global.html#gcs">gcs</a></li><li><a href="global.html#gcsPosition">gcsPosition</a></li><li><a href="global.html#gcsToDisplay">gcsToDisplay</a></li><li><a href="global.html#gcsToWorld">gcsToWorld</a></li><li><a href="global.html#geo_action">geo_action</a></li><li><a href="global.html#geojson">geojson</a></li><li><a href="global.html#geometry">geometry</a></li><li><a href="global.html#geoOff">geoOff</a></li><li><a href="global.html#geoOn">geoOn</a></li><li><a href="global.html#geoTrigger">geoTrigger</a></li><li><a href="global.html#globals">globals</a></li><li><a href="global.html#hasAction">hasAction</a></li><li><a href="global.html#height">height</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#ingcs">ingcs</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#intensity">intensity</a></li><li><a href="global.html#interactor">interactor</a></li><li><a href="global.html#inverse">inverse</a></li><li><a href="global.html#isInViewport">isInViewport</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#layer">layer</a></li><li><a href="global.html#layers">layers</a></li><li><a href="global.html#line">line</a></li><li><a href="global.html#linkFeatures">linkFeatures</a></li><li><a href="global.html#links">links</a></li><li><a href="global.html#loop">loop</a></li><li><a href="global.html#map">map</a></li><li><a href="global.html#maximumRadius">maximumRadius</a></li><li><a href="global.html#maxIntensity">maxIntensity</a></li><li><a href="global.html#minimumRadius">minimumRadius</a></li><li><a href="global.html#minIntensity">minIntensity</a></li><li><a href="global.html#mode">mode</a></li><li><a href="global.html#modified">modified</a></li><li><a href="global.html#mouse">mouse</a></li><li><a href="global.html#mouseClick">mouseClick</a></li><li><a href="global.html#mouseMove">mouseMove</a></li><li><a href="global.html#moveDown">moveDown</a></li><li><a href="global.html#moveToBottom">moveToBottom</a></li><li><a href="global.html#moveToTop">moveToTop</a></li><li><a href="global.html#moveUp">moveUp</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#node">node</a></li><li><a href="global.html#nodeFeature">nodeFeature</a></li><li><a href="global.html#nodes">nodes</a></li><li><a href="global.html#now">now</a></li><li><a href="global.html#object">object</a></li><li><a href="global.html#onIdle">onIdle</a></li><li><a href="global.html#opacity">opacity</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#origin">origin</a></li><li><a href="global.html#pan">pan</a></li><li><a href="global.html#parent">parent</a></li><li><a href="global.html#parentCanvas">parentCanvas</a></li><li><a href="global.html#pause">pause</a></li><li><a href="global.html#pointAnnotation">pointAnnotation</a></li><li><a href="global.html#pointSearch">pointSearch</a></li><li><a href="global.html#polygonAnnotation">polygonAnnotation</a></li><li><a href="global.html#position">position</a></li><li><a href="global.html#radii">radii</a></li><li><a href="global.html#radiiSquared">radiiSquared</a></li><li><a href="global.html#read">read</a></li><li><a href="global.html#rectangleAnnotation">rectangleAnnotation</a></li><li><a href="global.html#removeAction">removeAction</a></li><li><a href="global.html#removeAllAnnotations">removeAllAnnotations</a></li><li><a href="global.html#removeAnnotation">removeAnnotation</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#renderer">renderer</a></li><li><a href="global.html#rendererName">rendererName</a></li><li><a href="global.html#reposition">reposition</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#resize">resize</a></li><li><a href="global.html#rotatedSize">rotatedSize</a></li><li><a href="global.html#rotation">rotation</a></li><li><a href="global.html#scalar">scalar</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#scaleFactor">scaleFactor</a></li><li><a href="global.html#select">select</a></li><li><a href="global.html#selectionAPI">selectionAPI</a></li><li><a href="global.html#simulateEvent">simulateEvent</a></li><li><a href="global.html#size">size</a></li><li><a href="global.html#source">source</a></li><li><a href="global.html#springBack">springBack</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#state">state</a></li><li><a href="global.html#step">step</a></li><li><a href="global.html#stepBackward">stepBackward</a></li><li><a href="global.html#stepForward">stepForward</a></li><li><a href="global.html#sticky">sticky</a></li><li><a href="global.html#style">style</a></li><li><a href="global.html#target">target</a></li><li><a href="global.html#toLocal">toLocal</a></li><li><a href="global.html#transformGeometry">transformGeometry</a></li><li><a href="global.html#transformPoint">transformPoint</a></li><li><a href="global.html#transition">transition</a></li><li><a href="global.html#transitionCancel">transitionCancel</a></li><li><a href="global.html#type">type</a></li><li><a href="global.html#unitsPerPixel">unitsPerPixel</a></li><li><a href="global.html#updateAttribution">updateAttribution</a></li><li><a href="global.html#updateDelay">updateDelay</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#verticesPerFeature">verticesPerFeature</a></li><li><a href="global.html#visible">visible</a></li><li><a href="global.html#width">width</a></li><li><a href="global.html#worldToDisplay">worldToDisplay</a></li><li><a href="global.html#worldToGcs">worldToGcs</a></li><li><a href="global.html#zIndex">zIndex</a></li><li><a href="global.html#zoom">zoom</a></li><li><a href="global.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li><li><a href="global.html#zoomRange">zoomRange</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Jul 19 2016 13:07:08 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.1</a> on Fri Sep 30 2016 15:37:13 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

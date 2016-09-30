@@ -52,86 +52,86 @@
 
   <span class="hljs-keyword">var</span> query = utils.getQuery();
   <span class="hljs-keyword">var</span> map = geo.map({
-    node: <span class="hljs-string">'#map'</span>,
-    center: {
-      x: <span class="hljs-number">-88.0</span>,
-      y: <span class="hljs-number">29</span>
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-88.0</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>
     },
-    zoom: <span class="hljs-number">4</span>
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">4</span>
   });
   <span class="hljs-keyword">var</span> layer = map.createLayer(<span class="hljs-string">'feature'</span>, {
-    renderer: query.renderer ? (query.renderer === <span class="hljs-string">'html'</span> ? <span class="hljs-literal">null</span> : query.renderer) : <span class="hljs-literal">undefined</span>,
-    features: query.renderer ? <span class="hljs-literal">undefined</span> : [<span class="hljs-string">'quad'</span>]
+    <span class="hljs-attr">renderer</span>: query.renderer ? (query.renderer === <span class="hljs-string">'html'</span> ? <span class="hljs-literal">null</span> : query.renderer) : <span class="hljs-literal">undefined</span>,
+    <span class="hljs-attr">features</span>: query.renderer ? <span class="hljs-literal">undefined</span> : [<span class="hljs-string">'quad'</span>]
   });
-  <span class="hljs-keyword">var</span> quads = layer.createFeature(<span class="hljs-string">'quad'</span>, {selectionAPI: <span class="hljs-literal">true</span>});
+  <span class="hljs-keyword">var</span> quads = layer.createFeature(<span class="hljs-string">'quad'</span>, {<span class="hljs-attr">selectionAPI</span>: <span class="hljs-literal">true</span>});
   <span class="hljs-keyword">var</span> previewImage = <span class="hljs-keyword">new</span> Image();
   previewImage.onload = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 
     quads
       .data([{
-        ll: {x: <span class="hljs-number">-108</span>, y: <span class="hljs-number">29</span>},
-        ur: {x: <span class="hljs-number">-88</span>, y: <span class="hljs-number">49</span>},
-        image: <span class="hljs-string">'../../data/tilefancy.png'</span>
+        <span class="hljs-attr">ll</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-108</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">ur</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-88</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">49</span>},
+        <span class="hljs-attr">image</span>: <span class="hljs-string">'../../data/tilefancy.png'</span>
       }, {
-        ll: {x: <span class="hljs-number">-88</span>, y: <span class="hljs-number">29</span>},
-        ur: {x: <span class="hljs-number">-58</span>, y: <span class="hljs-number">49</span>},
-        image: <span class="hljs-string">'flower1.jpg'</span>,
-        opacity: <span class="hljs-number">0.75</span>
+        <span class="hljs-attr">ll</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-88</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">ur</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-58</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">49</span>},
+        <span class="hljs-attr">image</span>: <span class="hljs-string">'flower1.jpg'</span>,
+        <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.75</span>
       }, {
-        ul: {x: <span class="hljs-number">-108</span>, y: <span class="hljs-number">29</span>},
-        ur: {x: <span class="hljs-number">-58</span>, y: <span class="hljs-number">29</span>},
-        ll: {x: <span class="hljs-number">-98</span>, y: <span class="hljs-number">9</span>},
-        lr: {x: <span class="hljs-number">-68</span>, y: <span class="hljs-number">9</span>},
-        previewImage: <span class="hljs-literal">null</span>,
-        image: <span class="hljs-string">'flower3.jpg'</span>
+        <span class="hljs-attr">ul</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-108</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">ur</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-58</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">ll</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-98</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">9</span>},
+        <span class="hljs-attr">lr</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-68</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">9</span>},
+        <span class="hljs-attr">previewImage</span>: <span class="hljs-literal">null</span>,
+        <span class="hljs-attr">image</span>: <span class="hljs-string">'flower3.jpg'</span>
       }, {
-        lr: {x: <span class="hljs-number">-58</span>, y: <span class="hljs-number">29</span>},
-        ur: {x: <span class="hljs-number">-58</span>, y: <span class="hljs-number">49</span>},
-        ul: {x: <span class="hljs-number">-38</span>, y: <span class="hljs-number">54</span>},
-        ll: {x: <span class="hljs-number">-33</span>, y: <span class="hljs-number">34</span>},
-        image: <span class="hljs-string">'flower2.jpg'</span>,
-        opacity: <span class="hljs-number">0.15</span>
+        <span class="hljs-attr">lr</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-58</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">ur</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-58</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">49</span>},
+        <span class="hljs-attr">ul</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-38</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">54</span>},
+        <span class="hljs-attr">ll</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-33</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">34</span>},
+        <span class="hljs-attr">image</span>: <span class="hljs-string">'flower2.jpg'</span>,
+        <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.15</span>
       }, {
-        ll: {x: <span class="hljs-number">-33</span>, y: <span class="hljs-number">34</span>},
-        lr: {x: <span class="hljs-number">-33</span>, y: <span class="hljs-number">9</span>},
-        ur: {x: <span class="hljs-number">-68</span>, y: <span class="hljs-number">9</span>},
-        ul: {x: <span class="hljs-number">-58</span>, y: <span class="hljs-number">29</span>},
-        image: <span class="hljs-string">'../../data/tilefancy.png'</span>
+        <span class="hljs-attr">ll</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-33</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">34</span>},
+        <span class="hljs-attr">lr</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-33</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">9</span>},
+        <span class="hljs-attr">ur</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-68</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">9</span>},
+        <span class="hljs-attr">ul</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-58</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">image</span>: <span class="hljs-string">'../../data/tilefancy.png'</span>
       }, {
-        ll: {x: <span class="hljs-number">-128</span>, y: <span class="hljs-number">29</span>},
-        ur: {x: <span class="hljs-number">-108</span>, y: <span class="hljs-number">49</span>},
-        image: <span class="hljs-string">'../../data/nosuchimage.png'</span>
+        <span class="hljs-attr">ll</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-128</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">ur</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-108</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">49</span>},
+        <span class="hljs-attr">image</span>: <span class="hljs-string">'../../data/nosuchimage.png'</span>
       }, {
-        ul: {x: <span class="hljs-number">-128</span>, y: <span class="hljs-number">29</span>},
-        ur: {x: <span class="hljs-number">-108</span>, y: <span class="hljs-number">29</span>},
-        ll: {x: <span class="hljs-number">-123</span>, y: <span class="hljs-number">9</span>},
-        lr: {x: <span class="hljs-number">-98</span>, y: <span class="hljs-number">9</span>},
-        previewImage: <span class="hljs-literal">null</span>,
-        image: <span class="hljs-string">'../../data/nosuchimage.png'</span>
+        <span class="hljs-attr">ul</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-128</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">ur</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-108</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">ll</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-123</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">9</span>},
+        <span class="hljs-attr">lr</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-98</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">9</span>},
+        <span class="hljs-attr">previewImage</span>: <span class="hljs-literal">null</span>,
+        <span class="hljs-attr">image</span>: <span class="hljs-string">'../../data/nosuchimage.png'</span>
       }, {
-        ul: {x: <span class="hljs-number">-148</span>, y: <span class="hljs-number">29</span>},
-        ur: {x: <span class="hljs-number">-128</span>, y: <span class="hljs-number">29</span>},
-        ll: {x: <span class="hljs-number">-148</span>, y: <span class="hljs-number">9</span>},
-        lr: {x: <span class="hljs-number">-123</span>, y: <span class="hljs-number">9</span>},
-        previewImage: previewImage,
-        image: <span class="hljs-string">'../../data/nosuchimage.png'</span>
+        <span class="hljs-attr">ul</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-148</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">ur</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-128</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">ll</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-148</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">9</span>},
+        <span class="hljs-attr">lr</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-123</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">9</span>},
+        <span class="hljs-attr">previewImage</span>: previewImage,
+        <span class="hljs-attr">image</span>: <span class="hljs-string">'../../data/nosuchimage.png'</span>
       }, {
-        ll: {x: <span class="hljs-number">-138</span>, y: <span class="hljs-number">29</span>},
-        ur: {x: <span class="hljs-number">-128</span>, y: <span class="hljs-number">39</span>},
-        color: <span class="hljs-string">'#FF0000'</span>
+        <span class="hljs-attr">ll</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-138</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">ur</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-128</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">39</span>},
+        <span class="hljs-attr">color</span>: <span class="hljs-string">'#FF0000'</span>
       }, {
-        ll: {x: <span class="hljs-number">-148</span>, y: <span class="hljs-number">39</span>},
-        ur: {x: <span class="hljs-number">-138</span>, y: <span class="hljs-number">49</span>},
-        color: <span class="hljs-string">'#FF0000'</span>
+        <span class="hljs-attr">ll</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-148</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">39</span>},
+        <span class="hljs-attr">ur</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-138</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">49</span>},
+        <span class="hljs-attr">color</span>: <span class="hljs-string">'#FF0000'</span>
       }, {
-        ll: {x: <span class="hljs-number">-138</span>, y: <span class="hljs-number">39</span>},
-        ur: {x: <span class="hljs-number">-128</span>, y: <span class="hljs-number">49</span>},
-        color: <span class="hljs-string">'#00FFFF'</span>
+        <span class="hljs-attr">ll</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-138</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">39</span>},
+        <span class="hljs-attr">ur</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-128</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">49</span>},
+        <span class="hljs-attr">color</span>: <span class="hljs-string">'#00FFFF'</span>
       }, {
-        ll: {x: <span class="hljs-number">-148</span>, y: <span class="hljs-number">29</span>},
-        ur: {x: <span class="hljs-number">-138</span>, y: <span class="hljs-number">39</span>},
-        opacity: <span class="hljs-number">0.25</span>,
-        color: <span class="hljs-string">'#0000FF'</span>
+        <span class="hljs-attr">ll</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-148</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">29</span>},
+        <span class="hljs-attr">ur</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">-138</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">39</span>},
+        <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.25</span>,
+        <span class="hljs-attr">color</span>: <span class="hljs-string">'#0000FF'</span>
       <span class="hljs-comment">/* You can specify quads so that the corners are 'twisted' and the quad
        * would be non-convex.  In this case, the quads are each rendered as a
        * pair of triangles, but they probably aren't what is desired.
@@ -150,14 +150,14 @@
       */</span>
       }])
       .style({
-        opacity: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+        <span class="hljs-attr">opacity</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
           <span class="hljs-keyword">return</span> d.opacity !== <span class="hljs-literal">undefined</span> ? d.opacity : <span class="hljs-number">1</span>;
         },
-        color: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+        <span class="hljs-attr">color</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
           <span class="hljs-keyword">return</span> d.color;
         },
-        previewColor: {r: <span class="hljs-number">1</span>, g: <span class="hljs-number">0.75</span>, b: <span class="hljs-number">0.75</span>},
-        previewImage: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+        <span class="hljs-attr">previewColor</span>: {<span class="hljs-attr">r</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0.75</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0.75</span>},
+        <span class="hljs-attr">previewImage</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
           <span class="hljs-keyword">return</span> d.previewImage !== <span class="hljs-literal">undefined</span> ? d.previewImage : previewImage;
         }
       })

@@ -55,29 +55,29 @@
 
     <span class="hljs-keyword">this</span>._getTile = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">index, source</span>) </span>{
       <span class="hljs-keyword">return</span> geo.imageTile({
-        index: index,
-        size: {x: <span class="hljs-keyword">this</span>._options.tileWidth, y: <span class="hljs-keyword">this</span>._options.tileHeight},
-        url: <span class="hljs-keyword">this</span>._options.url(source || index)
+        <span class="hljs-attr">index</span>: index,
+        <span class="hljs-attr">size</span>: {<span class="hljs-attr">x</span>: <span class="hljs-keyword">this</span>._options.tileWidth, <span class="hljs-attr">y</span>: <span class="hljs-keyword">this</span>._options.tileHeight},
+        <span class="hljs-attr">url</span>: <span class="hljs-keyword">this</span>._options.url(source || index)
       });
     };
   };
 
   DeepZoom.defaults = $.extend({}, geo.tileLayer.defaults, {
-    minLevel: <span class="hljs-number">0</span>,
-    maxLevel: <span class="hljs-number">9</span>,
-    levelOffset: <span class="hljs-number">8</span>,
-    attribution: <span class="hljs-string">''</span>,
-    wrapX: <span class="hljs-literal">false</span>,
-    wrapY: <span class="hljs-literal">false</span>,
-    url: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">index</span>) </span>{
+    <span class="hljs-attr">minLevel</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-attr">maxLevel</span>: <span class="hljs-number">9</span>,
+    <span class="hljs-attr">levelOffset</span>: <span class="hljs-number">8</span>,
+    <span class="hljs-attr">attribution</span>: <span class="hljs-string">''</span>,
+    <span class="hljs-attr">wrapX</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">wrapY</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">url</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">index</span>) </span>{
       <span class="hljs-keyword">return</span> <span class="hljs-string">'http://node15.cci.emory.edu/cgi-bin/iipsrv.fcgi?DeepZoom=/bigdata2/'</span> +
       <span class="hljs-string">'PYRAMIDS/CDSA/ACC_Diagnostic/nationwidechildrens.org_ACC.diagnostic_images.'</span> +
       <span class="hljs-string">'Level_1.304.4.0/TCGA-OR-A5J1-01Z-00-DX1.600C7D8C-F04C-4125-AF14-B1E76DC01A1E.'</span> +
       <span class="hljs-string">'svs.dzi.tif_files/'</span> + (index.level + <span class="hljs-number">8</span>) + <span class="hljs-string">'/'</span> + index.x + <span class="hljs-string">'_'</span> + index.y + <span class="hljs-string">'.jpg'</span>;
     },
-    tileOffset : <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">level</span>) </span>{
+    <span class="hljs-attr">tileOffset</span> : <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">level</span>) </span>{
       <span class="hljs-keyword">var</span> s = <span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2</span>, level - <span class="hljs-number">1</span>) * <span class="hljs-number">256</span>;
-      <span class="hljs-keyword">return</span> {x: s, y: s};
+      <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: s, <span class="hljs-attr">y</span>: s};
     }
   });
   geo.inherit(DeepZoom, geo.tileLayer);
@@ -97,7 +97,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
-    node: <span class="hljs-string">'#map'</span>
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>
   });</pre></div></div>
             
         </li>

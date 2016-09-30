@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+    <title>Annotation Layer</title>
+    <!-- include the main bundle-->
+    <script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
+    <!-- include example sources-->
+    <!-- Include example specific files-->
+    <link rel="stylesheet" href="main.css">
+    <script type="text/javascript" src="main.js"></script>
+  </head>
+  <body>
+    <!-- Add a navbar-->
+    <nav role="navigation" class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" data-toggle="collapse" data-target="gj-navbar-collapse" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a href="https://github.com/OpenGeoscience/geojs" target="gj-homepage" class="navbar-brand">GeoJS</a>
+        </div>
+        <div id="gj-navbar-collapse" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="docs/main.html" target="gj-docco" class="gj-show-source-link">Source</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#about-modal" class="gj-show-about-link">About</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- Add an about modal dialog-->
+    <div id="about-modal" class="modal fade">
+      <div class="modal-dialog modal-md">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Annotation Layer</h4>
+          </div>
+          <div class="modal-body">
+            <p class="text-left">This example shows how to add annotations, such as marked rectangles, to a map.  Left click to add a polygon, right click to add a rectangle.</p>
+            <p class="text-right">© 2014, Kitware, Inc.</p>
+          </div>
+          <div class="modal-footer">
+            <button data-dismiss="modal" data-target="#about-modal" class="btn btn-primary">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Add the default main content element-->
+    <div id="map"></div>
+    <div id="controls">
+      <div title="Select the type of annotation to add." class="form-group annotationtype">
+        <div class="shortlabel">Add</div>
+        <button id="rectangle" next="polygon" class="lastused">Rectangle</button>
+        <button id="polygon" next="point">Polygon</button>
+        <button id="point" next="rectangle">Point</button>
+      </div>
+      <div class="form-group">
+        <div id="instructions" annotation="none">
+          <div class="annotation none"></div>
+          <div class="annotation polygon">Left-click points in the polygon.  Double click, right click, or click the starting point to close the polygon.</div>
+          <div class="annotation rectangle">Left click-and-drag to draw a rectangle.</div>
+          <div class="annotation point">Left click to create a point.</div>
+        </div>
+      </div>
+      <div title="If enabled, left-click to add another annotation, and right-click to switch annotation type.  Otherwise, you must click a button above." class="form-group">
+        <label for="clickadd">Click to add annotation</label>
+        <input id="clickadd" param-name="clickadd" type="checkbox" placeholder="true" checked="checked">
+      </div>
+      <div title="If enabled, immediately after adding one annotation, you can add another without either left-clicking or selecting a button." class="form-group">
+        <label for="keepadding">Keep adding annotations</label>
+        <input id="keepadding" param-name="keepadding" type="checkbox" placeholder="false">
+      </div>
+      <div id="annotationheader" class="form-group">
+        <div class="shortlabel">Created Annotations</div><a action="remove-all" title="Delete all annotations" class="entry-remove-all">&#x2716;</a>
+      </div>
+      <div class="form-group">
+        <div id="annotationlist">
+          <div id="sample" class="entry"><span class="entry-name">Sample</span><a action="edit" title="Edit name and properties" class="entry-edit">&#x270e;</a><a action="remove" title="Delete this annotation" class="entry-remove">&#x2716;</a></div>
+        </div>
+      </div>
+      <!-- add buttons to copy annotations as geojson and to paste geojson to annotations-->
+    </div>
+    <div id="editdialog" class="modal fade">
+      <div class="modal-dialog">
+        <form class="modal-content">
+          <div class="modal-header">
+            <button type="button" data-dismiss="modal" class="close">&times;</button>
+            <h4 class="modal-title">Edit Annotation</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="edit-name">Name</label>
+              <input id="edit-name" option="name">
+            </div>
+            <div annotation-types="point" class="form-group">
+              <label for="edit-radius">Radius</label>
+              <input id="edit-radius" option="radius" format="positive">
+            </div>
+            <div annotation-types="point polygon rectangle" class="form-group">
+              <label for="edit-fill">Fill</label>
+              <select id="edit-stroke" option="fill" format="boolean">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+            <div annotation-types="point polygon rectangle" class="form-group">
+              <label for="edit-fillColor">Fill Color</label>
+              <input id="edit-fillColor" option="fillColor" format="color">
+            </div>
+            <div annotation-types="point polygon rectangle" class="form-group">
+              <label for="edit-fillOpacity">Fill Opacity</label>
+              <input id="edit-fillOpacity" option="fillOpacity" format="opacity">
+            </div>
+            <div annotation-types="point polygon rectangle" class="form-group">
+              <label for="edit-stroke">Stroke </label>
+              <select id="edit-stroke" option="stroke" format="boolean">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+            <div annotation-types="point polygon rectangle" class="form-group">
+              <label for="edit-strokeWidth">Stroke Width</label>
+              <input id="edit-strokeWidth" option="strokeWidth" format="positive">
+            </div>
+            <div annotation-types="point polygon rectangle" class="form-group">
+              <label for="edit-strokeColor">Stroke Color</label>
+              <input id="edit-strokeColor" option="strokeColor" format="color">
+            </div>
+            <div annotation-types="point polygon rectangle" class="form-group">
+              <label for="edit-strokeOpacity">Stroke Opacity</label>
+              <input id="edit-strokeOpacity" option="strokeOpacity" format="opacity">
+            </div>
+            <div class="form-group">
+              <div id="edit-validation-error"></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="edit-update" type="submit" class="btn btn-sm btn-primary">Update</button>
+            <button data-dismiss="modal" class="btn btn-sm btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

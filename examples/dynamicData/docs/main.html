@@ -47,7 +47,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({node: <span class="hljs-string">'#map'</span>, zoom: <span class="hljs-number">3</span>});</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({<span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>, <span class="hljs-attr">zoom</span>: <span class="hljs-number">3</span>});</pre></div></div>
             
         </li>
         
@@ -100,7 +100,7 @@ renderer that supports point features, like so:
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> features = map.createLayer(<span class="hljs-string">'feature'</span>, {renderer: <span class="hljs-string">'d3'</span>});
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> features = map.createLayer(<span class="hljs-string">'feature'</span>, {<span class="hljs-attr">renderer</span>: <span class="hljs-string">'d3'</span>});
 
   <span class="hljs-keyword">var</span> numberOfFeatures = <span class="hljs-number">200</span>;
 
@@ -146,7 +146,7 @@ renderer that supports point features, like so:
       <span class="hljs-keyword">var</span> x = alpha * <span class="hljs-built_in">Math</span>.cos(t) + beta * <span class="hljs-built_in">Math</span>.cos(gamma * t);
       <span class="hljs-keyword">var</span> y = alpha * <span class="hljs-built_in">Math</span>.sin(t) + beta * <span class="hljs-built_in">Math</span>.sin(gamma * t);
 
-      positions.push({x: x, y: y});
+      positions.push({<span class="hljs-attr">x</span>: x, <span class="hljs-attr">y</span>: y});
     }</pre></div></div>
             
         </li>
@@ -162,13 +162,13 @@ renderer that supports point features, like so:
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> yellow = {r: <span class="hljs-number">255</span>, g: <span class="hljs-number">255</span>, b: <span class="hljs-number">0</span>};
-    <span class="hljs-keyword">var</span> red = {r: <span class="hljs-number">255</span>, g: <span class="hljs-number">0</span>, b: <span class="hljs-number">0</span>};
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> yellow = {<span class="hljs-attr">r</span>: <span class="hljs-number">255</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">255</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>};
+    <span class="hljs-keyword">var</span> red = {<span class="hljs-attr">r</span>: <span class="hljs-number">255</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>};
 
     features.createFeature(<span class="hljs-string">'point'</span>)
       .data(positions)
       .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
-        <span class="hljs-keyword">return</span> {x: data.x, y: data.y};
+        <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: data.x, <span class="hljs-attr">y</span>: data.y};
       })
       .style(<span class="hljs-string">'radius'</span>, <span class="hljs-number">5</span>)
       .style(<span class="hljs-string">'fillColor'</span>, yellow)
