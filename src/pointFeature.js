@@ -143,7 +143,6 @@ var pointFeature = function (arg) {
     // prevent recomputing the clustering and set the new data array
     m_ignoreData = true;
     m_this.data(data);
-    m_this.draw();
   };
 
   ////////////////////////////////////////////////////////////////////////////
