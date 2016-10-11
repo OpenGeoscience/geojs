@@ -98,8 +98,7 @@ var canvas_gridFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._renderPoints = function (context2d, map, data) {
-    var position = m_this.gcsPosition(),
-        intensityFunc = m_this.intensity(),
+    var intensityFunc = m_this.intensity(),
         minIntensity = m_this.minIntensity(),
         upperLeft = m_this.upperLeft(),
         rowCount = m_this.rowCount(),
@@ -110,12 +109,12 @@ var canvas_gridFeature = function (arg) {
 
     cellDisplayLength =
       map.gcsToDisplay({x: cellSize, y: 0}).x -
-      map.gcsToDisplay({x: 0, y: 0}).x
+      map.gcsToDisplay({x: 0, y: 0}).x;
 
     var upperLeftDisplay = map.gcsToDisplay({
       x: upperLeft.x,
       y: upperLeft.y
-    })
+    });
 
     for (i = 0; i < rowCount; i++) {
       for (j = 0; j < columnCount; j++) {
@@ -129,7 +128,7 @@ var canvas_gridFeature = function (arg) {
         }
         gradientIndex = Math.floor(255 * intensity) << 2;
         context2d.beginPath();
-        context2d.fillStyle = 'rgba(' + m_this._grad[gradientIndex] + ',' + m_this._grad[gradientIndex + 1] + ','  + m_this._grad[gradientIndex + 2] + ', 1)';
+        context2d.fillStyle = 'rgba(' + m_this._grad[gradientIndex] + ',' + m_this._grad[gradientIndex + 1] + ',' + m_this._grad[gradientIndex + 2] + ', 1)';
         context2d.fillRect(pos.x, pos.y, cellDisplayLength, cellDisplayLength);
         context2d.closePath();
       }
@@ -148,7 +147,6 @@ var canvas_gridFeature = function (arg) {
 
     if (m_renderTime.getMTime() < m_this.buildTime().getMTime()) {
       var data = m_this.data() || [],
-          canvas, pixelArray,
           layer = m_this.layer(),
           viewport = map.camera()._viewport;
 
@@ -158,7 +156,6 @@ var canvas_gridFeature = function (arg) {
 
       m_this._computeGradient();
       m_this._renderPoints(context2d, map, data);
-      canvas = layer.canvas()[0];
 
       m_gridMapPosition = {
         zoom: map.zoom(),
