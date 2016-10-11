@@ -18,7 +18,7 @@ $(function () {
   };
   var gridOptions = {
     minIntensity: 0,
-    maxIntensity: 1,
+    maxIntensity: 1E6,
     style: {
       color: {
         0.00: {r: 0, g: 0, b: 0, a: 0.0},
@@ -28,18 +28,18 @@ $(function () {
       }
     },
     upperLeft: {
-      x: -180,
-      y: 30
+      x: -140,
+      y: 45
     },
-    cellSize: 10 / 69, // in degrees, approximately 10 miles
+    cellSize: 10 / 69, // in degrees, approximately 5 miles
     rowCount: 1000,
     updateDelay: 50
   };
   map.createLayer('osm');
   layer = map.createLayer('feature', layerOptions);
   grid = layer.createFeature('grid', gridOptions);
-  grid.data(Array(1E6).fill(0).map(function () {
-    return Math.random();
+  grid.data(Array(1E6).fill(0).map(function (v, i) {
+    return i;
   }));
   grid.draw();
   /* Make some values available in the global context so curious people can
