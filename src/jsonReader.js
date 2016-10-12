@@ -203,12 +203,12 @@ var jsonReader = function (arg) {
     _default = convert(_default);
     return function (d, i, e, j) {
       var p;
-      if (spec) {
+      if (spec && j !== undefined && spec[j] !== undefined) {
         p = spec[j].properties;
       } else {
         p = d.properties;
       }
-      if (p.hasOwnProperty(prop)) {
+      if (p !== undefined && p.hasOwnProperty(prop)) {
         return convert(p[prop]);
       }
       return _default;

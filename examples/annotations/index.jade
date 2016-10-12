@@ -28,7 +28,9 @@ block append mainContent
           span.entry-name Sample
           a.entry-edit(action='edit', title='Edit name and properties') &#x270e;
           a.entry-remove(action='remove', title='Delete this annotation') &#x2716;
-    // add buttons to copy annotations as geojson and to paste geojson to annotations
+    .form-group
+      textarea#geojson(type='textarea', rows=15, autocomplete='off',
+        autocorrect='off', autocapitalize='off', spellcheck='false')
 
   #editdialog.modal.fade
     .modal-dialog

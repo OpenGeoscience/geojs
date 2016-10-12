@@ -4,6 +4,7 @@ var geo_action = require('./action');
 var geo_annotation = require('./annotation');
 var geo_event = require('./event');
 var registry = require('./registry');
+var transform = require('./transform');
 var $ = require('jquery');
 var Mousetrap = require('mousetrap');
 
@@ -50,6 +51,17 @@ var annotationLayer = function (args) {
       m_mode = null,
       m_annotations = [],
       m_features = [];
+
+  var geojsonStyleProperties = {
+    'fill': {dataType: 'boolean', keys: ['fill']},
+    'fillColor': {dataType: 'color', keys: ['fillColor', 'fill-color', 'marker-color', 'fill']},
+    'fillOpacity': {dataType: 'opacity', keys: ['fillOpacity', 'fill-opacity']},
+    'radius': {dataType: 'positive', keys: ['radius']},
+    'stroke': {dataType: 'boolean', keys: ['stroke']},
+    'strokeColor': {dataType: 'color', keys: ['strokeColor', 'stroke-color', 'stroke']},
+    'strokeOpacity': {dataType: 'opacity', keys: ['strokeOpacity', 'stroke-opacity']},
+    'strokeWidth': {dataType: 'positive', keys: ['strokeWidth', 'stroke-width']}
+  };
 
   m_options = $.extend(true, {}, {
     dblClickTime: 300,
@@ -248,9 +260,11 @@ var annotationLayer = function (args) {
    *
    * @param {boolean} skipCreating: if true, don't remove annotations that are
    *    in the create state.
+   * @param {boolean} update if false, don't update the layer after removing
+   *    the annotation.
    * @returns {number} the number of annotations that were removed.
    */
-  this.removeAllAnnotations = function (skipCreating) {
+  this.removeAllAnnotations = function (skipCreating, update) {
     var removed = 0, annotation, pos = 0;
     while (pos < m_annotations.length) {
       annotation = m_annotations[pos];
@@ -261,7 +275,7 @@ var annotationLayer = function (args) {
       this.removeAnnotation(annotation, false);
       removed += 1;
     }
-    if (removed) {
+    if (removed && update !== false) {
       this.modified();
       this._update();
       this.draw();
@@ -349,6 +363,224 @@ var annotationLayer = function (args) {
         mode: m_mode, oldMode: oldMode});
     }
     return this;
+  };
+
+  /**
+   * Return the current set of annotations as a geojson object.  Alternately,
+   * add a set of annotations from a geojson object.
+   *
+   * @param {object} geojson: if present, add annotations based on the given
+   *    geojson object.  If undefined, return the current annotations as
+   *    geojson.  This may be a JSON string, a javascript object, or a File
+   *    object.
+   * @param {boolean} clear: if true, when adding annotations, first remove all
+   *    existing objects.  If 'update', update existing annotations and remove
+   *    annotations that no longer exit,  If false, update existing
+   *    annotations and leave unchanged annotations.
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @param {boolean} includeCrs: if true, include the coordinate system in the
+   *    output.
+   * @return {object|number|undefined} if geojson was undefined, the current
+   *    annotations as a javascript object that can be converted to geojson
+   *    using JSON.stringify.  If geojson is specified, either the number of
+   *    annotations now present upon success, or undefined if the value in
+   *    geojson was not able to be parsed.
+   */
+  this.geojson = function (geojson, clear, gcs, includeCrs) {
+    if (geojson !== undefined) {
+      var reader = registry.createFileReader('jsonReader', {layer: this});
+      if (!reader.canRead(geojson)) {
+        return;
+      }
+      if (clear === true) {
+        this.removeAllAnnotations(true, false);
+      }
+      if (clear === 'update') {
+        $.each(this.annotations(), function (idx, annotation) {
+          annotation.options('updated', false);
+        });
+      }
+      reader.read(geojson, function (features) {
+        $.each(features.slice(), function (feature_idx, feature) {
+          m_this._geojsonFeatureToAnnotation(feature, gcs);
+          m_this.deleteFeature(feature);
+        });
+      });
+      if (clear === 'update') {
+        $.each(this.annotations(), function (idx, annotation) {
+          if (annotation.options('updated') === false &&
+              annotation.state() === geo_annotation.state.done) {
+            m_this.removeAnnotation(annotation, false);
+          }
+        });
+      }
+      this.modified();
+      this._update();
+      this.draw();
+      return m_annotations.length;
+    }
+    geojson = null;
+    var features = [];
+    $.each(m_annotations, function (annotation_idx, annotation) {
+      var obj = annotation.geojson(gcs, includeCrs);
+      if (obj) {
+        features.push(obj);
+      }
+    });
+    if (features.length) {
+      geojson = {
+        type: 'FeatureCollection',
+        features: features
+      };
+    }
+    return geojson;
+  };
+
+  /**
+   * Convert a feature as parsed by the geojson reader into one or more
+   * annotations.
+   *
+   * @param {geo.feature} feature: the feature to convert.
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   */
+  this._geojsonFeatureToAnnotation = function (feature, gcs) {
+    var dataList = feature.data(),
+        annotationList = registry.listAnnotations();
+    $.each(dataList, function (data_idx, data) {
+      var type = (data.properties || {}).annotationType || feature.featureType,
+          options = $.extend({}, data.properties || {}),
+          position, datagcs, i, existing;
+      if ($.inArray(type, annotationList) < 0) {
+        return;
+      }
+      if (!options.style) {
+        options.style = {};
+      }
+      delete options.annotationType;
+      switch (feature.featureType) {
+        case 'polygon':
+          position = feature.polygon()(data, data_idx);
+          if (!position || !position.outer || position.outer.length < 3) {
+            return;
+          }
+          position = position.outer;
+          if (position[position.length - 1][0] === position[0][0] &&
+              position[position.length - 1][1] === position[0][1]) {
+            position.splice(position.length - 1, 1);
+            if (position.length < 3) {
+              return;
+            }
+          }
+          break;
+        case 'point':
+          position = [feature.position()(data, data_idx)];
+          break;
+        default:
+          return;
+      }
+      for (i = 0; i < position.length; i += 1) {
+        position[i] = util.normalizeCoordinates(position[i]);
+      }
+      datagcs = ((data.crs && data.crs.type === 'name' && data.crs.properties &&
+                  data.crs.properties.type === 'proj4' &&
+                  data.crs.properties.name) ? data.crs.properties.name : gcs);
+      if (datagcs !== m_this.map().gcs()) {
+        position = transform.transformCoordinates(datagcs, m_this.map().gcs(), position);
+      }
+      options.coordinates = position;
+      /* For each style listed in the geojsonStyleProperties object, check if
+       * is given under any of the variety of keys as a valid instance of the
+       * required data type.  If not, use the property from the feature. */
+      $.each(geojsonStyleProperties, function (key, prop) {
+        var value;
+        $.each(prop.keys, function (idx, altkey) {
+          if (value === undefined) {
+            value = m_this.validateAttribute(options[altkey], prop.dataType);
+            return;
+          }
+        });
+        if (value === undefined) {
+          value = m_this.validateAttribute(
+            feature.style.get(key)(data, data_idx), prop.dataType);
+        }
+        if (value !== undefined) {
+          options.style[key] = value;
+        }
+      });
+      /* Delete property keys we have used */
+      $.each(geojsonStyleProperties, function (key, prop) {
+        $.each(prop.keys, function (idx, altkey) {
+          delete options[altkey];
+        });
+      });
+      if (options.annotationId !== undefined) {
+        existing = m_this.annotationById(options.annotationId);
+        delete options.annotationId;
+      }
+      if (existing && existing.type() === type && existing.state() === geo_annotation.state.done && existing.options('updated') === false) {
+        /* We could change the state of the existing annotation if it differs
+         * from done. */
+        delete options.state;
+        delete options.layer;
+        options.updated = true;
+        existing.options(options);
+        m_this.geoTrigger(geo_event.annotation.update, {
+          annotation: existing
+        });
+      } else {
+        options.state = geo_annotation.state.done;
+        options.layer = m_this;
+        options.updated = 'new';
+        m_this.addAnnotation(registry.createAnnotation(type, options));
+      }
+    });
+  };
+
+  /**
+   * Validate a value for an attribute based on a specified data type.  This
+   * returns a sanitized value or undefined if the value was invalid.  Data
+   * types include:
+   *   color: a css string, #rrggbb hex string, #rgb hex string, number, or
+   *     object with r, g, b properties in the range of [0-1].
+   *   opacity: a floating point number in the range [0, 1].
+   *   positive: a floating point number greater than zero.
+   *   boolean: the string 'false' and falsy values are false, all else is
+   *     true.  null and undefined are still considered invalid values.
+   * @param {number|string|object|boolean} value: the value to validate.
+   * @param {string} dataType: the data type for validation.
+   * @returns {number|string|object|boolean|undefined} the sanitized value or
+   *    undefined.
+   */
+  this.validateAttribute = function (value, dataType) {
+    if (value === undefined || value === null) {
+      return;
+    }
+    switch (dataType) {
+      case 'boolean':
+        value = !!value && value !== 'false';
+        break;
+      case 'color':
+        value = util.convertColor(value);
+        if (value === undefined || value.r === undefined) {
+          return;
+        }
+        break;
+      case 'opacity':
+        value = +value;
+        if (isNaN(value) || value < 0 || value > 1) {
+          return;
+        }
+        break;
+      case 'positive':
+        value = +value;
+        if (isNaN(value) || value <= 0) {
+          return;
+        }
+        break;
+    }
+    return value;
   };
 
   ///////////////////////////////////////////////////////////////////////////

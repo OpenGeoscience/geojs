@@ -141,6 +141,21 @@
     },
 
     /**
+     * Convert a color to a six digit hex value prefixed with #.
+     */
+    convertColorToHex: function (color) {
+      var value = geo.util.convertColor(color);
+      if (!value.r && !value.g && !value.b) {
+        value = '#000000';
+      } else {
+        value = '#' + ((1 << 24) + (Math.round(value.r * 255) << 16) +
+                       (Math.round(value.g * 255) << 8) +
+                        Math.round(value.b * 255)).toString(16).slice(1);
+      }
+      return value;
+    },
+
+    /**
      * Normalize a coordinate object into {x: ..., y: ..., z: ... } form.
      * Accepts 2-3d arrays,
      * latitude -> lat -> y

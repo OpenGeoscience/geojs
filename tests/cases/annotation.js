@@ -37,11 +37,11 @@ describe('geo.annotation', function () {
       expect(ann.name()).toBe('Test ' + ann.id());
       expect(ann.layer()).toBe(undefined);
       expect(ann.features()).toEqual([]);
-      expect(ann.coordinates()).toBe(undefined);
+      expect(ann.coordinates()).toEqual([]);
       expect(ann.mouseClick()).toBe(undefined);
       expect(ann.mouseMove()).toBe(undefined);
       expect(ann._coordinates()).toEqual([]);
-      expect(ann.geojson()).toBe('not implemented');
+      expect(ann.geojson()).toBe(undefined);
       map = create_map();
       layer = map.createLayer('annotation', {
         annotations: geo.listAnnotations()
@@ -101,6 +101,22 @@ describe('geo.annotation', function () {
       expect(ann.options().testopt).toBe(40);
       expect(ann.options({testopt: 30})).toBe(ann);
       expect(ann.options().testopt).toBe(30);
+      /* name and coordinates are handled specially */
+      ann.options('name', 'newname');
+      expect(ann.options().name).toBe(undefined);
+      expect(ann.name()).toBe('newname');
+      var coord = null, testval = [[1, 2], [3, 4]];
+      ann._coordinates = function (arg) {
+        if (arg !== undefined) {
+          coord = arg;
+          return ann;
+        }
+        return coord;
+      };
+      expect(ann._coordinates()).toBe(null);
+      ann.options('coordinates', testval);
+      expect(ann.options().coordinates).toBe(undefined);
+      expect(ann._coordinates()).toBe(testval);
     });
     it('coordinates', function () {
       var ann = geo.annotation.annotation('test', {layer: layer});
@@ -128,10 +144,44 @@ describe('geo.annotation', function () {
       expect(drawCalled).toBe(1);
       layer.draw = oldDraw;
     });
+    it('geojson', function () {
+      var ann = geo.annotation.annotation('test', {
+        layer: layer,
+        style: {fillColor: 'red'},
+        name: 'testAnnotation'
+      });
+      expect(ann.geojson()).toBe(undefined);
+      ann._coordinates = function () {
+        return geo.transform.transformCoordinates(map.ingcs(), map.gcs(), [
+          -73.757222, 42.849776]);
+      };
+      ann._geojsonCoordinates = function (gcs) {
+        return this.coordinates(gcs);
+      };
+      ann._geojsonGeometryType = function () {
+        return 'Point';
+      };
+      var geojson = ann.geojson();
+      expect(geojson.type).toBe('Feature');
+      expect(geojson.geometry.type).toBe('Point');
+      expect(geojson.geometry.coordinates.length).toBe(2);
+      expect(geojson.geometry.coordinates[1]).toBeCloseTo(42.849775);
+      expect(geojson.properties.name).toBe('testAnnotation');
+      expect(geojson.properties.fillColor).toBe('#ff0000');
+      expect(geojson.crs).toBe(undefined);
+      geojson = ann.geojson('EPSG:3857');
+      expect(geojson.geometry.coordinates[1]).toBeCloseTo(5289134.103576);
+      expect(geojson.crs).toBe(undefined);
+      geojson = ann.geojson('EPSG:3857', true);
+      expect(geojson.crs.properties.name).toBe('EPSG:3857');
+      geojson = ann.geojson(undefined, true);
+      expect(geojson.crs.properties.name).toBe('EPSG:4326');
+    });
   });
 
   describe('geo.annotation.rectangleAnnotation', function () {
-    var corners = [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}];
+    var corners = [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}],
+        corners2 = [{x: 2, y: 0}, {x: 3, y: 0}, {x: 3, y: 1}, {x: 2, y: 1}];
     it('create', function () {
       var ann = geo.annotation.rectangleAnnotation();
       expect(ann instanceof geo.annotation.rectangleAnnotation);
@@ -147,11 +197,34 @@ describe('geo.annotation', function () {
     it('_coordinates', function () {
       var ann = geo.annotation.rectangleAnnotation({corners: corners});
       expect(ann._coordinates()).toEqual(corners);
+      ann._coordinates(corners2);
+      expect(ann._coordinates()).toEqual(corners2);
+    });
+    it('_geojsonCoordinates', function () {
+      var ann = geo.annotation.rectangleAnnotation();
+      expect(ann._geojsonCoordinates()).toBe(undefined);
+      ann._coordinates(corners);
+      var coor = ann._geojsonCoordinates();
+      expect(coor[0].length).toBe(5);
+    });
+    it('_geojsonGeometryType', function () {
+      var ann = geo.annotation.rectangleAnnotation();
+      expect(ann._geojsonGeometryType()).toBe('Polygon');
+    });
+    it('geojson', function () {
+      var ann = geo.annotation.rectangleAnnotation({corners: corners});
+      var geojson = ann.geojson();
+      expect(geojson.type).toBe('Feature');
+      expect(geojson.geometry.type).toBe('Polygon');
+      expect(geojson.geometry.coordinates.length).toBe(1);
+      expect(geojson.geometry.coordinates[0].length).toBe(5);
+      expect(geojson.geometry.coordinates[0][2][1]).toBeCloseTo(1);
     });
   });
 
   describe('geo.annotation.polygonAnnotation', function () {
     var vertices = [{x: 30, y: 0}, {x: 50, y: 0}, {x: 40, y: 20}, {x: 30, y: 10}];
+    var vertices2 = [{x: 30, y: 10}, {x: 50, y: 10}, {x: 40, y: 30}];
     it('create', function () {
       var ann = geo.annotation.polygonAnnotation();
       expect(ann instanceof geo.annotation.polygonAnnotation);
@@ -186,6 +259,28 @@ describe('geo.annotation', function () {
     it('_coordinates', function () {
       var ann = geo.annotation.polygonAnnotation({vertices: vertices});
       expect(ann._coordinates()).toEqual(vertices);
+      ann._coordinates(vertices2);
+      expect(ann._coordinates()).toEqual(vertices2);
+    });
+    it('_geojsonCoordinates', function () {
+      var ann = geo.annotation.polygonAnnotation();
+      expect(ann._geojsonCoordinates()).toBe(undefined);
+      ann._coordinates(vertices2);
+      var coor = ann._geojsonCoordinates();
+      expect(coor[0].length).toBe(4);
+    });
+    it('_geojsonGeometryType', function () {
+      var ann = geo.annotation.polygonAnnotation();
+      expect(ann._geojsonGeometryType()).toBe('Polygon');
+    });
+    it('geojson', function () {
+      var ann = geo.annotation.polygonAnnotation({vertices: vertices2});
+      var geojson = ann.geojson();
+      expect(geojson.type).toBe('Feature');
+      expect(geojson.geometry.type).toBe('Polygon');
+      expect(geojson.geometry.coordinates.length).toBe(1);
+      expect(geojson.geometry.coordinates[0].length).toBe(4);
+      expect(geojson.geometry.coordinates[0][2][1]).toBeCloseTo(30);
     });
     it('mouseMove', function () {
       var ann = geo.annotation.polygonAnnotation({vertices: vertices});
@@ -257,6 +352,7 @@ describe('geo.annotation', function () {
 
   describe('geo.annotation.pointAnnotation', function () {
     var point = {x: 30, y: 25};
+    var point2 = {x: 50, y: 35};
 
     it('create', function () {
       var ann = geo.annotation.pointAnnotation();
@@ -276,8 +372,33 @@ describe('geo.annotation', function () {
     it('_coordinates', function () {
       var ann = geo.annotation.pointAnnotation({position: point});
       expect(ann._coordinates()).toEqual([point]);
+      ann._coordinates([point2]);
+      expect(ann._coordinates()).toEqual([point2]);
       ann.state(geo.annotation.state.create);
       expect(ann._coordinates()).toEqual([]);
+    });
+    it('_geojsonStyles', function () {
+      var ann = geo.annotation.pointAnnotation();
+      expect(ann._geojsonStyles().length).toBe(8);
+    });
+    it('_geojsonCoordinates', function () {
+      var ann = geo.annotation.pointAnnotation();
+      expect(ann._geojsonCoordinates()).toBe(undefined);
+      ann._coordinates([point]);
+      var coor = ann._geojsonCoordinates();
+      expect(coor.length).toBe(2);
+    });
+    it('_geojsonGeometryType', function () {
+      var ann = geo.annotation.pointAnnotation();
+      expect(ann._geojsonGeometryType()).toBe('Point');
+    });
+    it('geojson', function () {
+      var ann = geo.annotation.pointAnnotation({position: point});
+      var geojson = ann.geojson();
+      expect(geojson.type).toBe('Feature');
+      expect(geojson.geometry.type).toBe('Point');
+      expect(geojson.geometry.coordinates.length).toBe(2);
+      expect(geojson.geometry.coordinates[1]).toBeCloseTo(25);
     });
     it('mouseClick', function () {
       var ann = geo.annotation.pointAnnotation();
@@ -305,6 +426,7 @@ describe('geo.annotation', function () {
   });
 
   describe('annotation registry', function () {
+    var newshapeCount = 0;
     it('listAnnotations', function () {
       var list = geo.listAnnotations();
       expect($.inArray('rectangle', list) >= 0).toBe(true);
@@ -313,12 +435,18 @@ describe('geo.annotation', function () {
       expect($.inArray('unknown', list) >= 0).toBe(false);
     });
     it('registerAnnotation', function () {
-      var func = function () {};
+      var func = function () { newshapeCount += 1; return 'newshape return'; };
       expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(false);
       expect(geo.registerAnnotation('newshape', func)).toBe(undefined);
       expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(true);
       expect(geo.registerAnnotation('newshape', func).func).toBe(func);
       expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(true);
+    });
+    it('createAnnotation', function () {
+      expect(geo.createAnnotation('unknown')).toBe(undefined);
+      expect(newshapeCount).toBe(0);
+      expect(geo.createAnnotation('newshape')).toBe('newshape return');
+      expect(newshapeCount).toBe(1);
     });
     it('featuresForAnnotations', function () {
       var features = geo.featuresForAnnotations(['polygon']);

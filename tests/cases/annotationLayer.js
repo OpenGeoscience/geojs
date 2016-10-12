@@ -190,6 +190,69 @@ describe('geo.annotationLayer', function () {
       expect(layer.displayDistance(c3, null, c1, 'display')).toBeCloseTo(10.63, 2);
       expect(layer.displayDistance(c3, null, c2)).toBeCloseTo(4.47, 2);
     });
+    it('geojson', function () {
+      layer.removeAllAnnotations();
+      layer.addAnnotation(poly);
+      layer.addAnnotation(rect);
+      var geojson = layer.geojson();
+      expect(geojson.type).toBe('FeatureCollection');
+      expect(geojson.features.length).toBe(1);
+      expect(geojson.features[0].crs).toBe(undefined);
+      geojson = layer.geojson(undefined, undefined, 'EPSG:4326', true);
+      expect(geojson.features[0].crs.properties.name).toBe('EPSG:4326');
+      layer.removeAllAnnotations();
+      expect(layer.geojson()).toBe(null);
+      /* test setting via geojson */
+      layer.addAnnotation(poly);
+      layer.addAnnotation(rect);
+      expect(layer.geojson('not geojson')).toBe(undefined);
+      expect(layer.geojson('not geojson', true)).toBe(undefined);
+      expect(layer.annotations().length).toBe(2);
+      var sampleGeojson = {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-118.872649, 36.696299]
+        }
+      };
+      expect(layer.geojson(sampleGeojson)).toBe(3);
+      expect(layer.geojson(JSON.stringify(sampleGeojson))).toBe(4);
+      sampleGeojson.properties = {annotationId: layer.annotations()[3].id()};
+      expect(layer.geojson(sampleGeojson)).toBe(5);
+      expect(layer.geojson(sampleGeojson, 'update')).toBe(2);
+      expect(layer.geojson(sampleGeojson, true)).toBe(2);
+    });
+    it('validateAttribute', function () {
+      expect(layer.validateAttribute(undefined, 'other')).toBe(undefined);
+      expect(layer.validateAttribute(null, 'other')).toBe(undefined);
+
+      expect(layer.validateAttribute('value', 'other')).toBe('value');
+      expect(layer.validateAttribute('value', 'boolean')).toBe(true);
+      expect(layer.validateAttribute(true, 'boolean')).toBe(true);
+      expect(layer.validateAttribute(0, 'boolean')).toBe(false);
+      expect(layer.validateAttribute('false', 'boolean')).toBe(false);
+
+      expect(layer.validateAttribute('not a color', 'color')).toBe(undefined);
+      expect(layer.validateAttribute('yellow', 'color')).toEqual({r: 1, g: 1, b: 0});
+      expect(layer.validateAttribute('#ffff00', 'color')).toEqual({r: 1, g: 1, b: 0});
+      expect(layer.validateAttribute('#ff0', 'color')).toEqual({r: 1, g: 1, b: 0});
+      expect(layer.validateAttribute({r: 1, g: 1, b: 0}, 'color')).toEqual({r: 1, g: 1, b: 0});
+
+      expect(layer.validateAttribute(0.5, 'opacity')).toBe(0.5);
+      expect(layer.validateAttribute('0.5', 'opacity')).toBe(0.5);
+      expect(layer.validateAttribute(0, 'opacity')).toBe(0);
+      expect(layer.validateAttribute(-1, 'opacity')).toBe(undefined);
+      expect(layer.validateAttribute(1, 'opacity')).toBe(1);
+      expect(layer.validateAttribute(1.2, 'opacity')).toBe(undefined);
+      expect(layer.validateAttribute('value', 'opacity')).toBe(undefined);
+
+      expect(layer.validateAttribute(0.5, 'positive')).toBe(0.5);
+      expect(layer.validateAttribute('0.5', 'positive')).toBe(0.5);
+      expect(layer.validateAttribute(0, 'positive')).toBe(undefined);
+      expect(layer.validateAttribute(-1, 'positive')).toBe(undefined);
+      expect(layer.validateAttribute(1.2, 'positive')).toBe(1.2);
+      expect(layer.validateAttribute('value', 'positive')).toBe(undefined);
+    });
   });
   describe('Private utility functions', function () {
     var map, layer, point, rect, rect2;
@@ -312,6 +375,123 @@ describe('geo.annotationLayer', function () {
       });
       expect(layer.annotations().length).toBe(1);
       expect(layer.annotations()[0].type()).toBe('rectangle');
+    });
+    it('_geojsonFeatureToAnnotation', function () {
+      map.deleteLayer(layer);
+      layer = map.createLayer('annotation');  /* use the vgl variant */
+      /* This is tested through the layer.geojson function */
+      var lineString = {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [[-73.759202, 42.849643], [-73.756799, 42.849572]]
+        }
+      };
+      expect(layer.geojson(lineString)).toBe(0);
+      lineString.properties.annotationType = 'polygon';
+      expect(layer.geojson(lineString)).toBe(0);
+      var sample = {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [-118.872649, 36.696298]
+          },
+          properties: {
+            radius: 6.7
+          }
+        }, {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [-118.915853, 36.606894],
+              [-118.531332, 36.587048],
+              [-118.280020, 36.600279],
+              [-118.355551, 36.436937],
+              [-118.565664, 36.302031],
+              [-118.764791, 36.488847],
+              [-118.915853, 36.606894]
+            ]]
+          },
+          properties: {
+            name: 'Sequoia',
+            fill: true,
+            fillColor: '#00ff00',
+            fillOpacity: 0.25,
+            stroke: true,
+            strokeColor: 'black',
+            strokeOpacity: 1,
+            strokeWidth: 4
+          }
+        }, {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [-118.897685, 36.773031],
+              [-118.897685, 36.915198],
+              [-118.692647, 36.915198],
+              [-118.692647, 36.773031],
+              [-118.897685, 36.773031]
+            ]]
+          },
+          properties: {
+            annotationType: 'rectangle'
+          }
+        }]
+      };
+      expect(layer.geojson(sample)).toBe(3);
+      var badpoly = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[
+            [-118.915853, 36.606894],
+            [-118.531332, 36.587048],
+            [-118.915853, 36.606894]
+          ]]
+        }
+      };
+      expect(layer.geojson(badpoly, true)).toBe(0);
+      badpoly.geometry.coordinates.splice(2, 1);
+      expect(layer.geojson(badpoly, true)).toBe(0);
+      var badattr = {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-118.872649, 36.696298]
+        },
+        properties: {
+          radius: -5,
+          fillColor: 'no such color',
+          fillOpacity: -1
+        }
+      };
+      layer.geojson(badattr, true);
+      var attr = layer.geojson().features[0].properties;
+      expect(attr.radius).toBeGreaterThan(0);
+      expect(attr.fillOpacity).toBeGreaterThan(0);
+      expect(attr.fillColor).toBe('#00ff00');
+      var goodattr = {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-118.872649, 36.696298]
+        },
+        properties: {
+          radius: 3,
+          fillColor: 'indigo',
+          fillOpacity: 0.3
+        }
+      };
+      layer.geojson(goodattr, true);
+      attr = layer.geojson().features[0].properties;
+      expect(attr.radius).toBe(3);
+      expect(attr.fillOpacity).toBe(0.3);
+      expect(attr.fillColor).toBe('#4b0082');
     });
   });
   it('Test destroy layer.', function () {
