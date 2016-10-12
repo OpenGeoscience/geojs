@@ -198,7 +198,7 @@ var sliderWidget = function (arg) {
 
     // Respond to a mouse event on the widget
     function respond(evt, trans) {
-      var z = m_yscale.invert(d3.mouse(m_this.layer().node()[0])[1]),
+      var z = m_yscale.invert(d3.mouse(svg.node())[1]),
           zrange = map.zoomRange();
       z = (1 - z) * (zrange.max - zrange.min) + zrange.min;
       if (trans) {
