@@ -1,23 +1,24 @@
 language: node_js
-sudo: False
+sudo: false
 node_js:
-    - "0.12"
-
+- '0.12'
 cache:
-    directories:
-        - node_modules
-        - $HOME/cache
-
+  directories:
+  - node_modules
+  - "$HOME/cache"
 before_install:
-    - CACHE="${HOME}/cache" CMAKE_VERSION=3.5.0 CMAKE_SHORT_VERSION=3.5 source ./scripts/install_cmake.sh
-    - npm prune
-
+- CACHE="${HOME}/cache" CMAKE_VERSION=3.5.0 CMAKE_SHORT_VERSION=3.5 source ./scripts/install_cmake.sh
+- npm prune
 script:
-    - npm run build
-    - npm run docs
-    - mkdir _build
-    - ctest -S cmake/travis_build.cmake -VV || true
-    - if [ -f _build/test_failed ] ; then false ; fi
-
+- npm run build
+- npm run docs
+- mkdir _build
+- ctest -S cmake/travis_build.cmake -VV || true
+- if [ -f _build/test_failed ] ; then false ; fi
 after_success:
-  - npm run codecov
+- npm run codecov
+env:
+  global:
+  - secure: L6J79xqMkGc0i6A469jd+2nyJdvJSWRkEuhfvjMbv7wFyTHF8GYjceeenGGGnCxc62LpKFLLOU35ulRqOWMAUqgHOzXUo8BEZtc+XljGq25Uqgm0/z84p1vSbuH1tZyY7/PwM2m06UadWe9Y6Vo6qZsVuiUCiEjImfmzeP9fb5g=
+  - secure: Rj4jqVvqPV4H/E2tpWbONhQY6zyESWmJRLvZiZC55gR3D9EIfq8L5AYwF+BJVlYAPZ2g9vzsXUnLy07GDxE/MVsiooLdiU0WofRNbLCnJjijP+v2ZWCR/77Vl6hTDZ/5PeFT2zwNdFDcIOLONzJNzgrX0jqrIyuehReFmZVwTs0=
+  - secure: fBktMf44ZPj7Y4gAXJSOG3u0Bvo1jv9HKCeM0zVLOW61bDdMCbCHBAxGa0QxHht1aISm8DNnhTrnnzpeZLHUEYyVdqU3zmDxJILKEhhnEavWAXf1ZBIY/VPysA2S1MfrLfwgLTj5tCP+/1Ytet2CSp6mmTDBDzL90URoFUYwweU=
