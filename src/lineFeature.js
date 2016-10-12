@@ -260,6 +260,8 @@ lineFeature.create = function (layer, spec) {
 };
 
 lineFeature.capabilities = {
+  /* core feature name -- support in any manner */
+  feature: 'line',
   /* support for solid-colored, constant-width lines */
   basic: 'line.basic',
   /* support for lines that vary in width and color */
