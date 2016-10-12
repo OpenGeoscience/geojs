@@ -3,7 +3,8 @@
  */
 module.exports = {
   canvasRenderer: require('./canvasRenderer'),
-  quadFeature: require('./quadFeature'),
   heatmapFeature: require('./heatmapFeature'),
+  pixelmapFeature: require('./pixelmapFeature'),
+  quadFeature: require('./quadFeature'),
   tileLayer: require('./tileLayer')
 };

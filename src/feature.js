@@ -212,11 +212,12 @@ var feature = function (arg) {
    * Private mouseclick handler
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._handleMouseclick = function () {
+  this._handleMouseclick = function (evt) {
     var mouse = m_this.layer().map().interactor().mouse(),
         data = m_this.data(),
         over = m_this.pointSearch(mouse.geo);
 
+    mouse.buttonsDown = evt.buttonsDown;
     feature.eventID += 1;
     over.index.forEach(function (i, idx) {
       m_this.geoTrigger(geo_event.feature.mouseclick, {

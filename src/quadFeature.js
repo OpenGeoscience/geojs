@@ -138,10 +138,12 @@ var quadFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (coordinate) {
-    var found = [], indices = [], data = m_this.data(), i,
+    var found = [], indices = [], basis = [],
         poly1 = [{}, {}, {}, {}], poly2 = [{}, {}, {}, {}],
+        order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1],
+        data = m_this.data(),
         map = m_this.layer().map(),
-        order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1];
+        i, coordbasis;
     coordinate = transform.transformCoordinates(
         map.ingcs(), map.gcs(), coordinate);
     if (!m_quads) {
@@ -161,12 +163,25 @@ var quadFeature = function (arg) {
             util.pointInPolygon(coordinate, poly2)) {
           indices.push(quad.idx);
           found.push(data[quad.idx]);
+          coordbasis = util.pointTo2DTriangleBasis(
+            coordinate, poly1[0], poly1[1], poly1[2]);
+          if (!coordbasis || coordbasis.x + coordbasis.y > 1) {
+            coordbasis = util.pointTo2DTriangleBasis(
+              coordinate, poly2[2], poly2[1], poly2[0]);
+            if (coordbasis) {
+              coordbasis.x = 1 - coordbasis.x;
+            }
+          } else {
+            coordbasis.y = 1 - coordbasis.y;
+          }
+          basis.push(coordbasis);
         }
       });
     });
     return {
       index: indices,
-      found: found
+      found: found,
+      basis: basis
     };
   };
 
