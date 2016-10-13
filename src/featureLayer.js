@@ -36,6 +36,8 @@ var featureLayer = function (arg) {
   /**
    * Create feature give a name
    *
+   * @param {string} featureName the name of the feature to create
+   * @param {object} arg properties for the new feature
    * @returns {geo.Feature} Will return a new feature
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -43,40 +45,64 @@ var featureLayer = function (arg) {
 
     var newFeature = registry.createFeature(
       featureName, m_this, m_this.renderer(), arg);
-
-    m_this.addChild(newFeature);
-    m_features.push(newFeature);
-    m_this.features(m_features);
-    m_this.modified();
+    this.addFeature(newFeature);
     return newFeature;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Add a feature to the layer if it is not already present.
+   *
+   * @param {object} feature the feature to add.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.addFeature = function (feature) {
+    /* try to remove the feature first so that we don't have two copies */
+    this.removeFeature(feature);
+    m_this.addChild(feature);
+    m_features.push(feature);
+    m_this.dataTime().modified();
+    m_this.modified();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Remove feature without destroying it
+   *
+   * @param {object} feature the feature to remove.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.removeFeature = function (feature) {
+    var pos;
+
+    pos = m_features.indexOf(feature);
+    if (pos >= 0) {
+      m_features.splice(pos, 1);
+      m_this.removeChild(feature);
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Delete feature
    *
+   * @param {object} feature the feature to delete.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.deleteFeature = function (feature) {
-    var i;
 
-    for (i = 0; i < m_features.length; i += 1) {
-      if (m_features[i] === feature) {
-        m_features[i]._exit();
-        m_this.dataTime().modified();
-        m_this.modified();
+    // call _exit first, as destroying the feature affect other features
+    if (feature) {
+      if (m_features.indexOf(feature) >= 0) {
+        feature._exit();
       }
+      this.removeFeature(feature);
     }
-
-    // Loop through a second to time actually remove
-    // the given feature from the array because the
-    // `_exit` call above may mutate it.
-    for (i = 0; i < m_features.length; i += 1) {
-      if (m_features[i] === feature) {
-        m_features.splice(i, 1);
-      }
-    }
-    m_this.removeChild(feature);
 
     return m_this;
   };
@@ -90,11 +116,21 @@ var featureLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.features = function (val) {
     if (val === undefined) {
-      return m_features;
+      return m_features.slice();
     } else {
-      m_features = val.slice(0);
-      m_this.dataTime().modified();
-      m_this.modified();
+      // delete existing features that aren't in the new array.  Since features
+      // can affect other features during their exit process, make sure each
+      // feature still exists as we work through the list.
+      var existing = m_features.slice();
+      var i;
+      for (i = 0; i < existing.length; i += 1) {
+        if (val.indexOf(existing) < 0 && m_features.indexOf(existing) >= 0) {
+          this.deleteFeature(existing);
+        }
+      }
+      for (i = 0; i < val.length; i += 1) {
+        this.addFeature(val[i]);
+      }
       return m_this;
     }
   };
@@ -225,10 +261,10 @@ var featureLayer = function (arg) {
       m_features[i]._exit();
       m_this.removeChild(m_features[i]);
     }
+    m_features = [];
 
     m_this.dataTime().modified();
     m_this.modified();
-    m_features = [];
 
     return m_this;
   };
