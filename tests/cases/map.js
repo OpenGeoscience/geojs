@@ -144,7 +144,7 @@ describe('geo.core.map', function () {
       expect(m.scale()).toEqual({x: 1, y: 1, z: 1});
     });
     it('gcs and ingcs', function () {
-      var m = create_map(), units = m.unitsPerPixel();
+      var m = create_map(), units = m.unitsPerPixel(), bounds;
       var error = console.error;
       expect(m.gcs()).toBe('EPSG:3857');
       expect(m.ingcs()).toBe('EPSG:4326');
@@ -162,6 +162,26 @@ describe('geo.core.map', function () {
         left: -128 * units, top: 128 * units,
         right: 128 * units, bottom: -128 * units,
         width: 256 * units, height: 256 * units})).toBe(true);
+      // test with a different non-zero center
+      m.ingcs('EPSG:4326');
+      m.bounds({left: -180, top: 65, right: -45, bottom: 45});
+      bounds = m.bounds();
+      // compare left, top, right, bottom separately from width and height to
+      // use different precisions in the comparison
+      expect(closeToEqual({
+        left: bounds.left, top: bounds.top,
+        right: bounds.right, bottom: bounds.bottom
+      }, {
+        left: -180, top: 79.340, right: -45, bottom: 0.906
+      })).toBe(true);
+      expect(closeToEqual({width: bounds.width, height: bounds.height}, {
+        width: 96 * units, height: 96 * units}, -2)).toBe(true);
+      expect(closeToEqual(m.bounds(undefined, null), {
+        left: -128 * units, top: 96.6444 * units,
+        right: -32 * units, bottom: 0.6444 * units,
+        width: 96 * units, height: 96 * units}, -2)).toBe(true);
+      m.bounds({left: -180, top: 5, right: 180, bottom: -5});
+      // test with different projections
       m.unitsPerPixel(0, 1);
       m.gcs('+proj=longlat +axis=enu');
       expect(m.gcs()).toBe('+proj=longlat +axis=enu');
