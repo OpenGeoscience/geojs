@@ -9,8 +9,8 @@ describe('Contour Feature', function () {
   var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
 
   beforeEach(function () {
-    $('<div id="map-contour-wrap"/>').appendTo('body')
-      .css({width: '500px', height: '300px'});
+    $('<div id="map-contour-wrap"/>')
+      .css({width: '500px', height: '300px'}).appendTo('body');
 
     mockVGLRenderer();
     map = geo.map({

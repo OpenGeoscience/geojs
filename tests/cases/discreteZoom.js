@@ -16,8 +16,8 @@ describe('DiscreteZoom and ParallelProjection', function () {
   }
 
   beforeEach(function () {
-    $('<div id="map-discrete-zoom"/>').appendTo('body')
-      .css({width: '800px', height: '800px'});
+    $('<div id="map-discrete-zoom"/>')
+      .css({width: '800px', height: '800px'}).appendTo('body');
   });
 
   afterEach(function () {

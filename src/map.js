@@ -675,15 +675,15 @@ var map = function (arg) {
     var oldCenter = m_this.center();
     m_x = x;
     m_y = y;
-    m_width = w;
-    m_height = h;
+    m_width = w || m_width;
+    m_height = h || m_height;
 
     reset_minimum_zoom();
     var newZoom = fix_zoom(m_zoom);
     if (newZoom !== m_zoom) {
       m_this.zoom(newZoom);
     }
-    m_this.camera().viewport = {width: w, height: h};
+    m_this.camera().viewport = {width: m_width, height: m_height};
     m_this.center(oldCenter);
 
     m_this.geoTrigger(geo_event.resize, {
@@ -691,8 +691,8 @@ var map = function (arg) {
       target: m_this,
       x: m_x,
       y: m_y,
-      width: w,
-      height: h
+      width: m_width,
+      height: m_height
     });
 
     m_this.modified();
@@ -972,6 +972,10 @@ var map = function (arg) {
     // this makes it possible to set a null interactor
     // i.e. map.interactor(null);
     if (m_interactor) {
+      /* If we set a map interactor, make sure we have a tabindex */
+      if (!m_node.attr('tabindex')) {
+        m_node.attr('tabindex', 0);
+      }
       m_interactor.map(m_this);
     }
     return m_this;
@@ -1700,6 +1704,7 @@ var map = function (arg) {
    *    with other settings applied.
    */
   function fix_zoom(zoom, ignoreDiscreteZoom) {
+    zoom = Math.round(zoom * 1e6) / 1e6;
     zoom = Math.max(
       Math.min(
         m_validZoomRange.max,
@@ -1902,7 +1907,9 @@ var map = function (arg) {
   // Now update to the correct center and zoom level
   this.center($.extend({}, arg.center || m_center), undefined);
 
-  this.interactor(arg.interactor || mapInteractor({discreteZoom: m_discreteZoom}));
+  if (arg.interactor !== null) {
+    this.interactor(arg.interactor || mapInteractor({discreteZoom: m_discreteZoom}));
+  }
   this.clock(arg.clock || clock());
 
   function resizeSelf() {

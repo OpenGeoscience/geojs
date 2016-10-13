@@ -34,6 +34,8 @@ var feature = require('./feature');
  *   values, or an object with r, g, b on a [0-1] scale.
  * @param {number|Function} [arg.style.strokeOpacity] Opacity for each polygon
  *   stroke.  The opacity can vary by vertex.  Opacity is on a [0-1] scale.
+ * @param {number|Function} [arg.style.strokeWidth] The weight of the polygon
+ *   stroke in pixels.  The width can vary by vertex.
  * @param {boolean|Function} [arg.style.uniformPolygon] Boolean indicating if
  *   each polygon has a uniform style (uniform fill color, fill opacity, stroke
  *   color, and stroke opacity).   Defaults to false.  Can vary by polygon.
@@ -56,8 +58,6 @@ var polygonFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_position,
-      m_polygon,
       m_lineFeature,
       s_init = this._init,
       s_exit = this._exit,
@@ -67,21 +67,7 @@ var polygonFeature = function (arg) {
       s_style = this.style,
       m_coordinates = [];
 
-  if (arg.polygon === undefined) {
-    m_polygon = function (d) {
-      return d;
-    };
-  } else {
-    m_polygon = arg.polygon;
-  }
-
-  if (arg.position === undefined) {
-    m_position = function (d) {
-      return d;
-    };
-  } else {
-    m_position = arg.position;
-  }
+  this.featureType = 'polygon';
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -97,6 +83,7 @@ var polygonFeature = function (arg) {
     var ret = s_data(arg);
     if (arg !== undefined) {
       getCoordinates();
+      this._checkForStroke();
     }
     return ret;
   };
@@ -112,10 +99,13 @@ var polygonFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function getCoordinates() {
-    var posFunc = m_this.position(),
-        polyFunc = m_this.polygon();
+    var posFunc = m_this.style.get('position'),
+        polyFunc = m_this.style.get('polygon');
     m_coordinates = m_this.data().map(function (d, i) {
       var poly = polyFunc(d);
+      if (!poly) {
+        return;
+      }
       var outer, inner, range, coord, j, x, y;
 
       coord = poly.outer || (poly instanceof Array ? poly : []);
@@ -161,9 +151,9 @@ var polygonFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.polygon = function (val) {
     if (val === undefined) {
-      return m_polygon;
+      return m_this.style('polygon');
     } else {
-      m_polygon = val;
+      m_this.style('polygon', val);
       m_this.dataTime().modified();
       m_this.modified();
       getCoordinates();
@@ -184,9 +174,9 @@ var polygonFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
-      return m_position;
+      return m_this.style('position');
     } else {
-      m_position = val;
+      m_this.style('position', val);
       m_this.dataTime().modified();
       m_this.modified();
       getCoordinates();
@@ -278,7 +268,7 @@ var polygonFeature = function (arg) {
     }
     if (!m_lineFeature) {
       m_lineFeature = m_this.layer().createFeature(
-        'line', {selectionAPI: false});
+        'line', {selectionAPI: false, gcs: this.gcs()});
     }
     var polyStyle = m_this.style();
     m_lineFeature.style({
@@ -291,12 +281,16 @@ var polygonFeature = function (arg) {
       }
     });
     var data = this.data(),
-        posFunc = this.position();
+        posFunc = this.style.get('position'),
+        polyFunc = this.style.get('polygon');
     if (data !== m_lineFeature._lastData || posFunc !== m_lineFeature._posFunc) {
       var lineData = [], i, polygon, loop;
 
       for (i = 0; i < data.length; i += 1) {
-        polygon = m_this.polygon()(data[i], i);
+        polygon = polyFunc(data[i], i);
+        if (!polygon) {
+          continue;
+        }
         loop = polygon.outer || (polygon instanceof Array ? polygon : []);
         lineData.push(m_this._getLoopData(data[i], i, loop));
         if (polygon.inner) {
@@ -365,9 +359,10 @@ var polygonFeature = function (arg) {
     arg = arg || {};
     s_init.call(m_this, arg);
 
-    var defaultStyle = $.extend(
+    var style = $.extend(
       {},
       {
+        // default style
         fill: true,
         fillColor: {r: 0.0, g: 0.5, b: 0.5},
         fillOpacity: 1.0,
@@ -375,16 +370,21 @@ var polygonFeature = function (arg) {
         strokeWidth: 1.0,
         strokeStyle: 'solid',
         strokeColor: {r: 0.0, g: 1.0, b: 1.0},
-        strokeOpacity: 1.0
+        strokeOpacity: 1.0,
+        polygon: function (d) { return d; },
+        position: function (d) { return d; }
       },
       arg.style === undefined ? {} : arg.style
     );
 
-    m_this.style(defaultStyle);
-
-    if (m_position) {
-      m_this.dataTime().modified();
+    if (arg.polygon !== undefined) {
+      style.polygon = arg.polygon;
     }
+    if (arg.position !== undefined) {
+      style.position = arg.position;
+    }
+    m_this.style(style);
+
     this._checkForStroke();
   };
 
@@ -406,6 +406,11 @@ polygonFeature.create = function (layer, spec) {
   spec = spec || {};
   spec.type = 'polygon';
   return feature.create(layer, spec);
+};
+
+polygonFeature.capabilities = {
+  /* core feature name -- support in any manner */
+  feature: 'polygon'
 };
 
 inherit(polygonFeature, feature);

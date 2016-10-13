@@ -1,0 +1,77 @@
+extends ../common/templates/index.jade
+
+block append mainContent
+  #controls
+    .form-group.annotationtype(title='Select the type of annotation to add.')
+      .shortlabel Add
+      button#rectangle.lastused(next='polygon') Rectangle
+      button#polygon(next='point') Polygon
+      button#point(next='rectangle') Point
+    .form-group
+      #instructions(annotation='none')
+        .annotation.none
+        .annotation.polygon Left-click points in the polygon.  Double click, right click, or click the starting point to close the polygon.
+        .annotation.rectangle Left click-and-drag to draw a rectangle.
+        .annotation.point Left click to create a point.
+    .form-group(title='If enabled, left-click to add another annotation, and right-click to switch annotation type.  Otherwise, you must click a button above.')
+      label(for='clickadd') Click to add annotation
+      input#clickadd(param-name='clickadd', type='checkbox', placeholder='true', checked='checked')
+    .form-group(title='If enabled, immediately after adding one annotation, you can add another without either left-clicking or selecting a button.')
+      label(for='keepadding') Keep adding annotations
+      input#keepadding(param-name='keepadding', type='checkbox', placeholder='false')
+    .form-group#annotationheader
+      .shortlabel Created Annotations
+      a.entry-remove-all(action='remove-all', title='Delete all annotations') &#x2716;
+    .form-group
+      #annotationlist
+        .entry#sample
+          span.entry-name Sample
+          a.entry-edit(action='edit', title='Edit name and properties') &#x270e;
+          a.entry-remove(action='remove', title='Delete this annotation') &#x2716;
+    .form-group
+      textarea#geojson(type='textarea', rows=15, autocomplete='off',
+        autocorrect='off', autocapitalize='off', spellcheck='false')
+
+  #editdialog.modal.fade
+    .modal-dialog
+      form.modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal') &times;
+          h4.modal-title Edit Annotation
+        .modal-body
+          .form-group
+            label(for='edit-name') Name
+            input#edit-name(option='name')
+          .form-group(annotation-types='point')
+            label(for='edit-radius') Radius
+            input#edit-radius(option='radius', format='positive')
+          .form-group(annotation-types='point polygon rectangle')
+            label(for='edit-fill') Fill
+            select#edit-stroke(option='fill', format='boolean')
+              option(value='true') Yes
+              option(value='false') No
+          .form-group(annotation-types='point polygon rectangle')
+            label(for='edit-fillColor') Fill Color
+            input#edit-fillColor(option='fillColor', format='color')
+          .form-group(annotation-types='point polygon rectangle')
+            label(for='edit-fillOpacity') Fill Opacity
+            input#edit-fillOpacity(option='fillOpacity', format='opacity')
+          .form-group(annotation-types='point polygon rectangle')
+            label(for='edit-stroke') Stroke 
+            select#edit-stroke(option='stroke', format='boolean')
+              option(value='true') Yes
+              option(value='false') No
+          .form-group(annotation-types='point polygon rectangle')
+            label(for='edit-strokeWidth') Stroke Width
+            input#edit-strokeWidth(option='strokeWidth', format='positive')
+          .form-group(annotation-types='point polygon rectangle')
+            label(for='edit-strokeColor') Stroke Color
+            input#edit-strokeColor(option='strokeColor', format='color')
+          .form-group(annotation-types='point polygon rectangle')
+            label(for='edit-strokeOpacity') Stroke Opacity
+            input#edit-strokeOpacity(option='strokeOpacity', format='opacity')
+          .form-group
+            #edit-validation-error
+        .modal-footer
+          button.btn.btn-sm.btn-primary#edit-update(type='submit') Update
+          button.btn.btn-sm.btn-secondary(data-dismiss='modal') Cancel

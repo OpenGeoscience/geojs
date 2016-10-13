@@ -226,6 +226,63 @@ geo_event.unzoomselect = 'geo_unzoomselect';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Triggered when an action is initiated with mouse down
+ *
+ * @property {object} state The action state
+ * @property {geo.mouseState} mouse The mouse state
+ * @property {object} event The triggering event
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.actiondown = 'geo_actiondown';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an action is being processed during mouse movement.
+ *
+ * @property {object} state The action state
+ * @property {geo.mouseState} mouse The mouse state
+ * @property {object} event The triggering event
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.actionmove = 'geo_actionmove';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an action is ended with a mouse up.
+ *
+ * @property {object} state The action state
+ * @property {geo.mouseState} mouse The mouse state
+ * @property {object} event The triggering event
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.actionup = 'geo_actionup';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an action results in a selection.
+ *
+ * @property {object} state The action state
+ * @property {geo.mouseState} mouse The mouse state
+ * @property {object} event The triggering event
+ * @property {object} lowerLeft Lower left of selection in screen coordinates
+ * @property {object} upperRight Upper right of selection in screen coordinates
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.actionselection = 'geo_actionselection';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an action is triggered with a mouse wheel event.
+ *
+ * @property {object} state The action state
+ * @property {geo.mouseState} mouse The mouse state
+ * @property {object} event The triggering event
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.actionwheel = 'geo_actionwheel';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Triggered before a map navigation animation begins.  Set
  * <code>event.geo.cancelAnimation</code> to cancel the animation
  * of the navigation.  This will cause the map to navigate to the
@@ -370,5 +427,68 @@ geo_event.camera.projection = 'geo_camera_projection';
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.camera.viewport = 'geo_camera_viewport';
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * These events are triggered by the annotation layer.
+ * @namespace geo.event.annotation
+ */
+////////////////////////////////////////////////////////////////////////////
+geo_event.annotation = {};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an annotation has been added.
+ *
+ * @property {geo.annotation} annotation The annotation that was added.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.annotation.add = 'geo_annotation_add';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an annotation is about to be added.
+ *
+ * @property {geo.annotation} annotation The annotation that will be added.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.annotation.add_before = 'geo_annotation_add_before';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an annotation has been altered.  This is currently only
+ * triggered when updating existing annotations via the geojson function.
+ *
+ * @property {geo.annotation} annotation The annotation that was altered.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.annotation.update = 'geo_annotation_update';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an annotation has been removed.
+ *
+ * @property {geo.annotation} annotation The annotation that was removed.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.annotation.remove = 'geo_annotation_remove';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an annotation's state changes.
+ *
+ * @property {geo.annotation} annotation The annotation that changed/
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.annotation.state = 'geo_annotation_state';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the annotation mode is changed.
+ *
+ * @property {string|null} mode the new annotation mode.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.annotation.mode = 'geo_annotation_mode';
 
 module.exports = geo_event;

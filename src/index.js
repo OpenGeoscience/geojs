@@ -31,6 +31,8 @@ var $ = require('jquery');
 require('./polyfills');
 
 module.exports = $.extend({
+  annotation: require('./annotation'),
+  annotationLayer: require('./annotationLayer'),
   camera: require('./camera'),
   choroplethFeature: require('./choroplethFeature'),
   clock: require('./clock'),
@@ -41,6 +43,7 @@ module.exports = $.extend({
   featureLayer: require('./featureLayer'),
   fetchQueue: require('./fetchQueue'),
   fileReader: require('./fileReader'),
+  geo_action: require('./action'),
   geomFeature: require('./geomFeature'),
   graphFeature: require('./graphFeature'),
   gridFeature: require('./gridFeature'),

@@ -5,8 +5,8 @@ describe('widget api', function () {
   'use strict';
 
   beforeEach(function () {
-    $('<div id="map-widget-api"/>').appendTo('body')
-      .css({width: '500px', height: '400px'});
+    $('<div id="map-widget-api"/>')
+      .css({width: '500px', height: '400px'}).appendTo('body');
   });
 
   afterEach(function () {

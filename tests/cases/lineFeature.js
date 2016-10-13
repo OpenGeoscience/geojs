@@ -34,6 +34,8 @@ describe('geo.lineFeature', function () {
       ]
     }, {
       coord: [{x: 50, y: 10}, {x: 50, y: 10}]
+    }, {
+      coord: [{x: 60, y: 10}]
     }
   ];
 
@@ -214,7 +216,7 @@ describe('geo.lineFeature', function () {
       }).data(testLines);
       line.draw();
       stepAnimationFrame();
-      expect(layer.node().find('path').length).toBe(6);
+      expect(layer.node().find('path').length).toBe(7);
       unmockAnimationFrame();
     });
   });

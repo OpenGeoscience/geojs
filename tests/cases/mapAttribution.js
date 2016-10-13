@@ -5,8 +5,8 @@ describe('Test adding and remove attribution via layers', function () {
   var geo = require('../test-utils').geo;
 
   beforeEach(function () {
-    $('<div id="map-attribution"/>').appendTo('body')
-      .css({width: '500px', height: '400px'});
+    $('<div id="map-attribution"/>')
+      .css({width: '500px', height: '400px'}).appendTo('body');
   });
 
   afterEach(function () {

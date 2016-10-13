@@ -9,6 +9,7 @@ var features = {};
 var featureCapabilities = {};
 var fileReaders = {};
 var rendererLayerAdjustments = {};
+var annotations = {};
 var util = {};
 
 //////////////////////////////////////////////////////////////////////////////
@@ -65,7 +66,7 @@ util.createRenderer = function (name, layer, canvas, options) {
  * that would support those features.
  *
  * @params {string|null} name name of the desired renderer
- * @params {boolean} noFallack if true, don't recommend a fallback
+ * @params {boolean} noFallback if true, don't recommend a fallback
  * @return {string|null|false} the name of the renderer that should be used
  *      or false if no valid renderer can be determined.
  */
@@ -168,6 +169,8 @@ util.rendererForFeatures = function (featureList) {
  *      and image quads that support full transformations.  The capabailities
  *      should be defined in the base feature in a capabilities object so that
  *      they can be referenced by that rather than an explicit string.
+ * @returns {object} if this feature replaces an existing one, this was the
+ *      feature that was replaced.  In this case, a warning is issued.
  */
 //////////////////////////////////////////////////////////////////////////////
 util.registerFeature = function (category, name, func, capabilities) {
@@ -176,9 +179,13 @@ util.registerFeature = function (category, name, func, capabilities) {
     featureCapabilities[category] = {};
   }
 
-  // TODO Add warning if the name already exists
+  var old = features[category][name];
+  if (old) {
+    console.warn('The ' + category + '.' + name + ' feature is already registered');
+  }
   features[category][name] = func;
   featureCapabilities[category][name] = capabilities;
+  return old;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -207,6 +214,9 @@ util.createFeature = function (name, layer, renderer, arg) {
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Register a layer adjustment.
+ *
+ * @returns {object} if this layer adjustment replaces an existing one, this
+ *      was the value that was replaced.  In this case, a warning is issued.
  */
 //////////////////////////////////////////////////////////////////////////////
 util.registerLayerAdjustment = function (category, name, func) {
@@ -214,8 +224,12 @@ util.registerLayerAdjustment = function (category, name, func) {
     rendererLayerAdjustments[category] = {};
   }
 
-  // TODO Add warning if the name already exists
+  var old = rendererLayerAdjustments[category][name];
+  if (old) {
+    console.warn('The ' + category + '.' + name + ' layer adjustment is already registered');
+  }
   rendererLayerAdjustments[category][name] = func;
+  return old;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -276,6 +290,9 @@ util.createLayer = function (name, map, arg) {
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Register a new widget type
+ *
+ * @returns {object} if this widget replaces an existing one, this was the
+ *      value that was replaced.  In this case, a warning is issued.
  */
 //////////////////////////////////////////////////////////////////////////////
 util.registerWidget = function (category, name, func) {
@@ -283,8 +300,12 @@ util.registerWidget = function (category, name, func) {
     widgets[category] = {};
   }
 
-  // TODO Add warning if the name already exists
+  var old = widgets[category][name];
+  if (old) {
+    console.warn('The ' + category + '.' + name + ' widget is already registered');
+  }
   widgets[category][name] = func;
+  return old;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -306,6 +327,117 @@ util.createWidget = function (name, layer, arg) {
   }
 
   throw new Error('Cannot create unknown widget ' + name);
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Register a new annotation type
+ *
+ * @param {string} name The annotation name
+ * @param {function} func A function to call to create the annotation.
+ * @param {object|undefined} features A map of features that are used by this
+ *      annotation.  Each key is a feature that is used.  If the value is true,
+ *      the that feature is always needed.  If a list, then it is the set of
+ *      annotation states for which that feature is required.  These can be
+ *      used to pick an pparopriate renderer when creating an annotation layer.
+ * @returns {object} if this annotation replaces an existing one, this was the
+ *      value that was replaced.  In this case, a warning is issued.
+ */
+//////////////////////////////////////////////////////////////////////////////
+util.registerAnnotation = function (name, func, features) {
+  var old = annotations[name];
+  if (old) {
+    console.warn('The ' + name + ' annotation is already registered');
+  }
+  annotations[name] = {func: func, features: features || {}};
+  return old;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create an annotation based on a registered type.
+ *
+ * @param {string} name The annotation name
+ * @param {object} options The options for the annotation.
+ * @returns {object} the new annotation.
+ */
+//////////////////////////////////////////////////////////////////////////////
+util.createAnnotation = function (name, options) {
+  if (!annotations[name]) {
+    console.warn('The ' + name + ' annotation is not registered');
+    return;
+  }
+  var annotation = annotations[name].func(options);
+  return annotation;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Get a list of registered annotation types.
+ *
+ * @return {array} a list of registered annotations.
+ */
+//////////////////////////////////////////////////////////////////////////////
+util.listAnnotations = function () {
+  return Object.keys(annotations);
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Get a list of required features for a set of annotations.
+ *
+ * @param {array|object|undefined} annotationList A list of annotations that
+ *   will be used.  Instead of a list, if this is an object, the keys are the
+ *   annotation names, and the values are each a list of modes that will be
+ *   used with that annotation.  For example, ['polygon', 'rectangle'] lists
+ *   features required to show those annotations in any mode,  whereas
+ *   {polygon: [annotationState.done], rectangle: [annotationState.done]} only
+ *   lists features thatre are needed to show the completed annotations.
+ * @return {array} a list of features needed for the specified annotations.
+ *   There may be duplicates in the list.
+ */
+//////////////////////////////////////////////////////////////////////////////
+util.featuresForAnnotations = function (annotationList) {
+  var features = [];
+
+  var annList = Array.isArray(annotationList) ? annotationList : Object.keys(annotationList);
+  annList.forEach(function (ann) {
+    if (!annotations[ann]) {
+      return;
+    }
+    Object.keys(annotations[ann].features).forEach(function (feature) {
+      if (Array.isArray(annotationList) || annotationList[ann] === true ||
+          !Array.isArray(annotations[ann].features[feature])) {
+        features.push(feature);
+      } else {
+        annotationList[ann].forEach(function (state) {
+          if ($.inArray(state, annotations[ann].features[feature]) >= 0) {
+            features.push(feature);
+          }
+        });
+      }
+    });
+  });
+  return features;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Check if there is a renderer that is supported and supports a list of
+ * annotations.  If not, display a warning.  This generates a list of required
+ * features, then picks the first renderer that supports all of thse features.
+ *
+ * @param {array|object|undefined} annotationList A list of annotations that
+ *   will be used with this renderer.  Instead of a list, if this is an object,
+ *   the keys are the annotation names, and the values are each a list of modes
+ *   that will be used with that annotation.  See featuresForAnnotations for
+ *   more details.
+ * @return {string|null|false} the name of the renderer that should be used or
+ *   false if no valid renderer can be determined.
+ */
+//////////////////////////////////////////////////////////////////////////////
+util.rendererForAnnotations = function (annotationList) {
+  return util.rendererForFeatures(util.featuresForAnnotations(annotationList));
 };
 
 module.exports = util;

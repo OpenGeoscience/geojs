@@ -121,7 +121,13 @@
         if (geo.util.cssColors.hasOwnProperty(color)) {
           color = geo.util.cssColors[color];
         } else if (color.charAt(0) === '#') {
-          color = parseInt(color.slice(1), 16);
+          if (color.length === 4) {
+            /* interpret values of the form #rgb as #rrggbb */
+            color = parseInt(color.slice(1), 16);
+            color = (color & 0xf00) * 0x1100 + (color & 0xf0) * 0x110 + (color & 0xf) * 0x11;
+          } else {
+            color = parseInt(color.slice(1), 16);
+          }
         }
       }
       if (isFinite(color)) {
@@ -132,6 +138,21 @@
         };
       }
       return color;
+    },
+
+    /**
+     * Convert a color to a six digit hex value prefixed with #.
+     */
+    convertColorToHex: function (color) {
+      var value = geo.util.convertColor(color);
+      if (!value.r && !value.g && !value.b) {
+        value = '#000000';
+      } else {
+        value = '#' + ((1 << 24) + (Math.round(value.r * 255) << 16) +
+                       (Math.round(value.g * 255) << 8) +
+                        Math.round(value.b * 255)).toString(16).slice(1);
+      }
+      return value;
     },
 
     /**
@@ -288,6 +309,144 @@
       data = new Float32Array(len);
       src.setData(data);
       return data;
+    },
+
+    /**
+     * Ensure that the input and modifiers properties of all actions are
+     * objects, not plain strings.
+     *
+     * @param {Array} actions: an array of actions to adjust as needed.
+     */
+    adjustActions: function (actions) {
+      var action, i;
+      for (i = 0; i < actions.length; i += 1) {
+        action = actions[i];
+        if ($.type(action.input) === 'string') {
+          var actionEvents = {};
+          actionEvents[action.input] = true;
+          action.input = actionEvents;
+        }
+        if (!action.modifiers) {
+          action.modifiers = {};
+        }
+        if ($.type(action.modifiers) === 'string') {
+          var actionModifiers = {};
+          actionModifiers[action.modifiers] = true;
+          action.modifiers = actionModifiers;
+        }
+      }
+    },
+
+    /**
+     * Add an action to the list of handled actions.
+     *
+     * @param {Array} actions: an array of actions to adjust as needed.
+     * @param {object} action: an object defining the action.  This must have
+     *    action and event properties, and may have modifiers, name, and owner.
+     *    Use action, name, and owner to make this entry distinct if it will
+     *    need to be removed later.
+     * @param {boolean} toEnd: the action is added at the beginning of the
+     *    actions list unless toEnd is true.  Earlier actions prevent later
+     *    actions with the similar input and modifiers.
+     */
+    addAction: function (actions, action, toEnd) {
+      if (toEnd) {
+        actions.push(action);
+      } else {
+        actions.unshift(action);
+      }
+      geo.util.adjustActions(actions);
+    },
+
+    /**
+     * Check if an action is in the actions list.  An action matches if the
+     * action, name, and owner match.  A null or undefined value will match all
+     * actions.  If using an action object, this is the same as passing
+     * (action.action, action.name, action.owner).
+     *
+     * @param {Array} actions: an array of actions to search.
+     * @param {object|string} action Either an action object or the name of an
+     *    action.
+     * @param {string} name Optional name associated with the action.
+     * @param {string} owner Optional owner associated with the action.
+     * @return action the first matching action or null.
+     */
+    hasAction: function (actions, action, name, owner) {
+      if (action && action.action) {
+        name = action.name;
+        owner = action.owner;
+        action = action.action;
+      }
+      for (var i = 0; i < actions.length; i += 1) {
+        if ((!action || actions[i].action === action) &&
+            (!name || actions[i].name === name) &&
+            (!owner || actions[i].owner === owner)) {
+          return actions[i];
+        }
+      }
+      return null;
+    },
+
+    /**
+     * Remove all matching actions.  Actions are matched as with hasAction.
+     *
+     * @param {Array} actions: an array of actions to adjust as needed.
+     * @param {object|string} action Either an action object or the name of an
+     *    action.
+     * @param {string} name Optional name associated with the action.
+     * @param {string} owner Optional owner associated with the action.
+     * @return numRemoved the number of actions that were removed.
+     */
+    removeAction: function (actions, action, name, owner) {
+      var found, removed = 0;
+
+      do {
+        found = geo.util.hasAction(actions, action, name, owner);
+        if (found) {
+          actions.splice($.inArray(found, actions), 1);
+          removed += 1;
+        }
+      } while (found);
+      return removed;
+    },
+
+    /**
+     * Determine if the current inputs and modifiers match a known action.
+     *
+     * @param {object} inputs: an object where each input that is currently
+     *    active is truthy.  Common inputs are left, right, middle, wheel.
+     * @param {object} modifiers: an object where each currently applied
+     *    modifier is truthy.  Common modifiers are shift, ctrl, alt, meta.
+     * @param {Array} actions: a list of actions to compare to the inputs and
+     *    modifiers.  The first action that matches will be returned.
+     * @returns {object} action A matching action or undefined.
+     */
+    actionMatch: function (inputs, modifiers, actions) {
+      var matched;
+
+      /* actions must have already been processed by adjustActions */
+      if (actions.some(function (action) {
+        for (var input in action.input) {
+          if (action.input.hasOwnProperty(input)) {
+            if ((action.input[input] === false && inputs[input]) ||
+                (action.input[input] && !inputs[input])) {
+              return false;
+            }
+          }
+        }
+        for (var modifier in action.modifiers) {
+          if (action.modifiers.hasOwnProperty(modifier)) {
+            if ((action.modifiers[modifier] === false && modifiers[modifier]) ||
+                (action.modifiers[modifier] && !modifiers[modifier])) {
+              return false;
+            }
+          }
+        }
+        matched = action;
+        return true;
+      })) {
+        return matched;
+      }
     },
 
     /**
