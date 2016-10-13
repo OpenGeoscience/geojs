@@ -258,6 +258,7 @@ var polygonFeature = function (arg) {
       if (m_lineFeature && m_this.layer()) {
         m_this.layer().deleteFeature(m_lineFeature);
         m_lineFeature = null;
+        m_this.dependentFeatures([]);
       }
       return;
     }
@@ -265,8 +266,12 @@ var polygonFeature = function (arg) {
       return;
     }
     if (!m_lineFeature) {
-      m_lineFeature = m_this.layer().createFeature(
-        'line', {selectionAPI: false, gcs: this.gcs()});
+      m_lineFeature = m_this.layer().createFeature('line', {
+        selectionAPI: false,
+        gcs: m_this.gcs(),
+        visible: m_this.visible()
+      });
+      m_this.dependentFeatures([m_lineFeature]);
     }
     var polyStyle = m_this.style();
     m_lineFeature.style({
@@ -343,6 +348,7 @@ var polygonFeature = function (arg) {
     if (m_lineFeature && m_this.layer()) {
       m_this.layer().deleteFeature(m_lineFeature);
       m_lineFeature = null;
+      m_this.dependentFeatures([]);
     }
     s_exit();
   };

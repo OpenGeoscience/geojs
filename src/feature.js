@@ -41,6 +41,7 @@ var feature = function (arg) {
       m_dataTime = timestamp(),
       m_buildTime = timestamp(),
       m_updateTime = timestamp(),
+      m_dependentFeatures = [],
       m_selectedFeatures = [];
 
   ////////////////////////////////////////////////////////////////////////////
@@ -397,7 +398,8 @@ var feature = function (arg) {
   this.visible = function (val) {
     if (val === undefined) {
       return m_visible;
-    } else {
+    }
+    if (m_visible !== val) {
       m_visible = val;
       m_this.modified();
 
@@ -407,9 +409,25 @@ var feature = function (arg) {
       } else {
         m_this._unbindMouseHandlers();
       }
-
-      return m_this;
+      for (var i = 0; i < m_dependentFeatures.length; i += 1) {
+        m_dependentFeatures[i].visible(val);
+      }
     }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set a list of dependent features.  Dependent features have their
+   * visibility changed at the same time as the feature.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.dependentFeatures = function (arg) {
+    if (arg === undefined) {
+      return m_dependentFeatures.slice();
+    }
+    m_dependentFeatures = arg.slice();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////

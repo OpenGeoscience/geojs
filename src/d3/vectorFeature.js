@@ -242,6 +242,7 @@ var d3_vectorFeature = function (arg) {
       endStyle: s_style.endStyle
     };
     m_style.classes = ['d3VectorFeature'];
+    m_style.visible = m_this.visible;
 
     // Add markers to the defition list
     updateMarkers(data, s_style.strokeColor, s_style.strokeOpacity, s_style.originStyle, s_style.endStyle);

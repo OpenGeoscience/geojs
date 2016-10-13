@@ -478,6 +478,7 @@ var d3Renderer = function (arg) {
       data: arg.data,
       index: arg.dataIndex,
       style: arg.style,
+      visible: arg.visible,
       attributes: arg.attributes,
       classes: arg.classes,
       append: arg.append,
@@ -538,6 +539,7 @@ var d3Renderer = function (arg) {
     var data = m_features[id].data,
         index = m_features[id].index,
         style = m_features[id].style,
+        visible = m_features[id].visible,
         attributes = m_features[id].attributes,
         classes = m_features[id].classes,
         append = m_features[id].append,
@@ -549,6 +551,9 @@ var d3Renderer = function (arg) {
     setAttrs(rendersel, attributes);
     rendersel.attr('class', classes.concat([id]).join(' '));
     setStyles(rendersel, style);
+    if (visible) {
+      rendersel.style('visibility', visible() ? 'visible' : 'hidden');
+    }
     if (entries.size() && m_features[id].sortByZ) {
       selection.sort(function (a, b) {
         return (a.zIndex || 0) - (b.zIndex || 0);

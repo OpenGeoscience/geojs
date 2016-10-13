@@ -197,8 +197,12 @@ var pixelmapFeature = function (arg) {
     var destImage = new Image();
     destImage.src = canvas.toDataURL();
     if (!m_quadFeature) {
-      m_quadFeature = m_this.layer().createFeature(
-        'quad', {selectionAPI: false, gcs: m_this.gcs()});
+      m_quadFeature = m_this.layer().createFeature('quad', {
+        selectionAPI: false,
+        gcs: m_this.gcs(),
+        visible: m_this.visible()
+      });
+      m_this.dependentFeatures([m_quadFeature]);
     }
     m_quadFeature.style({image: destImage, position: m_this.style.get('position')});
     m_quadFeature.data([{}]);
@@ -230,6 +234,7 @@ var pixelmapFeature = function (arg) {
     if (m_quadFeature && m_this.layer()) {
       m_this.layer().deleteFeature(m_quadFeature);
       m_quadFeature = null;
+      m_this.dependentFeatures([]);
     }
     s_exit();
   };
