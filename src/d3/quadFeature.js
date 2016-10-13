@@ -182,6 +182,7 @@ var d3_quadFeature = function (arg) {
       },
       onlyRenderNew: !this.style('previewColor') && !this.style('previewImage'),
       sortByZ: true,
+      visible: m_this.visible,
       classes: ['d3QuadFeature']
     };
     renderer._drawFeatures(feature);

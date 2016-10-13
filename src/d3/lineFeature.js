@@ -99,6 +99,7 @@ var d3_lineFeature = function (arg) {
         },
         id: m_this._d3id() + idx,
         classes: ['d3LineFeature', 'd3SubLine-' + idx],
+        visible: m_this.visible,
         style: style
       };
 
