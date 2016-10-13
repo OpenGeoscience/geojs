@@ -70,6 +70,9 @@ var svgWidget = function (arg) {
 
     m_renderer = d3Renderer(rendererOpts);
 
+    // svg widgets manage their own sizes, so make the resize handler a no-op
+    m_renderer._resize = function () {};
+
     m_this.canvas(m_renderer.canvas()[0][0]);
   };
 

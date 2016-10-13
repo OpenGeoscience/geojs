@@ -151,7 +151,9 @@ var widget = function (arg) {
 
       return {
         left: position.x,
-        top: position.y
+        top: position.y,
+        right: null,
+        bottom: null
       };
     }
 
@@ -172,7 +174,14 @@ var widget = function (arg) {
 
     for (var cssAttr in position) {
       if (position.hasOwnProperty(cssAttr)) {
-        m_this.canvas().style[cssAttr] = position[cssAttr] + 'px';
+        // if the property is a number, add px to it, otherwise set it to the
+        // specified value.  Setting a property to null clears it.  Setting to
+        // undefined doesn't alter it.
+        if (/^\s*(\-|\+)?(\d+(\.\d*)?|\d*\.\d+)([eE](\-|\+)?\d+)?\s*$/.test(position[cssAttr])) {
+          m_this.canvas().style[cssAttr] = ('' + position[cssAttr]).trim() + 'px';
+        } else {
+          m_this.canvas().style[cssAttr] = position[cssAttr];
+        }
       }
     }
   };
