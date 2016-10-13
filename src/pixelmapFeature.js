@@ -87,11 +87,30 @@ var pixelmapFeature = function (arg) {
       return m_this.style('url');
     } else if (val !== m_this.style('url')) {
       m_srcImage = m_pixelmapWidth = m_pixelmapHeight = undefined;
+      m_pixelmapIndices = undefined;
       m_this.style('url', val);
       m_this.dataTime().modified();
       m_this.modified();
     }
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the maximum index value from the pixelmap.  This is a value present in
+   * the pixelmap.  This is a somewhat expensive call.
+   *
+   * @returns {geo.pixelmap}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.maxIndex = function () {
+    if (m_pixelmapIndices) {
+      var max = -1;
+      for (var i = 0; i < m_pixelmapIndices.length; i += 1) {
+        max = Math.max(max, m_pixelmapIndices[i]);
+      }
+      return max;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -174,15 +193,22 @@ var pixelmapFeature = function (arg) {
     canvas.height = m_pixelmapHeight;
     var context = canvas.getContext('2d');
 
-    context.drawImage(m_srcImage, 0, 0);
+    if (!m_pixelmapIndices) {
+      context.drawImage(m_srcImage, 0, 0);
+    }
     var imageData = context.getImageData(0, 0, canvas.width, canvas.height),
         pixelData = imageData.data,
         i, idx, color;
-    m_pixelmapIndices = new Array(pixelData.length / 4);
+    if (!m_pixelmapIndices) {
+      m_pixelmapIndices = new Array(pixelData.length / 4);
 
+      for (i = 0; i < pixelData.length; i += 4) {
+        idx = pixelData[i] + (pixelData[i + 1] << 8) + (pixelData[i + 2] << 16);
+        m_pixelmapIndices[i / 4] = idx;
+      }
+    }
     for (i = 0; i < pixelData.length; i += 4) {
-      idx = pixelData[i] + (pixelData[i + 1] << 8) + (pixelData[i + 2] << 16);
-      m_pixelmapIndices[i / 4] = idx;
+      idx = m_pixelmapIndices[i / 4];
       if (m_mappedColors[idx] === undefined) {
         m_mappedColors[idx] = mapColorFunc(data[idx], idx) || {};
       }
