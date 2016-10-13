@@ -30,9 +30,9 @@ var sliderWidget = function (arg) {
       m_plus,
       m_minus,
       m_nub,
-      m_width = 20, // Approximate size of the widget in pixels
-      m_height = 100,
-      m_nubSize = 10,
+      m_width = arg.width || 20, // Size of the widget in pixels
+      m_height = arg.height || 160,  // slider height + 3 * width
+      m_nubSize = arg.width ? arg.width * 0.5 : 10,
       m_plusIcon,
       m_minusIcon,
       m_group,
@@ -83,6 +83,10 @@ var sliderWidget = function (arg) {
     return g;
   }
 
+  this.size = function () {
+    return {width: m_width, height: m_height};
+  };
+
   //////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize the slider widget in the map.
@@ -99,14 +103,14 @@ var sliderWidget = function (arg) {
     m_this.reposition();
 
     var svg = d3.select(m_this.canvas()),
-        x0 = 40,
-        y0 = 40 + m_width,
         map = m_this.layer().map();
+
+    svg.attr('width', m_width).attr('height', m_height);
 
     // create d3 scales for positioning
     // TODO: make customizable and responsive
-    m_xscale = d3.scale.linear().domain([-4, 4]).range([x0, x0 + m_width]);
-    m_yscale = d3.scale.linear().domain([0, 1]).range([y0, y0 + m_height]);
+    m_xscale = d3.scale.linear().domain([-4, 4]).range([0, m_width]);
+    m_yscale = d3.scale.linear().domain([0, 1]).range([m_width * 1.5, m_height - m_width * 1.5]);
 
     // Create the main group element
     svg = svg.append('g').classed('geo-ui-slider', true);
@@ -122,7 +126,7 @@ var sliderWidget = function (arg) {
       .classed('geo-zoom-in', true)
       .attr('cx', m_xscale(0))
       .attr('cy', m_yscale(0.0) - m_width + 2)
-      .attr('r', m_width / 2)
+      .attr('r', (m_width - 2) / 2)
       .style({
         'cursor': 'pointer'
       })
@@ -143,7 +147,7 @@ var sliderWidget = function (arg) {
       m_plus,
       m_xscale(0),
       m_yscale(0) - m_width + 2,
-      m_width + 5
+      m_width + 4
     ).style('cursor', 'pointer')
       .style('pointer-events', 'none')
       .select('path')
@@ -162,7 +166,7 @@ var sliderWidget = function (arg) {
       .classed('geo-zoom-out', true)
       .attr('cx', m_xscale(0))
       .attr('cy', m_yscale(1.0) + m_width - 2)
-      .attr('r', m_width / 2)
+      .attr('r', (m_width - 2) / 2)
       .style({
         'cursor': 'pointer'
       })
@@ -183,7 +187,7 @@ var sliderWidget = function (arg) {
       m_minus,
       m_xscale(0),
       m_yscale(1) + m_width - 2,
-      m_width + 5
+      m_width + 4
     ).style('cursor', 'pointer')
       .style('pointer-events', 'none')
       .select('path')
@@ -194,7 +198,7 @@ var sliderWidget = function (arg) {
 
     // Respond to a mouse event on the widget
     function respond(evt, trans) {
-      var z = m_yscale.invert(d3.mouse(m_this.layer().node()[0])[1]),
+      var z = m_yscale.invert(d3.mouse(svg.node())[1]),
           zrange = map.zoomRange();
       z = (1 - z) * (zrange.max - zrange.min) + zrange.min;
       if (trans) {
@@ -223,7 +227,7 @@ var sliderWidget = function (arg) {
       .attr('rx', m_width / 10)
       .attr('ry', m_width / 10)
       .attr('width', m_width / 3)
-      .attr('height', m_height)
+      .attr('height', m_height - m_width * 3)
       .style({
         'cursor': 'pointer'
       })

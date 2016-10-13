@@ -79,6 +79,16 @@ describe('widget api', function () {
     expect($(widget.canvas()).position()).toEqual({top: 0, left: 0});
   });
 
+  it('Widgets positions can be changed', function () {
+    var o = makeMap(), widget = o.uiLayer.createWidget('dom', {
+          position: {left: 15, top: 10}});
+
+    expect($(widget.canvas()).position()).toEqual({top: 10, left: 15});
+    widget.position({top: null, bottom: '20%', left: 10});
+    expect(widget.position()).toEqual({top: null, bottom: '20%', left: 10});
+    expect($(widget.canvas()).position()).toEqual({top: 320, left: 10});
+  });
+
   it('nested widgets should be properly structured', function () {
     var o = makeMap();
     var domWidget = o.uiLayer.createWidget('dom');
