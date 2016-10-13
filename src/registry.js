@@ -355,6 +355,24 @@ util.registerAnnotation = function (name, func, features) {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Create an annotation based on a registered type.
+ *
+ * @param {string} name The annotation name
+ * @param {object} options The options for the annotation.
+ * @returns {object} the new annotation.
+ */
+//////////////////////////////////////////////////////////////////////////////
+util.createAnnotation = function (name, options) {
+  if (!annotations[name]) {
+    console.warn('The ' + name + ' annotation is not registered');
+    return;
+  }
+  var annotation = annotations[name].func(options);
+  return annotation;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Get a list of registered annotation types.
  *
  * @return {array} a list of registered annotations.

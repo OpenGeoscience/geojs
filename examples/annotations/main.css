@@ -99,3 +99,7 @@
   color: red;
   font-weight: bold;
 }
+#geojson {
+  width: 100%;
+  resize: vertical;
+}
