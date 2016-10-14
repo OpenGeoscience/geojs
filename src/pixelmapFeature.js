@@ -48,11 +48,8 @@ var pixelmapFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_quadFeature,
-      m_mappedColors,
-      m_pixelmapWidth,
-      m_pixelmapHeight,
-      m_pixelmapIndices,
       m_srcImage,
+      m_info,
       s_update = this._update,
       s_init = this._init,
       s_exit = this._exit;
@@ -86,8 +83,7 @@ var pixelmapFeature = function (arg) {
     if (val === undefined) {
       return m_this.style('url');
     } else if (val !== m_this.style('url')) {
-      m_srcImage = m_pixelmapWidth = m_pixelmapHeight = undefined;
-      m_pixelmapIndices = undefined;
+      m_srcImage = m_info = undefined;
       m_this.style('url', val);
       m_this.dataTime().modified();
       m_this.modified();
@@ -98,18 +94,23 @@ var pixelmapFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the maximum index value from the pixelmap.  This is a value present in
-   * the pixelmap.  This is a somewhat expensive call.
+   * the pixelmap.
    *
    * @returns {geo.pixelmap}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.maxIndex = function () {
-    if (m_pixelmapIndices) {
-      var max = -1;
-      for (var i = 0; i < m_pixelmapIndices.length; i += 1) {
-        max = Math.max(max, m_pixelmapIndices[i]);
+    if (m_info) {
+      /* This isn't just m_info.mappedColors.length - 1, since there
+       * may be more data than actual indices. */
+      if (m_info.maxIndex === undefined) {
+        var max = 0;
+        for (var i = 0; i < m_info.indices.length; i += 1) {
+          max = Math.max(max, m_info.indices[i]);
+        }
+        m_info.maxIndex = max;
       }
-      return max;
+      return m_info.maxIndex;
     }
   };
 
@@ -137,17 +138,19 @@ var pixelmapFeature = function (arg) {
    * can be included in the found results.
    */
   this.pointSearch = function (coordinate) {
-    if (m_quadFeature) {
+    if (m_quadFeature && m_info) {
       var result = m_quadFeature.pointSearch(coordinate);
       if (result.basis.length === 1) {
-        var x = result.basis[0].x, y = result.basis[0].y;
-        x = Math.floor(x * m_pixelmapWidth);
-        y = Math.floor(y * m_pixelmapHeight);
-        if (x >= 0 && x < m_pixelmapWidth && y >= 0 && y < m_pixelmapHeight) {
+        var x = result.basis[0].x, y = result.basis[0].y, idx;
+        x = Math.floor(x * m_info.width);
+        y = Math.floor(y * m_info.height);
+        if (x >= 0 && x < m_info.width &&
+            y >= 0 && y < m_info.height) {
+          idx = m_info.indices[y * m_info.width + x];
           result = {
-            index: [m_pixelmapIndices[y * m_pixelmapWidth + x]]
+            index: [idx],
+            found: [m_this.data()[idx]]
           };
-          result.found = [m_this.data()[result.index[0]]];
           return result;
         }
       }
@@ -161,15 +164,12 @@ var pixelmapFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var data = m_this.data() || [];
-
-    m_mappedColors = new Array(data.length);
     if (!m_srcImage) {
       m_srcImage = new Image();
       m_srcImage.crossOrigin = m_this.style.get('crossDomain')() || 'anonymous';
       m_srcImage.onload = this._computePixelmap;
       m_srcImage.src = m_this.style.get('url')();
-    } else if (m_pixelmapWidth) {
+    } else if (m_info) {
       this._computePixelmap();
     }
     m_this.buildTime().modified();
@@ -183,56 +183,122 @@ var pixelmapFeature = function (arg) {
    */
   this._computePixelmap = function () {
     var data = m_this.data() || [],
-        mapColorFunc = m_this.style.get('mapColor');
+        mapColorFunc = m_this.style.get('mapColor'),
+        i, idx, color, pixelData, indices, mappedColors,
+        updateIdx, update = false, oldColors, destImage;
 
-    m_pixelmapWidth = m_srcImage.naturalWidth;
-    m_pixelmapHeight = m_srcImage.naturalHeight;
+    if (!m_info) {
+      /* If we haven't compute information for this pixelmap image, do so.
+       * This is invalidated by a change in the image. */
+      m_info = {
+        width: m_srcImage.naturalWidth,
+        height: m_srcImage.naturalHeight,
+        canvas: document.createElement('canvas'),
+        updateIdx: new Array(data.length)
+      };
 
-    var canvas = document.createElement('canvas');
-    canvas.width = m_pixelmapWidth;
-    canvas.height = m_pixelmapHeight;
-    var context = canvas.getContext('2d');
+      m_info.canvas.width = m_info.width;
+      m_info.canvas.height = m_info.height;
+      m_info.context = m_info.canvas.getContext('2d');
 
-    if (!m_pixelmapIndices) {
-      context.drawImage(m_srcImage, 0, 0);
-    }
-    var imageData = context.getImageData(0, 0, canvas.width, canvas.height),
-        pixelData = imageData.data,
-        i, idx, color;
-    if (!m_pixelmapIndices) {
-      m_pixelmapIndices = new Array(pixelData.length / 4);
+      m_info.context.drawImage(m_srcImage, 0, 0);
+      m_info.imageData = m_info.context.getImageData(
+        0, 0, m_info.canvas.width, m_info.canvas.height);
+      pixelData = m_info.imageData.data;
+      m_info.indices = new Array(pixelData.length / 4);
 
       for (i = 0; i < pixelData.length; i += 4) {
         idx = pixelData[i] + (pixelData[i + 1] << 8) + (pixelData[i + 2] << 16);
-        m_pixelmapIndices[i / 4] = idx;
+        m_info.indices[i / 4] = idx;
       }
+    } else {
+      /* Otherwise, just get a local reference to our data */
+      pixelData = m_info.imageData.data;
     }
+    updateIdx = m_info.updateIdx;
+    oldColors = m_info.mappedColors;
+    /* We need to determine which colors have been computed and which have
+     * changed.  If memory churn is a factor, this could be refactored to
+     * update the array instead. */
+    mappedColors = m_info.mappedColors = new Array(data.length);
+    indices = m_info.indices;
     for (i = 0; i < pixelData.length; i += 4) {
-      idx = m_pixelmapIndices[i / 4];
-      if (m_mappedColors[idx] === undefined) {
-        m_mappedColors[idx] = mapColorFunc(data[idx], idx) || {};
+      idx = indices[i / 4];
+      if (mappedColors[idx] === undefined) {
+        color = mapColorFunc(data[idx], idx) || {};
+        color = [
+          (color.r || 0) * 255,
+          (color.g || 0) * 255,
+          (color.b || 0) * 255,
+          color.a === undefined ? 255 : (color.a * 255)
+        ];
+        updateIdx[idx] = (
+          !oldColors || !oldColors[idx] ||
+          oldColors[idx][0] !== color[0] ||
+          oldColors[idx][1] !== color[1] ||
+          oldColors[idx][2] !== color[2] ||
+          oldColors[idx][3] !== color[3]);
+        mappedColors[idx] = color;
+        update = update || updateIdx[idx];
       }
-      color = m_mappedColors[idx] || {};
-      pixelData[i] = (color.r || 0) * 255;
-      pixelData[i + 1] = (color.g || 0) * 255;
-      pixelData[i + 2] = (color.b || 0) * 255;
-      pixelData[i + 3] = color.a === undefined ? 255 : (color.a * 255);
+      if (update && updateIdx[idx]) {
+        color = mappedColors[idx];
+        pixelData[i] = color[0];
+        pixelData[i + 1] = color[1];
+        pixelData[i + 2] = color[2];
+        pixelData[i + 3] = color[3];
+      }
     }
-    context.putImageData(imageData, 0, 0);
+    /* If nothing was updated, we are done */
+    if (!update) {
+      return;
+    }
+    m_info.context.putImageData(m_info.imageData, 0, 0);
 
-    var destImage = new Image();
-    destImage.src = canvas.toDataURL();
-    if (!m_quadFeature) {
-      m_quadFeature = m_this.layer().createFeature('quad', {
-        selectionAPI: false,
-        gcs: m_this.gcs(),
-        visible: m_this.visible()
-      });
-      m_this.dependentFeatures([m_quadFeature]);
+    if (m_info.destImage) {
+      m_info.destImage._ignore = true;
     }
-    m_quadFeature.style({image: destImage, position: m_this.style.get('position')});
-    m_quadFeature.data([{}]);
-    m_quadFeature.draw();
+    /* We have a local reference to the destination image so that we can cancel
+     * processing an old image if it is no longer wanted.  When using
+     * canvas.toBlob, image loading is asynchronous (whereas canvas.toDataURL
+     * is synchronous).  This has speed benefits, but means that two updates in
+     * a short time could be called where the older update is not desired. */
+    destImage = m_info.destImage = new Image();
+    var prev_onload = destImage.onload,
+        url;
+    destImage.onload = function () {
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+      if (destImage._ignore) {
+        return;
+      }
+      if (prev_onload) {
+        return prev_onload.apply(this, arguments);
+      }
+      if (!m_quadFeature) {
+        m_quadFeature = m_this.layer().createFeature('quad', {
+          selectionAPI: false,
+          gcs: m_this.gcs(),
+          visible: m_this.visible()
+        });
+        m_quadFeature.data([{}]);
+        m_this.dependentFeatures([m_quadFeature]);
+      }
+      m_quadFeature.style({image: destImage,
+                           position: m_this.style.get('position')})
+                   .data([{}])
+                   .draw();
+    };
+    /* Not all browsers support toBlob, so use toDataURL as a fallback */
+    if (m_info.canvas.toBlob) {
+      m_info.canvas.toBlob(function (blob) {
+        url = URL.createObjectURL(blob);
+        destImage.src = url;
+      });
+    } else {
+      destImage.src = m_info.canvas.toDataURL();
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
