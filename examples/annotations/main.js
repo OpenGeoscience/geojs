@@ -6,7 +6,7 @@ var annotationDebug = {};
 $(function () {
   'use strict';
 
-  var layer, fromButtonSelect;
+  var layer, fromButtonSelect, fromGeojsonUpdate;
 
   // get the query parameters and set controls appropriately
   var query = utils.getQuery();
@@ -16,25 +16,31 @@ $(function () {
     $('.annotationtype button').removeClass('lastused');
     $('.annotationtype button#' + query.lastannotation).addClass('lastused');
   }
+  // You can set the intiial annotations via a query parameter.  If the query
+  // parameter 'save=true' is specified, the query will be updated with the
+  // geojson.  This can become too long for some browsers.
+  var initialGeoJSON = query.geojson;
 
+  // respond to changes in our controls
   $('#controls').on('change', change_controls);
+  $('#geojson[type=textarea]').on('input propertychange', change_geojson);
   $('#controls').on('click', 'a', select_control);
   $('.annotationtype button').on('click', select_annotation);
   $('#editdialog').on('submit', edit_update);
 
   $('#controls').toggleClass('no-controls', query.controls === 'false');
 
+  // start the map near Fresno unless the query parameters say to do otherwise
   var map = geo.map({
     node: '#map',
     center: {
-      x: query.x ? +query.x : -119.5420833,
-      y: query.y ? +query.y : 37.4958333
+      x: query.x ? +query.x : -119.150,
+      y: query.y ? +query.y : 36.712
     },
-    zoom: query.zoom ? +query.zoom : 8,
+    zoom: query.zoom ? +query.zoom : 10,
     rotation: query.rotation ? +query.rotation * Math.PI / 180 : 0
   });
-  // allow some query parameters without controls to specify what map we will
-  // show
+  // allow some query parameters to specify what map we will show
   if (query.map !== 'false') {
     if (query.map !== 'satellite') {
       annotationDebug.mapLayer = map.createLayer('osm');
@@ -52,6 +58,7 @@ $(function () {
   layer.geoOn(geo.event.mouseclick, mouseClickToStart);
   layer.geoOn(geo.event.annotation.mode, handleModeChange);
   layer.geoOn(geo.event.annotation.add, handleAnnotationChange);
+  layer.geoOn(geo.event.annotation.update, handleAnnotationChange);
   layer.geoOn(geo.event.annotation.remove, handleAnnotationChange);
   layer.geoOn(geo.event.annotation.state, handleAnnotationChange);
 
@@ -67,13 +74,18 @@ $(function () {
     }
   }
 
+  // if we have geojson as a query parameter, populate our annotations
+  if (initialGeoJSON) {
+    layer.geojson(initialGeoJSON, true);
+  }
+
   // expose some internal parameters so you can examine them from the console
   annotationDebug.map = map;
   annotationDebug.layer = layer;
   annotationDebug.query = query;
 
   /**
-   * When the mouse is clicked, switch adding an annotation if appropriate.
+   * When the mouse is clicked, switch to adding an annotation if appropriate.
    *
    * @param {geo.event} evt geojs event.
    */
@@ -115,7 +127,30 @@ $(function () {
         value === ctl.attr('placeholder'))) {
       delete query[param];
     }
+    // update our query parameters, os when you reload the page it is in the
+    // same state
     utils.setQuery(query);
+  }
+
+  /**
+   * Handle changes to the geojson.
+   *
+   * @param evt jquery evt that triggered this call.
+   */
+  function change_geojson(evt) {
+    var ctl = $(evt.target),
+        value = ctl.val();
+    // when we update the geojson from the textarea control, raise a flag so we
+    // (a) ignore bad geojson, and (b) don't replace the user's geojson with
+    // the auto-generated geojson
+    fromGeojsonUpdate = true;
+    var result = layer.geojson(value, 'update');
+    if (query.save && result !== undefined) {
+      var geojson = layer.geojson();
+      query.geojson = geojson ? JSON.stringify(geojson) : undefined;
+      utils.setQuery(query);
+    }
+    fromGeojsonUpdate = false;
   }
 
   /**
@@ -208,6 +243,15 @@ $(function () {
     });
     $('#annotationheader').css(
         'display', $('#annotationlist .entry').length <= 1 ? 'none' : 'block');
+    if (!fromGeojsonUpdate) {
+      // update the geojson textarea
+      var geojson = layer.geojson();
+      $('#geojson').val(geojson ? JSON.stringify(geojson, undefined, 2) : '');
+      if (query.save) {
+        query.geojson = geojson ? JSON.stringify(geojson) : undefined;
+        utils.setQuery(query);
+      }
+    }
   }
 
   /**
@@ -255,25 +299,24 @@ $(function () {
     dlg.attr('annotation-id', id);
     dlg.attr('annotation-type', type);
     $('[option="name"]', dlg).val(annotation.name());
+    // populate each control with the current value of the annotation
     $('.form-group[annotation-types]').each(function () {
       var ctl = $(this),
           key = $('[option]', ctl).attr('option'),
           format = $('[option]', ctl).attr('format'),
           value;
       if (!ctl.attr('annotation-types').match(typeMatch)) {
+        // if a property doesn't exist for the current annotation's type, hide
+        // the control
+        ctl.hide();
         return;
       }
+      ctl.show();
       value = opt.style[key];
       switch (format) {
         case 'color':
-          value = geo.util.convertColor(value);
-          if (!value.r && !value.g && !value.b) {
-            value = '#000000';
-          } else {
-            value = '#' + ((1 << 24) + (Math.round(value.r * 255) << 16) +
-                           (Math.round(value.g * 255) << 8) +
-                            Math.round(value.b * 255)).toString(16).slice(1);
-          }
+          // always show colors as hex values
+          value = geo.util.convertColorToHex(value);
           break;
       }
       $('[option]', ctl).val('' + value);
@@ -299,6 +342,7 @@ $(function () {
         error,
         newopt = {};
 
+    // validate form values
     $('.form-group[annotation-types]').each(function () {
       var ctl = $(this),
           key = $('[option]', ctl).attr('option'),
@@ -306,28 +350,13 @@ $(function () {
       if (!ctl.attr('annotation-types').match(typeMatch)) {
         return;
       }
-      value = $('[option]', ctl).val();
-      switch ($('[option]', ctl).attr('format')) {
-        case 'boolean':
-          value = ('' + value).toLowerCase() === 'true';
-          break;
-        case 'color':
-          value = geo.util.convertColor(value);
-          break;
-        case 'opacity':
-          value = +value;
-          if (value < 0 || value > 1 || isNaN(value)) {
-            error = $('label', ctl).text() + ' must be a between 0 and 1, inclusive.';
-          }
-          break;
-        case 'positive':
-          value = +value;
-          if (value <= 0 || isNaN(value)) {
-            error = $('label', ctl).text() + ' must be a positive number.';
-          }
-          break;
+      value = layer.validateAttribute($('[option]', ctl).val(),
+                                      $('[option]', ctl).attr('format'));
+      if (value === undefined) {
+        error = $('label', ctl).text() + ' is not a valid value';
+      } else {
+        newopt[key] = value;
       }
-      newopt[key] = value;
     });
     if (error) {
       $('#edit-validation-error', dlg).text(error);
@@ -337,6 +366,7 @@ $(function () {
     annotation.options({style: newopt}).draw();
 
     dlg.modal('hide');
+    // refresh the annotation list
     handleAnnotationChange();
   }
 });

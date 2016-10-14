@@ -9703,7 +9703,7 @@
 	  contourFeature: __webpack_require__(218),
 	  domRenderer: __webpack_require__(219),
 	  event: __webpack_require__(9),
-	  feature: __webpack_require__(82),
+	  feature: __webpack_require__(201),
 	  featureLayer: __webpack_require__(211),
 	  fetchQueue: __webpack_require__(221),
 	  fileReader: __webpack_require__(222),
@@ -9713,10 +9713,10 @@
 	  imageTile: __webpack_require__(225),
 	  jsonReader: __webpack_require__(227),
 	  layer: __webpack_require__(205),
-	  lineFeature: __webpack_require__(81),
+	  lineFeature: __webpack_require__(200),
 	  map: __webpack_require__(228),
 	  mapInteractor: __webpack_require__(214),
-	  object: __webpack_require__(84),
+	  object: __webpack_require__(203),
 	  osmLayer: __webpack_require__(230),
 	  pathFeature: __webpack_require__(233),
 	  pointFeature: __webpack_require__(207),
@@ -9724,24 +9724,24 @@
 	  quadFeature: __webpack_require__(215),
 	  heatmapFeature: __webpack_require__(234),
 	  renderer: __webpack_require__(220),
-	  sceneObject: __webpack_require__(83),
+	  sceneObject: __webpack_require__(202),
 	  tile: __webpack_require__(226),
 	  tileCache: __webpack_require__(232),
 	  tileLayer: __webpack_require__(231),
-	  timestamp: __webpack_require__(199),
+	  timestamp: __webpack_require__(204),
 	  transform: __webpack_require__(10),
 	  vectorFeature: __webpack_require__(235),
 	  inherit: __webpack_require__(8),
 	  version: __webpack_require__(236),
 	  sha: __webpack_require__(237),
 	
-	  util: __webpack_require__(200),
+	  util: __webpack_require__(80),
 	  jQuery: $,
 	  d3: __webpack_require__(238),
 	  gl: __webpack_require__(250),
 	  canvas: __webpack_require__(263),
 	  gui: __webpack_require__(269)
-	}, __webpack_require__(80));
+	}, __webpack_require__(199));
 	
 	if (window && !window.$) {
 	  window.$ = $;
@@ -19622,8 +19622,9 @@
 	var inherit = __webpack_require__(8);
 	var geo_event = __webpack_require__(9);
 	var transform = __webpack_require__(10);
-	var registerAnnotation = __webpack_require__(80).registerAnnotation;
-	var lineFeature = __webpack_require__(81);
+	var util = __webpack_require__(80);
+	var registerAnnotation = __webpack_require__(199).registerAnnotation;
+	var lineFeature = __webpack_require__(200);
 	var pointFeature = __webpack_require__(207);
 	var polygonFeature = __webpack_require__(209);
 	
@@ -19763,6 +19764,16 @@
 	    } else {
 	      m_options[arg1] = arg2;
 	    }
+	    if (m_options.coordinates) {
+	      var coor = m_options.coordinates;
+	      delete m_options.coordinates;
+	      this._coordinates(coor);
+	    }
+	    if (m_options.name !== undefined) {
+	      var name = m_options.name;
+	      delete m_options.name;
+	      this.name(name);
+	    }
 	    this.modified();
 	    return this;
 	  };
@@ -19815,9 +19826,10 @@
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
+	   * @param {array} coordinates: an optional array of coordinates to set.
 	   * @returns {array} an array of coordinates.
 	   */
-	  this._coordinates = function () {
+	  this._coordinates = function (coordinates) {
 	    return [];
 	  };
 	
@@ -19837,8 +19849,8 @@
 	      if (gcs !== map.gcs()) {
 	        coord = transform.transformCoordinates(map.gcs(), gcs, coord);
 	      }
-	      return coord;
 	    }
+	    return coord;
 	  };
 	
 	  /**
@@ -19864,10 +19876,88 @@
 	  };
 	
 	  /**
-	   * TODO: return the annotation as a geojson object
+	   * Return a list of styles that should be preserved in a geojson
+	   * representation of the annotation.
+	   *
+	   * @return {array} a list of style names to store.
 	   */
-	  this.geojson = function () {
-	    return 'not implemented';
+	  this._geojsonStyles = function () {
+	    return ['fill', 'fillColor', 'fillOpacity', 'stroke', 'strokeColor',
+	            'strokeOpacity', 'strokeWidth'];
+	  };
+	
+	  /**
+	   * Return the coordinates to be stored in a geojson geometery object.
+	   *
+	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+	   *    null to use the map gcs, or any other transform.
+	   * @return {array} an array of flattened coordinates in the ingcs coordinate
+	   *    system.  Undefined if this annotation is incompelte.
+	   */
+	  this._geojsonCoordinates = function (gcs) {
+	  };
+	
+	  /**
+	   * Return the geometry type that is used to store this annotation in geojson.
+	   *
+	   * @return {string} a geojson geometry type.
+	   */
+	  this._geojsonGeometryType = function () {
+	  };
+	
+	  /**
+	   * Return the annotation as a geojson object.
+	   *
+	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+	   *    null to use the map gcs, or any other transform.
+	   * @param {boolean} includeCrs: if true, include the coordinate system.
+	   * @return {object} the annotation as a geojson object, or undefined if it
+	   *    should not be represented (for instance, while it is being created).
+	   */
+	  this.geojson = function (gcs, includeCrs) {
+	    var coor = this._geojsonCoordinates(gcs),
+	        geotype = this._geojsonGeometryType(),
+	        styles = this._geojsonStyles(),
+	        objStyle = this.options('style'),
+	        i, key, value;
+	    if (!coor || !coor.length || !geotype) {
+	      return;
+	    }
+	    var obj = {
+	      type: 'Feature',
+	      geometry: {
+	        type: geotype,
+	        coordinates: coor
+	      },
+	      properties: {
+	        annotationType: m_type,
+	        name: this.name(),
+	        annotationId: this.id()
+	      }
+	    };
+	    for (i = 0; i < styles.length; i += 1) {
+	      key = styles[i];
+	      value = util.ensureFunction(objStyle[key])();
+	      if (value !== undefined) {
+	        if (key.toLowerCase().match(/color$/)) {
+	          value = util.convertColorToHex(value);
+	        }
+	        obj.properties[key] = value;
+	      }
+	    }
+	    if (includeCrs) {
+	      var map = this.layer().map();
+	      gcs = (gcs === null ? map.gcs() : (
+	             gcs === undefined ? map.ingcs() : gcs));
+	      obj.crs = {
+	        type: 'name',
+	        properties: {
+	          type: 'proj4',
+	          name: gcs
+	        }
+	      };
+	    }
+	    return obj;
 	  };
 	};
 	
@@ -19905,6 +19995,8 @@
 	      uniformPolygon: true
 	    }
 	  }, args || {});
+	  args.corners = args.corners || args.coordinates;
+	  delete args.coordinates;
 	  annotation.call(this, 'rectangle', args);
 	
 	  /**
@@ -19926,10 +20018,46 @@
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
+	   * @param {array} coordinates: an optional array of coordinates to set.
 	   * @returns {array} an array of coordinates.
 	   */
-	  this._coordinates = function () {
+	  this._coordinates = function (coordinates) {
+	    if (coordinates && coordinates.length >= 4) {
+	      this.options('corners', coordinates.slice(0, 4));
+	      /* Should we ensure that the four points form a rectangle in the current
+	       * projection, though this might not be rectangular in another gcs? */
+	    }
 	    return this.options('corners');
+	  };
+	
+	  /**
+	   * Return the coordinates to be stored in a geojson geometery object.
+	   *
+	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+	   *    null to use the map gcs, or any other transform.
+	   * @return {array} an array of flattened coordinates in the ingcs coordinate
+	   *    system.  Undefined if this annotation is incompelte.
+	   */
+	  this._geojsonCoordinates = function (gcs) {
+	    var src = this.coordinates(gcs);
+	    if (!src || src.length < 4) {
+	      return;
+	    }
+	    var coor = [];
+	    for (var i = 0; i < 4; i += 1) {
+	      coor.push([src[i].x, src[i].y]);
+	    }
+	    coor.push([src[0].x, src[0].y]);
+	    return [coor];
+	  };
+	
+	  /**
+	   * Return the geometry type that is used to store this annotation in geojson.
+	   *
+	   * @return {string} a geojson geometry type.
+	   */
+	  this._geojsonGeometryType = function () {
+	    return 'Polygon';
 	  };
 	};
 	inherit(rectangleAnnotation, annotation);
@@ -19965,7 +20093,6 @@
 	  var m_this = this;
 	
 	  args = $.extend(true, {}, {
-	    vertices: [],
 	    style: {
 	      fill: true,
 	      fillColor: {r: 0, g: 1, b: 0},
@@ -19999,6 +20126,8 @@
 	      uniformPolygon: true
 	    }
 	  }, args || {});
+	  args.vertices = args.vertices || args.coordinates || [];
+	  delete args.coordinates;
 	  annotation.call(this, 'polygon', args);
 	
 	  /**
@@ -20048,9 +20177,13 @@
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
+	   * @param {array} coordinates: an optional array of coordinates to set.
 	   * @returns {array} an array of coordinates.
 	   */
-	  this._coordinates = function () {
+	  this._coordinates = function (coordinates) {
+	    if (coordinates) {
+	      this.options('vertices', coordinates);
+	    }
 	    return this.options('vertices');
 	  };
 	
@@ -20130,6 +20263,36 @@
 	    }
 	    return (end || !skip);
 	  };
+	
+	  /**
+	   * Return the coordinates to be stored in a geojson geometery object.
+	   *
+	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+	   *    null to use the map gcs, or any other transform.
+	   * @return {array} an array of flattened coordinates in the ingcs coordinate
+	   *    system.  Undefined if this annotation is incompelte.
+	   */
+	  this._geojsonCoordinates = function (gcs) {
+	    var src = this.coordinates(gcs);
+	    if (!src || src.length < 3 || this.state() === annotationState.create) {
+	      return;
+	    }
+	    var coor = [];
+	    for (var i = 0; i < src.length; i += 1) {
+	      coor.push([src[i].x, src[i].y]);
+	    }
+	    coor.push([src[0].x, src[0].y]);
+	    return [coor];
+	  };
+	
+	  /**
+	   * Return the geometry type that is used to store this annotation in geojson.
+	   *
+	   * @return {string} a geojson geometry type.
+	   */
+	  this._geojsonGeometryType = function () {
+	    return 'Polygon';
+	  };
 	};
 	inherit(polygonAnnotation, annotation);
 	
@@ -20167,6 +20330,8 @@
 	      strokeWidth: 3
 	    }
 	  }, args || {});
+	  args.position = args.position || (args.coordinates ? args.coordinates[0] : undefined);
+	  delete args.coordinates;
 	  annotation.call(this, 'point', args);
 	
 	  /**
@@ -20199,9 +20364,13 @@
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
+	   * @param {array} coordinates: an optional array of coordinates to set.
 	   * @returns {array} an array of coordinates.
 	   */
-	  this._coordinates = function () {
+	  this._coordinates = function (coordinates) {
+	    if (coordinates && coordinates.length >= 1) {
+	      this.options('position', coordinates[0]);
+	    }
 	    if (this.state() === annotationState.create) {
 	      return [];
 	    }
@@ -20228,6 +20397,42 @@
 	    this.options('position', evt.mapgcs);
 	    this.state(annotationState.done);
 	    return 'done';
+	  };
+	
+	  /**
+	   * Return a list of styles that should be preserved in a geojson
+	   * representation of the annotation.
+	   *
+	   * @return {array} a list of style names to store.
+	   */
+	  this._geojsonStyles = function () {
+	    return ['fill', 'fillColor', 'fillOpacity', 'radius', 'stroke',
+	            'strokeColor', 'strokeOpacity', 'strokeWidth'];
+	  };
+	
+	  /**
+	   * Return the coordinates to be stored in a geojson geometery object.
+	   *
+	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+	   *    null to use the map gcs, or any other transform.
+	   * @return {array} an array of flattened coordinates in the ingcs coordinate
+	   *    system.  Undefined if this annotation is incompelte.
+	   */
+	  this._geojsonCoordinates = function (gcs) {
+	    var src = this.coordinates(gcs);
+	    if (!src || this.state() === annotationState.create || src.length < 1 || src[0] === undefined) {
+	      return;
+	    }
+	    return [src[0].x, src[0].y];
+	  };
+	
+	  /**
+	   * Return the geometry type that is used to store this annotation in geojson.
+	   *
+	   * @return {string} a geojson geometry type.
+	   */
+	  this._geojsonGeometryType = function () {
+	    return 'Point';
 	  };
 	};
 	inherit(pointAnnotation, annotation);
@@ -20725,6 +20930,16 @@
 	 */
 	//////////////////////////////////////////////////////////////////////////////
 	geo_event.annotation.add_before = 'geo_annotation_add_before';
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Triggered when an annotation has been altered.  This is currently only
+	 * triggered when updating existing annotations via the geojson function.
+	 *
+	 * @property {geo.annotation} annotation The annotation that was altered.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	geo_event.annotation.update = 'geo_annotation_update';
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -27113,428 +27328,14 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(5);
-	var widgets = {
-	  dom: {}
-	};
-	var layers = {};
-	var layerDefaultFeatures = {};
-	var renderers = {};
-	var features = {};
-	var featureCapabilities = {};
-	var fileReaders = {};
-	var rendererLayerAdjustments = {};
-	var annotations = {};
-	var util = {};
 	
-	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Register a new file reader type
+	 * @module geo.util
 	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.registerFileReader = function (name, func) {
-	  fileReaders[name] = func;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create a new file reader
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.createFileReader = function (name, opts) {
-	  if (fileReaders.hasOwnProperty(name)) {
-	    return fileReaders[name](opts);
-	  }
-	  return null;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Register a new renderer type
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.registerRenderer = function (name, func) {
-	  renderers[name] = func;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create new instance of the renderer
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.createRenderer = function (name, layer, canvas, options) {
-	  if (renderers.hasOwnProperty(name)) {
-	    var ren = renderers[name](
-	      {layer: layer, canvas: canvas, options: options}
-	    );
-	    ren._init();
-	    return ren;
-	  }
-	  return null;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Check if the named renderer is supported.  If not, display a warning and get
-	 * the name of a fallback renderer.  Ideally, we would pass a list of desired
-	 * features, and, if the renderer is unavailable, this would choose a fallback
-	 * that would support those features.
-	 *
-	 * @params {string|null} name name of the desired renderer
-	 * @params {boolean} noFallback if true, don't recommend a fallback
-	 * @return {string|null|false} the name of the renderer that should be used
-	 *      or false if no valid renderer can be determined.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.checkRenderer = function (name, noFallback) {
-	  if (name === null) {
-	    return name;
-	  }
-	  if (renderers.hasOwnProperty(name)) {
-	    var ren = renderers[name];
-	    if (!ren.supported || ren.supported()) {
-	      return name;
-	    }
-	    if (!ren.fallback || noFallback) {
-	      return false;
-	    }
-	    var fallback = util.checkRenderer(ren.fallback(), true);
-	    if (fallback !== false) {
-	      console.warn(name + ' renderer is unavailable, using ' + fallback +
-	                   ' renderer instead');
-	    }
-	    return fallback;
-	  }
-	  return false;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Check if there is a renderer that is supported and supports a list of
-	 * features.  If not, display a warning.  This picks the first renderer that
-	 * supports all of the listed features.
-	 *
-	 * @param {array|undefined} featureList A list of features that will be used
-	 *      with this renderer.  Features are the basic feature names (e.g.,
-	 *      'quad'), or the feature name followed by a required capability (e.g.,
-	 *      'quad.image').  If more than one feature or more than one capability of
-	 *      a feature is required, include each feature and capability combination
-	 *      in the list (e.g., ['quad.image', 'plane']).  If no capability is
-	 *      specified for a feature (or that feature was registered without a
-	 *      capability object), then the feature will match regardless of
-	 *      capabilities.
-	 * @return {string|null|false} the name of the renderer that should be used
-	 *      or false if no valid renderer can be determined.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.rendererForFeatures = function (featureList) {
-	  var preferredRenderers = ['vgl', 'canvas', 'd3', null];
-	
-	  var renderer, ridx, feature, fidx, capability, available;
-	  for (ridx = 0; ridx < preferredRenderers.length; ridx += 1) {
-	    renderer = preferredRenderers[ridx];
-	    if (util.checkRenderer(renderer, true) === false) {
-	      continue;
-	    }
-	    if (!featureList) {
-	      return renderer;
-	    }
-	    if (!features[renderer]) {
-	      continue;
-	    }
-	    available = true;
-	    for (fidx = 0; fidx < featureList.length; fidx += 1) {
-	      feature = featureList[fidx];
-	      capability = null;
-	      if (feature.indexOf('.') >= 0) {
-	        capability = feature;
-	        feature = feature.substr(0, feature.indexOf('.'));
-	      }
-	      if (features[renderer][feature] === undefined) {
-	        available = false;
-	        break;
-	      }
-	      if (capability && featureCapabilities[renderer][feature] &&
-	          !featureCapabilities[renderer][feature][capability]) {
-	        available = false;
-	        break;
-	      }
-	    }
-	    if (available) {
-	      return renderer;
-	    }
-	  }
-	  console.warn('There is no renderer available for the feature list "' +
-	               (featureList || []).join(', ') + '".');
-	  return false;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Register a new feature type
-	 *
-	 * @param {string} category The feature category -- this is the renderer name.
-	 * @param {string} name The feature name
-	 * @param {function} func A function to call to create the feature.
-	 * @param {object|undefined} capabilities A map of capabilities that this
-	 *      feature supports.  If the feature is implemented with different
-	 *      capabilities in multiple categories (renderers), then the feature
-	 *      should expose a simple dictionary of supported and unsupported
-	 *      features.  For instance, the quad feature has color quads, image quads,
-	 *      and image quads that support full transformations.  The capabailities
-	 *      should be defined in the base feature in a capabilities object so that
-	 *      they can be referenced by that rather than an explicit string.
-	 * @returns {object} if this feature replaces an existing one, this was the
-	 *      feature that was replaced.  In this case, a warning is issued.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.registerFeature = function (category, name, func, capabilities) {
-	  if (!(category in features)) {
-	    features[category] = {};
-	    featureCapabilities[category] = {};
-	  }
-	
-	  var old = features[category][name];
-	  if (old) {
-	    console.warn('The ' + category + '.' + name + ' feature is already registered');
-	  }
-	  features[category][name] = func;
-	  featureCapabilities[category][name] = capabilities;
-	  return old;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create new instance of a feature
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.createFeature = function (name, layer, renderer, arg) {
-	  var category = renderer.api(),
-	      options = {'layer': layer, 'renderer': renderer};
-	  if (category in features && name in features[category]) {
-	    if (arg !== undefined) {
-	      $.extend(true, options, arg);
-	    }
-	    var feature = features[category][name](options);
-	    if (layer.gcs === undefined) {
-	      layer.gcs = function () {
-	        return layer.map().gcs();
-	      };
-	    }
-	    return feature;
-	  }
-	  return null;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Register a layer adjustment.
-	 *
-	 * @returns {object} if this layer adjustment replaces an existing one, this
-	 *      was the value that was replaced.  In this case, a warning is issued.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.registerLayerAdjustment = function (category, name, func) {
-	  if (!(category in rendererLayerAdjustments)) {
-	    rendererLayerAdjustments[category] = {};
-	  }
-	
-	  var old = rendererLayerAdjustments[category][name];
-	  if (old) {
-	    console.warn('The ' + category + '.' + name + ' layer adjustment is already registered');
-	  }
-	  rendererLayerAdjustments[category][name] = func;
-	  return old;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * If a layer needs to be adjusted based on the renderer, call the function
-	 * that adjusts it.
-	 *
-	 * @param {string} name Name of the layer.
-	 * @param {object} layer Instantiated layer object.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.adjustLayerForRenderer = function (name, layer) {
-	  var rendererName = layer.rendererName();
-	  if (rendererName) {
-	    if (rendererLayerAdjustments &&
-	        rendererLayerAdjustments[rendererName] &&
-	        rendererLayerAdjustments[rendererName][name]) {
-	      rendererLayerAdjustments[rendererName][name].apply(layer);
-	    }
-	  }
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Register a new layer type
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.registerLayer = function (name, func, defaultFeatures) {
-	  layers[name] = func;
-	  layerDefaultFeatures[name] = defaultFeatures;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create new instance of the layer
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.createLayer = function (name, map, arg) {
-	  /// Default renderer is vgl
-	  var options = {map: map},
-	      layer = null;
-	
-	  if (name in layers) {
-	    if (!arg.renderer && !arg.features && layerDefaultFeatures) {
-	      options.features = layerDefaultFeatures[name];
-	    }
-	    if (arg !== undefined) {
-	      $.extend(true, options, arg);
-	    }
-	    layer = layers[name](options);
-	    layer._init();
-	    return layer;
-	  } else {
-	    return null;
-	  }
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Register a new widget type
-	 *
-	 * @returns {object} if this widget replaces an existing one, this was the
-	 *      value that was replaced.  In this case, a warning is issued.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.registerWidget = function (category, name, func) {
-	  if (!(category in widgets)) {
-	    widgets[category] = {};
-	  }
-	
-	  var old = widgets[category][name];
-	  if (old) {
-	    console.warn('The ' + category + '.' + name + ' widget is already registered');
-	  }
-	  widgets[category][name] = func;
-	  return old;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create new instance of the widget
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.createWidget = function (name, layer, arg) {
-	  var options = {
-	    layer: layer
-	  };
-	
-	  if (name in widgets.dom) {
-	    if (arg !== undefined) {
-	      $.extend(true, options, arg);
-	    }
-	
-	    return widgets.dom[name](options);
-	  }
-	
-	  throw new Error('Cannot create unknown widget ' + name);
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Register a new annotation type
-	 *
-	 * @param {string} name The annotation name
-	 * @param {function} func A function to call to create the annotation.
-	 * @param {object|undefined} features A map of features that are used by this
-	 *      annotation.  Each key is a feature that is used.  If the value is true,
-	 *      the that feature is always needed.  If a list, then it is the set of
-	 *      annotation states for which that feature is required.  These can be
-	 *      used to pick an pparopriate renderer when creating an annotation layer.
-	 * @returns {object} if this annotation replaces an existing one, this was the
-	 *      value that was replaced.  In this case, a warning is issued.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.registerAnnotation = function (name, func, features) {
-	  var old = annotations[name];
-	  if (old) {
-	    console.warn('The ' + name + ' annotation is already registered');
-	  }
-	  annotations[name] = {func: func, features: features || {}};
-	  return old;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Get a list of registered annotation types.
-	 *
-	 * @return {array} a list of registered annotations.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.listAnnotations = function () {
-	  return Object.keys(annotations);
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Get a list of required features for a set of annotations.
-	 *
-	 * @param {array|object|undefined} annotationList A list of annotations that
-	 *   will be used.  Instead of a list, if this is an object, the keys are the
-	 *   annotation names, and the values are each a list of modes that will be
-	 *   used with that annotation.  For example, ['polygon', 'rectangle'] lists
-	 *   features required to show those annotations in any mode,  whereas
-	 *   {polygon: [annotationState.done], rectangle: [annotationState.done]} only
-	 *   lists features thatre are needed to show the completed annotations.
-	 * @return {array} a list of features needed for the specified annotations.
-	 *   There may be duplicates in the list.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.featuresForAnnotations = function (annotationList) {
-	  var features = [];
-	
-	  var annList = Array.isArray(annotationList) ? annotationList : Object.keys(annotationList);
-	  annList.forEach(function (ann) {
-	    if (!annotations[ann]) {
-	      return;
-	    }
-	    Object.keys(annotations[ann].features).forEach(function (feature) {
-	      if (Array.isArray(annotationList) || annotationList[ann] === true ||
-	          !Array.isArray(annotations[ann].features[feature])) {
-	        features.push(feature);
-	      } else {
-	        annotationList[ann].forEach(function (state) {
-	          if ($.inArray(state, annotations[ann].features[feature]) >= 0) {
-	            features.push(feature);
-	          }
-	        });
-	      }
-	    });
-	  });
-	  return features;
-	};
-	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Check if there is a renderer that is supported and supports a list of
-	 * annotations.  If not, display a warning.  This generates a list of required
-	 * features, then picks the first renderer that supports all of thse features.
-	 *
-	 * @param {array|object|undefined} annotationList A list of annotations that
-	 *   will be used with this renderer.  Instead of a list, if this is an object,
-	 *   the keys are the annotation names, and the values are each a list of modes
-	 *   that will be used with that annotation.  See featuresForAnnotations for
-	 *   more details.
-	 * @return {string|null|false} the name of the renderer that should be used or
-	 *   false if no valid renderer can be determined.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	util.rendererForAnnotations = function (annotationList) {
-	  return util.rendererForFeatures(util.featuresForAnnotations(annotationList));
-	};
+	var util = __webpack_require__(81);
+	$.extend(util, __webpack_require__(82));
+	util.DistanceGrid = __webpack_require__(83);
+	util.ClusterGroup = __webpack_require__(84);
 	
 	module.exports = util;
 
@@ -27543,1271 +27344,1457 @@
 /* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(82);
 	
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create a new instance of class lineFeature
-	 *
-	 * @class geo.lineFeature
-	 * @extends geo.feature
-	 * @returns {geo.lineFeature}
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var lineFeature = function (arg) {
+	(function () {
 	  'use strict';
-	  if (!(this instanceof lineFeature)) {
-	    return new lineFeature(arg);
-	  }
 	
 	  var $ = __webpack_require__(5);
+	  var geo = {util: {}};
+	  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	
-	  arg = arg || {};
-	  feature.call(this, arg);
+	  var m_timingData = {},
+	      m_timingKeepRecent = 200,
+	      m_threshold = 15,
+	      m_originalRequestAnimationFrame;
 	
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
+	   * Takes a variable number of arguments and returns the first numeric value
+	   * it finds.
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  var m_this = this,
-	      s_init = this._init;
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set line accessor
-	   *
-	   * @returns {geo.pointFeature}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.line = function (val) {
-	    if (val === undefined) {
-	      return m_this.style('line');
-	    } else {
-	      m_this.style('line', val);
-	      m_this.dataTime().modified();
-	      m_this.modified();
+	  function setNumeric() {
+	    var i;
+	    for (i = 0; i < arguments.length; i += 1) {
+	      if (isFinite(arguments[i])) {
+	        return arguments[i];
+	      }
 	    }
-	    return m_this;
-	  };
+	  }
 	
-	  ////////////////////////////////////////////////////////////////////////////
+	  //////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get/Set position accessor
-	   *
-	   * @returns {geo.pointFeature}
+	   * Contains utility classes and methods used by geojs.
+	   * @namespace
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.position = function (val) {
-	    if (val === undefined) {
-	      return m_this.style('position');
-	    } else {
-	      m_this.style('position', val);
-	      m_this.dataTime().modified();
-	      m_this.modified();
-	    }
-	    return m_this;
-	  };
+	  //////////////////////////////////////////////////////////////////////////////
+	  geo.util = {
+	    /**
+	     * Returns true if the given point lies in the given polygon.
+	     * Algorithm description:
+	     *   http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+	     * @param {geo.screenPosition} point The test point
+	     * @param {geo.screenPosition[]} outer The outer boundary of the polygon
+	     * @param {geo.screenPosition[][]} [inner] Inner boundaries (holes)
+	     * @param {Object} [range] If specified, range.min.x, range.min.y,
+	     *   range.max.x, and range.max.y specified the extents of the outer
+	     *   polygon and are used for early detection.
+	     * @returns {boolean} true if the point is inside the polygon.
+	     */
+	    pointInPolygon: function (point, outer, inner, range) {
+	      var inside = false, n = outer.length, i, j;
 	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Returns an array of datum indices that contain the given point.
-	   * This is a slow implementation with runtime order of the number of
-	   * vertices.  A point is considered on a line segment if it is close to the
-	   * line or either end point.  Closeness is based on the maximum width of the
-	   * line segement, and is ceil(maxwidth / 2) + 2 pixels.  This means that
-	   * corner extensions due to mitering may be outside of the selection area and
-	   * that variable width lines will have a greater selection region than their
-	   * visual size at the narrow end.
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.pointSearch = function (p) {
-	    var data, pt, line, width, indices = [], found = [], pos;
-	    data = m_this.data();
-	    if (!data || !data.length) {
-	      return {
-	        found: [],
-	        index: []
-	      };
-	    }
-	
-	    line = m_this.line();
-	    width = m_this.style.get('strokeWidth');
-	    pos = m_this.position();
-	    pt = m_this.featureGcsToDisplay(p);
-	
-	    // minimum l2 distance squared from
-	    // q -> line(u, v)
-	    function lineDist2(q, u, v) {
-	      var t, l2 = dist2(u, v);
-	
-	      if (l2 < 1) {
-	        // u, v are within 1 pixel
-	        return dist2(q, u);
+	      if (range && range.min && range.max) {
+	        if (point.x < range.min.x || point.y < range.min.y ||
+	            point.x > range.max.x || point.y > range.max.y) {
+	          return;
+	        }
 	      }
 	
-	      t = ((q.x - u.x) * (v.x - u.x) + (q.y - u.y) * (v.y - u.y)) / l2;
-	      if (t < 0) { return dist2(q, u); }
-	      if (t > 1) { return dist2(q, v); }
-	      return dist2(
-	        q,
-	        {
-	          x: u.x + t * (v.x - u.x),
-	          y: u.y + t * (v.y - u.y)
+	      if (n < 3) {
+	        // we need 3 coordinates for this to make sense
+	        return false;
+	      }
+	
+	      for (i = 0, j = n - 1; i < n; j = i, i += 1) {
+	        if (((outer[i].y > point.y) !== (outer[j].y > point.y)) &&
+	            (point.x < (outer[j].x - outer[i].x) *
+	            (point.y - outer[i].y) / (outer[j].y - outer[i].y) + outer[i].x)) {
+	          inside = !inside;
 	        }
-	      );
-	    }
+	      }
 	
-	    // l2 distance squared from u to v
-	    function dist2(u, v) {
-	      var dx = u.x - v.x,
-	          dy = u.y - v.y;
-	      return dx * dx + dy * dy;
-	    }
+	      if (inner && inside) {
+	        (inner || []).forEach(function (hole) {
+	          inside = inside && !geo.util.pointInPolygon(point, hole);
+	        });
+	      }
 	
-	    // for each line
-	    data.forEach(function (d, index) {
-	      var closed = m_this.style.get('closed')(d, index),
-	          last, lastr, first;
+	      return inside;
+	    },
 	
-	      try {
-	        line(d, index).forEach(function (current, j) {
+	    /**
+	     * Returns true if the argument is a function.
+	     */
+	    isFunction: function (f) {
+	      return typeof f === 'function';
+	    },
 	
-	          // get the screen coordinates of the current point
-	          var p = pos(current, j, d, index);
-	          var s = m_this.featureGcsToDisplay(p);
-	          var r = Math.ceil(width(p, j, d, index) / 2) + 2;
+	    /**
+	     * Returns the argument if it is function, otherwise returns a function
+	     * that returns the argument.
+	     */
+	    ensureFunction: function (f) {
+	      if (geo.util.isFunction(f)) {
+	        return f;
+	      } else {
+	        return function () { return f; };
+	      }
+	    },
 	
-	          if (last) {
-	            var r2 = lastr > r ? lastr * lastr : r * r;
-	            // test the line segment s -> last
-	            if (lineDist2(pt, s, last) <= r2) {
-	              // short circuit the loop here
-	              throw 'found';
+	    /**
+	     * Return a random string of length n || 8.
+	     */
+	    randomString: function (n) {
+	      var s, i, r;
+	      n = n || 8;
+	      s = '';
+	      for (i = 0; i < n; i += 1) {
+	        r = Math.floor(Math.random() * chars.length);
+	        s += chars.substring(r, r + 1);
+	      }
+	      return s;
+	    },
+	
+	    /**
+	     * Convert a color from hex value or css name to rgb objects
+	     */
+	    convertColor: function (color) {
+	      if (color.r !== undefined && color.g !== undefined &&
+	          color.b !== undefined) {
+	        return color;
+	      }
+	      if (typeof color === 'string') {
+	        if (geo.util.cssColors.hasOwnProperty(color)) {
+	          color = geo.util.cssColors[color];
+	        } else if (color.charAt(0) === '#') {
+	          if (color.length === 4) {
+	            /* interpret values of the form #rgb as #rrggbb */
+	            color = parseInt(color.slice(1), 16);
+	            color = (color & 0xf00) * 0x1100 + (color & 0xf0) * 0x110 + (color & 0xf) * 0x11;
+	          } else {
+	            color = parseInt(color.slice(1), 16);
+	          }
+	        }
+	      }
+	      if (isFinite(color)) {
+	        color = {
+	          r: ((color & 0xff0000) >> 16) / 255,
+	          g: ((color & 0xff00) >> 8) / 255,
+	          b: ((color & 0xff)) / 255
+	        };
+	      }
+	      return color;
+	    },
+	
+	    /**
+	     * Convert a color to a six digit hex value prefixed with #.
+	     */
+	    convertColorToHex: function (color) {
+	      var value = geo.util.convertColor(color);
+	      if (!value.r && !value.g && !value.b) {
+	        value = '#000000';
+	      } else {
+	        value = '#' + ((1 << 24) + (Math.round(value.r * 255) << 16) +
+	                       (Math.round(value.g * 255) << 8) +
+	                        Math.round(value.b * 255)).toString(16).slice(1);
+	      }
+	      return value;
+	    },
+	
+	    /**
+	     * Normalize a coordinate object into {x: ..., y: ..., z: ... } form.
+	     * Accepts 2-3d arrays,
+	     * latitude -> lat -> y
+	     * longitude -> lon -> lng -> x
+	     */
+	    normalizeCoordinates: function (p) {
+	      p = p || {};
+	      if (Array.isArray(p)) {
+	        return {
+	          x: p[0],
+	          y: p[1],
+	          z: p[2] || 0
+	        };
+	      }
+	      return {
+	        x: setNumeric(
+	          p.x,
+	          p.longitude,
+	          p.lng,
+	          p.lon,
+	          0
+	        ),
+	        y: setNumeric(
+	          p.y,
+	          p.latitude,
+	          p.lat,
+	          0
+	        ),
+	        z: setNumeric(
+	          p.z,
+	          p.elevation,
+	          p.elev,
+	          p.height,
+	          0
+	        )
+	      };
+	    },
+	
+	    /**
+	     * Radius of the earth in meters, from the equatorial radius of SRID 4326.
+	     */
+	    radiusEarth: 6378137,
+	
+	    /**
+	     * Linearly combine two "coordinate-like" objects in a uniform way.
+	     * Coordinate like objects have ``x``, ``y``, and optionally a ``z``
+	     * key.  The first object is mutated.
+	     *
+	     *   a <= ca * a + cb * b
+	     *
+	     * @param {number} ca
+	     * @param {object} a
+	     * @param {number} [a.x=0]
+	     * @param {number} [a.y=0]
+	     * @param {number} [a.z=0]
+	     * @param {number} cb
+	     * @param {object} b
+	     * @param {number} [b.x=0]
+	     * @param {number} [b.y=0]
+	     * @param {number} [b.z=0]
+	     * @returns {object} ca * a + cb * b
+	     */
+	    lincomb: function (ca, a, cb, b) {
+	      a.x = ca * (a.x || 0) + cb * (b.x || 0);
+	      a.y = ca * (a.y || 0) + cb * (b.y || 0);
+	      a.z = ca * (a.x || 0) + cb * (b.x || 0);
+	      return a;
+	    },
+	
+	    /**
+	     * Element-wise product of two coordinate-like object.  Mutates
+	     * the first object.  Note the default values for ``b``, which
+	     * are intended to used as a anisotropic scaling factors.
+	     *
+	     *   a <= a * b^pow
+	     *
+	     * @param {object} a
+	     * @param {number} [a.x=0]
+	     * @param {number} [a.y=0]
+	     * @param {number} [a.z=0]
+	     * @param {object} b
+	     * @param {number} [b.x=1]
+	     * @param {number} [b.y=1]
+	     * @param {number} [b.z=1]
+	     * @param {number} [pow=1]
+	     * @returns {object} a * b^pow
+	     */
+	    scale: function (a, b, pow) {
+	      a.x = (a.x || 0) * Math.pow(b.x || 1, pow);
+	      a.y = (a.y || 0) * Math.pow(b.y || 1, pow);
+	      a.z = (a.z || 0) * Math.pow(b.z || 1, pow);
+	      return a;
+	    },
+	
+	    /**
+	     * Compare two arrays and return if their contents are equal.
+	     * @param {array} a1 first array to compare
+	     * @param {array} a2 second array to compare
+	     * @returns {boolean} true if the contents of the arrays are equal.
+	     */
+	    compareArrays: function (a1, a2) {
+	      return (a1.length === a2.length && a1.every(function (el, idx) {
+	        return el === a2[idx];
+	      }));
+	    },
+	
+	    /**
+	     * Create a vec3 that is always an array.  This should only be used if it
+	     * will not be used in a WebGL context.  Plain arrays usually use 64-bit
+	     * float values, whereas vec3 defaults to 32-bit floats.
+	     *
+	     * @returns {Array} zeroed-out vec3 compatible array.
+	     */
+	    vec3AsArray: function () {
+	      return [0, 0, 0];
+	    },
+	
+	    /**
+	     * Create a mat4 that is always an array.  This should only be used if it
+	     * will not be used in a WebGL context.  Plain arrays usually use 64-bit
+	     * float values, whereas mat4 defaults to 32-bit floats.
+	     *
+	     * @returns {Array} identity mat4 compatible array.
+	     */
+	    mat4AsArray: function () {
+	      return [
+	        1, 0, 0, 0,
+	        0, 1, 0, 0,
+	        0, 0, 1, 0,
+	        0, 0, 0, 1
+	      ];
+	    },
+	
+	    /**
+	     * Get a buffer for a vgl geometry source.  If a buffer already exists and
+	     * is the correct size, return it.  Otherwise, allocate a new buffer; any
+	     * data in an old buffer is discarded.
+	     *
+	     * @param geom: the geometry to reference and modify.
+	     * @param srcName: the name of the source.
+	     * @param len: the number of elements for the array.
+	     * @returns {Float32Array}
+	     */
+	    getGeomBuffer: function (geom, srcName, len) {
+	      var src = geom.sourceByName(srcName), data;
+	
+	      data = src.data();
+	      if (data instanceof Float32Array && data.length === len) {
+	        return data;
+	      }
+	      data = new Float32Array(len);
+	      src.setData(data);
+	      return data;
+	    },
+	
+	    /**
+	     * Ensure that the input and modifiers properties of all actions are
+	     * objects, not plain strings.
+	     *
+	     * @param {Array} actions: an array of actions to adjust as needed.
+	     */
+	    adjustActions: function (actions) {
+	      var action, i;
+	      for (i = 0; i < actions.length; i += 1) {
+	        action = actions[i];
+	        if ($.type(action.input) === 'string') {
+	          var actionEvents = {};
+	          actionEvents[action.input] = true;
+	          action.input = actionEvents;
+	        }
+	        if (!action.modifiers) {
+	          action.modifiers = {};
+	        }
+	        if ($.type(action.modifiers) === 'string') {
+	          var actionModifiers = {};
+	          actionModifiers[action.modifiers] = true;
+	          action.modifiers = actionModifiers;
+	        }
+	      }
+	    },
+	
+	    /**
+	     * Add an action to the list of handled actions.
+	     *
+	     * @param {Array} actions: an array of actions to adjust as needed.
+	     * @param {object} action: an object defining the action.  This must have
+	     *    action and event properties, and may have modifiers, name, and owner.
+	     *    Use action, name, and owner to make this entry distinct if it will
+	     *    need to be removed later.
+	     * @param {boolean} toEnd: the action is added at the beginning of the
+	     *    actions list unless toEnd is true.  Earlier actions prevent later
+	     *    actions with the similar input and modifiers.
+	     */
+	    addAction: function (actions, action, toEnd) {
+	      if (toEnd) {
+	        actions.push(action);
+	      } else {
+	        actions.unshift(action);
+	      }
+	      geo.util.adjustActions(actions);
+	    },
+	
+	    /**
+	     * Check if an action is in the actions list.  An action matches if the
+	     * action, name, and owner match.  A null or undefined value will match all
+	     * actions.  If using an action object, this is the same as passing
+	     * (action.action, action.name, action.owner).
+	     *
+	     * @param {Array} actions: an array of actions to search.
+	     * @param {object|string} action Either an action object or the name of an
+	     *    action.
+	     * @param {string} name Optional name associated with the action.
+	     * @param {string} owner Optional owner associated with the action.
+	     * @return action the first matching action or null.
+	     */
+	    hasAction: function (actions, action, name, owner) {
+	      if (action && action.action) {
+	        name = action.name;
+	        owner = action.owner;
+	        action = action.action;
+	      }
+	      for (var i = 0; i < actions.length; i += 1) {
+	        if ((!action || actions[i].action === action) &&
+	            (!name || actions[i].name === name) &&
+	            (!owner || actions[i].owner === owner)) {
+	          return actions[i];
+	        }
+	      }
+	      return null;
+	    },
+	
+	    /**
+	     * Remove all matching actions.  Actions are matched as with hasAction.
+	     *
+	     * @param {Array} actions: an array of actions to adjust as needed.
+	     * @param {object|string} action Either an action object or the name of an
+	     *    action.
+	     * @param {string} name Optional name associated with the action.
+	     * @param {string} owner Optional owner associated with the action.
+	     * @return numRemoved the number of actions that were removed.
+	     */
+	    removeAction: function (actions, action, name, owner) {
+	      var found, removed = 0;
+	
+	      do {
+	        found = geo.util.hasAction(actions, action, name, owner);
+	        if (found) {
+	          actions.splice($.inArray(found, actions), 1);
+	          removed += 1;
+	        }
+	      } while (found);
+	      return removed;
+	    },
+	
+	    /**
+	     * Determine if the current inputs and modifiers match a known action.
+	     *
+	     * @param {object} inputs: an object where each input that is currently
+	     *    active is truthy.  Common inputs are left, right, middle, wheel.
+	     * @param {object} modifiers: an object where each currently applied
+	     *    modifier is truthy.  Common modifiers are shift, ctrl, alt, meta.
+	     * @param {Array} actions: a list of actions to compare to the inputs and
+	     *    modifiers.  The first action that matches will be returned.
+	     * @returns {object} action A matching action or undefined.
+	     */
+	    actionMatch: function (inputs, modifiers, actions) {
+	      var matched;
+	
+	      /* actions must have already been processed by adjustActions */
+	      if (actions.some(function (action) {
+	        for (var input in action.input) {
+	          if (action.input.hasOwnProperty(input)) {
+	            if ((action.input[input] === false && inputs[input]) ||
+	                (action.input[input] && !inputs[input])) {
+	              return false;
 	            }
 	          }
-	
-	          last = s;
-	          lastr = r;
-	          if (!first && closed) {
-	            first = {s: s, r: r};
+	        }
+	        for (var modifier in action.modifiers) {
+	          if (action.modifiers.hasOwnProperty(modifier)) {
+	            if ((action.modifiers[modifier] === false && modifiers[modifier]) ||
+	                (action.modifiers[modifier] && !modifiers[modifier])) {
+	              return false;
+	            }
 	          }
-	        });
-	        if (closed && lineDist2(pt, last, first.s) <= first.r) {
-	          throw 'found';
 	        }
-	      } catch (err) {
-	        if (err !== 'found') {
-	          throw err;
-	        }
-	        found.push(d);
-	        indices.push(index);
+	        matched = action;
+	        return true;
+	      })) {
+	        return matched;
 	      }
-	    });
+	    },
 	
-	    return {
-	      found: found,
-	      index: indices
-	    };
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Returns an array of line indices that are contained in the given box.
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.boxSearch = function (lowerLeft, upperRight, opts) {
-	    var pos = m_this.position(),
-	        idx = [],
-	        line = m_this.line();
-	
-	    opts = opts || {};
-	    opts.partial = opts.partial || false;
-	    if (opts.partial) {
-	      throw new Error('Unimplemented query method.');
-	    }
-	
-	    m_this.data().forEach(function (d, i) {
-	      var inside = true;
-	      line(d, i).forEach(function (e, j) {
-	        if (!inside) { return; }
-	        var p = pos(e, j, d, i);
-	        if (!(p.x >= lowerLeft.x &&
-	              p.x <= upperRight.x &&
-	              p.y >= lowerLeft.y &&
-	              p.y <= upperRight.y)
-	        ) {
-	          inside = false;
+	    /**
+	     * Report on one or all of the tracked timings.
+	     *
+	     * @param {string} name name to report on, or undefined to report all.
+	     */
+	    timeReport: function (name) {
+	      $.each(m_timingData, function (key, item) {
+	        /* calculate the standard deviation of each item. */
+	        if (item.count) {
+	          item.stddev = Math.sqrt(Math.abs((
+	            item.sum2 - item.sum * item.sum / item.count) / item.count));
+	          item.average = item.sum / item.count;
+	        } else {
+	          item.stddev = 0;
+	          item.average = 0;
 	        }
 	      });
-	      if (inside) {
-	        idx.push(i);
+	      if (name) {
+	        return m_timingData[name];
 	      }
-	    });
-	    return idx;
+	      return m_timingData;
+	    },
+	
+	    /**
+	     * Note the start time of a function (or any other section of code).  This
+	     * should be paired with timeFunctionStop, which will collect statistics on
+	     * the amount of time spent in a function.
+	     *
+	     * @param {string} name name to use for tracking the timing.
+	     * @param {boolean} reset if true, clear old tracking data.
+	     */
+	    timeFunctionStart: function (name, reset) {
+	      if (!m_timingData[name] || reset) {
+	        m_timingData[name] = {
+	          count: 0, sum: 0, sum2: 0, max: 0, recent: []
+	        };
+	      }
+	      m_timingData[name].start = window.performance.now();
+	    },
+	
+	    /**
+	     * Note the stop time of a function (or any other section of code).  This
+	     * should be paired with timeFunctionStart.
+	     *
+	     * @param {string} name name to use for tracking the timing.
+	     */
+	    timeFunctionStop: function (name) {
+	      if (!m_timingData[name] || !m_timingData[name].start) {
+	        return;
+	      }
+	      var duration = window.performance.now() - m_timingData[name].start;
+	      m_timingData[name].start = null;
+	      m_timingData[name].sum += duration;
+	      m_timingData[name].sum2 += duration * duration;
+	      m_timingData[name].count += 1;
+	      m_timingData[name].max = Math.max(
+	        m_timingData[name].max, duration);
+	      m_timingData[name].recent.push(duration);
+	      if (m_timingData[name].recent.length > m_timingKeepRecent) {
+	        m_timingData[name].recent.splice(
+	            0, m_timingData[name].recent.length - m_timingKeepRecent);
+	      }
+	    },
+	
+	    /**
+	     * Start or stop tracking the time spent in requestAnimationFrame.  If
+	     * tracked, the results can be fetched via
+	     * timeFunctionReport('requestAnimationFrame').
+	     *
+	     * @param {boolean} stop falsy to start tracking, truthy to start tracking.
+	     * @param {boolean} reset if true, reset the statistics.
+	     * @param {number} threshold if present, set the threshold used in tracking
+	     *   slow callbacks.
+	     * @param {number} keep if present, set the number of recent frame times
+	     *   to track.
+	     */
+	    timeRequestAnimationFrame: function (stop, reset, threshold, keep) {
+	      if (!m_timingData.requestAnimationFrame || reset) {
+	        m_timingData.requestAnimationFrame = {
+	          count: 0, sum: 0, sum2: 0, max: 0, above_threshold: 0,
+	          recent: [], recentsub: []
+	        };
+	      }
+	      if (threshold) {
+	        m_threshold = threshold;
+	      }
+	      if (keep) {
+	        m_timingKeepRecent = keep;
+	      }
+	      if (stop && m_originalRequestAnimationFrame) {
+	        window.requestAnimationFrame = m_originalRequestAnimationFrame;
+	        m_originalRequestAnimationFrame = null;
+	      } else if (!stop && !m_originalRequestAnimationFrame) {
+	        m_originalRequestAnimationFrame = window.requestAnimationFrame;
+	        window.requestAnimationFrame = function (callback) {
+	          m_originalRequestAnimationFrame.call(window, function (timestamp) {
+	            var track = m_timingData.requestAnimationFrame, recent;
+	            /* Some environments have unsynchronized performance and time
+	             * counters.  The nowDelta factor compensates for this.  For
+	             * instance, our test enviornment has performance.now() values on
+	             * the order of ~3000 and timestamps approximating epoch. */
+	            if (track.timestamp !== timestamp) {
+	              track.nowDelta = window.performance.now() - timestamp;
+	              if (Math.abs(track.nowDelta) < 1000) {
+	                track.nowDelta = 0;
+	              }
+	              track.timestamp = timestamp;
+	              track.subcalls = track.subcalls || 0;
+	              track.start = {
+	                sum: track.sum,
+	                sum2: track.sum2,
+	                count: track.count,
+	                max: track.max,
+	                above_threshold: track.above_threshold
+	              };
+	              track.recent.push([0]);
+	              track.recentsub.push([]);
+	              if (track.recent.length > m_timingKeepRecent) {
+	                track.recent.splice(
+	                    0, track.recent.length - m_timingKeepRecent);
+	                track.recentsub.splice(
+	                    0, track.recentsub.length - m_timingKeepRecent);
+	              }
+	            }
+	            track.subcalls += 1;
+	            callback.apply(this, arguments);
+	            var duration = window.performance.now() - timestamp;
+	            duration -= track.nowDelta;
+	            track.sum = track.start.sum + duration;
+	            track.sum2 = track.start.sum2 + duration * duration;
+	            track.count = track.start.count + 1;
+	            track.max = Math.max(track.max, duration);
+	            track.above_threshold = track.start.above_threshold + (
+	              duration >= m_threshold ? 1 : 0);
+	            track.recent[track.recent.length - 1] = duration;
+	            recent = track.recentsub[track.recent.length - 1];
+	            recent.push({
+	              total_duration: duration,
+	              duration: duration - (recent.length ?
+	                recent[recent.length - 1].total_duration : 0),
+	              callback: callback.name || callback
+	            });
+	          });
+	        };
+	      }
+	    }
 	  };
 	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Initialize
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._init = function (arg) {
-	    arg = arg || {};
-	    s_init.call(m_this, arg);
-	
-	    var defaultStyle = $.extend(
-	      {},
-	      {
-	        strokeWidth: 1.0,
-	        // Default to gold color for lines
-	        strokeColor: { r: 1.0, g: 0.8431372549, b: 0.0 },
-	        strokeStyle: 'solid',
-	        strokeOpacity: 1.0,
-	        closed: false,
-	        line: function (d) { return d; },
-	        position: function (d) { return d; }
-	      },
-	      arg.style === undefined ? {} : arg.style
-	    );
-	
-	    if (arg.line !== undefined) {
-	      defaultStyle.line = arg.line;
-	    }
-	
-	    if (arg.position !== undefined) {
-	      defaultStyle.position = arg.position;
-	    }
-	
-	    m_this.style(defaultStyle);
-	
-	    m_this.dataTime().modified();
+	  geo.util.cssColors = {
+	    aliceblue: 0xf0f8ff,
+	    antiquewhite: 0xfaebd7,
+	    aqua: 0x00ffff,
+	    aquamarine: 0x7fffd4,
+	    azure: 0xf0ffff,
+	    beige: 0xf5f5dc,
+	    bisque: 0xffe4c4,
+	    black: 0x000000,
+	    blanchedalmond: 0xffebcd,
+	    blue: 0x0000ff,
+	    blueviolet: 0x8a2be2,
+	    brown: 0xa52a2a,
+	    burlywood: 0xdeb887,
+	    cadetblue: 0x5f9ea0,
+	    chartreuse: 0x7fff00,
+	    chocolate: 0xd2691e,
+	    coral: 0xff7f50,
+	    cornflowerblue: 0x6495ed,
+	    cornsilk: 0xfff8dc,
+	    crimson: 0xdc143c,
+	    cyan: 0x00ffff,
+	    darkblue: 0x00008b,
+	    darkcyan: 0x008b8b,
+	    darkgoldenrod: 0xb8860b,
+	    darkgray: 0xa9a9a9,
+	    darkgreen: 0x006400,
+	    darkgrey: 0xa9a9a9,
+	    darkkhaki: 0xbdb76b,
+	    darkmagenta: 0x8b008b,
+	    darkolivegreen: 0x556b2f,
+	    darkorange: 0xff8c00,
+	    darkorchid: 0x9932cc,
+	    darkred: 0x8b0000,
+	    darksalmon: 0xe9967a,
+	    darkseagreen: 0x8fbc8f,
+	    darkslateblue: 0x483d8b,
+	    darkslategray: 0x2f4f4f,
+	    darkslategrey: 0x2f4f4f,
+	    darkturquoise: 0x00ced1,
+	    darkviolet: 0x9400d3,
+	    deeppink: 0xff1493,
+	    deepskyblue: 0x00bfff,
+	    dimgray: 0x696969,
+	    dimgrey: 0x696969,
+	    dodgerblue: 0x1e90ff,
+	    firebrick: 0xb22222,
+	    floralwhite: 0xfffaf0,
+	    forestgreen: 0x228b22,
+	    fuchsia: 0xff00ff,
+	    gainsboro: 0xdcdcdc,
+	    ghostwhite: 0xf8f8ff,
+	    gold: 0xffd700,
+	    goldenrod: 0xdaa520,
+	    gray: 0x808080,
+	    green: 0x008000,
+	    greenyellow: 0xadff2f,
+	    grey: 0x808080,
+	    honeydew: 0xf0fff0,
+	    hotpink: 0xff69b4,
+	    indianred: 0xcd5c5c,
+	    indigo: 0x4b0082,
+	    ivory: 0xfffff0,
+	    khaki: 0xf0e68c,
+	    lavender: 0xe6e6fa,
+	    lavenderblush: 0xfff0f5,
+	    lawngreen: 0x7cfc00,
+	    lemonchiffon: 0xfffacd,
+	    lightblue: 0xadd8e6,
+	    lightcoral: 0xf08080,
+	    lightcyan: 0xe0ffff,
+	    lightgoldenrodyellow: 0xfafad2,
+	    lightgray: 0xd3d3d3,
+	    lightgreen: 0x90ee90,
+	    lightgrey: 0xd3d3d3,
+	    lightpink: 0xffb6c1,
+	    lightsalmon: 0xffa07a,
+	    lightseagreen: 0x20b2aa,
+	    lightskyblue: 0x87cefa,
+	    lightslategray: 0x778899,
+	    lightslategrey: 0x778899,
+	    lightsteelblue: 0xb0c4de,
+	    lightyellow: 0xffffe0,
+	    lime: 0x00ff00,
+	    limegreen: 0x32cd32,
+	    linen: 0xfaf0e6,
+	    magenta: 0xff00ff,
+	    maroon: 0x800000,
+	    mediumaquamarine: 0x66cdaa,
+	    mediumblue: 0x0000cd,
+	    mediumorchid: 0xba55d3,
+	    mediumpurple: 0x9370db,
+	    mediumseagreen: 0x3cb371,
+	    mediumslateblue: 0x7b68ee,
+	    mediumspringgreen: 0x00fa9a,
+	    mediumturquoise: 0x48d1cc,
+	    mediumvioletred: 0xc71585,
+	    midnightblue: 0x191970,
+	    mintcream: 0xf5fffa,
+	    mistyrose: 0xffe4e1,
+	    moccasin: 0xffe4b5,
+	    navajowhite: 0xffdead,
+	    navy: 0x000080,
+	    oldlace: 0xfdf5e6,
+	    olive: 0x808000,
+	    olivedrab: 0x6b8e23,
+	    orange: 0xffa500,
+	    orangered: 0xff4500,
+	    orchid: 0xda70d6,
+	    palegoldenrod: 0xeee8aa,
+	    palegreen: 0x98fb98,
+	    paleturquoise: 0xafeeee,
+	    palevioletred: 0xdb7093,
+	    papayawhip: 0xffefd5,
+	    peachpuff: 0xffdab9,
+	    peru: 0xcd853f,
+	    pink: 0xffc0cb,
+	    plum: 0xdda0dd,
+	    powderblue: 0xb0e0e6,
+	    purple: 0x800080,
+	    red: 0xff0000,
+	    rosybrown: 0xbc8f8f,
+	    royalblue: 0x4169e1,
+	    saddlebrown: 0x8b4513,
+	    salmon: 0xfa8072,
+	    sandybrown: 0xf4a460,
+	    seagreen: 0x2e8b57,
+	    seashell: 0xfff5ee,
+	    sienna: 0xa0522d,
+	    silver: 0xc0c0c0,
+	    skyblue: 0x87ceeb,
+	    slateblue: 0x6a5acd,
+	    slategray: 0x708090,
+	    slategrey: 0x708090,
+	    snow: 0xfffafa,
+	    springgreen: 0x00ff7f,
+	    steelblue: 0x4682b4,
+	    tan: 0xd2b48c,
+	    teal: 0x008080,
+	    thistle: 0xd8bfd8,
+	    tomato: 0xff6347,
+	    turquoise: 0x40e0d0,
+	    violet: 0xee82ee,
+	    wheat: 0xf5deb3,
+	    white: 0xffffff,
+	    whitesmoke: 0xf5f5f5,
+	    yellow: 0xffff00,
+	    yellowgreen: 0x9acd32
 	  };
 	
-	  this._init(arg);
-	  return this;
-	};
-	
-	/**
-	 * Create a lineFeature from an object.
-	 * @see {@link geo.feature.create}
-	 * @param {geo.layer} layer The layer to add the feature to
-	 * @param {geo.lineFeature.spec} spec The object specification
-	 * @returns {geo.lineFeature|null}
-	 */
-	lineFeature.create = function (layer, spec) {
-	  'use strict';
-	
-	  spec = spec || {};
-	  spec.type = 'line';
-	  return feature.create(layer, spec);
-	};
-	
-	lineFeature.capabilities = {
-	  /* core feature name -- support in any manner */
-	  feature: 'line',
-	  /* support for solid-colored, constant-width lines */
-	  basic: 'line.basic',
-	  /* support for lines that vary in width and color */
-	  multicolor: 'line.multicolor'
-	};
-	
-	inherit(lineFeature, feature);
-	module.exports = lineFeature;
+	  module.exports = geo.util;
+	}());
 
 
 /***/ },
 /* 82 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var $ = __webpack_require__(5);
-	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(83);
-	var timestamp = __webpack_require__(199);
-	var geo_event = __webpack_require__(9);
-	
-	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Create a new instance of class feature
+	 * @file
+	 * Based on the following jquery throttle / debounce plugin:
 	 *
-	 * @class geo.feature
-	 * @extends geo.sceneObject
-	 * @returns {geo.feature}
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var feature = function (arg) {
-	  'use strict';
-	  if (!(this instanceof feature)) {
-	    return new feature(arg);
-	  }
-	  sceneObject.call(this);
-	
-	  var util = __webpack_require__(200);
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * @private
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  arg = arg || {};
-	
-	  var m_this = this,
-	      s_exit = this._exit,
-	      m_selectionAPI = arg.selectionAPI === undefined ? false : arg.selectionAPI,
-	      m_style = {},
-	      m_layer = arg.layer === undefined ? null : arg.layer,
-	      m_gcs = arg.gcs,
-	      m_visible = arg.visible === undefined ? true : arg.visible,
-	      m_bin = arg.bin === undefined ? 0 : arg.bin,
-	      m_renderer = arg.renderer === undefined ? null : arg.renderer,
-	      m_dataTime = timestamp(),
-	      m_buildTime = timestamp(),
-	      m_updateTime = timestamp(),
-	      m_selectedFeatures = [];
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Private method to bind mouse handlers on the map element.
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._bindMouseHandlers = function () {
-	
-	    // Don't bind handlers for improved performance on features that don't
-	    // require it.
-	    if (!m_selectionAPI) {
-	      return;
-	    }
-	
-	    // First unbind to be sure that the handlers aren't bound twice.
-	    m_this._unbindMouseHandlers();
-	
-	    m_this.geoOn(geo_event.mousemove, m_this._handleMousemove);
-	    m_this.geoOn(geo_event.mouseclick, m_this._handleMouseclick);
-	    m_this.geoOn(geo_event.brushend, m_this._handleBrushend);
-	    m_this.geoOn(geo_event.brush, m_this._handleBrush);
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Private method to unbind mouse handlers on the map element.
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._unbindMouseHandlers = function () {
-	    m_this.geoOff(geo_event.mousemove, m_this._handleMousemove);
-	    m_this.geoOff(geo_event.mouseclick, m_this._handleMouseclick);
-	    m_this.geoOff(geo_event.brushend, m_this._handleBrushend);
-	    m_this.geoOff(geo_event.brush, m_this._handleBrush);
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * For binding mouse events, use functions with
-	   * the following call signatures:
-	   *
-	   * function handler(arg) {
-	   *   // arg.data - the data object of the feature
-	   *   // arg.index - the index inside the data array of the featue
-	   *   // arg.mouse - mouse information object (see src/core/mapInteractor.js)
-	   * }
-	   *
-	   * i.e.
-	   *
-	   * feature.geoOn(geo.event.feature.mousemove, function (arg) {
-	   *   // do something with the feature marker.
-	   * });
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Search for features containing the given point.
-	   *
-	   * Returns an object: ::
-	   *
-	   *   {
-	   *     data: [...] // an array of data objects for matching features
-	   *     index: [...] // an array of indices of the matching features
-	   *   }
-	   *
-	   * @argument {Object} coordinate
-	   * @returns {Object}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.pointSearch = function () {
-	    // base class method does nothing
-	    return {
-	      index: [],
-	      found: []
-	    };
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Private mousemove handler
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._handleMousemove = function () {
-	    var mouse = m_this.layer().map().interactor().mouse(),
-	        data = m_this.data(),
-	        over = m_this.pointSearch(mouse.geo),
-	        newFeatures = [], oldFeatures = [], lastTop = -1, top = -1;
-	
-	    // Get the index of the element that was previously on top
-	    if (m_selectedFeatures.length) {
-	      lastTop = m_selectedFeatures[m_selectedFeatures.length - 1];
-	    }
-	
-	    // There are probably faster ways of doing this:
-	    newFeatures = over.index.filter(function (i) {
-	      return m_selectedFeatures.indexOf(i) < 0;
-	    });
-	    oldFeatures = m_selectedFeatures.filter(function (i) {
-	      return over.index.indexOf(i) < 0;
-	    });
-	
-	    feature.eventID += 1;
-	    // Fire events for mouse in first.
-	    newFeatures.forEach(function (i, idx) {
-	      m_this.geoTrigger(geo_event.feature.mouseover, {
-	        data: data[i],
-	        index: i,
-	        mouse: mouse,
-	        eventID: feature.eventID,
-	        top: idx === newFeatures.length - 1
-	      }, true);
-	    });
-	
-	    feature.eventID += 1;
-	    // Fire events for mouse out next
-	    oldFeatures.forEach(function (i, idx) {
-	      m_this.geoTrigger(geo_event.feature.mouseout, {
-	        data: data[i],
-	        index: i,
-	        mouse: mouse,
-	        eventID: feature.eventID,
-	        top: idx === oldFeatures.length - 1
-	      }, true);
-	    });
-	
-	    feature.eventID += 1;
-	    // Fire events for mouse move last
-	    over.index.forEach(function (i, idx) {
-	      m_this.geoTrigger(geo_event.feature.mousemove, {
-	        data: data[i],
-	        index: i,
-	        mouse: mouse,
-	        eventID: feature.eventID,
-	        top: idx === over.index.length - 1
-	      }, true);
-	    });
-	
-	    // Replace the selected features array
-	    m_selectedFeatures = over.index;
-	
-	    // Get the index of the element that is now on top
-	    if (m_selectedFeatures.length) {
-	      top = m_selectedFeatures[m_selectedFeatures.length - 1];
-	    }
-	
-	    if (lastTop !== top) {
-	      // The element on top changed so we need to fire mouseon/mouseoff
-	      if (lastTop !== -1) {
-	        m_this.geoTrigger(geo_event.feature.mouseoff, {
-	          data: data[lastTop],
-	          index: lastTop,
-	          mouse: mouse
-	        }, true);
-	      }
-	
-	      if (top !== -1) {
-	        m_this.geoTrigger(geo_event.feature.mouseon, {
-	          data: data[top],
-	          index: top,
-	          mouse: mouse
-	        }, true);
-	      }
-	    }
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Private mouseclick handler
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._handleMouseclick = function () {
-	    var mouse = m_this.layer().map().interactor().mouse(),
-	        data = m_this.data(),
-	        over = m_this.pointSearch(mouse.geo);
-	
-	    feature.eventID += 1;
-	    over.index.forEach(function (i, idx) {
-	      m_this.geoTrigger(geo_event.feature.mouseclick, {
-	        data: data[i],
-	        index: i,
-	        mouse: mouse,
-	        eventID: feature.eventID,
-	        top: idx === over.index.length - 1
-	      }, true);
-	    });
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Private brush handler.
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._handleBrush = function (brush) {
-	    var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
-	        data = m_this.data();
-	
-	    feature.eventID += 1;
-	    idx.forEach(function (i, idx) {
-	      m_this.geoTrigger(geo_event.feature.brush, {
-	        data: data[i],
-	        index: i,
-	        mouse: brush.mouse,
-	        brush: brush,
-	        eventID: feature.eventID,
-	        top: idx === idx.length - 1
-	      }, true);
-	    });
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Private brushend handler.
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._handleBrushend = function (brush) {
-	    var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
-	        data = m_this.data();
-	
-	    feature.eventID += 1;
-	    idx.forEach(function (i, idx) {
-	      m_this.geoTrigger(geo_event.feature.brushend, {
-	        data: data[i],
-	        index: i,
-	        mouse: brush.mouse,
-	        brush: brush,
-	        eventID: feature.eventID,
-	        top: idx === idx.length - 1
-	      }, true);
-	    });
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set style used by the feature
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.style = function (arg1, arg2) {
-	    if (arg1 === undefined) {
-	      return m_style;
-	    } else if (typeof arg1 === 'string' && arg2 === undefined) {
-	      return m_style[arg1];
-	    } else if (arg2 === undefined) {
-	      m_style = $.extend({}, m_style, arg1);
-	      m_this.modified();
-	      return m_this;
-	    } else {
-	      m_style[arg1] = arg2;
-	      m_this.modified();
-	      return m_this;
-	    }
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * A uniform getter that always returns a function even for constant styles.
-	   * Maybe extend later to support accessor-like objects.  If undefined input,
-	   * return all the styles as an object.
-	   *
-	   * @param {string|undefined} key
-	   * @return {function}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.style.get = function (key) {
-	    var out;
-	    if (key === undefined) {
-	      var all = {}, k;
-	      for (k in m_style) {
-	        if (m_style.hasOwnProperty(k)) {
-	          all[k] = m_this.style.get(k);
-	        }
-	      }
-	      return all;
-	    }
-	    if (key.toLowerCase().match(/color$/)) {
-	      if (util.isFunction(m_style[key])) {
-	        out = function () {
-	          return util.convertColor(
-	            m_style[key].apply(this, arguments)
-	          );
-	        };
-	      } else {
-	        // if the color is not a function, only convert it once
-	        out = util.ensureFunction(util.convertColor(m_style[key]));
-	      }
-	    } else {
-	      out = util.ensureFunction(m_style[key]);
-	    }
-	    return out;
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get layer referenced by the feature
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.layer = function () {
-	    return m_layer;
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get renderer used by the feature
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.renderer = function () {
-	    return m_renderer;
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set projection of the feature
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.gcs = function (val) {
-	    if (val === undefined) {
-	      if (m_gcs === undefined && m_renderer) {
-	        return m_renderer.layer().map().ingcs();
-	      }
-	      return m_gcs;
-	    } else {
-	      m_gcs = val;
-	      m_this.modified();
-	      return m_this;
-	    }
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Convert from the renderer's input gcs coordinates to display coordinates.
-	   *
-	   * @param {object} c The input coordinate to convert
-	   * @param {object} c.x
-	   * @param {object} c.y
-	   * @param {object} [c.z=0]
-	   * @return {object} Display space coordinates
-	   */
-	  this.featureGcsToDisplay = function (c) {
-	    var map = m_renderer.layer().map();
-	    c = map.gcsToWorld(c, m_this.gcs());
-	    c = map.worldToDisplay(c);
-	    if (m_renderer.baseToLocal) {
-	      c = m_renderer.baseToLocal(c);
-	    }
-	    return c;
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set visibility of the feature
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.visible = function (val) {
-	    if (val === undefined) {
-	      return m_visible;
-	    } else {
-	      m_visible = val;
-	      m_this.modified();
-	
-	      // bind or unbind mouse handlers on visibility change
-	      if (m_visible) {
-	        m_this._bindMouseHandlers();
-	      } else {
-	        m_this._unbindMouseHandlers();
-	      }
-	
-	      return m_this;
-	    }
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set bin of the feature
-	   *
-	   * Bin number is typically used for sorting the order of rendering
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.bin = function (val) {
-	    if (val === undefined) {
-	      return m_bin;
-	    } else {
-	      m_bin = val;
-	      m_this.modified();
-	      return m_this;
-	    }
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set timestamp of data change
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.dataTime = function (val) {
-	    if (val === undefined) {
-	      return m_dataTime;
-	    } else {
-	      m_dataTime = val;
-	      m_this.modified();
-	      return m_this;
-	    }
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set timestamp of last time build happened
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.buildTime = function (val) {
-	    if (val === undefined) {
-	      return m_buildTime;
-	    } else {
-	      m_buildTime = val;
-	      m_this.modified();
-	      return m_this;
-	    }
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set timestamp of last time update happened
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.updateTime = function (val) {
-	    if (val === undefined) {
-	      return m_updateTime;
-	    } else {
-	      m_updateTime = val;
-	      m_this.modified();
-	      return m_this;
-	    }
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set the data array for the feature.
-	   *
-	   * @returns {Array|this}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.data = function (data) {
-	    if (data === undefined) {
-	      return m_this.style('data') || [];
-	    } else {
-	      m_this.style('data', data);
-	      m_this.dataTime().modified();
-	      m_this.modified();
-	      return m_this;
-	    }
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Query if the selection API is enabled for this feature.
-	   * @returns {bool}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.selectionAPI = function () {
-	    return m_selectionAPI;
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Initialize
-	   *
-	   * Derived class should implement this
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._init = function (arg) {
-	    if (!m_layer) {
-	      throw 'Feature requires a valid layer';
-	    }
-	    m_style = $.extend({},
-	                {'opacity': 1.0}, arg.style === undefined ? {} :
-	                arg.style);
-	    m_this._bindMouseHandlers();
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Build
-	   *
-	   * Derived class should implement this
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._build = function () {
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Update
-	   *
-	   * Derived class should implement this
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._update = function () {
-	  };
-	
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Destroy
-	   *
-	   * Derived class should implement this
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._exit = function () {
-	    m_this._unbindMouseHandlers();
-	    m_selectedFeatures = [];
-	    m_style = {};
-	    arg = {};
-	    s_exit();
-	  };
-	
-	  this._init(arg);
-	  return this;
-	};
-	
-	/**
-	 * The most recent feature event triggered.
-	 * @type {number}
-	 */
-	feature.eventID = 0;
-	
-	/**
-	 * General object specification for feature types.
-	 * @typedef geo.feature.spec
-	 * @type {object}
-	 * @property {string} type A supported feature type.
-	 * @property {object[]} [data=[]] An array of arbitrary objects used to
-	 * construct the feature.  These objects (and their associated
-	 * indices in the array) will be passed back to style and attribute
-	 * accessors provided by the user.  In general the number of
-	 * 'markers' drawn will be equal to the length of this array.
+	 * jQuery throttle / debounce - v1.1 - 3/7/2010
+	 * http://benalman.com/projects/jquery-throttle-debounce-plugin/
+	 *
+	 * @copyright 2010 "Cowboy" Ben Alman
+	 * Dual licensed under the MIT and GPL licenses.
+	 * http://benalman.com/about/license/
+	 *
+	 * The implementation included here is modified to support a callback
+	 * method that can accumulate values between actual invocations of
+	 * the throttled method.
 	 */
 	
-	/**
-	 * Create a feature from an object.  The implementation here is
-	 * meant to define the general interface of creating features
-	 * from a javascript object.  See documentation from individual
-	 * feature types for specific details.  In case of an error in
-	 * the arguments this method will return null;
-	 * @param {geo.layer} layer The layer to add the feature to
-	 * @param {geo.feature.spec} [spec={}] The object specification
-	 * @returns {geo.feature|null}
-	 */
-	feature.create = function (layer, spec) {
+	(function (window) {
 	  'use strict';
 	
-	  var type = spec.type;
+	  /**
+	   * Throttle execution of a function. Especially useful for rate limiting
+	   * execution of handlers on events like resize and scroll. If you want to
+	   * rate-limit execution of a function to a single time see
+	   * {@link geo.util.debounce}.
+	   *
+	   * In this visualization, | is a throttled-function call and X is the actual
+	   * callback execution:
+	   *
+	   * ::
+	   *   Throttled with `no_trailing` specified as false or unspecified:
+	   *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+	   *   X    X    X    X    X    X        X    X    X    X    X    X
+	   *
+	   *   Throttled with `no_trailing` specified as true:
+	   *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+	   *   X    X    X    X    X             X    X    X    X    X
+	   *
+	   * @function geo.util.throttle
+	   * @param {number} delay A zero-or-greater delay in milliseconds. For event
+	   *    callbacks, values around 100 or 250 (or even higher) are most useful.
+	   * @param {boolean} [no_trailing=false] If no_trailing is
+	   *    true, callback will only execute every `delay` milliseconds while the
+	   *    throttled-function is being called. If no_trailing is false or
+	   *    unspecified, callback will be executed one final time after the last
+	   *    throttled-function call. (After the throttled-function has not been
+	   *    called for `delay` milliseconds, the internal counter is reset)
+	   * @param {function} callback A function to be executed after `delay`
+	   *    milliseconds. The `this` context and all arguments are passed through,
+	   *    as-is, to `callback` when the throttled-function is executed.
+	   * @param {function} [accumulator] A function to be executed (synchronously)
+	   *    during **each** call to the wrapped function.  Typically, this
+	   *    this method is used to accumulate values that the callback uses
+	   *    when it finally executes.
+	   *
+	   * @returns {function} The throttled version of `callback`
+	   *
+	   * @example
+	   * var throttled = geo.util.throttle( delay, [ no_trailing, ] callback );
+	   * $('selector').bind( 'someevent', throttled );
+	   * $('selector').unbind( 'someevent', throttled );
+	   */
+	  var throttle = function (delay, no_trailing,
+	                                callback, accumulator, debounce_mode) {
+	    // After wrapper has stopped being called, this timeout ensures that
+	    // `callback` is executed at the proper times in `throttle` and `end`
+	    // debounce modes.
+	    var timeout_id,
 	
-	  // Check arguments
-	  if (!(layer instanceof __webpack_require__(205))) {
-	    console.warn('Invalid layer');
-	    return null;
-	  }
-	  if (typeof spec !== 'object') {
-	    console.warn('Invalid spec');
-	    return null;
-	  }
-	  var feature = layer.createFeature(type);
-	  if (!feature) {
-	    console.warn('Could not create feature type "' + type + '"');
-	    return null;
-	  }
+	      // Keep track of the last time `callback` was executed.
+	        last_exec = 0;
 	
-	  spec = spec || {};
-	  spec.data = spec.data || [];
-	  return feature.style(spec);
-	};
+	    // `no_trailing` defaults to falsy.
+	    if (typeof no_trailing !== 'boolean') {
+	      debounce_mode = accumulator;
+	      accumulator = callback;
+	      callback = no_trailing;
+	      no_trailing = undefined;
+	    }
 	
-	inherit(feature, sceneObject);
-	module.exports = feature;
+	    // accumulator defaults to no-op
+	    if (typeof accumulator !== 'function') {
+	      debounce_mode = accumulator;
+	      accumulator = function () {};
+	    }
+	
+	    // The `wrapper` function encapsulates all of the throttling / debouncing
+	    // functionality and when executed will limit the rate at which `callback`
+	    // is executed.
+	    function wrapper() {
+	      var that = this,
+	          elapsed = +new Date() - last_exec,
+	          args = arguments;
+	
+	      // Execute `callback` and update the `last_exec` timestamp.
+	      function exec() {
+	        last_exec = +new Date();
+	        callback.apply(that, args);
+	      }
+	
+	      // If `debounce_mode` is true (at_begin) this is used to clear the flag
+	      // to allow future `callback` executions.
+	      function clear() {
+	        timeout_id = undefined;
+	      }
+	
+	      // always call the accumulator first
+	      accumulator.apply(that, args);
+	
+	      if (debounce_mode && !timeout_id) {
+	        // Since `wrapper` is being called for the first time and
+	        // `debounce_mode` is true (at_begin), execute `callback`.
+	        exec();
+	      }
+	
+	      // Clear any existing timeout.
+	      void (
+	        timeout_id && clearTimeout(timeout_id)
+	      );
+	
+	      if (debounce_mode === undefined && elapsed > delay) {
+	        // In throttle mode, if `delay` time has been exceeded, execute
+	        // `callback`.
+	        exec();
+	
+	      } else if (no_trailing !== true) {
+	        // In trailing throttle mode, since `delay` time has not been
+	        // exceeded, schedule `callback` to execute `delay` ms after most
+	        // recent execution.
+	        //
+	        // If `debounce_mode` is true (at_begin), schedule `clear` to execute
+	        // after `delay` ms.
+	        //
+	        // If `debounce_mode` is false (at end), schedule `callback` to
+	        // execute after `delay` ms.
+	        timeout_id = setTimeout(
+	          debounce_mode ?
+	            clear :
+	            exec,
+	          debounce_mode === undefined ?
+	            delay - elapsed :
+	            delay
+	        );
+	      }
+	    }
+	
+	    // Return the wrapper function.
+	    return wrapper;
+	  };
+	
+	  /**
+	   * Debounce execution of a function. Debouncing, unlike throttling,
+	   * guarantees that a function is only executed a single time, either at the
+	   * very beginning of a series of calls, or at the very end. If you want to
+	   * simply rate-limit execution of a function, see the <jQuery.throttle>
+	   * method.
+	   *
+	   * In this visualization, | is a debounced-function call and X is the actual
+	   * callback execution:
+	   *
+	   * ::
+	   *
+	   *   Debounced with `at_begin` specified as false or unspecified:
+	   *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+	   *                            X                                 X
+	   *
+	   *   Debounced with `at_begin` specified as true:
+	   *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+	   *   X                                 X
+	   *
+	   *
+	   * @param {number} delay A zero-or-greater delay in milliseconds. For event
+	   *    callbacks, values around 100 or 250 (or even higher) are most useful.
+	   * @param {boolean} [at_begin=false] If at_begin is false or
+	   *    unspecified, callback will only be executed `delay` milliseconds after
+	   *    the last debounced-function call. If at_begin is true, callback will be
+	   *    executed only at the first debounced-function call. (After the
+	   *    throttled-function has not been called for `delay` milliseconds, the
+	   *    internal counter is reset)
+	   * @param {function} callback A function to be executed after delay milliseconds.
+	   *    The `this` context and all arguments are passed through, as-is, to
+	   *    `callback` when the debounced-function is executed.
+	   * @param {function} [accumulator] A function to be executed (synchronously)
+	   *    during **each** call to the wrapped function.  Typically, this
+	   *    this method is used to accumulate values that the callback uses
+	   *    when it finally executes.
+	   *
+	   * @returns {function} A new, debounced, function.
+	   *
+	   * @example
+	   * var debounced = geo.util.debounce( delay, [ at_begin, ] callback );
+	   * $('selector').bind( 'someevent', debounced );
+	   * $('selector').unbind( 'someevent', debounced );
+	   *
+	   */
+	
+	  var debounce = function (delay, at_begin, callback, accumulator) {
+	    if (typeof at_begin !== 'boolean') {
+	      accumulator = callback;
+	      callback = at_begin;
+	      at_begin = false;
+	    }
+	    accumulator = accumulator || function () {};
+	    return throttle(delay, false, callback, accumulator, !!at_begin);
+	  };
+	
+	  module.exports = {
+	    throttle: throttle,
+	    debounce: debounce
+	  };
+	})(this);
 
 
 /***/ },
 /* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var inherit = __webpack_require__(8);
-	var object = __webpack_require__(84);
+	/*
+	markercluster plugin:
 	
-	//////////////////////////////////////////////////////////////////////////////
+	Copyright 2012 David Leaver
+	
+	Permission is hereby granted, free of charge, to any person obtaining
+	a copy of this software and associated documentation files (the
+	"Software"), to deal in the Software without restriction, including
+	without limitation the rights to use, copy, modify, merge, publish,
+	distribute, sublicense, and/or sell copies of the Software, and to
+	permit persons to whom the Software is furnished to do so, subject to
+	the following conditions:
+	
+	The above copyright notice and this permission notice shall be
+	included in all copies or substantial portions of the Software.
+	
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+	EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+	NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+	LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+	OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+	
+	Leaflet utilities:
+	
+	Copyright (c) 2010-2015, Vladimir Agafonkin
+	Copyright (c) 2010-2011, CloudMade
+	All rights reserved.
+	
+	Redistribution and use in source and binary forms, with or without modification, are
+	permitted provided that the following conditions are met:
+	
+	   1. Redistributions of source code must retain the above copyright notice, this list of
+	      conditions and the following disclaimer.
+	
+	   2. Redistributions in binary form must reproduce the above copyright notice, this list
+	      of conditions and the following disclaimer in the documentation and/or other
+	      materials provided with the distribution.
+	
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+	EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+	MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+	COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+	EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+	SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+	HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+	TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+	*/
+	
 	/**
-	 * Create a new instance of class sceneObject, which extends the object's
-	 * event handling with a tree-based event propagation.
-	 *
-	 * @class geo.sceneObject
-	 * @extends geo.object
-	 * @returns {geo.sceneObject}
+	 * @file
+	 * Code taken from https://github.com/Leaflet/Leaflet.markercluster
+	 * to support faster hierarchical clustering of features.
+	 * @copyright 2012, David Leaver
 	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var sceneObject = function (arg) {
-	  'use strict';
-	  if (!(this instanceof sceneObject)) {
-	    return new sceneObject();
-	  }
-	  object.call(this, arg);
 	
-	  var m_this = this,
-	      m_parent = null,
-	      m_children = [],
-	      s_exit = this._exit,
-	      s_trigger = this.geoTrigger,
-	      s_addPromise = this.addPromise,
-	      s_onIdle = this.onIdle;
+	(function () {
+	    "use strict";
 	
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Override object.addPromise to propagate up the scene tree.
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.addPromise = function (promise) {
-	    if (m_parent) {
-	      m_parent.addPromise(promise);
-	    } else {
-	      s_addPromise(promise);
-	    }
-	  };
+	    var $ = __webpack_require__(5);
+	    var L = {};
+	    L.Util = {
+	        // return unique ID of an object
+	        stamp: function (obj) {
+	            obj._leaflet_id = obj._leaflet_id || ++L.Util.lastId;
+	            return obj._leaflet_id;
+	        },
+	        lastId: 0
+	    };
 	
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Override object.onIdle to propagate up the scene tree.
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.onIdle = function (handler) {
-	    if (m_parent) {
-	      m_parent.onIdle(handler);
-	    } else {
-	      s_onIdle(handler);
-	    }
-	  };
+	    var DistanceGrid = function (cellSize) {
+	        this._cellSize = cellSize;
+	        this._sqCellSize = cellSize * cellSize;
+	        this._grid = {};
+	        this._objectPoint = {};
+	    };
 	
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Get/set parent of the object
-	   *  @param {?geo.sceneObject} parent
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.parent = function (arg) {
-	    if (arg === undefined) {
-	      return m_parent;
-	    }
-	    m_parent = arg;
-	    return m_this;
-	  };
+	    DistanceGrid.prototype = {
 	
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Add a child (or an array of children) to the object
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.addChild = function (child) {
-	    if (Array.isArray(child)) {
-	      child.forEach(m_this.addChild);
-	      return m_this;
-	    }
-	    child.parent(m_this);
-	    m_children.push(child);
-	    return m_this;
-	  };
+	        addObject: function (obj, point) {
+	            var x = this._getCoord(point.x),
+	                y = this._getCoord(point.y),
+	                grid = this._grid,
+	                row = grid[y] = grid[y] || {},
+	                cell = row[x] = row[x] || [],
+	                stamp = L.Util.stamp(obj);
 	
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Remove a child (or array of children) from the object
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.removeChild = function (child) {
-	    if (Array.isArray(child)) {
-	      child.forEach(m_this.removeChild);
-	      return m_this;
-	    }
-	    m_children = m_children.filter(function (c) { return c !== child; });
-	    return m_this;
-	  };
+	            point.obj = obj;
+	            this._objectPoint[stamp] = point;
 	
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Get an array of child objects
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.children = function () {
-	    return m_children.slice();
-	  };
+	            cell.push(obj);
+	        },
 	
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Force redraw of a scene object, to be implemented by subclasses.
-	   *  Base class just calls draw of child objects.
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.draw = function (arg) {
-	    m_this.children().forEach(function (child) {
-	      child.draw(arg);
-	    });
-	    return m_this;
-	  };
+	        updateObject: function (obj, point) {
+	            this.removeObject(obj);
+	            this.addObject(obj, point);
+	        },
 	
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Trigger an event (or events) on this object and call all handlers.
-	   *  @param {String} event the event to trigger
-	   *  @param {Object} args arbitrary argument to pass to the handler
-	   *  @param {Boolean} childrenOnly if true, only propagate down the tree
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.geoTrigger = function (event, args, childrenOnly) {
+	        //Returns true if the object was found
+	        removeObject: function (obj, point) {
+	            var x = this._getCoord(point.x),
+	                y = this._getCoord(point.y),
+	                grid = this._grid,
+	                row = grid[y] = grid[y] || {},
+	                cell = row[x] = row[x] || [],
+	                i, len;
 	
-	    var geoArgs;
+	            delete this._objectPoint[L.Util.stamp(obj)];
 	
-	    args = args || {};
-	    geoArgs = args.geo || {};
-	    args.geo = geoArgs;
+	            for (i = 0, len = cell.length; i < len; i++) {
+	                if (cell[i] === obj) {
 	
-	    // stop propagation if requested by the handler
-	    if (geoArgs.stopPropagation) {
-	      return m_this;
-	    }
+	                    cell.splice(i, 1);
 	
-	    // If the event was not triggered by the parent, just propagate up the tree
-	    if (!childrenOnly && m_parent && geoArgs._triggeredBy !== m_parent) {
-	      geoArgs._triggeredBy = m_this;
-	      m_parent.geoTrigger(event, args);
-	      return m_this;
-	    }
+	                    if (len === 1) {
+	                        delete row[x];
+	                    }
 	
-	    // call the object's own handlers
-	    s_trigger.call(m_this, event, args);
+	                    return true;
+	                }
+	            }
 	
-	    // stop propagation if requested by the handler
-	    if (geoArgs.stopPropagation) {
-	      return m_this;
-	    }
+	        },
 	
-	    // trigger the event on the children
-	    m_children.forEach(function (child) {
-	      if (child.geoTrigger) {
-	        geoArgs._triggeredBy = m_this;
-	        child.geoTrigger(event, args);
-	      }
-	    });
+	        eachObject: function (fn, context) {
+	            var i, j, k, len, row, cell, removed,
+	                grid = this._grid;
 	
-	    return m_this;
-	  };
+	            for (i in grid) {
+	                row = grid[i];
 	
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Free all resources and destroy the object.
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this._exit = function () {
-	    m_this.children = [];
-	    delete m_this.parent;
-	    s_exit();
-	  };
+	                for (j in row) {
+	                    cell = row[j];
 	
-	  return this;
-	};
+	                    for (k = 0, len = cell.length; k < len; k++) {
+	                        removed = fn.call(context, cell[k]);
+	                        if (removed) {
+	                            k--;
+	                            len--;
+	                        }
+	                    }
+	                }
+	            }
+	        },
 	
-	inherit(sceneObject, object);
-	module.exports = sceneObject;
+	        getNearObject: function (point) {
+	            var x = this._getCoord(point.x),
+	                y = this._getCoord(point.y),
+	                i, j, k, row, cell, len, obj, dist,
+	                objectPoint = this._objectPoint,
+	                closestDistSq = this._sqCellSize,
+	                closest = null;
+	
+	            for (i = y - 1; i <= y + 1; i++) {
+	                row = this._grid[i];
+	                if (row) {
+	
+	                    for (j = x - 1; j <= x + 1; j++) {
+	                        cell = row[j];
+	                        if (cell) {
+	
+	                            for (k = 0, len = cell.length; k < len; k++) {
+	                                obj = cell[k];
+	                                dist = this._sqDist(
+	                                    objectPoint[L.Util.stamp(obj)],
+	                                    point
+	                                );
+	                                if (dist < closestDistSq) {
+	                                    closestDistSq = dist;
+	                                    closest = obj;
+	                                }
+	                            }
+	                        }
+	                    }
+	                }
+	            }
+	            return closest;
+	        },
+	
+	        /* return the point coordinates contained in the structure */
+	        contents: function () {
+	            return $.map(this._objectPoint, function (val) { return val; });
+	        },
+	
+	        _getCoord: function (x) {
+	            return Math.floor(x / this._cellSize);
+	        },
+	
+	        _sqDist: function (p, p2) {
+	            var dx = p2.x - p.x,
+	                dy = p2.y - p.y;
+	            return dx * dx + dy * dy;
+	        }
+	    };
+	
+	    module.exports = DistanceGrid;
+	})();
 
 
 /***/ },
 /* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var vgl = __webpack_require__(85);
-	var inherit = __webpack_require__(8);
-	
-	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Create a new instance of class object
-	 *
-	 * @class geo.object
-	 * @extends vgl.object
-	 * @returns {geo.object}
+	 * @file
+	 * Using methods adapted from leaflet to cluster an array of positions
+	 * hierarchically given an array of length scales (zoom levels).
 	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var object = function () {
+	
+	(function () {
 	  'use strict';
-	  if (!(this instanceof object)) {
-	    return new object();
+	
+	  var $ = __webpack_require__(5);
+	  var vgl = __webpack_require__(85);
+	
+	  /**
+	   * This class manages a group of nearby points that are clustered as a
+	   * single object for display purposes.  The class constructor is private
+	   * and only meant to be created by the ClusterGroup object.
+	   *
+	   * This is a tree-like data structure.  Each node in the tree is a
+	   * cluster containing child clusters and unclustered points.
+	   *
+	   * @class
+	   * @private
+	   *
+	   * @param {geo.util.ClusterGroup} group The source cluster group
+	   * @param {number} zoom The zoom level of the current node
+	   * @param {object[]} children An array of ClusterTrees or point objects
+	   */
+	  function ClusterTree(group, zoom, children) {
+	    this._group = group;
+	    this._zoom = zoom;
+	    this._points = [];     // Unclustered points
+	    this._clusters = [];   // Child clusters
+	    this._count = 0;       // Total number of points
+	    this._parent = null;
+	    this._coord = null;    // The cached coordinates
+	    var that = this;
+	
+	    // add the children provided in the constructor call
+	    (children || []).forEach(function (c) {
+	      that._add(c);
+	    });
 	  }
 	
-	  var m_this = this,
-	      m_eventHandlers = {},
-	      m_idleHandlers = [],
-	      m_promiseCount = 0;
-	
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
-	   *  Bind a handler that will be called once when all internal promises are
-	   *  resolved.
-	   *
-	   *  @param {function} handler A function taking no arguments
-	   *  @returns {geo.object[]|geo.object} this
+	   * Add a point or cluster as a child to the current cluster.
+	   * @param {object} pt A ClusterTree or point object
+	   * @private
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.onIdle = function (handler) {
-	    if (m_promiseCount) {
-	      m_idleHandlers.push(handler);
+	  ClusterTree.prototype._add = function (pt) {
+	    var inc = 1;
+	
+	    if (pt instanceof ClusterTree) {
+	      // add a child cluster
+	      this._clusters.push(pt);
+	      inc = pt._count;
 	    } else {
-	      handler();
+	      this._points.push(pt);
 	    }
-	    return m_this;
+	    pt._parent = this;
+	
+	    // increment the counter
+	    this._increment(inc);
 	  };
 	
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
-	   *  Add a new promise object preventing idle event handlers from being called
-	   *  until it is resolved.
-	   *
-	   *  @param {Promise} promise A promise object
+	   * Increment the child counter for this and the parent.
+	   * @param {number} inc The value to increment by
+	   * @private
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.addPromise = function (promise) {
-	    // called on any resolution of the promise
-	    function onDone() {
-	      m_promiseCount -= 1;
-	      if (!m_promiseCount) {
-	        m_idleHandlers.splice(0, m_idleHandlers.length)
-	          .forEach(function (handler) {
-	            handler();
-	          });
-	      }
+	  ClusterTree.prototype._increment = function (inc) {
+	    this._coord = null;
+	    this._count += inc;
+	    if (this._parent) {
+	      this._parent._increment(inc);
 	    }
-	    m_promiseCount += 1;
-	    promise.then(onDone, onDone);
-	    return m_this;
 	  };
 	
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
-	   *  Bind an event handler to this object
-	   *
-	   *  @param {String} event
-	   *    An event from {geo.events}
-	   *  @param {function} handler
-	   *    A function that will be called when ``event`` is triggered.  The
-	   *    function will be given an event object as a first parameter and
-	   *    optionally a second argument provided by the triggerer.
+	   * Return the total number of child points contained in the cluster.
+	   * @returns {number} Total points contained
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.geoOn = function (event, handler) {
-	    if (Array.isArray(event)) {
-	      event.forEach(function (e) {
-	        m_this.geoOn(e, handler);
-	      });
-	      return m_this;
-	    }
-	    if (!m_eventHandlers.hasOwnProperty(event)) {
-	      m_eventHandlers[event] = [];
-	    }
-	    m_eventHandlers[event].push(handler);
-	    return m_this;
+	  ClusterTree.prototype.count = function () {
+	    return this._count;
 	  };
 	
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
-	   *  Trigger an event (or events) on this object and call all handlers
-	   *
-	   *  @param {String} event An event from {geo.event}
-	   *  @param {Object} args An optional argument to pass to handlers
+	   * Recursively call a function on all points contained in the cluster.
+	   * Calls the function with `this` as the current ClusterTree object, and
+	   * arguments to arguments the point object and the zoom level:
+	   *   func.call(this, point, zoom)
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.geoTrigger = function (event, args) {
-	
-	    // if we have an array of events, recall with single events
-	    if (Array.isArray(event)) {
-	      event.forEach(function (e) {
-	        m_this.geoTrigger(e, args);
-	      });
-	      return m_this;
+	  ClusterTree.prototype.each = function (func) {
+	    var i;
+	    for (i = 0; i < this._points.length; i += 1) {
+	      func.call(this, this._points[i], this._zoom);
 	    }
-	
-	    // append the event type to the argument object
-	    args = args || {};
-	    args.event = event;
-	
-	    if (m_eventHandlers.hasOwnProperty(event)) {
-	      m_eventHandlers[event].forEach(function (handler) {
-	        handler.call(m_this, args);
-	      });
-	    }
-	
-	    return m_this;
-	  };
-	
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Remove handlers from an event (or an array of events).  If no event is
-	   *  provided all hanlders will be removed.
-	   *
-	   *  @param {string?} event An event from {geo.events}
-	   *  @param {object?} arg A function or array of functions to remove from the events
-	   *                      or if falsey remove all handlers from the events
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.geoOff = function (event, arg) {
-	    if (event === undefined) {
-	      m_eventHandlers = {};
-	      m_idleHandlers = [];
-	      m_promiseCount = 0;
-	    }
-	    if (Array.isArray(event)) {
-	      event.forEach(function (e) {
-	        m_this.geoOff(e, arg);
-	      });
-	      return m_this;
-	    }
-	    if (!arg) {
-	      m_eventHandlers[event] = [];
-	    } else if (Array.isArray(arg)) {
-	      arg.forEach(function (handler) {
-	        m_this.geoOff(event, handler);
-	      });
-	      return m_this;
-	    }
-	    // What do we do if the handler is not already bound?
-	    //   ignoring for now...
-	    if (m_eventHandlers.hasOwnProperty(event)) {
-	      m_eventHandlers[event] = m_eventHandlers[event].filter(function (f) {
-	        return f !== arg;
-	      }
+	    for (i = 0; i < this._clusters.length; i += 1) {
+	      this._clusters[i].each.call(
+	        this._clusters[i],
+	        func
 	      );
 	    }
-	    return m_this;
 	  };
 	
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Free all resources and destroy the object.
+	   * Get the coordinates of the cluster (the mean position of all the points
+	   * contained).  This is lazily calculated and cached.
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this._exit = function () {
-	    m_this.geoOff();
+	  ClusterTree.prototype.coords = function () {
+	    var i, center = {x: 0, y: 0};
+	    if (this._coord) {
+	      return this._coord;
+	    }
+	    // first add up the points at the node
+	    for (i = 0; i < this._points.length; i += 1) {
+	      center.x += this._points[i].x;
+	      center.y += this._points[i].y;
+	    }
+	
+	    // add up the contribution from the clusters
+	    for (i = 0; i < this._clusters.length; i += 1) {
+	      center.x += this._clusters[i].coords().x * this._clusters[i].count();
+	      center.y += this._clusters[i].coords().y * this._clusters[i].count();
+	    }
+	
+	    return {
+	      x: center.x / this.count(),
+	      y: center.y / this.count()
+	    };
 	  };
 	
-	  vgl.object.call(this);
+	  /**
+	   * This class manages clustering of an array of positions hierarchically.
+	   * The algorithm and code was adapted from the Leaflet marker cluster
+	   * plugin by David Leaver: https://github.com/Leaflet/Leaflet.markercluster
+	   *
+	   * @class geo.util.ClusterGroup
+	   * @param {object} opts An options object
+	   * @param {number} width The width of the window; used for scaling.
+	   * @param {number} height The height of the window; used for scaling.
+	   * @param {number} maxZoom The maximimum zoom level to calculate
+	   * @param {number} radius Proportional to the clustering radius in pixels
+	   */
+	  function C(opts, width, height) {
 	
-	  return this;
-	};
+	    var DistanceGrid = __webpack_require__(83);
 	
-	inherit(object, vgl.object);
-	module.exports = object;
+	    // store the options
+	    this._opts = $.extend({
+	      maxZoom: 18,
+	      radius: 0.05
+	    }, opts);
+	    this._opts.width = this._opts.width || width || 256;
+	    this._opts.height = this._opts.height || height || 256;
+	
+	    // generate the initial datastructures
+	    this._clusters = {}; // clusters at each zoom level
+	    this._points = {};   // unclustered points at each zoom level
+	
+	    var zoom, scl;
+	    for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
+	      scl = this._scaleAtLevel(zoom, this._opts.width, this._opts.height);
+	      this._clusters[zoom] = new DistanceGrid(scl);
+	      this._points[zoom] = new DistanceGrid(scl);
+	    }
+	    this._topClusterLevel = new ClusterTree(this, -1);
+	  }
+	
+	  /**
+	   * Returns a characteristic distance scale at a particular zoom level.  This
+	   * scale is used to control the clustering radius.  When the renderer supports
+	   * it, this call should be replaced by a calculation involving the view port
+	   * size in point coordinates at a particular zoom level.
+	   * @private
+	   */
+	  C.prototype._scaleAtLevel = function (zoom, width, height) {
+	    return vgl.zoomToHeight(zoom, width, height) / 2 * this._opts.radius;
+	  };
+	
+	  /**
+	   * Add a position to the cluster group.
+	   * @protected
+	   */
+	  C.prototype.addPoint = function (point) {
+	    var zoom, closest, parent, newCluster, lastParent, z;
+	
+	    // start at the maximum zoom level and search for nearby
+	    //
+	    // 1.  existing clusters
+	    // 2.  unclustered points
+	    //
+	    // otherwise add the point as a new unclustered point
+	
+	    for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
+	
+	      // find near cluster
+	      closest = this._clusters[zoom].getNearObject(point);
+	      if (closest) {
+	        // add the point to the cluster and return
+	        closest._add(point);
+	        return;
+	      }
+	
+	      // find near point
+	      closest = this._points[zoom].getNearObject(point);
+	      if (closest) {
+	        parent = closest._parent;
+	        if (parent) {
+	          // remove the point from the parent
+	          for (z = parent._points.length - 1; z >= 0; z -= 1) {
+	            if (parent._points[z] === closest) {
+	              parent._points.splice(z, 1);
+	              parent._increment(-1);
+	              break;
+	            }
+	          }
+	        }
+	
+	        if (!parent) {
+	          $.noop();
+	        }
+	        // create a new cluster with these two points
+	        newCluster = new ClusterTree(this, zoom, [closest, point]);
+	        this._clusters[zoom].addObject(newCluster, newCluster.coords());
+	
+	        // create intermediate parent clusters that don't exist
+	        lastParent = newCluster;
+	        for (z = zoom - 1; z > parent._zoom; z -= 1) {
+	          lastParent = new ClusterTree(this, z, [lastParent]);
+	          this._clusters[z].addObject(lastParent, lastParent.coords());
+	        }
+	        parent._add(lastParent);
+	
+	        // remove closest from this zoom level and any above (replace with newCluster)
+	        for (z = zoom; z >= 0; z -= 1) {
+	          if (!this._points[z].removeObject(closest, closest)) {
+	            break;
+	          }
+	        }
+	
+	        return;
+	      }
+	
+	      // add an unclustered point
+	      this._points[zoom].addObject(point, point);
+	    }
+	
+	    // otherwise add to the top
+	    this._topClusterLevel._add(point);
+	  };
+	
+	  /**
+	   * Return the unclustered points contained at a given zoom level.
+	   * @param {number} zoom The zoom level
+	   * @return {object[]} The array of unclustered points
+	   */
+	  C.prototype.points = function (zoom) {
+	    zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
+	    return this._points[Math.floor(zoom)].contents();
+	  };
+	
+	  /**
+	   * Return the clusters contained at a given zoom level.
+	   * @param {number} zoom The zoom level
+	   * @return {ClusterTree[]} The array of clusters
+	   */
+	  C.prototype.clusters = function (zoom) {
+	    zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
+	    return this._clusters[Math.floor(zoom)].contents();
+	  };
+	
+	  module.exports = C;
+	})();
 
 
 /***/ },
@@ -45048,6 +45035,1728 @@
 /* 199 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var $ = __webpack_require__(5);
+	var widgets = {
+	  dom: {}
+	};
+	var layers = {};
+	var layerDefaultFeatures = {};
+	var renderers = {};
+	var features = {};
+	var featureCapabilities = {};
+	var fileReaders = {};
+	var rendererLayerAdjustments = {};
+	var annotations = {};
+	var util = {};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Register a new file reader type
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.registerFileReader = function (name, func) {
+	  fileReaders[name] = func;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new file reader
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.createFileReader = function (name, opts) {
+	  if (fileReaders.hasOwnProperty(name)) {
+	    return fileReaders[name](opts);
+	  }
+	  return null;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Register a new renderer type
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.registerRenderer = function (name, func) {
+	  renderers[name] = func;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create new instance of the renderer
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.createRenderer = function (name, layer, canvas, options) {
+	  if (renderers.hasOwnProperty(name)) {
+	    var ren = renderers[name](
+	      {layer: layer, canvas: canvas, options: options}
+	    );
+	    ren._init();
+	    return ren;
+	  }
+	  return null;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Check if the named renderer is supported.  If not, display a warning and get
+	 * the name of a fallback renderer.  Ideally, we would pass a list of desired
+	 * features, and, if the renderer is unavailable, this would choose a fallback
+	 * that would support those features.
+	 *
+	 * @params {string|null} name name of the desired renderer
+	 * @params {boolean} noFallback if true, don't recommend a fallback
+	 * @return {string|null|false} the name of the renderer that should be used
+	 *      or false if no valid renderer can be determined.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.checkRenderer = function (name, noFallback) {
+	  if (name === null) {
+	    return name;
+	  }
+	  if (renderers.hasOwnProperty(name)) {
+	    var ren = renderers[name];
+	    if (!ren.supported || ren.supported()) {
+	      return name;
+	    }
+	    if (!ren.fallback || noFallback) {
+	      return false;
+	    }
+	    var fallback = util.checkRenderer(ren.fallback(), true);
+	    if (fallback !== false) {
+	      console.warn(name + ' renderer is unavailable, using ' + fallback +
+	                   ' renderer instead');
+	    }
+	    return fallback;
+	  }
+	  return false;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Check if there is a renderer that is supported and supports a list of
+	 * features.  If not, display a warning.  This picks the first renderer that
+	 * supports all of the listed features.
+	 *
+	 * @param {array|undefined} featureList A list of features that will be used
+	 *      with this renderer.  Features are the basic feature names (e.g.,
+	 *      'quad'), or the feature name followed by a required capability (e.g.,
+	 *      'quad.image').  If more than one feature or more than one capability of
+	 *      a feature is required, include each feature and capability combination
+	 *      in the list (e.g., ['quad.image', 'plane']).  If no capability is
+	 *      specified for a feature (or that feature was registered without a
+	 *      capability object), then the feature will match regardless of
+	 *      capabilities.
+	 * @return {string|null|false} the name of the renderer that should be used
+	 *      or false if no valid renderer can be determined.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.rendererForFeatures = function (featureList) {
+	  var preferredRenderers = ['vgl', 'canvas', 'd3', null];
+	
+	  var renderer, ridx, feature, fidx, capability, available;
+	  for (ridx = 0; ridx < preferredRenderers.length; ridx += 1) {
+	    renderer = preferredRenderers[ridx];
+	    if (util.checkRenderer(renderer, true) === false) {
+	      continue;
+	    }
+	    if (!featureList) {
+	      return renderer;
+	    }
+	    if (!features[renderer]) {
+	      continue;
+	    }
+	    available = true;
+	    for (fidx = 0; fidx < featureList.length; fidx += 1) {
+	      feature = featureList[fidx];
+	      capability = null;
+	      if (feature.indexOf('.') >= 0) {
+	        capability = feature;
+	        feature = feature.substr(0, feature.indexOf('.'));
+	      }
+	      if (features[renderer][feature] === undefined) {
+	        available = false;
+	        break;
+	      }
+	      if (capability && featureCapabilities[renderer][feature] &&
+	          !featureCapabilities[renderer][feature][capability]) {
+	        available = false;
+	        break;
+	      }
+	    }
+	    if (available) {
+	      return renderer;
+	    }
+	  }
+	  console.warn('There is no renderer available for the feature list "' +
+	               (featureList || []).join(', ') + '".');
+	  return false;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Register a new feature type
+	 *
+	 * @param {string} category The feature category -- this is the renderer name.
+	 * @param {string} name The feature name
+	 * @param {function} func A function to call to create the feature.
+	 * @param {object|undefined} capabilities A map of capabilities that this
+	 *      feature supports.  If the feature is implemented with different
+	 *      capabilities in multiple categories (renderers), then the feature
+	 *      should expose a simple dictionary of supported and unsupported
+	 *      features.  For instance, the quad feature has color quads, image quads,
+	 *      and image quads that support full transformations.  The capabailities
+	 *      should be defined in the base feature in a capabilities object so that
+	 *      they can be referenced by that rather than an explicit string.
+	 * @returns {object} if this feature replaces an existing one, this was the
+	 *      feature that was replaced.  In this case, a warning is issued.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.registerFeature = function (category, name, func, capabilities) {
+	  if (!(category in features)) {
+	    features[category] = {};
+	    featureCapabilities[category] = {};
+	  }
+	
+	  var old = features[category][name];
+	  if (old) {
+	    console.warn('The ' + category + '.' + name + ' feature is already registered');
+	  }
+	  features[category][name] = func;
+	  featureCapabilities[category][name] = capabilities;
+	  return old;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create new instance of a feature
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.createFeature = function (name, layer, renderer, arg) {
+	  var category = renderer.api(),
+	      options = {'layer': layer, 'renderer': renderer};
+	  if (category in features && name in features[category]) {
+	    if (arg !== undefined) {
+	      $.extend(true, options, arg);
+	    }
+	    var feature = features[category][name](options);
+	    if (layer.gcs === undefined) {
+	      layer.gcs = function () {
+	        return layer.map().gcs();
+	      };
+	    }
+	    return feature;
+	  }
+	  return null;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Register a layer adjustment.
+	 *
+	 * @returns {object} if this layer adjustment replaces an existing one, this
+	 *      was the value that was replaced.  In this case, a warning is issued.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.registerLayerAdjustment = function (category, name, func) {
+	  if (!(category in rendererLayerAdjustments)) {
+	    rendererLayerAdjustments[category] = {};
+	  }
+	
+	  var old = rendererLayerAdjustments[category][name];
+	  if (old) {
+	    console.warn('The ' + category + '.' + name + ' layer adjustment is already registered');
+	  }
+	  rendererLayerAdjustments[category][name] = func;
+	  return old;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * If a layer needs to be adjusted based on the renderer, call the function
+	 * that adjusts it.
+	 *
+	 * @param {string} name Name of the layer.
+	 * @param {object} layer Instantiated layer object.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.adjustLayerForRenderer = function (name, layer) {
+	  var rendererName = layer.rendererName();
+	  if (rendererName) {
+	    if (rendererLayerAdjustments &&
+	        rendererLayerAdjustments[rendererName] &&
+	        rendererLayerAdjustments[rendererName][name]) {
+	      rendererLayerAdjustments[rendererName][name].apply(layer);
+	    }
+	  }
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Register a new layer type
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.registerLayer = function (name, func, defaultFeatures) {
+	  layers[name] = func;
+	  layerDefaultFeatures[name] = defaultFeatures;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create new instance of the layer
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.createLayer = function (name, map, arg) {
+	  /// Default renderer is vgl
+	  var options = {map: map},
+	      layer = null;
+	
+	  if (name in layers) {
+	    if (!arg.renderer && !arg.features && layerDefaultFeatures) {
+	      options.features = layerDefaultFeatures[name];
+	    }
+	    if (arg !== undefined) {
+	      $.extend(true, options, arg);
+	    }
+	    layer = layers[name](options);
+	    layer._init();
+	    return layer;
+	  } else {
+	    return null;
+	  }
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Register a new widget type
+	 *
+	 * @returns {object} if this widget replaces an existing one, this was the
+	 *      value that was replaced.  In this case, a warning is issued.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.registerWidget = function (category, name, func) {
+	  if (!(category in widgets)) {
+	    widgets[category] = {};
+	  }
+	
+	  var old = widgets[category][name];
+	  if (old) {
+	    console.warn('The ' + category + '.' + name + ' widget is already registered');
+	  }
+	  widgets[category][name] = func;
+	  return old;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create new instance of the widget
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.createWidget = function (name, layer, arg) {
+	  var options = {
+	    layer: layer
+	  };
+	
+	  if (name in widgets.dom) {
+	    if (arg !== undefined) {
+	      $.extend(true, options, arg);
+	    }
+	
+	    return widgets.dom[name](options);
+	  }
+	
+	  throw new Error('Cannot create unknown widget ' + name);
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Register a new annotation type
+	 *
+	 * @param {string} name The annotation name
+	 * @param {function} func A function to call to create the annotation.
+	 * @param {object|undefined} features A map of features that are used by this
+	 *      annotation.  Each key is a feature that is used.  If the value is true,
+	 *      the that feature is always needed.  If a list, then it is the set of
+	 *      annotation states for which that feature is required.  These can be
+	 *      used to pick an pparopriate renderer when creating an annotation layer.
+	 * @returns {object} if this annotation replaces an existing one, this was the
+	 *      value that was replaced.  In this case, a warning is issued.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.registerAnnotation = function (name, func, features) {
+	  var old = annotations[name];
+	  if (old) {
+	    console.warn('The ' + name + ' annotation is already registered');
+	  }
+	  annotations[name] = {func: func, features: features || {}};
+	  return old;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create an annotation based on a registered type.
+	 *
+	 * @param {string} name The annotation name
+	 * @param {object} options The options for the annotation.
+	 * @returns {object} the new annotation.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.createAnnotation = function (name, options) {
+	  if (!annotations[name]) {
+	    console.warn('The ' + name + ' annotation is not registered');
+	    return;
+	  }
+	  var annotation = annotations[name].func(options);
+	  return annotation;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Get a list of registered annotation types.
+	 *
+	 * @return {array} a list of registered annotations.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.listAnnotations = function () {
+	  return Object.keys(annotations);
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Get a list of required features for a set of annotations.
+	 *
+	 * @param {array|object|undefined} annotationList A list of annotations that
+	 *   will be used.  Instead of a list, if this is an object, the keys are the
+	 *   annotation names, and the values are each a list of modes that will be
+	 *   used with that annotation.  For example, ['polygon', 'rectangle'] lists
+	 *   features required to show those annotations in any mode,  whereas
+	 *   {polygon: [annotationState.done], rectangle: [annotationState.done]} only
+	 *   lists features thatre are needed to show the completed annotations.
+	 * @return {array} a list of features needed for the specified annotations.
+	 *   There may be duplicates in the list.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.featuresForAnnotations = function (annotationList) {
+	  var features = [];
+	
+	  var annList = Array.isArray(annotationList) ? annotationList : Object.keys(annotationList);
+	  annList.forEach(function (ann) {
+	    if (!annotations[ann]) {
+	      return;
+	    }
+	    Object.keys(annotations[ann].features).forEach(function (feature) {
+	      if (Array.isArray(annotationList) || annotationList[ann] === true ||
+	          !Array.isArray(annotations[ann].features[feature])) {
+	        features.push(feature);
+	      } else {
+	        annotationList[ann].forEach(function (state) {
+	          if ($.inArray(state, annotations[ann].features[feature]) >= 0) {
+	            features.push(feature);
+	          }
+	        });
+	      }
+	    });
+	  });
+	  return features;
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Check if there is a renderer that is supported and supports a list of
+	 * annotations.  If not, display a warning.  This generates a list of required
+	 * features, then picks the first renderer that supports all of thse features.
+	 *
+	 * @param {array|object|undefined} annotationList A list of annotations that
+	 *   will be used with this renderer.  Instead of a list, if this is an object,
+	 *   the keys are the annotation names, and the values are each a list of modes
+	 *   that will be used with that annotation.  See featuresForAnnotations for
+	 *   more details.
+	 * @return {string|null|false} the name of the renderer that should be used or
+	 *   false if no valid renderer can be determined.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.rendererForAnnotations = function (annotationList) {
+	  return util.rendererForFeatures(util.featuresForAnnotations(annotationList));
+	};
+	
+	module.exports = util;
+
+
+/***/ },
+/* 200 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(8);
+	var feature = __webpack_require__(201);
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class lineFeature
+	 *
+	 * @class geo.lineFeature
+	 * @extends geo.feature
+	 * @returns {geo.lineFeature}
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	var lineFeature = function (arg) {
+	  'use strict';
+	  if (!(this instanceof lineFeature)) {
+	    return new lineFeature(arg);
+	  }
+	
+	  var $ = __webpack_require__(5);
+	
+	  arg = arg || {};
+	  feature.call(this, arg);
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * @private
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  var m_this = this,
+	      s_init = this._init;
+	
+	  this.featureType = 'line';
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set line accessor
+	   *
+	   * @returns {geo.pointFeature}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.line = function (val) {
+	    if (val === undefined) {
+	      return m_this.style('line');
+	    } else {
+	      m_this.style('line', val);
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set position accessor
+	   *
+	   * @returns {geo.pointFeature}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.position = function (val) {
+	    if (val === undefined) {
+	      return m_this.style('position');
+	    } else {
+	      m_this.style('position', val);
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Returns an array of datum indices that contain the given point.
+	   * This is a slow implementation with runtime order of the number of
+	   * vertices.  A point is considered on a line segment if it is close to the
+	   * line or either end point.  Closeness is based on the maximum width of the
+	   * line segement, and is ceil(maxwidth / 2) + 2 pixels.  This means that
+	   * corner extensions due to mitering may be outside of the selection area and
+	   * that variable width lines will have a greater selection region than their
+	   * visual size at the narrow end.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.pointSearch = function (p) {
+	    var data, pt, line, width, indices = [], found = [], pos;
+	    data = m_this.data();
+	    if (!data || !data.length) {
+	      return {
+	        found: [],
+	        index: []
+	      };
+	    }
+	
+	    line = m_this.line();
+	    width = m_this.style.get('strokeWidth');
+	    pos = m_this.position();
+	    pt = m_this.featureGcsToDisplay(p);
+	
+	    // minimum l2 distance squared from
+	    // q -> line(u, v)
+	    function lineDist2(q, u, v) {
+	      var t, l2 = dist2(u, v);
+	
+	      if (l2 < 1) {
+	        // u, v are within 1 pixel
+	        return dist2(q, u);
+	      }
+	
+	      t = ((q.x - u.x) * (v.x - u.x) + (q.y - u.y) * (v.y - u.y)) / l2;
+	      if (t < 0) { return dist2(q, u); }
+	      if (t > 1) { return dist2(q, v); }
+	      return dist2(
+	        q,
+	        {
+	          x: u.x + t * (v.x - u.x),
+	          y: u.y + t * (v.y - u.y)
+	        }
+	      );
+	    }
+	
+	    // l2 distance squared from u to v
+	    function dist2(u, v) {
+	      var dx = u.x - v.x,
+	          dy = u.y - v.y;
+	      return dx * dx + dy * dy;
+	    }
+	
+	    // for each line
+	    data.forEach(function (d, index) {
+	      var closed = m_this.style.get('closed')(d, index),
+	          last, lastr, first;
+	
+	      try {
+	        line(d, index).forEach(function (current, j) {
+	
+	          // get the screen coordinates of the current point
+	          var p = pos(current, j, d, index);
+	          var s = m_this.featureGcsToDisplay(p);
+	          var r = Math.ceil(width(p, j, d, index) / 2) + 2;
+	
+	          if (last) {
+	            var r2 = lastr > r ? lastr * lastr : r * r;
+	            // test the line segment s -> last
+	            if (lineDist2(pt, s, last) <= r2) {
+	              // short circuit the loop here
+	              throw 'found';
+	            }
+	          }
+	
+	          last = s;
+	          lastr = r;
+	          if (!first && closed) {
+	            first = {s: s, r: r};
+	          }
+	        });
+	        if (closed && lineDist2(pt, last, first.s) <= first.r) {
+	          throw 'found';
+	        }
+	      } catch (err) {
+	        if (err !== 'found') {
+	          throw err;
+	        }
+	        found.push(d);
+	        indices.push(index);
+	      }
+	    });
+	
+	    return {
+	      found: found,
+	      index: indices
+	    };
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Returns an array of line indices that are contained in the given box.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.boxSearch = function (lowerLeft, upperRight, opts) {
+	    var pos = m_this.position(),
+	        idx = [],
+	        line = m_this.line();
+	
+	    opts = opts || {};
+	    opts.partial = opts.partial || false;
+	    if (opts.partial) {
+	      throw new Error('Unimplemented query method.');
+	    }
+	
+	    m_this.data().forEach(function (d, i) {
+	      var inside = true;
+	      line(d, i).forEach(function (e, j) {
+	        if (!inside) { return; }
+	        var p = pos(e, j, d, i);
+	        if (!(p.x >= lowerLeft.x &&
+	              p.x <= upperRight.x &&
+	              p.y >= lowerLeft.y &&
+	              p.y <= upperRight.y)
+	        ) {
+	          inside = false;
+	        }
+	      });
+	      if (inside) {
+	        idx.push(i);
+	      }
+	    });
+	    return idx;
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Initialize
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._init = function (arg) {
+	    arg = arg || {};
+	    s_init.call(m_this, arg);
+	
+	    var defaultStyle = $.extend(
+	      {},
+	      {
+	        strokeWidth: 1.0,
+	        // Default to gold color for lines
+	        strokeColor: { r: 1.0, g: 0.8431372549, b: 0.0 },
+	        strokeStyle: 'solid',
+	        strokeOpacity: 1.0,
+	        closed: false,
+	        line: function (d) { return d; },
+	        position: function (d) { return d; }
+	      },
+	      arg.style === undefined ? {} : arg.style
+	    );
+	
+	    if (arg.line !== undefined) {
+	      defaultStyle.line = arg.line;
+	    }
+	
+	    if (arg.position !== undefined) {
+	      defaultStyle.position = arg.position;
+	    }
+	
+	    m_this.style(defaultStyle);
+	
+	    m_this.dataTime().modified();
+	  };
+	
+	  this._init(arg);
+	  return this;
+	};
+	
+	/**
+	 * Create a lineFeature from an object.
+	 * @see {@link geo.feature.create}
+	 * @param {geo.layer} layer The layer to add the feature to
+	 * @param {geo.lineFeature.spec} spec The object specification
+	 * @returns {geo.lineFeature|null}
+	 */
+	lineFeature.create = function (layer, spec) {
+	  'use strict';
+	
+	  spec = spec || {};
+	  spec.type = 'line';
+	  return feature.create(layer, spec);
+	};
+	
+	lineFeature.capabilities = {
+	  /* core feature name -- support in any manner */
+	  feature: 'line',
+	  /* support for solid-colored, constant-width lines */
+	  basic: 'line.basic',
+	  /* support for lines that vary in width and color */
+	  multicolor: 'line.multicolor'
+	};
+	
+	inherit(lineFeature, feature);
+	module.exports = lineFeature;
+
+
+/***/ },
+/* 201 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var $ = __webpack_require__(5);
+	var inherit = __webpack_require__(8);
+	var sceneObject = __webpack_require__(202);
+	var timestamp = __webpack_require__(204);
+	var geo_event = __webpack_require__(9);
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class feature
+	 *
+	 * @class geo.feature
+	 * @extends geo.sceneObject
+	 * @returns {geo.feature}
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	var feature = function (arg) {
+	  'use strict';
+	  if (!(this instanceof feature)) {
+	    return new feature(arg);
+	  }
+	  sceneObject.call(this);
+	
+	  var util = __webpack_require__(80);
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * @private
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  arg = arg || {};
+	
+	  var m_this = this,
+	      s_exit = this._exit,
+	      m_selectionAPI = arg.selectionAPI === undefined ? false : arg.selectionAPI,
+	      m_style = {},
+	      m_layer = arg.layer === undefined ? null : arg.layer,
+	      m_gcs = arg.gcs,
+	      m_visible = arg.visible === undefined ? true : arg.visible,
+	      m_bin = arg.bin === undefined ? 0 : arg.bin,
+	      m_renderer = arg.renderer === undefined ? null : arg.renderer,
+	      m_dataTime = timestamp(),
+	      m_buildTime = timestamp(),
+	      m_updateTime = timestamp(),
+	      m_selectedFeatures = [];
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Private method to bind mouse handlers on the map element.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._bindMouseHandlers = function () {
+	
+	    // Don't bind handlers for improved performance on features that don't
+	    // require it.
+	    if (!m_selectionAPI) {
+	      return;
+	    }
+	
+	    // First unbind to be sure that the handlers aren't bound twice.
+	    m_this._unbindMouseHandlers();
+	
+	    m_this.geoOn(geo_event.mousemove, m_this._handleMousemove);
+	    m_this.geoOn(geo_event.mouseclick, m_this._handleMouseclick);
+	    m_this.geoOn(geo_event.brushend, m_this._handleBrushend);
+	    m_this.geoOn(geo_event.brush, m_this._handleBrush);
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Private method to unbind mouse handlers on the map element.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._unbindMouseHandlers = function () {
+	    m_this.geoOff(geo_event.mousemove, m_this._handleMousemove);
+	    m_this.geoOff(geo_event.mouseclick, m_this._handleMouseclick);
+	    m_this.geoOff(geo_event.brushend, m_this._handleBrushend);
+	    m_this.geoOff(geo_event.brush, m_this._handleBrush);
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * For binding mouse events, use functions with
+	   * the following call signatures:
+	   *
+	   * function handler(arg) {
+	   *   // arg.data - the data object of the feature
+	   *   // arg.index - the index inside the data array of the featue
+	   *   // arg.mouse - mouse information object (see src/core/mapInteractor.js)
+	   * }
+	   *
+	   * i.e.
+	   *
+	   * feature.geoOn(geo.event.feature.mousemove, function (arg) {
+	   *   // do something with the feature marker.
+	   * });
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Search for features containing the given point.
+	   *
+	   * Returns an object: ::
+	   *
+	   *   {
+	   *     data: [...] // an array of data objects for matching features
+	   *     index: [...] // an array of indices of the matching features
+	   *   }
+	   *
+	   * @argument {Object} coordinate
+	   * @returns {Object}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.pointSearch = function () {
+	    // base class method does nothing
+	    return {
+	      index: [],
+	      found: []
+	    };
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Private mousemove handler
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._handleMousemove = function () {
+	    var mouse = m_this.layer().map().interactor().mouse(),
+	        data = m_this.data(),
+	        over = m_this.pointSearch(mouse.geo),
+	        newFeatures = [], oldFeatures = [], lastTop = -1, top = -1;
+	
+	    // Get the index of the element that was previously on top
+	    if (m_selectedFeatures.length) {
+	      lastTop = m_selectedFeatures[m_selectedFeatures.length - 1];
+	    }
+	
+	    // There are probably faster ways of doing this:
+	    newFeatures = over.index.filter(function (i) {
+	      return m_selectedFeatures.indexOf(i) < 0;
+	    });
+	    oldFeatures = m_selectedFeatures.filter(function (i) {
+	      return over.index.indexOf(i) < 0;
+	    });
+	
+	    feature.eventID += 1;
+	    // Fire events for mouse in first.
+	    newFeatures.forEach(function (i, idx) {
+	      m_this.geoTrigger(geo_event.feature.mouseover, {
+	        data: data[i],
+	        index: i,
+	        mouse: mouse,
+	        eventID: feature.eventID,
+	        top: idx === newFeatures.length - 1
+	      }, true);
+	    });
+	
+	    feature.eventID += 1;
+	    // Fire events for mouse out next
+	    oldFeatures.forEach(function (i, idx) {
+	      m_this.geoTrigger(geo_event.feature.mouseout, {
+	        data: data[i],
+	        index: i,
+	        mouse: mouse,
+	        eventID: feature.eventID,
+	        top: idx === oldFeatures.length - 1
+	      }, true);
+	    });
+	
+	    feature.eventID += 1;
+	    // Fire events for mouse move last
+	    over.index.forEach(function (i, idx) {
+	      m_this.geoTrigger(geo_event.feature.mousemove, {
+	        data: data[i],
+	        index: i,
+	        mouse: mouse,
+	        eventID: feature.eventID,
+	        top: idx === over.index.length - 1
+	      }, true);
+	    });
+	
+	    // Replace the selected features array
+	    m_selectedFeatures = over.index;
+	
+	    // Get the index of the element that is now on top
+	    if (m_selectedFeatures.length) {
+	      top = m_selectedFeatures[m_selectedFeatures.length - 1];
+	    }
+	
+	    if (lastTop !== top) {
+	      // The element on top changed so we need to fire mouseon/mouseoff
+	      if (lastTop !== -1) {
+	        m_this.geoTrigger(geo_event.feature.mouseoff, {
+	          data: data[lastTop],
+	          index: lastTop,
+	          mouse: mouse
+	        }, true);
+	      }
+	
+	      if (top !== -1) {
+	        m_this.geoTrigger(geo_event.feature.mouseon, {
+	          data: data[top],
+	          index: top,
+	          mouse: mouse
+	        }, true);
+	      }
+	    }
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Private mouseclick handler
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._handleMouseclick = function () {
+	    var mouse = m_this.layer().map().interactor().mouse(),
+	        data = m_this.data(),
+	        over = m_this.pointSearch(mouse.geo);
+	
+	    feature.eventID += 1;
+	    over.index.forEach(function (i, idx) {
+	      m_this.geoTrigger(geo_event.feature.mouseclick, {
+	        data: data[i],
+	        index: i,
+	        mouse: mouse,
+	        eventID: feature.eventID,
+	        top: idx === over.index.length - 1
+	      }, true);
+	    });
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Private brush handler.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._handleBrush = function (brush) {
+	    var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
+	        data = m_this.data();
+	
+	    feature.eventID += 1;
+	    idx.forEach(function (i, idx) {
+	      m_this.geoTrigger(geo_event.feature.brush, {
+	        data: data[i],
+	        index: i,
+	        mouse: brush.mouse,
+	        brush: brush,
+	        eventID: feature.eventID,
+	        top: idx === idx.length - 1
+	      }, true);
+	    });
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Private brushend handler.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._handleBrushend = function (brush) {
+	    var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
+	        data = m_this.data();
+	
+	    feature.eventID += 1;
+	    idx.forEach(function (i, idx) {
+	      m_this.geoTrigger(geo_event.feature.brushend, {
+	        data: data[i],
+	        index: i,
+	        mouse: brush.mouse,
+	        brush: brush,
+	        eventID: feature.eventID,
+	        top: idx === idx.length - 1
+	      }, true);
+	    });
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set style used by the feature
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.style = function (arg1, arg2) {
+	    if (arg1 === undefined) {
+	      return m_style;
+	    } else if (typeof arg1 === 'string' && arg2 === undefined) {
+	      return m_style[arg1];
+	    } else if (arg2 === undefined) {
+	      m_style = $.extend({}, m_style, arg1);
+	      m_this.modified();
+	      return m_this;
+	    } else {
+	      m_style[arg1] = arg2;
+	      m_this.modified();
+	      return m_this;
+	    }
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * A uniform getter that always returns a function even for constant styles.
+	   * Maybe extend later to support accessor-like objects.  If undefined input,
+	   * return all the styles as an object.
+	   *
+	   * @param {string|undefined} key
+	   * @return {function}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.style.get = function (key) {
+	    var out;
+	    if (key === undefined) {
+	      var all = {}, k;
+	      for (k in m_style) {
+	        if (m_style.hasOwnProperty(k)) {
+	          all[k] = m_this.style.get(k);
+	        }
+	      }
+	      return all;
+	    }
+	    if (key.toLowerCase().match(/color$/)) {
+	      if (util.isFunction(m_style[key])) {
+	        out = function () {
+	          return util.convertColor(
+	            m_style[key].apply(this, arguments)
+	          );
+	        };
+	      } else {
+	        // if the color is not a function, only convert it once
+	        out = util.ensureFunction(util.convertColor(m_style[key]));
+	      }
+	    } else {
+	      out = util.ensureFunction(m_style[key]);
+	    }
+	    return out;
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get layer referenced by the feature
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.layer = function () {
+	    return m_layer;
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get renderer used by the feature
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.renderer = function () {
+	    return m_renderer;
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set projection of the feature
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.gcs = function (val) {
+	    if (val === undefined) {
+	      if (m_gcs === undefined && m_renderer) {
+	        return m_renderer.layer().map().ingcs();
+	      }
+	      return m_gcs;
+	    } else {
+	      m_gcs = val;
+	      m_this.modified();
+	      return m_this;
+	    }
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Convert from the renderer's input gcs coordinates to display coordinates.
+	   *
+	   * @param {object} c The input coordinate to convert
+	   * @param {object} c.x
+	   * @param {object} c.y
+	   * @param {object} [c.z=0]
+	   * @return {object} Display space coordinates
+	   */
+	  this.featureGcsToDisplay = function (c) {
+	    var map = m_renderer.layer().map();
+	    c = map.gcsToWorld(c, m_this.gcs());
+	    c = map.worldToDisplay(c);
+	    if (m_renderer.baseToLocal) {
+	      c = m_renderer.baseToLocal(c);
+	    }
+	    return c;
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set visibility of the feature
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.visible = function (val) {
+	    if (val === undefined) {
+	      return m_visible;
+	    } else {
+	      m_visible = val;
+	      m_this.modified();
+	
+	      // bind or unbind mouse handlers on visibility change
+	      if (m_visible) {
+	        m_this._bindMouseHandlers();
+	      } else {
+	        m_this._unbindMouseHandlers();
+	      }
+	
+	      return m_this;
+	    }
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set bin of the feature
+	   *
+	   * Bin number is typically used for sorting the order of rendering
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.bin = function (val) {
+	    if (val === undefined) {
+	      return m_bin;
+	    } else {
+	      m_bin = val;
+	      m_this.modified();
+	      return m_this;
+	    }
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set timestamp of data change
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.dataTime = function (val) {
+	    if (val === undefined) {
+	      return m_dataTime;
+	    } else {
+	      m_dataTime = val;
+	      m_this.modified();
+	      return m_this;
+	    }
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set timestamp of last time build happened
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.buildTime = function (val) {
+	    if (val === undefined) {
+	      return m_buildTime;
+	    } else {
+	      m_buildTime = val;
+	      m_this.modified();
+	      return m_this;
+	    }
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set timestamp of last time update happened
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.updateTime = function (val) {
+	    if (val === undefined) {
+	      return m_updateTime;
+	    } else {
+	      m_updateTime = val;
+	      m_this.modified();
+	      return m_this;
+	    }
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set the data array for the feature.
+	   *
+	   * @returns {Array|this}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.data = function (data) {
+	    if (data === undefined) {
+	      return m_this.style('data') || [];
+	    } else {
+	      m_this.style('data', data);
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	      return m_this;
+	    }
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Query if the selection API is enabled for this feature.
+	   * @returns {bool}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.selectionAPI = function () {
+	    return m_selectionAPI;
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Initialize
+	   *
+	   * Derived class should implement this
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._init = function (arg) {
+	    if (!m_layer) {
+	      throw 'Feature requires a valid layer';
+	    }
+	    m_style = $.extend({},
+	                {'opacity': 1.0}, arg.style === undefined ? {} :
+	                arg.style);
+	    m_this._bindMouseHandlers();
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Build
+	   *
+	   * Derived class should implement this
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._build = function () {
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Update
+	   *
+	   * Derived class should implement this
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._update = function () {
+	  };
+	
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Destroy
+	   *
+	   * Derived class should implement this
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._exit = function () {
+	    m_this._unbindMouseHandlers();
+	    m_selectedFeatures = [];
+	    m_style = {};
+	    arg = {};
+	    s_exit();
+	  };
+	
+	  this._init(arg);
+	  return this;
+	};
+	
+	/**
+	 * The most recent feature event triggered.
+	 * @type {number}
+	 */
+	feature.eventID = 0;
+	
+	/**
+	 * General object specification for feature types.
+	 * @typedef geo.feature.spec
+	 * @type {object}
+	 * @property {string} type A supported feature type.
+	 * @property {object[]} [data=[]] An array of arbitrary objects used to
+	 * construct the feature.  These objects (and their associated
+	 * indices in the array) will be passed back to style and attribute
+	 * accessors provided by the user.  In general the number of
+	 * 'markers' drawn will be equal to the length of this array.
+	 */
+	
+	/**
+	 * Create a feature from an object.  The implementation here is
+	 * meant to define the general interface of creating features
+	 * from a javascript object.  See documentation from individual
+	 * feature types for specific details.  In case of an error in
+	 * the arguments this method will return null;
+	 * @param {geo.layer} layer The layer to add the feature to
+	 * @param {geo.feature.spec} [spec={}] The object specification
+	 * @returns {geo.feature|null}
+	 */
+	feature.create = function (layer, spec) {
+	  'use strict';
+	
+	  var type = spec.type;
+	
+	  // Check arguments
+	  if (!(layer instanceof __webpack_require__(205))) {
+	    console.warn('Invalid layer');
+	    return null;
+	  }
+	  if (typeof spec !== 'object') {
+	    console.warn('Invalid spec');
+	    return null;
+	  }
+	  var feature = layer.createFeature(type);
+	  if (!feature) {
+	    console.warn('Could not create feature type "' + type + '"');
+	    return null;
+	  }
+	
+	  spec = spec || {};
+	  spec.data = spec.data || [];
+	  return feature.style(spec);
+	};
+	
+	inherit(feature, sceneObject);
+	module.exports = feature;
+
+
+/***/ },
+/* 202 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(8);
+	var object = __webpack_require__(203);
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class sceneObject, which extends the object's
+	 * event handling with a tree-based event propagation.
+	 *
+	 * @class geo.sceneObject
+	 * @extends geo.object
+	 * @returns {geo.sceneObject}
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	var sceneObject = function (arg) {
+	  'use strict';
+	  if (!(this instanceof sceneObject)) {
+	    return new sceneObject();
+	  }
+	  object.call(this, arg);
+	
+	  var m_this = this,
+	      m_parent = null,
+	      m_children = [],
+	      s_exit = this._exit,
+	      s_trigger = this.geoTrigger,
+	      s_addPromise = this.addPromise,
+	      s_onIdle = this.onIdle;
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Override object.addPromise to propagate up the scene tree.
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.addPromise = function (promise) {
+	    if (m_parent) {
+	      m_parent.addPromise(promise);
+	    } else {
+	      s_addPromise(promise);
+	    }
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Override object.onIdle to propagate up the scene tree.
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.onIdle = function (handler) {
+	    if (m_parent) {
+	      m_parent.onIdle(handler);
+	    } else {
+	      s_onIdle(handler);
+	    }
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Get/set parent of the object
+	   *  @param {?geo.sceneObject} parent
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.parent = function (arg) {
+	    if (arg === undefined) {
+	      return m_parent;
+	    }
+	    m_parent = arg;
+	    return m_this;
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Add a child (or an array of children) to the object
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.addChild = function (child) {
+	    if (Array.isArray(child)) {
+	      child.forEach(m_this.addChild);
+	      return m_this;
+	    }
+	    child.parent(m_this);
+	    m_children.push(child);
+	    return m_this;
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Remove a child (or array of children) from the object
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.removeChild = function (child) {
+	    if (Array.isArray(child)) {
+	      child.forEach(m_this.removeChild);
+	      return m_this;
+	    }
+	    m_children = m_children.filter(function (c) { return c !== child; });
+	    return m_this;
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Get an array of child objects
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.children = function () {
+	    return m_children.slice();
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Force redraw of a scene object, to be implemented by subclasses.
+	   *  Base class just calls draw of child objects.
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.draw = function (arg) {
+	    m_this.children().forEach(function (child) {
+	      child.draw(arg);
+	    });
+	    return m_this;
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Trigger an event (or events) on this object and call all handlers.
+	   *  @param {String} event the event to trigger
+	   *  @param {Object} args arbitrary argument to pass to the handler
+	   *  @param {Boolean} childrenOnly if true, only propagate down the tree
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.geoTrigger = function (event, args, childrenOnly) {
+	
+	    var geoArgs;
+	
+	    args = args || {};
+	    geoArgs = args.geo || {};
+	    args.geo = geoArgs;
+	
+	    // stop propagation if requested by the handler
+	    if (geoArgs.stopPropagation) {
+	      return m_this;
+	    }
+	
+	    // If the event was not triggered by the parent, just propagate up the tree
+	    if (!childrenOnly && m_parent && geoArgs._triggeredBy !== m_parent) {
+	      geoArgs._triggeredBy = m_this;
+	      m_parent.geoTrigger(event, args);
+	      return m_this;
+	    }
+	
+	    // call the object's own handlers
+	    s_trigger.call(m_this, event, args);
+	
+	    // stop propagation if requested by the handler
+	    if (geoArgs.stopPropagation) {
+	      return m_this;
+	    }
+	
+	    // trigger the event on the children
+	    m_children.forEach(function (child) {
+	      if (child.geoTrigger) {
+	        geoArgs._triggeredBy = m_this;
+	        child.geoTrigger(event, args);
+	      }
+	    });
+	
+	    return m_this;
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Free all resources and destroy the object.
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this._exit = function () {
+	    m_this.children = [];
+	    delete m_this.parent;
+	    s_exit();
+	  };
+	
+	  return this;
+	};
+	
+	inherit(sceneObject, object);
+	module.exports = sceneObject;
+
+
+/***/ },
+/* 203 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var vgl = __webpack_require__(85);
+	var inherit = __webpack_require__(8);
+	
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class object
+	 *
+	 * @class geo.object
+	 * @extends vgl.object
+	 * @returns {geo.object}
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	var object = function () {
+	  'use strict';
+	  if (!(this instanceof object)) {
+	    return new object();
+	  }
+	
+	  var m_this = this,
+	      m_eventHandlers = {},
+	      m_idleHandlers = [],
+	      m_promiseCount = 0;
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Bind a handler that will be called once when all internal promises are
+	   *  resolved.
+	   *
+	   *  @param {function} handler A function taking no arguments
+	   *  @returns {geo.object[]|geo.object} this
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.onIdle = function (handler) {
+	    if (m_promiseCount) {
+	      m_idleHandlers.push(handler);
+	    } else {
+	      handler();
+	    }
+	    return m_this;
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Add a new promise object preventing idle event handlers from being called
+	   *  until it is resolved.
+	   *
+	   *  @param {Promise} promise A promise object
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.addPromise = function (promise) {
+	    // called on any resolution of the promise
+	    function onDone() {
+	      m_promiseCount -= 1;
+	      if (!m_promiseCount) {
+	        m_idleHandlers.splice(0, m_idleHandlers.length)
+	          .forEach(function (handler) {
+	            handler();
+	          });
+	      }
+	    }
+	    m_promiseCount += 1;
+	    promise.then(onDone, onDone);
+	    return m_this;
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Bind an event handler to this object
+	   *
+	   *  @param {String} event
+	   *    An event from {geo.events}
+	   *  @param {function} handler
+	   *    A function that will be called when ``event`` is triggered.  The
+	   *    function will be given an event object as a first parameter and
+	   *    optionally a second argument provided by the triggerer.
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.geoOn = function (event, handler) {
+	    if (Array.isArray(event)) {
+	      event.forEach(function (e) {
+	        m_this.geoOn(e, handler);
+	      });
+	      return m_this;
+	    }
+	    if (!m_eventHandlers.hasOwnProperty(event)) {
+	      m_eventHandlers[event] = [];
+	    }
+	    m_eventHandlers[event].push(handler);
+	    return m_this;
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Trigger an event (or events) on this object and call all handlers
+	   *
+	   *  @param {String} event An event from {geo.event}
+	   *  @param {Object} args An optional argument to pass to handlers
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.geoTrigger = function (event, args) {
+	
+	    // if we have an array of events, recall with single events
+	    if (Array.isArray(event)) {
+	      event.forEach(function (e) {
+	        m_this.geoTrigger(e, args);
+	      });
+	      return m_this;
+	    }
+	
+	    // append the event type to the argument object
+	    args = args || {};
+	    args.event = event;
+	
+	    if (m_eventHandlers.hasOwnProperty(event)) {
+	      m_eventHandlers[event].forEach(function (handler) {
+	        handler.call(m_this, args);
+	      });
+	    }
+	
+	    return m_this;
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Remove handlers from an event (or an array of events).  If no event is
+	   *  provided all hanlders will be removed.
+	   *
+	   *  @param {string?} event An event from {geo.events}
+	   *  @param {object?} arg A function or array of functions to remove from the events
+	   *                      or if falsey remove all handlers from the events
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.geoOff = function (event, arg) {
+	    if (event === undefined) {
+	      m_eventHandlers = {};
+	      m_idleHandlers = [];
+	      m_promiseCount = 0;
+	    }
+	    if (Array.isArray(event)) {
+	      event.forEach(function (e) {
+	        m_this.geoOff(e, arg);
+	      });
+	      return m_this;
+	    }
+	    if (!arg) {
+	      m_eventHandlers[event] = [];
+	    } else if (Array.isArray(arg)) {
+	      arg.forEach(function (handler) {
+	        m_this.geoOff(event, handler);
+	      });
+	      return m_this;
+	    }
+	    // What do we do if the handler is not already bound?
+	    //   ignoring for now...
+	    if (m_eventHandlers.hasOwnProperty(event)) {
+	      m_eventHandlers[event] = m_eventHandlers[event].filter(function (f) {
+	        return f !== arg;
+	      }
+	      );
+	    }
+	    return m_this;
+	  };
+	
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Free all resources and destroy the object.
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this._exit = function () {
+	    m_this.geoOff();
+	  };
+	
+	  vgl.object.call(this);
+	
+	  return this;
+	};
+	
+	inherit(object, vgl.object);
+	module.exports = object;
+
+
+/***/ },
+/* 204 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var vgl = __webpack_require__(85);
 	var inherit = __webpack_require__(8);
 	
@@ -45073,1474 +46782,15 @@
 
 
 /***/ },
-/* 200 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var $ = __webpack_require__(5);
-	
-	/**
-	 * @module geo.util
-	 */
-	var util = __webpack_require__(201);
-	$.extend(util, __webpack_require__(202));
-	util.DistanceGrid = __webpack_require__(203);
-	util.ClusterGroup = __webpack_require__(204);
-	
-	module.exports = util;
-
-
-/***/ },
-/* 201 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	(function () {
-	  'use strict';
-	
-	  var $ = __webpack_require__(5);
-	  var geo = {util: {}};
-	  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	
-	  var m_timingData = {},
-	      m_timingKeepRecent = 200,
-	      m_threshold = 15,
-	      m_originalRequestAnimationFrame;
-	
-	  /**
-	   * Takes a variable number of arguments and returns the first numeric value
-	   * it finds.
-	   * @private
-	   */
-	  function setNumeric() {
-	    var i;
-	    for (i = 0; i < arguments.length; i += 1) {
-	      if (isFinite(arguments[i])) {
-	        return arguments[i];
-	      }
-	    }
-	  }
-	
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Contains utility classes and methods used by geojs.
-	   * @namespace
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  geo.util = {
-	    /**
-	     * Returns true if the given point lies in the given polygon.
-	     * Algorithm description:
-	     *   http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-	     * @param {geo.screenPosition} point The test point
-	     * @param {geo.screenPosition[]} outer The outer boundary of the polygon
-	     * @param {geo.screenPosition[][]} [inner] Inner boundaries (holes)
-	     * @param {Object} [range] If specified, range.min.x, range.min.y,
-	     *   range.max.x, and range.max.y specified the extents of the outer
-	     *   polygon and are used for early detection.
-	     * @returns {boolean} true if the point is inside the polygon.
-	     */
-	    pointInPolygon: function (point, outer, inner, range) {
-	      var inside = false, n = outer.length, i, j;
-	
-	      if (range && range.min && range.max) {
-	        if (point.x < range.min.x || point.y < range.min.y ||
-	            point.x > range.max.x || point.y > range.max.y) {
-	          return;
-	        }
-	      }
-	
-	      if (n < 3) {
-	        // we need 3 coordinates for this to make sense
-	        return false;
-	      }
-	
-	      for (i = 0, j = n - 1; i < n; j = i, i += 1) {
-	        if (((outer[i].y > point.y) !== (outer[j].y > point.y)) &&
-	            (point.x < (outer[j].x - outer[i].x) *
-	            (point.y - outer[i].y) / (outer[j].y - outer[i].y) + outer[i].x)) {
-	          inside = !inside;
-	        }
-	      }
-	
-	      if (inner && inside) {
-	        (inner || []).forEach(function (hole) {
-	          inside = inside && !geo.util.pointInPolygon(point, hole);
-	        });
-	      }
-	
-	      return inside;
-	    },
-	
-	    /**
-	     * Returns true if the argument is a function.
-	     */
-	    isFunction: function (f) {
-	      return typeof f === 'function';
-	    },
-	
-	    /**
-	     * Returns the argument if it is function, otherwise returns a function
-	     * that returns the argument.
-	     */
-	    ensureFunction: function (f) {
-	      if (geo.util.isFunction(f)) {
-	        return f;
-	      } else {
-	        return function () { return f; };
-	      }
-	    },
-	
-	    /**
-	     * Return a random string of length n || 8.
-	     */
-	    randomString: function (n) {
-	      var s, i, r;
-	      n = n || 8;
-	      s = '';
-	      for (i = 0; i < n; i += 1) {
-	        r = Math.floor(Math.random() * chars.length);
-	        s += chars.substring(r, r + 1);
-	      }
-	      return s;
-	    },
-	
-	    /**
-	     * Convert a color from hex value or css name to rgb objects
-	     */
-	    convertColor: function (color) {
-	      if (color.r !== undefined && color.g !== undefined &&
-	          color.b !== undefined) {
-	        return color;
-	      }
-	      if (typeof color === 'string') {
-	        if (geo.util.cssColors.hasOwnProperty(color)) {
-	          color = geo.util.cssColors[color];
-	        } else if (color.charAt(0) === '#') {
-	          if (color.length === 4) {
-	            /* interpret values of the form #rgb as #rrggbb */
-	            color = parseInt(color.slice(1), 16);
-	            color = (color & 0xf00) * 0x1100 + (color & 0xf0) * 0x110 + (color & 0xf) * 0x11;
-	          } else {
-	            color = parseInt(color.slice(1), 16);
-	          }
-	        }
-	      }
-	      if (isFinite(color)) {
-	        color = {
-	          r: ((color & 0xff0000) >> 16) / 255,
-	          g: ((color & 0xff00) >> 8) / 255,
-	          b: ((color & 0xff)) / 255
-	        };
-	      }
-	      return color;
-	    },
-	
-	    /**
-	     * Normalize a coordinate object into {x: ..., y: ..., z: ... } form.
-	     * Accepts 2-3d arrays,
-	     * latitude -> lat -> y
-	     * longitude -> lon -> lng -> x
-	     */
-	    normalizeCoordinates: function (p) {
-	      p = p || {};
-	      if (Array.isArray(p)) {
-	        return {
-	          x: p[0],
-	          y: p[1],
-	          z: p[2] || 0
-	        };
-	      }
-	      return {
-	        x: setNumeric(
-	          p.x,
-	          p.longitude,
-	          p.lng,
-	          p.lon,
-	          0
-	        ),
-	        y: setNumeric(
-	          p.y,
-	          p.latitude,
-	          p.lat,
-	          0
-	        ),
-	        z: setNumeric(
-	          p.z,
-	          p.elevation,
-	          p.elev,
-	          p.height,
-	          0
-	        )
-	      };
-	    },
-	
-	    /**
-	     * Radius of the earth in meters, from the equatorial radius of SRID 4326.
-	     */
-	    radiusEarth: 6378137,
-	
-	    /**
-	     * Linearly combine two "coordinate-like" objects in a uniform way.
-	     * Coordinate like objects have ``x``, ``y``, and optionally a ``z``
-	     * key.  The first object is mutated.
-	     *
-	     *   a <= ca * a + cb * b
-	     *
-	     * @param {number} ca
-	     * @param {object} a
-	     * @param {number} [a.x=0]
-	     * @param {number} [a.y=0]
-	     * @param {number} [a.z=0]
-	     * @param {number} cb
-	     * @param {object} b
-	     * @param {number} [b.x=0]
-	     * @param {number} [b.y=0]
-	     * @param {number} [b.z=0]
-	     * @returns {object} ca * a + cb * b
-	     */
-	    lincomb: function (ca, a, cb, b) {
-	      a.x = ca * (a.x || 0) + cb * (b.x || 0);
-	      a.y = ca * (a.y || 0) + cb * (b.y || 0);
-	      a.z = ca * (a.x || 0) + cb * (b.x || 0);
-	      return a;
-	    },
-	
-	    /**
-	     * Element-wise product of two coordinate-like object.  Mutates
-	     * the first object.  Note the default values for ``b``, which
-	     * are intended to used as a anisotropic scaling factors.
-	     *
-	     *   a <= a * b^pow
-	     *
-	     * @param {object} a
-	     * @param {number} [a.x=0]
-	     * @param {number} [a.y=0]
-	     * @param {number} [a.z=0]
-	     * @param {object} b
-	     * @param {number} [b.x=1]
-	     * @param {number} [b.y=1]
-	     * @param {number} [b.z=1]
-	     * @param {number} [pow=1]
-	     * @returns {object} a * b^pow
-	     */
-	    scale: function (a, b, pow) {
-	      a.x = (a.x || 0) * Math.pow(b.x || 1, pow);
-	      a.y = (a.y || 0) * Math.pow(b.y || 1, pow);
-	      a.z = (a.z || 0) * Math.pow(b.z || 1, pow);
-	      return a;
-	    },
-	
-	    /**
-	     * Compare two arrays and return if their contents are equal.
-	     * @param {array} a1 first array to compare
-	     * @param {array} a2 second array to compare
-	     * @returns {boolean} true if the contents of the arrays are equal.
-	     */
-	    compareArrays: function (a1, a2) {
-	      return (a1.length === a2.length && a1.every(function (el, idx) {
-	        return el === a2[idx];
-	      }));
-	    },
-	
-	    /**
-	     * Create a vec3 that is always an array.  This should only be used if it
-	     * will not be used in a WebGL context.  Plain arrays usually use 64-bit
-	     * float values, whereas vec3 defaults to 32-bit floats.
-	     *
-	     * @returns {Array} zeroed-out vec3 compatible array.
-	     */
-	    vec3AsArray: function () {
-	      return [0, 0, 0];
-	    },
-	
-	    /**
-	     * Create a mat4 that is always an array.  This should only be used if it
-	     * will not be used in a WebGL context.  Plain arrays usually use 64-bit
-	     * float values, whereas mat4 defaults to 32-bit floats.
-	     *
-	     * @returns {Array} identity mat4 compatible array.
-	     */
-	    mat4AsArray: function () {
-	      return [
-	        1, 0, 0, 0,
-	        0, 1, 0, 0,
-	        0, 0, 1, 0,
-	        0, 0, 0, 1
-	      ];
-	    },
-	
-	    /**
-	     * Get a buffer for a vgl geometry source.  If a buffer already exists and
-	     * is the correct size, return it.  Otherwise, allocate a new buffer; any
-	     * data in an old buffer is discarded.
-	     *
-	     * @param geom: the geometry to reference and modify.
-	     * @param srcName: the name of the source.
-	     * @param len: the number of elements for the array.
-	     * @returns {Float32Array}
-	     */
-	    getGeomBuffer: function (geom, srcName, len) {
-	      var src = geom.sourceByName(srcName), data;
-	
-	      data = src.data();
-	      if (data instanceof Float32Array && data.length === len) {
-	        return data;
-	      }
-	      data = new Float32Array(len);
-	      src.setData(data);
-	      return data;
-	    },
-	
-	    /**
-	     * Ensure that the input and modifiers properties of all actions are
-	     * objects, not plain strings.
-	     *
-	     * @param {Array} actions: an array of actions to adjust as needed.
-	     */
-	    adjustActions: function (actions) {
-	      var action, i;
-	      for (i = 0; i < actions.length; i += 1) {
-	        action = actions[i];
-	        if ($.type(action.input) === 'string') {
-	          var actionEvents = {};
-	          actionEvents[action.input] = true;
-	          action.input = actionEvents;
-	        }
-	        if (!action.modifiers) {
-	          action.modifiers = {};
-	        }
-	        if ($.type(action.modifiers) === 'string') {
-	          var actionModifiers = {};
-	          actionModifiers[action.modifiers] = true;
-	          action.modifiers = actionModifiers;
-	        }
-	      }
-	    },
-	
-	    /**
-	     * Add an action to the list of handled actions.
-	     *
-	     * @param {Array} actions: an array of actions to adjust as needed.
-	     * @param {object} action: an object defining the action.  This must have
-	     *    action and event properties, and may have modifiers, name, and owner.
-	     *    Use action, name, and owner to make this entry distinct if it will
-	     *    need to be removed later.
-	     * @param {boolean} toEnd: the action is added at the beginning of the
-	     *    actions list unless toEnd is true.  Earlier actions prevent later
-	     *    actions with the similar input and modifiers.
-	     */
-	    addAction: function (actions, action, toEnd) {
-	      if (toEnd) {
-	        actions.push(action);
-	      } else {
-	        actions.unshift(action);
-	      }
-	      geo.util.adjustActions(actions);
-	    },
-	
-	    /**
-	     * Check if an action is in the actions list.  An action matches if the
-	     * action, name, and owner match.  A null or undefined value will match all
-	     * actions.  If using an action object, this is the same as passing
-	     * (action.action, action.name, action.owner).
-	     *
-	     * @param {Array} actions: an array of actions to search.
-	     * @param {object|string} action Either an action object or the name of an
-	     *    action.
-	     * @param {string} name Optional name associated with the action.
-	     * @param {string} owner Optional owner associated with the action.
-	     * @return action the first matching action or null.
-	     */
-	    hasAction: function (actions, action, name, owner) {
-	      if (action && action.action) {
-	        name = action.name;
-	        owner = action.owner;
-	        action = action.action;
-	      }
-	      for (var i = 0; i < actions.length; i += 1) {
-	        if ((!action || actions[i].action === action) &&
-	            (!name || actions[i].name === name) &&
-	            (!owner || actions[i].owner === owner)) {
-	          return actions[i];
-	        }
-	      }
-	      return null;
-	    },
-	
-	    /**
-	     * Remove all matching actions.  Actions are matched as with hasAction.
-	     *
-	     * @param {Array} actions: an array of actions to adjust as needed.
-	     * @param {object|string} action Either an action object or the name of an
-	     *    action.
-	     * @param {string} name Optional name associated with the action.
-	     * @param {string} owner Optional owner associated with the action.
-	     * @return numRemoved the number of actions that were removed.
-	     */
-	    removeAction: function (actions, action, name, owner) {
-	      var found, removed = 0;
-	
-	      do {
-	        found = geo.util.hasAction(actions, action, name, owner);
-	        if (found) {
-	          actions.splice($.inArray(found, actions), 1);
-	          removed += 1;
-	        }
-	      } while (found);
-	      return removed;
-	    },
-	
-	    /**
-	     * Determine if the current inputs and modifiers match a known action.
-	     *
-	     * @param {object} inputs: an object where each input that is currently
-	     *    active is truthy.  Common inputs are left, right, middle, wheel.
-	     * @param {object} modifiers: an object where each currently applied
-	     *    modifier is truthy.  Common modifiers are shift, ctrl, alt, meta.
-	     * @param {Array} actions: a list of actions to compare to the inputs and
-	     *    modifiers.  The first action that matches will be returned.
-	     * @returns {object} action A matching action or undefined.
-	     */
-	    actionMatch: function (inputs, modifiers, actions) {
-	      var matched;
-	
-	      /* actions must have already been processed by adjustActions */
-	      if (actions.some(function (action) {
-	        for (var input in action.input) {
-	          if (action.input.hasOwnProperty(input)) {
-	            if ((action.input[input] === false && inputs[input]) ||
-	                (action.input[input] && !inputs[input])) {
-	              return false;
-	            }
-	          }
-	        }
-	        for (var modifier in action.modifiers) {
-	          if (action.modifiers.hasOwnProperty(modifier)) {
-	            if ((action.modifiers[modifier] === false && modifiers[modifier]) ||
-	                (action.modifiers[modifier] && !modifiers[modifier])) {
-	              return false;
-	            }
-	          }
-	        }
-	        matched = action;
-	        return true;
-	      })) {
-	        return matched;
-	      }
-	    },
-	
-	    /**
-	     * Report on one or all of the tracked timings.
-	     *
-	     * @param {string} name name to report on, or undefined to report all.
-	     */
-	    timeReport: function (name) {
-	      $.each(m_timingData, function (key, item) {
-	        /* calculate the standard deviation of each item. */
-	        if (item.count) {
-	          item.stddev = Math.sqrt(Math.abs((
-	            item.sum2 - item.sum * item.sum / item.count) / item.count));
-	          item.average = item.sum / item.count;
-	        } else {
-	          item.stddev = 0;
-	          item.average = 0;
-	        }
-	      });
-	      if (name) {
-	        return m_timingData[name];
-	      }
-	      return m_timingData;
-	    },
-	
-	    /**
-	     * Note the start time of a function (or any other section of code).  This
-	     * should be paired with timeFunctionStop, which will collect statistics on
-	     * the amount of time spent in a function.
-	     *
-	     * @param {string} name name to use for tracking the timing.
-	     * @param {boolean} reset if true, clear old tracking data.
-	     */
-	    timeFunctionStart: function (name, reset) {
-	      if (!m_timingData[name] || reset) {
-	        m_timingData[name] = {
-	          count: 0, sum: 0, sum2: 0, max: 0, recent: []
-	        };
-	      }
-	      m_timingData[name].start = window.performance.now();
-	    },
-	
-	    /**
-	     * Note the stop time of a function (or any other section of code).  This
-	     * should be paired with timeFunctionStart.
-	     *
-	     * @param {string} name name to use for tracking the timing.
-	     */
-	    timeFunctionStop: function (name) {
-	      if (!m_timingData[name] || !m_timingData[name].start) {
-	        return;
-	      }
-	      var duration = window.performance.now() - m_timingData[name].start;
-	      m_timingData[name].start = null;
-	      m_timingData[name].sum += duration;
-	      m_timingData[name].sum2 += duration * duration;
-	      m_timingData[name].count += 1;
-	      m_timingData[name].max = Math.max(
-	        m_timingData[name].max, duration);
-	      m_timingData[name].recent.push(duration);
-	      if (m_timingData[name].recent.length > m_timingKeepRecent) {
-	        m_timingData[name].recent.splice(
-	            0, m_timingData[name].recent.length - m_timingKeepRecent);
-	      }
-	    },
-	
-	    /**
-	     * Start or stop tracking the time spent in requestAnimationFrame.  If
-	     * tracked, the results can be fetched via
-	     * timeFunctionReport('requestAnimationFrame').
-	     *
-	     * @param {boolean} stop falsy to start tracking, truthy to start tracking.
-	     * @param {boolean} reset if true, reset the statistics.
-	     * @param {number} threshold if present, set the threshold used in tracking
-	     *   slow callbacks.
-	     * @param {number} keep if present, set the number of recent frame times
-	     *   to track.
-	     */
-	    timeRequestAnimationFrame: function (stop, reset, threshold, keep) {
-	      if (!m_timingData.requestAnimationFrame || reset) {
-	        m_timingData.requestAnimationFrame = {
-	          count: 0, sum: 0, sum2: 0, max: 0, above_threshold: 0,
-	          recent: [], recentsub: []
-	        };
-	      }
-	      if (threshold) {
-	        m_threshold = threshold;
-	      }
-	      if (keep) {
-	        m_timingKeepRecent = keep;
-	      }
-	      if (stop && m_originalRequestAnimationFrame) {
-	        window.requestAnimationFrame = m_originalRequestAnimationFrame;
-	        m_originalRequestAnimationFrame = null;
-	      } else if (!stop && !m_originalRequestAnimationFrame) {
-	        m_originalRequestAnimationFrame = window.requestAnimationFrame;
-	        window.requestAnimationFrame = function (callback) {
-	          m_originalRequestAnimationFrame.call(window, function (timestamp) {
-	            var track = m_timingData.requestAnimationFrame, recent;
-	            /* Some environments have unsynchronized performance and time
-	             * counters.  The nowDelta factor compensates for this.  For
-	             * instance, our test enviornment has performance.now() values on
-	             * the order of ~3000 and timestamps approximating epoch. */
-	            if (track.timestamp !== timestamp) {
-	              track.nowDelta = window.performance.now() - timestamp;
-	              if (Math.abs(track.nowDelta) < 1000) {
-	                track.nowDelta = 0;
-	              }
-	              track.timestamp = timestamp;
-	              track.subcalls = track.subcalls || 0;
-	              track.start = {
-	                sum: track.sum,
-	                sum2: track.sum2,
-	                count: track.count,
-	                max: track.max,
-	                above_threshold: track.above_threshold
-	              };
-	              track.recent.push([0]);
-	              track.recentsub.push([]);
-	              if (track.recent.length > m_timingKeepRecent) {
-	                track.recent.splice(
-	                    0, track.recent.length - m_timingKeepRecent);
-	                track.recentsub.splice(
-	                    0, track.recentsub.length - m_timingKeepRecent);
-	              }
-	            }
-	            track.subcalls += 1;
-	            callback.apply(this, arguments);
-	            var duration = window.performance.now() - timestamp;
-	            duration -= track.nowDelta;
-	            track.sum = track.start.sum + duration;
-	            track.sum2 = track.start.sum2 + duration * duration;
-	            track.count = track.start.count + 1;
-	            track.max = Math.max(track.max, duration);
-	            track.above_threshold = track.start.above_threshold + (
-	              duration >= m_threshold ? 1 : 0);
-	            track.recent[track.recent.length - 1] = duration;
-	            recent = track.recentsub[track.recent.length - 1];
-	            recent.push({
-	              total_duration: duration,
-	              duration: duration - (recent.length ?
-	                recent[recent.length - 1].total_duration : 0),
-	              callback: callback.name || callback
-	            });
-	          });
-	        };
-	      }
-	    }
-	  };
-	
-	  geo.util.cssColors = {
-	    aliceblue: 0xf0f8ff,
-	    antiquewhite: 0xfaebd7,
-	    aqua: 0x00ffff,
-	    aquamarine: 0x7fffd4,
-	    azure: 0xf0ffff,
-	    beige: 0xf5f5dc,
-	    bisque: 0xffe4c4,
-	    black: 0x000000,
-	    blanchedalmond: 0xffebcd,
-	    blue: 0x0000ff,
-	    blueviolet: 0x8a2be2,
-	    brown: 0xa52a2a,
-	    burlywood: 0xdeb887,
-	    cadetblue: 0x5f9ea0,
-	    chartreuse: 0x7fff00,
-	    chocolate: 0xd2691e,
-	    coral: 0xff7f50,
-	    cornflowerblue: 0x6495ed,
-	    cornsilk: 0xfff8dc,
-	    crimson: 0xdc143c,
-	    cyan: 0x00ffff,
-	    darkblue: 0x00008b,
-	    darkcyan: 0x008b8b,
-	    darkgoldenrod: 0xb8860b,
-	    darkgray: 0xa9a9a9,
-	    darkgreen: 0x006400,
-	    darkgrey: 0xa9a9a9,
-	    darkkhaki: 0xbdb76b,
-	    darkmagenta: 0x8b008b,
-	    darkolivegreen: 0x556b2f,
-	    darkorange: 0xff8c00,
-	    darkorchid: 0x9932cc,
-	    darkred: 0x8b0000,
-	    darksalmon: 0xe9967a,
-	    darkseagreen: 0x8fbc8f,
-	    darkslateblue: 0x483d8b,
-	    darkslategray: 0x2f4f4f,
-	    darkslategrey: 0x2f4f4f,
-	    darkturquoise: 0x00ced1,
-	    darkviolet: 0x9400d3,
-	    deeppink: 0xff1493,
-	    deepskyblue: 0x00bfff,
-	    dimgray: 0x696969,
-	    dimgrey: 0x696969,
-	    dodgerblue: 0x1e90ff,
-	    firebrick: 0xb22222,
-	    floralwhite: 0xfffaf0,
-	    forestgreen: 0x228b22,
-	    fuchsia: 0xff00ff,
-	    gainsboro: 0xdcdcdc,
-	    ghostwhite: 0xf8f8ff,
-	    gold: 0xffd700,
-	    goldenrod: 0xdaa520,
-	    gray: 0x808080,
-	    green: 0x008000,
-	    greenyellow: 0xadff2f,
-	    grey: 0x808080,
-	    honeydew: 0xf0fff0,
-	    hotpink: 0xff69b4,
-	    indianred: 0xcd5c5c,
-	    indigo: 0x4b0082,
-	    ivory: 0xfffff0,
-	    khaki: 0xf0e68c,
-	    lavender: 0xe6e6fa,
-	    lavenderblush: 0xfff0f5,
-	    lawngreen: 0x7cfc00,
-	    lemonchiffon: 0xfffacd,
-	    lightblue: 0xadd8e6,
-	    lightcoral: 0xf08080,
-	    lightcyan: 0xe0ffff,
-	    lightgoldenrodyellow: 0xfafad2,
-	    lightgray: 0xd3d3d3,
-	    lightgreen: 0x90ee90,
-	    lightgrey: 0xd3d3d3,
-	    lightpink: 0xffb6c1,
-	    lightsalmon: 0xffa07a,
-	    lightseagreen: 0x20b2aa,
-	    lightskyblue: 0x87cefa,
-	    lightslategray: 0x778899,
-	    lightslategrey: 0x778899,
-	    lightsteelblue: 0xb0c4de,
-	    lightyellow: 0xffffe0,
-	    lime: 0x00ff00,
-	    limegreen: 0x32cd32,
-	    linen: 0xfaf0e6,
-	    magenta: 0xff00ff,
-	    maroon: 0x800000,
-	    mediumaquamarine: 0x66cdaa,
-	    mediumblue: 0x0000cd,
-	    mediumorchid: 0xba55d3,
-	    mediumpurple: 0x9370db,
-	    mediumseagreen: 0x3cb371,
-	    mediumslateblue: 0x7b68ee,
-	    mediumspringgreen: 0x00fa9a,
-	    mediumturquoise: 0x48d1cc,
-	    mediumvioletred: 0xc71585,
-	    midnightblue: 0x191970,
-	    mintcream: 0xf5fffa,
-	    mistyrose: 0xffe4e1,
-	    moccasin: 0xffe4b5,
-	    navajowhite: 0xffdead,
-	    navy: 0x000080,
-	    oldlace: 0xfdf5e6,
-	    olive: 0x808000,
-	    olivedrab: 0x6b8e23,
-	    orange: 0xffa500,
-	    orangered: 0xff4500,
-	    orchid: 0xda70d6,
-	    palegoldenrod: 0xeee8aa,
-	    palegreen: 0x98fb98,
-	    paleturquoise: 0xafeeee,
-	    palevioletred: 0xdb7093,
-	    papayawhip: 0xffefd5,
-	    peachpuff: 0xffdab9,
-	    peru: 0xcd853f,
-	    pink: 0xffc0cb,
-	    plum: 0xdda0dd,
-	    powderblue: 0xb0e0e6,
-	    purple: 0x800080,
-	    red: 0xff0000,
-	    rosybrown: 0xbc8f8f,
-	    royalblue: 0x4169e1,
-	    saddlebrown: 0x8b4513,
-	    salmon: 0xfa8072,
-	    sandybrown: 0xf4a460,
-	    seagreen: 0x2e8b57,
-	    seashell: 0xfff5ee,
-	    sienna: 0xa0522d,
-	    silver: 0xc0c0c0,
-	    skyblue: 0x87ceeb,
-	    slateblue: 0x6a5acd,
-	    slategray: 0x708090,
-	    slategrey: 0x708090,
-	    snow: 0xfffafa,
-	    springgreen: 0x00ff7f,
-	    steelblue: 0x4682b4,
-	    tan: 0xd2b48c,
-	    teal: 0x008080,
-	    thistle: 0xd8bfd8,
-	    tomato: 0xff6347,
-	    turquoise: 0x40e0d0,
-	    violet: 0xee82ee,
-	    wheat: 0xf5deb3,
-	    white: 0xffffff,
-	    whitesmoke: 0xf5f5f5,
-	    yellow: 0xffff00,
-	    yellowgreen: 0x9acd32
-	  };
-	
-	  module.exports = geo.util;
-	}());
-
-
-/***/ },
-/* 202 */
-/***/ function(module, exports) {
-
-	/**
-	 * @file
-	 * Based on the following jquery throttle / debounce plugin:
-	 *
-	 * jQuery throttle / debounce - v1.1 - 3/7/2010
-	 * http://benalman.com/projects/jquery-throttle-debounce-plugin/
-	 *
-	 * @copyright 2010 "Cowboy" Ben Alman
-	 * Dual licensed under the MIT and GPL licenses.
-	 * http://benalman.com/about/license/
-	 *
-	 * The implementation included here is modified to support a callback
-	 * method that can accumulate values between actual invocations of
-	 * the throttled method.
-	 */
-	
-	(function (window) {
-	  'use strict';
-	
-	  /**
-	   * Throttle execution of a function. Especially useful for rate limiting
-	   * execution of handlers on events like resize and scroll. If you want to
-	   * rate-limit execution of a function to a single time see
-	   * {@link geo.util.debounce}.
-	   *
-	   * In this visualization, | is a throttled-function call and X is the actual
-	   * callback execution:
-	   *
-	   * ::
-	   *   Throttled with `no_trailing` specified as false or unspecified:
-	   *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
-	   *   X    X    X    X    X    X        X    X    X    X    X    X
-	   *
-	   *   Throttled with `no_trailing` specified as true:
-	   *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
-	   *   X    X    X    X    X             X    X    X    X    X
-	   *
-	   * @function geo.util.throttle
-	   * @param {number} delay A zero-or-greater delay in milliseconds. For event
-	   *    callbacks, values around 100 or 250 (or even higher) are most useful.
-	   * @param {boolean} [no_trailing=false] If no_trailing is
-	   *    true, callback will only execute every `delay` milliseconds while the
-	   *    throttled-function is being called. If no_trailing is false or
-	   *    unspecified, callback will be executed one final time after the last
-	   *    throttled-function call. (After the throttled-function has not been
-	   *    called for `delay` milliseconds, the internal counter is reset)
-	   * @param {function} callback A function to be executed after `delay`
-	   *    milliseconds. The `this` context and all arguments are passed through,
-	   *    as-is, to `callback` when the throttled-function is executed.
-	   * @param {function} [accumulator] A function to be executed (synchronously)
-	   *    during **each** call to the wrapped function.  Typically, this
-	   *    this method is used to accumulate values that the callback uses
-	   *    when it finally executes.
-	   *
-	   * @returns {function} The throttled version of `callback`
-	   *
-	   * @example
-	   * var throttled = geo.util.throttle( delay, [ no_trailing, ] callback );
-	   * $('selector').bind( 'someevent', throttled );
-	   * $('selector').unbind( 'someevent', throttled );
-	   */
-	  var throttle = function (delay, no_trailing,
-	                                callback, accumulator, debounce_mode) {
-	    // After wrapper has stopped being called, this timeout ensures that
-	    // `callback` is executed at the proper times in `throttle` and `end`
-	    // debounce modes.
-	    var timeout_id,
-	
-	      // Keep track of the last time `callback` was executed.
-	        last_exec = 0;
-	
-	    // `no_trailing` defaults to falsy.
-	    if (typeof no_trailing !== 'boolean') {
-	      debounce_mode = accumulator;
-	      accumulator = callback;
-	      callback = no_trailing;
-	      no_trailing = undefined;
-	    }
-	
-	    // accumulator defaults to no-op
-	    if (typeof accumulator !== 'function') {
-	      debounce_mode = accumulator;
-	      accumulator = function () {};
-	    }
-	
-	    // The `wrapper` function encapsulates all of the throttling / debouncing
-	    // functionality and when executed will limit the rate at which `callback`
-	    // is executed.
-	    function wrapper() {
-	      var that = this,
-	          elapsed = +new Date() - last_exec,
-	          args = arguments;
-	
-	      // Execute `callback` and update the `last_exec` timestamp.
-	      function exec() {
-	        last_exec = +new Date();
-	        callback.apply(that, args);
-	      }
-	
-	      // If `debounce_mode` is true (at_begin) this is used to clear the flag
-	      // to allow future `callback` executions.
-	      function clear() {
-	        timeout_id = undefined;
-	      }
-	
-	      // always call the accumulator first
-	      accumulator.apply(that, args);
-	
-	      if (debounce_mode && !timeout_id) {
-	        // Since `wrapper` is being called for the first time and
-	        // `debounce_mode` is true (at_begin), execute `callback`.
-	        exec();
-	      }
-	
-	      // Clear any existing timeout.
-	      void (
-	        timeout_id && clearTimeout(timeout_id)
-	      );
-	
-	      if (debounce_mode === undefined && elapsed > delay) {
-	        // In throttle mode, if `delay` time has been exceeded, execute
-	        // `callback`.
-	        exec();
-	
-	      } else if (no_trailing !== true) {
-	        // In trailing throttle mode, since `delay` time has not been
-	        // exceeded, schedule `callback` to execute `delay` ms after most
-	        // recent execution.
-	        //
-	        // If `debounce_mode` is true (at_begin), schedule `clear` to execute
-	        // after `delay` ms.
-	        //
-	        // If `debounce_mode` is false (at end), schedule `callback` to
-	        // execute after `delay` ms.
-	        timeout_id = setTimeout(
-	          debounce_mode ?
-	            clear :
-	            exec,
-	          debounce_mode === undefined ?
-	            delay - elapsed :
-	            delay
-	        );
-	      }
-	    }
-	
-	    // Return the wrapper function.
-	    return wrapper;
-	  };
-	
-	  /**
-	   * Debounce execution of a function. Debouncing, unlike throttling,
-	   * guarantees that a function is only executed a single time, either at the
-	   * very beginning of a series of calls, or at the very end. If you want to
-	   * simply rate-limit execution of a function, see the <jQuery.throttle>
-	   * method.
-	   *
-	   * In this visualization, | is a debounced-function call and X is the actual
-	   * callback execution:
-	   *
-	   * ::
-	   *
-	   *   Debounced with `at_begin` specified as false or unspecified:
-	   *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
-	   *                            X                                 X
-	   *
-	   *   Debounced with `at_begin` specified as true:
-	   *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
-	   *   X                                 X
-	   *
-	   *
-	   * @param {number} delay A zero-or-greater delay in milliseconds. For event
-	   *    callbacks, values around 100 or 250 (or even higher) are most useful.
-	   * @param {boolean} [at_begin=false] If at_begin is false or
-	   *    unspecified, callback will only be executed `delay` milliseconds after
-	   *    the last debounced-function call. If at_begin is true, callback will be
-	   *    executed only at the first debounced-function call. (After the
-	   *    throttled-function has not been called for `delay` milliseconds, the
-	   *    internal counter is reset)
-	   * @param {function} callback A function to be executed after delay milliseconds.
-	   *    The `this` context and all arguments are passed through, as-is, to
-	   *    `callback` when the debounced-function is executed.
-	   * @param {function} [accumulator] A function to be executed (synchronously)
-	   *    during **each** call to the wrapped function.  Typically, this
-	   *    this method is used to accumulate values that the callback uses
-	   *    when it finally executes.
-	   *
-	   * @returns {function} A new, debounced, function.
-	   *
-	   * @example
-	   * var debounced = geo.util.debounce( delay, [ at_begin, ] callback );
-	   * $('selector').bind( 'someevent', debounced );
-	   * $('selector').unbind( 'someevent', debounced );
-	   *
-	   */
-	
-	  var debounce = function (delay, at_begin, callback, accumulator) {
-	    if (typeof at_begin !== 'boolean') {
-	      accumulator = callback;
-	      callback = at_begin;
-	      at_begin = false;
-	    }
-	    accumulator = accumulator || function () {};
-	    return throttle(delay, false, callback, accumulator, !!at_begin);
-	  };
-	
-	  module.exports = {
-	    throttle: throttle,
-	    debounce: debounce
-	  };
-	})(this);
-
-
-/***/ },
-/* 203 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*
-	markercluster plugin:
-	
-	Copyright 2012 David Leaver
-	
-	Permission is hereby granted, free of charge, to any person obtaining
-	a copy of this software and associated documentation files (the
-	"Software"), to deal in the Software without restriction, including
-	without limitation the rights to use, copy, modify, merge, publish,
-	distribute, sublicense, and/or sell copies of the Software, and to
-	permit persons to whom the Software is furnished to do so, subject to
-	the following conditions:
-	
-	The above copyright notice and this permission notice shall be
-	included in all copies or substantial portions of the Software.
-	
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-	EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-	NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-	LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-	OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-	
-	Leaflet utilities:
-	
-	Copyright (c) 2010-2015, Vladimir Agafonkin
-	Copyright (c) 2010-2011, CloudMade
-	All rights reserved.
-	
-	Redistribution and use in source and binary forms, with or without modification, are
-	permitted provided that the following conditions are met:
-	
-	   1. Redistributions of source code must retain the above copyright notice, this list of
-	      conditions and the following disclaimer.
-	
-	   2. Redistributions in binary form must reproduce the above copyright notice, this list
-	      of conditions and the following disclaimer in the documentation and/or other
-	      materials provided with the distribution.
-	
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-	EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-	MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-	COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-	EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-	SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-	HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-	TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-	*/
-	
-	/**
-	 * @file
-	 * Code taken from https://github.com/Leaflet/Leaflet.markercluster
-	 * to support faster hierarchical clustering of features.
-	 * @copyright 2012, David Leaver
-	 */
-	
-	(function () {
-	    "use strict";
-	
-	    var $ = __webpack_require__(5);
-	    var L = {};
-	    L.Util = {
-	        // return unique ID of an object
-	        stamp: function (obj) {
-	            obj._leaflet_id = obj._leaflet_id || ++L.Util.lastId;
-	            return obj._leaflet_id;
-	        },
-	        lastId: 0
-	    };
-	
-	    var DistanceGrid = function (cellSize) {
-	        this._cellSize = cellSize;
-	        this._sqCellSize = cellSize * cellSize;
-	        this._grid = {};
-	        this._objectPoint = {};
-	    };
-	
-	    DistanceGrid.prototype = {
-	
-	        addObject: function (obj, point) {
-	            var x = this._getCoord(point.x),
-	                y = this._getCoord(point.y),
-	                grid = this._grid,
-	                row = grid[y] = grid[y] || {},
-	                cell = row[x] = row[x] || [],
-	                stamp = L.Util.stamp(obj);
-	
-	            point.obj = obj;
-	            this._objectPoint[stamp] = point;
-	
-	            cell.push(obj);
-	        },
-	
-	        updateObject: function (obj, point) {
-	            this.removeObject(obj);
-	            this.addObject(obj, point);
-	        },
-	
-	        //Returns true if the object was found
-	        removeObject: function (obj, point) {
-	            var x = this._getCoord(point.x),
-	                y = this._getCoord(point.y),
-	                grid = this._grid,
-	                row = grid[y] = grid[y] || {},
-	                cell = row[x] = row[x] || [],
-	                i, len;
-	
-	            delete this._objectPoint[L.Util.stamp(obj)];
-	
-	            for (i = 0, len = cell.length; i < len; i++) {
-	                if (cell[i] === obj) {
-	
-	                    cell.splice(i, 1);
-	
-	                    if (len === 1) {
-	                        delete row[x];
-	                    }
-	
-	                    return true;
-	                }
-	            }
-	
-	        },
-	
-	        eachObject: function (fn, context) {
-	            var i, j, k, len, row, cell, removed,
-	                grid = this._grid;
-	
-	            for (i in grid) {
-	                row = grid[i];
-	
-	                for (j in row) {
-	                    cell = row[j];
-	
-	                    for (k = 0, len = cell.length; k < len; k++) {
-	                        removed = fn.call(context, cell[k]);
-	                        if (removed) {
-	                            k--;
-	                            len--;
-	                        }
-	                    }
-	                }
-	            }
-	        },
-	
-	        getNearObject: function (point) {
-	            var x = this._getCoord(point.x),
-	                y = this._getCoord(point.y),
-	                i, j, k, row, cell, len, obj, dist,
-	                objectPoint = this._objectPoint,
-	                closestDistSq = this._sqCellSize,
-	                closest = null;
-	
-	            for (i = y - 1; i <= y + 1; i++) {
-	                row = this._grid[i];
-	                if (row) {
-	
-	                    for (j = x - 1; j <= x + 1; j++) {
-	                        cell = row[j];
-	                        if (cell) {
-	
-	                            for (k = 0, len = cell.length; k < len; k++) {
-	                                obj = cell[k];
-	                                dist = this._sqDist(
-	                                    objectPoint[L.Util.stamp(obj)],
-	                                    point
-	                                );
-	                                if (dist < closestDistSq) {
-	                                    closestDistSq = dist;
-	                                    closest = obj;
-	                                }
-	                            }
-	                        }
-	                    }
-	                }
-	            }
-	            return closest;
-	        },
-	
-	        /* return the point coordinates contained in the structure */
-	        contents: function () {
-	            return $.map(this._objectPoint, function (val) { return val; });
-	        },
-	
-	        _getCoord: function (x) {
-	            return Math.floor(x / this._cellSize);
-	        },
-	
-	        _sqDist: function (p, p2) {
-	            var dx = p2.x - p.x,
-	                dy = p2.y - p.y;
-	            return dx * dx + dy * dy;
-	        }
-	    };
-	
-	    module.exports = DistanceGrid;
-	})();
-
-
-/***/ },
-/* 204 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * @file
-	 * Using methods adapted from leaflet to cluster an array of positions
-	 * hierarchically given an array of length scales (zoom levels).
-	 */
-	
-	(function () {
-	  'use strict';
-	
-	  var $ = __webpack_require__(5);
-	  var vgl = __webpack_require__(85);
-	
-	  /**
-	   * This class manages a group of nearby points that are clustered as a
-	   * single object for display purposes.  The class constructor is private
-	   * and only meant to be created by the ClusterGroup object.
-	   *
-	   * This is a tree-like data structure.  Each node in the tree is a
-	   * cluster containing child clusters and unclustered points.
-	   *
-	   * @class
-	   * @private
-	   *
-	   * @param {geo.util.ClusterGroup} group The source cluster group
-	   * @param {number} zoom The zoom level of the current node
-	   * @param {object[]} children An array of ClusterTrees or point objects
-	   */
-	  function ClusterTree(group, zoom, children) {
-	    this._group = group;
-	    this._zoom = zoom;
-	    this._points = [];     // Unclustered points
-	    this._clusters = [];   // Child clusters
-	    this._count = 0;       // Total number of points
-	    this._parent = null;
-	    this._coord = null;    // The cached coordinates
-	    var that = this;
-	
-	    // add the children provided in the constructor call
-	    (children || []).forEach(function (c) {
-	      that._add(c);
-	    });
-	  }
-	
-	  /**
-	   * Add a point or cluster as a child to the current cluster.
-	   * @param {object} pt A ClusterTree or point object
-	   * @private
-	   */
-	  ClusterTree.prototype._add = function (pt) {
-	    var inc = 1;
-	
-	    if (pt instanceof ClusterTree) {
-	      // add a child cluster
-	      this._clusters.push(pt);
-	      inc = pt._count;
-	    } else {
-	      this._points.push(pt);
-	    }
-	    pt._parent = this;
-	
-	    // increment the counter
-	    this._increment(inc);
-	  };
-	
-	  /**
-	   * Increment the child counter for this and the parent.
-	   * @param {number} inc The value to increment by
-	   * @private
-	   */
-	  ClusterTree.prototype._increment = function (inc) {
-	    this._coord = null;
-	    this._count += inc;
-	    if (this._parent) {
-	      this._parent._increment(inc);
-	    }
-	  };
-	
-	  /**
-	   * Return the total number of child points contained in the cluster.
-	   * @returns {number} Total points contained
-	   */
-	  ClusterTree.prototype.count = function () {
-	    return this._count;
-	  };
-	
-	  /**
-	   * Recursively call a function on all points contained in the cluster.
-	   * Calls the function with `this` as the current ClusterTree object, and
-	   * arguments to arguments the point object and the zoom level:
-	   *   func.call(this, point, zoom)
-	   */
-	  ClusterTree.prototype.each = function (func) {
-	    var i;
-	    for (i = 0; i < this._points.length; i += 1) {
-	      func.call(this, this._points[i], this._zoom);
-	    }
-	    for (i = 0; i < this._clusters.length; i += 1) {
-	      this._clusters[i].each.call(
-	        this._clusters[i],
-	        func
-	      );
-	    }
-	  };
-	
-	  /**
-	   * Get the coordinates of the cluster (the mean position of all the points
-	   * contained).  This is lazily calculated and cached.
-	   */
-	  ClusterTree.prototype.coords = function () {
-	    var i, center = {x: 0, y: 0};
-	    if (this._coord) {
-	      return this._coord;
-	    }
-	    // first add up the points at the node
-	    for (i = 0; i < this._points.length; i += 1) {
-	      center.x += this._points[i].x;
-	      center.y += this._points[i].y;
-	    }
-	
-	    // add up the contribution from the clusters
-	    for (i = 0; i < this._clusters.length; i += 1) {
-	      center.x += this._clusters[i].coords().x * this._clusters[i].count();
-	      center.y += this._clusters[i].coords().y * this._clusters[i].count();
-	    }
-	
-	    return {
-	      x: center.x / this.count(),
-	      y: center.y / this.count()
-	    };
-	  };
-	
-	  /**
-	   * This class manages clustering of an array of positions hierarchically.
-	   * The algorithm and code was adapted from the Leaflet marker cluster
-	   * plugin by David Leaver: https://github.com/Leaflet/Leaflet.markercluster
-	   *
-	   * @class geo.util.ClusterGroup
-	   * @param {object} opts An options object
-	   * @param {number} width The width of the window; used for scaling.
-	   * @param {number} height The height of the window; used for scaling.
-	   * @param {number} maxZoom The maximimum zoom level to calculate
-	   * @param {number} radius Proportional to the clustering radius in pixels
-	   */
-	  function C(opts, width, height) {
-	
-	    var DistanceGrid = __webpack_require__(203);
-	
-	    // store the options
-	    this._opts = $.extend({
-	      maxZoom: 18,
-	      radius: 0.05
-	    }, opts);
-	    this._opts.width = this._opts.width || width || 256;
-	    this._opts.height = this._opts.height || height || 256;
-	
-	    // generate the initial datastructures
-	    this._clusters = {}; // clusters at each zoom level
-	    this._points = {};   // unclustered points at each zoom level
-	
-	    var zoom, scl;
-	    for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
-	      scl = this._scaleAtLevel(zoom, this._opts.width, this._opts.height);
-	      this._clusters[zoom] = new DistanceGrid(scl);
-	      this._points[zoom] = new DistanceGrid(scl);
-	    }
-	    this._topClusterLevel = new ClusterTree(this, -1);
-	  }
-	
-	  /**
-	   * Returns a characteristic distance scale at a particular zoom level.  This
-	   * scale is used to control the clustering radius.  When the renderer supports
-	   * it, this call should be replaced by a calculation involving the view port
-	   * size in point coordinates at a particular zoom level.
-	   * @private
-	   */
-	  C.prototype._scaleAtLevel = function (zoom, width, height) {
-	    return vgl.zoomToHeight(zoom, width, height) / 2 * this._opts.radius;
-	  };
-	
-	  /**
-	   * Add a position to the cluster group.
-	   * @protected
-	   */
-	  C.prototype.addPoint = function (point) {
-	    var zoom, closest, parent, newCluster, lastParent, z;
-	
-	    // start at the maximum zoom level and search for nearby
-	    //
-	    // 1.  existing clusters
-	    // 2.  unclustered points
-	    //
-	    // otherwise add the point as a new unclustered point
-	
-	    for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
-	
-	      // find near cluster
-	      closest = this._clusters[zoom].getNearObject(point);
-	      if (closest) {
-	        // add the point to the cluster and return
-	        closest._add(point);
-	        return;
-	      }
-	
-	      // find near point
-	      closest = this._points[zoom].getNearObject(point);
-	      if (closest) {
-	        parent = closest._parent;
-	        if (parent) {
-	          // remove the point from the parent
-	          for (z = parent._points.length - 1; z >= 0; z -= 1) {
-	            if (parent._points[z] === closest) {
-	              parent._points.splice(z, 1);
-	              parent._increment(-1);
-	              break;
-	            }
-	          }
-	        }
-	
-	        if (!parent) {
-	          $.noop();
-	        }
-	        // create a new cluster with these two points
-	        newCluster = new ClusterTree(this, zoom, [closest, point]);
-	        this._clusters[zoom].addObject(newCluster, newCluster.coords());
-	
-	        // create intermediate parent clusters that don't exist
-	        lastParent = newCluster;
-	        for (z = zoom - 1; z > parent._zoom; z -= 1) {
-	          lastParent = new ClusterTree(this, z, [lastParent]);
-	          this._clusters[z].addObject(lastParent, lastParent.coords());
-	        }
-	        parent._add(lastParent);
-	
-	        // remove closest from this zoom level and any above (replace with newCluster)
-	        for (z = zoom; z >= 0; z -= 1) {
-	          if (!this._points[z].removeObject(closest, closest)) {
-	            break;
-	          }
-	        }
-	
-	        return;
-	      }
-	
-	      // add an unclustered point
-	      this._points[zoom].addObject(point, point);
-	    }
-	
-	    // otherwise add to the top
-	    this._topClusterLevel._add(point);
-	  };
-	
-	  /**
-	   * Return the unclustered points contained at a given zoom level.
-	   * @param {number} zoom The zoom level
-	   * @return {object[]} The array of unclustered points
-	   */
-	  C.prototype.points = function (zoom) {
-	    zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
-	    return this._points[Math.floor(zoom)].contents();
-	  };
-	
-	  /**
-	   * Return the clusters contained at a given zoom level.
-	   * @param {number} zoom The zoom level
-	   * @return {ClusterTree[]} The array of clusters
-	   */
-	  C.prototype.clusters = function (zoom) {
-	    zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
-	    return this._clusters[Math.floor(zoom)].contents();
-	  };
-	
-	  module.exports = C;
-	})();
-
-
-/***/ },
 /* 205 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(83);
-	var feature = __webpack_require__(82);
-	var checkRenderer = __webpack_require__(80).checkRenderer;
-	var rendererForFeatures = __webpack_require__(80).rendererForFeatures;
-	var rendererForAnnotations = __webpack_require__(80).rendererForAnnotations;
+	var sceneObject = __webpack_require__(202);
+	var feature = __webpack_require__(201);
+	var checkRenderer = __webpack_require__(199).checkRenderer;
+	var rendererForFeatures = __webpack_require__(199).rendererForFeatures;
+	var rendererForAnnotations = __webpack_require__(199).rendererForAnnotations;
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -46563,9 +46813,9 @@
 	  sceneObject.call(this, arg);
 	
 	  var $ = __webpack_require__(5);
-	  var timestamp = __webpack_require__(199);
-	  var createRenderer = __webpack_require__(80).createRenderer;
-	  var newLayerId = __webpack_require__(200).newLayerId;
+	  var timestamp = __webpack_require__(204);
+	  var createRenderer = __webpack_require__(199).createRenderer;
+	  var newLayerId = __webpack_require__(80).newLayerId;
 	  var geo_event = __webpack_require__(9);
 	  var camera = __webpack_require__(206);
 	
@@ -47113,8 +47363,8 @@
 	  'use strict';
 	
 	  var inherit = __webpack_require__(8);
-	  var object = __webpack_require__(84);
-	  var util = __webpack_require__(200);
+	  var object = __webpack_require__(203);
+	  var util = __webpack_require__(80);
 	  var mat4 = __webpack_require__(87);
 	  var vec4 = __webpack_require__(111);
 	
@@ -48037,7 +48287,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(82);
+	var feature = __webpack_require__(201);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -48059,10 +48309,10 @@
 	  feature.call(this, arg);
 	
 	  var $ = __webpack_require__(5);
-	  var timestamp = __webpack_require__(199);
-	  var ClusterGroup = __webpack_require__(204);
+	  var timestamp = __webpack_require__(204);
+	  var ClusterGroup = __webpack_require__(84);
 	  var geo_event = __webpack_require__(9);
-	  var util = __webpack_require__(200);
+	  var util = __webpack_require__(80);
 	  var wigglemaps = __webpack_require__(208);
 	
 	  ////////////////////////////////////////////////////////////////////////////
@@ -48081,6 +48331,8 @@
 	      m_allData = [],
 	      m_lastZoom = null,
 	      m_ignoreData = false; // flag to ignore data() calls made locally
+	
+	  this.featureType = 'point';
 	
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -48897,7 +49149,7 @@
 
 	var $ = __webpack_require__(5);
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(82);
+	var feature = __webpack_require__(201);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -48947,7 +49199,7 @@
 	  arg = arg || {};
 	  feature.call(this, arg);
 	
-	  var util = __webpack_require__(200);
+	  var util = __webpack_require__(80);
 	
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -48963,6 +49215,8 @@
 	      s_modified = this.modified,
 	      s_style = this.style,
 	      m_coordinates = [];
+	
+	  this.featureType = 'polygon';
 	
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -49321,7 +49575,8 @@
 	var geo_action = __webpack_require__(212);
 	var geo_annotation = __webpack_require__(7);
 	var geo_event = __webpack_require__(9);
-	var registry = __webpack_require__(80);
+	var registry = __webpack_require__(199);
+	var transform = __webpack_require__(10);
 	var $ = __webpack_require__(5);
 	var Mousetrap = __webpack_require__(213);
 	
@@ -49355,8 +49610,8 @@
 	  featureLayer.call(this, args);
 	
 	  var mapInteractor = __webpack_require__(214);
-	  var timestamp = __webpack_require__(199);
-	  var util = __webpack_require__(200);
+	  var timestamp = __webpack_require__(204);
+	  var util = __webpack_require__(80);
 	
 	  var m_this = this,
 	      s_init = this._init,
@@ -49368,6 +49623,17 @@
 	      m_mode = null,
 	      m_annotations = [],
 	      m_features = [];
+	
+	  var geojsonStyleProperties = {
+	    'fill': {dataType: 'boolean', keys: ['fill']},
+	    'fillColor': {dataType: 'color', keys: ['fillColor', 'fill-color', 'marker-color', 'fill']},
+	    'fillOpacity': {dataType: 'opacity', keys: ['fillOpacity', 'fill-opacity']},
+	    'radius': {dataType: 'positive', keys: ['radius']},
+	    'stroke': {dataType: 'boolean', keys: ['stroke']},
+	    'strokeColor': {dataType: 'color', keys: ['strokeColor', 'stroke-color', 'stroke']},
+	    'strokeOpacity': {dataType: 'opacity', keys: ['strokeOpacity', 'stroke-opacity']},
+	    'strokeWidth': {dataType: 'positive', keys: ['strokeWidth', 'stroke-width']}
+	  };
 	
 	  m_options = $.extend(true, {}, {
 	    dblClickTime: 300,
@@ -49566,9 +49832,11 @@
 	   *
 	   * @param {boolean} skipCreating: if true, don't remove annotations that are
 	   *    in the create state.
+	   * @param {boolean} update if false, don't update the layer after removing
+	   *    the annotation.
 	   * @returns {number} the number of annotations that were removed.
 	   */
-	  this.removeAllAnnotations = function (skipCreating) {
+	  this.removeAllAnnotations = function (skipCreating, update) {
 	    var removed = 0, annotation, pos = 0;
 	    while (pos < m_annotations.length) {
 	      annotation = m_annotations[pos];
@@ -49579,7 +49847,7 @@
 	      this.removeAnnotation(annotation, false);
 	      removed += 1;
 	    }
-	    if (removed) {
+	    if (removed && update !== false) {
 	      this.modified();
 	      this._update();
 	      this.draw();
@@ -49667,6 +49935,224 @@
 	        mode: m_mode, oldMode: oldMode});
 	    }
 	    return this;
+	  };
+	
+	  /**
+	   * Return the current set of annotations as a geojson object.  Alternately,
+	   * add a set of annotations from a geojson object.
+	   *
+	   * @param {object} geojson: if present, add annotations based on the given
+	   *    geojson object.  If undefined, return the current annotations as
+	   *    geojson.  This may be a JSON string, a javascript object, or a File
+	   *    object.
+	   * @param {boolean} clear: if true, when adding annotations, first remove all
+	   *    existing objects.  If 'update', update existing annotations and remove
+	   *    annotations that no longer exit,  If false, update existing
+	   *    annotations and leave unchanged annotations.
+	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+	   *    null to use the map gcs, or any other transform.
+	   * @param {boolean} includeCrs: if true, include the coordinate system in the
+	   *    output.
+	   * @return {object|number|undefined} if geojson was undefined, the current
+	   *    annotations as a javascript object that can be converted to geojson
+	   *    using JSON.stringify.  If geojson is specified, either the number of
+	   *    annotations now present upon success, or undefined if the value in
+	   *    geojson was not able to be parsed.
+	   */
+	  this.geojson = function (geojson, clear, gcs, includeCrs) {
+	    if (geojson !== undefined) {
+	      var reader = registry.createFileReader('jsonReader', {layer: this});
+	      if (!reader.canRead(geojson)) {
+	        return;
+	      }
+	      if (clear === true) {
+	        this.removeAllAnnotations(true, false);
+	      }
+	      if (clear === 'update') {
+	        $.each(this.annotations(), function (idx, annotation) {
+	          annotation.options('updated', false);
+	        });
+	      }
+	      reader.read(geojson, function (features) {
+	        $.each(features.slice(), function (feature_idx, feature) {
+	          m_this._geojsonFeatureToAnnotation(feature, gcs);
+	          m_this.deleteFeature(feature);
+	        });
+	      });
+	      if (clear === 'update') {
+	        $.each(this.annotations(), function (idx, annotation) {
+	          if (annotation.options('updated') === false &&
+	              annotation.state() === geo_annotation.state.done) {
+	            m_this.removeAnnotation(annotation, false);
+	          }
+	        });
+	      }
+	      this.modified();
+	      this._update();
+	      this.draw();
+	      return m_annotations.length;
+	    }
+	    geojson = null;
+	    var features = [];
+	    $.each(m_annotations, function (annotation_idx, annotation) {
+	      var obj = annotation.geojson(gcs, includeCrs);
+	      if (obj) {
+	        features.push(obj);
+	      }
+	    });
+	    if (features.length) {
+	      geojson = {
+	        type: 'FeatureCollection',
+	        features: features
+	      };
+	    }
+	    return geojson;
+	  };
+	
+	  /**
+	   * Convert a feature as parsed by the geojson reader into one or more
+	   * annotations.
+	   *
+	   * @param {geo.feature} feature: the feature to convert.
+	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+	   *    null to use the map gcs, or any other transform.
+	   */
+	  this._geojsonFeatureToAnnotation = function (feature, gcs) {
+	    var dataList = feature.data(),
+	        annotationList = registry.listAnnotations();
+	    $.each(dataList, function (data_idx, data) {
+	      var type = (data.properties || {}).annotationType || feature.featureType,
+	          options = $.extend({}, data.properties || {}),
+	          position, datagcs, i, existing;
+	      if ($.inArray(type, annotationList) < 0) {
+	        return;
+	      }
+	      if (!options.style) {
+	        options.style = {};
+	      }
+	      delete options.annotationType;
+	      switch (feature.featureType) {
+	        case 'polygon':
+	          position = feature.polygon()(data, data_idx);
+	          if (!position || !position.outer || position.outer.length < 3) {
+	            return;
+	          }
+	          position = position.outer;
+	          if (position[position.length - 1][0] === position[0][0] &&
+	              position[position.length - 1][1] === position[0][1]) {
+	            position.splice(position.length - 1, 1);
+	            if (position.length < 3) {
+	              return;
+	            }
+	          }
+	          break;
+	        case 'point':
+	          position = [feature.position()(data, data_idx)];
+	          break;
+	        default:
+	          return;
+	      }
+	      for (i = 0; i < position.length; i += 1) {
+	        position[i] = util.normalizeCoordinates(position[i]);
+	      }
+	      datagcs = ((data.crs && data.crs.type === 'name' && data.crs.properties &&
+	                  data.crs.properties.type === 'proj4' &&
+	                  data.crs.properties.name) ? data.crs.properties.name : gcs);
+	      if (datagcs !== m_this.map().gcs()) {
+	        position = transform.transformCoordinates(datagcs, m_this.map().gcs(), position);
+	      }
+	      options.coordinates = position;
+	      /* For each style listed in the geojsonStyleProperties object, check if
+	       * is given under any of the variety of keys as a valid instance of the
+	       * required data type.  If not, use the property from the feature. */
+	      $.each(geojsonStyleProperties, function (key, prop) {
+	        var value;
+	        $.each(prop.keys, function (idx, altkey) {
+	          if (value === undefined) {
+	            value = m_this.validateAttribute(options[altkey], prop.dataType);
+	            return;
+	          }
+	        });
+	        if (value === undefined) {
+	          value = m_this.validateAttribute(
+	            feature.style.get(key)(data, data_idx), prop.dataType);
+	        }
+	        if (value !== undefined) {
+	          options.style[key] = value;
+	        }
+	      });
+	      /* Delete property keys we have used */
+	      $.each(geojsonStyleProperties, function (key, prop) {
+	        $.each(prop.keys, function (idx, altkey) {
+	          delete options[altkey];
+	        });
+	      });
+	      if (options.annotationId !== undefined) {
+	        existing = m_this.annotationById(options.annotationId);
+	        delete options.annotationId;
+	      }
+	      if (existing && existing.type() === type && existing.state() === geo_annotation.state.done && existing.options('updated') === false) {
+	        /* We could change the state of the existing annotation if it differs
+	         * from done. */
+	        delete options.state;
+	        delete options.layer;
+	        options.updated = true;
+	        existing.options(options);
+	        m_this.geoTrigger(geo_event.annotation.update, {
+	          annotation: existing
+	        });
+	      } else {
+	        options.state = geo_annotation.state.done;
+	        options.layer = m_this;
+	        options.updated = 'new';
+	        m_this.addAnnotation(registry.createAnnotation(type, options));
+	      }
+	    });
+	  };
+	
+	  /**
+	   * Validate a value for an attribute based on a specified data type.  This
+	   * returns a sanitized value or undefined if the value was invalid.  Data
+	   * types include:
+	   *   color: a css string, #rrggbb hex string, #rgb hex string, number, or
+	   *     object with r, g, b properties in the range of [0-1].
+	   *   opacity: a floating point number in the range [0, 1].
+	   *   positive: a floating point number greater than zero.
+	   *   boolean: the string 'false' and falsy values are false, all else is
+	   *     true.  null and undefined are still considered invalid values.
+	   * @param {number|string|object|boolean} value: the value to validate.
+	   * @param {string} dataType: the data type for validation.
+	   * @returns {number|string|object|boolean|undefined} the sanitized value or
+	   *    undefined.
+	   */
+	  this.validateAttribute = function (value, dataType) {
+	    if (value === undefined || value === null) {
+	      return;
+	    }
+	    switch (dataType) {
+	      case 'boolean':
+	        value = !!value && value !== 'false';
+	        break;
+	      case 'color':
+	        value = util.convertColor(value);
+	        if (value === undefined || value.r === undefined) {
+	          return;
+	        }
+	        break;
+	      case 'opacity':
+	        value = +value;
+	        if (isNaN(value) || value < 0 || value > 1) {
+	          return;
+	        }
+	        break;
+	      case 'positive':
+	        value = +value;
+	        if (isNaN(value) || value <= 0) {
+	          return;
+	        }
+	        break;
+	    }
+	    return value;
 	  };
 	
 	  ///////////////////////////////////////////////////////////////////////////
@@ -49811,7 +50297,7 @@
 	var inherit = __webpack_require__(8);
 	var layer = __webpack_require__(205);
 	var geo_event = __webpack_require__(9);
-	var registry = __webpack_require__(80);
+	var registry = __webpack_require__(199);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -51127,8 +51613,8 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var object = __webpack_require__(84);
-	var util = __webpack_require__(200);
+	var object = __webpack_require__(203);
+	var util = __webpack_require__(80);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -51152,9 +51638,9 @@
 	  var $ = __webpack_require__(5);
 	  var geo_event = __webpack_require__(9);
 	  var geo_action = __webpack_require__(212);
-	  var throttle = __webpack_require__(200).throttle;
-	  var debounce = __webpack_require__(200).debounce;
-	  var actionMatch = __webpack_require__(200).actionMatch;
+	  var throttle = __webpack_require__(80).throttle;
+	  var debounce = __webpack_require__(80).debounce;
+	  var actionMatch = __webpack_require__(80).actionMatch;
 	  var quadFeature = __webpack_require__(215);
 	
 	  var m_options = args || {},
@@ -52049,7 +52535,7 @@
 	
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Based on the screen coodinates of a selection, zoom or unzoom and
+	   * Based on the screen coordinates of a selection, zoom or unzoom and
 	   * recenter.
 	   *
 	   * @private
@@ -52751,7 +53237,7 @@
 
 	var $ = __webpack_require__(5);
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(82);
+	var feature = __webpack_require__(201);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -52798,7 +53284,7 @@
 	  'use strict';
 	
 	  var transform = __webpack_require__(10);
-	  var util = __webpack_require__(200);
+	  var util = __webpack_require__(80);
 	
 	  if (!(this instanceof quadFeature)) {
 	    return new quadFeature(arg);
@@ -53243,7 +53729,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(82);
+	var feature = __webpack_require__(201);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -53264,7 +53750,7 @@
 	  feature.call(this, arg);
 	
 	  var $ = __webpack_require__(5);
-	  var ensureFunction = __webpack_require__(200).ensureFunction;
+	  var ensureFunction = __webpack_require__(80).ensureFunction;
 	
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -53537,7 +54023,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var object = __webpack_require__(84);
+	var object = __webpack_require__(203);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -53840,7 +54326,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(82);
+	var feature = __webpack_require__(201);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -53859,7 +54345,7 @@
 	  }
 	
 	  var $ = __webpack_require__(5);
-	  var util = __webpack_require__(200);
+	  var util = __webpack_require__(80);
 	
 	  arg = arg || {};
 	  feature.call(this, arg);
@@ -54301,7 +54787,7 @@
 
 	var inherit = __webpack_require__(8);
 	var renderer = __webpack_require__(220);
-	var registerRenderer = __webpack_require__(80).registerRenderer;
+	var registerRenderer = __webpack_require__(199).registerRenderer;
 	
 	/**
 	 * @class geo.domRenderer
@@ -54348,7 +54834,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var object = __webpack_require__(84);
+	var object = __webpack_require__(203);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -54711,7 +55197,7 @@
 
 	var inherit = __webpack_require__(8);
 	var featureLayer = __webpack_require__(211);
-	var object = __webpack_require__(84);
+	var object = __webpack_require__(203);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -54826,7 +55312,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(82);
+	var feature = __webpack_require__(201);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -54869,7 +55355,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(82);
+	var feature = __webpack_require__(201);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -54890,8 +55376,8 @@
 	  feature.call(this, arg);
 	
 	  var $ = __webpack_require__(5);
-	  var util = __webpack_require__(200);
-	  var registry = __webpack_require__(80);
+	  var util = __webpack_require__(80);
+	  var registry = __webpack_require__(199);
 	
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -55456,7 +55942,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFileReader = __webpack_require__(80).registerFileReader;
+	var registerFileReader = __webpack_require__(199).registerFileReader;
 	var fileReader = __webpack_require__(222);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -55475,7 +55961,7 @@
 	  }
 	
 	  var $ = __webpack_require__(5);
-	  var convertColor = __webpack_require__(200).convertColor;
+	  var convertColor = __webpack_require__(80).convertColor;
 	
 	  var m_this = this;
 	
@@ -55660,12 +56146,12 @@
 	    _default = convert(_default);
 	    return function (d, i, e, j) {
 	      var p;
-	      if (spec) {
+	      if (spec && j !== undefined && spec[j] !== undefined) {
 	        p = spec[j].properties;
 	      } else {
 	        p = d.properties;
 	      }
-	      if (p.hasOwnProperty(prop)) {
+	      if (p !== undefined && p.hasOwnProperty(prop)) {
 	        return convert(p[prop]);
 	      }
 	      return _default;
@@ -55764,7 +56250,7 @@
 	var $ = __webpack_require__(5);
 	var vgl = __webpack_require__(85);
 	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(83);
+	var sceneObject = __webpack_require__(202);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -55847,8 +56333,8 @@
 	
 	  var camera = __webpack_require__(206);
 	  var transform = __webpack_require__(10);
-	  var util = __webpack_require__(200);
-	  var registry = __webpack_require__(80);
+	  var util = __webpack_require__(80);
+	  var registry = __webpack_require__(199);
 	  var geo_event = __webpack_require__(9);
 	  var mapInteractor = __webpack_require__(214);
 	  var clock = __webpack_require__(217);
@@ -57189,7 +57675,7 @@
 	    // preprocess the arguments
 	    zoom = fix_zoom(zoom, ignoreDiscreteZoom);
 	    units = m_this.unitsPerPixel(zoom);
-	    center = m_this.gcsToWorld(center, gcs);
+	    center = m_this.gcsToWorld(center, null);
 	
 	    // get half the width and height in world coordinates
 	    width = m_width * units;
@@ -57741,7 +58227,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerLayer = __webpack_require__(80).registerLayer;
+	var registerLayer = __webpack_require__(199).registerLayer;
 	var layer = __webpack_require__(205);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -57756,7 +58242,7 @@
 	var uiLayer = function (arg) {
 	  'use strict';
 	
-	  var createWidget = __webpack_require__(80).createWidget;
+	  var createWidget = __webpack_require__(199).createWidget;
 	
 	  // The widget stays fixed on the screen.
 	  arg.renderer = 'dom';
@@ -57831,7 +58317,7 @@
 	  var $ = __webpack_require__(5);
 	  var inherit = __webpack_require__(8);
 	  var tileLayer = __webpack_require__(231);
-	  var registry = __webpack_require__(80);
+	  var registry = __webpack_require__(199);
 	  var quadFeature = __webpack_require__(215);
 	
 	  //////////////////////////////////////////////////////////////////////////////
@@ -58066,7 +58552,7 @@
 	    var transform = __webpack_require__(10);
 	    var tileCache = __webpack_require__(232);
 	    var fetchQueue = __webpack_require__(221);
-	    var adjustLayerForRenderer = __webpack_require__(80).adjustLayerForRenderer;
+	    var adjustLayerForRenderer = __webpack_require__(199).adjustLayerForRenderer;
 	    var Tile = __webpack_require__(226);
 	
 	    if (!(this instanceof tileLayer)) {
@@ -59583,7 +60069,7 @@
 
 	var $ = __webpack_require__(5);
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(82);
+	var feature = __webpack_require__(201);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -59667,7 +60153,7 @@
 
 	var $ = __webpack_require__(5);
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(82);
+	var feature = __webpack_require__(201);
 	var transform = __webpack_require__(10);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -59957,7 +60443,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(82);
+	var feature = __webpack_require__(201);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -60064,14 +60550,14 @@
 /* 236 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("0.10.2");
+	module.exports = ("0.10.3");
 
 
 /***/ },
 /* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("58a4973046b0d28afb27468b26c47de676f2d5eb");
+	module.exports = ("cf34404fbda34ca22915c5743903786c79fda8e2");
 
 
 /***/ },
@@ -60112,7 +60598,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
+	var registerFeature = __webpack_require__(199).registerFeature;
 	var graphFeature = __webpack_require__(224);
 	
 	/**
@@ -60161,8 +60647,8 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
-	var lineFeature = __webpack_require__(81);
+	var registerFeature = __webpack_require__(199).registerFeature;
+	var lineFeature = __webpack_require__(200);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -60182,8 +60668,8 @@
 	
 	  var d3 = __webpack_require__(2);
 	  var object = __webpack_require__(242);
-	  var timestamp = __webpack_require__(199);
-	  var util = __webpack_require__(200);
+	  var timestamp = __webpack_require__(204);
+	  var util = __webpack_require__(80);
 	
 	  arg = arg || {};
 	  lineFeature.call(this, arg);
@@ -60310,7 +60796,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(83);
+	var sceneObject = __webpack_require__(202);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -60324,7 +60810,7 @@
 	var d3_object = function (arg) {
 	  'use strict';
 	
-	  var object = __webpack_require__(84);
+	  var object = __webpack_require__(203);
 	  var uniqueID = __webpack_require__(243);
 	
 	  // this is used to extend other geojs classes, so only generate
@@ -60412,7 +60898,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
+	var registerFeature = __webpack_require__(199).registerFeature;
 	var pathFeature = __webpack_require__(233);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -60434,7 +60920,7 @@
 	  var $ = __webpack_require__(5);
 	  var d3 = __webpack_require__(2);
 	  var object = __webpack_require__(242);
-	  var timestamp = __webpack_require__(199);
+	  var timestamp = __webpack_require__(204);
 	
 	  arg = arg || {};
 	  pathFeature.call(this, arg);
@@ -60548,7 +61034,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
+	var registerFeature = __webpack_require__(199).registerFeature;
 	var pointFeature = __webpack_require__(207);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -60569,7 +61055,7 @@
 	  }
 	
 	  var d3_object = __webpack_require__(242);
-	  var timestamp = __webpack_require__(199);
+	  var timestamp = __webpack_require__(204);
 	
 	  arg = arg || {};
 	  pointFeature.call(this, arg);
@@ -60674,7 +61160,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
+	var registerFeature = __webpack_require__(199).registerFeature;
 	var quadFeature = __webpack_require__(215);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -60918,7 +61404,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerRenderer = __webpack_require__(80).registerRenderer;
+	var registerRenderer = __webpack_require__(199).registerRenderer;
 	var renderer = __webpack_require__(220);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -60935,7 +61421,7 @@
 	
 	  var d3 = __webpack_require__(2);
 	  var object = __webpack_require__(242);
-	  var util = __webpack_require__(200);
+	  var util = __webpack_require__(80);
 	  var geo_event = __webpack_require__(9);
 	  var d3Rescale = __webpack_require__(239);
 	
@@ -61566,7 +62052,7 @@
 /* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var registerLayerAdjustment = __webpack_require__(80).registerLayerAdjustment;
+	var registerLayerAdjustment = __webpack_require__(199).registerLayerAdjustment;
 	
 	var d3_tileLayer = function () {
 	  'use strict';
@@ -61662,7 +62148,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
+	var registerFeature = __webpack_require__(199).registerFeature;
 	var vectorFeature = __webpack_require__(235);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -61682,7 +62168,7 @@
 	  }
 	
 	  var object = __webpack_require__(242);
-	  var timestamp = __webpack_require__(199);
+	  var timestamp = __webpack_require__(204);
 	  var d3 = __webpack_require__(2);
 	
 	  arg = arg || {};
@@ -61991,7 +62477,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
+	var registerFeature = __webpack_require__(199).registerFeature;
 	var choroplethFeature = __webpack_require__(216);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -62121,7 +62607,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
+	var registerFeature = __webpack_require__(199).registerFeature;
 	var contourFeature = __webpack_require__(218);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -62144,7 +62630,7 @@
 	
 	  var vgl = __webpack_require__(85);
 	  var transform = __webpack_require__(10);
-	  var util = __webpack_require__(200);
+	  var util = __webpack_require__(80);
 	  var object = __webpack_require__(253);
 	
 	  object.call(this);
@@ -62431,7 +62917,7 @@
 	var gl_object = function (arg) {
 	  'use strict';
 	
-	  var object = __webpack_require__(84);
+	  var object = __webpack_require__(203);
 	
 	  // this is used to extend other geojs classes, so only generate
 	  // a new object when that is not the case... like if this === window
@@ -62487,7 +62973,7 @@
 	  }
 	
 	  var vgl = __webpack_require__(85);
-	  var util = __webpack_require__(200);
+	  var util = __webpack_require__(80);
 	  var vec3 = __webpack_require__(137);
 	
 	  x = vgl.defaultValue(x, 0.0);
@@ -62801,8 +63287,8 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
-	var lineFeature = __webpack_require__(81);
+	var registerFeature = __webpack_require__(199).registerFeature;
+	var lineFeature = __webpack_require__(200);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -62823,7 +63309,7 @@
 	
 	  var vgl = __webpack_require__(85);
 	  var transform = __webpack_require__(10);
-	  var util = __webpack_require__(200);
+	  var util = __webpack_require__(80);
 	  var object = __webpack_require__(253);
 	
 	  object.call(this);
@@ -63241,7 +63727,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
+	var registerFeature = __webpack_require__(199).registerFeature;
 	var pointFeature = __webpack_require__(207);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -63263,7 +63749,7 @@
 	
 	  var vgl = __webpack_require__(85);
 	  var transform = __webpack_require__(10);
-	  var util = __webpack_require__(200);
+	  var util = __webpack_require__(80);
 	  var object = __webpack_require__(253);
 	
 	  object.call(this);
@@ -63791,7 +64277,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
+	var registerFeature = __webpack_require__(199).registerFeature;
 	var polygonFeature = __webpack_require__(209);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -63814,7 +64300,7 @@
 	  var vgl = __webpack_require__(85);
 	  var earcut = __webpack_require__(259);
 	  var transform = __webpack_require__(10);
-	  var util = __webpack_require__(200);
+	  var util = __webpack_require__(80);
 	  var object = __webpack_require__(253);
 	
 	  object.call(this);
@@ -64828,7 +65314,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
+	var registerFeature = __webpack_require__(199).registerFeature;
 	var quadFeature = __webpack_require__(215);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -65260,7 +65746,7 @@
 /* 261 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var registerLayerAdjustment = __webpack_require__(80).registerLayerAdjustment;
+	var registerLayerAdjustment = __webpack_require__(199).registerLayerAdjustment;
 	
 	var gl_tileLayer = function () {
 	  'use strict';
@@ -65365,7 +65851,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerRenderer = __webpack_require__(80).registerRenderer;
+	var registerRenderer = __webpack_require__(199).registerRenderer;
 	var renderer = __webpack_require__(220);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -65390,7 +65876,7 @@
 	  var $ = __webpack_require__(5);
 	  var vgl = __webpack_require__(85);
 	  var mat4 = __webpack_require__(87);
-	  var util = __webpack_require__(200);
+	  var util = __webpack_require__(80);
 	  var geo_event = __webpack_require__(9);
 	
 	  var m_this = this,
@@ -65676,7 +66162,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerRenderer = __webpack_require__(80).registerRenderer;
+	var registerRenderer = __webpack_require__(199).registerRenderer;
 	var renderer = __webpack_require__(220);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -65850,7 +66336,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
+	var registerFeature = __webpack_require__(199).registerFeature;
 	var quadFeature = __webpack_require__(215);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -66014,7 +66500,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(83);
+	var sceneObject = __webpack_require__(202);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -66027,7 +66513,7 @@
 	var canvas_object = function (arg) {
 	  'use strict';
 	
-	  var object = __webpack_require__(84);
+	  var object = __webpack_require__(203);
 	
 	  // this is used to extend other geojs classes, so only generate
 	  // a new object when that is not the case... like if this === window
@@ -66064,9 +66550,9 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var registerFeature = __webpack_require__(80).registerFeature;
+	var registerFeature = __webpack_require__(199).registerFeature;
 	var heatmapFeature = __webpack_require__(234);
-	var timestamp = __webpack_require__(199);
+	var timestamp = __webpack_require__(204);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -66551,7 +67037,7 @@
 /* 268 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var registerLayerAdjustment = __webpack_require__(80).registerLayerAdjustment;
+	var registerLayerAdjustment = __webpack_require__(199).registerLayerAdjustment;
 	
 	var canvas_tileLayer = function () {
 	  'use strict';
@@ -66670,7 +67156,7 @@
 
 	var widget = __webpack_require__(271);
 	var inherit = __webpack_require__(8);
-	var registerWidget = __webpack_require__(80).registerWidget;
+	var registerWidget = __webpack_require__(199).registerWidget;
 	
 	var domWidget = function (arg) {
 	  'use strict';
@@ -66729,7 +67215,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(83);
+	var sceneObject = __webpack_require__(202);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -66748,7 +67234,7 @@
 	  sceneObject.call(this, arg);
 	
 	  var geo_event = __webpack_require__(9);
-	  var createFeature = __webpack_require__(80).createFeature;
+	  var createFeature = __webpack_require__(199).createFeature;
 	
 	  var m_this = this,
 	      s_exit = this._exit,
@@ -66881,7 +67367,9 @@
 	
 	      return {
 	        left: position.x,
-	        top: position.y
+	        top: position.y,
+	        right: null,
+	        bottom: null
 	      };
 	    }
 	
@@ -66902,7 +67390,14 @@
 	
 	    for (var cssAttr in position) {
 	      if (position.hasOwnProperty(cssAttr)) {
-	        m_this.canvas().style[cssAttr] = position[cssAttr] + 'px';
+	        // if the property is a number, add px to it, otherwise set it to the
+	        // specified value.  Setting a property to null clears it.  Setting to
+	        // undefined doesn't alter it.
+	        if (/^\s*(\-|\+)?(\d+(\.\d*)?|\d*\.\d+)([eE](\-|\+)?\d+)?\s*$/.test(position[cssAttr])) {
+	          m_this.canvas().style[cssAttr] = ('' + position[cssAttr]).trim() + 'px';
+	        } else {
+	          m_this.canvas().style[cssAttr] = position[cssAttr];
+	        }
 	      }
 	    }
 	  };
@@ -66941,7 +67436,7 @@
 
 	var svgWidget = __webpack_require__(273);
 	var inherit = __webpack_require__(8);
-	var registerWidget = __webpack_require__(80).registerWidget;
+	var registerWidget = __webpack_require__(199).registerWidget;
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -67233,7 +67728,7 @@
 
 	var domWidget = __webpack_require__(270);
 	var inherit = __webpack_require__(8);
-	var registerWidget = __webpack_require__(80).registerWidget;
+	var registerWidget = __webpack_require__(199).registerWidget;
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -67303,6 +67798,9 @@
 	
 	    m_renderer = d3Renderer(rendererOpts);
 	
+	    // svg widgets manage their own sizes, so make the resize handler a no-op
+	    m_renderer._resize = function () {};
+	
 	    m_this.canvas(m_renderer.canvas()[0][0]);
 	  };
 	
@@ -67321,7 +67819,7 @@
 
 	var svgWidget = __webpack_require__(273);
 	var inherit = __webpack_require__(8);
-	var registerWidget = __webpack_require__(80).registerWidget;
+	var registerWidget = __webpack_require__(199).registerWidget;
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -67351,9 +67849,9 @@
 	      m_plus,
 	      m_minus,
 	      m_nub,
-	      m_width = 20, // Approximate size of the widget in pixels
-	      m_height = 100,
-	      m_nubSize = 10,
+	      m_width = arg.width || 20, // Size of the widget in pixels
+	      m_height = arg.height || 160,  // slider height + 3 * width
+	      m_nubSize = arg.width ? arg.width * 0.5 : 10,
 	      m_plusIcon,
 	      m_minusIcon,
 	      m_group,
@@ -67404,6 +67902,10 @@
 	    return g;
 	  }
 	
+	  this.size = function () {
+	    return {width: m_width, height: m_height};
+	  };
+	
 	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize the slider widget in the map.
@@ -67420,14 +67922,14 @@
 	    m_this.reposition();
 	
 	    var svg = d3.select(m_this.canvas()),
-	        x0 = 40,
-	        y0 = 40 + m_width,
 	        map = m_this.layer().map();
+	
+	    svg.attr('width', m_width).attr('height', m_height);
 	
 	    // create d3 scales for positioning
 	    // TODO: make customizable and responsive
-	    m_xscale = d3.scale.linear().domain([-4, 4]).range([x0, x0 + m_width]);
-	    m_yscale = d3.scale.linear().domain([0, 1]).range([y0, y0 + m_height]);
+	    m_xscale = d3.scale.linear().domain([-4, 4]).range([0, m_width]);
+	    m_yscale = d3.scale.linear().domain([0, 1]).range([m_width * 1.5, m_height - m_width * 1.5]);
 	
 	    // Create the main group element
 	    svg = svg.append('g').classed('geo-ui-slider', true);
@@ -67443,7 +67945,7 @@
 	      .classed('geo-zoom-in', true)
 	      .attr('cx', m_xscale(0))
 	      .attr('cy', m_yscale(0.0) - m_width + 2)
-	      .attr('r', m_width / 2)
+	      .attr('r', (m_width - 2) / 2)
 	      .style({
 	        'cursor': 'pointer'
 	      })
@@ -67464,7 +67966,7 @@
 	      m_plus,
 	      m_xscale(0),
 	      m_yscale(0) - m_width + 2,
-	      m_width + 5
+	      m_width + 4
 	    ).style('cursor', 'pointer')
 	      .style('pointer-events', 'none')
 	      .select('path')
@@ -67483,7 +67985,7 @@
 	      .classed('geo-zoom-out', true)
 	      .attr('cx', m_xscale(0))
 	      .attr('cy', m_yscale(1.0) + m_width - 2)
-	      .attr('r', m_width / 2)
+	      .attr('r', (m_width - 2) / 2)
 	      .style({
 	        'cursor': 'pointer'
 	      })
@@ -67504,7 +68006,7 @@
 	      m_minus,
 	      m_xscale(0),
 	      m_yscale(1) + m_width - 2,
-	      m_width + 5
+	      m_width + 4
 	    ).style('cursor', 'pointer')
 	      .style('pointer-events', 'none')
 	      .select('path')
@@ -67515,7 +68017,7 @@
 	
 	    // Respond to a mouse event on the widget
 	    function respond(evt, trans) {
-	      var z = m_yscale.invert(d3.mouse(m_this.layer().node()[0])[1]),
+	      var z = m_yscale.invert(d3.mouse(svg.node())[1]),
 	          zrange = map.zoomRange();
 	      z = (1 - z) * (zrange.max - zrange.min) + zrange.min;
 	      if (trans) {
@@ -67544,7 +68046,7 @@
 	      .attr('rx', m_width / 10)
 	      .attr('ry', m_width / 10)
 	      .attr('width', m_width / 3)
-	      .attr('height', m_height)
+	      .attr('height', m_height - m_width * 3)
 	      .style({
 	        'cursor': 'pointer'
 	      })
@@ -82082,7 +82584,7 @@
 	      '&').map(function (n) {
 	        n = n.split('=');
 	        if (n[0]) {
-	          this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
+	          this[decodeURIComponent(n[0].replace(/\+/g, '%20'))] = decodeURIComponent(n[1].replace(/\+/g, '%20'));
 	        }
 	        return this;
 	      }.bind({}))[0];

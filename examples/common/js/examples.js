@@ -8,7 +8,7 @@ var exampleUtils = {
       '&').map(function (n) {
         n = n.split('=');
         if (n[0]) {
-          this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
+          this[decodeURIComponent(n[0].replace(/\+/g, '%20'))] = decodeURIComponent(n[1].replace(/\+/g, '%20'));
         }
         return this;
       }.bind({}))[0];

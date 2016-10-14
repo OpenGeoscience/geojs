@@ -78,5 +78,5 @@ $(function () {
   });
 
   // Create a zoom slider widget
-  ui.createWidget('slider');
+  ui.createWidget('slider', {position: {left: 40, top: 40}});
 });
