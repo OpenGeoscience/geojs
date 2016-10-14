@@ -1,6 +1,7 @@
 var $ = require('jquery');
 var inherit = require('./inherit');
 var feature = require('./feature');
+var geo_event = require('./event');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -223,10 +224,11 @@ var pixelmapFeature = function (arg) {
     var data = m_this.data() || [],
         mapColorFunc = m_this.style.get('mapColor'),
         i, idx, lastidx, color, pixelData, indices, mappedColors,
-        updateFirst, updateLast = -1, update;
+        updateFirst, updateLast = -1, update, prepared;
 
     if (!m_info) {
       m_this._preparePixelmap();
+      prepared = true;
     }
     mappedColors = m_info.mappedColors;
     updateFirst = m_info.area;
@@ -291,6 +293,12 @@ var pixelmapFeature = function (arg) {
                            position: m_this.style.get('position')})
                    .data([{}])
                    .draw();
+    }
+    /* If we prepared the pixelmap and rendered it, send a prepared event */
+    if (prepared) {
+      m_this.geoTrigger(geo_event.pixelmap.prepared, {
+        pixelmap: m_this
+      });
     }
   };
 
