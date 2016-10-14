@@ -422,6 +422,7 @@ capabilities[quadFeature.capabilities.color] = true;
 capabilities[quadFeature.capabilities.image] = true;
 capabilities[quadFeature.capabilities.imageCrop] = true;
 capabilities[quadFeature.capabilities.imageFull] = true;
+capabilities[quadFeature.capabilities.canvas] = false;
 
 registerFeature('vgl', 'quad', gl_quadFeature, capabilities);
 module.exports = gl_quadFeature;

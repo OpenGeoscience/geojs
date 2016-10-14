@@ -153,6 +153,7 @@ capabilities[quadFeature.capabilities.color] = false;
 capabilities[quadFeature.capabilities.image] = true;
 capabilities[quadFeature.capabilities.imageCrop] = true;
 capabilities[quadFeature.capabilities.imageFull] = false;
+capabilities[quadFeature.capabilities.canvas] = true;
 
 registerFeature('canvas', 'quad', canvas_quadFeature, capabilities);
 module.exports = canvas_quadFeature;

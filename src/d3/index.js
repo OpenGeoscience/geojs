@@ -11,7 +11,6 @@ module.exports = {
   lineFeature: require('./lineFeature'),
   object: require('./object'),
   pathFeature: require('./pathFeature'),
-  pixelmapFeature: require('./pixelmapFeature'),
   pointFeature: require('./pointFeature'),
   quadFeature: require('./quadFeature'),
   renderer: require('./d3Renderer'),

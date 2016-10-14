@@ -104,11 +104,12 @@ var pixelmapFeature = function (arg) {
       /* This isn't just m_info.mappedColors.length - 1, since there
        * may be more data than actual indices. */
       if (m_info.maxIndex === undefined) {
-        var max = 0;
-        for (var i = 0; i < m_info.indices.length; i += 1) {
-          max = Math.max(max, m_info.indices[i]);
+        m_info.maxIndex = 0;
+        for (var idx in m_info.mappedColors) {
+          if (m_info.mappedColors.hasOwnProperty(idx)) {
+            m_info.maxIndex = Math.max(m_info.maxIndex, idx);
+          }
         }
-        m_info.maxIndex = max;
       }
       return m_info.maxIndex;
     }
@@ -177,6 +178,43 @@ var pixelmapFeature = function (arg) {
   };
 
   /**
+   * Compute information for this pixelmap image.  It is wasterful to call this
+   * if the pixelmap has already been prepared (it is invalidated by a change
+   * in the image).
+   */
+  this._preparePixelmap = function () {
+    var i, idx, pixelData;
+
+    m_info = {
+      width: m_srcImage.naturalWidth,
+      height: m_srcImage.naturalHeight,
+      canvas: document.createElement('canvas'),
+      updateIdx: {}
+    };
+
+    m_info.canvas.width = m_info.width;
+    m_info.canvas.height = m_info.height;
+    m_info.context = m_info.canvas.getContext('2d');
+
+    m_info.context.drawImage(m_srcImage, 0, 0);
+    m_info.imageData = m_info.context.getImageData(
+      0, 0, m_info.canvas.width, m_info.canvas.height);
+    pixelData = m_info.imageData.data;
+    m_info.indices = new Array(pixelData.length / 4);
+    m_info.area = pixelData.length / 4;
+
+    m_info.mappedColors = {};
+    for (i = 0; i < pixelData.length; i += 4) {
+      idx = pixelData[i] + (pixelData[i + 1] << 8) + (pixelData[i + 2] << 16);
+      m_info.indices[i / 4] = idx;
+      if (!m_info.mappedColors[idx]) {
+        m_info.mappedColors[idx] = {first: i / 4};
+      }
+      m_info.mappedColors[idx].last = i / 4;
+    }
+  };
+
+  /**
    * Given the loaded pixelmap image, create a canvas the size of the image.
    * Compute a color for each distinct index and recolor the canvas based on
    * thise colors, then draw the resultant image as a quad.
@@ -184,47 +222,16 @@ var pixelmapFeature = function (arg) {
   this._computePixelmap = function () {
     var data = m_this.data() || [],
         mapColorFunc = m_this.style.get('mapColor'),
-        i, idx, color, pixelData, indices, mappedColors,
-        updateIdx, update = false, oldColors, destImage;
+        i, idx, lastidx, color, pixelData, indices, mappedColors,
+        updateFirst, updateLast = -1, update;
 
     if (!m_info) {
-      /* If we haven't compute information for this pixelmap image, do so.
-       * This is invalidated by a change in the image. */
-      m_info = {
-        width: m_srcImage.naturalWidth,
-        height: m_srcImage.naturalHeight,
-        canvas: document.createElement('canvas'),
-        updateIdx: new Array(data.length)
-      };
-
-      m_info.canvas.width = m_info.width;
-      m_info.canvas.height = m_info.height;
-      m_info.context = m_info.canvas.getContext('2d');
-
-      m_info.context.drawImage(m_srcImage, 0, 0);
-      m_info.imageData = m_info.context.getImageData(
-        0, 0, m_info.canvas.width, m_info.canvas.height);
-      pixelData = m_info.imageData.data;
-      m_info.indices = new Array(pixelData.length / 4);
-
-      for (i = 0; i < pixelData.length; i += 4) {
-        idx = pixelData[i] + (pixelData[i + 1] << 8) + (pixelData[i + 2] << 16);
-        m_info.indices[i / 4] = idx;
-      }
-    } else {
-      /* Otherwise, just get a local reference to our data */
-      pixelData = m_info.imageData.data;
+      m_this._preparePixelmap();
     }
-    updateIdx = m_info.updateIdx;
-    oldColors = m_info.mappedColors;
-    /* We need to determine which colors have been computed and which have
-     * changed.  If memory churn is a factor, this could be refactored to
-     * update the array instead. */
-    mappedColors = m_info.mappedColors = new Array(data.length);
-    indices = m_info.indices;
-    for (i = 0; i < pixelData.length; i += 4) {
-      idx = indices[i / 4];
-      if (mappedColors[idx] === undefined) {
+    mappedColors = m_info.mappedColors;
+    updateFirst = m_info.area;
+    for (idx in mappedColors) {
+      if (mappedColors.hasOwnProperty(idx)) {
         color = mapColorFunc(data[idx], idx) || {};
         color = [
           (color.r || 0) * 255,
@@ -232,72 +239,58 @@ var pixelmapFeature = function (arg) {
           (color.b || 0) * 255,
           color.a === undefined ? 255 : (color.a * 255)
         ];
-        updateIdx[idx] = (
-          !oldColors || !oldColors[idx] ||
-          oldColors[idx][0] !== color[0] ||
-          oldColors[idx][1] !== color[1] ||
-          oldColors[idx][2] !== color[2] ||
-          oldColors[idx][3] !== color[3]);
-        mappedColors[idx] = color;
-        update = update || updateIdx[idx];
-      }
-      if (update && updateIdx[idx]) {
-        color = mappedColors[idx];
-        pixelData[i] = color[0];
-        pixelData[i + 1] = color[1];
-        pixelData[i + 2] = color[2];
-        pixelData[i + 3] = color[3];
+        mappedColors[idx].update = (
+          !mappedColors[idx].color ||
+          mappedColors[idx].color[0] !== color[0] ||
+          mappedColors[idx].color[1] !== color[1] ||
+          mappedColors[idx].color[2] !== color[2] ||
+          mappedColors[idx].color[3] !== color[3]);
+        if (mappedColors[idx].update) {
+          mappedColors[idx].color = color;
+          updateFirst = Math.min(mappedColors[idx].first, updateFirst);
+          updateLast = Math.max(mappedColors[idx].last, updateLast);
+        }
       }
     }
     /* If nothing was updated, we are done */
-    if (!update) {
+    if (updateFirst >= updateLast) {
       return;
     }
-    m_info.context.putImageData(m_info.imageData, 0, 0);
-
-    if (m_info.destImage) {
-      m_info.destImage._ignore = true;
+    /* Update only the extent that has changed */
+    pixelData = m_info.imageData.data;
+    indices = m_info.indices;
+    for (i = updateFirst; i <= updateLast; i += 1) {
+      idx = indices[i];
+      if (idx !== lastidx) {
+        lastidx = idx;
+        color = mappedColors[idx].color;
+        update = mappedColors[idx].update;
+      }
+      if (update) {
+        pixelData[i * 4] = color[0];
+        pixelData[i * 4 + 1] = color[1];
+        pixelData[i * 4 + 2] = color[2];
+        pixelData[i * 4 + 3] = color[3];
+      }
     }
-    /* We have a local reference to the destination image so that we can cancel
-     * processing an old image if it is no longer wanted.  When using
-     * canvas.toBlob, image loading is asynchronous (whereas canvas.toDataURL
-     * is synchronous).  This has speed benefits, but means that two updates in
-     * a short time could be called where the older update is not desired. */
-    destImage = m_info.destImage = new Image();
-    var prev_onload = destImage.onload,
-        url;
-    destImage.onload = function () {
-      if (url) {
-        URL.revokeObjectURL(url);
-      }
-      if (destImage._ignore) {
-        return;
-      }
-      if (prev_onload) {
-        return prev_onload.apply(this, arguments);
-      }
-      if (!m_quadFeature) {
-        m_quadFeature = m_this.layer().createFeature('quad', {
-          selectionAPI: false,
-          gcs: m_this.gcs(),
-          visible: m_this.visible()
-        });
-        m_quadFeature.data([{}]);
-        m_this.dependentFeatures([m_quadFeature]);
-      }
-      m_quadFeature.style({image: destImage,
+    /* Place the updated area into the canvas */
+    m_info.context.putImageData(
+      m_info.imageData, 0, 0, 0, Math.floor(updateFirst / m_info.width),
+      m_info.width, Math.ceil((updateLast + 1) / m_info.width));
+
+    /* If we haven't made a quad feature, make one now.  The quad feature needs
+     * to have the canvas capability. */
+    if (!m_quadFeature) {
+      m_quadFeature = m_this.layer().createFeature('quad', {
+        selectionAPI: false,
+        gcs: m_this.gcs(),
+        visible: m_this.visible()
+      });
+      m_this.dependentFeatures([m_quadFeature]);
+      m_quadFeature.style({image: m_info.canvas,
                            position: m_this.style.get('position')})
                    .data([{}])
                    .draw();
-    };
-    /* Not all browsers support toBlob, so use toDataURL as a fallback */
-    if (m_info.canvas.toBlob) {
-      m_info.canvas.toBlob(function (blob) {
-        url = URL.createObjectURL(blob);
-        destImage.src = url;
-      });
-    } else {
-      destImage.src = m_info.canvas.toDataURL();
     }
   };
 
