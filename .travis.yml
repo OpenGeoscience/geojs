@@ -17,8 +17,9 @@ script:
 - if [ -f _build/test_failed ] ; then false ; fi
 after_success:
 - npm run codecov
+- pip install --user GitPython boto3
+- python $TRAVIS_BUILD_DIR/scripts/upload_notes.py --repo $TRAVIS_BUILD_DIR --upload $TRAVIS_BUILD_DIR/_build/build_notes.json
 env:
   global:
-  - secure: L6J79xqMkGc0i6A469jd+2nyJdvJSWRkEuhfvjMbv7wFyTHF8GYjceeenGGGnCxc62LpKFLLOU35ulRqOWMAUqgHOzXUo8BEZtc+XljGq25Uqgm0/z84p1vSbuH1tZyY7/PwM2m06UadWe9Y6Vo6qZsVuiUCiEjImfmzeP9fb5g=
-  - secure: Rj4jqVvqPV4H/E2tpWbONhQY6zyESWmJRLvZiZC55gR3D9EIfq8L5AYwF+BJVlYAPZ2g9vzsXUnLy07GDxE/MVsiooLdiU0WofRNbLCnJjijP+v2ZWCR/77Vl6hTDZ/5PeFT2zwNdFDcIOLONzJNzgrX0jqrIyuehReFmZVwTs0=
-  - secure: fBktMf44ZPj7Y4gAXJSOG3u0Bvo1jv9HKCeM0zVLOW61bDdMCbCHBAxGa0QxHht1aISm8DNnhTrnnzpeZLHUEYyVdqU3zmDxJILKEhhnEavWAXf1ZBIY/VPysA2S1MfrLfwgLTj5tCP+/1Ytet2CSp6mmTDBDzL90URoFUYwweU=
+  - secure: JYWs3zJV09uAb7CvX32pADRYTH2XqSGvImNEI6zVFxJxs9r0JsGgyOTz4PPBgs3dv1OjVBXqxu4GD2ZBKeo0Ax13ZnBNVR/BacupBtIwXbxp/FG2lr+WBzE0YnEBhAF/mW5DEkNBWJyLSiBlxYA5QFAAHYwb/GOADl+Z9Qi2FIU=
+  - secure: on13Ka+3jkLDCXxqzxuT+CY4sPM0Zxfbe9M2F3LE0yhN2ww5vaBKdbTrzEWa0TOlBkM2qQUPAFybjHXfHeRyKpZDlsssjogH8YO5qx4zFRP5ZB9ny39QAqBsfZTuXt2WmOTLEcXkByYXVH8my/8ZqZqofSeBZsZdeauzoLbr0R0=
