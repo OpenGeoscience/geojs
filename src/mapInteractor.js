@@ -155,6 +155,14 @@ var mapInteractor = function (args) {
     },
     m_options
   );
+  /* We don't want to merge the original arrays array with a array passed in
+   * the args, so override that as necessary for actions. */
+  if (args && args.actions) {
+    m_options.actions = $.extend(true, [], args.actions);
+  }
+  if (args && args.momentum && args.momentum.actions) {
+    m_options.momentum.actions = $.extend(true, [], args.momentum.actions);
+  }
 
   // options supported:
   // {
