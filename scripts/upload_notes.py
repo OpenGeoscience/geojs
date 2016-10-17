@@ -29,7 +29,7 @@ def gather_info(repo_path='.'):
         'regeneration_command': 'npm run test',
         'vcs': 'git'
     }
-    if os.environ.get('TRAVIS') is 'true':
+    if os.environ.get('TRAVIS'):
         info['travis_id'] = os.environ.get('TRAVIS_BUILD_ID')
         info['host'] = 'travis'
     return info
