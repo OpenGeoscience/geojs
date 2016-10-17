@@ -6,12 +6,19 @@ from datetime import datetime
 import os
 import argparse
 from StringIO import StringIO
-
-import boto3
-import git
+import sys
 
 
 def gather_info(repo_path='.'):
+    try:
+        import git
+    except ImportError:
+        print(
+            'Please install GitPython (`pip install GitPython`)',
+            file=sys.stderr
+        )
+        sys.exit(1)
+
     repo = git.Repo(repo_path)
     try:
         branch = repo.active_branch.name
@@ -38,6 +45,15 @@ def gather_info(repo_path='.'):
 def upload(data, bucket='geojs-build-outputs'):
     # assumes credentials coming from environment variables
     # such as AWS_ACCESS_KEY_ID, AWS_PROFILE, etc.
+    try:
+        import boto3
+    except ImportError:
+        print(
+            'Please install boto3 (`pip install boto3`)',
+            file=sys.stderr
+        )
+        sys.exit(1)
+
     s3 = boto3.client('s3')
 
     f = StringIO()
