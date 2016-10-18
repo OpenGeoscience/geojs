@@ -1426,7 +1426,7 @@ var map = function (arg) {
     // preprocess the arguments
     zoom = fix_zoom(zoom, ignoreDiscreteZoom);
     units = m_this.unitsPerPixel(zoom);
-    center = m_this.gcsToWorld(center, gcs);
+    center = m_this.gcsToWorld(center, null);
 
     // get half the width and height in world coordinates
     width = m_width * units;
