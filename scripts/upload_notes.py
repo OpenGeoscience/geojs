@@ -7,6 +7,7 @@ import os
 import argparse
 from StringIO import StringIO
 import sys
+import uuid
 
 
 def gather_info(repo_path='.'):
@@ -26,11 +27,13 @@ def gather_info(repo_path='.'):
         branch = os.environ.get('TRAVIS_BRANCH')
 
     info = {
+        'uuid': str(uuid.uuid4()),
         'build_outputs': [],
         'build_timestamp': datetime.now().isoformat(),
+        'commit_timestamp': repo.head.commit.committed_datetime.isoformat(),
         'datasets': [],
         'git_branch': branch,
-        'git_repo': 'git@github.com:OpenGeoscience/geojs.git',
+        'git_repo_url': 'git@github.com:OpenGeoscience/geojs.git',
         'git_sha': repo.head.commit.hexsha,
         'host': socket.gethostname(),
         'regeneration_command': 'npm run test',
@@ -68,6 +71,7 @@ def main(args):
     notes = json.load(open(args.notes, 'r'))
     info = gather_info(args.repo)
     info['data'] = notes
+    info['submission_timestamp'] = datetime.now().isoformat()
 
     data = json.dumps(info)
     print(data)
