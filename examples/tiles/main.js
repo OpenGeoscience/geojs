@@ -100,8 +100,7 @@ $(function () {
       x: -98.0,
       y: 39.5
     },
-    maxBounds: {},
-    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3
+    maxBounds: {}
   };
   // Set the tile layer defaults to use the specified renderer and opacity
   var layerParams = {
@@ -134,44 +133,14 @@ $(function () {
   }
   // For image tile servers, where we know the maximum width and height, use
   // a pixel coordinate system.
-  var w, h;
   if (query.w && query.h) {
-    w = parseInt(query.w, 10);
-    h = parseInt(query.h, 10);
-    // Set a pixel coordinate system where 0, 0 is the upper left and w, h is
-    // the lower-right.
-    /* If both ingcs and gcs are set to an empty string '', the coordinates
-     * will stay at pixel values, but the y values will from from [0, -h).  If
-     * '+proj=longlat +axis=esu', '+proj=longlat +axis=enu' are used instead,
-     * the y coordinate will be reversed.  It would be better to install a new
-     * 'inverse-y' projection into proj4, but this works without that change.
-     * The 'longlat' projection functionally is a no-op in this case. */
-    mapParams.ingcs = '+proj=longlat +axis=esu';
-    mapParams.gcs = '+proj=longlat +axis=enu';
-    /* mapParams.ingcs = mapParams.gcs = ''; */
-    mapParams.maxBounds = {left: 0, top: 0, right: w, bottom: h};
-    mapParams.center = {x: w / 2, y: h / 2};
-    mapParams.max = Math.ceil(Math.log(Math.max(w, h) / 256) / Math.log(2));
-    mapParams.clampBoundsX = mapParams.clampBoundsY = true;
-    layerParams.maxLevel = mapParams.max;
-    layerParams.wrapX = layerParams.wrapY = false;
-    layerParams.tileOffset = function () {
-      return {x: 0, y: 0};
-    };
-    layerParams.attribution = '';
-    layerParams.tileRounding = Math.ceil;
-    layerParams.tilesAtZoom = function (level) {
-      var scale = Math.pow(2, layerParams.maxLevel - level);
-      return {
-        x: Math.ceil(w / (layerParams.tileWidth || 256) / scale),
-        y: Math.ceil(h / (layerParams.tileHeight || 256) / scale)
-      };
-    };
-    layerParams.tilesMaxBounds = function (level) {
-      var scale = Math.pow(2, layerParams.maxLevel - level);
-      return {x: Math.floor(w / scale), y: Math.floor(h / scale)};
-    };
+    var pixelParams = geo.util.pixelCoordinateParams(
+      '#map', parseInt(query.w, 10), parseInt(query.h, 10),
+      layerParams.tileWidth || 256, layerParams.tileHeight || 256);
+    $.extend(mapParams, pixelParams.map);
+    $.extend(layerParams, pixelParams.layer);
   }
+  mapParams.zoom = query.zoom !== undefined ? parseFloat(query.zoom) : 3;
   // Parse additional query options
   if (query.x !== undefined) {
     mapParams.center.x = parseFloat(query.x);
@@ -209,12 +178,6 @@ $(function () {
   if (query.tileHeight) {
     layerParams.tileHeight = parseInt(query.tileHeight, 10);
   }
-  if (w && h) {
-    mapParams.max = Math.ceil(Math.log(Math.max(
-        w / (layerParams.tileWidth || 256),
-        h / (layerParams.tileHeight || 256))) / Math.log(2));
-    layerParams.maxLevel = mapParams.max;
-  }
   if (query.max !== undefined) {
     mapParams.max = parseFloat(query.max);
   }
@@ -227,11 +190,6 @@ $(function () {
   // allow a generous max tile level so it is never the limit
   if (!layerParams.maxLevel) {
     layerParams.maxLevel = 25;
-  }
-  if (w && h) {
-    // unitsPerPixel is at zoom level 0.  We want each pixel to be 1 at the
-    // maximum zoom
-    mapParams.unitsPerPixel = Math.pow(2, mapParams.max);
   }
   if (query.unitsPerPixel !== undefined) {
     mapParams.unitsPerPixel = parseFloat(query.unitsPerPixel);
