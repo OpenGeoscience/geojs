@@ -379,7 +379,7 @@ describe('geo.annotation', function () {
     });
     it('_geojsonStyles', function () {
       var ann = geo.annotation.pointAnnotation();
-      expect(ann._geojsonStyles().length).toBe(8);
+      expect(ann._geojsonStyles().length).toBe(9);
     });
     it('_geojsonCoordinates', function () {
       var ann = geo.annotation.pointAnnotation();
@@ -422,6 +422,30 @@ describe('geo.annotation', function () {
       })).toBe('done');
       expect(ann.options('position')).toEqual({x: 10, y: 20});
       expect(ann.state()).toBe(geo.annotation.state.done);
+    });
+    it('scaled radius', function () {
+      var map = create_map();
+      var layer = map.createLayer('annotation', {
+        annotations: ['point']
+      });
+      var ann = geo.annotation.pointAnnotation({
+        position: point, layer: layer, style: {scaled: true}});
+      var features = ann.features();
+      expect(features.length).toBe(1);
+      expect(features[0].point.x).toEqual(point.x);
+      expect(features[0].point.style.radius()).toBe(10);
+      map.zoom(3);
+      features = ann.features();
+      expect(features[0].point.style.radius()).toBe(5);
+      ann.options().style.radius = function () {
+        return map.zoom() > 6.5 ? 4 : 10;
+      };
+      map.zoom(6);
+      features = ann.features();
+      expect(features[0].point.style.radius()).toBe(40);
+      map.zoom(7);
+      features = ann.features();
+      expect(features[0].point.style.radius()).toBe(32);
     });
   });
 

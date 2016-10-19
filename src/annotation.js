@@ -690,7 +690,11 @@ registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
  * May specify:
  *   style.
  *     radius, fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
- *     strokeOpacity
+ *     strokeOpacity, scaled
+ *
+ * If scaled is false, the point is not scaled with zoom level.  If it is true,
+ * the radius is based on the zoom level at first instantiation.  Otherwise, if
+ * it is a number, the radius is used at that zoom level.
  */
 /////////////////////////////////////////////////////////////////////////////
 var pointAnnotation = function (args) {
@@ -698,12 +702,15 @@ var pointAnnotation = function (args) {
   if (!(this instanceof pointAnnotation)) {
     return new pointAnnotation(args);
   }
+  var m_this = this;
+
   args = $.extend(true, {}, {
     style: {
       fill: true,
       fillColor: {r: 0, g: 1, b: 0},
       fillOpacity: 0.25,
       radius: 10,
+      scaled: false,
       stroke: true,
       strokeColor: {r: 0, g: 0, b: 0},
       strokeOpacity: 1,
@@ -722,17 +729,36 @@ var pointAnnotation = function (args) {
   this.features = function () {
     var opt = this.options(),
         state = this.state(),
-        features;
+        features, style, scaleOnZoom;
     switch (state) {
       case annotationState.create:
         features = [];
         break;
       default:
+        style = opt.style;
+        if (opt.style.scaled || opt.style.scaled === 0) {
+          if (opt.style.scaled === true) {
+            opt.style.scaled = this.layer().map().zoom();
+          }
+          style = $.extend({}, style, {
+            radius: function () {
+              var radius = opt.style.radius,
+                  zoom = m_this.layer().map().zoom();
+              if (util.isFunction(radius)) {
+                radius = radius.apply(this, arguments);
+              }
+              radius *= Math.pow(2, zoom - opt.style.scaled);
+              return radius;
+            }
+          });
+          scaleOnZoom = true;
+        }
         features = [{
           point: {
             x: opt.position.x,
             y: opt.position.y,
-            style: opt.style
+            style: style,
+            scaleOnZoom: scaleOnZoom
           }
         }];
         break;
@@ -786,7 +812,7 @@ var pointAnnotation = function (args) {
    * @return {array} a list of style names to store.
    */
   this._geojsonStyles = function () {
-    return ['fill', 'fillColor', 'fillOpacity', 'radius', 'stroke',
+    return ['fill', 'fillColor', 'fillOpacity', 'radius', 'scaled', 'stroke',
             'strokeColor', 'strokeOpacity', 'strokeWidth'];
   };
 

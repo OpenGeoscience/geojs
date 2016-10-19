@@ -57,6 +57,7 @@ var annotationLayer = function (args) {
     'fillColor': {dataType: 'color', keys: ['fillColor', 'fill-color', 'marker-color', 'fill']},
     'fillOpacity': {dataType: 'opacity', keys: ['fillOpacity', 'fill-opacity']},
     'radius': {dataType: 'positive', keys: ['radius']},
+    'scaled': {dataType: 'booleanOrNumber', keys: ['scaled']},
     'stroke': {dataType: 'boolean', keys: ['stroke']},
     'strokeColor': {dataType: 'color', keys: ['strokeColor', 'stroke-color', 'stroke']},
     'strokeOpacity': {dataType: 'opacity', keys: ['strokeOpacity', 'stroke-opacity']},
@@ -546,8 +547,13 @@ var annotationLayer = function (args) {
    *     object with r, g, b properties in the range of [0-1].
    *   opacity: a floating point number in the range [0, 1].
    *   positive: a floating point number greater than zero.
-   *   boolean: the string 'false' and falsy values are false, all else is
-   *     true.  null and undefined are still considered invalid values.
+   *   boolean: a string whose lowercase value is 'false', 'off', or 'no', and
+   *     falsy values are false, all else is true.  null and undefined are
+   *     still considered invalid values.
+   *   booleanOrNumber: a string whose lowercase value is 'false', 'off', no',
+   *     'true', 'on', or 'yes', falsy values that aren't 0, and true are
+   *     handled as booleans.  Otherwise, a floating point number that isn't
+   *     NaN or an infinity.
    * @param {number|string|object|boolean} value: the value to validate.
    * @param {string} dataType: the data type for validation.
    * @returns {number|string|object|boolean|undefined} the sanitized value or
@@ -558,8 +564,18 @@ var annotationLayer = function (args) {
       return;
     }
     switch (dataType) {
+      case 'booleanOrNumber':
+        if ((!value && value !== 0) || ['true', 'false', 'off', 'on', 'no', 'yes'].indexOf(('' + value).toLowerCase()) >= 0) {
+          value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
+        } else {
+          value = +value;
+          if (isNaN(value) || !isFinite(value)) {
+            return;
+          }
+        }
+        break;
       case 'boolean':
-        value = !!value && value !== 'false';
+        value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
         break;
       case 'color':
         value = util.convertColor(value);
@@ -575,7 +591,7 @@ var annotationLayer = function (args) {
         break;
       case 'positive':
         value = +value;
-        if (isNaN(value) || value <= 0) {
+        if (isNaN(value) || !isFinite(value) || value <= 0) {
           return;
         }
         break;
@@ -599,6 +615,7 @@ var annotationLayer = function (args) {
       $.each(m_features, function (idx, featureLevel) {
         $.each(featureLevel, function (type, feature) {
           feature.data = [];
+          delete feature.feature.scaleOnZoom;
         });
       });
       $.each(m_annotations, function (annotation_idx, annotation) {
@@ -663,6 +680,9 @@ var annotationLayer = function (args) {
             }
             /* Collect the data for each feature */
             m_features[idx][type].data.push(featureSpec.data || featureSpec);
+            if (featureSpec.scaleOnZoom) {
+              m_features[idx][type].feature.scaleOnZoom = true;
+            }
           });
         });
       });
@@ -675,6 +695,19 @@ var annotationLayer = function (args) {
       m_buildTime.modified();
     }
     s_update.call(m_this, request);
+  };
+
+  /**
+   * Check if any features are marked that they need to be updated when a zoom
+   * occurs.  If so, mark that feature as modified.
+   */
+  this._handleZoom = function () {
+    var i, features = m_this.features();
+    for (i = 0; i < features.length; i += 1) {
+      if (features[i].scaleOnZoom) {
+        features[i].modified();
+      }
+    }
   };
 
   ///////////////////////////////////////////////////////////////////////////
@@ -693,6 +726,8 @@ var annotationLayer = function (args) {
 
     m_this.geoOn(geo_event.mouseclick, m_this._handleMouseClick);
     m_this.geoOn(geo_event.mousemove, m_this._handleMouseMove);
+
+    m_this.geoOn(geo_event.zoom, m_this._handleZoom);
 
     return m_this;
   };
