@@ -450,6 +450,80 @@
     },
 
     /**
+     * Return recommended defaults for map parameters and osm or tile layer
+     * paramaters where the expected intent is to use the map in pixel
+     * coordinates (upper left is (0, 0), lower right is (width, height).  The
+     * returned objects can be modified or extended.  For instance,
+     *   var results = pixelCoordinateParams('#map', 10000, 9000);
+     *   geo.map($.extend(results.map, {clampZoom: false}));
+     *
+     * @param {string} [node] DOM selector for the map container
+     * @param {number} width width of the whole map contents in pixels
+     * @param {number} height height of the whole map contents in pixels
+     * @param {number} tileWidth if an osm or tile layer is going to be used,
+     *     the width of a tile.
+     * @param {number} tileHeight if an osm or tile layer is going to be used,
+     *     the height of a tile.
+     */
+    pixelCoordinateParams: function (node, width, height, tileWidth, tileHeight) {
+      var mapW, mapH, tiled;
+      if (node) {
+        node = $(node);
+        mapW = node.innerWidth();
+        mapH = node.innerHeight();
+      }
+      tileWidth = tileWidth || width;
+      tileHeight = tileHeight || height;
+      tiled = (tileWidth !== width || tileHeight !== height);
+      var minLevel = Math.min(0, Math.floor(Math.log(Math.min(
+            (mapW || tileWidth) / tileWidth,
+            (mapH || tileHeight) / tileHeight)) / Math.log(2))),
+          maxLevel = Math.ceil(Math.log(Math.max(
+            width / tileWidth,
+            height / tileHeight)) / Math.log(2));
+      var mapParams = {
+        node: node,
+        ingcs: '+proj=longlat +axis=esu',
+        gcs: '+proj=longlat +axis=enu',
+        maxBounds: {left: 0, top: 0, right: width, bottom: height},
+        center: {x: width / 2, y: height / 2},
+        min: minLevel,
+        max: maxLevel,
+        zoom: minLevel,
+        clampBoundsX: true,
+        clampBoundsY: true,
+        clampZoom: true
+      };
+      var layerParams = {
+        maxLevel: maxLevel,
+        wrapX: false,
+        wrapY: false,
+        tileOffset: function () {
+          return {x: 0, y: 0};
+        },
+        attribution: '',
+        tileWidth: tileWidth,
+        tileHeight: tileHeight,
+        tileRounding: Math.ceil,
+        tilesAtZoom: tiled ? function (level) {
+          var scale = Math.pow(2, maxLevel - level);
+          return {
+            x: Math.ceil(width / tileWidth / scale),
+            y: Math.ceil(height / tileHeight / scale)
+          };
+        } : undefined,
+        tilesMaxBounds: tiled ? function (level) {
+          var scale = Math.pow(2, maxLevel - level);
+          return {
+            x: Math.floor(width / scale),
+            y: Math.floor(height / scale)
+          };
+        } : undefined
+      };
+      return {map: mapParams, layer: layerParams};
+    },
+
+    /**
      * Report on one or all of the tracked timings.
      *
      * @param {string} name name to report on, or undefined to report all.
