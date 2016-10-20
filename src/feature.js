@@ -121,6 +121,16 @@ var feature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Returns an array of line indices that are contained in the given box.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.boxSearch = function (lowerLeft, upperRight, opts) {
+    // base class method does nothing
+    return [];
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Private mousemove handler
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -130,6 +140,10 @@ var feature = function (arg) {
         over = m_this.pointSearch(mouse.geo),
         newFeatures = [], oldFeatures = [], lastTop = -1, top = -1;
 
+    // exit if we have no old or new found entries
+    if (!m_selectedFeatures.length && !over.index.length) {
+      return;
+    }
     // Get the index of the element that was previously on top
     if (m_selectedFeatures.length) {
       lastTop = m_selectedFeatures[m_selectedFeatures.length - 1];
@@ -212,11 +226,12 @@ var feature = function (arg) {
    * Private mouseclick handler
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._handleMouseclick = function () {
+  this._handleMouseclick = function (evt) {
     var mouse = m_this.layer().map().interactor().mouse(),
         data = m_this.data(),
         over = m_this.pointSearch(mouse.geo);
 
+    mouse.buttonsDown = evt.buttonsDown;
     feature.eventID += 1;
     over.index.forEach(function (i, idx) {
       m_this.geoTrigger(geo_event.feature.mouseclick, {
@@ -510,7 +525,7 @@ var feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     if (!m_layer) {
-      throw 'Feature requires a valid layer';
+      throw new Error('Feature requires a valid layer');
     }
     m_style = $.extend({},
                 {'opacity': 1.0}, arg.style === undefined ? {} :
@@ -549,7 +564,6 @@ var feature = function (arg) {
     m_this._unbindMouseHandlers();
     m_selectedFeatures = [];
     m_style = {};
-    arg = {};
     s_exit();
   };
 
@@ -588,8 +602,6 @@ feature.eventID = 0;
 feature.create = function (layer, spec) {
   'use strict';
 
-  var type = spec.type;
-
   // Check arguments
   if (!(layer instanceof require('./layer'))) {
     console.warn('Invalid layer');
@@ -599,13 +611,13 @@ feature.create = function (layer, spec) {
     console.warn('Invalid spec');
     return null;
   }
+  var type = spec.type;
   var feature = layer.createFeature(type);
   if (!feature) {
     console.warn('Could not create feature type "' + type + '"');
     return null;
   }
 
-  spec = spec || {};
   spec.data = spec.data || [];
   return feature.style(spec);
 };
