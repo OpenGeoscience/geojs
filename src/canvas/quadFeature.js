@@ -152,6 +152,7 @@ var capabilities = {};
 capabilities[quadFeature.capabilities.color] = false;
 capabilities[quadFeature.capabilities.image] = true;
 capabilities[quadFeature.capabilities.imageCrop] = true;
+capabilities[quadFeature.capabilities.imageFixedScale] = true;
 capabilities[quadFeature.capabilities.imageFull] = false;
 
 registerFeature('canvas', 'quad', canvas_quadFeature, capabilities);
