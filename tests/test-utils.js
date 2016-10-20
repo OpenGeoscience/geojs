@@ -9,6 +9,7 @@ var $ = require('jquery');
 
 var geo = require('../src');
 var _supported = geo.gl.vglRenderer.supported;
+var bowser = require('bowser');
 
 module.exports = {};
 
@@ -286,6 +287,7 @@ module.exports.logCanvas2D = function logCanvas2D(enable) {
  * @param note: the data to send.  This will be converted to JSON.
  */
 module.exports.submitNote = function submitNote(key, note) {
+  note.browser = bowser;
   return $.ajax({
     url: '/notes?key=' + encodeURIComponent(key),
     data: JSON.stringify(note),
