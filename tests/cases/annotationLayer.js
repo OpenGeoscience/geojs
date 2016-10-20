@@ -355,6 +355,20 @@ describe('geo.annotationLayer', function () {
       });
       expect(layer.annotations()[0].options('vertices')[0]).not.toEqual(layer.annotations()[0].options('vertices')[1]);
     });
+    it('_handleZoom', function () {
+      layer.mode(null);
+      layer.removeAllAnnotations();
+      layer.addAnnotation(point);
+      layer._update();
+      var mod = layer.features()[0].getMTime();
+      layer._handleZoom();
+      expect(layer.features()[0].getMTime()).toBe(mod);
+      layer.annotations()[0].options({style: {scaled: true}});
+      layer._update();
+      mod = layer.features()[0].getMTime();
+      layer._handleZoom();
+      expect(layer.features()[0].getMTime()).toBeGreaterThan(mod);
+    });
     it('_processSelection', function () {
       layer.removeAllAnnotations();
       layer._processSelection({
@@ -467,7 +481,8 @@ describe('geo.annotationLayer', function () {
         properties: {
           radius: -5,
           fillColor: 'no such color',
-          fillOpacity: -1
+          fillOpacity: -1,
+          scaled: 'not a number'
         }
       };
       layer.geojson(badattr, true);
@@ -475,6 +490,7 @@ describe('geo.annotationLayer', function () {
       expect(attr.radius).toBeGreaterThan(0);
       expect(attr.fillOpacity).toBeGreaterThan(0);
       expect(attr.fillColor).toBe('#00ff00');
+      expect(attr.scaled).toBe(false);
       var goodattr = {
         type: 'Feature',
         geometry: {
@@ -484,7 +500,8 @@ describe('geo.annotationLayer', function () {
         properties: {
           radius: 3,
           fillColor: 'indigo',
-          fillOpacity: 0.3
+          fillOpacity: 0.3,
+          scaled: 'On'
         }
       };
       layer.geojson(goodattr, true);
@@ -492,6 +509,7 @@ describe('geo.annotationLayer', function () {
       expect(attr.radius).toBe(3);
       expect(attr.fillOpacity).toBe(0.3);
       expect(attr.fillColor).toBe('#4b0082');
+      expect(attr.scaled).toBe(4);
     });
   });
   it('Test destroy layer.', function () {
