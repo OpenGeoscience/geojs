@@ -122,7 +122,7 @@ module.exports = (function () {
    *   This function takes a zoom level argument and returns, in units of
    *   pixels, the coordinates of the point (0, 0) at the given zoom level
    *   relative to the bottom left corner of the domain.
-   * @param {function} [options.tileMaxBounds=null]
+   * @param {function} [options.tilesMaxBounds=null]
    *   This function takes a zoom level argument and returns, in units of
    *   pixels, the top, left, right, and bottom maximum value for which tiles
    *   should be drawn at the given zoom level relative to the bottom left

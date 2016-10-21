@@ -166,7 +166,7 @@ util.rendererForFeatures = function (featureList) {
  *      capabilities in multiple categories (renderers), then the feature
  *      should expose a simple dictionary of supported and unsupported
  *      features.  For instance, the quad feature has color quads, image quads,
- *      and image quads that support full transformations.  The capabailities
+ *      and image quads that support full transformations.  The capabilities
  *      should be defined in the base feature in a capabilities object so that
  *      they can be referenced by that rather than an explicit string.
  * @returns {object} if this feature replaces an existing one, this was the
@@ -339,7 +339,7 @@ util.createWidget = function (name, layer, arg) {
  *      annotation.  Each key is a feature that is used.  If the value is true,
  *      the that feature is always needed.  If a list, then it is the set of
  *      annotation states for which that feature is required.  These can be
- *      used to pick an pparopriate renderer when creating an annotation layer.
+ *      used to pick an appropriate renderer when creating an annotation layer.
  * @returns {object} if this annotation replaces an existing one, this was the
  *      value that was replaced.  In this case, a warning is issued.
  */
@@ -392,7 +392,7 @@ util.listAnnotations = function () {
  *   used with that annotation.  For example, ['polygon', 'rectangle'] lists
  *   features required to show those annotations in any mode,  whereas
  *   {polygon: [annotationState.done], rectangle: [annotationState.done]} only
- *   lists features thatre are needed to show the completed annotations.
+ *   lists features that are needed to show the completed annotations.
  * @return {array} a list of features needed for the specified annotations.
  *   There may be duplicates in the list.
  */
@@ -425,7 +425,7 @@ util.featuresForAnnotations = function (annotationList) {
 /**
  * Check if there is a renderer that is supported and supports a list of
  * annotations.  If not, display a warning.  This generates a list of required
- * features, then picks the first renderer that supports all of thse features.
+ * features, then picks the first renderer that supports all of these features.
  *
  * @param {array|object|undefined} annotationList A list of annotations that
  *   will be used with this renderer.  Instead of a list, if this is an object,

@@ -627,11 +627,10 @@ var annotationLayer = function (args) {
           $.each(featureLevel, function (type, featureSpec) {
             /* Create features as needed */
             if (!m_features[idx][type]) {
-              try {
-                var feature = m_this.createFeature(type, {
-                  gcs: m_this.map().gcs()
-                });
-              } catch (err) {
+              var feature = m_this.createFeature(type, {
+                gcs: m_this.map().gcs()
+              });
+              if (!feature) {
                 /* We can't create the desired feature, porbably because of the
                  * selected renderer.  Issue one warning only. */
                 var key = 'error_feature_' + type;
