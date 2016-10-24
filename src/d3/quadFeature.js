@@ -233,6 +233,7 @@ var capabilities = {};
 capabilities[quadFeature.capabilities.color] = true;
 capabilities[quadFeature.capabilities.image] = true;
 capabilities[quadFeature.capabilities.imageCrop] = false;
+capabilities[quadFeature.capabilities.imageFixedScale] = false;
 capabilities[quadFeature.capabilities.imageFull] = false;
 capabilities[quadFeature.capabilities.canvas] = false;
 

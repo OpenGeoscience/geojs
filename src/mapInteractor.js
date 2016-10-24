@@ -90,38 +90,54 @@ var mapInteractor = function (args) {
       actions: [{
         action: geo_action.pan,
         input: 'left',
-        modifiers: {shift: false, ctrl: false}
+        modifiers: {shift: false, ctrl: false},
+        owner: 'geo.mapInteractor',
+        name: 'button pan'
       }, {
         action: geo_action.zoom,
         input: 'right',
-        modifiers: {shift: false, ctrl: false}
+        modifiers: {shift: false, ctrl: false},
+        owner: 'geo.mapInteractor',
+        name: 'button zoom'
       }, {
         action: geo_action.zoom,
         input: 'wheel',
-        modifiers: {shift: false, ctrl: false}
+        modifiers: {shift: false, ctrl: false},
+        owner: 'geo.mapInteractor',
+        name: 'wheel zoom'
       }, {
         action: geo_action.rotate,
         input: 'left',
-        modifiers: {shift: false, ctrl: true}
+        modifiers: {shift: false, ctrl: true},
+        owner: 'geo.mapInteractor',
+        name: 'button rotate'
       }, {
         action: geo_action.rotate,
         input: 'wheel',
-        modifiers: {shift: false, ctrl: true}
+        modifiers: {shift: false, ctrl: true},
+        owner: 'geo.mapInteractor',
+        name: 'wheel rotate'
       }, {
         action: geo_action.select,
         input: 'left',
         modifiers: {shift: true, ctrl: true},
-        selectionRectangle: geo_event.select
+        selectionRectangle: geo_event.select,
+        owner: 'geo.mapInteractor',
+        name: 'drag select'
       }, {
         action: geo_action.zoomselect,
         input: 'left',
         modifiers: {shift: true, ctrl: false},
-        selectionRectangle: geo_event.zoomselect
+        selectionRectangle: geo_event.zoomselect,
+        owner: 'geo.mapInteractor',
+        name: 'drag zoom'
       }, {
         action: geo_action.unzoomselect,
         input: 'right',
         modifiers: {shift: true, ctrl: false},
-        selectionRectangle: geo_event.unzoomselect
+        selectionRectangle: geo_event.unzoomselect,
+        owner: 'geo.mapInteractor',
+        name: 'drag unzoom'
       }],
 
       click: {

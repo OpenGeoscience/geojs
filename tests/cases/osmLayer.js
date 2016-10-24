@@ -280,6 +280,28 @@ describe('geo.core.osmLayer', function () {
     });
   });
 
+  describe('pixel coordinates', function () {
+    it('util.pixelCoordinateParams', function () {
+      var sizeX = 12345, sizeY = 5678, tileSize = 240;
+      var params = geo.util.pixelCoordinateParams('#map-osm-layer', sizeX, sizeY, tileSize, tileSize);
+      expect(params.map.ingcs).toBe('+proj=longlat +axis=esu');
+      expect(params.layer.tileRounding).toBe(Math.ceil);
+      expect(params.layer.tileOffset()).toEqual({x: 0, y: 0});
+      expect(params.layer.tilesAtZoom(3)).toEqual({x: 7, y: 3});
+      expect(params.layer.tilesMaxBounds(3)).toEqual({x: 1543, y: 709});
+      map = create_map(params.map);
+      map.createLayer('osm', $.extend(
+        {}, params.layer, {renderer: null, url: '/data/white.jpg', zoom: 3}));
+      expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
+    });
+    waitForIt('.geo-tile-container', function () {
+      return map.node().find('.geo-tile-container').length > 0;
+    });
+    it('check for tiles', function () {
+      expect(map.node().find('.geo-tile-container').length).toBeGreaterThan(0);
+    });
+    it('destroy', destroy_map);
+  });
   describe('geo.d3.osmLayer', function () {
     var layer, mapinfo = {};
     it('test that tiles are created', function () {

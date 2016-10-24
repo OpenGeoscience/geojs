@@ -468,6 +468,16 @@ geo_event.annotation.add_before = 'geo_annotation_add_before';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Triggered when an annotation has been altered.  This is currently only
+ * triggered when updating existing annotations via the geojson function.
+ *
+ * @property {geo.annotation} annotation The annotation that was altered.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.annotation.update = 'geo_annotation_update';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Triggered when an annotation has been removed.
  *
  * @property {geo.annotation} annotation The annotation that was removed.

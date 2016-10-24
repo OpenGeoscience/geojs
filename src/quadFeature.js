@@ -495,6 +495,8 @@ quadFeature.capabilities = {
   image: 'quad.image',
   /* support for cropping quad images */
   imageCrop: 'quad.imageCrop',
+  /* support for fixed-scale quad images */
+  imageFixedScale: 'quad.imageFixedScale',
   /* support for arbitrary quad images */
   imageFull: 'quad.imageFull',
   /* support for canvas as images */

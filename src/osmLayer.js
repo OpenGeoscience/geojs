@@ -54,6 +54,8 @@ module.exports = (function () {
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
         queue: this._queue,
+        overlap: this._options.tileOverlap,
+        scale: this._options.tileScale,
         url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
                                this._options.subdomains)
       });

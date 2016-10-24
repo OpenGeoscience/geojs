@@ -44,6 +44,8 @@ var pointFeature = function (arg) {
       m_lastZoom = null,
       m_ignoreData = false; // flag to ignore data() calls made locally
 
+  this.featureType = 'point';
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set clustering option

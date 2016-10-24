@@ -141,6 +141,10 @@ var feature = function (arg) {
         over = m_this.pointSearch(mouse.geo),
         newFeatures = [], oldFeatures = [], lastTop = -1, top = -1;
 
+    // exit if we have no old or new found entries
+    if (!m_selectedFeatures.length && !over.index.length) {
+      return;
+    }
     // Get the index of the element that was previously on top
     if (m_selectedFeatures.length) {
       lastTop = m_selectedFeatures[m_selectedFeatures.length - 1];
@@ -539,7 +543,7 @@ var feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     if (!m_layer) {
-      throw 'Feature requires a valid layer';
+      throw new Error('Feature requires a valid layer');
     }
     m_style = $.extend({},
                 {'opacity': 1.0}, arg.style === undefined ? {} :
@@ -578,7 +582,6 @@ var feature = function (arg) {
     m_this._unbindMouseHandlers();
     m_selectedFeatures = [];
     m_style = {};
-    arg = {};
     s_exit();
   };
 
@@ -617,8 +620,6 @@ feature.eventID = 0;
 feature.create = function (layer, spec) {
   'use strict';
 
-  var type = spec.type;
-
   // Check arguments
   if (!(layer instanceof require('./layer'))) {
     console.warn('Invalid layer');
@@ -628,13 +629,13 @@ feature.create = function (layer, spec) {
     console.warn('Invalid spec');
     return null;
   }
+  var type = spec.type;
   var feature = layer.createFeature(type);
   if (!feature) {
     console.warn('Could not create feature type "' + type + '"');
     return null;
   }
 
-  spec = spec || {};
   spec.data = spec.data || [];
   return feature.style(spec);
 };

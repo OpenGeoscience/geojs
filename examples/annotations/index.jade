@@ -28,7 +28,9 @@ block append mainContent
           span.entry-name Sample
           a.entry-edit(action='edit', title='Edit name and properties') &#x270e;
           a.entry-remove(action='remove', title='Delete this annotation') &#x2716;
-    // add buttons to copy annotations as geojson and to paste geojson to annotations
+    .form-group
+      textarea#geojson(type='textarea', rows=15, autocomplete='off',
+        autocorrect='off', autocapitalize='off', spellcheck='false')
 
   #editdialog.modal.fade
     .modal-dialog
@@ -43,6 +45,9 @@ block append mainContent
           .form-group(annotation-types='point')
             label(for='edit-radius') Radius
             input#edit-radius(option='radius', format='positive')
+          .form-group(annotation-types='point', title='Set to "false" to disable, "true" to use the specified radius at the current zoom, or a zoom level to use the specified radius at that zoom level.')
+            label(for='edit-scaled') Scale with Zoom
+            input#edit-radius(option='scaled', format='booleanOrNumber')
           .form-group(annotation-types='point polygon rectangle')
             label(for='edit-fill') Fill
             select#edit-stroke(option='fill', format='boolean')

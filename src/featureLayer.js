@@ -45,7 +45,9 @@ var featureLayer = function (arg) {
 
     var newFeature = registry.createFeature(
       featureName, m_this, m_this.renderer(), arg);
-    this.addFeature(newFeature);
+    if (newFeature) {
+      this.addFeature(newFeature);
+    }
     return newFeature;
   };
 
@@ -124,8 +126,8 @@ var featureLayer = function (arg) {
       var existing = m_features.slice();
       var i;
       for (i = 0; i < existing.length; i += 1) {
-        if (val.indexOf(existing) < 0 && m_features.indexOf(existing) >= 0) {
-          this.deleteFeature(existing);
+        if (val.indexOf(existing[i]) < 0 && m_features.indexOf(existing[i]) >= 0) {
+          this.deleteFeature(existing[i]);
         }
       }
       for (i = 0; i < val.length; i += 1) {
@@ -198,11 +200,6 @@ var featureLayer = function (arg) {
     /// Call base class update
     s_update.call(m_this, request);
 
-    if (m_features && m_features.length === 0) {
-      console.log('[info] No valid data source found.');
-      return;
-    }
-
     if (m_this.dataTime().getMTime() > m_this.updateTime().getMTime()) {
       for (i = 0; i < m_features.length; i += 1) {
         m_features[i].renderer(m_this.renderer());
@@ -251,21 +248,9 @@ var featureLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.clear = function () {
-    var i;
-
-    if (!m_features.length) {
-      return m_this;
+    while (m_features.length) {
+      m_this.deleteFeature(m_features[0]);
     }
-
-    for (i = 0; i < m_features.length; i += 1) {
-      m_features[i]._exit();
-      m_this.removeChild(m_features[i]);
-    }
-    m_features = [];
-
-    m_this.dataTime().modified();
-    m_this.modified();
-
     return m_this;
   };
 

@@ -67,6 +67,8 @@ var polygonFeature = function (arg) {
       s_style = this.style,
       m_coordinates = [];
 
+  this.featureType = 'polygon';
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set data.
