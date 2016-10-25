@@ -97,10 +97,9 @@
           x = point.x - vert0.x,
           y = point.y - vert0.y,
           det = a * d - b * c;
-      if (!det) {
-        return;
+      if (det) {
+        return {x: (x * d - y * b) / det, y: (x * -c + y * a) / det};
       }
-      return {x: (x * d - y * b) / det, y: (x * -c + y * a) / det};
     },
 
     /**

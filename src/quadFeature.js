@@ -138,7 +138,7 @@ var quadFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (coordinate) {
-    var found = [], indices = [], basis = [],
+    var found = [], indices = [], extra = {},
         poly1 = [{}, {}, {}, {}], poly2 = [{}, {}, {}, {}],
         order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1],
         data = m_this.data(),
@@ -174,14 +174,16 @@ var quadFeature = function (arg) {
           } else {
             coordbasis.y = 1 - coordbasis.y;
           }
-          basis.push(coordbasis);
+          if (coordbasis) {
+            extra[quad.idx] = {basis: coordbasis};
+          }
         }
       });
     });
     return {
       index: indices,
       found: found,
-      basis: basis
+      extra: extra
     };
   };
 

@@ -196,7 +196,9 @@ describe('geo.quadFeature', function () {
         quad = geo.quadFeature({layer: layer});
         quad._init();
         data = [{
-          ll: [-60, 10], ur: [-40, 30], image: preloadImage
+          ll: [-40, 30], ur: [-60, 10], image: preloadImage
+        }, {
+          ll: [-90, 10], ur: [-100, 10], image: preloadImage
         }, {
           ll: [-80, 10], lr: [-50, 10], ur: [-70, 30], image: preloadImage
         }];
@@ -205,12 +207,23 @@ describe('geo.quadFeature', function () {
         expect(pt.index).toEqual([0]);
         expect(pt.found.length).toBe(1);
         expect(pt.found[0].ll).toEqual(data[0].ll);
+        expect(pt.extra[0].basis.x).toBeCloseTo(0.25);
+        expect(pt.extra[0].basis.y).toBeCloseTo(0.047477);
         pt = quad.pointSearch({x: -55, y: 11});
-        expect(pt.index).toEqual([0, 1]);
+        expect(pt.index).toEqual([0, 2]);
         expect(pt.found.length).toBe(2);
+        expect(pt.extra[0].basis.x).toBeCloseTo(0.75);
+        expect(pt.extra[0].basis.y).toBeCloseTo(0.047477);
+        expect(pt.extra[2].basis.x).toBeCloseTo(0.833333);
+        expect(pt.extra[2].basis.y).toBeCloseTo(0.952523);
         pt = quad.pointSearch({x: -35, y: 11});
         expect(pt.index).toEqual([]);
         expect(pt.found.length).toBe(0);
+        /* not in a degenerate quad */
+        pt = quad.pointSearch({x: -95, y: 10});
+        expect(pt.index).toEqual([]);
+        expect(pt.found.length).toBe(0);
+        expect(pt.extra[1]).toBe(undefined);
       });
     });
   });

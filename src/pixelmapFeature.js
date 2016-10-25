@@ -142,10 +142,10 @@ var pixelmapFeature = function (arg) {
   this.pointSearch = function (coordinate) {
     if (m_quadFeature && m_info) {
       var result = m_quadFeature.pointSearch(coordinate);
-      if (result.basis.length === 1) {
-        var x = result.basis[0].x, y = result.basis[0].y, idx;
-        x = Math.floor(x * m_info.width);
-        y = Math.floor(y * m_info.height);
+      if (result.index.length === 1 && result.extra && result.extra[result.index[0]].basis) {
+        var basis = result.extra[result.index[0]].basis, x, y, idx;
+        x = Math.floor(basis.x * m_info.width);
+        y = Math.floor(basis.y * m_info.height);
         if (x >= 0 && x < m_info.width &&
             y >= 0 && y < m_info.height) {
           idx = m_info.indices[y * m_info.width + x];
