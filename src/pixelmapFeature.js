@@ -10,9 +10,9 @@ var geo_event = require('./event');
  * @class geo.pixelmapFeature
  * @param {Object} arg Options object
  * @extends geo.feature
- * @param {Object|Function} [url] URL of a pixel map.  The rgb data is
- *   interpretted as an index of the form 0xbbggrr.  The alpha channel is
- *   ignored.
+ * @param {Object|Function|HTMLImageElement} [url] URL of a pixel map or an
+ *   HTML Image element.  The rgb data is interpretted as an index of the form
+ *   0xbbggrr.  The alpha channel is ignored.
  * @param {Object|Function} [mapColor] The color that should be used for each
  *   data element.  Data elements correspond to the indices in the pixel map.
  *   If an index is larger than the number of data elements, it will be
@@ -166,15 +166,61 @@ var pixelmapFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
+    /* Set the build time at the start of the call.  A build can result in
+     * drawing a quad, which can trigger a full layer update, which in tern
+     * checks if this feature is built.  Setting the build time avoid calling
+     * this a second time. */
+    m_this.buildTime().modified();
     if (!m_srcImage) {
-      m_srcImage = new Image();
-      m_srcImage.crossOrigin = m_this.style.get('crossDomain')() || 'anonymous';
-      m_srcImage.onload = this._computePixelmap;
-      m_srcImage.src = m_this.style.get('url')();
+      var src = this.style.get('url')();
+      if (src instanceof Image && src.complete && src.naturalWidth && src.naturalHeight) {
+        /* we have an already laoded image, so we can just use it. */
+        m_srcImage = src;
+        this._computePixelmap();
+      } else if (src) {
+        var defer = new $.Deferred(), prev_onload, prev_onerror;
+        if (src instanceof Image) {
+          /* we have an unloaded image.  Hook to the load and error callbacks
+           * so that when it is loaded we can use it. */
+          m_srcImage = src;
+          prev_onload = src.onload;
+          prev_onerror = src.onerror;
+        } else {
+          /* we were given a url, so construct a new image */
+          m_srcImage = new Image();
+          // Only set the crossOrigin parameter if this is going across origins.
+          if (src.indexOf(':') >= 0 &&
+              src.indexOf('/') === src.indexOf(':') + 1) {
+            m_srcImage.crossOrigin = this.style.get('crossDomain')() || 'anonymous';
+          }
+        }
+        m_srcImage.onload = function () {
+          if (prev_onload) {
+            prev_onload.apply(this, arguments);
+          }
+          /* Only use this image if our pixelmap hasn't changed since we
+           * attached our handler */
+          if (m_this.style.get('url')() === src) {
+            m_info = undefined;
+            m_this._computePixelmap();
+          }
+          defer.resolve();
+        };
+        m_srcImage.onerror = function () {
+          if (prev_onerror) {
+            prev_onerror.apply(this, arguments);
+          }
+          defer.reject();
+        };
+        defer.promise(this);
+        this.layer().addPromise(this);
+        if (!(src instanceof Image)) {
+          m_srcImage.src = src;
+        }
+      }
     } else if (m_info) {
       this._computePixelmap();
     }
-    m_this.buildTime().modified();
     return m_this;
   };
 
@@ -186,6 +232,10 @@ var pixelmapFeature = function (arg) {
   this._preparePixelmap = function () {
     var i, idx, pixelData;
 
+    if (!m_srcImage || !m_srcImage.complete || !m_srcImage.naturalWidth ||
+        !m_srcImage.naturalHeight) {
+      return;
+    }
     m_info = {
       width: m_srcImage.naturalWidth,
       height: m_srcImage.naturalHeight,
@@ -213,6 +263,7 @@ var pixelmapFeature = function (arg) {
       }
       m_info.mappedColors[idx].last = i / 4;
     }
+    return m_info;
   };
 
   /**
@@ -227,14 +278,16 @@ var pixelmapFeature = function (arg) {
         updateFirst, updateLast = -1, update, prepared;
 
     if (!m_info) {
-      m_this._preparePixelmap();
+      if (!m_this._preparePixelmap()) {
+        return;
+      }
       prepared = true;
     }
     mappedColors = m_info.mappedColors;
     updateFirst = m_info.area;
     for (idx in mappedColors) {
       if (mappedColors.hasOwnProperty(idx)) {
-        color = mapColorFunc(data[idx], idx) || {};
+        color = mapColorFunc(data[idx], +idx) || {};
         color = [
           (color.r || 0) * 255,
           (color.g || 0) * 255,
@@ -315,15 +368,16 @@ var pixelmapFeature = function (arg) {
     }
 
     m_this.updateTime().modified();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
-   * @memberof geo.polygonFeature
+   * @memberof geo.pixelmapFeature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._exit = function () {
+  this._exit = function (abc) {
     if (m_quadFeature && m_this.layer()) {
       m_this.layer().deleteFeature(m_quadFeature);
       m_quadFeature = null;
@@ -338,6 +392,7 @@ var pixelmapFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
+    arg = arg || {};
     s_init.call(m_this, arg);
 
     var style = $.extend(
@@ -350,7 +405,8 @@ var pixelmapFeature = function (arg) {
             b: ((idx >> 16) & 0xFF) / 255,
             a: 1
           };
-        }
+        },
+        position: function (d) { return d; }
       },
       arg.style === undefined ? {} : arg.style
     );
@@ -368,6 +424,27 @@ var pixelmapFeature = function (arg) {
   };
 
   return this;
+};
+
+/**
+ * Create a pixelmapFeature from an object.
+ *
+ * @see {@link geo.feature.create}
+ * @param {geo.layer} layer The layer to add the feature to
+ * @param {geo.pixelmapFeature.spec} spec The object specification
+ * @returns {geo.pixelmapFeature|null}
+ */
+pixelmapFeature.create = function (layer, spec) {
+  'use strict';
+
+  spec = spec || {};
+  spec.type = 'pixelmap';
+  return feature.create(layer, spec);
+};
+
+pixelmapFeature.capabilities = {
+  /* core feature name -- support in any manner */
+  feature: 'pixelmap'
 };
 
 inherit(pixelmapFeature, feature);
