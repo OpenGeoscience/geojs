@@ -186,6 +186,18 @@ describe('geo.feature', function () {
       expect(feat.visible(false)).toBe(feat);
       expect(feat.visible()).toBe(false);
       expect(feat.getMTime()).toBeGreaterThan(modTime);
+
+      expect(feat.visible(true)).toBe(feat);
+      var depFeat = geo.feature({layer: layer, renderer: layer.renderer()});
+      feat.dependentFeatures([depFeat]);
+      modTime = depFeat.getMTime();
+      expect(feat.visible(false)).toBe(feat);
+      expect(feat.visible()).toBe(false);
+      expect(depFeat.visible()).toBe(false);
+      expect(depFeat.getMTime()).toBeGreaterThan(modTime);
+      feat.dependentFeatures([]);
+      expect(feat.visible(true)).toBe(feat);
+      expect(depFeat.visible()).toBe(false);
     });
   });
   describe('Check class accessors', function () {
@@ -220,6 +232,12 @@ describe('geo.feature', function () {
       expect(feat.gcs()).toBe(map.ingcs());
       expect(feat.gcs('EPSG:3857')).toBe(feat);
       expect(feat.gcs()).toBe('EPSG:3857');
+    });
+    it('dependentFeatures', function () {
+      expect(feat.dependentFeatures()).toEqual([]);
+      var depFeat = geo.feature({layer: layer, renderer: layer.renderer()});
+      expect(feat.dependentFeatures([depFeat])).toBe(feat);
+      expect(feat.dependentFeatures()).toEqual([depFeat]);
     });
     it('bin', function () {
       expect(feat.bin()).toBe(0);

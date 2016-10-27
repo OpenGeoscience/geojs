@@ -94,6 +94,7 @@ var d3_pathFeature = function (arg) {
       'fill': function () { return false; },
       'fillColor': function () { return { r: 0, g: 0, b: 0 }; }
     }, s_style);
+    m_style.visible = m_this.visible;
 
     m_this.renderer()._drawFeatures(m_style);
 

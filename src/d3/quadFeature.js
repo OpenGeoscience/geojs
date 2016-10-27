@@ -182,6 +182,7 @@ var d3_quadFeature = function (arg) {
       },
       onlyRenderNew: !this.style('previewColor') && !this.style('previewImage'),
       sortByZ: true,
+      visible: m_this.visible,
       classes: ['d3QuadFeature']
     };
     renderer._drawFeatures(feature);
@@ -234,6 +235,7 @@ capabilities[quadFeature.capabilities.image] = true;
 capabilities[quadFeature.capabilities.imageCrop] = false;
 capabilities[quadFeature.capabilities.imageFixedScale] = false;
 capabilities[quadFeature.capabilities.imageFull] = false;
+capabilities[quadFeature.capabilities.canvas] = false;
 
 registerFeature('d3', 'quad', d3_quadFeature, capabilities);
 module.exports = d3_quadFeature;

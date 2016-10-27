@@ -105,7 +105,9 @@ var canvasRenderer = function (arg) {
 
         var features = layer.features();
         for (var i = 0; i < features.length; i += 1) {
-          features[i]._renderOnCanvas(m_this.context2d, map);
+          if (features[i].visible()) {
+            features[i]._renderOnCanvas(m_this.context2d, map);
+          }
         }
       });
     }

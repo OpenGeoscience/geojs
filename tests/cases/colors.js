@@ -1,60 +1,65 @@
+/* global $ */
+
 describe('geo.util.convertColor', function () {
   'use strict';
 
   var geo = require('../test-utils').geo;
 
-  describe('From hex string', function () {
-    it('#000000', function () {
-      var c = geo.util.convertColor('#000000');
-      expect(c).toEqual({
-        r: 0,
-        g: 0,
-        b: 0
-      });
-    });
-    it('#ffffff', function () {
-      var c = geo.util.convertColor('#ffffff');
-      expect(c).toEqual({
-        r: 1,
-        g: 1,
-        b: 1
-      });
-    });
-    it('#1256ab', function () {
-      var c = geo.util.convertColor('#1256ab');
-      expect(c).toEqual({
-        r: 18 / 255,
-        g: 86 / 255,
-        b: 171 / 255
+  var tests = {
+    // #rrggbb
+    '#000000': {r: 0, g: 0, b: 0},
+    '#ffffff': {r: 1, g: 1, b: 1},
+    '#1256ab': {r: 18 / 255, g: 86 / 255, b: 171 / 255},
+    // #rrggbbaa
+    '#00000000': {r: 0, g: 0, b: 0, a: 0},
+    '#ffffffff': {r: 1, g: 1, b: 1, a: 1},
+    '#1256ab43': {r: 18 / 255, g: 86 / 255, b: 171 / 255, a: 67 / 255},
+    // #rgb
+    '#000': {r: 0, g: 0, b: 0},
+    '#fff': {r: 1, g: 1, b: 1},
+    '#26b': {r: 2 / 15, g: 6 / 15, b: 11 / 15},
+    // # rgba
+    '#0001': {r: 0, g: 0, b: 0, a: 1 / 15},
+    '#fff2': {r: 1, g: 1, b: 1, a: 2 / 15},
+    '#26b3': {r: 2 / 15, g: 6 / 15, b: 11 / 15, a: 3 / 15},
+    // css color names
+    'red': {r: 1, g: 0, b: 0},
+    'green': {r: 0, g: 128 / 255, b: 0},
+    'blue': {r: 0, g: 0, b: 1},
+    'steelblue': {r: 70 / 255, g: 130 / 255, b: 180 / 255},
+    // rgb() and rgba()
+    'rgb(18, 86, 171)': {r: 18 / 255, g: 86 / 255, b: 171 / 255},
+    'rgb(18 86 171)': {r: 18 / 255, g: 86 / 255, b: 171 / 255},
+    'rgba(18 86 171)': {r: 18 / 255, g: 86 / 255, b: 171 / 255},
+    'rgb(  18 ,86,171 )': {r: 18 / 255, g: 86 / 255, b: 171 / 255},
+    'rgb(10% 35% 63.2%)': {r: 0.1, g: 0.35, b: 0.632},
+    'rgb(18 120% 300)': {r: 18 / 255, g: 1, b: 1},
+    'rgba(18 86 171 0.3)': {r: 18 / 255, g: 86 / 255, b: 171 / 255, a: 0.3},
+    'rgb(18 86 171 0.3)': {r: 18 / 255, g: 86 / 255, b: 171 / 255, a: 0.3},
+    'rgba(10% 35% 63.2% 40%)': {r: 0.1, g: 0.35, b: 0.632, a: 0.4},
+    // hsl() and hsla()
+    'hsl(120, 100%, 25%)': {r: 0, g: 0.5, b: 0},
+    'hsla(120, 100%, 25%)': {r: 0, g: 0.5, b: 0},
+    'hsl(120, 100%, 25%, 0.3)': {r: 0, g: 0.5, b: 0, a: 0.3},
+    'hsla(120, 100%, 25%, 30%)': {r: 0, g: 0.5, b: 0, a: 0.3},
+    'hsl(120deg 100% 25%)': {r: 0, g: 0.5, b: 0},
+    'hsl(207 44% 49%)': {r: 0.2744, g: 0.51156, b: 0.7056},
+    'hsl(207 100% 50%)': {r: 0, g: 0.55, b: 1},
+    // transparent
+    'transparent': {r: 0, g: 0, b: 0, a: 0},
+    // unknown strings
+    'none': 'none'
+  };
+
+  describe('From strings', function () {
+    $.each(tests, function (key, value) {
+      it(key, function () {
+        var c = geo.util.convertColor(key);
+        expect(c).toEqual(value);
       });
     });
   });
-  describe('From short hex string', function () {
-    it('#000', function () {
-      var c = geo.util.convertColor('#000');
-      expect(c).toEqual({
-        r: 0,
-        g: 0,
-        b: 0
-      });
-    });
-    it('#fff', function () {
-      var c = geo.util.convertColor('#fff');
-      expect(c).toEqual({
-        r: 1,
-        g: 1,
-        b: 1
-      });
-    });
-    it('#26b', function () {
-      var c = geo.util.convertColor('#26b');
-      expect(c).toEqual({
-        r: 2 / 15,
-        g: 6 / 15,
-        b: 11 / 15
-      });
-    });
-  });
+
   describe('From hex value', function () {
     it('0x000000', function () {
       var c = geo.util.convertColor(0x000000);
@@ -81,45 +86,7 @@ describe('geo.util.convertColor', function () {
       });
     });
   });
-  describe('From css name', function () {
-    it('red', function () {
-      var c = geo.util.convertColor('red');
-      expect(c).toEqual({
-        r: 1,
-        g: 0,
-        b: 0
-      });
-    });
-    it('green', function () {
-      var c = geo.util.convertColor('green');
-      expect(c).toEqual({
-        r: 0,
-        g: 128 / 255,
-        b: 0
-      });
-    });
-    it('blue', function () {
-      var c = geo.util.convertColor('blue');
-      expect(c).toEqual({
-        r: 0,
-        g: 0,
-        b: 1
-      });
-    });
-    it('steelblue', function () {
-      var c = geo.util.convertColor('steelblue');
-      expect(c).toEqual({
-        r: 70 / 255,
-        g: 130 / 255,
-        b: 180 / 255
-      });
-    });
-  });
   describe('Pass through unknown colors', function () {
-    it('none', function () {
-      var c = geo.util.convertColor('none');
-      expect(c).toEqual('none');
-    });
     it('object', function () {
       var c = geo.util.convertColor({
         r: 0,
@@ -214,6 +181,24 @@ describe('geo.util.convertColorToHex', function () {
     it('none', function () {
       var c = geo.util.convertColorToHex('none');
       expect(c).toEqual('#000000');
+    });
+  });
+  describe('With alpha', function () {
+    it('no flag', function () {
+      var c = geo.util.convertColorToHex({r: 0, g: 1, b: 1, a: 0.3});
+      expect(c).toEqual('#00ffff');
+    });
+    it('true flag and alpha', function () {
+      var c = geo.util.convertColorToHex({r: 0, g: 1, b: 1, a: 0.3}, true);
+      expect(c).toEqual('#00ffff4d');
+    });
+    it('true flag and no alpha', function () {
+      var c = geo.util.convertColorToHex({r: 0, g: 1, b: 1}, true);
+      expect(c).toEqual('#00ffff');
+    });
+    it('false flag and alpha', function () {
+      var c = geo.util.convertColorToHex({r: 0, g: 1, b: 1, a: 0.3}, false);
+      expect(c).toEqual('#00ffff');
     });
   });
 });
