@@ -77,6 +77,32 @@
     },
 
     /**
+     * Return a point in the basis of the triangle.  If the point is located on
+     * a vertex of the triangle, it will be at vert0: (0, 0), vert1: (1, 0),
+     * vert2: (0, 1).  If it is within the triangle, its coordinates will be
+     * 0 <= x <= 1, 0 <= y <= 1, x + y <= 1.
+     *
+     * @param {object} point: the point to convert.
+     * @param {object} vert0: vertex 0 of the triangle
+     * @param {object} vert1: vertex 1 (x direction) of the triangle
+     * @param {object} vert2: vertex 2 (y direction) of the triangle
+     * @returns {object} basisPoint: the point in the triangle basis, or
+     *    undefined if the triangle is degenerate.
+     */
+    pointTo2DTriangleBasis: function (point, vert0, vert1, vert2) {
+      var a = vert1.x - vert0.x,
+          b = vert2.x - vert0.x,
+          c = vert1.y - vert0.y,
+          d = vert2.y - vert0.y,
+          x = point.x - vert0.x,
+          y = point.y - vert0.y,
+          det = a * d - b * c;
+      if (det) {
+        return {x: (x * d - y * b) / det, y: (x * -c + y * a) / det};
+      }
+    },
+
+    /**
      * Returns true if the argument is a function.
      */
     isFunction: function (f) {

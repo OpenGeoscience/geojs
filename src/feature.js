@@ -139,12 +139,13 @@ var feature = function (arg) {
     var mouse = m_this.layer().map().interactor().mouse(),
         data = m_this.data(),
         over = m_this.pointSearch(mouse.geo),
-        newFeatures = [], oldFeatures = [], lastTop = -1, top = -1;
+        newFeatures = [], oldFeatures = [], lastTop = -1, top = -1, extra;
 
     // exit if we have no old or new found entries
     if (!m_selectedFeatures.length && !over.index.length) {
       return;
     }
+    extra = over.extra || {};
     // Get the index of the element that was previously on top
     if (m_selectedFeatures.length) {
       lastTop = m_selectedFeatures[m_selectedFeatures.length - 1];
@@ -164,6 +165,7 @@ var feature = function (arg) {
       m_this.geoTrigger(geo_event.feature.mouseover, {
         data: data[i],
         index: i,
+        extra: extra[i],
         mouse: mouse,
         eventID: feature.eventID,
         top: idx === newFeatures.length - 1
@@ -188,6 +190,7 @@ var feature = function (arg) {
       m_this.geoTrigger(geo_event.feature.mousemove, {
         data: data[i],
         index: i,
+        extra: extra[i],
         mouse: mouse,
         eventID: feature.eventID,
         top: idx === over.index.length - 1
@@ -216,6 +219,7 @@ var feature = function (arg) {
         m_this.geoTrigger(geo_event.feature.mouseon, {
           data: data[top],
           index: top,
+          extra: extra[top],
           mouse: mouse
         }, true);
       }
@@ -230,7 +234,8 @@ var feature = function (arg) {
   this._handleMouseclick = function (evt) {
     var mouse = m_this.layer().map().interactor().mouse(),
         data = m_this.data(),
-        over = m_this.pointSearch(mouse.geo);
+        over = m_this.pointSearch(mouse.geo),
+        extra = over.extra || {};
 
     mouse.buttonsDown = evt.buttonsDown;
     feature.eventID += 1;
@@ -238,6 +243,7 @@ var feature = function (arg) {
       m_this.geoTrigger(geo_event.feature.mouseclick, {
         data: data[i],
         index: i,
+        extra: extra[i],
         mouse: mouse,
         eventID: feature.eventID,
         top: idx === over.index.length - 1

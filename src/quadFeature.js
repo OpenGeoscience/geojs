@@ -138,10 +138,12 @@ var quadFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (coordinate) {
-    var found = [], indices = [], data = m_this.data(), i,
+    var found = [], indices = [], extra = {},
         poly1 = [{}, {}, {}, {}], poly2 = [{}, {}, {}, {}],
+        order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1],
+        data = m_this.data(),
         map = m_this.layer().map(),
-        order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1];
+        i, coordbasis;
     coordinate = transform.transformCoordinates(
         map.ingcs(), map.gcs(), coordinate);
     if (!m_quads) {
@@ -161,12 +163,36 @@ var quadFeature = function (arg) {
             util.pointInPolygon(coordinate, poly2)) {
           indices.push(quad.idx);
           found.push(data[quad.idx]);
+          /* If a point is in the quad (based on pointInPolygon, above), check
+           * where in the quad it is located.  We want to output coordinates
+           * where the upper-left is (0, 0) and the lower-right is (1, 1). */
+          coordbasis = util.pointTo2DTriangleBasis(
+            coordinate, poly1[0], poly1[1], poly1[2]);
+          if (!coordbasis || coordbasis.x + coordbasis.y > 1) {
+            coordbasis = util.pointTo2DTriangleBasis(
+              coordinate, poly2[2], poly2[1], poly2[0]);
+            if (coordbasis) {
+              /* In the second triangle, (0, 0) is upper-right, (1, 0) is
+               * upper-left, and (0, 1) is lower-right.  Invert x to get to
+               * the desired output coordinates. */
+              coordbasis.x = 1 - coordbasis.x;
+            }
+          } else {
+            /* In the first triangle, (0, 0) is lower-left, (1, 0) is lower-
+             * right, and (0, 1) is upper-left.  Invert y to get to the
+             * desired output coordinates. */
+            coordbasis.y = 1 - coordbasis.y;
+          }
+          if (coordbasis) {
+            extra[quad.idx] = {basis: coordbasis};
+          }
         }
       });
     });
     return {
       index: indices,
-      found: found
+      found: found,
+      extra: extra
     };
   };
 
@@ -241,7 +267,7 @@ var quadFeature = function (arg) {
 
   /**
    * Convert the current data set to a pair of arrays, one of quads that are
-   * solid color and one of qudas that have an image.  All quads are objects
+   * solid color and one of quads that have an image.  All quads are objects
    * with pos (a 12 value array containing 4 three-dimensional position
    * coordinates), and opacity.  Color quads also have a color.  Image quads
    * may have an image element, if the image is loaded.  If it isn't, this
@@ -275,7 +301,7 @@ var quadFeature = function (arg) {
         clrQuads = [], imgQuads = [],
         origin = [0, 0, 0], origindiag2, diag2;
     /* Keep track of images that we are using.  This prevents creating
-     * additional Image elemnts for repeated urls. */
+     * additional Image elements for repeated urls. */
     m_this._objectListStart(m_images);
     $.each(data, function (i, d) {
       if (d._cachedQuad) {
