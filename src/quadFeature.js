@@ -331,7 +331,7 @@ var quadFeature = function (arg) {
       } else {
         image = m_this._objectListGet(m_images, img);
         if (image === undefined) {
-          if (img instanceof Image) {
+          if (img instanceof Image || img instanceof HTMLCanvasElement) {
             image = img;
           } else {
             image = new Image();
@@ -350,7 +350,8 @@ var quadFeature = function (arg) {
         if (d.crop) {
           quad.crop = d.crop;
         }
-        if (image.complete && image.naturalWidth && image.naturalHeight) {
+        if ((image.complete && image.naturalWidth && image.naturalHeight) ||
+             image instanceof HTMLCanvasElement) {
           quad.image = image;
         } else {
           previewColor = undefined;
@@ -482,7 +483,9 @@ quadFeature.capabilities = {
   /* support for fixed-scale quad images */
   imageFixedScale: 'quad.imageFixedScale',
   /* support for arbitrary quad images */
-  imageFull: 'quad.imageFull'
+  imageFull: 'quad.imageFull',
+  /* support for canvas as content in image quads*/
+  canvas: 'quad.canvas'
 };
 
 inherit(quadFeature, feature);

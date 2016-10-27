@@ -514,7 +514,7 @@ describe('geo.quadFeature', function () {
 
   /* This is a basic integration test of geo.canvas.quadFeature. */
   describe('geo.canvas.quadFeature', function () {
-    var map, layer, quads, counts;
+    var map, layer, quads, counts, canvasElement;
     it('load preview image', load_preview_image);
     it('basic usage', function () {
       var buildTime;
@@ -562,6 +562,38 @@ describe('geo.quadFeature', function () {
       return window._canvasLog.counts.drawImage >= counts.drawImage + 200 &&
              window._canvasLog.counts.clearRect >= counts.clearRect + 1;
     });
+    it('canvas quads', function () {
+      canvasElement = document.createElement('canvas');
+      canvasElement.width = 640;
+      canvasElement.height = 480;
+      var context = canvasElement.getContext('2d');
+      context.fillStyle = 'green';
+      context.fillRect(0, 0, 640, 480);
+      var data = [{
+        ul: {x: -98, y: 29},
+        ur: {x: -68, y: 29},
+        ll: {x: -98, y: 9},
+        lr: {x: -68, y: 9},
+        previewImage: null,
+        image: canvasElement
+      }];
+      counts = $.extend({}, window._canvasLog.counts);
+      logCanvas2D(true);  // enable call logging
+      quads.data(data);
+      map.draw();
+    });
+    waitForIt('next render canvas D', function () {
+      return window._canvasLog.counts.drawImage >= counts.drawImage + 1 &&
+             window._canvasLog.counts.clearRect >= counts.clearRect + 1;
+    });
+    it('confirm canvas quads', function () {
+      var log = window._canvasLog.log, i = log.length - 1;
+      while (i > 0 && log[i].func !== 'drawImage') {
+        i -= 1;
+      }
+      expect(log[i].arg[0]).toBe(canvasElement);
+      logCanvas2D(false);  // disable call logging
+    });
     it('_exit', function () {
       var buildTime = quads.buildTime().getMTime();
       layer.deleteFeature(quads);
@@ -581,7 +613,6 @@ describe('geo.quadFeature', function () {
       $.each(testQuads, function (idx, quad) {
         delete quad._cachedQuad;
       });
-      logCanvas2D();
       map = create_map();
       layer = map.createLayer('feature', {renderer: 'd3'});
       quads = layer.createFeature('quad', {style: testStyle, data: testQuads});
