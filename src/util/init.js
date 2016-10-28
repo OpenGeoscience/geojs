@@ -648,6 +648,7 @@
         ingcs: '+proj=longlat +axis=esu',
         gcs: '+proj=longlat +axis=enu',
         maxBounds: {left: 0, top: 0, right: width, bottom: height},
+        unitsPerPixel: Math.pow(2, maxLevel),
         center: {x: width / 2, y: height / 2},
         min: minLevel,
         max: maxLevel,
