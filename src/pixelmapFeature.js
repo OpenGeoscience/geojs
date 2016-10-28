@@ -2,6 +2,7 @@ var $ = require('jquery');
 var inherit = require('./inherit');
 var feature = require('./feature');
 var geo_event = require('./event');
+var util = require('./util');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -173,8 +174,8 @@ var pixelmapFeature = function (arg) {
     m_this.buildTime().modified();
     if (!m_srcImage) {
       var src = this.style.get('url')();
-      if (src instanceof Image && src.complete && src.naturalWidth && src.naturalHeight) {
-        /* we have an already laoded image, so we can just use it. */
+      if (util.isReadyImage(src)) {
+        /* we have an already loaded image, so we can just use it. */
         m_srcImage = src;
         this._computePixelmap();
       } else if (src) {
@@ -232,8 +233,7 @@ var pixelmapFeature = function (arg) {
   this._preparePixelmap = function () {
     var i, idx, pixelData;
 
-    if (!m_srcImage || !m_srcImage.complete || !m_srcImage.naturalWidth ||
-        !m_srcImage.naturalHeight) {
+    if (!util.isReadyImage(m_srcImage)) {
       return;
     }
     m_info = {

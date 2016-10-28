@@ -376,15 +376,12 @@ var quadFeature = function (arg) {
         if (d.crop) {
           quad.crop = d.crop;
         }
-        if ((image.complete && image.naturalWidth && image.naturalHeight) ||
-             image instanceof HTMLCanvasElement) {
+        if (util.isReadyImage(image) || image instanceof HTMLCanvasElement) {
           quad.image = image;
         } else {
           previewColor = undefined;
           previewImage = previewImageFunc.call(m_this, d, i);
-          if (previewImage && previewImage instanceof Image &&
-              previewImage.complete && previewImage.naturalWidth &&
-              previewImage.naturalHeight) {
+          if (previewImage && util.isReadyImage(previewImage)) {
             quad.image = previewImage;
           } else {
             previewColor = previewColorFunc.call(m_this, d, i);
