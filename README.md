@@ -5,21 +5,19 @@
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.15459.svg)](http://dx.doi.org/10.5281/zenodo.15459)
 [![Gitter](https://badges.gitter.im/OpenGeoscience/geojs.svg)](https://gitter.im/OpenGeoscience/geojs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-=======
 Primarily developed by [Kitware](http://www.kitware.com) and
 [Epidemico](http://epidemico.com/), GeoJS is a high performance
 visualization and analysis library targeted for GeoInformatics.
 
-![Historical hurricane data Visualization in GeoJS]
-(http://opengeoscience.github.io/geojs/examples/hurricanes/thumb.jpg "")
+![Historical hurricane data Visualization in GeoJS](http://opengeoscience.github.io/geojs/examples/hurricanes/thumb.jpg)
 
 Documentation
-==============
+=============
 You can find more information on GeoJS installation and usage in our [Documentation](http://geojs.readthedocs.org/en/latest/index.html).
 For live examples visit [Github.io](http://opengeoscience.github.io/geojs/examples/index.html).
 
 Support
-==============
+=======
 We would love to get your feedback and bug reports. Please send us an email at
 [geojs-developers](http://public.kitware.com/mailman/listinfo/geojs-developers)
 for questions related to feature requests, roadmap or in-depth
@@ -27,7 +25,7 @@ technical discussions. Use [geojs-users](http://public.kitware.com/mailman/listi
 if you have general questions or bug reports on GeoJS.
 
 License
-============
+=======
 Copyright 2015 Kitware Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
