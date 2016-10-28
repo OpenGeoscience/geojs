@@ -77,6 +77,51 @@
     },
 
     /**
+     * Return a point in the basis of the triangle.  If the point is located on
+     * a vertex of the triangle, it will be at vert0: (0, 0), vert1: (1, 0),
+     * vert2: (0, 1).  If it is within the triangle, its coordinates will be
+     * 0 <= x <= 1, 0 <= y <= 1, x + y <= 1.
+     *
+     * @param {object} point: the point to convert.
+     * @param {object} vert0: vertex 0 of the triangle
+     * @param {object} vert1: vertex 1 (x direction) of the triangle
+     * @param {object} vert2: vertex 2 (y direction) of the triangle
+     * @returns {object} basisPoint: the point in the triangle basis, or
+     *    undefined if the triangle is degenerate.
+     */
+    pointTo2DTriangleBasis: function (point, vert0, vert1, vert2) {
+      var a = vert1.x - vert0.x,
+          b = vert2.x - vert0.x,
+          c = vert1.y - vert0.y,
+          d = vert2.y - vert0.y,
+          x = point.x - vert0.x,
+          y = point.y - vert0.y,
+          det = a * d - b * c;
+      if (det) {
+        return {x: (x * d - y * b) / det, y: (x * -c + y * a) / det};
+      }
+    },
+
+    /**
+     * Returns true if the argument is an HTML Image element that is fully
+     * loaded.
+     *
+     * @param {object} img: an object that might be an HTML Image element.
+     * @param {boolean} [allowFailedImage]: if true, an image element that has
+     *     a source and has failed to load is also considered 'ready' in the
+     *     sense that it isn't expected to change to a better state.
+     * @returns {boolean} true if this is an image that is ready.
+     */
+    isReadyImage: function (img, allowFailedImage) {
+      if (img instanceof Image && img.complete && img.src) {
+        if ((img.naturalWidth && img.naturalHeight) || allowFailedImage) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    /**
      * Returns true if the argument is a function.
      */
     isFunction: function (f) {
@@ -109,24 +154,135 @@
       return s;
     },
 
+    /* This is a list of regex and processing functions for color conversions
+     * to rgb objects.  Each entry contains:
+     *   name: a name of the color conversion.
+     *   regex: a regex that, if it matches the color string, will cause the
+     *      process function to be invoked.
+     *   process: a function that takes (color, match) with the original color
+     *      string and the results of matching the regex.  It outputs an rgb
+     *      color object or the original color string if there is still a
+     *      parsing failure.
+     * In general, these conversions are somewhat more forgiving than the css
+     * specification (see https://drafts.csswg.org/css-color/) in that
+     * percentages may be mixed with numbers, and that floating point values
+     * are accepted for all numbers.  Commas are optional.  As per the latest
+     * draft standard, rgb and rgba are aliases of each other, as are hsl and
+     * hsla.
+     */
+    cssColorConversions: [{
+      name: 'rgb',
+      regex: new RegExp(
+        '^\\s*rgba?' +
+        '\\(\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
+        ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
+        ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
+        '(,?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*)?' +
+        '\\)\\s*$'),
+      process: function (color, match) {
+        color = {
+          r: Math.min(1, Math.max(0, +match[1] / (match[2] ? 100 : 255))),
+          g: Math.min(1, Math.max(0, +match[3] / (match[4] ? 100 : 255))),
+          b: Math.min(1, Math.max(0, +match[5] / (match[6] ? 100 : 255)))
+        };
+        if (match[7]) {
+          color.a = Math.min(1, Math.max(0, +match[8] / (match[9] ? 100 : 1)));
+        }
+        return color;
+      }
+    }, {
+      name: 'hsl',
+      regex: new RegExp(
+        '^\\s*hsla?' +
+        '\\(\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(deg)?\\s*' +
+        ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*%\\s*' +
+        ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*%\\s*' +
+        '(,?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*)?' +
+        '\\)\\s*$'),
+      process: function (color, match) {
+        /* Conversion from https://www.w3.org/TR/2011/REC-css3-color-20110607
+         */
+        var hue_to_rgb = function (m1, m2, h) {
+          h = h - Math.floor(h);
+          if (h * 6 < 1) {
+            return m1 + (m2 - m1) * h * 6;
+          }
+          if (h * 6 < 3) {
+            return m2;
+          }
+          if (h * 6 < 4) {
+            return m1 + (m2 - m1) * (2 / 3 - h) * 6;
+          }
+          return m1;
+        };
+
+        var h = +match[1] / 360,
+            s = Math.min(1, Math.max(0, +match[3] / 100)),
+            l = Math.min(1, Math.max(0, +match[4] / 100)),
+            m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s,
+            m1 = l * 2 - m2;
+        color = {
+          r: hue_to_rgb(m1, m2, h + 1 / 3),
+          g: hue_to_rgb(m1, m2, h),
+          b: hue_to_rgb(m1, m2, h - 1 / 3)
+        };
+        if (match[5]) {
+          color.a = Math.min(1, Math.max(0, +match[6] / (match[7] ? 100 : 1)));
+        }
+        return color;
+      }
+    }],
+
     /**
-     * Convert a color from hex value or css name to rgb objects
+     * Convert a color to a standard rgb object.  Allowed inputs:
+     *   - rgb object with optional 'a' (alpha) value.
+     *   - css color name
+     *   - #rrggbb, #rrggbbaa, #rgb, #rgba hexadecimal colors
+     *   - rgb(), rgba(), hsl(), and hsla() css colors
+     *   - transparent
+     * The output object always contains r, g, b on a scale of [0-1].  If an
+     * alpha value is specified, the output will also contain an 'a' value on a
+     * scale of [0-1].  Objects already in rgb format are not checked to make
+     * sure that all parameters are in the range of [0-1], but string inputs
+     * are so validated.
+     *
+     * @param {object|string} color: one of the various input formats.
+     * @returns {object} an rgb color object, possibly with an 'a' value.  If
+     *    the input cannot be converted to a valid color, the input value is
+     *    returned.
      */
     convertColor: function (color) {
       if (color.r !== undefined && color.g !== undefined &&
           color.b !== undefined) {
         return color;
       }
+      var opacity;
       if (typeof color === 'string') {
         if (geo.util.cssColors.hasOwnProperty(color)) {
           color = geo.util.cssColors[color];
         } else if (color.charAt(0) === '#') {
-          if (color.length === 4) {
-            /* interpret values of the form #rgb as #rrggbb */
-            color = parseInt(color.slice(1), 16);
+          if (color.length === 4 || color.length === 5) {
+            /* interpret values of the form #rgb as #rrggbb and #rgba as
+             * #rrggbbaa */
+            if (color.length === 5) {
+              opacity = parseInt(color.slice(4), 16) / 0xf;
+            }
+            color = parseInt(color.slice(1, 4), 16);
             color = (color & 0xf00) * 0x1100 + (color & 0xf0) * 0x110 + (color & 0xf) * 0x11;
-          } else {
-            color = parseInt(color.slice(1), 16);
+          } else if (color.length === 7 || color.length === 9) {
+            if (color.length === 9) {
+              opacity = parseInt(color.slice(7), 16) / 0xff;
+            }
+            color = parseInt(color.slice(1, 7), 16);
+          }
+        } else if (color === 'transparent') {
+          opacity = color = 0;
+        } else if (color.indexOf('(') >= 0) {
+          for (var idx = 0; idx < geo.util.cssColorConversions.length; idx += 1) {
+            var match = geo.util.cssColorConversions[idx].regex.exec(color);
+            if (match) {
+              return geo.util.cssColorConversions[idx].process(color, match);
+            }
           }
         }
       }
@@ -137,20 +293,26 @@
           b: ((color & 0xff)) / 255
         };
       }
+      if (opacity !== undefined) {
+        color.a = opacity;
+      }
       return color;
     },
 
     /**
-     * Convert a color to a six digit hex value prefixed with #.
+     * Convert a color to a six or eight digit hex value prefixed with #.
      */
-    convertColorToHex: function (color) {
-      var value = geo.util.convertColor(color);
-      if (!value.r && !value.g && !value.b) {
+    convertColorToHex: function (color, allowAlpha) {
+      var rgb = geo.util.convertColor(color), value;
+      if (!rgb.r && !rgb.g && !rgb.b) {
         value = '#000000';
       } else {
-        value = '#' + ((1 << 24) + (Math.round(value.r * 255) << 16) +
-                       (Math.round(value.g * 255) << 8) +
-                        Math.round(value.b * 255)).toString(16).slice(1);
+        value = '#' + ((1 << 24) + (Math.round(rgb.r * 255) << 16) +
+                       (Math.round(rgb.g * 255) << 8) +
+                        Math.round(rgb.b * 255)).toString(16).slice(1);
+      }
+      if (rgb.a !== undefined && allowAlpha) {
+        value += (256 + Math.round(rgb.a * 255)).toString(16).slice(1);
       }
       return value;
     },
@@ -486,6 +648,7 @@
         ingcs: '+proj=longlat +axis=esu',
         gcs: '+proj=longlat +axis=enu',
         maxBounds: {left: 0, top: 0, right: width, bottom: height},
+        unitsPerPixel: Math.pow(2, maxLevel),
         center: {x: width / 2, y: height / 2},
         min: minLevel,
         max: maxLevel,
@@ -791,6 +954,7 @@
     plum: 0xdda0dd,
     powderblue: 0xb0e0e6,
     purple: 0x800080,
+    rebeccapurple: 0x663399,
     red: 0xff0000,
     rosybrown: 0xbc8f8f,
     royalblue: 0x4169e1,

@@ -24,6 +24,12 @@ var canvas_object = function (arg) {
   var m_this = this,
       s_draw = this.draw;
 
+  /**
+   * This must be overridden by any feature that needs to render.
+   */
+  this._renderOnCanvas = function () {
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
   *  Redraw the object.

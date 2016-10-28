@@ -369,6 +369,18 @@ geo_event.feature = {
 
 ////////////////////////////////////////////////////////////////////////////
 /**
+ * These events are triggered by the pixelmap feature.
+ * @namespace geo.event.pixelmap
+ */
+////////////////////////////////////////////////////////////////////////////
+geo_event.pixelmap = {
+  /* The image associated with the pixel map url has been prepared and rendered
+   * once. */
+  prepared: 'geo_pixelmap_prepared'
+};
+
+////////////////////////////////////////////////////////////////////////////
+/**
  * These events are triggered by the camera when it's internal state is
  * mutated.
  * @namespace geo.event.camera

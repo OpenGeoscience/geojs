@@ -189,6 +189,17 @@ describe('mapInteractor', function () {
     expect(interactor.map()).toBe(map);
   });
 
+  it('Test initialization with array values.', function () {
+    var map = mockedMap('#mapNode1');
+    var interactor = geo.mapInteractor({
+      map: map,
+      actions: [{action: geo.geo_action.pan, input: 'left'}],
+      momentum: {actions: [geo.geo_action.pan]}
+    });
+    expect(interactor.options().actions.length).toBe(1);
+    expect(interactor.options().momentum.actions.length).toBe(1);
+  });
+
   it('Test pan wheel event propagation', function () {
     var map = mockedMap('#mapNode1');
 

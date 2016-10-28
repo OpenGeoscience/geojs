@@ -118,6 +118,25 @@ describe('geo.polygonFeature', function () {
       polygon._init({style: {data: pos}});
       expect(polygon.data()).toEqual(pos);
     });
+
+    it('style', function () {
+      mockVGLRenderer();
+      map = create_map();
+      // we have to use a valid renderer so that the stroke can be enabled.
+      layer = map.createLayer('feature', {renderer: 'vgl'});
+      polygon = geo.polygonFeature({layer: layer});
+      polygon._init();
+      expect(polygon.style().stroke).toBe(false);
+      expect(polygon.dependentFeatures()).toEqual([]);
+      polygon.style('stroke', true);
+      expect(polygon.style().stroke).toBe(true);
+      expect(polygon.dependentFeatures().length).toEqual(1);
+      polygon.style({stroke: false});
+      expect(polygon.style().stroke).toBe(false);
+      expect(polygon.dependentFeatures()).toEqual([]);
+      map.deleteLayer(layer);
+      restoreVGLRenderer();
+    });
   });
 
   describe('Public utility methods', function () {

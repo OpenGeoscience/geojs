@@ -90,38 +90,54 @@ var mapInteractor = function (args) {
       actions: [{
         action: geo_action.pan,
         input: 'left',
-        modifiers: {shift: false, ctrl: false}
+        modifiers: {shift: false, ctrl: false},
+        owner: 'geo.mapInteractor',
+        name: 'button pan'
       }, {
         action: geo_action.zoom,
         input: 'right',
-        modifiers: {shift: false, ctrl: false}
+        modifiers: {shift: false, ctrl: false},
+        owner: 'geo.mapInteractor',
+        name: 'button zoom'
       }, {
         action: geo_action.zoom,
         input: 'wheel',
-        modifiers: {shift: false, ctrl: false}
+        modifiers: {shift: false, ctrl: false},
+        owner: 'geo.mapInteractor',
+        name: 'wheel zoom'
       }, {
         action: geo_action.rotate,
         input: 'left',
-        modifiers: {shift: false, ctrl: true}
+        modifiers: {shift: false, ctrl: true},
+        owner: 'geo.mapInteractor',
+        name: 'button rotate'
       }, {
         action: geo_action.rotate,
         input: 'wheel',
-        modifiers: {shift: false, ctrl: true}
+        modifiers: {shift: false, ctrl: true},
+        owner: 'geo.mapInteractor',
+        name: 'wheel rotate'
       }, {
         action: geo_action.select,
         input: 'left',
         modifiers: {shift: true, ctrl: true},
-        selectionRectangle: geo_event.select
+        selectionRectangle: geo_event.select,
+        owner: 'geo.mapInteractor',
+        name: 'drag select'
       }, {
         action: geo_action.zoomselect,
         input: 'left',
         modifiers: {shift: true, ctrl: false},
-        selectionRectangle: geo_event.zoomselect
+        selectionRectangle: geo_event.zoomselect,
+        owner: 'geo.mapInteractor',
+        name: 'drag zoom'
       }, {
         action: geo_action.unzoomselect,
         input: 'right',
         modifiers: {shift: true, ctrl: false},
-        selectionRectangle: geo_event.unzoomselect
+        selectionRectangle: geo_event.unzoomselect,
+        owner: 'geo.mapInteractor',
+        name: 'drag unzoom'
       }],
 
       click: {
@@ -155,6 +171,14 @@ var mapInteractor = function (args) {
     },
     m_options
   );
+  /* We don't want to merge the original arrays array with a array passed in
+   * the args, so override that as necessary for actions. */
+  if (args && args.actions) {
+    m_options.actions = $.extend(true, [], args.actions);
+  }
+  if (args && args.momentum && args.momentum.actions) {
+    m_options.momentum.actions = $.extend(true, [], args.momentum.actions);
+  }
 
   // options supported:
   // {
@@ -921,7 +945,7 @@ var mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Based on the screen coordinates of a selection, zoom or unzoom and
+   * Based on the screen coodinates of a selection, zoom or unzoom and
    * recenter.
    *
    * @private
