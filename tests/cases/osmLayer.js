@@ -285,6 +285,7 @@ describe('geo.core.osmLayer', function () {
       var sizeX = 12345, sizeY = 5678, tileSize = 240;
       var params = geo.util.pixelCoordinateParams('#map-osm-layer', sizeX, sizeY, tileSize, tileSize);
       expect(params.map.ingcs).toBe('+proj=longlat +axis=esu');
+      expect(params.map.unitsPerPixel).toEqual(64);
       expect(params.layer.tileRounding).toBe(Math.ceil);
       expect(params.layer.tileOffset()).toEqual({x: 0, y: 0});
       expect(params.layer.tilesAtZoom(3)).toEqual({x: 7, y: 3});
