@@ -18,27 +18,27 @@ $(function () {
   };
   var gridOptions = {
     minIntensity: 0,
-    maxIntensity: 1E6,
+    maxIntensity: 100,
     style: {
       color: {
         0.00: {r: 0, g: 0, b: 0, a: 0.0},
         0.25: {r: 0, g: 1, b: 0, a: 0.5},
-        0.50: {r: 1, g: 1, b: 0, a: 0.8},
-        1.00: {r: 1, g: 0, b: 0, a: 1.0}
+        0.50: {r: 1, g: 1, b: 0, a: 0.5},
+        1.00: {r: 1, g: 0, b: 0, a: 0.5}
       }
     },
     upperLeft: {
       x: -140,
       y: 45
     },
-    cellSize: 10 / 69, // in degrees, approximately 5 miles
-    rowCount: 1000,
+    cellSize: 1, // in degrees, approximately 5 miles
+    rowCount: 10,
     updateDelay: 50
   };
   map.createLayer('osm');
   layer = map.createLayer('feature', layerOptions);
   grid = layer.createFeature('grid', gridOptions);
-  grid.data(Array(1E6).fill(0).map(function (v, i) {
+  grid.data(Array(100).fill(0).map(function (v, i) {
     return i;
   }));
   grid.draw();
