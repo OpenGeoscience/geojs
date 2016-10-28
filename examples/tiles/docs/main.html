@@ -206,8 +206,7 @@ zoom level</p>
       <span class="hljs-attr">x</span>: <span class="hljs-number">-98.0</span>,
       <span class="hljs-attr">y</span>: <span class="hljs-number">39.5</span>
     },
-    <span class="hljs-attr">maxBounds</span>: {},
-    <span class="hljs-attr">zoom</span>: query.zoom !== <span class="hljs-literal">undefined</span> ? <span class="hljs-built_in">parseFloat</span>(query.zoom) : <span class="hljs-number">3</span>
+    <span class="hljs-attr">maxBounds</span>: {}
   };</pre></div></div>
             
         </li>
@@ -292,10 +291,14 @@ a pixel coordinate system.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> w, h;
-  <span class="hljs-keyword">if</span> (query.w &amp;&amp; query.h) {
-    w = <span class="hljs-built_in">parseInt</span>(query.w, <span class="hljs-number">10</span>);
-    h = <span class="hljs-built_in">parseInt</span>(query.h, <span class="hljs-number">10</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span> (query.w &amp;&amp; query.h) {
+    <span class="hljs-keyword">var</span> pixelParams = geo.util.pixelCoordinateParams(
+      <span class="hljs-string">'#map'</span>, <span class="hljs-built_in">parseInt</span>(query.w, <span class="hljs-number">10</span>), <span class="hljs-built_in">parseInt</span>(query.h, <span class="hljs-number">10</span>),
+      layerParams.tileWidth || <span class="hljs-number">256</span>, layerParams.tileHeight || <span class="hljs-number">256</span>);
+    $.extend(mapParams, pixelParams.map);
+    $.extend(layerParams, pixelParams.layer);
+  }
+  mapParams.zoom = query.zoom !== <span class="hljs-literal">undefined</span> ? <span class="hljs-built_in">parseFloat</span>(query.zoom) : <span class="hljs-number">3</span>;</pre></div></div>
             
         </li>
         
@@ -305,53 +308,6 @@ a pixel coordinate system.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-12">&#182;</a>
-              </div>
-              <p>Set a pixel coordinate system where 0, 0 is the upper left and w, h is
-the lower-right.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-comment">/* If both ingcs and gcs are set to an empty string '', the coordinates
-     * will stay at pixel values, but the y values will from from [0, -h).  If
-     * '+proj=longlat +axis=esu', '+proj=longlat +axis=enu' are used instead,
-     * the y coordinate will be reversed.  It would be better to install a new
-     * 'inverse-y' projection into proj4, but this works without that change.
-     * The 'longlat' projection functionally is a no-op in this case. */</span>
-    mapParams.ingcs = <span class="hljs-string">'+proj=longlat +axis=esu'</span>;
-    mapParams.gcs = <span class="hljs-string">'+proj=longlat +axis=enu'</span>;
-    <span class="hljs-comment">/* mapParams.ingcs = mapParams.gcs = ''; */</span>
-    mapParams.maxBounds = {<span class="hljs-attr">left</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">top</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">right</span>: w, <span class="hljs-attr">bottom</span>: h};
-    mapParams.center = {<span class="hljs-attr">x</span>: w / <span class="hljs-number">2</span>, <span class="hljs-attr">y</span>: h / <span class="hljs-number">2</span>};
-    mapParams.max = <span class="hljs-built_in">Math</span>.ceil(<span class="hljs-built_in">Math</span>.log(<span class="hljs-built_in">Math</span>.max(w, h) / <span class="hljs-number">256</span>) / <span class="hljs-built_in">Math</span>.log(<span class="hljs-number">2</span>));
-    mapParams.clampBoundsX = mapParams.clampBoundsY = <span class="hljs-literal">true</span>;
-    layerParams.maxLevel = mapParams.max;
-    layerParams.wrapX = layerParams.wrapY = <span class="hljs-literal">false</span>;
-    layerParams.tileOffset = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-      <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>};
-    };
-    layerParams.attribution = <span class="hljs-string">''</span>;
-    layerParams.tileRounding = <span class="hljs-built_in">Math</span>.ceil;
-    layerParams.tilesAtZoom = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">level</span>) </span>{
-      <span class="hljs-keyword">var</span> scale = <span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2</span>, layerParams.maxLevel - level);
-      <span class="hljs-keyword">return</span> {
-        <span class="hljs-attr">x</span>: <span class="hljs-built_in">Math</span>.ceil(w / (layerParams.tileWidth || <span class="hljs-number">256</span>) / scale),
-        <span class="hljs-attr">y</span>: <span class="hljs-built_in">Math</span>.ceil(h / (layerParams.tileHeight || <span class="hljs-number">256</span>) / scale)
-      };
-    };
-    layerParams.tilesMaxBounds = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">level</span>) </span>{
-      <span class="hljs-keyword">var</span> scale = <span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2</span>, layerParams.maxLevel - level);
-      <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: <span class="hljs-built_in">Math</span>.floor(w / scale), <span class="hljs-attr">y</span>: <span class="hljs-built_in">Math</span>.floor(h / scale)};
-    };
-  }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-13">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>Parse additional query options</p>
 
@@ -393,12 +349,6 @@ the lower-right.</p>
   <span class="hljs-keyword">if</span> (query.tileHeight) {
     layerParams.tileHeight = <span class="hljs-built_in">parseInt</span>(query.tileHeight, <span class="hljs-number">10</span>);
   }
-  <span class="hljs-keyword">if</span> (w &amp;&amp; h) {
-    mapParams.max = <span class="hljs-built_in">Math</span>.ceil(<span class="hljs-built_in">Math</span>.log(<span class="hljs-built_in">Math</span>.max(
-        w / (layerParams.tileWidth || <span class="hljs-number">256</span>),
-        h / (layerParams.tileHeight || <span class="hljs-number">256</span>))) / <span class="hljs-built_in">Math</span>.log(<span class="hljs-number">2</span>));
-    layerParams.maxLevel = mapParams.max;
-  }
   <span class="hljs-keyword">if</span> (query.max !== <span class="hljs-literal">undefined</span>) {
     mapParams.max = <span class="hljs-built_in">parseFloat</span>(query.max);
   }
@@ -412,11 +362,11 @@ the lower-right.</p>
         </li>
         
         
-        <li id="section-14">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>allow a generous max tile level so it is never the limit</p>
 
@@ -425,24 +375,6 @@ the lower-right.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span> (!layerParams.maxLevel) {
     layerParams.maxLevel = <span class="hljs-number">25</span>;
   }
-  <span class="hljs-keyword">if</span> (w &amp;&amp; h) {</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-15">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
-              </div>
-              <p>unitsPerPixel is at zoom level 0.  We want each pixel to be 1 at the
-maximum zoom</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    mapParams.unitsPerPixel = <span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2</span>, mapParams.max);
-  }
   <span class="hljs-keyword">if</span> (query.unitsPerPixel !== <span class="hljs-literal">undefined</span>) {
     mapParams.unitsPerPixel = <span class="hljs-built_in">parseFloat</span>(query.unitsPerPixel);
   }</pre></div></div>
@@ -450,11 +382,11 @@ maximum zoom</p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>Populate boolean flags for the map</p>
 
@@ -474,11 +406,11 @@ maximum zoom</p>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>Populate boolean flags for the tile layer</p>
 
@@ -497,11 +429,11 @@ maximum zoom</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>Create a map object</p>
 
@@ -512,11 +444,11 @@ maximum zoom</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>Set the projection.  This has to be set on the camera, not in the map
 parameters</p>
@@ -530,11 +462,11 @@ parameters</p>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>Set the spring back.  This is set on the map interactor.</p>
 
@@ -547,11 +479,11 @@ parameters</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>Compute default values for zoom animation, then set the map interactor</p>
 
@@ -567,11 +499,11 @@ parameters</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Enable debug classes, if requested.</p>
 
@@ -586,11 +518,11 @@ parameters</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>Add the tile layer with the specified parameters</p>
 
@@ -601,11 +533,11 @@ parameters</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>Make variables available as a global for easier debug</p>
 
@@ -727,11 +659,11 @@ parameters</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>update the url to reflect the changes</p>
 

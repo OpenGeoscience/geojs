@@ -105,6 +105,51 @@
     },
 
     /**
+     * Return a point in the basis of the triangle.  If the point is located on
+     * a vertex of the triangle, it will be at vert0: (0, 0), vert1: (1, 0),
+     * vert2: (0, 1).  If it is within the triangle, its coordinates will be
+     * 0 &lt;= x &lt;= 1, 0 &lt;= y &lt;= 1, x + y &lt;= 1.
+     *
+     * @param {object} point: the point to convert.
+     * @param {object} vert0: vertex 0 of the triangle
+     * @param {object} vert1: vertex 1 (x direction) of the triangle
+     * @param {object} vert2: vertex 2 (y direction) of the triangle
+     * @returns {object} basisPoint: the point in the triangle basis, or
+     *    undefined if the triangle is degenerate.
+     */
+    pointTo2DTriangleBasis: function (point, vert0, vert1, vert2) {
+      var a = vert1.x - vert0.x,
+          b = vert2.x - vert0.x,
+          c = vert1.y - vert0.y,
+          d = vert2.y - vert0.y,
+          x = point.x - vert0.x,
+          y = point.y - vert0.y,
+          det = a * d - b * c;
+      if (det) {
+        return {x: (x * d - y * b) / det, y: (x * -c + y * a) / det};
+      }
+    },
+
+    /**
+     * Returns true if the argument is an HTML Image element that is fully
+     * loaded.
+     *
+     * @param {object} img: an object that might be an HTML Image element.
+     * @param {boolean} [allowFailedImage]: if true, an image element that has
+     *     a source and has failed to load is also considered 'ready' in the
+     *     sense that it isn't expected to change to a better state.
+     * @returns {boolean} true if this is an image that is ready.
+     */
+    isReadyImage: function (img, allowFailedImage) {
+      if (img instanceof Image &amp;&amp; img.complete &amp;&amp; img.src) {
+        if ((img.naturalWidth &amp;&amp; img.naturalHeight) || allowFailedImage) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    /**
      * Returns true if the argument is a function.
      */
     isFunction: function (f) {
@@ -137,24 +182,135 @@
       return s;
     },
 
+    /* This is a list of regex and processing functions for color conversions
+     * to rgb objects.  Each entry contains:
+     *   name: a name of the color conversion.
+     *   regex: a regex that, if it matches the color string, will cause the
+     *      process function to be invoked.
+     *   process: a function that takes (color, match) with the original color
+     *      string and the results of matching the regex.  It outputs an rgb
+     *      color object or the original color string if there is still a
+     *      parsing failure.
+     * In general, these conversions are somewhat more forgiving than the css
+     * specification (see https://drafts.csswg.org/css-color/) in that
+     * percentages may be mixed with numbers, and that floating point values
+     * are accepted for all numbers.  Commas are optional.  As per the latest
+     * draft standard, rgb and rgba are aliases of each other, as are hsl and
+     * hsla.
+     */
+    cssColorConversions: [{
+      name: 'rgb',
+      regex: new RegExp(
+        '^\\s*rgba?' +
+        '\\(\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
+        ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
+        ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
+        '(,?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*)?' +
+        '\\)\\s*$'),
+      process: function (color, match) {
+        color = {
+          r: Math.min(1, Math.max(0, +match[1] / (match[2] ? 100 : 255))),
+          g: Math.min(1, Math.max(0, +match[3] / (match[4] ? 100 : 255))),
+          b: Math.min(1, Math.max(0, +match[5] / (match[6] ? 100 : 255)))
+        };
+        if (match[7]) {
+          color.a = Math.min(1, Math.max(0, +match[8] / (match[9] ? 100 : 1)));
+        }
+        return color;
+      }
+    }, {
+      name: 'hsl',
+      regex: new RegExp(
+        '^\\s*hsla?' +
+        '\\(\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(deg)?\\s*' +
+        ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*%\\s*' +
+        ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*%\\s*' +
+        '(,?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*)?' +
+        '\\)\\s*$'),
+      process: function (color, match) {
+        /* Conversion from https://www.w3.org/TR/2011/REC-css3-color-20110607
+         */
+        var hue_to_rgb = function (m1, m2, h) {
+          h = h - Math.floor(h);
+          if (h * 6 &lt; 1) {
+            return m1 + (m2 - m1) * h * 6;
+          }
+          if (h * 6 &lt; 3) {
+            return m2;
+          }
+          if (h * 6 &lt; 4) {
+            return m1 + (m2 - m1) * (2 / 3 - h) * 6;
+          }
+          return m1;
+        };
+
+        var h = +match[1] / 360,
+            s = Math.min(1, Math.max(0, +match[3] / 100)),
+            l = Math.min(1, Math.max(0, +match[4] / 100)),
+            m2 = l &lt;= 0.5 ? l * (s + 1) : l + s - l * s,
+            m1 = l * 2 - m2;
+        color = {
+          r: hue_to_rgb(m1, m2, h + 1 / 3),
+          g: hue_to_rgb(m1, m2, h),
+          b: hue_to_rgb(m1, m2, h - 1 / 3)
+        };
+        if (match[5]) {
+          color.a = Math.min(1, Math.max(0, +match[6] / (match[7] ? 100 : 1)));
+        }
+        return color;
+      }
+    }],
+
     /**
-     * Convert a color from hex value or css name to rgb objects
+     * Convert a color to a standard rgb object.  Allowed inputs:
+     *   - rgb object with optional 'a' (alpha) value.
+     *   - css color name
+     *   - #rrggbb, #rrggbbaa, #rgb, #rgba hexadecimal colors
+     *   - rgb(), rgba(), hsl(), and hsla() css colors
+     *   - transparent
+     * The output object always contains r, g, b on a scale of [0-1].  If an
+     * alpha value is specified, the output will also contain an 'a' value on a
+     * scale of [0-1].  Objects already in rgb format are not checked to make
+     * sure that all parameters are in the range of [0-1], but string inputs
+     * are so validated.
+     *
+     * @param {object|string} color: one of the various input formats.
+     * @returns {object} an rgb color object, possibly with an 'a' value.  If
+     *    the input cannot be converted to a valid color, the input value is
+     *    returned.
      */
     convertColor: function (color) {
       if (color.r !== undefined &amp;&amp; color.g !== undefined &amp;&amp;
           color.b !== undefined) {
         return color;
       }
+      var opacity;
       if (typeof color === 'string') {
         if (geo.util.cssColors.hasOwnProperty(color)) {
           color = geo.util.cssColors[color];
         } else if (color.charAt(0) === '#') {
-          if (color.length === 4) {
-            /* interpret values of the form #rgb as #rrggbb */
-            color = parseInt(color.slice(1), 16);
+          if (color.length === 4 || color.length === 5) {
+            /* interpret values of the form #rgb as #rrggbb and #rgba as
+             * #rrggbbaa */
+            if (color.length === 5) {
+              opacity = parseInt(color.slice(4), 16) / 0xf;
+            }
+            color = parseInt(color.slice(1, 4), 16);
             color = (color &amp; 0xf00) * 0x1100 + (color &amp; 0xf0) * 0x110 + (color &amp; 0xf) * 0x11;
-          } else {
-            color = parseInt(color.slice(1), 16);
+          } else if (color.length === 7 || color.length === 9) {
+            if (color.length === 9) {
+              opacity = parseInt(color.slice(7), 16) / 0xff;
+            }
+            color = parseInt(color.slice(1, 7), 16);
+          }
+        } else if (color === 'transparent') {
+          opacity = color = 0;
+        } else if (color.indexOf('(') >= 0) {
+          for (var idx = 0; idx &lt; geo.util.cssColorConversions.length; idx += 1) {
+            var match = geo.util.cssColorConversions[idx].regex.exec(color);
+            if (match) {
+              return geo.util.cssColorConversions[idx].process(color, match);
+            }
           }
         }
       }
@@ -165,20 +321,26 @@
           b: ((color &amp; 0xff)) / 255
         };
       }
+      if (opacity !== undefined) {
+        color.a = opacity;
+      }
       return color;
     },
 
     /**
-     * Convert a color to a six digit hex value prefixed with #.
+     * Convert a color to a six or eight digit hex value prefixed with #.
      */
-    convertColorToHex: function (color) {
-      var value = geo.util.convertColor(color);
-      if (!value.r &amp;&amp; !value.g &amp;&amp; !value.b) {
+    convertColorToHex: function (color, allowAlpha) {
+      var rgb = geo.util.convertColor(color), value;
+      if (!rgb.r &amp;&amp; !rgb.g &amp;&amp; !rgb.b) {
         value = '#000000';
       } else {
-        value = '#' + ((1 &lt;&lt; 24) + (Math.round(value.r * 255) &lt;&lt; 16) +
-                       (Math.round(value.g * 255) &lt;&lt; 8) +
-                        Math.round(value.b * 255)).toString(16).slice(1);
+        value = '#' + ((1 &lt;&lt; 24) + (Math.round(rgb.r * 255) &lt;&lt; 16) +
+                       (Math.round(rgb.g * 255) &lt;&lt; 8) +
+                        Math.round(rgb.b * 255)).toString(16).slice(1);
+      }
+      if (rgb.a !== undefined &amp;&amp; allowAlpha) {
+        value += (256 + Math.round(rgb.a * 255)).toString(16).slice(1);
       }
       return value;
     },
@@ -478,6 +640,80 @@
     },
 
     /**
+     * Return recommended defaults for map parameters and osm or tile layer
+     * paramaters where the expected intent is to use the map in pixel
+     * coordinates (upper left is (0, 0), lower right is (width, height).  The
+     * returned objects can be modified or extended.  For instance,
+     *   var results = pixelCoordinateParams('#map', 10000, 9000);
+     *   geo.map($.extend(results.map, {clampZoom: false}));
+     *
+     * @param {string} [node] DOM selector for the map container
+     * @param {number} width width of the whole map contents in pixels
+     * @param {number} height height of the whole map contents in pixels
+     * @param {number} tileWidth if an osm or tile layer is going to be used,
+     *     the width of a tile.
+     * @param {number} tileHeight if an osm or tile layer is going to be used,
+     *     the height of a tile.
+     */
+    pixelCoordinateParams: function (node, width, height, tileWidth, tileHeight) {
+      var mapW, mapH, tiled;
+      if (node) {
+        node = $(node);
+        mapW = node.innerWidth();
+        mapH = node.innerHeight();
+      }
+      tileWidth = tileWidth || width;
+      tileHeight = tileHeight || height;
+      tiled = (tileWidth !== width || tileHeight !== height);
+      var minLevel = Math.min(0, Math.floor(Math.log(Math.min(
+            (mapW || tileWidth) / tileWidth,
+            (mapH || tileHeight) / tileHeight)) / Math.log(2))),
+          maxLevel = Math.ceil(Math.log(Math.max(
+            width / tileWidth,
+            height / tileHeight)) / Math.log(2));
+      var mapParams = {
+        node: node,
+        ingcs: '+proj=longlat +axis=esu',
+        gcs: '+proj=longlat +axis=enu',
+        maxBounds: {left: 0, top: 0, right: width, bottom: height},
+        center: {x: width / 2, y: height / 2},
+        min: minLevel,
+        max: maxLevel,
+        zoom: minLevel,
+        clampBoundsX: true,
+        clampBoundsY: true,
+        clampZoom: true
+      };
+      var layerParams = {
+        maxLevel: maxLevel,
+        wrapX: false,
+        wrapY: false,
+        tileOffset: function () {
+          return {x: 0, y: 0};
+        },
+        attribution: '',
+        tileWidth: tileWidth,
+        tileHeight: tileHeight,
+        tileRounding: Math.ceil,
+        tilesAtZoom: tiled ? function (level) {
+          var scale = Math.pow(2, maxLevel - level);
+          return {
+            x: Math.ceil(width / tileWidth / scale),
+            y: Math.ceil(height / tileHeight / scale)
+          };
+        } : undefined,
+        tilesMaxBounds: tiled ? function (level) {
+          var scale = Math.pow(2, maxLevel - level);
+          return {
+            x: Math.floor(width / scale),
+            y: Math.floor(height / scale)
+          };
+        } : undefined
+      };
+      return {map: mapParams, layer: layerParams};
+    },
+
+    /**
      * Report on one or all of the tracked timings.
      *
      * @param {string} name name to report on, or undefined to report all.
@@ -745,6 +981,7 @@
     plum: 0xdda0dd,
     powderblue: 0xb0e0e6,
     purple: 0x800080,
+    rebeccapurple: 0x663399,
     red: 0xff0000,
     rosybrown: 0xbc8f8f,
     royalblue: 0x4169e1,
@@ -787,13 +1024,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="geo.module_util.html">geo.util</a></li></ul><h3>Classes</h3><ul><li><a href="geo.annotation.html">geo.annotation</a></li><li><a href="geo.annotationLayer.html">geo.annotationLayer</a></li><li><a href="geo.camera.html">geo.camera</a></li><li><a href="geo.canvas.heatmapFeature.html">geo.canvas.heatmapFeature</a></li><li><a href="geo.canvas.object.html">geo.canvas.object</a></li><li><a href="geo.canvas.quadFeature.html">geo.canvas.quadFeature</a></li><li><a href="geo.canvas.renderer.html">geo.canvas.renderer</a></li><li><a href="geo.choroplethFeature.html">geo.choroplethFeature</a></li><li><a href="geo.clock.html">geo.clock</a></li><li><a href="geo.contourFeature.html">geo.contourFeature</a></li><li><a href="geo.d3.graphFeature.html">geo.d3.graphFeature</a></li><li><a href="geo.d3.lineFeature.html">geo.d3.lineFeature</a></li><li><a href="geo.d3.object.html">geo.d3.object</a></li><li><a href="geo.d3.pathFeature.html">geo.d3.pathFeature</a></li><li><a href="geo.d3.pointFeature.html">geo.d3.pointFeature</a></li><li><a href="geo.d3.quadFeature.html">geo.d3.quadFeature</a></li><li><a href="geo.d3.renderer.html">geo.d3.renderer</a></li><li><a href="geo.d3.vectorFeature.html">geo.d3.vectorFeature</a></li><li><a href="geo.domRenderer.html">geo.domRenderer</a></li><li><a href="geo.feature.html">geo.feature</a></li><li><a href="geo.featureLayer.html">geo.featureLayer</a></li><li><a href="geo.fetchQueue.html">geo.fetchQueue</a></li><li><a href="geo.fileReader.html">geo.fileReader</a></li><li><a href="geo.geomFeature.html">geo.geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">geo.gl.choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">geo.gl.contourFeature</a></li><li><a href="geo.gl.ellipsoid.html">geo.gl.ellipsoid</a></li><li><a href="geo.gl.geomFeature.html">geo.gl.geomFeature</a></li><li><a href="geo.gl.lineFeature.html">geo.gl.lineFeature</a></li><li><a href="geo.gl.object.html">geo.gl.object</a></li><li><a href="geo.gl.pointFeature.html">geo.gl.pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">geo.gl.polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">geo.gl.quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">geo.gl.vglRenderer</a></li><li><a href="geo.greaphFeature.html">geo.greaphFeature</a></li><li><a href="geo.gui.legendWidget.html">geo.gui.legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">geo.gui.sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">geo.gui.svgWidget</a></li><li><a href="geo.gui.uiLayer.html">geo.gui.uiLayer</a></li><li><a href="geo.gui.widget.html">geo.gui.widget</a></li><li><a href="geo.heatmapFeature.html">geo.heatmapFeature</a></li><li><a href="geo.imageTile.html">geo.imageTile</a></li><li><a href="geo.jsonReader.html">geo.jsonReader</a></li><li><a href="geo.layer.html">geo.layer</a></li><li><a href="geo.lineFeature.html">geo.lineFeature</a></li><li><a href="geo.map.html">geo.map</a></li><li><a href="geo.mapInteractor.html">geo.mapInteractor</a></li><li><a href="geo.object.html">geo.object</a></li><li><a href="geo.osmLayer.html">geo.osmLayer</a></li><li><a href="geo.pathFeature.html">geo.pathFeature</a></li><li><a href="geo.pointFeature.html">geo.pointFeature</a></li><li><a href="geo.polygonFeature.html">geo.polygonFeature</a></li><li><a href="geo.quadFeature.html">geo.quadFeature</a></li><li><a href="geo.renderer.html">geo.renderer</a></li><li><a href="geo.sceneObject.html">geo.sceneObject</a></li><li><a href="geo.tile.html">geo.tile</a></li><li><a href="geo.tileCache.html">geo.tileCache</a></li><li><a href="geo.tileLayer.html">geo.tileLayer</a></li><li><a href="geo.timestamp.html">geo.timestamp</a></li><li><a href="geo.transform.html">geo.transform</a></li><li><a href="geo.util.ClusterGroup.html">geo.util.ClusterGroup</a></li><li><a href="geo.vectorFeature.html">geo.vectorFeature</a></li></ul><h3>Namespaces</h3><ul><li><a href="-_anonymous_-geo.util.html"><anonymous>~geo.util</a></li><li><a href="geo.canvas.html">geo.canvas</a></li><li><a href="geo.d3.html">geo.d3</a></li><li><a href="geo.event.html">geo.event</a></li><li><a href="geo.event.annotation.html">geo.event.annotation</a></li><li><a href="geo.event.camera.html">geo.event.camera</a></li><li><a href="geo.event.feature.html">geo.event.feature</a></li><li><a href="geo.gl.html">geo.gl</a></li><li><a href="geo.gui.html">geo.gui</a></li><li><a href="geo_event.clock.html">geo_event.clock</a></li></ul><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#__render">__render</a></li><li><a href="global.html#_addPolygonFeature">_addPolygonFeature</a></li><li><a href="global.html#_animatePan">_animatePan</a></li><li><a href="global.html#_appendChild">_appendChild</a></li><li><a href="global.html#_bindMouseHandlers">_bindMouseHandlers</a></li><li><a href="global.html#_boundingBox">_boundingBox</a></li><li><a href="global.html#_build">_build</a></li><li><a href="global.html#_checkForStroke">_checkForStroke</a></li><li><a href="global.html#_clusterData">_clusterData</a></li><li><a href="global.html#_colorize">_colorize</a></li><li><a href="global.html#_computeGradient">_computeGradient</a></li><li><a href="global.html#_connectEvents">_connectEvents</a></li><li><a href="global.html#_coordinates">_coordinates</a></li><li><a href="global.html#_createCanvas">_createCanvas</a></li><li><a href="global.html#_createCircle">_createCircle</a></li><li><a href="global.html#_createFeature">_createFeature</a></li><li><a href="global.html#_definitions">_definitions</a></li><li><a href="global.html#_deleteFeature">_deleteFeature</a></li><li><a href="global.html#_disconnectEvents">_disconnectEvents</a></li><li><a href="global.html#_drawFeatures">_drawFeatures</a></li><li><a href="global.html#_exit">_exit</a></li><li><a href="global.html#_feature">_feature</a></li><li><a href="global.html#_featureArray">_featureArray</a></li><li><a href="global.html#_featureToPolygons">_featureToPolygons</a></li><li><a href="global.html#_forward">_forward</a></li><li><a href="global.html#_generateQuads">_generateQuads</a></li><li><a href="global.html#_generateScale">_generateScale</a></li><li><a href="global.html#_geojsonCoordinates">_geojsonCoordinates</a></li><li><a href="global.html#_geojsonFeatureToAnnotation">_geojsonFeatureToAnnotation</a></li><li><a href="global.html#_geojsonGeometryType">_geojsonGeometryType</a></li><li><a href="global.html#_geojsonStyles">_geojsonStyles</a></li><li><a href="global.html#_getArrayBuffer">_getArrayBuffer</a></li><li><a href="global.html#_getLoopData">_getLoopData</a></li><li><a href="global.html#_getMouseButton">_getMouseButton</a></li><li><a href="global.html#_getMouseModifiers">_getMouseModifiers</a></li><li><a href="global.html#_getMousePosition">_getMousePosition</a></li><li><a href="global.html#_getString">_getString</a></li><li><a href="global.html#_handleBrush">_handleBrush</a></li><li><a href="global.html#_handleBrushend">_handleBrushend</a></li><li><a href="global.html#_handleDoubleClick">_handleDoubleClick</a></li><li><a href="global.html#_handleMouseClick">_handleMouseClick</a></li><li><a href="global.html#_handleMouseclick">_handleMouseclick</a></li><li><a href="global.html#_handleMouseDown">_handleMouseDown</a></li><li><a href="global.html#_handleMouseMove">_handleMouseMove</a></li><li><a href="global.html#_handleMousemove">_handleMousemove</a></li><li><a href="global.html#_handleMouseMoveDocument">_handleMouseMoveDocument</a></li><li><a href="global.html#_handleMouseUp">_handleMouseUp</a></li><li><a href="global.html#_handleMouseUpDocument">_handleMouseUpDocument</a></li><li><a href="global.html#_handleMouseWheel">_handleMouseWheel</a></li><li><a href="global.html#_handleZoom">_handleZoom</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_inverse">_inverse</a></li><li><a href="global.html#_objectListAdd">_objectListAdd</a></li><li><a href="global.html#_objectListEnd">_objectListEnd</a></li><li><a href="global.html#_objectListGet">_objectListGet</a></li><li><a href="global.html#_objectListStart">_objectListStart</a></li><li><a href="global.html#_position">_position</a></li><li><a href="global.html#_positionToQuad">_positionToQuad</a></li><li><a href="global.html#_processSelection">_processSelection</a></li><li><a href="global.html#_removeFeature">_removeFeature</a></li><li><a href="global.html#_render">_render</a></li><li><a href="global.html#_renderBinnedData">_renderBinnedData</a></li><li><a href="global.html#_renderColorQuads">_renderColorQuads</a></li><li><a href="global.html#_renderFrame">_renderFrame</a></li><li><a href="global.html#_renderImageQuads">_renderImageQuads</a></li><li><a href="global.html#_renderOnCanvas">_renderOnCanvas</a></li><li><a href="global.html#_renderPoints">_renderPoints</a></li><li><a href="global.html#_resize">_resize</a></li><li><a href="global.html#_setClickMaybe">_setClickMaybe</a></li><li><a href="global.html#_style">_style</a></li><li><a href="global.html#_unbindMouseHandlers">_unbindMouseHandlers</a></li><li><a href="global.html#_update">_update</a></li><li><a href="global.html#_updateRangeTree">_updateRangeTree</a></li><li><a href="global.html#_updateTextures">_updateTextures</a></li><li><a href="global.html#_wipePolygons">_wipePolygons</a></li><li><a href="global.html#active">active</a></li><li><a href="global.html#actors">actors</a></li><li><a href="global.html#addAction">addAction</a></li><li><a href="global.html#addAnnotation">addAnnotation</a></li><li><a href="global.html#addChild">addChild</a></li><li><a href="global.html#addPromise">addPromise</a></li><li><a href="global.html#allowRotation">allowRotation</a></li><li><a href="global.html#annotationById">annotationById</a></li><li><a href="global.html#annotations">annotations</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#attribution">attribution</a></li><li><a href="global.html#bin">bin</a></li><li><a href="global.html#binned">binned</a></li><li><a href="global.html#bounds">bounds</a></li><li><a href="global.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li><li><a href="global.html#boxSearch">boxSearch</a></li><li><a href="global.html#buildTime">buildTime</a></li><li><a href="global.html#camera">camera</a></li><li><a href="global.html#cancel">cancel</a></li><li><a href="global.html#canRead">canRead</a></li><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#center">center</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#choropleth">choropleth</a></li><li><a href="global.html#clampBoundsX">clampBoundsX</a></li><li><a href="global.html#clampBoundsY">clampBoundsY</a></li><li><a href="global.html#clampZoom">clampZoom</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clock">clock</a></li><li><a href="global.html#clustering">clustering</a></li><li><a href="global.html#computeGeodeticSurfaceNormal">computeGeodeticSurfaceNormal</a></li><li><a href="global.html#contextRenderer">contextRenderer</a></li><li><a href="global.html#contour">contour</a></li><li><a href="global.html#coordinates">coordinates</a></li><li><a href="global.html#createChoropleth">createChoropleth</a></li><li><a href="global.html#createContours">createContours</a></li><li><a href="global.html#createFeature">createFeature</a></li><li><a href="global.html#createLayer">createLayer</a></li><li><a href="global.html#createWidget">createWidget</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#dataTime">dataTime</a></li><li><a href="global.html#deleteFeature">deleteFeature</a></li><li><a href="global.html#deleteLayer">deleteLayer</a></li><li><a href="global.html#deleteWidget">deleteWidget</a></li><li><a href="global.html#delta">delta</a></li><li><a href="global.html#destroy">destroy</a></li><li><a href="global.html#discreteZoom">discreteZoom</a></li><li><a href="global.html#displayDistance">displayDistance</a></li><li><a href="global.html#displayToGcs">displayToGcs</a></li><li><a href="global.html#displayToWorld">displayToWorld</a></li><li><a href="global.html#draw">draw</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#exit">exit</a></li><li><a href="global.html#featureGcsToDisplay">featureGcsToDisplay</a></li><li><a href="global.html#features">features</a></li><li><a href="global.html#featureVertices">featureVertices</a></li><li><a href="global.html#fileReader">fileReader</a></li><li><a href="global.html#forward">forward</a></li><li><a href="global.html#framerate">framerate</a></li><li><a href="global.html#fromLocal">fromLocal</a></li><li><a href="global.html#gcs">gcs</a></li><li><a href="global.html#gcsPosition">gcsPosition</a></li><li><a href="global.html#gcsToDisplay">gcsToDisplay</a></li><li><a href="global.html#gcsToWorld">gcsToWorld</a></li><li><a href="global.html#geo_action">geo_action</a></li><li><a href="global.html#geojson">geojson</a></li><li><a href="global.html#geometry">geometry</a></li><li><a href="global.html#geoOff">geoOff</a></li><li><a href="global.html#geoOn">geoOn</a></li><li><a href="global.html#geoTrigger">geoTrigger</a></li><li><a href="global.html#globals">globals</a></li><li><a href="global.html#hasAction">hasAction</a></li><li><a href="global.html#height">height</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#ingcs">ingcs</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#intensity">intensity</a></li><li><a href="global.html#interactor">interactor</a></li><li><a href="global.html#inverse">inverse</a></li><li><a href="global.html#isInViewport">isInViewport</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#layer">layer</a></li><li><a href="global.html#layers">layers</a></li><li><a href="global.html#line">line</a></li><li><a href="global.html#linkFeatures">linkFeatures</a></li><li><a href="global.html#links">links</a></li><li><a href="global.html#loop">loop</a></li><li><a href="global.html#map">map</a></li><li><a href="global.html#maximumRadius">maximumRadius</a></li><li><a href="global.html#maxIntensity">maxIntensity</a></li><li><a href="global.html#minimumRadius">minimumRadius</a></li><li><a href="global.html#minIntensity">minIntensity</a></li><li><a href="global.html#mode">mode</a></li><li><a href="global.html#modified">modified</a></li><li><a href="global.html#mouse">mouse</a></li><li><a href="global.html#mouseClick">mouseClick</a></li><li><a href="global.html#mouseMove">mouseMove</a></li><li><a href="global.html#moveDown">moveDown</a></li><li><a href="global.html#moveToBottom">moveToBottom</a></li><li><a href="global.html#moveToTop">moveToTop</a></li><li><a href="global.html#moveUp">moveUp</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#node">node</a></li><li><a href="global.html#nodeFeature">nodeFeature</a></li><li><a href="global.html#nodes">nodes</a></li><li><a href="global.html#now">now</a></li><li><a href="global.html#object">object</a></li><li><a href="global.html#onIdle">onIdle</a></li><li><a href="global.html#opacity">opacity</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#origin">origin</a></li><li><a href="global.html#pan">pan</a></li><li><a href="global.html#parent">parent</a></li><li><a href="global.html#parentCanvas">parentCanvas</a></li><li><a href="global.html#pause">pause</a></li><li><a href="global.html#pointAnnotation">pointAnnotation</a></li><li><a href="global.html#pointSearch">pointSearch</a></li><li><a href="global.html#polygonAnnotation">polygonAnnotation</a></li><li><a href="global.html#position">position</a></li><li><a href="global.html#radii">radii</a></li><li><a href="global.html#radiiSquared">radiiSquared</a></li><li><a href="global.html#read">read</a></li><li><a href="global.html#rectangleAnnotation">rectangleAnnotation</a></li><li><a href="global.html#removeAction">removeAction</a></li><li><a href="global.html#removeAllAnnotations">removeAllAnnotations</a></li><li><a href="global.html#removeAnnotation">removeAnnotation</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#renderer">renderer</a></li><li><a href="global.html#rendererName">rendererName</a></li><li><a href="global.html#reposition">reposition</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#resize">resize</a></li><li><a href="global.html#rotatedSize">rotatedSize</a></li><li><a href="global.html#rotation">rotation</a></li><li><a href="global.html#scalar">scalar</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#scaleFactor">scaleFactor</a></li><li><a href="global.html#select">select</a></li><li><a href="global.html#selectionAPI">selectionAPI</a></li><li><a href="global.html#simulateEvent">simulateEvent</a></li><li><a href="global.html#size">size</a></li><li><a href="global.html#source">source</a></li><li><a href="global.html#springBack">springBack</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#state">state</a></li><li><a href="global.html#step">step</a></li><li><a href="global.html#stepBackward">stepBackward</a></li><li><a href="global.html#stepForward">stepForward</a></li><li><a href="global.html#sticky">sticky</a></li><li><a href="global.html#style">style</a></li><li><a href="global.html#target">target</a></li><li><a href="global.html#toLocal">toLocal</a></li><li><a href="global.html#transformGeometry">transformGeometry</a></li><li><a href="global.html#transformPoint">transformPoint</a></li><li><a href="global.html#transition">transition</a></li><li><a href="global.html#transitionCancel">transitionCancel</a></li><li><a href="global.html#type">type</a></li><li><a href="global.html#unitsPerPixel">unitsPerPixel</a></li><li><a href="global.html#updateAttribution">updateAttribution</a></li><li><a href="global.html#updateDelay">updateDelay</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#validateAttribute">validateAttribute</a></li><li><a href="global.html#verticesPerFeature">verticesPerFeature</a></li><li><a href="global.html#visible">visible</a></li><li><a href="global.html#width">width</a></li><li><a href="global.html#worldToDisplay">worldToDisplay</a></li><li><a href="global.html#worldToGcs">worldToGcs</a></li><li><a href="global.html#zIndex">zIndex</a></li><li><a href="global.html#zoom">zoom</a></li><li><a href="global.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li><li><a href="global.html#zoomRange">zoomRange</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="geo.module_util.html">geo.util</a></li></ul><h3>Classes</h3><ul><li><a href="geo.annotation.html">geo.annotation</a></li><li><a href="geo.annotationLayer.html">geo.annotationLayer</a></li><li><a href="geo.camera.html">geo.camera</a></li><li><a href="geo.canvas.heatmapFeature.html">geo.canvas.heatmapFeature</a></li><li><a href="geo.canvas.object.html">geo.canvas.object</a></li><li><a href="geo.canvas.pixelmapFeature.html">geo.canvas.pixelmapFeature</a></li><li><a href="geo.canvas.quadFeature.html">geo.canvas.quadFeature</a></li><li><a href="geo.canvas.renderer.html">geo.canvas.renderer</a></li><li><a href="geo.choroplethFeature.html">geo.choroplethFeature</a></li><li><a href="geo.clock.html">geo.clock</a></li><li><a href="geo.contourFeature.html">geo.contourFeature</a></li><li><a href="geo.d3.graphFeature.html">geo.d3.graphFeature</a></li><li><a href="geo.d3.lineFeature.html">geo.d3.lineFeature</a></li><li><a href="geo.d3.object.html">geo.d3.object</a></li><li><a href="geo.d3.pathFeature.html">geo.d3.pathFeature</a></li><li><a href="geo.d3.pointFeature.html">geo.d3.pointFeature</a></li><li><a href="geo.d3.quadFeature.html">geo.d3.quadFeature</a></li><li><a href="geo.d3.renderer.html">geo.d3.renderer</a></li><li><a href="geo.d3.vectorFeature.html">geo.d3.vectorFeature</a></li><li><a href="geo.domRenderer.html">geo.domRenderer</a></li><li><a href="geo.feature.html">geo.feature</a></li><li><a href="geo.featureLayer.html">geo.featureLayer</a></li><li><a href="geo.fetchQueue.html">geo.fetchQueue</a></li><li><a href="geo.fileReader.html">geo.fileReader</a></li><li><a href="geo.geomFeature.html">geo.geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">geo.gl.choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">geo.gl.contourFeature</a></li><li><a href="geo.gl.ellipsoid.html">geo.gl.ellipsoid</a></li><li><a href="geo.gl.geomFeature.html">geo.gl.geomFeature</a></li><li><a href="geo.gl.lineFeature.html">geo.gl.lineFeature</a></li><li><a href="geo.gl.object.html">geo.gl.object</a></li><li><a href="geo.gl.pointFeature.html">geo.gl.pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">geo.gl.polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">geo.gl.quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">geo.gl.vglRenderer</a></li><li><a href="geo.greaphFeature.html">geo.greaphFeature</a></li><li><a href="geo.gui.legendWidget.html">geo.gui.legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">geo.gui.sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">geo.gui.svgWidget</a></li><li><a href="geo.gui.uiLayer.html">geo.gui.uiLayer</a></li><li><a href="geo.gui.widget.html">geo.gui.widget</a></li><li><a href="geo.heatmapFeature.html">geo.heatmapFeature</a></li><li><a href="geo.imageTile.html">geo.imageTile</a></li><li><a href="geo.jsonReader.html">geo.jsonReader</a></li><li><a href="geo.layer.html">geo.layer</a></li><li><a href="geo.lineFeature.html">geo.lineFeature</a></li><li><a href="geo.map.html">geo.map</a></li><li><a href="geo.mapInteractor.html">geo.mapInteractor</a></li><li><a href="geo.object.html">geo.object</a></li><li><a href="geo.osmLayer.html">geo.osmLayer</a></li><li><a href="geo.pathFeature.html">geo.pathFeature</a></li><li><a href="geo.pixelmapFeature.html">geo.pixelmapFeature</a></li><li><a href="geo.pointFeature.html">geo.pointFeature</a></li><li><a href="geo.polygonFeature.html">geo.polygonFeature</a></li><li><a href="geo.quadFeature.html">geo.quadFeature</a></li><li><a href="geo.renderer.html">geo.renderer</a></li><li><a href="geo.sceneObject.html">geo.sceneObject</a></li><li><a href="geo.tile.html">geo.tile</a></li><li><a href="geo.tileCache.html">geo.tileCache</a></li><li><a href="geo.tileLayer.html">geo.tileLayer</a></li><li><a href="geo.timestamp.html">geo.timestamp</a></li><li><a href="geo.transform.html">geo.transform</a></li><li><a href="geo.util.ClusterGroup.html">geo.util.ClusterGroup</a></li><li><a href="geo.vectorFeature.html">geo.vectorFeature</a></li></ul><h3>Namespaces</h3><ul><li><a href="-_anonymous_-geo.util.html"><anonymous>~geo.util</a></li><li><a href="geo.canvas.html">geo.canvas</a></li><li><a href="geo.d3.html">geo.d3</a></li><li><a href="geo.event.html">geo.event</a></li><li><a href="geo.event.annotation.html">geo.event.annotation</a></li><li><a href="geo.event.camera.html">geo.event.camera</a></li><li><a href="geo.event.feature.html">geo.event.feature</a></li><li><a href="geo.event.pixelmap.html">geo.event.pixelmap</a></li><li><a href="geo.gl.html">geo.gl</a></li><li><a href="geo.gui.html">geo.gui</a></li><li><a href="geo_event.clock.html">geo_event.clock</a></li></ul><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#__render">__render</a></li><li><a href="global.html#_addPolygonFeature">_addPolygonFeature</a></li><li><a href="global.html#_animatePan">_animatePan</a></li><li><a href="global.html#_appendChild">_appendChild</a></li><li><a href="global.html#_bindMouseHandlers">_bindMouseHandlers</a></li><li><a href="global.html#_boundingBox">_boundingBox</a></li><li><a href="global.html#_build">_build</a></li><li><a href="global.html#_checkForStroke">_checkForStroke</a></li><li><a href="global.html#_clusterData">_clusterData</a></li><li><a href="global.html#_colorize">_colorize</a></li><li><a href="global.html#_computeGradient">_computeGradient</a></li><li><a href="global.html#_computePixelmap">_computePixelmap</a></li><li><a href="global.html#_connectEvents">_connectEvents</a></li><li><a href="global.html#_coordinates">_coordinates</a></li><li><a href="global.html#_createCanvas">_createCanvas</a></li><li><a href="global.html#_createCircle">_createCircle</a></li><li><a href="global.html#_createFeature">_createFeature</a></li><li><a href="global.html#_definitions">_definitions</a></li><li><a href="global.html#_deleteFeature">_deleteFeature</a></li><li><a href="global.html#_disconnectEvents">_disconnectEvents</a></li><li><a href="global.html#_drawFeatures">_drawFeatures</a></li><li><a href="global.html#_exit">_exit</a></li><li><a href="global.html#_feature">_feature</a></li><li><a href="global.html#_featureArray">_featureArray</a></li><li><a href="global.html#_featureToPolygons">_featureToPolygons</a></li><li><a href="global.html#_forward">_forward</a></li><li><a href="global.html#_generateQuads">_generateQuads</a></li><li><a href="global.html#_generateScale">_generateScale</a></li><li><a href="global.html#_geojsonCoordinates">_geojsonCoordinates</a></li><li><a href="global.html#_geojsonFeatureToAnnotation">_geojsonFeatureToAnnotation</a></li><li><a href="global.html#_geojsonGeometryType">_geojsonGeometryType</a></li><li><a href="global.html#_geojsonStyles">_geojsonStyles</a></li><li><a href="global.html#_getArrayBuffer">_getArrayBuffer</a></li><li><a href="global.html#_getLoopData">_getLoopData</a></li><li><a href="global.html#_getMouseButton">_getMouseButton</a></li><li><a href="global.html#_getMouseModifiers">_getMouseModifiers</a></li><li><a href="global.html#_getMousePosition">_getMousePosition</a></li><li><a href="global.html#_getString">_getString</a></li><li><a href="global.html#_handleBrush">_handleBrush</a></li><li><a href="global.html#_handleBrushend">_handleBrushend</a></li><li><a href="global.html#_handleDoubleClick">_handleDoubleClick</a></li><li><a href="global.html#_handleMouseClick">_handleMouseClick</a></li><li><a href="global.html#_handleMouseclick">_handleMouseclick</a></li><li><a href="global.html#_handleMouseDown">_handleMouseDown</a></li><li><a href="global.html#_handleMousemove">_handleMousemove</a></li><li><a href="global.html#_handleMouseMove">_handleMouseMove</a></li><li><a href="global.html#_handleMouseMoveDocument">_handleMouseMoveDocument</a></li><li><a href="global.html#_handleMouseUp">_handleMouseUp</a></li><li><a href="global.html#_handleMouseUpDocument">_handleMouseUpDocument</a></li><li><a href="global.html#_handleMouseWheel">_handleMouseWheel</a></li><li><a href="global.html#_handleZoom">_handleZoom</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_inverse">_inverse</a></li><li><a href="global.html#_objectListAdd">_objectListAdd</a></li><li><a href="global.html#_objectListEnd">_objectListEnd</a></li><li><a href="global.html#_objectListGet">_objectListGet</a></li><li><a href="global.html#_objectListStart">_objectListStart</a></li><li><a href="global.html#_position">_position</a></li><li><a href="global.html#_positionToQuad">_positionToQuad</a></li><li><a href="global.html#_preparePixelmap">_preparePixelmap</a></li><li><a href="global.html#_processSelection">_processSelection</a></li><li><a href="global.html#_removeFeature">_removeFeature</a></li><li><a href="global.html#_render">_render</a></li><li><a href="global.html#_renderBinnedData">_renderBinnedData</a></li><li><a href="global.html#_renderColorQuads">_renderColorQuads</a></li><li><a href="global.html#_renderFrame">_renderFrame</a></li><li><a href="global.html#_renderImageQuads">_renderImageQuads</a></li><li><a href="global.html#_renderOnCanvas">_renderOnCanvas</a></li><li><a href="global.html#_renderPoints">_renderPoints</a></li><li><a href="global.html#_resize">_resize</a></li><li><a href="global.html#_setClickMaybe">_setClickMaybe</a></li><li><a href="global.html#_style">_style</a></li><li><a href="global.html#_unbindMouseHandlers">_unbindMouseHandlers</a></li><li><a href="global.html#_update">_update</a></li><li><a href="global.html#_updateRangeTree">_updateRangeTree</a></li><li><a href="global.html#_updateTextures">_updateTextures</a></li><li><a href="global.html#_wipePolygons">_wipePolygons</a></li><li><a href="global.html#active">active</a></li><li><a href="global.html#actors">actors</a></li><li><a href="global.html#addAction">addAction</a></li><li><a href="global.html#addAnnotation">addAnnotation</a></li><li><a href="global.html#addChild">addChild</a></li><li><a href="global.html#addFeature">addFeature</a></li><li><a href="global.html#addPromise">addPromise</a></li><li><a href="global.html#allowRotation">allowRotation</a></li><li><a href="global.html#annotationById">annotationById</a></li><li><a href="global.html#annotations">annotations</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#attribution">attribution</a></li><li><a href="global.html#bin">bin</a></li><li><a href="global.html#binned">binned</a></li><li><a href="global.html#bounds">bounds</a></li><li><a href="global.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li><li><a href="global.html#boxSearch">boxSearch</a></li><li><a href="global.html#buildTime">buildTime</a></li><li><a href="global.html#camera">camera</a></li><li><a href="global.html#cancel">cancel</a></li><li><a href="global.html#canRead">canRead</a></li><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#center">center</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#choropleth">choropleth</a></li><li><a href="global.html#clampBoundsX">clampBoundsX</a></li><li><a href="global.html#clampBoundsY">clampBoundsY</a></li><li><a href="global.html#clampZoom">clampZoom</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clock">clock</a></li><li><a href="global.html#clustering">clustering</a></li><li><a href="global.html#color">color</a></li><li><a href="global.html#computeGeodeticSurfaceNormal">computeGeodeticSurfaceNormal</a></li><li><a href="global.html#contextRenderer">contextRenderer</a></li><li><a href="global.html#contour">contour</a></li><li><a href="global.html#coordinates">coordinates</a></li><li><a href="global.html#createChoropleth">createChoropleth</a></li><li><a href="global.html#createContours">createContours</a></li><li><a href="global.html#createFeature">createFeature</a></li><li><a href="global.html#createLayer">createLayer</a></li><li><a href="global.html#createWidget">createWidget</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#dataTime">dataTime</a></li><li><a href="global.html#deleteFeature">deleteFeature</a></li><li><a href="global.html#deleteLayer">deleteLayer</a></li><li><a href="global.html#deleteWidget">deleteWidget</a></li><li><a href="global.html#delta">delta</a></li><li><a href="global.html#dependentFeatures">dependentFeatures</a></li><li><a href="global.html#destroy">destroy</a></li><li><a href="global.html#discreteZoom">discreteZoom</a></li><li><a href="global.html#displayDistance">displayDistance</a></li><li><a href="global.html#displayToGcs">displayToGcs</a></li><li><a href="global.html#displayToWorld">displayToWorld</a></li><li><a href="global.html#draw">draw</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#exit">exit</a></li><li><a href="global.html#featureGcsToDisplay">featureGcsToDisplay</a></li><li><a href="global.html#features">features</a></li><li><a href="global.html#featureVertices">featureVertices</a></li><li><a href="global.html#fileReader">fileReader</a></li><li><a href="global.html#forward">forward</a></li><li><a href="global.html#framerate">framerate</a></li><li><a href="global.html#fromLocal">fromLocal</a></li><li><a href="global.html#gcs">gcs</a></li><li><a href="global.html#gcsPosition">gcsPosition</a></li><li><a href="global.html#gcsToDisplay">gcsToDisplay</a></li><li><a href="global.html#gcsToWorld">gcsToWorld</a></li><li><a href="global.html#geo_action">geo_action</a></li><li><a href="global.html#geojson">geojson</a></li><li><a href="global.html#geometry">geometry</a></li><li><a href="global.html#geoOff">geoOff</a></li><li><a href="global.html#geoOn">geoOn</a></li><li><a href="global.html#geoTrigger">geoTrigger</a></li><li><a href="global.html#globals">globals</a></li><li><a href="global.html#hasAction">hasAction</a></li><li><a href="global.html#height">height</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#ingcs">ingcs</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#intensity">intensity</a></li><li><a href="global.html#interactor">interactor</a></li><li><a href="global.html#inverse">inverse</a></li><li><a href="global.html#isInViewport">isInViewport</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#layer">layer</a></li><li><a href="global.html#layers">layers</a></li><li><a href="global.html#line">line</a></li><li><a href="global.html#linkFeatures">linkFeatures</a></li><li><a href="global.html#links">links</a></li><li><a href="global.html#loop">loop</a></li><li><a href="global.html#map">map</a></li><li><a href="global.html#maximumRadius">maximumRadius</a></li><li><a href="global.html#maxIndex">maxIndex</a></li><li><a href="global.html#maxIntensity">maxIntensity</a></li><li><a href="global.html#minimumRadius">minimumRadius</a></li><li><a href="global.html#minIntensity">minIntensity</a></li><li><a href="global.html#mode">mode</a></li><li><a href="global.html#modified">modified</a></li><li><a href="global.html#mouse">mouse</a></li><li><a href="global.html#mouseClick">mouseClick</a></li><li><a href="global.html#mouseMove">mouseMove</a></li><li><a href="global.html#moveDown">moveDown</a></li><li><a href="global.html#moveToBottom">moveToBottom</a></li><li><a href="global.html#moveToTop">moveToTop</a></li><li><a href="global.html#moveUp">moveUp</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#node">node</a></li><li><a href="global.html#nodeFeature">nodeFeature</a></li><li><a href="global.html#nodes">nodes</a></li><li><a href="global.html#now">now</a></li><li><a href="global.html#object">object</a></li><li><a href="global.html#onIdle">onIdle</a></li><li><a href="global.html#opacity">opacity</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#origin">origin</a></li><li><a href="global.html#pan">pan</a></li><li><a href="global.html#parent">parent</a></li><li><a href="global.html#parentCanvas">parentCanvas</a></li><li><a href="global.html#pause">pause</a></li><li><a href="global.html#pointAnnotation">pointAnnotation</a></li><li><a href="global.html#pointSearch">pointSearch</a></li><li><a href="global.html#polygonAnnotation">polygonAnnotation</a></li><li><a href="global.html#position">position</a></li><li><a href="global.html#radii">radii</a></li><li><a href="global.html#radiiSquared">radiiSquared</a></li><li><a href="global.html#read">read</a></li><li><a href="global.html#rectangleAnnotation">rectangleAnnotation</a></li><li><a href="global.html#removeAction">removeAction</a></li><li><a href="global.html#removeAllAnnotations">removeAllAnnotations</a></li><li><a href="global.html#removeAnnotation">removeAnnotation</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#removeFeature">removeFeature</a></li><li><a href="global.html#renderer">renderer</a></li><li><a href="global.html#rendererName">rendererName</a></li><li><a href="global.html#reposition">reposition</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#resize">resize</a></li><li><a href="global.html#rotatedSize">rotatedSize</a></li><li><a href="global.html#rotation">rotation</a></li><li><a href="global.html#scalar">scalar</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#scaleFactor">scaleFactor</a></li><li><a href="global.html#select">select</a></li><li><a href="global.html#selectionAPI">selectionAPI</a></li><li><a href="global.html#simulateEvent">simulateEvent</a></li><li><a href="global.html#size">size</a></li><li><a href="global.html#source">source</a></li><li><a href="global.html#springBack">springBack</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#state">state</a></li><li><a href="global.html#step">step</a></li><li><a href="global.html#stepBackward">stepBackward</a></li><li><a href="global.html#stepForward">stepForward</a></li><li><a href="global.html#sticky">sticky</a></li><li><a href="global.html#style">style</a></li><li><a href="global.html#target">target</a></li><li><a href="global.html#toLocal">toLocal</a></li><li><a href="global.html#transformGeometry">transformGeometry</a></li><li><a href="global.html#transformPoint">transformPoint</a></li><li><a href="global.html#transition">transition</a></li><li><a href="global.html#transitionCancel">transitionCancel</a></li><li><a href="global.html#type">type</a></li><li><a href="global.html#unitsPerPixel">unitsPerPixel</a></li><li><a href="global.html#updateAttribution">updateAttribution</a></li><li><a href="global.html#updateDelay">updateDelay</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#url">url</a></li><li><a href="global.html#validateAttribute">validateAttribute</a></li><li><a href="global.html#verticesPerFeature">verticesPerFeature</a></li><li><a href="global.html#visible">visible</a></li><li><a href="global.html#width">width</a></li><li><a href="global.html#worldToDisplay">worldToDisplay</a></li><li><a href="global.html#worldToGcs">worldToGcs</a></li><li><a href="global.html#zIndex">zIndex</a></li><li><a href="global.html#zoom">zoom</a></li><li><a href="global.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li><li><a href="global.html#zoomRange">zoomRange</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.1</a> on Fri Oct 14 2016 13:39:42 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Fri Oct 28 2016 13:12:58 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

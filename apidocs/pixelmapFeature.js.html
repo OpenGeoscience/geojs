@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pixelmapFeature.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pixelmapFeature.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>var $ = require('jquery');
+var inherit = require('./inherit');
+var feature = require('./feature');
+var geo_event = require('./event');
+var util = require('./util');
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class imagemapFeature
+ *
+ * @class geo.pixelmapFeature
+ * @param {Object} arg Options object
+ * @extends geo.feature
+ * @param {Object|Function|HTMLImageElement} [url] URL of a pixel map or an
+ *   HTML Image element.  The rgb data is interpretted as an index of the form
+ *   0xbbggrr.  The alpha channel is ignored.
+ * @param {Object|Function} [color] The color that should be used for each data
+ *   element.  Data elements correspond to the indices in the pixel map.  If an
+ *   index is larger than the number of data elements, it will be transparent.
+ *   If there is more data than there are indices, it is ignored.
+ * @param {Object|Function} [position] Position of the image.  Default is
+ *   (data).  The position is an Object which specifies the corners of the
+ *   quad: ll, lr, ur, ul.  At least two opposite corners must be specified.
+ *   The corners do not have to physically correspond to the order specified,
+ *   but rather correspond to that part of the image map.  If a corner is
+ *   unspecified, it will use the x coordinate from one adjacent corner, the y
+ *   coordinate from the other adjacent corner, and the average z value of
+ *   those two corners.  For instance, if ul is unspecified, it is
+ *   {x: ll.x, y: ur.y}.  Note that each quad is rendered as a pair of
+ *   triangles: (ll, lr, ul) and (ur, ul, lr).  Nothing special is done for
+ *   quads that are not convex or quads that have substantially different
+ *   transformations for those two triangles.
+ * @returns {geo.pixelmapFeature}
+ */
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+var pixelmapFeature = function (arg) {
+  'use strict';
+  if (!(this instanceof pixelmapFeature)) {
+    return new pixelmapFeature(arg);
+  }
+  arg = arg || {};
+  feature.call(this, arg);
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_this = this,
+      m_quadFeature,
+      m_srcImage,
+      m_info,
+      s_update = this._update,
+      s_init = this._init,
+      s_exit = this._exit;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set position accessor
+   *
+   * @returns {geo.pixelmap}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.position = function (val) {
+    if (val === undefined) {
+      return m_this.style('position');
+    } else if (val !== m_this.style('position')) {
+      m_this.style('position', val);
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set url accessor
+   *
+   * @returns {geo.pixelmap}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.url = function (val) {
+    if (val === undefined) {
+      return m_this.style('url');
+    } else if (val !== m_this.style('url')) {
+      m_srcImage = m_info = undefined;
+      m_this.style('url', val);
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the maximum index value from the pixelmap.  This is a value present in
+   * the pixelmap.
+   *
+   * @returns {geo.pixelmap}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.maxIndex = function () {
+    if (m_info) {
+      /* This isn't just m_info.mappedColors.length - 1, since there
+       * may be more data than actual indices. */
+      if (m_info.maxIndex === undefined) {
+        m_info.maxIndex = 0;
+        for (var idx in m_info.mappedColors) {
+          if (m_info.mappedColors.hasOwnProperty(idx)) {
+            m_info.maxIndex = Math.max(m_info.maxIndex, idx);
+          }
+        }
+      }
+      return m_info.maxIndex;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set color accessor
+   *
+   * @returns {geo.pixelmap}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.color = function (val) {
+    if (val === undefined) {
+      return m_this.style('color');
+    } else if (val !== m_this.style('color')) {
+      m_this.style('color', val);
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  /**
+   * If the specified coordinates are in the rendered quad, use the basis
+   * information from the quad to determine the pixelmap index value so that it
+   * can be included in the found results.
+   */
+  this.pointSearch = function (coordinate) {
+    if (m_quadFeature &amp;&amp; m_info) {
+      var result = m_quadFeature.pointSearch(coordinate);
+      if (result.index.length === 1 &amp;&amp; result.extra &amp;&amp; result.extra[result.index[0]].basis) {
+        var basis = result.extra[result.index[0]].basis, x, y, idx;
+        x = Math.floor(basis.x * m_info.width);
+        y = Math.floor(basis.y * m_info.height);
+        if (x >= 0 &amp;&amp; x &lt; m_info.width &amp;&amp;
+            y >= 0 &amp;&amp; y &lt; m_info.height) {
+          idx = m_info.indices[y * m_info.width + x];
+          result = {
+            index: [idx],
+            found: [m_this.data()[idx]]
+          };
+          return result;
+        }
+      }
+    }
+    return {index: [], found: []};
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._build = function () {
+    /* Set the build time at the start of the call.  A build can result in
+     * drawing a quad, which can trigger a full layer update, which in tern
+     * checks if this feature is built.  Setting the build time avoid calling
+     * this a second time. */
+    m_this.buildTime().modified();
+    if (!m_srcImage) {
+      var src = this.style.get('url')();
+      if (util.isReadyImage(src)) {
+        /* we have an already loaded image, so we can just use it. */
+        m_srcImage = src;
+        this._computePixelmap();
+      } else if (src) {
+        var defer = new $.Deferred(), prev_onload, prev_onerror;
+        if (src instanceof Image) {
+          /* we have an unloaded image.  Hook to the load and error callbacks
+           * so that when it is loaded we can use it. */
+          m_srcImage = src;
+          prev_onload = src.onload;
+          prev_onerror = src.onerror;
+        } else {
+          /* we were given a url, so construct a new image */
+          m_srcImage = new Image();
+          // Only set the crossOrigin parameter if this is going across origins.
+          if (src.indexOf(':') >= 0 &amp;&amp;
+              src.indexOf('/') === src.indexOf(':') + 1) {
+            m_srcImage.crossOrigin = this.style.get('crossDomain')() || 'anonymous';
+          }
+        }
+        m_srcImage.onload = function () {
+          if (prev_onload) {
+            prev_onload.apply(this, arguments);
+          }
+          /* Only use this image if our pixelmap hasn't changed since we
+           * attached our handler */
+          if (m_this.style.get('url')() === src) {
+            m_info = undefined;
+            m_this._computePixelmap();
+          }
+          defer.resolve();
+        };
+        m_srcImage.onerror = function () {
+          if (prev_onerror) {
+            prev_onerror.apply(this, arguments);
+          }
+          defer.reject();
+        };
+        defer.promise(this);
+        this.layer().addPromise(this);
+        if (!(src instanceof Image)) {
+          m_srcImage.src = src;
+        }
+      }
+    } else if (m_info) {
+      this._computePixelmap();
+    }
+    return m_this;
+  };
+
+  /**
+   * Compute information for this pixelmap image.  It is wasterful to call this
+   * if the pixelmap has already been prepared (it is invalidated by a change
+   * in the image).
+   */
+  this._preparePixelmap = function () {
+    var i, idx, pixelData;
+
+    if (!util.isReadyImage(m_srcImage)) {
+      return;
+    }
+    m_info = {
+      width: m_srcImage.naturalWidth,
+      height: m_srcImage.naturalHeight,
+      canvas: document.createElement('canvas'),
+      updateIdx: {}
+    };
+
+    m_info.canvas.width = m_info.width;
+    m_info.canvas.height = m_info.height;
+    m_info.context = m_info.canvas.getContext('2d');
+
+    m_info.context.drawImage(m_srcImage, 0, 0);
+    m_info.imageData = m_info.context.getImageData(
+      0, 0, m_info.canvas.width, m_info.canvas.height);
+    pixelData = m_info.imageData.data;
+    m_info.indices = new Array(pixelData.length / 4);
+    m_info.area = pixelData.length / 4;
+
+    m_info.mappedColors = {};
+    for (i = 0; i &lt; pixelData.length; i += 4) {
+      idx = pixelData[i] + (pixelData[i + 1] &lt;&lt; 8) + (pixelData[i + 2] &lt;&lt; 16);
+      m_info.indices[i / 4] = idx;
+      if (!m_info.mappedColors[idx]) {
+        m_info.mappedColors[idx] = {first: i / 4};
+      }
+      m_info.mappedColors[idx].last = i / 4;
+    }
+    return m_info;
+  };
+
+  /**
+   * Given the loaded pixelmap image, create a canvas the size of the image.
+   * Compute a color for each distinct index and recolor the canvas based on
+   * thise colors, then draw the resultant image as a quad.
+   */
+  this._computePixelmap = function () {
+    var data = m_this.data() || [],
+        colorFunc = m_this.style.get('color'),
+        i, idx, lastidx, color, pixelData, indices, mappedColors,
+        updateFirst, updateLast = -1, update, prepared;
+
+    if (!m_info) {
+      if (!m_this._preparePixelmap()) {
+        return;
+      }
+      prepared = true;
+    }
+    mappedColors = m_info.mappedColors;
+    updateFirst = m_info.area;
+    for (idx in mappedColors) {
+      if (mappedColors.hasOwnProperty(idx)) {
+        color = colorFunc(data[idx], +idx) || {};
+        color = [
+          (color.r || 0) * 255,
+          (color.g || 0) * 255,
+          (color.b || 0) * 255,
+          color.a === undefined ? 255 : (color.a * 255)
+        ];
+        mappedColors[idx].update = (
+          !mappedColors[idx].color ||
+          mappedColors[idx].color[0] !== color[0] ||
+          mappedColors[idx].color[1] !== color[1] ||
+          mappedColors[idx].color[2] !== color[2] ||
+          mappedColors[idx].color[3] !== color[3]);
+        if (mappedColors[idx].update) {
+          mappedColors[idx].color = color;
+          updateFirst = Math.min(mappedColors[idx].first, updateFirst);
+          updateLast = Math.max(mappedColors[idx].last, updateLast);
+        }
+      }
+    }
+    /* If nothing was updated, we are done */
+    if (updateFirst >= updateLast) {
+      return;
+    }
+    /* Update only the extent that has changed */
+    pixelData = m_info.imageData.data;
+    indices = m_info.indices;
+    for (i = updateFirst; i &lt;= updateLast; i += 1) {
+      idx = indices[i];
+      if (idx !== lastidx) {
+        lastidx = idx;
+        color = mappedColors[idx].color;
+        update = mappedColors[idx].update;
+      }
+      if (update) {
+        pixelData[i * 4] = color[0];
+        pixelData[i * 4 + 1] = color[1];
+        pixelData[i * 4 + 2] = color[2];
+        pixelData[i * 4 + 3] = color[3];
+      }
+    }
+    /* Place the updated area into the canvas */
+    m_info.context.putImageData(
+      m_info.imageData, 0, 0, 0, Math.floor(updateFirst / m_info.width),
+      m_info.width, Math.ceil((updateLast + 1) / m_info.width));
+
+    /* If we haven't made a quad feature, make one now.  The quad feature needs
+     * to have the canvas capability. */
+    if (!m_quadFeature) {
+      m_quadFeature = m_this.layer().createFeature('quad', {
+        selectionAPI: false,
+        gcs: m_this.gcs(),
+        visible: m_this.visible()
+      });
+      m_this.dependentFeatures([m_quadFeature]);
+      m_quadFeature.style({image: m_info.canvas,
+                           position: m_this.style.get('position')})
+                   .data([{}])
+                   .draw();
+    }
+    /* If we prepared the pixelmap and rendered it, send a prepared event */
+    if (prepared) {
+      m_this.geoTrigger(geo_event.pixelmap.prepared, {
+        pixelmap: m_this
+      });
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._update = function () {
+    s_update.call(m_this);
+    if (m_this.buildTime().getMTime() &lt;= m_this.dataTime().getMTime() ||
+        m_this.updateTime().getMTime() &lt; m_this.getMTime()) {
+      m_this._build();
+    }
+
+    m_this.updateTime().modified();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy
+   * @memberof geo.pixelmapFeature
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function (abc) {
+    if (m_quadFeature &amp;&amp; m_this.layer()) {
+      m_this.layer().deleteFeature(m_quadFeature);
+      m_quadFeature = null;
+      m_this.dependentFeatures([]);
+    }
+    s_exit();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    arg = arg || {};
+    s_init.call(m_this, arg);
+
+    var style = $.extend(
+      {},
+      {
+        color: function (d, idx) {
+          return {
+            r: (idx &amp; 0xFF) / 255,
+            g: ((idx >> 8) &amp; 0xFF) / 255,
+            b: ((idx >> 16) &amp; 0xFF) / 255,
+            a: 1
+          };
+        },
+        position: function (d) { return d; }
+      },
+      arg.style === undefined ? {} : arg.style
+    );
+    if (arg.position !== undefined) {
+      style.position = arg.position;
+    }
+    if (arg.url !== undefined) {
+      style.url = arg.url;
+    }
+    if (arg.color !== undefined) {
+      style.color = arg.color;
+    }
+    m_this.style(style);
+    m_this.dataTime().modified();
+  };
+
+  return this;
+};
+
+/**
+ * Create a pixelmapFeature from an object.
+ *
+ * @see {@link geo.feature.create}
+ * @param {geo.layer} layer The layer to add the feature to
+ * @param {geo.pixelmapFeature.spec} spec The object specification
+ * @returns {geo.pixelmapFeature|null}
+ */
+pixelmapFeature.create = function (layer, spec) {
+  'use strict';
+
+  spec = spec || {};
+  spec.type = 'pixelmap';
+  return feature.create(layer, spec);
+};
+
+pixelmapFeature.capabilities = {
+  /* core feature name -- support in any manner */
+  feature: 'pixelmap'
+};
+
+inherit(pixelmapFeature, feature);
+module.exports = pixelmapFeature;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="geo.module_util.html">geo.util</a></li></ul><h3>Classes</h3><ul><li><a href="geo.annotation.html">geo.annotation</a></li><li><a href="geo.annotationLayer.html">geo.annotationLayer</a></li><li><a href="geo.camera.html">geo.camera</a></li><li><a href="geo.canvas.heatmapFeature.html">geo.canvas.heatmapFeature</a></li><li><a href="geo.canvas.object.html">geo.canvas.object</a></li><li><a href="geo.canvas.pixelmapFeature.html">geo.canvas.pixelmapFeature</a></li><li><a href="geo.canvas.quadFeature.html">geo.canvas.quadFeature</a></li><li><a href="geo.canvas.renderer.html">geo.canvas.renderer</a></li><li><a href="geo.choroplethFeature.html">geo.choroplethFeature</a></li><li><a href="geo.clock.html">geo.clock</a></li><li><a href="geo.contourFeature.html">geo.contourFeature</a></li><li><a href="geo.d3.graphFeature.html">geo.d3.graphFeature</a></li><li><a href="geo.d3.lineFeature.html">geo.d3.lineFeature</a></li><li><a href="geo.d3.object.html">geo.d3.object</a></li><li><a href="geo.d3.pathFeature.html">geo.d3.pathFeature</a></li><li><a href="geo.d3.pointFeature.html">geo.d3.pointFeature</a></li><li><a href="geo.d3.quadFeature.html">geo.d3.quadFeature</a></li><li><a href="geo.d3.renderer.html">geo.d3.renderer</a></li><li><a href="geo.d3.vectorFeature.html">geo.d3.vectorFeature</a></li><li><a href="geo.domRenderer.html">geo.domRenderer</a></li><li><a href="geo.feature.html">geo.feature</a></li><li><a href="geo.featureLayer.html">geo.featureLayer</a></li><li><a href="geo.fetchQueue.html">geo.fetchQueue</a></li><li><a href="geo.fileReader.html">geo.fileReader</a></li><li><a href="geo.geomFeature.html">geo.geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">geo.gl.choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">geo.gl.contourFeature</a></li><li><a href="geo.gl.ellipsoid.html">geo.gl.ellipsoid</a></li><li><a href="geo.gl.geomFeature.html">geo.gl.geomFeature</a></li><li><a href="geo.gl.lineFeature.html">geo.gl.lineFeature</a></li><li><a href="geo.gl.object.html">geo.gl.object</a></li><li><a href="geo.gl.pointFeature.html">geo.gl.pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">geo.gl.polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">geo.gl.quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">geo.gl.vglRenderer</a></li><li><a href="geo.greaphFeature.html">geo.greaphFeature</a></li><li><a href="geo.gui.legendWidget.html">geo.gui.legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">geo.gui.sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">geo.gui.svgWidget</a></li><li><a href="geo.gui.uiLayer.html">geo.gui.uiLayer</a></li><li><a href="geo.gui.widget.html">geo.gui.widget</a></li><li><a href="geo.heatmapFeature.html">geo.heatmapFeature</a></li><li><a href="geo.imageTile.html">geo.imageTile</a></li><li><a href="geo.jsonReader.html">geo.jsonReader</a></li><li><a href="geo.layer.html">geo.layer</a></li><li><a href="geo.lineFeature.html">geo.lineFeature</a></li><li><a href="geo.map.html">geo.map</a></li><li><a href="geo.mapInteractor.html">geo.mapInteractor</a></li><li><a href="geo.object.html">geo.object</a></li><li><a href="geo.osmLayer.html">geo.osmLayer</a></li><li><a href="geo.pathFeature.html">geo.pathFeature</a></li><li><a href="geo.pixelmapFeature.html">geo.pixelmapFeature</a></li><li><a href="geo.pointFeature.html">geo.pointFeature</a></li><li><a href="geo.polygonFeature.html">geo.polygonFeature</a></li><li><a href="geo.quadFeature.html">geo.quadFeature</a></li><li><a href="geo.renderer.html">geo.renderer</a></li><li><a href="geo.sceneObject.html">geo.sceneObject</a></li><li><a href="geo.tile.html">geo.tile</a></li><li><a href="geo.tileCache.html">geo.tileCache</a></li><li><a href="geo.tileLayer.html">geo.tileLayer</a></li><li><a href="geo.timestamp.html">geo.timestamp</a></li><li><a href="geo.transform.html">geo.transform</a></li><li><a href="geo.util.ClusterGroup.html">geo.util.ClusterGroup</a></li><li><a href="geo.vectorFeature.html">geo.vectorFeature</a></li></ul><h3>Namespaces</h3><ul><li><a href="-_anonymous_-geo.util.html"><anonymous>~geo.util</a></li><li><a href="geo.canvas.html">geo.canvas</a></li><li><a href="geo.d3.html">geo.d3</a></li><li><a href="geo.event.html">geo.event</a></li><li><a href="geo.event.annotation.html">geo.event.annotation</a></li><li><a href="geo.event.camera.html">geo.event.camera</a></li><li><a href="geo.event.feature.html">geo.event.feature</a></li><li><a href="geo.event.pixelmap.html">geo.event.pixelmap</a></li><li><a href="geo.gl.html">geo.gl</a></li><li><a href="geo.gui.html">geo.gui</a></li><li><a href="geo_event.clock.html">geo_event.clock</a></li></ul><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#__render">__render</a></li><li><a href="global.html#_addPolygonFeature">_addPolygonFeature</a></li><li><a href="global.html#_animatePan">_animatePan</a></li><li><a href="global.html#_appendChild">_appendChild</a></li><li><a href="global.html#_bindMouseHandlers">_bindMouseHandlers</a></li><li><a href="global.html#_boundingBox">_boundingBox</a></li><li><a href="global.html#_build">_build</a></li><li><a href="global.html#_checkForStroke">_checkForStroke</a></li><li><a href="global.html#_clusterData">_clusterData</a></li><li><a href="global.html#_colorize">_colorize</a></li><li><a href="global.html#_computeGradient">_computeGradient</a></li><li><a href="global.html#_computePixelmap">_computePixelmap</a></li><li><a href="global.html#_connectEvents">_connectEvents</a></li><li><a href="global.html#_coordinates">_coordinates</a></li><li><a href="global.html#_createCanvas">_createCanvas</a></li><li><a href="global.html#_createCircle">_createCircle</a></li><li><a href="global.html#_createFeature">_createFeature</a></li><li><a href="global.html#_definitions">_definitions</a></li><li><a href="global.html#_deleteFeature">_deleteFeature</a></li><li><a href="global.html#_disconnectEvents">_disconnectEvents</a></li><li><a href="global.html#_drawFeatures">_drawFeatures</a></li><li><a href="global.html#_exit">_exit</a></li><li><a href="global.html#_feature">_feature</a></li><li><a href="global.html#_featureArray">_featureArray</a></li><li><a href="global.html#_featureToPolygons">_featureToPolygons</a></li><li><a href="global.html#_forward">_forward</a></li><li><a href="global.html#_generateQuads">_generateQuads</a></li><li><a href="global.html#_generateScale">_generateScale</a></li><li><a href="global.html#_geojsonCoordinates">_geojsonCoordinates</a></li><li><a href="global.html#_geojsonFeatureToAnnotation">_geojsonFeatureToAnnotation</a></li><li><a href="global.html#_geojsonGeometryType">_geojsonGeometryType</a></li><li><a href="global.html#_geojsonStyles">_geojsonStyles</a></li><li><a href="global.html#_getArrayBuffer">_getArrayBuffer</a></li><li><a href="global.html#_getLoopData">_getLoopData</a></li><li><a href="global.html#_getMouseButton">_getMouseButton</a></li><li><a href="global.html#_getMouseModifiers">_getMouseModifiers</a></li><li><a href="global.html#_getMousePosition">_getMousePosition</a></li><li><a href="global.html#_getString">_getString</a></li><li><a href="global.html#_handleBrush">_handleBrush</a></li><li><a href="global.html#_handleBrushend">_handleBrushend</a></li><li><a href="global.html#_handleDoubleClick">_handleDoubleClick</a></li><li><a href="global.html#_handleMouseClick">_handleMouseClick</a></li><li><a href="global.html#_handleMouseclick">_handleMouseclick</a></li><li><a href="global.html#_handleMouseDown">_handleMouseDown</a></li><li><a href="global.html#_handleMousemove">_handleMousemove</a></li><li><a href="global.html#_handleMouseMove">_handleMouseMove</a></li><li><a href="global.html#_handleMouseMoveDocument">_handleMouseMoveDocument</a></li><li><a href="global.html#_handleMouseUp">_handleMouseUp</a></li><li><a href="global.html#_handleMouseUpDocument">_handleMouseUpDocument</a></li><li><a href="global.html#_handleMouseWheel">_handleMouseWheel</a></li><li><a href="global.html#_handleZoom">_handleZoom</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_inverse">_inverse</a></li><li><a href="global.html#_objectListAdd">_objectListAdd</a></li><li><a href="global.html#_objectListEnd">_objectListEnd</a></li><li><a href="global.html#_objectListGet">_objectListGet</a></li><li><a href="global.html#_objectListStart">_objectListStart</a></li><li><a href="global.html#_position">_position</a></li><li><a href="global.html#_positionToQuad">_positionToQuad</a></li><li><a href="global.html#_preparePixelmap">_preparePixelmap</a></li><li><a href="global.html#_processSelection">_processSelection</a></li><li><a href="global.html#_removeFeature">_removeFeature</a></li><li><a href="global.html#_render">_render</a></li><li><a href="global.html#_renderBinnedData">_renderBinnedData</a></li><li><a href="global.html#_renderColorQuads">_renderColorQuads</a></li><li><a href="global.html#_renderFrame">_renderFrame</a></li><li><a href="global.html#_renderImageQuads">_renderImageQuads</a></li><li><a href="global.html#_renderOnCanvas">_renderOnCanvas</a></li><li><a href="global.html#_renderPoints">_renderPoints</a></li><li><a href="global.html#_resize">_resize</a></li><li><a href="global.html#_setClickMaybe">_setClickMaybe</a></li><li><a href="global.html#_style">_style</a></li><li><a href="global.html#_unbindMouseHandlers">_unbindMouseHandlers</a></li><li><a href="global.html#_update">_update</a></li><li><a href="global.html#_updateRangeTree">_updateRangeTree</a></li><li><a href="global.html#_updateTextures">_updateTextures</a></li><li><a href="global.html#_wipePolygons">_wipePolygons</a></li><li><a href="global.html#active">active</a></li><li><a href="global.html#actors">actors</a></li><li><a href="global.html#addAction">addAction</a></li><li><a href="global.html#addAnnotation">addAnnotation</a></li><li><a href="global.html#addChild">addChild</a></li><li><a href="global.html#addFeature">addFeature</a></li><li><a href="global.html#addPromise">addPromise</a></li><li><a href="global.html#allowRotation">allowRotation</a></li><li><a href="global.html#annotationById">annotationById</a></li><li><a href="global.html#annotations">annotations</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#attribution">attribution</a></li><li><a href="global.html#bin">bin</a></li><li><a href="global.html#binned">binned</a></li><li><a href="global.html#bounds">bounds</a></li><li><a href="global.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li><li><a href="global.html#boxSearch">boxSearch</a></li><li><a href="global.html#buildTime">buildTime</a></li><li><a href="global.html#camera">camera</a></li><li><a href="global.html#cancel">cancel</a></li><li><a href="global.html#canRead">canRead</a></li><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#center">center</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#choropleth">choropleth</a></li><li><a href="global.html#clampBoundsX">clampBoundsX</a></li><li><a href="global.html#clampBoundsY">clampBoundsY</a></li><li><a href="global.html#clampZoom">clampZoom</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clock">clock</a></li><li><a href="global.html#clustering">clustering</a></li><li><a href="global.html#color">color</a></li><li><a href="global.html#computeGeodeticSurfaceNormal">computeGeodeticSurfaceNormal</a></li><li><a href="global.html#contextRenderer">contextRenderer</a></li><li><a href="global.html#contour">contour</a></li><li><a href="global.html#coordinates">coordinates</a></li><li><a href="global.html#createChoropleth">createChoropleth</a></li><li><a href="global.html#createContours">createContours</a></li><li><a href="global.html#createFeature">createFeature</a></li><li><a href="global.html#createLayer">createLayer</a></li><li><a href="global.html#createWidget">createWidget</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#dataTime">dataTime</a></li><li><a href="global.html#deleteFeature">deleteFeature</a></li><li><a href="global.html#deleteLayer">deleteLayer</a></li><li><a href="global.html#deleteWidget">deleteWidget</a></li><li><a href="global.html#delta">delta</a></li><li><a href="global.html#dependentFeatures">dependentFeatures</a></li><li><a href="global.html#destroy">destroy</a></li><li><a href="global.html#discreteZoom">discreteZoom</a></li><li><a href="global.html#displayDistance">displayDistance</a></li><li><a href="global.html#displayToGcs">displayToGcs</a></li><li><a href="global.html#displayToWorld">displayToWorld</a></li><li><a href="global.html#draw">draw</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#exit">exit</a></li><li><a href="global.html#featureGcsToDisplay">featureGcsToDisplay</a></li><li><a href="global.html#features">features</a></li><li><a href="global.html#featureVertices">featureVertices</a></li><li><a href="global.html#fileReader">fileReader</a></li><li><a href="global.html#forward">forward</a></li><li><a href="global.html#framerate">framerate</a></li><li><a href="global.html#fromLocal">fromLocal</a></li><li><a href="global.html#gcs">gcs</a></li><li><a href="global.html#gcsPosition">gcsPosition</a></li><li><a href="global.html#gcsToDisplay">gcsToDisplay</a></li><li><a href="global.html#gcsToWorld">gcsToWorld</a></li><li><a href="global.html#geo_action">geo_action</a></li><li><a href="global.html#geojson">geojson</a></li><li><a href="global.html#geometry">geometry</a></li><li><a href="global.html#geoOff">geoOff</a></li><li><a href="global.html#geoOn">geoOn</a></li><li><a href="global.html#geoTrigger">geoTrigger</a></li><li><a href="global.html#globals">globals</a></li><li><a href="global.html#hasAction">hasAction</a></li><li><a href="global.html#height">height</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#ingcs">ingcs</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#intensity">intensity</a></li><li><a href="global.html#interactor">interactor</a></li><li><a href="global.html#inverse">inverse</a></li><li><a href="global.html#isInViewport">isInViewport</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#layer">layer</a></li><li><a href="global.html#layers">layers</a></li><li><a href="global.html#line">line</a></li><li><a href="global.html#linkFeatures">linkFeatures</a></li><li><a href="global.html#links">links</a></li><li><a href="global.html#loop">loop</a></li><li><a href="global.html#map">map</a></li><li><a href="global.html#maximumRadius">maximumRadius</a></li><li><a href="global.html#maxIndex">maxIndex</a></li><li><a href="global.html#maxIntensity">maxIntensity</a></li><li><a href="global.html#minimumRadius">minimumRadius</a></li><li><a href="global.html#minIntensity">minIntensity</a></li><li><a href="global.html#mode">mode</a></li><li><a href="global.html#modified">modified</a></li><li><a href="global.html#mouse">mouse</a></li><li><a href="global.html#mouseClick">mouseClick</a></li><li><a href="global.html#mouseMove">mouseMove</a></li><li><a href="global.html#moveDown">moveDown</a></li><li><a href="global.html#moveToBottom">moveToBottom</a></li><li><a href="global.html#moveToTop">moveToTop</a></li><li><a href="global.html#moveUp">moveUp</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#node">node</a></li><li><a href="global.html#nodeFeature">nodeFeature</a></li><li><a href="global.html#nodes">nodes</a></li><li><a href="global.html#now">now</a></li><li><a href="global.html#object">object</a></li><li><a href="global.html#onIdle">onIdle</a></li><li><a href="global.html#opacity">opacity</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#origin">origin</a></li><li><a href="global.html#pan">pan</a></li><li><a href="global.html#parent">parent</a></li><li><a href="global.html#parentCanvas">parentCanvas</a></li><li><a href="global.html#pause">pause</a></li><li><a href="global.html#pointAnnotation">pointAnnotation</a></li><li><a href="global.html#pointSearch">pointSearch</a></li><li><a href="global.html#polygonAnnotation">polygonAnnotation</a></li><li><a href="global.html#position">position</a></li><li><a href="global.html#radii">radii</a></li><li><a href="global.html#radiiSquared">radiiSquared</a></li><li><a href="global.html#read">read</a></li><li><a href="global.html#rectangleAnnotation">rectangleAnnotation</a></li><li><a href="global.html#removeAction">removeAction</a></li><li><a href="global.html#removeAllAnnotations">removeAllAnnotations</a></li><li><a href="global.html#removeAnnotation">removeAnnotation</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#removeFeature">removeFeature</a></li><li><a href="global.html#renderer">renderer</a></li><li><a href="global.html#rendererName">rendererName</a></li><li><a href="global.html#reposition">reposition</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#resize">resize</a></li><li><a href="global.html#rotatedSize">rotatedSize</a></li><li><a href="global.html#rotation">rotation</a></li><li><a href="global.html#scalar">scalar</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#scaleFactor">scaleFactor</a></li><li><a href="global.html#select">select</a></li><li><a href="global.html#selectionAPI">selectionAPI</a></li><li><a href="global.html#simulateEvent">simulateEvent</a></li><li><a href="global.html#size">size</a></li><li><a href="global.html#source">source</a></li><li><a href="global.html#springBack">springBack</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#state">state</a></li><li><a href="global.html#step">step</a></li><li><a href="global.html#stepBackward">stepBackward</a></li><li><a href="global.html#stepForward">stepForward</a></li><li><a href="global.html#sticky">sticky</a></li><li><a href="global.html#style">style</a></li><li><a href="global.html#target">target</a></li><li><a href="global.html#toLocal">toLocal</a></li><li><a href="global.html#transformGeometry">transformGeometry</a></li><li><a href="global.html#transformPoint">transformPoint</a></li><li><a href="global.html#transition">transition</a></li><li><a href="global.html#transitionCancel">transitionCancel</a></li><li><a href="global.html#type">type</a></li><li><a href="global.html#unitsPerPixel">unitsPerPixel</a></li><li><a href="global.html#updateAttribution">updateAttribution</a></li><li><a href="global.html#updateDelay">updateDelay</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#url">url</a></li><li><a href="global.html#validateAttribute">validateAttribute</a></li><li><a href="global.html#verticesPerFeature">verticesPerFeature</a></li><li><a href="global.html#visible">visible</a></li><li><a href="global.html#width">width</a></li><li><a href="global.html#worldToDisplay">worldToDisplay</a></li><li><a href="global.html#worldToGcs">worldToGcs</a></li><li><a href="global.html#zIndex">zIndex</a></li><li><a href="global.html#zoom">zoom</a></li><li><a href="global.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li><li><a href="global.html#zoomRange">zoomRange</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Fri Oct 28 2016 13:12:58 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

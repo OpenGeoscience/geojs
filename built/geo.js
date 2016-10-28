@@ -102,37 +102,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	  geo_action: __webpack_require__(208),
 	  geomFeature: __webpack_require__(220),
 	  graphFeature: __webpack_require__(221),
-	  imageTile: __webpack_require__(222),
-	  jsonReader: __webpack_require__(224),
+	  heatmapFeature: __webpack_require__(222),
+	  imageTile: __webpack_require__(223),
+	  jsonReader: __webpack_require__(225),
 	  layer: __webpack_require__(201),
 	  lineFeature: __webpack_require__(196),
-	  map: __webpack_require__(225),
+	  map: __webpack_require__(226),
 	  mapInteractor: __webpack_require__(210),
 	  object: __webpack_require__(199),
-	  osmLayer: __webpack_require__(227),
-	  pathFeature: __webpack_require__(230),
+	  osmLayer: __webpack_require__(228),
+	  pathFeature: __webpack_require__(231),
 	  pointFeature: __webpack_require__(203),
 	  polygonFeature: __webpack_require__(205),
 	  quadFeature: __webpack_require__(211),
-	  heatmapFeature: __webpack_require__(231),
+	  pixelmapFeature: __webpack_require__(232),
 	  renderer: __webpack_require__(217),
 	  sceneObject: __webpack_require__(198),
-	  tile: __webpack_require__(223),
-	  tileCache: __webpack_require__(229),
-	  tileLayer: __webpack_require__(228),
+	  tile: __webpack_require__(224),
+	  tileCache: __webpack_require__(230),
+	  tileLayer: __webpack_require__(229),
 	  timestamp: __webpack_require__(200),
 	  transform: __webpack_require__(6),
-	  vectorFeature: __webpack_require__(232),
+	  vectorFeature: __webpack_require__(233),
 	  inherit: __webpack_require__(4),
-	  version: __webpack_require__(233),
-	  sha: __webpack_require__(234),
+	  version: __webpack_require__(234),
+	  sha: __webpack_require__(235),
 
 	  util: __webpack_require__(76),
 	  jQuery: $,
-	  d3: __webpack_require__(235),
-	  gl: __webpack_require__(247),
-	  canvas: __webpack_require__(260),
-	  gui: __webpack_require__(266)
+	  d3: __webpack_require__(236),
+	  gl: __webpack_require__(248),
+	  canvas: __webpack_require__(261),
+	  gui: __webpack_require__(268)
 	}, __webpack_require__(195));
 
 	if (window && !window.$) {
@@ -10005,7 +10006,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-
 /***/ },
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
@@ -10702,7 +10702,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * May specify:
 	 *   style.
 	 *     radius, fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
-	 *     strokeOpacity
+	 *     strokeOpacity, scaled
+	 *
+	 * If scaled is false, the point is not scaled with zoom level.  If it is true,
+	 * the radius is based on the zoom level at first instantiation.  Otherwise, if
+	 * it is a number, the radius is used at that zoom level.
 	 */
 	/////////////////////////////////////////////////////////////////////////////
 	var pointAnnotation = function (args) {
@@ -10710,12 +10714,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!(this instanceof pointAnnotation)) {
 	    return new pointAnnotation(args);
 	  }
+	  var m_this = this;
+
 	  args = $.extend(true, {}, {
 	    style: {
 	      fill: true,
 	      fillColor: {r: 0, g: 1, b: 0},
 	      fillOpacity: 0.25,
 	      radius: 10,
+	      scaled: false,
 	      stroke: true,
 	      strokeColor: {r: 0, g: 0, b: 0},
 	      strokeOpacity: 1,
@@ -10734,17 +10741,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.features = function () {
 	    var opt = this.options(),
 	        state = this.state(),
-	        features;
+	        features, style, scaleOnZoom;
 	    switch (state) {
 	      case annotationState.create:
 	        features = [];
 	        break;
 	      default:
+	        style = opt.style;
+	        if (opt.style.scaled || opt.style.scaled === 0) {
+	          if (opt.style.scaled === true) {
+	            opt.style.scaled = this.layer().map().zoom();
+	          }
+	          style = $.extend({}, style, {
+	            radius: function () {
+	              var radius = opt.style.radius,
+	                  zoom = m_this.layer().map().zoom();
+	              if (util.isFunction(radius)) {
+	                radius = radius.apply(this, arguments);
+	              }
+	              radius *= Math.pow(2, zoom - opt.style.scaled);
+	              return radius;
+	            }
+	          });
+	          scaleOnZoom = true;
+	        }
 	        features = [{
 	          point: {
 	            x: opt.position.x,
 	            y: opt.position.y,
-	            style: opt.style
+	            style: style,
+	            scaleOnZoom: scaleOnZoom
 	          }
 	        }];
 	        break;
@@ -10798,7 +10824,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {array} a list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
-	    return ['fill', 'fillColor', 'fillOpacity', 'radius', 'stroke',
+	    return ['fill', 'fillColor', 'fillOpacity', 'radius', 'scaled', 'stroke',
 	            'strokeColor', 'strokeOpacity', 'strokeWidth'];
 	  };
 
@@ -11234,6 +11260,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  mouseclick: 'geo_feature_mouseclick',
 	  brushend:   'geo_feature_brushend',
 	  brush:      'geo_feature_brush'
+	};
+
+	////////////////////////////////////////////////////////////////////////////
+	/**
+	 * These events are triggered by the pixelmap feature.
+	 * @namespace geo.event.pixelmap
+	 */
+	////////////////////////////////////////////////////////////////////////////
+	geo_event.pixelmap = {
+	  /* The image associated with the pixel map url has been prepared and rendered
+	   * once. */
+	  prepared: 'geo_pixelmap_prepared'
 	};
 
 	////////////////////////////////////////////////////////////////////////////
@@ -17815,6 +17853,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 
 	    /**
+	     * Return a point in the basis of the triangle.  If the point is located on
+	     * a vertex of the triangle, it will be at vert0: (0, 0), vert1: (1, 0),
+	     * vert2: (0, 1).  If it is within the triangle, its coordinates will be
+	     * 0 <= x <= 1, 0 <= y <= 1, x + y <= 1.
+	     *
+	     * @param {object} point: the point to convert.
+	     * @param {object} vert0: vertex 0 of the triangle
+	     * @param {object} vert1: vertex 1 (x direction) of the triangle
+	     * @param {object} vert2: vertex 2 (y direction) of the triangle
+	     * @returns {object} basisPoint: the point in the triangle basis, or
+	     *    undefined if the triangle is degenerate.
+	     */
+	    pointTo2DTriangleBasis: function (point, vert0, vert1, vert2) {
+	      var a = vert1.x - vert0.x,
+	          b = vert2.x - vert0.x,
+	          c = vert1.y - vert0.y,
+	          d = vert2.y - vert0.y,
+	          x = point.x - vert0.x,
+	          y = point.y - vert0.y,
+	          det = a * d - b * c;
+	      if (det) {
+	        return {x: (x * d - y * b) / det, y: (x * -c + y * a) / det};
+	      }
+	    },
+
+	    /**
+	     * Returns true if the argument is an HTML Image element that is fully
+	     * loaded.
+	     *
+	     * @param {object} img: an object that might be an HTML Image element.
+	     * @param {boolean} [allowFailedImage]: if true, an image element that has
+	     *     a source and has failed to load is also considered 'ready' in the
+	     *     sense that it isn't expected to change to a better state.
+	     * @returns {boolean} true if this is an image that is ready.
+	     */
+	    isReadyImage: function (img, allowFailedImage) {
+	      if (img instanceof Image && img.complete && img.src) {
+	        if ((img.naturalWidth && img.naturalHeight) || allowFailedImage) {
+	          return true;
+	        }
+	      }
+	      return false;
+	    },
+
+	    /**
 	     * Returns true if the argument is a function.
 	     */
 	    isFunction: function (f) {
@@ -17847,24 +17930,135 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return s;
 	    },
 
+	    /* This is a list of regex and processing functions for color conversions
+	     * to rgb objects.  Each entry contains:
+	     *   name: a name of the color conversion.
+	     *   regex: a regex that, if it matches the color string, will cause the
+	     *      process function to be invoked.
+	     *   process: a function that takes (color, match) with the original color
+	     *      string and the results of matching the regex.  It outputs an rgb
+	     *      color object or the original color string if there is still a
+	     *      parsing failure.
+	     * In general, these conversions are somewhat more forgiving than the css
+	     * specification (see https://drafts.csswg.org/css-color/) in that
+	     * percentages may be mixed with numbers, and that floating point values
+	     * are accepted for all numbers.  Commas are optional.  As per the latest
+	     * draft standard, rgb and rgba are aliases of each other, as are hsl and
+	     * hsla.
+	     */
+	    cssColorConversions: [{
+	      name: 'rgb',
+	      regex: new RegExp(
+	        '^\\s*rgba?' +
+	        '\\(\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
+	        ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
+	        ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
+	        '(,?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*)?' +
+	        '\\)\\s*$'),
+	      process: function (color, match) {
+	        color = {
+	          r: Math.min(1, Math.max(0, +match[1] / (match[2] ? 100 : 255))),
+	          g: Math.min(1, Math.max(0, +match[3] / (match[4] ? 100 : 255))),
+	          b: Math.min(1, Math.max(0, +match[5] / (match[6] ? 100 : 255)))
+	        };
+	        if (match[7]) {
+	          color.a = Math.min(1, Math.max(0, +match[8] / (match[9] ? 100 : 1)));
+	        }
+	        return color;
+	      }
+	    }, {
+	      name: 'hsl',
+	      regex: new RegExp(
+	        '^\\s*hsla?' +
+	        '\\(\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(deg)?\\s*' +
+	        ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*%\\s*' +
+	        ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*%\\s*' +
+	        '(,?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*)?' +
+	        '\\)\\s*$'),
+	      process: function (color, match) {
+	        /* Conversion from https://www.w3.org/TR/2011/REC-css3-color-20110607
+	         */
+	        var hue_to_rgb = function (m1, m2, h) {
+	          h = h - Math.floor(h);
+	          if (h * 6 < 1) {
+	            return m1 + (m2 - m1) * h * 6;
+	          }
+	          if (h * 6 < 3) {
+	            return m2;
+	          }
+	          if (h * 6 < 4) {
+	            return m1 + (m2 - m1) * (2 / 3 - h) * 6;
+	          }
+	          return m1;
+	        };
+
+	        var h = +match[1] / 360,
+	            s = Math.min(1, Math.max(0, +match[3] / 100)),
+	            l = Math.min(1, Math.max(0, +match[4] / 100)),
+	            m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s,
+	            m1 = l * 2 - m2;
+	        color = {
+	          r: hue_to_rgb(m1, m2, h + 1 / 3),
+	          g: hue_to_rgb(m1, m2, h),
+	          b: hue_to_rgb(m1, m2, h - 1 / 3)
+	        };
+	        if (match[5]) {
+	          color.a = Math.min(1, Math.max(0, +match[6] / (match[7] ? 100 : 1)));
+	        }
+	        return color;
+	      }
+	    }],
+
 	    /**
-	     * Convert a color from hex value or css name to rgb objects
+	     * Convert a color to a standard rgb object.  Allowed inputs:
+	     *   - rgb object with optional 'a' (alpha) value.
+	     *   - css color name
+	     *   - #rrggbb, #rrggbbaa, #rgb, #rgba hexadecimal colors
+	     *   - rgb(), rgba(), hsl(), and hsla() css colors
+	     *   - transparent
+	     * The output object always contains r, g, b on a scale of [0-1].  If an
+	     * alpha value is specified, the output will also contain an 'a' value on a
+	     * scale of [0-1].  Objects already in rgb format are not checked to make
+	     * sure that all parameters are in the range of [0-1], but string inputs
+	     * are so validated.
+	     *
+	     * @param {object|string} color: one of the various input formats.
+	     * @returns {object} an rgb color object, possibly with an 'a' value.  If
+	     *    the input cannot be converted to a valid color, the input value is
+	     *    returned.
 	     */
 	    convertColor: function (color) {
 	      if (color.r !== undefined && color.g !== undefined &&
 	          color.b !== undefined) {
 	        return color;
 	      }
+	      var opacity;
 	      if (typeof color === 'string') {
 	        if (geo.util.cssColors.hasOwnProperty(color)) {
 	          color = geo.util.cssColors[color];
 	        } else if (color.charAt(0) === '#') {
-	          if (color.length === 4) {
-	            /* interpret values of the form #rgb as #rrggbb */
-	            color = parseInt(color.slice(1), 16);
+	          if (color.length === 4 || color.length === 5) {
+	            /* interpret values of the form #rgb as #rrggbb and #rgba as
+	             * #rrggbbaa */
+	            if (color.length === 5) {
+	              opacity = parseInt(color.slice(4), 16) / 0xf;
+	            }
+	            color = parseInt(color.slice(1, 4), 16);
 	            color = (color & 0xf00) * 0x1100 + (color & 0xf0) * 0x110 + (color & 0xf) * 0x11;
-	          } else {
-	            color = parseInt(color.slice(1), 16);
+	          } else if (color.length === 7 || color.length === 9) {
+	            if (color.length === 9) {
+	              opacity = parseInt(color.slice(7), 16) / 0xff;
+	            }
+	            color = parseInt(color.slice(1, 7), 16);
+	          }
+	        } else if (color === 'transparent') {
+	          opacity = color = 0;
+	        } else if (color.indexOf('(') >= 0) {
+	          for (var idx = 0; idx < geo.util.cssColorConversions.length; idx += 1) {
+	            var match = geo.util.cssColorConversions[idx].regex.exec(color);
+	            if (match) {
+	              return geo.util.cssColorConversions[idx].process(color, match);
+	            }
 	          }
 	        }
 	      }
@@ -17875,20 +18069,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	          b: ((color & 0xff)) / 255
 	        };
 	      }
+	      if (opacity !== undefined) {
+	        color.a = opacity;
+	      }
 	      return color;
 	    },
 
 	    /**
-	     * Convert a color to a six digit hex value prefixed with #.
+	     * Convert a color to a six or eight digit hex value prefixed with #.
 	     */
-	    convertColorToHex: function (color) {
-	      var value = geo.util.convertColor(color);
-	      if (!value.r && !value.g && !value.b) {
+	    convertColorToHex: function (color, allowAlpha) {
+	      var rgb = geo.util.convertColor(color), value;
+	      if (!rgb.r && !rgb.g && !rgb.b) {
 	        value = '#000000';
 	      } else {
-	        value = '#' + ((1 << 24) + (Math.round(value.r * 255) << 16) +
-	                       (Math.round(value.g * 255) << 8) +
-	                        Math.round(value.b * 255)).toString(16).slice(1);
+	        value = '#' + ((1 << 24) + (Math.round(rgb.r * 255) << 16) +
+	                       (Math.round(rgb.g * 255) << 8) +
+	                        Math.round(rgb.b * 255)).toString(16).slice(1);
+	      }
+	      if (rgb.a !== undefined && allowAlpha) {
+	        value += (256 + Math.round(rgb.a * 255)).toString(16).slice(1);
 	      }
 	      return value;
 	    },
@@ -18188,6 +18388,80 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 
 	    /**
+	     * Return recommended defaults for map parameters and osm or tile layer
+	     * paramaters where the expected intent is to use the map in pixel
+	     * coordinates (upper left is (0, 0), lower right is (width, height).  The
+	     * returned objects can be modified or extended.  For instance,
+	     *   var results = pixelCoordinateParams('#map', 10000, 9000);
+	     *   geo.map($.extend(results.map, {clampZoom: false}));
+	     *
+	     * @param {string} [node] DOM selector for the map container
+	     * @param {number} width width of the whole map contents in pixels
+	     * @param {number} height height of the whole map contents in pixels
+	     * @param {number} tileWidth if an osm or tile layer is going to be used,
+	     *     the width of a tile.
+	     * @param {number} tileHeight if an osm or tile layer is going to be used,
+	     *     the height of a tile.
+	     */
+	    pixelCoordinateParams: function (node, width, height, tileWidth, tileHeight) {
+	      var mapW, mapH, tiled;
+	      if (node) {
+	        node = $(node);
+	        mapW = node.innerWidth();
+	        mapH = node.innerHeight();
+	      }
+	      tileWidth = tileWidth || width;
+	      tileHeight = tileHeight || height;
+	      tiled = (tileWidth !== width || tileHeight !== height);
+	      var minLevel = Math.min(0, Math.floor(Math.log(Math.min(
+	            (mapW || tileWidth) / tileWidth,
+	            (mapH || tileHeight) / tileHeight)) / Math.log(2))),
+	          maxLevel = Math.ceil(Math.log(Math.max(
+	            width / tileWidth,
+	            height / tileHeight)) / Math.log(2));
+	      var mapParams = {
+	        node: node,
+	        ingcs: '+proj=longlat +axis=esu',
+	        gcs: '+proj=longlat +axis=enu',
+	        maxBounds: {left: 0, top: 0, right: width, bottom: height},
+	        center: {x: width / 2, y: height / 2},
+	        min: minLevel,
+	        max: maxLevel,
+	        zoom: minLevel,
+	        clampBoundsX: true,
+	        clampBoundsY: true,
+	        clampZoom: true
+	      };
+	      var layerParams = {
+	        maxLevel: maxLevel,
+	        wrapX: false,
+	        wrapY: false,
+	        tileOffset: function () {
+	          return {x: 0, y: 0};
+	        },
+	        attribution: '',
+	        tileWidth: tileWidth,
+	        tileHeight: tileHeight,
+	        tileRounding: Math.ceil,
+	        tilesAtZoom: tiled ? function (level) {
+	          var scale = Math.pow(2, maxLevel - level);
+	          return {
+	            x: Math.ceil(width / tileWidth / scale),
+	            y: Math.ceil(height / tileHeight / scale)
+	          };
+	        } : undefined,
+	        tilesMaxBounds: tiled ? function (level) {
+	          var scale = Math.pow(2, maxLevel - level);
+	          return {
+	            x: Math.floor(width / scale),
+	            y: Math.floor(height / scale)
+	          };
+	        } : undefined
+	      };
+	      return {map: mapParams, layer: layerParams};
+	    },
+
+	    /**
 	     * Report on one or all of the tracked timings.
 	     *
 	     * @param {string} name name to report on, or undefined to report all.
@@ -18455,6 +18729,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    plum: 0xdda0dd,
 	    powderblue: 0xb0e0e6,
 	    purple: 0x800080,
+	    rebeccapurple: 0x663399,
 	    red: 0xff0000,
 	    rosybrown: 0xbc8f8f,
 	    royalblue: 0x4169e1,
@@ -35595,7 +35870,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *      capabilities in multiple categories (renderers), then the feature
 	 *      should expose a simple dictionary of supported and unsupported
 	 *      features.  For instance, the quad feature has color quads, image quads,
-	 *      and image quads that support full transformations.  The capabailities
+	 *      and image quads that support full transformations.  The capabilities
 	 *      should be defined in the base feature in a capabilities object so that
 	 *      they can be referenced by that rather than an explicit string.
 	 * @returns {object} if this feature replaces an existing one, this was the
@@ -35768,7 +36043,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *      annotation.  Each key is a feature that is used.  If the value is true,
 	 *      the that feature is always needed.  If a list, then it is the set of
 	 *      annotation states for which that feature is required.  These can be
-	 *      used to pick an pparopriate renderer when creating an annotation layer.
+	 *      used to pick an appropriate renderer when creating an annotation layer.
 	 * @returns {object} if this annotation replaces an existing one, this was the
 	 *      value that was replaced.  In this case, a warning is issued.
 	 */
@@ -35821,7 +36096,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *   used with that annotation.  For example, ['polygon', 'rectangle'] lists
 	 *   features required to show those annotations in any mode,  whereas
 	 *   {polygon: [annotationState.done], rectangle: [annotationState.done]} only
-	 *   lists features thatre are needed to show the completed annotations.
+	 *   lists features that are needed to show the completed annotations.
 	 * @return {array} a list of features needed for the specified annotations.
 	 *   There may be duplicates in the list.
 	 */
@@ -35854,7 +36129,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Check if there is a renderer that is supported and supports a list of
 	 * annotations.  If not, display a warning.  This generates a list of required
-	 * features, then picks the first renderer that supports all of thse features.
+	 * features, then picks the first renderer that supports all of these features.
 	 *
 	 * @param {array|object|undefined} annotationList A list of annotations that
 	 *   will be used with this renderer.  Instead of a list, if this is an object,
@@ -36199,6 +36474,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_dataTime = timestamp(),
 	      m_buildTime = timestamp(),
 	      m_updateTime = timestamp(),
+	      m_dependentFeatures = [],
 	      m_selectedFeatures = [];
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -36279,6 +36555,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
+	   * Returns an array of line indices that are contained in the given box.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.boxSearch = function (lowerLeft, upperRight, opts) {
+	    // base class method does nothing
+	    return [];
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
 	   * Private mousemove handler
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
@@ -36286,8 +36572,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var mouse = m_this.layer().map().interactor().mouse(),
 	        data = m_this.data(),
 	        over = m_this.pointSearch(mouse.geo),
-	        newFeatures = [], oldFeatures = [], lastTop = -1, top = -1;
+	        newFeatures = [], oldFeatures = [], lastTop = -1, top = -1, extra;
 
+	    // exit if we have no old or new found entries
+	    if (!m_selectedFeatures.length && !over.index.length) {
+	      return;
+	    }
+	    extra = over.extra || {};
 	    // Get the index of the element that was previously on top
 	    if (m_selectedFeatures.length) {
 	      lastTop = m_selectedFeatures[m_selectedFeatures.length - 1];
@@ -36307,6 +36598,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_this.geoTrigger(geo_event.feature.mouseover, {
 	        data: data[i],
 	        index: i,
+	        extra: extra[i],
 	        mouse: mouse,
 	        eventID: feature.eventID,
 	        top: idx === newFeatures.length - 1
@@ -36331,6 +36623,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_this.geoTrigger(geo_event.feature.mousemove, {
 	        data: data[i],
 	        index: i,
+	        extra: extra[i],
 	        mouse: mouse,
 	        eventID: feature.eventID,
 	        top: idx === over.index.length - 1
@@ -36359,6 +36652,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        m_this.geoTrigger(geo_event.feature.mouseon, {
 	          data: data[top],
 	          index: top,
+	          extra: extra[top],
 	          mouse: mouse
 	        }, true);
 	      }
@@ -36370,16 +36664,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Private mouseclick handler
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
-	  this._handleMouseclick = function () {
+	  this._handleMouseclick = function (evt) {
 	    var mouse = m_this.layer().map().interactor().mouse(),
 	        data = m_this.data(),
-	        over = m_this.pointSearch(mouse.geo);
+	        over = m_this.pointSearch(mouse.geo),
+	        extra = over.extra || {};
 
+	    mouse.buttonsDown = evt.buttonsDown;
 	    feature.eventID += 1;
 	    over.index.forEach(function (i, idx) {
 	      m_this.geoTrigger(geo_event.feature.mouseclick, {
 	        data: data[i],
 	        index: i,
+	        extra: extra[i],
 	        mouse: mouse,
 	        eventID: feature.eventID,
 	        top: idx === over.index.length - 1
@@ -36554,7 +36851,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.visible = function (val) {
 	    if (val === undefined) {
 	      return m_visible;
-	    } else {
+	    }
+	    if (m_visible !== val) {
 	      m_visible = val;
 	      m_this.modified();
 
@@ -36564,9 +36862,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } else {
 	        m_this._unbindMouseHandlers();
 	      }
-
-	      return m_this;
+	      for (var i = 0; i < m_dependentFeatures.length; i += 1) {
+	        m_dependentFeatures[i].visible(val);
+	      }
 	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set a list of dependent features.  Dependent features have their
+	   * visibility changed at the same time as the feature.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.dependentFeatures = function (arg) {
+	    if (arg === undefined) {
+	      return m_dependentFeatures.slice();
+	    }
+	    m_dependentFeatures = arg.slice();
+	    return m_this;
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -36668,7 +36982,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    if (!m_layer) {
-	      throw 'Feature requires a valid layer';
+	      throw new Error('Feature requires a valid layer');
 	    }
 	    m_style = $.extend({},
 	                {'opacity': 1.0}, arg.style === undefined ? {} :
@@ -36707,7 +37021,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this._unbindMouseHandlers();
 	    m_selectedFeatures = [];
 	    m_style = {};
-	    arg = {};
 	    s_exit();
 	  };
 
@@ -36746,8 +37059,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	feature.create = function (layer, spec) {
 	  'use strict';
 
-	  var type = spec.type;
-
 	  // Check arguments
 	  if (!(layer instanceof __webpack_require__(201))) {
 	    console.warn('Invalid layer');
@@ -36757,13 +37068,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    console.warn('Invalid spec');
 	    return null;
 	  }
+	  var type = spec.type;
 	  var feature = layer.createFeature(type);
 	  if (!feature) {
 	    console.warn('Could not create feature type "' + type + '"');
 	    return null;
 	  }
 
-	  spec = spec || {};
 	  spec.data = spec.data || [];
 	  return feature.style(spec);
 	};
@@ -39801,6 +40112,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (m_lineFeature && m_this.layer()) {
 	        m_this.layer().deleteFeature(m_lineFeature);
 	        m_lineFeature = null;
+	        m_this.dependentFeatures([]);
 	      }
 	      return;
 	    }
@@ -39808,8 +40120,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return;
 	    }
 	    if (!m_lineFeature) {
-	      m_lineFeature = m_this.layer().createFeature(
-	        'line', {selectionAPI: false, gcs: this.gcs()});
+	      m_lineFeature = m_this.layer().createFeature('line', {
+	        selectionAPI: false,
+	        gcs: m_this.gcs(),
+	        visible: m_this.visible()
+	      });
+	      m_this.dependentFeatures([m_lineFeature]);
 	    }
 	    var polyStyle = m_this.style();
 	    m_lineFeature.style({
@@ -39886,6 +40202,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (m_lineFeature && m_this.layer()) {
 	      m_this.layer().deleteFeature(m_lineFeature);
 	      m_lineFeature = null;
+	      m_this.dependentFeatures([]);
 	    }
 	    s_exit();
 	  };
@@ -40021,6 +40338,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'fillColor': {dataType: 'color', keys: ['fillColor', 'fill-color', 'marker-color', 'fill']},
 	    'fillOpacity': {dataType: 'opacity', keys: ['fillOpacity', 'fill-opacity']},
 	    'radius': {dataType: 'positive', keys: ['radius']},
+	    'scaled': {dataType: 'booleanOrNumber', keys: ['scaled']},
 	    'stroke': {dataType: 'boolean', keys: ['stroke']},
 	    'strokeColor': {dataType: 'color', keys: ['strokeColor', 'stroke-color', 'stroke']},
 	    'strokeOpacity': {dataType: 'opacity', keys: ['strokeOpacity', 'stroke-opacity']},
@@ -40510,8 +40828,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *     object with r, g, b properties in the range of [0-1].
 	   *   opacity: a floating point number in the range [0, 1].
 	   *   positive: a floating point number greater than zero.
-	   *   boolean: the string 'false' and falsy values are false, all else is
-	   *     true.  null and undefined are still considered invalid values.
+	   *   boolean: a string whose lowercase value is 'false', 'off', or 'no', and
+	   *     falsy values are false, all else is true.  null and undefined are
+	   *     still considered invalid values.
+	   *   booleanOrNumber: a string whose lowercase value is 'false', 'off', no',
+	   *     'true', 'on', or 'yes', falsy values that aren't 0, and true are
+	   *     handled as booleans.  Otherwise, a floating point number that isn't
+	   *     NaN or an infinity.
 	   * @param {number|string|object|boolean} value: the value to validate.
 	   * @param {string} dataType: the data type for validation.
 	   * @returns {number|string|object|boolean|undefined} the sanitized value or
@@ -40522,8 +40845,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return;
 	    }
 	    switch (dataType) {
+	      case 'booleanOrNumber':
+	        if ((!value && value !== 0) || ['true', 'false', 'off', 'on', 'no', 'yes'].indexOf(('' + value).toLowerCase()) >= 0) {
+	          value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
+	        } else {
+	          value = +value;
+	          if (isNaN(value) || !isFinite(value)) {
+	            return;
+	          }
+	        }
+	        break;
 	      case 'boolean':
-	        value = !!value && value !== 'false';
+	        value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
 	        break;
 	      case 'color':
 	        value = util.convertColor(value);
@@ -40539,7 +40872,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        break;
 	      case 'positive':
 	        value = +value;
-	        if (isNaN(value) || value <= 0) {
+	        if (isNaN(value) || !isFinite(value) || value <= 0) {
 	          return;
 	        }
 	        break;
@@ -40563,6 +40896,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      $.each(m_features, function (idx, featureLevel) {
 	        $.each(featureLevel, function (type, feature) {
 	          feature.data = [];
+	          delete feature.feature.scaleOnZoom;
 	        });
 	      });
 	      $.each(m_annotations, function (annotation_idx, annotation) {
@@ -40574,11 +40908,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	          $.each(featureLevel, function (type, featureSpec) {
 	            /* Create features as needed */
 	            if (!m_features[idx][type]) {
-	              try {
-	                var feature = m_this.createFeature(type, {
-	                  gcs: m_this.map().gcs()
-	                });
-	              } catch (err) {
+	              var feature = m_this.createFeature(type, {
+	                gcs: m_this.map().gcs()
+	              });
+	              if (!feature) {
 	                /* We can't create the desired feature, porbably because of the
 	                 * selected renderer.  Issue one warning only. */
 	                var key = 'error_feature_' + type;
@@ -40627,6 +40960,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            /* Collect the data for each feature */
 	            m_features[idx][type].data.push(featureSpec.data || featureSpec);
+	            if (featureSpec.scaleOnZoom) {
+	              m_features[idx][type].feature.scaleOnZoom = true;
+	            }
 	          });
 	        });
 	      });
@@ -40639,6 +40975,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_buildTime.modified();
 	    }
 	    s_update.call(m_this, request);
+	  };
+
+	  /**
+	   * Check if any features are marked that they need to be updated when a zoom
+	   * occurs.  If so, mark that feature as modified.
+	   */
+	  this._handleZoom = function () {
+	    var i, features = m_this.features();
+	    for (i = 0; i < features.length; i += 1) {
+	      if (features[i].scaleOnZoom) {
+	        features[i].modified();
+	      }
+	    }
 	  };
 
 	  ///////////////////////////////////////////////////////////////////////////
@@ -40657,6 +41006,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    m_this.geoOn(geo_event.mouseclick, m_this._handleMouseClick);
 	    m_this.geoOn(geo_event.mousemove, m_this._handleMouseMove);
+
+	    m_this.geoOn(geo_event.zoom, m_this._handleZoom);
 
 	    return m_this;
 	  };
@@ -40724,6 +41075,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Create feature give a name
 	   *
+	   * @param {string} featureName the name of the feature to create
+	   * @param {object} arg properties for the new feature
 	   * @returns {geo.Feature} Will return a new feature
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
@@ -40731,40 +41084,66 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var newFeature = registry.createFeature(
 	      featureName, m_this, m_this.renderer(), arg);
-
-	    m_this.addChild(newFeature);
-	    m_features.push(newFeature);
-	    m_this.features(m_features);
-	    m_this.modified();
+	    if (newFeature) {
+	      this.addFeature(newFeature);
+	    }
 	    return newFeature;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Add a feature to the layer if it is not already present.
+	   *
+	   * @param {object} feature the feature to add.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.addFeature = function (feature) {
+	    /* try to remove the feature first so that we don't have two copies */
+	    this.removeFeature(feature);
+	    m_this.addChild(feature);
+	    m_features.push(feature);
+	    m_this.dataTime().modified();
+	    m_this.modified();
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Remove feature without destroying it
+	   *
+	   * @param {object} feature the feature to remove.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.removeFeature = function (feature) {
+	    var pos;
+
+	    pos = m_features.indexOf(feature);
+	    if (pos >= 0) {
+	      m_features.splice(pos, 1);
+	      m_this.removeChild(feature);
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+
+	    return m_this;
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Delete feature
 	   *
+	   * @param {object} feature the feature to delete.
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.deleteFeature = function (feature) {
-	    var i;
 
-	    for (i = 0; i < m_features.length; i += 1) {
-	      if (m_features[i] === feature) {
-	        m_features[i]._exit();
-	        m_this.dataTime().modified();
-	        m_this.modified();
+	    // call _exit first, as destroying the feature affect other features
+	    if (feature) {
+	      if (m_features.indexOf(feature) >= 0) {
+	        feature._exit();
 	      }
+	      this.removeFeature(feature);
 	    }
-
-	    // Loop through a second to time actually remove
-	    // the given feature from the array because the
-	    // `_exit` call above may mutate it.
-	    for (i = 0; i < m_features.length; i += 1) {
-	      if (m_features[i] === feature) {
-	        m_features.splice(i, 1);
-	      }
-	    }
-	    m_this.removeChild(feature);
 
 	    return m_this;
 	  };
@@ -40778,11 +41157,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.features = function (val) {
 	    if (val === undefined) {
-	      return m_features;
+	      return m_features.slice();
 	    } else {
-	      m_features = val.slice(0);
-	      m_this.dataTime().modified();
-	      m_this.modified();
+	      // delete existing features that aren't in the new array.  Since features
+	      // can affect other features during their exit process, make sure each
+	      // feature still exists as we work through the list.
+	      var existing = m_features.slice();
+	      var i;
+	      for (i = 0; i < existing.length; i += 1) {
+	        if (val.indexOf(existing[i]) < 0 && m_features.indexOf(existing[i]) >= 0) {
+	          this.deleteFeature(existing[i]);
+	        }
+	      }
+	      for (i = 0; i < val.length; i += 1) {
+	        this.addFeature(val[i]);
+	      }
 	      return m_this;
 	    }
 	  };
@@ -40850,11 +41239,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    /// Call base class update
 	    s_update.call(m_this, request);
 
-	    if (m_features && m_features.length === 0) {
-	      console.log('[info] No valid data source found.');
-	      return;
-	    }
-
 	    if (m_this.dataTime().getMTime() > m_this.updateTime().getMTime()) {
 	      for (i = 0; i < m_features.length; i += 1) {
 	        m_features[i].renderer(m_this.renderer());
@@ -40903,21 +41287,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.clear = function () {
-	    var i;
-
-	    if (!m_features.length) {
-	      return m_this;
+	    while (m_features.length) {
+	      m_this.deleteFeature(m_features[0]);
 	    }
-
-	    for (i = 0; i < m_features.length; i += 1) {
-	      m_features[i]._exit();
-	      m_this.removeChild(m_features[i]);
-	    }
-
-	    m_this.dataTime().modified();
-	    m_this.modified();
-	    m_features = [];
-
 	    return m_this;
 	  };
 
@@ -42096,38 +42468,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	      actions: [{
 	        action: geo_action.pan,
 	        input: 'left',
-	        modifiers: {shift: false, ctrl: false}
+	        modifiers: {shift: false, ctrl: false},
+	        owner: 'geo.mapInteractor',
+	        name: 'button pan'
 	      }, {
 	        action: geo_action.zoom,
 	        input: 'right',
-	        modifiers: {shift: false, ctrl: false}
+	        modifiers: {shift: false, ctrl: false},
+	        owner: 'geo.mapInteractor',
+	        name: 'button zoom'
 	      }, {
 	        action: geo_action.zoom,
 	        input: 'wheel',
-	        modifiers: {shift: false, ctrl: false}
+	        modifiers: {shift: false, ctrl: false},
+	        owner: 'geo.mapInteractor',
+	        name: 'wheel zoom'
 	      }, {
 	        action: geo_action.rotate,
 	        input: 'left',
-	        modifiers: {shift: false, ctrl: true}
+	        modifiers: {shift: false, ctrl: true},
+	        owner: 'geo.mapInteractor',
+	        name: 'button rotate'
 	      }, {
 	        action: geo_action.rotate,
 	        input: 'wheel',
-	        modifiers: {shift: false, ctrl: true}
+	        modifiers: {shift: false, ctrl: true},
+	        owner: 'geo.mapInteractor',
+	        name: 'wheel rotate'
 	      }, {
 	        action: geo_action.select,
 	        input: 'left',
 	        modifiers: {shift: true, ctrl: true},
-	        selectionRectangle: geo_event.select
+	        selectionRectangle: geo_event.select,
+	        owner: 'geo.mapInteractor',
+	        name: 'drag select'
 	      }, {
 	        action: geo_action.zoomselect,
 	        input: 'left',
 	        modifiers: {shift: true, ctrl: false},
-	        selectionRectangle: geo_event.zoomselect
+	        selectionRectangle: geo_event.zoomselect,
+	        owner: 'geo.mapInteractor',
+	        name: 'drag zoom'
 	      }, {
 	        action: geo_action.unzoomselect,
 	        input: 'right',
 	        modifiers: {shift: true, ctrl: false},
-	        selectionRectangle: geo_event.unzoomselect
+	        selectionRectangle: geo_event.unzoomselect,
+	        owner: 'geo.mapInteractor',
+	        name: 'drag unzoom'
 	      }],
 
 	      click: {
@@ -42161,6 +42549,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    m_options
 	  );
+	  /* We don't want to merge the original arrays array with a array passed in
+	   * the args, so override that as necessary for actions. */
+	  if (args && args.actions) {
+	    m_options.actions = $.extend(true, [], args.actions);
+	  }
+	  if (args && args.momentum && args.momentum.actions) {
+	    m_options.momentum.actions = $.extend(true, [], args.momentum.actions);
+	  }
 
 	  // options supported:
 	  // {
@@ -42927,7 +43323,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Based on the screen coordinates of a selection, zoom or unzoom and
+	   * Based on the screen coodinates of a selection, zoom or unzoom and
 	   * recenter.
 	   *
 	   * @private
@@ -43767,10 +44163,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.pointSearch = function (coordinate) {
-	    var found = [], indices = [], data = m_this.data(), i,
+	    var found = [], indices = [], extra = {},
 	        poly1 = [{}, {}, {}, {}], poly2 = [{}, {}, {}, {}],
+	        order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1],
+	        data = m_this.data(),
 	        map = m_this.layer().map(),
-	        order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1];
+	        i, coordbasis;
 	    coordinate = transform.transformCoordinates(
 	        map.ingcs(), map.gcs(), coordinate);
 	    if (!m_quads) {
@@ -43790,12 +44188,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	            util.pointInPolygon(coordinate, poly2)) {
 	          indices.push(quad.idx);
 	          found.push(data[quad.idx]);
+	          /* If a point is in the quad (based on pointInPolygon, above), check
+	           * where in the quad it is located.  We want to output coordinates
+	           * where the upper-left is (0, 0) and the lower-right is (1, 1). */
+	          coordbasis = util.pointTo2DTriangleBasis(
+	            coordinate, poly1[0], poly1[1], poly1[2]);
+	          if (!coordbasis || coordbasis.x + coordbasis.y > 1) {
+	            coordbasis = util.pointTo2DTriangleBasis(
+	              coordinate, poly2[2], poly2[1], poly2[0]);
+	            if (coordbasis) {
+	              /* In the second triangle, (0, 0) is upper-right, (1, 0) is
+	               * upper-left, and (0, 1) is lower-right.  Invert x to get to
+	               * the desired output coordinates. */
+	              coordbasis.x = 1 - coordbasis.x;
+	            }
+	          } else {
+	            /* In the first triangle, (0, 0) is lower-left, (1, 0) is lower-
+	             * right, and (0, 1) is upper-left.  Invert y to get to the
+	             * desired output coordinates. */
+	            coordbasis.y = 1 - coordbasis.y;
+	          }
+	          if (coordbasis) {
+	            extra[quad.idx] = {basis: coordbasis};
+	          }
 	        }
 	      });
 	    });
 	    return {
 	      index: indices,
-	      found: found
+	      found: found,
+	      extra: extra
 	    };
 	  };
 
@@ -43870,7 +44292,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Convert the current data set to a pair of arrays, one of quads that are
-	   * solid color and one of qudas that have an image.  All quads are objects
+	   * solid color and one of quads that have an image.  All quads are objects
 	   * with pos (a 12 value array containing 4 three-dimensional position
 	   * coordinates), and opacity.  Color quads also have a color.  Image quads
 	   * may have an image element, if the image is loaded.  If it isn't, this
@@ -43904,7 +44326,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        clrQuads = [], imgQuads = [],
 	        origin = [0, 0, 0], origindiag2, diag2;
 	    /* Keep track of images that we are using.  This prevents creating
-	     * additional Image elemnts for repeated urls. */
+	     * additional Image elements for repeated urls. */
 	    m_this._objectListStart(m_images);
 	    $.each(data, function (i, d) {
 	      if (d._cachedQuad) {
@@ -43960,7 +44382,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } else {
 	        image = m_this._objectListGet(m_images, img);
 	        if (image === undefined) {
-	          if (img instanceof Image) {
+	          if (img instanceof Image || img instanceof HTMLCanvasElement) {
 	            image = img;
 	          } else {
 	            image = new Image();
@@ -43979,14 +44401,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (d.crop) {
 	          quad.crop = d.crop;
 	        }
-	        if (image.complete && image.naturalWidth && image.naturalHeight) {
+	        if (util.isReadyImage(image) || image instanceof HTMLCanvasElement) {
 	          quad.image = image;
 	        } else {
 	          previewColor = undefined;
 	          previewImage = previewImageFunc.call(m_this, d, i);
-	          if (previewImage && previewImage instanceof Image &&
-	              previewImage.complete && previewImage.naturalWidth &&
-	              previewImage.naturalHeight) {
+	          if (previewImage && util.isReadyImage(previewImage)) {
 	            quad.image = previewImage;
 	          } else {
 	            previewColor = previewColorFunc.call(m_this, d, i);
@@ -44108,8 +44528,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  image: 'quad.image',
 	  /* support for cropping quad images */
 	  imageCrop: 'quad.imageCrop',
+	  /* support for fixed-scale quad images */
+	  imageFixedScale: 'quad.imageFixedScale',
 	  /* support for arbitrary quad images */
-	  imageFull: 'quad.imageFull'
+	  imageFull: 'quad.imageFull',
+	  /* support for canvas elements as content in image quads */
+	  canvas: 'quad.canvas'
 	};
 
 	inherit(quadFeature, feature);
@@ -45991,8 +46415,299 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 222 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(4);
-	var tile = __webpack_require__(223);
+	var feature = __webpack_require__(197);
+	var transform = __webpack_require__(6);
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class heatmapFeature
+	 *
+	 * @class geo.heatmapFeature
+	 * @param {Object} arg Options object
+	 * @extends geo.feature
+	 * @param {Object|Function} [position] Position of the data.  Default is
+	 *   (data).
+	 * @param {Object|Function} [intensity] Scalar value of each data point. Scalar
+	 *   value must be a positive real number and will be used to compute
+	 *   the weight for each data point.
+	 * @param {number} [maxIntensity=null] Maximum intensity of the data. Maximum
+	 *   intensity must be a positive real number and will be used to normalize all
+	 *   intensities with a dataset. If no value is given, then a it will
+	 *   be computed.
+	 * @param {number} [minIntensity=null] Minimum intensity of the data. Minimum
+	 *   intensity must be a positive real number will be used to normalize all
+	 *   intensities with a dataset. If no value is given, then a it will
+	 *   be computed.
+	 * @param {number} [updateDelay=1000] Delay in milliseconds after a zoom,
+	 *   rotate, or pan event before recomputing the heatmap.
+	 * @param {boolean|number|'auto'} [binned='auto'] If true or a number,
+	 *   spatially bin data as part of producing the heatpmap.  If false, each
+	 *   datapoint stands on its own.  If 'auto', bin data if there are more data
+	 *   points than there would be bins.  Using true or auto uses bins that are
+	 *   max(Math.floor((radius + blurRadius) / 8), 3).
+	 * @param {Object|string|Function} [style.color] Color transfer function that.
+	 *   will be used to evaluate color of each pixel using normalized intensity
+	 *   as the look up value.
+	 * @param {Object|Function} [style.radius=10] Radius of a point in terms of
+	 *   number of pixels.
+	 * @param {Object|Function} [style.blurRadius=10] Blur radius for each point in
+	 *  terms of number of pixels.
+	 * @param {boolean} [style.gaussian=true] If true, appoximate a gaussian
+	 *   distribution for each point using a multi-segment linear radial
+	 *   appoximation.  The total weight of the gaussian area is approximately the
+	 *   9/16 r^2.  The sum of radius + blurRadius is used as the radius for the
+	 *   gaussian distribution.
+	 * @returns {geo.heatmapFeature}
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////////////////
+	var heatmapFeature = function (arg) {
+	  'use strict';
+	  if (!(this instanceof heatmapFeature)) {
+	    return new heatmapFeature(arg);
+	  }
+	  arg = arg || {};
+	  feature.call(this, arg);
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * @private
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  var m_this = this,
+	      m_position,
+	      m_intensity,
+	      m_maxIntensity,
+	      m_minIntensity,
+	      m_updateDelay,
+	      m_binned,
+	      m_gcsPosition,
+	      s_init = this._init;
+
+	  m_position = arg.position || function (d) { return d; };
+	  m_intensity = arg.intensity || function (d) { return 1; };
+	  m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
+	  m_minIntensity = arg.minIntensity !== undefined ? arg.minIntensity : null;
+	  m_binned = arg.binned !== undefined ? arg.binned : 'auto';
+	  m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set maxIntensity
+	   *
+	   * @returns {geo.heatmap}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.maxIntensity = function (val) {
+	    if (val === undefined) {
+	      return m_maxIntensity;
+	    } else {
+	      m_maxIntensity = val;
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set maxIntensity
+	   *
+	   * @returns {geo.heatmap}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.minIntensity = function (val) {
+	    if (val === undefined) {
+	      return m_minIntensity;
+	    } else {
+	      m_minIntensity = val;
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set updateDelay
+	   *
+	   * @returns {geo.heatmap}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.updateDelay = function (val) {
+	    if (val === undefined) {
+	      return m_updateDelay;
+	    } else {
+	      m_updateDelay = parseInt(val, 10);
+	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set binned
+	   *
+	   * @returns {geo.heatmap}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.binned = function (val) {
+	    if (val === undefined) {
+	      return m_binned;
+	    } else {
+	      if (val === 'true') {
+	        val = true;
+	      } else if (val === 'false') {
+	        val = false;
+	      } else if (val !== 'auto' && val !== true && val !== false) {
+	        val = parseInt(val, 10);
+	        if (val <= 0 || isNaN(val)) {
+	          val = false;
+	        }
+	      }
+	      m_binned = val;
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set position accessor
+	   *
+	   * @returns {geo.heatmap}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.position = function (val) {
+	    if (val === undefined) {
+	      return m_position;
+	    } else {
+	      m_position = val;
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get pre-computed gcs position accessor
+	   *
+	   * @returns {geo.heatmap}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.gcsPosition = function () {
+	    this._update();
+	    return m_gcsPosition;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set intensity
+	   *
+	   * @returns {geo.heatmap}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.intensity = function (val) {
+	    if (val === undefined) {
+	      return m_intensity;
+	    } else {
+	      m_intensity = val;
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Initialize
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._init = function (arg) {
+	    s_init.call(m_this, arg);
+
+	    var defaultStyle = $.extend(
+	      {},
+	      {
+	        radius: 10,
+	        blurRadius: 10,
+	        gaussian: true,
+	        color: {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
+	                0.25: {r: 0, g: 0, b: 1, a: 0.5},
+	                0.5:  {r: 0, g: 1, b: 1, a: 0.6},
+	                0.75: {r: 1, g: 1, b: 0, a: 0.7},
+	                1:    {r: 1, g: 0, b: 0, a: 0.8}}
+	      },
+	      arg.style === undefined ? {} : arg.style
+	    );
+
+	    m_this.style(defaultStyle);
+
+	    if (m_position) {
+	      m_this.dataTime().modified();
+	    }
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Build
+	   * @override
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._build = function () {
+	    var data = m_this.data(),
+	        intensity = null,
+	        position = [],
+	        setMax = (m_maxIntensity === null || m_maxIntensity === undefined),
+	        setMin = (m_minIntensity === null || m_minIntensity === undefined);
+
+	    data.forEach(function (d) {
+	      position.push(m_this.position()(d));
+	      if (setMax || setMin) {
+	        intensity = m_this.intensity()(d);
+	        if (m_maxIntensity === null || m_maxIntensity === undefined) {
+	          m_maxIntensity = intensity;
+	        }
+	        if (m_minIntensity === null || m_minIntensity === undefined) {
+	          m_minIntensity = intensity;
+	        }
+	        if (setMax && intensity > m_maxIntensity) {
+	          m_maxIntensity = intensity;
+	        }
+	        if (setMin && intensity < m_minIntensity) {
+	          m_minIntensity = intensity;
+	        }
+
+	      }
+	    });
+	    if (setMin && setMax && m_minIntensity === m_maxIntensity) {
+	      m_minIntensity -= 1;
+	    }
+	    m_gcsPosition = transform.transformCoordinates(
+	        m_this.gcs(), m_this.layer().map().gcs(), position);
+
+	    m_this.buildTime().modified();
+	    return m_this;
+	  };
+
+	  this._init(arg);
+	  return this;
+	};
+
+	inherit(heatmapFeature, feature);
+	module.exports = heatmapFeature;
+
+
+/***/ },
+/* 223 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(4);
+	var tile = __webpack_require__(224);
 
 	module.exports = (function () {
 	  'use strict';
@@ -46063,8 +46778,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (!this._image) {
 	        this._image = new Image(this.size.x, this.size.y);
 	        // Only set the crossOrigin parameter if this is going across origins.
-	        if (this._url.indexOf(':') >= 0 && this._url.indexOf('/') >= 0 &&
-	            this._url.indexOf(':') < this._url.indexOf('/')) {
+	        if (this._url.indexOf(':') >= 0 &&
+	            this._url.indexOf('/') === this._url.indexOf(':') + 1) {
 	          this._image.crossOrigin = this._cors;
 	        }
 	        defer = new $.Deferred();
@@ -46107,7 +46822,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 223 */
+/* 224 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
@@ -46336,7 +47051,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 224 */
+/* 225 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -46642,7 +47357,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 225 */
+/* 226 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -46736,7 +47451,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var geo_event = __webpack_require__(5);
 	  var mapInteractor = __webpack_require__(210);
 	  var clock = __webpack_require__(214);
-	  var uiLayer = __webpack_require__(226);
+	  var uiLayer = __webpack_require__(227);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -48621,7 +49336,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 226 */
+/* 227 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -48706,7 +49421,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 227 */
+/* 228 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
@@ -48714,7 +49429,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var inherit = __webpack_require__(4);
-	  var tileLayer = __webpack_require__(228);
+	  var tileLayer = __webpack_require__(229);
 	  var registry = __webpack_require__(195);
 	  var quadFeature = __webpack_require__(211);
 
@@ -48732,7 +49447,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  //////////////////////////////////////////////////////////////////////////////
 	  var osmLayer = function (arg) {
 
-	    var imageTile = __webpack_require__(222);
+	    var imageTile = __webpack_require__(223);
 
 	    if (!(this instanceof osmLayer)) {
 	      return new osmLayer(arg);
@@ -48765,6 +49480,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        index: index,
 	        size: {x: this._options.tileWidth, y: this._options.tileHeight},
 	        queue: this._queue,
+	        overlap: this._options.tileOverlap,
+	        scale: this._options.tileScale,
 	        url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
 	                               this._options.subdomains)
 	      });
@@ -48801,7 +49518,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 228 */
+/* 229 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
@@ -48928,7 +49645,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *   This function takes a zoom level argument and returns, in units of
 	   *   pixels, the coordinates of the point (0, 0) at the given zoom level
 	   *   relative to the bottom left corner of the domain.
-	   * @param {function} [options.tileMaxBounds=null]
+	   * @param {function} [options.tilesMaxBounds=null]
 	   *   This function takes a zoom level argument and returns, in units of
 	   *   pixels, the top, left, right, and bottom maximum value for which tiles
 	   *   should be drawn at the given zoom level relative to the bottom left
@@ -48948,10 +49665,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var $ = __webpack_require__(1);
 	    var geo_event = __webpack_require__(5);
 	    var transform = __webpack_require__(6);
-	    var tileCache = __webpack_require__(229);
+	    var tileCache = __webpack_require__(230);
 	    var fetchQueue = __webpack_require__(218);
 	    var adjustLayerForRenderer = __webpack_require__(195).adjustLayerForRenderer;
-	    var Tile = __webpack_require__(223);
+	    var Tile = __webpack_require__(224);
 
 	    if (!(this instanceof tileLayer)) {
 	      return new tileLayer(options);
@@ -50308,7 +51025,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 229 */
+/* 230 */
 /***/ function(module, exports) {
 
 	module.exports = (function () {
@@ -50462,7 +51179,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 230 */
+/* 231 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -50546,62 +51263,50 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 231 */
+/* 232 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(4);
 	var feature = __webpack_require__(197);
-	var transform = __webpack_require__(6);
+	var geo_event = __webpack_require__(5);
+	var util = __webpack_require__(76);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Create a new instance of class heatmapFeature
+	 * Create a new instance of class imagemapFeature
 	 *
-	 * @class geo.heatmapFeature
+	 * @class geo.pixelmapFeature
 	 * @param {Object} arg Options object
 	 * @extends geo.feature
-	 * @param {Object|Function} [position] Position of the data.  Default is
-	 *   (data).
-	 * @param {Object|Function} [intensity] Scalar value of each data point. Scalar
-	 *   value must be a positive real number and will be used to compute
-	 *   the weight for each data point.
-	 * @param {number} [maxIntensity=null] Maximum intensity of the data. Maximum
-	 *   intensity must be a positive real number and will be used to normalize all
-	 *   intensities with a dataset. If no value is given, then a it will
-	 *   be computed.
-	 * @param {number} [minIntensity=null] Minimum intensity of the data. Minimum
-	 *   intensity must be a positive real number will be used to normalize all
-	 *   intensities with a dataset. If no value is given, then a it will
-	 *   be computed.
-	 * @param {number} [updateDelay=1000] Delay in milliseconds after a zoom,
-	 *   rotate, or pan event before recomputing the heatmap.
-	 * @param {boolean|number|'auto'} [binned='auto'] If true or a number,
-	 *   spatially bin data as part of producing the heatpmap.  If false, each
-	 *   datapoint stands on its own.  If 'auto', bin data if there are more data
-	 *   points than there would be bins.  Using true or auto uses bins that are
-	 *   max(Math.floor((radius + blurRadius) / 8), 3).
-	 * @param {Object|string|Function} [style.color] Color transfer function that.
-	 *   will be used to evaluate color of each pixel using normalized intensity
-	 *   as the look up value.
-	 * @param {Object|Function} [style.radius=10] Radius of a point in terms of
-	 *   number of pixels.
-	 * @param {Object|Function} [style.blurRadius=10] Blur radius for each point in
-	 *  terms of number of pixels.
-	 * @param {boolean} [style.gaussian=true] If true, appoximate a gaussian
-	 *   distribution for each point using a multi-segment linear radial
-	 *   appoximation.  The total weight of the gaussian area is approximately the
-	 *   9/16 r^2.  The sum of radius + blurRadius is used as the radius for the
-	 *   gaussian distribution.
-	 * @returns {geo.heatmapFeature}
+	 * @param {Object|Function|HTMLImageElement} [url] URL of a pixel map or an
+	 *   HTML Image element.  The rgb data is interpretted as an index of the form
+	 *   0xbbggrr.  The alpha channel is ignored.
+	 * @param {Object|Function} [color] The color that should be used for each data
+	 *   element.  Data elements correspond to the indices in the pixel map.  If an
+	 *   index is larger than the number of data elements, it will be transparent.
+	 *   If there is more data than there are indices, it is ignored.
+	 * @param {Object|Function} [position] Position of the image.  Default is
+	 *   (data).  The position is an Object which specifies the corners of the
+	 *   quad: ll, lr, ur, ul.  At least two opposite corners must be specified.
+	 *   The corners do not have to physically correspond to the order specified,
+	 *   but rather correspond to that part of the image map.  If a corner is
+	 *   unspecified, it will use the x coordinate from one adjacent corner, the y
+	 *   coordinate from the other adjacent corner, and the average z value of
+	 *   those two corners.  For instance, if ul is unspecified, it is
+	 *   {x: ll.x, y: ur.y}.  Note that each quad is rendered as a pair of
+	 *   triangles: (ll, lr, ul) and (ur, ul, lr).  Nothing special is done for
+	 *   quads that are not convex or quads that have substantially different
+	 *   transformations for those two triangles.
+	 * @returns {geo.pixelmapFeature}
 	 */
 	//////////////////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////////////////
-	var heatmapFeature = function (arg) {
+	var pixelmapFeature = function (arg) {
 	  'use strict';
-	  if (!(this instanceof heatmapFeature)) {
-	    return new heatmapFeature(arg);
+	  if (!(this instanceof pixelmapFeature)) {
+	    return new pixelmapFeature(arg);
 	  }
 	  arg = arg || {};
 	  feature.call(this, arg);
@@ -50612,114 +51317,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
-	      m_position,
-	      m_intensity,
-	      m_maxIntensity,
-	      m_minIntensity,
-	      m_updateDelay,
-	      m_binned,
-	      m_gcsPosition,
-	      s_init = this._init;
-
-	  m_position = arg.position || function (d) { return d; };
-	  m_intensity = arg.intensity || function (d) { return 1; };
-	  m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
-	  m_minIntensity = arg.minIntensity !== undefined ? arg.minIntensity : null;
-	  m_binned = arg.binned !== undefined ? arg.binned : 'auto';
-	  m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set maxIntensity
-	   *
-	   * @returns {geo.heatmap}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.maxIntensity = function (val) {
-	    if (val === undefined) {
-	      return m_maxIntensity;
-	    } else {
-	      m_maxIntensity = val;
-	      m_this.dataTime().modified();
-	      m_this.modified();
-	    }
-	    return m_this;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set maxIntensity
-	   *
-	   * @returns {geo.heatmap}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.minIntensity = function (val) {
-	    if (val === undefined) {
-	      return m_minIntensity;
-	    } else {
-	      m_minIntensity = val;
-	      m_this.dataTime().modified();
-	      m_this.modified();
-	    }
-	    return m_this;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set updateDelay
-	   *
-	   * @returns {geo.heatmap}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.updateDelay = function (val) {
-	    if (val === undefined) {
-	      return m_updateDelay;
-	    } else {
-	      m_updateDelay = parseInt(val, 10);
-	    }
-	    return m_this;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set binned
-	   *
-	   * @returns {geo.heatmap}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.binned = function (val) {
-	    if (val === undefined) {
-	      return m_binned;
-	    } else {
-	      if (val === 'true') {
-	        val = true;
-	      } else if (val === 'false') {
-	        val = false;
-	      } else if (val !== 'auto' && val !== true && val !== false) {
-	        val = parseInt(val, 10);
-	        if (val <= 0 || isNaN(val)) {
-	          val = false;
-	        }
-	      }
-	      m_binned = val;
-	      m_this.dataTime().modified();
-	      m_this.modified();
-	    }
-	    return m_this;
-	  };
+	      m_quadFeature,
+	      m_srcImage,
+	      m_info,
+	      s_update = this._update,
+	      s_init = this._init,
+	      s_exit = this._exit;
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set position accessor
 	   *
-	   * @returns {geo.heatmap}
+	   * @returns {geo.pixelmap}
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.position = function (val) {
 	    if (val === undefined) {
-	      return m_position;
-	    } else {
-	      m_position = val;
+	      return m_this.style('position');
+	    } else if (val !== m_this.style('position')) {
+	      m_this.style('position', val);
 	      m_this.dataTime().modified();
 	      m_this.modified();
 	    }
@@ -50728,32 +51344,314 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get pre-computed gcs position accessor
+	   * Get/Set url accessor
 	   *
-	   * @returns {geo.heatmap}
+	   * @returns {geo.pixelmap}
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
-	  this.gcsPosition = function () {
-	    this._update();
-	    return m_gcsPosition;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set intensity
-	   *
-	   * @returns {geo.heatmap}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.intensity = function (val) {
+	  this.url = function (val) {
 	    if (val === undefined) {
-	      return m_intensity;
-	    } else {
-	      m_intensity = val;
+	      return m_this.style('url');
+	    } else if (val !== m_this.style('url')) {
+	      m_srcImage = m_info = undefined;
+	      m_this.style('url', val);
 	      m_this.dataTime().modified();
 	      m_this.modified();
 	    }
 	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get the maximum index value from the pixelmap.  This is a value present in
+	   * the pixelmap.
+	   *
+	   * @returns {geo.pixelmap}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.maxIndex = function () {
+	    if (m_info) {
+	      /* This isn't just m_info.mappedColors.length - 1, since there
+	       * may be more data than actual indices. */
+	      if (m_info.maxIndex === undefined) {
+	        m_info.maxIndex = 0;
+	        for (var idx in m_info.mappedColors) {
+	          if (m_info.mappedColors.hasOwnProperty(idx)) {
+	            m_info.maxIndex = Math.max(m_info.maxIndex, idx);
+	          }
+	        }
+	      }
+	      return m_info.maxIndex;
+	    }
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set color accessor
+	   *
+	   * @returns {geo.pixelmap}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.color = function (val) {
+	    if (val === undefined) {
+	      return m_this.style('color');
+	    } else if (val !== m_this.style('color')) {
+	      m_this.style('color', val);
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+
+	  /**
+	   * If the specified coordinates are in the rendered quad, use the basis
+	   * information from the quad to determine the pixelmap index value so that it
+	   * can be included in the found results.
+	   */
+	  this.pointSearch = function (coordinate) {
+	    if (m_quadFeature && m_info) {
+	      var result = m_quadFeature.pointSearch(coordinate);
+	      if (result.index.length === 1 && result.extra && result.extra[result.index[0]].basis) {
+	        var basis = result.extra[result.index[0]].basis, x, y, idx;
+	        x = Math.floor(basis.x * m_info.width);
+	        y = Math.floor(basis.y * m_info.height);
+	        if (x >= 0 && x < m_info.width &&
+	            y >= 0 && y < m_info.height) {
+	          idx = m_info.indices[y * m_info.width + x];
+	          result = {
+	            index: [idx],
+	            found: [m_this.data()[idx]]
+	          };
+	          return result;
+	        }
+	      }
+	    }
+	    return {index: [], found: []};
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Build
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._build = function () {
+	    /* Set the build time at the start of the call.  A build can result in
+	     * drawing a quad, which can trigger a full layer update, which in tern
+	     * checks if this feature is built.  Setting the build time avoid calling
+	     * this a second time. */
+	    m_this.buildTime().modified();
+	    if (!m_srcImage) {
+	      var src = this.style.get('url')();
+	      if (util.isReadyImage(src)) {
+	        /* we have an already loaded image, so we can just use it. */
+	        m_srcImage = src;
+	        this._computePixelmap();
+	      } else if (src) {
+	        var defer = new $.Deferred(), prev_onload, prev_onerror;
+	        if (src instanceof Image) {
+	          /* we have an unloaded image.  Hook to the load and error callbacks
+	           * so that when it is loaded we can use it. */
+	          m_srcImage = src;
+	          prev_onload = src.onload;
+	          prev_onerror = src.onerror;
+	        } else {
+	          /* we were given a url, so construct a new image */
+	          m_srcImage = new Image();
+	          // Only set the crossOrigin parameter if this is going across origins.
+	          if (src.indexOf(':') >= 0 &&
+	              src.indexOf('/') === src.indexOf(':') + 1) {
+	            m_srcImage.crossOrigin = this.style.get('crossDomain')() || 'anonymous';
+	          }
+	        }
+	        m_srcImage.onload = function () {
+	          if (prev_onload) {
+	            prev_onload.apply(this, arguments);
+	          }
+	          /* Only use this image if our pixelmap hasn't changed since we
+	           * attached our handler */
+	          if (m_this.style.get('url')() === src) {
+	            m_info = undefined;
+	            m_this._computePixelmap();
+	          }
+	          defer.resolve();
+	        };
+	        m_srcImage.onerror = function () {
+	          if (prev_onerror) {
+	            prev_onerror.apply(this, arguments);
+	          }
+	          defer.reject();
+	        };
+	        defer.promise(this);
+	        this.layer().addPromise(this);
+	        if (!(src instanceof Image)) {
+	          m_srcImage.src = src;
+	        }
+	      }
+	    } else if (m_info) {
+	      this._computePixelmap();
+	    }
+	    return m_this;
+	  };
+
+	  /**
+	   * Compute information for this pixelmap image.  It is wasterful to call this
+	   * if the pixelmap has already been prepared (it is invalidated by a change
+	   * in the image).
+	   */
+	  this._preparePixelmap = function () {
+	    var i, idx, pixelData;
+
+	    if (!util.isReadyImage(m_srcImage)) {
+	      return;
+	    }
+	    m_info = {
+	      width: m_srcImage.naturalWidth,
+	      height: m_srcImage.naturalHeight,
+	      canvas: document.createElement('canvas'),
+	      updateIdx: {}
+	    };
+
+	    m_info.canvas.width = m_info.width;
+	    m_info.canvas.height = m_info.height;
+	    m_info.context = m_info.canvas.getContext('2d');
+
+	    m_info.context.drawImage(m_srcImage, 0, 0);
+	    m_info.imageData = m_info.context.getImageData(
+	      0, 0, m_info.canvas.width, m_info.canvas.height);
+	    pixelData = m_info.imageData.data;
+	    m_info.indices = new Array(pixelData.length / 4);
+	    m_info.area = pixelData.length / 4;
+
+	    m_info.mappedColors = {};
+	    for (i = 0; i < pixelData.length; i += 4) {
+	      idx = pixelData[i] + (pixelData[i + 1] << 8) + (pixelData[i + 2] << 16);
+	      m_info.indices[i / 4] = idx;
+	      if (!m_info.mappedColors[idx]) {
+	        m_info.mappedColors[idx] = {first: i / 4};
+	      }
+	      m_info.mappedColors[idx].last = i / 4;
+	    }
+	    return m_info;
+	  };
+
+	  /**
+	   * Given the loaded pixelmap image, create a canvas the size of the image.
+	   * Compute a color for each distinct index and recolor the canvas based on
+	   * thise colors, then draw the resultant image as a quad.
+	   */
+	  this._computePixelmap = function () {
+	    var data = m_this.data() || [],
+	        colorFunc = m_this.style.get('color'),
+	        i, idx, lastidx, color, pixelData, indices, mappedColors,
+	        updateFirst, updateLast = -1, update, prepared;
+
+	    if (!m_info) {
+	      if (!m_this._preparePixelmap()) {
+	        return;
+	      }
+	      prepared = true;
+	    }
+	    mappedColors = m_info.mappedColors;
+	    updateFirst = m_info.area;
+	    for (idx in mappedColors) {
+	      if (mappedColors.hasOwnProperty(idx)) {
+	        color = colorFunc(data[idx], +idx) || {};
+	        color = [
+	          (color.r || 0) * 255,
+	          (color.g || 0) * 255,
+	          (color.b || 0) * 255,
+	          color.a === undefined ? 255 : (color.a * 255)
+	        ];
+	        mappedColors[idx].update = (
+	          !mappedColors[idx].color ||
+	          mappedColors[idx].color[0] !== color[0] ||
+	          mappedColors[idx].color[1] !== color[1] ||
+	          mappedColors[idx].color[2] !== color[2] ||
+	          mappedColors[idx].color[3] !== color[3]);
+	        if (mappedColors[idx].update) {
+	          mappedColors[idx].color = color;
+	          updateFirst = Math.min(mappedColors[idx].first, updateFirst);
+	          updateLast = Math.max(mappedColors[idx].last, updateLast);
+	        }
+	      }
+	    }
+	    /* If nothing was updated, we are done */
+	    if (updateFirst >= updateLast) {
+	      return;
+	    }
+	    /* Update only the extent that has changed */
+	    pixelData = m_info.imageData.data;
+	    indices = m_info.indices;
+	    for (i = updateFirst; i <= updateLast; i += 1) {
+	      idx = indices[i];
+	      if (idx !== lastidx) {
+	        lastidx = idx;
+	        color = mappedColors[idx].color;
+	        update = mappedColors[idx].update;
+	      }
+	      if (update) {
+	        pixelData[i * 4] = color[0];
+	        pixelData[i * 4 + 1] = color[1];
+	        pixelData[i * 4 + 2] = color[2];
+	        pixelData[i * 4 + 3] = color[3];
+	      }
+	    }
+	    /* Place the updated area into the canvas */
+	    m_info.context.putImageData(
+	      m_info.imageData, 0, 0, 0, Math.floor(updateFirst / m_info.width),
+	      m_info.width, Math.ceil((updateLast + 1) / m_info.width));
+
+	    /* If we haven't made a quad feature, make one now.  The quad feature needs
+	     * to have the canvas capability. */
+	    if (!m_quadFeature) {
+	      m_quadFeature = m_this.layer().createFeature('quad', {
+	        selectionAPI: false,
+	        gcs: m_this.gcs(),
+	        visible: m_this.visible()
+	      });
+	      m_this.dependentFeatures([m_quadFeature]);
+	      m_quadFeature.style({image: m_info.canvas,
+	                           position: m_this.style.get('position')})
+	                   .data([{}])
+	                   .draw();
+	    }
+	    /* If we prepared the pixelmap and rendered it, send a prepared event */
+	    if (prepared) {
+	      m_this.geoTrigger(geo_event.pixelmap.prepared, {
+	        pixelmap: m_this
+	      });
+	    }
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Update
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._update = function () {
+	    s_update.call(m_this);
+	    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
+	        m_this.updateTime().getMTime() < m_this.getMTime()) {
+	      m_this._build();
+	    }
+
+	    m_this.updateTime().modified();
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Destroy
+	   * @memberof geo.pixelmapFeature
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._exit = function (abc) {
+	    if (m_quadFeature && m_this.layer()) {
+	      m_this.layer().deleteFeature(m_quadFeature);
+	      m_quadFeature = null;
+	      m_this.dependentFeatures([]);
+	    }
+	    s_exit();
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -50762,82 +51660,67 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
+	    arg = arg || {};
 	    s_init.call(m_this, arg);
 
-	    var defaultStyle = $.extend(
+	    var style = $.extend(
 	      {},
 	      {
-	        radius: 10,
-	        blurRadius: 10,
-	        gaussian: true,
-	        color: {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
-	                0.25: {r: 0, g: 0, b: 1, a: 0.5},
-	                0.5:  {r: 0, g: 1, b: 1, a: 0.6},
-	                0.75: {r: 1, g: 1, b: 0, a: 0.7},
-	                1:    {r: 1, g: 0, b: 0, a: 0.8}}
+	        color: function (d, idx) {
+	          return {
+	            r: (idx & 0xFF) / 255,
+	            g: ((idx >> 8) & 0xFF) / 255,
+	            b: ((idx >> 16) & 0xFF) / 255,
+	            a: 1
+	          };
+	        },
+	        position: function (d) { return d; }
 	      },
 	      arg.style === undefined ? {} : arg.style
 	    );
-
-	    m_this.style(defaultStyle);
-
-	    if (m_position) {
-	      m_this.dataTime().modified();
+	    if (arg.position !== undefined) {
+	      style.position = arg.position;
 	    }
+	    if (arg.url !== undefined) {
+	      style.url = arg.url;
+	    }
+	    if (arg.color !== undefined) {
+	      style.color = arg.color;
+	    }
+	    m_this.style(style);
+	    m_this.dataTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Build
-	   * @override
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._build = function () {
-	    var data = m_this.data(),
-	        intensity = null,
-	        position = [],
-	        setMax = (m_maxIntensity === null || m_maxIntensity === undefined),
-	        setMin = (m_minIntensity === null || m_minIntensity === undefined);
-
-	    data.forEach(function (d) {
-	      position.push(m_this.position()(d));
-	      if (setMax || setMin) {
-	        intensity = m_this.intensity()(d);
-	        if (m_maxIntensity === null || m_maxIntensity === undefined) {
-	          m_maxIntensity = intensity;
-	        }
-	        if (m_minIntensity === null || m_minIntensity === undefined) {
-	          m_minIntensity = intensity;
-	        }
-	        if (setMax && intensity > m_maxIntensity) {
-	          m_maxIntensity = intensity;
-	        }
-	        if (setMin && intensity < m_minIntensity) {
-	          m_minIntensity = intensity;
-	        }
-
-	      }
-	    });
-	    if (setMin && setMax && m_minIntensity === m_maxIntensity) {
-	      m_minIntensity -= 1;
-	    }
-	    m_gcsPosition = transform.transformCoordinates(
-	        m_this.gcs(), m_this.layer().map().gcs(), position);
-
-	    m_this.buildTime().modified();
-	    return m_this;
-	  };
-
-	  this._init(arg);
 	  return this;
 	};
 
-	inherit(heatmapFeature, feature);
-	module.exports = heatmapFeature;
+	/**
+	 * Create a pixelmapFeature from an object.
+	 *
+	 * @see {@link geo.feature.create}
+	 * @param {geo.layer} layer The layer to add the feature to
+	 * @param {geo.pixelmapFeature.spec} spec The object specification
+	 * @returns {geo.pixelmapFeature|null}
+	 */
+	pixelmapFeature.create = function (layer, spec) {
+	  'use strict';
+
+	  spec = spec || {};
+	  spec.type = 'pixelmap';
+	  return feature.create(layer, spec);
+	};
+
+	pixelmapFeature.capabilities = {
+	  /* core feature name -- support in any manner */
+	  feature: 'pixelmap'
+	};
+
+	inherit(pixelmapFeature, feature);
+	module.exports = pixelmapFeature;
 
 
 /***/ },
-/* 232 */
+/* 233 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -50945,54 +51828,54 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 233 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = ("0.10.3");
-
-
-/***/ },
 /* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("cf34404fbda34ca22915c5743903786c79fda8e2");
+	module.exports = ("0.10.4");
 
 
 /***/ },
 /* 235 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = ("dcce0b618cf679fe23941eab97a919320d08eb2f");
+
+
+/***/ },
+/* 236 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var geo_event = __webpack_require__(5);
 	geo_event.d3 = {
-	  rescale: __webpack_require__(236)
+	  rescale: __webpack_require__(237)
 	};
 
 	/**
 	 * @namespace geo.d3
 	 */
 	module.exports = {
-	  graphFeature: __webpack_require__(237),
-	  lineFeature: __webpack_require__(238),
-	  object: __webpack_require__(239),
-	  pathFeature: __webpack_require__(241),
-	  pointFeature: __webpack_require__(242),
-	  quadFeature: __webpack_require__(243),
-	  renderer: __webpack_require__(244),
-	  tileLayer: __webpack_require__(245),
-	  uniqueID: __webpack_require__(240),
-	  vectorFeature: __webpack_require__(246)
+	  graphFeature: __webpack_require__(238),
+	  lineFeature: __webpack_require__(239),
+	  object: __webpack_require__(240),
+	  pathFeature: __webpack_require__(242),
+	  pointFeature: __webpack_require__(243),
+	  quadFeature: __webpack_require__(244),
+	  renderer: __webpack_require__(245),
+	  tileLayer: __webpack_require__(246),
+	  uniqueID: __webpack_require__(241),
+	  vectorFeature: __webpack_require__(247)
 	};
 
 
 /***/ },
-/* 236 */
+/* 237 */
 /***/ function(module, exports) {
 
 	module.exports = 'geo_d3_rescale';
 
 
 /***/ },
-/* 237 */
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -51041,7 +51924,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 238 */
+/* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -51065,7 +51948,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var d3 = __webpack_require__(213);
-	  var object = __webpack_require__(239);
+	  var object = __webpack_require__(240);
 	  var timestamp = __webpack_require__(200);
 	  var util = __webpack_require__(76);
 
@@ -51145,6 +52028,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        id: m_this._d3id() + idx,
 	        classes: ['d3LineFeature', 'd3SubLine-' + idx],
+	        visible: m_this.visible,
 	        style: style
 	      };
 
@@ -51190,7 +52074,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 239 */
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -51209,7 +52093,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  var object = __webpack_require__(199);
-	  var uniqueID = __webpack_require__(240);
+	  var uniqueID = __webpack_require__(241);
 
 	  // this is used to extend other geojs classes, so only generate
 	  // a new object when that is not the case... like if this === window
@@ -51265,7 +52149,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 240 */
+/* 241 */
 /***/ function(module, exports) {
 
 	var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
@@ -51292,12 +52176,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 241 */
+/* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
 	var registerFeature = __webpack_require__(195).registerFeature;
-	var pathFeature = __webpack_require__(230);
+	var pathFeature = __webpack_require__(231);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -51317,7 +52201,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var d3 = __webpack_require__(213);
-	  var object = __webpack_require__(239);
+	  var object = __webpack_require__(240);
 	  var timestamp = __webpack_require__(200);
 
 	  arg = arg || {};
@@ -51391,6 +52275,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      'fill': function () { return false; },
 	      'fillColor': function () { return { r: 0, g: 0, b: 0 }; }
 	    }, s_style);
+	    m_style.visible = m_this.visible;
 
 	    m_this.renderer()._drawFeatures(m_style);
 
@@ -51428,7 +52313,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 242 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -51452,7 +52337,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new d3_pointFeature(arg);
 	  }
 
-	  var d3_object = __webpack_require__(239);
+	  var d3_object = __webpack_require__(240);
 	  var timestamp = __webpack_require__(200);
 
 	  arg = arg || {};
@@ -51514,6 +52399,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    m_style.style = s_style;
 	    m_style.classes = ['d3PointFeature'];
+	    m_style.visible = m_this.visible;
 
 	    // pass to renderer to draw
 	    m_this.renderer()._drawFeatures(m_style);
@@ -51554,7 +52440,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 243 */
+/* 244 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -51579,7 +52465,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var d3 = __webpack_require__(213);
-	  var object = __webpack_require__(239);
+	  var object = __webpack_require__(240);
 
 	  quadFeature.call(this, arg);
 	  object.call(this);
@@ -51741,6 +52627,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      },
 	      onlyRenderNew: !this.style('previewColor') && !this.style('previewImage'),
 	      sortByZ: true,
+	      visible: m_this.visible,
 	      classes: ['d3QuadFeature']
 	    };
 	    renderer._drawFeatures(feature);
@@ -51791,14 +52678,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	capabilities[quadFeature.capabilities.color] = true;
 	capabilities[quadFeature.capabilities.image] = true;
 	capabilities[quadFeature.capabilities.imageCrop] = false;
+	capabilities[quadFeature.capabilities.imageFixedScale] = false;
 	capabilities[quadFeature.capabilities.imageFull] = false;
+	capabilities[quadFeature.capabilities.canvas] = false;
 
 	registerFeature('d3', 'quad', d3_quadFeature, capabilities);
 	module.exports = d3_quadFeature;
 
 
 /***/ },
-/* 244 */
+/* 245 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -51818,10 +52707,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  var d3 = __webpack_require__(213);
-	  var object = __webpack_require__(239);
+	  var object = __webpack_require__(240);
 	  var util = __webpack_require__(76);
 	  var geo_event = __webpack_require__(5);
-	  var d3Rescale = __webpack_require__(236);
+	  var d3Rescale = __webpack_require__(237);
 
 	  if (!(this instanceof d3Renderer)) {
 	    return new d3Renderer(arg);
@@ -52281,6 +53170,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      data: arg.data,
 	      index: arg.dataIndex,
 	      style: arg.style,
+	      visible: arg.visible,
 	      attributes: arg.attributes,
 	      classes: arg.classes,
 	      append: arg.append,
@@ -52341,6 +53231,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var data = m_features[id].data,
 	        index = m_features[id].index,
 	        style = m_features[id].style,
+	        visible = m_features[id].visible,
 	        attributes = m_features[id].attributes,
 	        classes = m_features[id].classes,
 	        append = m_features[id].append,
@@ -52352,6 +53243,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    setAttrs(rendersel, attributes);
 	    rendersel.attr('class', classes.concat([id]).join(' '));
 	    setStyles(rendersel, style);
+	    if (visible) {
+	      rendersel.style('visibility', visible() ? 'visible' : 'hidden');
+	    }
 	    if (entries.size() && m_features[id].sortByZ) {
 	      selection.sort(function (a, b) {
 	        return (a.zIndex || 0) - (b.zIndex || 0);
@@ -52447,7 +53341,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 245 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(195).registerLayerAdjustment;
@@ -52542,12 +53436,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 246 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
 	var registerFeature = __webpack_require__(195).registerFeature;
-	var vectorFeature = __webpack_require__(232);
+	var vectorFeature = __webpack_require__(233);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -52565,7 +53459,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new d3_vectorFeature(arg);
 	  }
 
-	  var object = __webpack_require__(239);
+	  var object = __webpack_require__(240);
 	  var timestamp = __webpack_require__(200);
 	  var d3 = __webpack_require__(213);
 
@@ -52789,6 +53683,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      endStyle: s_style.endStyle
 	    };
 	    m_style.classes = ['d3VectorFeature'];
+	    m_style.visible = m_this.visible;
 
 	    // Add markers to the defition list
 	    updateMarkers(data, s_style.strokeColor, s_style.strokeOpacity, s_style.originStyle, s_style.endStyle);
@@ -52850,28 +53745,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 247 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.gl
 	 */
 	module.exports = {
-	  choroplethFeature: __webpack_require__(248),
-	  contourFeature: __webpack_require__(249),
-	  ellipsoid: __webpack_require__(251),
-	  geomFeature: __webpack_require__(252),
-	  lineFeature: __webpack_require__(253),
-	  pointFeature: __webpack_require__(254),
-	  polygonFeature: __webpack_require__(255),
-	  quadFeature: __webpack_require__(257),
-	  tileLayer: __webpack_require__(258),
-	  vglRenderer: __webpack_require__(259)
+	  choroplethFeature: __webpack_require__(249),
+	  contourFeature: __webpack_require__(250),
+	  ellipsoid: __webpack_require__(252),
+	  geomFeature: __webpack_require__(253),
+	  lineFeature: __webpack_require__(254),
+	  pointFeature: __webpack_require__(255),
+	  polygonFeature: __webpack_require__(256),
+	  quadFeature: __webpack_require__(258),
+	  tileLayer: __webpack_require__(259),
+	  vglRenderer: __webpack_require__(260)
 	};
 
 
 /***/ },
-/* 248 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -53001,7 +53896,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 249 */
+/* 250 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -53029,7 +53924,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var vgl = __webpack_require__(81);
 	  var transform = __webpack_require__(6);
 	  var util = __webpack_require__(76);
-	  var object = __webpack_require__(250);
+	  var object = __webpack_require__(251);
 
 	  object.call(this);
 
@@ -53301,7 +54196,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 250 */
+/* 251 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -53346,7 +54241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 251 */
+/* 252 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -53551,7 +54446,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 252 */
+/* 253 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -53577,7 +54472,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  arg = arg || {};
 	  geomFeature.call(this, arg);
-	  var object = __webpack_require__(250);
+	  var object = __webpack_require__(251);
 
 	  object.call(this);
 
@@ -53681,7 +54576,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 253 */
+/* 254 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -53708,7 +54603,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var vgl = __webpack_require__(81);
 	  var transform = __webpack_require__(6);
 	  var util = __webpack_require__(76);
-	  var object = __webpack_require__(250);
+	  var object = __webpack_require__(251);
 
 	  object.call(this);
 
@@ -54121,7 +55016,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 254 */
+/* 255 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -54148,7 +55043,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var vgl = __webpack_require__(81);
 	  var transform = __webpack_require__(6);
 	  var util = __webpack_require__(76);
-	  var object = __webpack_require__(250);
+	  var object = __webpack_require__(251);
 
 	  object.call(this);
 
@@ -54671,7 +55566,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 255 */
+/* 256 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -54696,10 +55591,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  polygonFeature.call(this, arg);
 
 	  var vgl = __webpack_require__(81);
-	  var earcut = __webpack_require__(256);
+	  var earcut = __webpack_require__(257);
 	  var transform = __webpack_require__(6);
 	  var util = __webpack_require__(76);
-	  var object = __webpack_require__(250);
+	  var object = __webpack_require__(251);
 
 	  object.call(this);
 
@@ -55058,7 +55953,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 256 */
+/* 257 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -55708,7 +56603,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 257 */
+/* 258 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -55734,7 +56629,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var vgl = __webpack_require__(81);
-	  var object = __webpack_require__(250);
+	  var object = __webpack_require__(251);
 
 	  object.call(this);
 
@@ -56134,14 +57029,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	capabilities[quadFeature.capabilities.color] = true;
 	capabilities[quadFeature.capabilities.image] = true;
 	capabilities[quadFeature.capabilities.imageCrop] = true;
+	capabilities[quadFeature.capabilities.imageFixedScale] = false;
 	capabilities[quadFeature.capabilities.imageFull] = true;
+	capabilities[quadFeature.capabilities.canvas] = false;
 
 	registerFeature('vgl', 'quad', gl_quadFeature, capabilities);
 	module.exports = gl_quadFeature;
 
 
 /***/ },
-/* 258 */
+/* 259 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(195).registerLayerAdjustment;
@@ -56245,7 +57142,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 259 */
+/* 260 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -56541,22 +57438,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 260 */
+/* 261 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.canvas
 	 */
 	module.exports = {
-	  canvasRenderer: __webpack_require__(261),
-	  quadFeature: __webpack_require__(262),
-	  heatmapFeature: __webpack_require__(264),
-	  tileLayer: __webpack_require__(265)
+	  canvasRenderer: __webpack_require__(262),
+	  heatmapFeature: __webpack_require__(263),
+	  pixelmapFeature: __webpack_require__(265),
+	  quadFeature: __webpack_require__(266),
+	  tileLayer: __webpack_require__(267)
 	};
 
 
 /***/ },
-/* 261 */
+/* 262 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -56666,7 +57564,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var features = layer.features();
 	        for (var i = 0; i < features.length; i += 1) {
-	          features[i]._renderOnCanvas(m_this.context2d, map);
+	          if (features[i].visible()) {
+	            features[i]._renderOnCanvas(m_this.context2d, map);
+	          }
 	        }
 	      });
 	    }
@@ -56730,226 +57630,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 262 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
-	var quadFeature = __webpack_require__(211);
-
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create a new instance of class quadFeature
-	 *
-	 * @class geo.canvas.quadFeature
-	 * @param {Object} arg Options object
-	 * @extends geo.quadFeature
-	 * @returns {geo.canvas.quadFeature}
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var canvas_quadFeature = function (arg) {
-	  'use strict';
-
-	  if (!(this instanceof canvas_quadFeature)) {
-	    return new canvas_quadFeature(arg);
-	  }
-	  quadFeature.call(this, arg);
-
-	  var object = __webpack_require__(263);
-	  object.call(this);
-
-	  var $ = __webpack_require__(1);
-
-	  var m_this = this,
-	      s_exit = this._exit,
-	      s_init = this._init,
-	      s_update = this._update,
-	      m_quads;
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Build this feature
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._build = function () {
-	    if (!m_this.position()) {
-	      return;
-	    }
-	    m_quads = this._generateQuads();
-
-	    if (m_quads.imgQuads) {
-	      m_quads.imgQuads.sort(function (a, b) {
-	        return a.pos[2] - b.pos[2];
-	      });
-	    }
-	    m_this.buildTime().modified();
-	  };
-
-	  /**
-	   * Render all of the color quads using a single mapper.
-	   *
-	   * @param renderState: the render state used for the render.
-	   */
-	  this._renderColorQuads = function (renderState) {
-	      // ....
-	      // Not implemented yet.
-	  };
-
-	  /**
-	   * Render all of the image quads using a single mapper.
-	   *
-	   * @param renderState: the render state used for the render.
-	   */
-	  this._renderImageQuads = function (context2d, map) {
-	    if (!m_quads.imgQuads.length) {
-	      return;
-	    }
-
-	    var oldAlpha = context2d.globalAlpha;
-	    var opacity = oldAlpha;
-	    $.each(m_quads.imgQuads, function (idx, quad) {
-	      if (!quad.image) {
-	        return;
-	      }
-	      var w = quad.image.width,
-	          h = quad.image.height;
-	      // Canvas transform is affine, so quad has to be a parallelogram
-	      // Also, canvas has no way to render z.
-	      var p0 = map.gcsToDisplay({x:quad.pos[0], y:quad.pos[1]}, null),
-	          p3 = map.gcsToDisplay({x:quad.pos[9], y:quad.pos[10]}, null),
-	          p2 = map.gcsToDisplay({x:quad.pos[6], y:quad.pos[7]}, null);
-	      context2d.setTransform((p3.x - p2.x) / w, (p3.y - p2.y) / h,
-	                             (p0.x - p2.x) / w, (p0.y - p2.y) / h,
-	                             p2.x, p2.y);
-	      if (quad.opacity !== opacity) {
-	        opacity = quad.opacity;
-	        context2d.globalAlpha = opacity;
-	      }
-	      if (!quad.crop) {
-	        context2d.drawImage(quad.image, 0, 0);
-	      } else {
-	        context2d.drawImage(quad.image, 0, 0, quad.crop.x, quad.crop.y, 0, 0,
-	                            quad.crop.x, quad.crop.y);
-	      }
-	    });
-	    if (opacity !== oldAlpha) {
-	      context2d.globalAlpha = oldAlpha;
-	    }
-	  };
-
-	  this._renderOnCanvas = function (context, map) {
-	    this._renderImageQuads(context, map);
-	    this._renderColorQuads(context, map);
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Update
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._update = function () {
-	    s_update.call(m_this);
-	    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
-	        m_this.updateTime().getMTime() < m_this.getMTime()) {
-	      m_this._build();
-	    }
-
-	    m_this.updateTime().modified();
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Initialize
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._init = function () {
-	    s_init.call(m_this, arg);
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Destroy
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._exit = function () {
-
-	    s_exit.call(m_this);
-	  };
-
-	  m_this._init(arg);
-	  return this;
-	};
-
-	inherit(canvas_quadFeature, quadFeature);
-
-	// Now register it
-	var capabilities = {};
-	capabilities[quadFeature.capabilities.color] = false;
-	capabilities[quadFeature.capabilities.image] = true;
-	capabilities[quadFeature.capabilities.imageCrop] = true;
-	capabilities[quadFeature.capabilities.imageFull] = false;
-
-	registerFeature('canvas', 'quad', canvas_quadFeature, capabilities);
-	module.exports = canvas_quadFeature;
-
-
-/***/ },
 /* 263 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var sceneObject = __webpack_require__(198);
-
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Canvas specific subclass of object which rerenders when the object is drawn.
-	 * @class geo.canvas.object
-	 * @extends geo.sceneObject
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-
-	var canvas_object = function (arg) {
-	  'use strict';
-
-	  var object = __webpack_require__(199);
-
-	  // this is used to extend other geojs classes, so only generate
-	  // a new object when that is not the case... like if this === window
-	  if (!(this instanceof object)) {
-	    return new canvas_object(arg);
-	  }
-	  sceneObject.call(this);
-
-	  var m_this = this,
-	      s_draw = this.draw;
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	  *  Redraw the object.
-	  */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.draw = function () {
-	    m_this._update();
-	    m_this.renderer()._render();
-	    s_draw();
-	    return m_this;
-	  };
-
-	  return this;
-	};
-
-	inherit(canvas_object, sceneObject);
-	module.exports = canvas_object;
-
-
-
-/***/ },
-/* 264 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var inherit = __webpack_require__(4);
 	var registerFeature = __webpack_require__(195).registerFeature;
-	var heatmapFeature = __webpack_require__(231);
+	var heatmapFeature = __webpack_require__(222);
 	var timestamp = __webpack_require__(200);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -56971,7 +57657,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new canvas_heatmapFeature(arg);
 	  }
 	  heatmapFeature.call(this, arg);
-	  var object = __webpack_require__(263);
+	  var object = __webpack_require__(264);
 
 	  object.call(this);
 
@@ -57432,7 +58118,269 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 264 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(4);
+	var sceneObject = __webpack_require__(198);
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Canvas specific subclass of object which rerenders when the object is drawn.
+	 * @class geo.canvas.object
+	 * @extends geo.sceneObject
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+
+	var canvas_object = function (arg) {
+	  'use strict';
+
+	  var object = __webpack_require__(199);
+
+	  // this is used to extend other geojs classes, so only generate
+	  // a new object when that is not the case... like if this === window
+	  if (!(this instanceof object)) {
+	    return new canvas_object(arg);
+	  }
+	  sceneObject.call(this);
+
+	  var m_this = this,
+	      s_draw = this.draw;
+
+	  /**
+	   * This must be overridden by any feature that needs to render.
+	   */
+	  this._renderOnCanvas = function () {
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	  *  Redraw the object.
+	  */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.draw = function () {
+	    m_this._update();
+	    m_this.renderer()._render();
+	    s_draw();
+	    return m_this;
+	  };
+
+	  return this;
+	};
+
+	inherit(canvas_object, sceneObject);
+	module.exports = canvas_object;
+
+
+
+/***/ },
 /* 265 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(4);
+	var registerFeature = __webpack_require__(195).registerFeature;
+	var pixelmapFeature = __webpack_require__(232);
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class pixelmapFeature
+	 *
+	 * @class geo.canvas.pixelmapFeature
+	 * @param {Object} arg Options object
+	 * @extends geo.pixelmapFeature
+	 * @returns {canvas_pixelmapFeature}
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	var canvas_pixelmapFeature = function (arg) {
+	  'use strict';
+
+	  if (!(this instanceof canvas_pixelmapFeature)) {
+	    return new canvas_pixelmapFeature(arg);
+	  }
+	  pixelmapFeature.call(this, arg);
+
+	  var object = __webpack_require__(264);
+	  object.call(this);
+
+	  this._init(arg);
+	  return this;
+	};
+
+	inherit(canvas_pixelmapFeature, pixelmapFeature);
+
+	// Now register it
+	registerFeature('canvas', 'pixelmap', canvas_pixelmapFeature);
+	module.exports = canvas_pixelmapFeature;
+
+
+/***/ },
+/* 266 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(4);
+	var registerFeature = __webpack_require__(195).registerFeature;
+	var quadFeature = __webpack_require__(211);
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class quadFeature
+	 *
+	 * @class geo.canvas.quadFeature
+	 * @param {Object} arg Options object
+	 * @extends geo.quadFeature
+	 * @returns {geo.canvas.quadFeature}
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	var canvas_quadFeature = function (arg) {
+	  'use strict';
+
+	  if (!(this instanceof canvas_quadFeature)) {
+	    return new canvas_quadFeature(arg);
+	  }
+	  quadFeature.call(this, arg);
+
+	  var object = __webpack_require__(264);
+	  object.call(this);
+
+	  var $ = __webpack_require__(1);
+
+	  var m_this = this,
+	      s_exit = this._exit,
+	      s_init = this._init,
+	      s_update = this._update,
+	      m_quads;
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Build this feature
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._build = function () {
+	    if (!m_this.position()) {
+	      return;
+	    }
+	    m_quads = this._generateQuads();
+
+	    if (m_quads.imgQuads) {
+	      m_quads.imgQuads.sort(function (a, b) {
+	        return a.pos[2] - b.pos[2];
+	      });
+	    }
+	    m_this.buildTime().modified();
+	  };
+
+	  /**
+	   * Render all of the color quads using a single mapper.
+	   *
+	   * @param renderState: the render state used for the render.
+	   */
+	  this._renderColorQuads = function (renderState) {
+	      // ....
+	      // Not implemented yet.
+	  };
+
+	  /**
+	   * Render all of the image quads using a single mapper.
+	   *
+	   * @param renderState: the render state used for the render.
+	   */
+	  this._renderImageQuads = function (context2d, map) {
+	    if (!m_quads.imgQuads.length) {
+	      return;
+	    }
+
+	    var oldAlpha = context2d.globalAlpha;
+	    var opacity = oldAlpha;
+	    $.each(m_quads.imgQuads, function (idx, quad) {
+	      if (!quad.image) {
+	        return;
+	      }
+	      var w = quad.image.width,
+	          h = quad.image.height;
+	      // Canvas transform is affine, so quad has to be a parallelogram
+	      // Also, canvas has no way to render z.
+	      var p0 = map.gcsToDisplay({x:quad.pos[0], y:quad.pos[1]}, null),
+	          p3 = map.gcsToDisplay({x:quad.pos[9], y:quad.pos[10]}, null),
+	          p2 = map.gcsToDisplay({x:quad.pos[6], y:quad.pos[7]}, null);
+	      context2d.setTransform((p3.x - p2.x) / w, (p3.y - p2.y) / h,
+	                             (p0.x - p2.x) / w, (p0.y - p2.y) / h,
+	                             p2.x, p2.y);
+	      if (quad.opacity !== opacity) {
+	        opacity = quad.opacity;
+	        context2d.globalAlpha = opacity;
+	      }
+	      if (!quad.crop) {
+	        context2d.drawImage(quad.image, 0, 0);
+	      } else {
+	        context2d.drawImage(quad.image, 0, 0, quad.crop.x, quad.crop.y, 0, 0,
+	                            quad.crop.x, quad.crop.y);
+	      }
+	    });
+	    if (opacity !== oldAlpha) {
+	      context2d.globalAlpha = oldAlpha;
+	    }
+	  };
+
+	  this._renderOnCanvas = function (context, map) {
+	    this._renderImageQuads(context, map);
+	    this._renderColorQuads(context, map);
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Update
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._update = function () {
+	    s_update.call(m_this);
+	    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
+	        m_this.updateTime().getMTime() < m_this.getMTime()) {
+	      m_this._build();
+	    }
+
+	    m_this.updateTime().modified();
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Initialize
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._init = function () {
+	    s_init.call(m_this, arg);
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Destroy
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._exit = function () {
+
+	    s_exit.call(m_this);
+	  };
+
+	  m_this._init(arg);
+	  return this;
+	};
+
+	inherit(canvas_quadFeature, quadFeature);
+
+	// Now register it
+	var capabilities = {};
+	capabilities[quadFeature.capabilities.color] = false;
+	capabilities[quadFeature.capabilities.image] = true;
+	capabilities[quadFeature.capabilities.imageCrop] = true;
+	capabilities[quadFeature.capabilities.imageFixedScale] = true;
+	capabilities[quadFeature.capabilities.imageFull] = false;
+	capabilities[quadFeature.capabilities.canvas] = true;
+
+	registerFeature('canvas', 'quad', canvas_quadFeature, capabilities);
+	module.exports = canvas_quadFeature;
+
+
+/***/ },
+/* 267 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(195).registerLayerAdjustment;
@@ -57532,27 +58480,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 266 */
+/* 268 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.gui
 	 */
 	module.exports = {
-	  domWidget: __webpack_require__(267),
-	  legendWidget: __webpack_require__(269),
-	  sliderWidget: __webpack_require__(271),
-	  svgWidget: __webpack_require__(270),
-	  uiLayer: __webpack_require__(226),
-	  widget: __webpack_require__(268)
+	  domWidget: __webpack_require__(269),
+	  legendWidget: __webpack_require__(271),
+	  sliderWidget: __webpack_require__(273),
+	  svgWidget: __webpack_require__(272),
+	  uiLayer: __webpack_require__(227),
+	  widget: __webpack_require__(270)
 	};
 
 
 /***/ },
-/* 267 */
+/* 269 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var widget = __webpack_require__(268);
+	var widget = __webpack_require__(270);
 	var inherit = __webpack_require__(4);
 	var registerWidget = __webpack_require__(195).registerWidget;
 
@@ -57609,7 +58557,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 268 */
+/* 270 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -57829,10 +58777,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 269 */
+/* 271 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var svgWidget = __webpack_require__(270);
+	var svgWidget = __webpack_require__(272);
 	var inherit = __webpack_require__(4);
 	var registerWidget = __webpack_require__(195).registerWidget;
 
@@ -58121,10 +59069,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 270 */
+/* 272 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var domWidget = __webpack_require__(267);
+	var domWidget = __webpack_require__(269);
 	var inherit = __webpack_require__(4);
 	var registerWidget = __webpack_require__(195).registerWidget;
 
@@ -58154,7 +59102,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  domWidget.call(this, arg);
 
-	  var d3Renderer = __webpack_require__(244);
+	  var d3Renderer = __webpack_require__(245);
 
 	  var m_this = this,
 	      m_renderer = null;
@@ -58212,10 +59160,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 271 */
+/* 273 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var svgWidget = __webpack_require__(270);
+	var svgWidget = __webpack_require__(272);
 	var inherit = __webpack_require__(4);
 	var registerWidget = __webpack_require__(195).registerWidget;
 
