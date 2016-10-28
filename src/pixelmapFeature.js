@@ -14,10 +14,10 @@ var util = require('./util');
  * @param {Object|Function|HTMLImageElement} [url] URL of a pixel map or an
  *   HTML Image element.  The rgb data is interpretted as an index of the form
  *   0xbbggrr.  The alpha channel is ignored.
- * @param {Object|Function} [mapColor] The color that should be used for each
- *   data element.  Data elements correspond to the indices in the pixel map.
- *   If an index is larger than the number of data elements, it will be
- *   transparent.  If there is more data than there are indices, it is ignored.
+ * @param {Object|Function} [color] The color that should be used for each data
+ *   element.  Data elements correspond to the indices in the pixel map.  If an
+ *   index is larger than the number of data elements, it will be transparent.
+ *   If there is more data than there are indices, it is ignored.
  * @param {Object|Function} [position] Position of the image.  Default is
  *   (data).  The position is an Object which specifies the corners of the
  *   quad: ll, lr, ur, ul.  At least two opposite corners must be specified.
@@ -119,16 +119,16 @@ var pixelmapFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set mapColor accessor
+   * Get/Set color accessor
    *
    * @returns {geo.pixelmap}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.mapColor = function (val) {
+  this.color = function (val) {
     if (val === undefined) {
-      return m_this.style('mapColor');
-    } else if (val !== m_this.style('mapColor')) {
-      m_this.style('mapColor', val);
+      return m_this.style('color');
+    } else if (val !== m_this.style('color')) {
+      m_this.style('color', val);
       m_this.dataTime().modified();
       m_this.modified();
     }
@@ -273,7 +273,7 @@ var pixelmapFeature = function (arg) {
    */
   this._computePixelmap = function () {
     var data = m_this.data() || [],
-        mapColorFunc = m_this.style.get('mapColor'),
+        colorFunc = m_this.style.get('color'),
         i, idx, lastidx, color, pixelData, indices, mappedColors,
         updateFirst, updateLast = -1, update, prepared;
 
@@ -287,7 +287,7 @@ var pixelmapFeature = function (arg) {
     updateFirst = m_info.area;
     for (idx in mappedColors) {
       if (mappedColors.hasOwnProperty(idx)) {
-        color = mapColorFunc(data[idx], +idx) || {};
+        color = colorFunc(data[idx], +idx) || {};
         color = [
           (color.r || 0) * 255,
           (color.g || 0) * 255,
@@ -398,7 +398,7 @@ var pixelmapFeature = function (arg) {
     var style = $.extend(
       {},
       {
-        mapColor: function (d, idx) {
+        color: function (d, idx) {
           return {
             r: (idx & 0xFF) / 255,
             g: ((idx >> 8) & 0xFF) / 255,
@@ -416,8 +416,8 @@ var pixelmapFeature = function (arg) {
     if (arg.url !== undefined) {
       style.url = arg.url;
     }
-    if (arg.mapColor !== undefined) {
-      style.mapColor = arg.mapColor;
+    if (arg.color !== undefined) {
+      style.color = arg.color;
     }
     m_this.style(style);
     m_this.dataTime().modified();

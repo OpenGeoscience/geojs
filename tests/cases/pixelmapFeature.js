@@ -60,21 +60,21 @@ describe('geo.pixelmapFeature', function () {
         layer = map.createLayer('feature', {renderer: null});
         pixelmap = geo.pixelmapFeature({layer: layer});
         pixelmap._init();
-        expect(pixelmap.mapColor()(0, 0)).toEqual({r: 0, g: 0, b: 0, a: 1});
+        expect(pixelmap.color()(0, 0)).toEqual({r: 0, g: 0, b: 0, a: 1});
       });
       it('arg gets added to style', function () {
         pixelmap = geo.pixelmapFeature({layer: layer});
         /* init is not automatically called on the geo.pixelmapFeature (it is
          * on geo.canvas.pixelmapFeature). */
         pixelmap._init({
-          mapColor: 'red',
+          color: 'red',
           position: position,
           url: testImageSrc,
           style: {position: {ul: {x: 1}}}
         });
         expect(pixelmap.style('position').ul.x).toBe(-140);
         expect(pixelmap.style('url').slice(0, 4)).toBe('data');
-        expect(pixelmap.style('mapColor')).toBe('red');
+        expect(pixelmap.style('color')).toBe('red');
       });
     });
     it('_exit', function () {
@@ -256,14 +256,14 @@ describe('geo.pixelmapFeature', function () {
       pixelmap._update();
       expect(pixelmap.maxIndex()).toBe(6);
     });
-    it('mapColor', function () {
+    it('color', function () {
       var colorFunc = function (d, i) {
         return i & 1 ? 'red' : 'blue';
       };
-      expect(pixelmap.mapColor()(0, 2)).toEqual({r: 2 / 255, g: 0, b: 0, a: 1});
-      expect(pixelmap.mapColor(colorFunc)).toBe(pixelmap);
-      expect(pixelmap.mapColor()(0, 2)).toEqual('blue');
-      expect(pixelmap.mapColor()(0, 3)).toEqual('red');
+      expect(pixelmap.color()(0, 2)).toEqual({r: 2 / 255, g: 0, b: 0, a: 1});
+      expect(pixelmap.color(colorFunc)).toBe(pixelmap);
+      expect(pixelmap.color()(0, 2)).toEqual('blue');
+      expect(pixelmap.color()(0, 3)).toEqual('red');
     });
   });
 
@@ -330,7 +330,7 @@ describe('geo.pixelmapFeature', function () {
       var colorFunc = function (d, i) {
         return i & 1 ? 'red' : 'blue';
       };
-      pixelmap.mapColor(colorFunc);
+      pixelmap.color(colorFunc);
       counts = $.extend({}, window._canvasLog.counts);
       pixelmap.draw();
     });
