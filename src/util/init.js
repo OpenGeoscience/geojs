@@ -103,6 +103,25 @@
     },
 
     /**
+     * Returns true if the argument is an HTML Image element that is fully
+     * loaded.
+     *
+     * @param {object} img: an object that might be an HTML Image element.
+     * @param {boolean} [allowFailedImage]: if true, an image element that has
+     *     a source and has failed to load is also considered 'ready' in the
+     *     sense that it isn't expected to change to a better state.
+     * @returns {boolean} true if this is an image that is ready.
+     */
+    isReadyImage: function (img, allowFailedImage) {
+      if (img instanceof Image && img.complete && img.src) {
+        if ((img.naturalWidth && img.naturalHeight) || allowFailedImage) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    /**
      * Returns true if the argument is a function.
      */
     isFunction: function (f) {

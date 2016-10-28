@@ -70,8 +70,8 @@ module.exports = (function () {
       if (!this._image) {
         this._image = new Image(this.size.x, this.size.y);
         // Only set the crossOrigin parameter if this is going across origins.
-        if (this._url.indexOf(':') >= 0 && this._url.indexOf('/') >= 0 &&
-            this._url.indexOf(':') < this._url.indexOf('/')) {
+        if (this._url.indexOf(':') >= 0 &&
+            this._url.indexOf('/') === this._url.indexOf(':') + 1) {
           this._image.crossOrigin = this._cors;
         }
         defer = new $.Deferred();
