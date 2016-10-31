@@ -7,13 +7,13 @@ html, body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  overflow: hidden;
+}
+
+.navbar {
+  margin: 0;
 }
 
 #map {
-  top: -21px;
   width: 100%;
   height: calc(100% - 60px);
-  position: relative;
-  overflow: hidden;
 }

@@ -88,6 +88,7 @@ var vglRenderer = function (arg) {
 
     var canvas = $(document.createElement('canvas'));
     canvas.attr('class', 'webgl-canvas');
+    canvas.css('display', 'block');
     $(m_this.layer().node().get(0)).append(canvas);
     m_viewer = vgl.viewer(canvas.get(0), arg.options);
     m_viewer.init();

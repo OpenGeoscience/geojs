@@ -58,6 +58,7 @@ var canvasRenderer = function (arg) {
     m_this.context2d = canvas[0].getContext('2d');
 
     canvas.attr('class', 'canvas-canvas');
+    canvas.css('display', 'block');
     $(m_this.layer().node().get(0)).append(canvas);
 
     m_this.canvas(canvas);
