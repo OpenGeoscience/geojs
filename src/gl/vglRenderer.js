@@ -189,8 +189,11 @@ var vglRenderer = function (arg) {
       m_lastZoom = map.zoom();
       cam.setViewMatrix(view, true);
       cam.setProjectionMatrix(proj);
+      var viewport = camera.viewport;
       if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
           proj[8] || proj[9] || proj[11] || proj[15] !== 1 || !ortho ||
+          (viewport.left && viewport.left % 1) ||
+          (viewport.top && viewport.top % 1) ||
           (parseFloat(m_lastZoom.toFixed(6)) !==
            parseFloat(m_lastZoom.toFixed(0)))) {
         /* Don't align texels */
@@ -202,11 +205,11 @@ var vglRenderer = function (arg) {
          * probably be divided by window.devicePixelRatio. */
         cam.viewAlignment = function () {
           var align = {
-            roundx: 2.0 / camera.viewport.width,
-            roundy: 2.0 / camera.viewport.height
+            roundx: 2.0 / viewport.width,
+            roundy: 2.0 / viewport.height
           };
-          align.dx = (camera.viewport.width % 2) ? align.roundx * 0.5 : 0;
-          align.dy = (camera.viewport.height % 2) ? align.roundy * 0.5 : 0;
+          align.dx = (viewport.width % 2) ? align.roundx * 0.5 : 0;
+          align.dy = (viewport.height % 2) ? align.roundy * 0.5 : 0;
           return align;
         };
       }

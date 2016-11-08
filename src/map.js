@@ -151,7 +151,10 @@ var map = function (arg) {
   m_unitsPerPixel = (arg.unitsPerPixel || (
     m_maxBounds.right - m_maxBounds.left) / 256);
 
-  m_camera.viewport = {width: m_width, height: m_height};
+  m_camera.viewport = {
+    width: m_width, height: m_height,
+    left: m_node.offset().left, top: m_node.offset().top
+  };
   arg.center = util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
   m_clampBoundsX = arg.clampBoundsX === undefined ? false : arg.clampBoundsX;
@@ -683,7 +686,10 @@ var map = function (arg) {
     if (newZoom !== m_zoom) {
       m_this.zoom(newZoom);
     }
-    m_this.camera().viewport = {width: m_width, height: m_height};
+    m_this.camera().viewport = {
+      width: m_width, height: m_height,
+      left: m_node.offset().left, top: m_node.offset().top
+    };
     m_this.center(oldCenter);
 
     m_this.geoTrigger(geo_event.resize, {
