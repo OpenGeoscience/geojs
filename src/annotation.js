@@ -1,6 +1,7 @@
 var $ = require('jquery');
 var inherit = require('./inherit');
 var geo_event = require('./event');
+var geo_action = require('./action');
 var transform = require('./transform');
 var util = require('./util');
 var registerAnnotation = require('./registry').registerAnnotation;
@@ -15,6 +16,8 @@ var annotationState = {
   done: 'done',
   edit: 'edit'
 };
+
+var annotationActionOwner = 'annotationAction';
 
 /////////////////////////////////////////////////////////////////////////////
 /**
@@ -122,6 +125,28 @@ var annotation = function (type, args) {
   };
 
   /**
+   * Return actions needed for the specified state of this annotation.
+   *
+   * @param {string} state: the state to return actions for.  Defaults to
+   *    the current state.
+   * @returns {array}: a list of actions.
+   */
+  this.actions = function () {
+    return [];
+  };
+
+  /**
+   * Process any actions for this annotation.
+   *
+   * @param {object} evt: the action event.
+   * @returns {boolean|string} true to update the annotation, 'done' if the
+   *    annotation was completed (changed from create to done state), 'remove'
+   *    if the annotation should be removed, falsy to not update anything.
+   */
+  this.processAction = function () {
+  };
+
+  /**
    * Set or get options.
    *
    * @param {string|object} arg1 if undefined, return the options object.  If
@@ -221,7 +246,7 @@ var annotation = function (type, args) {
    * @returns {array} an array of coordinates.
    */
   this.coordinates = function (gcs) {
-    var coord = this._coordinates();
+    var coord = this._coordinates() || [];
     if (this.layer()) {
       var map = this.layer().map();
       gcs = (gcs === null ? map.gcs() : (
@@ -380,18 +405,80 @@ var rectangleAnnotation = function (args) {
   annotation.call(this, 'rectangle', args);
 
   /**
+   * Return actions needed for the specified state of this annotation.
+   *
+   * @param {string} state: the state to return actions for.  Defaults to
+   *    the current state.
+   * @returns {array}: a list of actions.
+   */
+  this.actions = function (state) {
+    if (!state) {
+      state = this.state();
+    }
+    switch (state) {
+      case annotationState.create:
+        return [{
+          action: geo_action.annotation_rectangle,
+          name: 'rectangle create',
+          owner: annotationActionOwner,
+          input: 'left',
+          modifiers: {shift: false, ctrl: false},
+          selectionRectangle: true
+        }];
+      default:
+        return [];
+    }
+  };
+
+  /**
+   * Process any actions for this annotation.
+   *
+   * @param {object} evt: the action event.
+   * @returns {boolean|string} true to update the annotation, 'done' if the
+   *    annotation was completed (changed from create to done state), 'remove'
+   *    if the annotation should be removed, falsy to not update anything.
+   */
+  this.processAction = function (evt) {
+    var layer = this.layer();
+    if (this.state() !== annotationState.create || !layer ||
+        evt.state.action !== geo_action.annotation_rectangle) {
+      return;
+    }
+    var map = layer.map();
+    this.options('corners', [
+      /* Keep in map gcs, not interface gcs to avoid wrapping issues */
+      map.displayToGcs({x: evt.lowerLeft.x, y: evt.lowerLeft.y}, null),
+      map.displayToGcs({x: evt.lowerLeft.x, y: evt.upperRight.y}, null),
+      map.displayToGcs({x: evt.upperRight.x, y: evt.upperRight.y}, null),
+      map.displayToGcs({x: evt.upperRight.x, y: evt.lowerLeft.y}, null)
+    ]);
+    this.state(annotationState.done);
+    return 'done';
+  };
+
+  /**
    * Get a list of renderable features for this annotation.
    *
    * @returns {array} an array of features.
    */
   this.features = function () {
-    var opt = this.options();
-    return [{
-      polygon: {
-        polygon: opt.corners,
-        style: opt.style
-      }
-    }];
+    var opt = this.options(),
+        state = this.state(),
+        features;
+    switch (state) {
+      case annotationState.create:
+        features = [];
+        break;
+      default:
+        features = [{
+          polygon: {
+            polygon: opt.corners,
+            style: opt.style
+          }
+        }];
+        break;
+    }
+    return features;
   };
 
   /**
@@ -420,7 +507,7 @@ var rectangleAnnotation = function (args) {
    */
   this._geojsonCoordinates = function (gcs) {
     var src = this.coordinates(gcs);
-    if (!src || src.length < 4) {
+    if (!src || this.state() === annotationState.create || src.length < 4) {
       return;
     }
     var coor = [];
@@ -849,6 +936,7 @@ registerAnnotation('point', pointAnnotation, pointRequiredFeatures);
 
 module.exports = {
   state: annotationState,
+  actionOwner: annotationActionOwner,
   annotation: annotation,
   pointAnnotation: pointAnnotation,
   polygonAnnotation: polygonAnnotation,
