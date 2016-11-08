@@ -340,11 +340,11 @@ var gl_polygonFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._update = function (opts) {
     if (opts && opts.mayDelay) {
-      m_updateAnimFrameRef = window.requestAnimationFrame(this._update);
+      m_updateAnimFrameRef = m_this.layer().map().scheduleAnimationFrame(m_this._update);
       return;
     }
     if (m_updateAnimFrameRef) {
-      window.cancelAnimationFrame(m_updateAnimFrameRef);
+      m_this.layer().map().scheduleAnimationFrame(m_this._update, 'remove');
       m_updateAnimFrameRef = null;
     }
     s_update.call(m_this);

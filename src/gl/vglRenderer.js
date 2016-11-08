@@ -32,8 +32,8 @@ var vglRenderer = function (arg) {
       m_viewer = null,
       m_width = 0,
       m_height = 0,
-      m_renderAnimFrameRef = null,
       m_lastZoom,
+      m_updateCamera = false,
       s_init = this._init,
       s_exit = this._exit;
 
@@ -121,7 +121,7 @@ var vglRenderer = function (arg) {
     m_this.canvas().attr('height', h);
     renderWindow.positionAndResize(x, y, w, h);
 
-    m_this._updateRendererCamera();
+    m_updateCamera = true;
     m_this._render();
 
     return m_this;
@@ -133,10 +133,13 @@ var vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._render = function () {
-    if (m_renderAnimFrameRef) {
-      window.cancelAnimationFrame(m_renderAnimFrameRef);
-    }
-    m_renderAnimFrameRef = window.requestAnimationFrame(this._renderFrame);
+    /* If we are already scheduled to render, don't schedule again.  Rather,
+     * mark that we should render after other animation frame requests occur.
+     * It would be nice if we could just reschedule the call by removing and
+     * readding the animation frame request, but this doesn't work for if the
+     * reschedule occurs during another animation frame callback (it then waits
+     * until a subsequent frame). */
+    m_this.layer().map().scheduleAnimationFrame(this._renderFrame, true);
     return m_this;
   };
 
@@ -144,7 +147,10 @@ var vglRenderer = function (arg) {
    * This clears the render timer and actually renders.
    */
   this._renderFrame = function () {
-    m_renderAnimFrameRef = null;
+    if (m_updateCamera) {
+      m_updateCamera = false;
+      m_this._updateRendererCamera();
+    }
     m_viewer.render();
   };
 
@@ -217,7 +223,7 @@ var vglRenderer = function (arg) {
   // produce a pan
   m_this.layer().geoOn(geo_event.pan, function (evt) {
     void (evt);
-    m_this._updateRendererCamera();
+    m_updateCamera = true;
   });
 
   // Connect to parallelprojection event
@@ -230,10 +236,11 @@ var vglRenderer = function (arg) {
       if (!vglRenderer || !vglRenderer.camera()) {
         console.log('Parallel projection event triggered on unconnected VGL ' +
                     'renderer.');
+        return;
       }
       camera = vglRenderer.camera();
       camera.setEnableParallelProjection(evt.parallelProjection);
-      m_this._updateRendererCamera();
+      m_updateCamera = true;
     }
   });
 

@@ -57,6 +57,9 @@ var sceneObject = require('./sceneObject');
  * @param {geo.camera?} camera The camera to control the view
  * @param {geo.mapInteractor?} interactor The UI event handler
  * @param {geo.clock?} clock The clock used to synchronize time events
+ * @param {array} [animationQueue] An array used to synchonize animations.  If
+ *   specified, this should be an empty array or the same array as passed to
+ *   other map instances.
  * @param {boolean} [autoResize=true] Adjust map size on window resize
  * @param {boolean} [clampBoundsX=false] Prevent panning outside of the
  *   maximum bounds in the horizontal direction.
@@ -127,6 +130,7 @@ var map = function (arg) {
       m_clampBoundsX,
       m_clampBoundsY,
       m_clampZoom,
+      m_animationQueue = arg.animationQueue || [],
       m_origin,
       m_scale = {x: 1, y: 1, z: 1}; // constant and ignored for the moment
 
@@ -1223,7 +1227,7 @@ var map = function (arg) {
       }
       m_this.rotation(p[3], undefined, true);
 
-      window.requestAnimationFrame(anim);
+      m_this.scheduleAnimationFrame(anim);
     }
 
     m_this.geoTrigger(geo_event.transitionstart, opts);
@@ -1239,7 +1243,7 @@ var map = function (arg) {
     } else if (animTime) {
       anim(animTime);
     } else {
-      window.requestAnimationFrame(anim);
+      m_this.scheduleAnimationFrame(anim);
     }
     return m_this;
   };
@@ -1559,6 +1563,56 @@ var map = function (arg) {
     $a.appendTo(m_this.node());
     return m_this;
   };
+
+  /**
+   * Instead of each function using window.requestAnimationFrame, schedule all
+   * such frames here.  This allows the callbacks to be reordered or removed as
+   * needed and reduces overhead in Chrome a small amount.  Also, if the
+   * animation queue is shared between map instances, the callbacks will be
+   * called as one, providing better synchronization.
+   *
+   * @param {function} callback: function to call during the animation frame.
+   *    It is called with an animation epoch, exactly as requestAnimationFrame.
+   * @param {string|boolean} action: falsy to only add the callback if it is
+   *    not already scheduled.  'remove' to remove the callback (use this
+   *    instead of cancelAnimationFrame).  Any other truthy value moves the
+   *    callback to the end of the list.
+   * @returns {integer} An integer as returned by window.requestAnimationFrame.
+   */
+  this.scheduleAnimationFrame = function (callback, action) {
+    if (!m_animationQueue.length) {
+      /* By refering to requestAnimationFrame as a property of window, versus
+       * explicitly using window.requestAnimationFrame, we prevent the
+       * stripping of 'window' off of the reference and allow our tests to
+       * override this if needed. */
+      m_animationQueue.push(window['requestAnimationFrame'](processAnimationFrame));
+    }
+    var pos = m_animationQueue.indexOf(callback, 1);
+    if (pos >= 0) {
+      if (!action) {
+        return;
+      }
+      m_animationQueue.splice(pos, 1);
+      if (action === 'remove') {
+        return;
+      }
+    }
+    m_animationQueue.push(callback);
+    return m_animationQueue[0];
+  };
+
+  /**
+   * Sevice the callback during an animation frame.  This uses splice to modify
+   * the animationQueue to allow multiple map instances to share the queue.
+   */
+  function processAnimationFrame() {
+    var queue = m_animationQueue.splice(0, m_animationQueue.length);
+
+    /* The first entry is the reference to the window.requestAnimationFrame. */
+    for (var i = 1; i < queue.length; i += 1) {
+      queue[i].apply(this, arguments);
+    }
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   //
