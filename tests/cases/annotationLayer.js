@@ -75,13 +75,13 @@ describe('geo.annotationLayer', function () {
       expect(layer.mode()).toBe('polygon');
       expect(layer.annotations().length).toBe(1);
       expect(layer.annotations()[0].id()).not.toBe(id);
-      expect(map.interactor().hasAction(undefined, undefined, 'annotationLayer')).toBeNull();
+      expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).toBeNull();
       expect(layer.mode('rectangle')).toBe(layer);
       expect(layer.mode()).toBe('rectangle');
-      expect(map.interactor().hasAction(undefined, undefined, 'annotationLayer')).not.toBeNull();
+      expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).not.toBeNull();
       expect(layer.mode(null)).toBe(layer);
       expect(layer.mode()).toBe(null);
-      expect(map.interactor().hasAction(undefined, undefined, 'annotationLayer')).toBeNull();
+      expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).toBeNull();
     });
     it('annotations', function () {
       var poly = geo.annotation.polygonAnnotation({
@@ -380,8 +380,12 @@ describe('geo.annotationLayer', function () {
       });
       expect(layer.annotations().length).toBe(0);
       layer.mode('rectangle');
+      expect(layer.annotations()[0].state()).toBe(geo.annotation.state.create);
       layer._processSelection({
-        state: {action: geo.geo_action.annotation_rectangle},
+        state: {
+          action: geo.geo_action.annotation_rectangle,
+          actionRecord: {owner: geo.annotation.actionOwner}
+        },
         lowerLeft: {x: 10, y: 10},
         lowerRight: {x: 20, y: 10},
         upperLeft: {x: 10, y: 5},
@@ -389,6 +393,7 @@ describe('geo.annotationLayer', function () {
       });
       expect(layer.annotations().length).toBe(1);
       expect(layer.annotations()[0].type()).toBe('rectangle');
+      expect(layer.annotations()[0].state()).toBe(geo.annotation.state.done);
     });
     it('_geojsonFeatureToAnnotation', function () {
       map.deleteLayer(layer);
