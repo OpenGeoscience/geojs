@@ -99,6 +99,9 @@ describe('geo.util.convertColor', function () {
         b: 1
       });
     });
+    it('undefined', function () {
+      expect(geo.util.convertColor(undefined)).toBe(undefined);
+    });
   });
 });
 

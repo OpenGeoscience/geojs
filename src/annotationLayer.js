@@ -1,6 +1,5 @@
 var inherit = require('./inherit');
 var featureLayer = require('./featureLayer');
-var geo_action = require('./action');
 var geo_annotation = require('./annotation');
 var geo_event = require('./event');
 var registry = require('./registry');
@@ -47,7 +46,6 @@ var annotationLayer = function (args) {
       s_update = this._update,
       m_buildTime = timestamp(),
       m_options,
-      m_actions,
       m_mode = null,
       m_annotations = [],
       m_features = [];
@@ -70,16 +68,6 @@ var annotationLayer = function (args) {
     finalPointProximity: 10  // in pixels, 0 is exact
   }, args);
 
-  m_actions = {
-    rectangle: {
-      action: geo_action.annotation_rectangle,
-      owner: 'annotationLayer',
-      input: 'left',
-      modifiers: {shift: false, ctrl: false},
-      selectionRectangle: true
-    }
-  };
-
   /**
    * Process a selection event.  If we are in rectangle-creation mode, this
    * creates a rectangle.
@@ -87,22 +75,37 @@ var annotationLayer = function (args) {
    * @param {geo.event} evt the selection event.
    */
   this._processSelection = function (evt) {
-    if (m_this.mode() === 'rectangle') {
-      m_this.mode(null);
-      if (evt.state.action === geo_action.annotation_rectangle) {
-        var map = m_this.map();
-        var params = {
-          corners: [
-            /* Keep in map gcs, not interface gcs to avoid wrapping issues */
-            map.displayToGcs({x: evt.lowerLeft.x, y: evt.lowerLeft.y}, null),
-            map.displayToGcs({x: evt.lowerLeft.x, y: evt.upperRight.y}, null),
-            map.displayToGcs({x: evt.upperRight.x, y: evt.upperRight.y}, null),
-            map.displayToGcs({x: evt.upperRight.x, y: evt.lowerLeft.y}, null)
-          ],
-          layer: this
-        };
-        this.addAnnotation(geo_annotation.rectangleAnnotation(params));
-      }
+    var update;
+    if (evt.state && evt.state.actionRecord &&
+        evt.state.actionRecord.owner === geo_annotation.actionOwner &&
+        this.currentAnnotation) {
+      update = this.currentAnnotation.processAction(evt);
+    }
+    this._updateFromEvent(update);
+  };
+
+  /**
+   * Handle updating the current annotation based on an update state.
+   *
+   * @param {string|undefined} update: truthy to update.  'done' if the
+   *    annotation was completed and the mode should return to null.  'remove'
+   *    to remove the current annotation and set the mode to null.  Falsy to do
+   *    nothing.
+   */
+  this._updateFromEvent = function (update) {
+    switch (update) {
+      case 'remove':
+        m_this.removeAnnotation(m_this.currentAnnotation, false);
+        m_this.mode(null);
+        break;
+      case 'done':
+        m_this.mode(null);
+        break;
+    }
+    if (update) {
+      m_this.modified();
+      m_this._update();
+      m_this.draw();
     }
   };
 
@@ -132,20 +135,7 @@ var annotationLayer = function (args) {
   this._handleMouseClick = function (evt) {
     if (this.mode() && this.currentAnnotation) {
       var update = this.currentAnnotation.mouseClick(evt);
-      switch (update) {
-        case 'remove':
-          m_this.removeAnnotation(m_this.currentAnnotation, false);
-          m_this.mode(null);
-          break;
-        case 'done':
-          m_this.mode(null);
-          break;
-      }
-      if (update) {
-        m_this.modified();
-        m_this._update();
-        m_this.draw();
-      }
+      this._updateFromEvent(update);
     }
   };
 
@@ -323,7 +313,8 @@ var annotationLayer = function (args) {
       return m_mode;
     }
     if (arg !== m_mode) {
-      var createAnnotation, mapNode = m_this.map().node(), oldMode = m_mode;
+      var createAnnotation, actions,
+          mapNode = m_this.map().node(), oldMode = m_mode;
       m_mode = arg;
       mapNode.css('cursor', m_mode ? 'crosshair' : '');
       if (m_mode) {
@@ -347,18 +338,21 @@ var annotationLayer = function (args) {
           createAnnotation = geo_annotation.polygonAnnotation;
           break;
         case 'rectangle':
-          m_this.map().interactor().addAction(m_actions.rectangle);
+          createAnnotation = geo_annotation.rectangleAnnotation;
           break;
       }
+      m_this.map().interactor().removeAction(
+        undefined, undefined, geo_annotation.actionOwner);
       if (createAnnotation) {
         this.currentAnnotation = createAnnotation({
           state: geo_annotation.state.create,
           layer: this
         });
         this.addAnnotation(m_this.currentAnnotation);
-      }
-      if (m_mode !== 'rectangle') {
-        m_this.map().interactor().removeAction(m_actions.rectangle);
+        actions = this.currentAnnotation.actions(geo_annotation.state.create);
+        $.each(actions, function (idx, action) {
+          m_this.map().interactor().addAction(action);
+        });
       }
       m_this.geoTrigger(geo_event.annotation.mode, {
         mode: m_mode, oldMode: oldMode});
