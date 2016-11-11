@@ -190,6 +190,15 @@ var vglRenderer = function (arg) {
       cam.setViewMatrix(view, true);
       cam.setProjectionMatrix(proj);
       var viewport = camera.viewport;
+      /* Test if we should align texels.  We won't if the projection matrix
+       * is not simple, if there is a rotation that isn't a multiple of 90
+       * degrees, if the viewport is not at an integer location, or if the zoom
+       * level is not close to an integer.
+       *   Note that the test for the viewport is strict (val % 1 is non-zero
+       * if the value is not an integer), as, in general, the alignment is only
+       * non-integral if a percent offset or calculation was used in css
+       * somewhere.  The test for zoom level always has some allowance for
+       * precision, as it is often the result of repeated computations. */
       if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
           proj[8] || proj[9] || proj[11] || proj[15] !== 1 || !ortho ||
           (viewport.left && viewport.left % 1) ||
