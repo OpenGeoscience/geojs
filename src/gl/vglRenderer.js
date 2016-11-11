@@ -189,8 +189,20 @@ var vglRenderer = function (arg) {
       m_lastZoom = map.zoom();
       cam.setViewMatrix(view, true);
       cam.setProjectionMatrix(proj);
+      var viewport = camera.viewport;
+      /* Test if we should align texels.  We won't if the projection matrix
+       * is not simple, if there is a rotation that isn't a multiple of 90
+       * degrees, if the viewport is not at an integer location, or if the zoom
+       * level is not close to an integer.
+       *   Note that the test for the viewport is strict (val % 1 is non-zero
+       * if the value is not an integer), as, in general, the alignment is only
+       * non-integral if a percent offset or calculation was used in css
+       * somewhere.  The test for zoom level always has some allowance for
+       * precision, as it is often the result of repeated computations. */
       if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
           proj[8] || proj[9] || proj[11] || proj[15] !== 1 || !ortho ||
+          (viewport.left && viewport.left % 1) ||
+          (viewport.top && viewport.top % 1) ||
           (parseFloat(m_lastZoom.toFixed(6)) !==
            parseFloat(m_lastZoom.toFixed(0)))) {
         /* Don't align texels */
@@ -202,11 +214,11 @@ var vglRenderer = function (arg) {
          * probably be divided by window.devicePixelRatio. */
         cam.viewAlignment = function () {
           var align = {
-            roundx: 2.0 / camera.viewport.width,
-            roundy: 2.0 / camera.viewport.height
+            roundx: 2.0 / viewport.width,
+            roundy: 2.0 / viewport.height
           };
-          align.dx = (camera.viewport.width % 2) ? align.roundx * 0.5 : 0;
-          align.dy = (camera.viewport.height % 2) ? align.roundy * 0.5 : 0;
+          align.dx = (viewport.width % 2) ? align.roundx * 0.5 : 0;
+          align.dy = (viewport.height % 2) ? align.roundy * 0.5 : 0;
           return align;
         };
       }

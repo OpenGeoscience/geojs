@@ -303,10 +303,17 @@
 
     /**
      * Getter/setter for the viewport.
+     *
+     * The viewport consists of a width and height in pixels, plus a left and
+     * top offset in pixels.  The offsets are only used to determine if pixel
+     * alignment is possible.
      */
     Object.defineProperty(this, 'viewport', {
       get: function () {
-        return {width: this._viewport.width, height: this._viewport.height};
+        return {
+          width: this._viewport.width, height: this._viewport.height,
+          left: this._viewport.left, top: this._viewport.top
+        };
       },
       set: function (viewport) {
         if (!(viewport.width > 0 &&
@@ -335,7 +342,10 @@
           ]);
         }
 
-        this._viewport = {width: viewport.width, height: viewport.height};
+        this._viewport = {
+          width: viewport.width, height: viewport.height,
+          left: viewport.left, top: viewport.top
+        };
         this._update();
         this.geoTrigger(geo_event.camera.viewport, {
           camera: this,
