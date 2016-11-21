@@ -252,8 +252,8 @@
      *    returned.
      */
     convertColor: function (color) {
-      if (color.r !== undefined && color.g !== undefined &&
-          color.b !== undefined) {
+      if (color === undefined || (color.r !== undefined &&
+          color.g !== undefined && color.b !== undefined)) {
         return color;
       }
       var opacity;

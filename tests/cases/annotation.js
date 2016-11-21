@@ -38,6 +38,8 @@ describe('geo.annotation', function () {
       expect(ann.layer()).toBe(undefined);
       expect(ann.features()).toEqual([]);
       expect(ann.coordinates()).toEqual([]);
+      expect(ann.actions()).toEqual([]);
+      expect(ann.processAction()).toBe(undefined);
       expect(ann.mouseClick()).toBe(undefined);
       expect(ann.mouseMove()).toBe(undefined);
       expect(ann._coordinates()).toEqual([]);
@@ -193,6 +195,44 @@ describe('geo.annotation', function () {
       expect(features.length).toBe(1);
       expect(features[0].polygon.polygon).toEqual(corners);
       expect(features[0].polygon.style.fillOpacity).toBe(0.25);
+      ann.state(geo.annotation.state.create);
+      features = ann.features();
+      expect(features.length).toBe(0);
+    });
+    it('actions', function () {
+      var ann = geo.annotation.rectangleAnnotation({corners: corners});
+      var actions = ann.actions();
+      expect(actions.length).toBe(0);
+      actions = ann.actions(geo.annotation.state.create);
+      expect(actions.length).toBe(1);
+      expect(actions[0].name).toEqual('rectangle create');
+      ann.state(geo.annotation.state.create);
+      actions = ann.actions();
+      expect(actions.length).toBe(1);
+      expect(actions[0].name).toEqual('rectangle create');
+      actions = ann.actions(geo.annotation.state.done);
+      expect(actions.length).toBe(0);
+    });
+    it('processAction', function () {
+      var map = create_map();
+      var layer = map.createLayer('annotation', {
+        annotations: ['rectangle']
+      });
+      var ann = geo.annotation.rectangleAnnotation({layer: layer, corners: corners});
+      expect(ann.processAction({state: null})).toBe(undefined);
+      ann.state(geo.annotation.state.create);
+      var evt = {
+        state: {action: geo.geo_action.annotation_rectangle},
+        lowerLeft: {x: 10, y: 65},
+        upperRight: {x: 90, y: 5}
+      };
+      expect(ann.processAction(evt)).toBe('done');
+      expect(ann.state()).toBe(geo.annotation.state.done);
+      var coor = ann.coordinates();
+      expect(coor[0].x).toBeCloseTo(-27.246);
+      expect(coor[0].y).toBeCloseTo(10.055);
+      expect(coor[2].x).toBeCloseTo(-20.215);
+      expect(coor[2].y).toBeCloseTo(15.199);
     });
     it('_coordinates', function () {
       var ann = geo.annotation.rectangleAnnotation({corners: corners});
