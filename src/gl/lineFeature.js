@@ -182,7 +182,9 @@ var gl_lineFeature = function (arg) {
           '          xOffset = miterLimit * strokeWidth * (1.0 - offset * sign(sinABC)) + antialiasing;',
           '        }',
           '      } else {',
-          '        xOffset = abs(sinABC / cosABC) * strokeWidth * (1.0 - offset * sign(sinABC)) + antialiasing;',
+          // we add an extra 1.0 to the xOffset to make sure that fragment
+          // shader is doing the clipping
+          '        xOffset = abs(sinABC / cosABC) * strokeWidth * (1.0 - offset * sign(sinABC)) + antialiasing + 1.0;',
           '        nearMode = 4;',
           '      }',
           '    }',
