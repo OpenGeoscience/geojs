@@ -341,6 +341,7 @@ module.exports.mockAnimationFrame = function (mockDate) {
     animFrameIndex += 1;
     var id = animFrameIndex;
     animFrameCallbacks.push({id: id, callback: callback});
+    return id;
   }
 
   /* Replace window.cancelAnimationFrame with this function.

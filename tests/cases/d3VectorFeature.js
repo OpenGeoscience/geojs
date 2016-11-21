@@ -10,6 +10,7 @@ describe('d3 vector feature', function () {
   var map, layer, feature1;
 
   it('Create a map with a d3 feature layer', function () {
+    mockAnimationFrame();
     d3.select('body').append('div').attr('id', 'map-d3-vector');
     map = geo.map({node: '#map-d3-vector',
       center: [0, 0],
@@ -36,7 +37,6 @@ describe('d3 vector feature', function () {
   });
 
   it('Add features to a layer', function () {
-    mockAnimationFrame();
     var vectorLines, featureGroup, markers;
     feature1 = layer.createFeature('vector')
     .data([{y: 0, x: 0}, {y: 10, x: 0}, {y: 0, x: 10}])
