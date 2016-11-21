@@ -170,7 +170,7 @@ var gl_lineFeature = function (arg) {
           '    angleABC = (mod(angleABC + PI, 2.0 * PI) - PI) / 2.0;',
           '    cosABC = cos(angleABC);  sinABC = sin(angleABC);',
           // if this angle is close to flat, pass-through the join
-          '    if (nearMode >= 4 && cosABC > 0.999) {',
+          '    if (nearMode >= 4 && cosABC > 0.999999) {',
           '      nearMode = 3;',
           '    }',
           // miter, miter-clip
@@ -201,7 +201,7 @@ var gl_lineFeature = function (arg) {
           '    angleBCD = (mod(angleBCD + PI, 2.0 * PI) - PI) / 2.0;',
           '    cosBCD = cos(angleBCD);  sinBCD = sin(angleBCD);',
           // if this angle is close to flat, pass-through the join
-          '    if (farMode >= 4 && cosBCD > 0.999) {',
+          '    if (farMode >= 4 && cosBCD > 0.999999) {',
           '      farMode = 3;',
           '    }',
           // miter, miter-clip
