@@ -1431,11 +1431,11 @@ var mapInteractor = function (args) {
       }
 
       if (m_state.handler) {
-        window.requestAnimationFrame(m_state.handler);
+        m_this.map().scheduleAnimationFrame(m_state.handler);
       }
     };
     if (m_state.handler) {
-      window.requestAnimationFrame(m_state.handler);
+      m_this.map().scheduleAnimationFrame(m_state.handler);
     }
   };
 

@@ -20,12 +20,12 @@ describe('d3 graph feature', function () {
     var map, layer, feature;
 
     it('Setup map', function () {
+      mockAnimationFrame();
       map = geo.map({node: '#map-d3-graph-feature', center: [0, 0], zoom: 3});
       layer = map.createLayer('feature', {'renderer': 'd3'});
     });
 
     it('Add features to a layer', function () {
-      mockAnimationFrame();
       var selection, nodes;
 
       nodes = [

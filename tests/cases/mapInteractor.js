@@ -136,6 +136,9 @@ describe('mapInteractor', function () {
     map.gcs = function (arg) {
       return 'EPSG:3857';
     };
+    map.scheduleAnimationFrame = function (callback) {
+      return window['requestAnimationFrame'](callback);
+    };
     return map;
   }
 
@@ -1327,6 +1330,7 @@ describe('mapInteractor', function () {
   });
 
   it('Test momentum', function () {
+    mockAnimationFrame();
     var map = mockedMap('#mapNode1'), start;
 
     var interactor = geo.mapInteractor({
@@ -1338,7 +1342,6 @@ describe('mapInteractor', function () {
       }],
       throttle: false
     });
-    mockAnimationFrame();
     mockDate();
     // initiate a pan and release
     interactor.simulateEvent(
@@ -1380,6 +1383,7 @@ describe('mapInteractor', function () {
   });
 
   it('Test springback', function () {
+    mockAnimationFrame();
     $('#mapNode1').css({width: '400px', height: '400px'});
     var map = mockedMap('#mapNode1'), start;
 
@@ -1393,7 +1397,6 @@ describe('mapInteractor', function () {
       }],
       throttle: false
     });
-    mockAnimationFrame();
     mockDate();
     // pan past the max bounds
     interactor.simulateEvent(

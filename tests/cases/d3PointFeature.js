@@ -20,6 +20,7 @@ describe('d3 point feature', function () {
     var map, width = 800, height = 600, layer, feature1, feature2;
 
     it('Setup map', function () {
+      mockAnimationFrame();
       map = geo.map({node: '#map-d3-point-feature', center: [0, 0], zoom: 3});
       layer = map.createLayer('feature', {'renderer': 'd3'});
 
@@ -27,7 +28,6 @@ describe('d3 point feature', function () {
     });
 
     it('Add features to a layer', function () {
-      mockAnimationFrame();
       var selection;
       feature1 = layer.createFeature('point', {selectionAPI: true})
         .data([{y: 0, x: 0}, {y: 10, x: 0}, {y: 0, x: 10}])
