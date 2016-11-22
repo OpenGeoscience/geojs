@@ -352,16 +352,16 @@ var gl_lineFeature = function (arg) {
         i, j, k, v, v2, lidx,
         numSegments = 0, len,
         lineItem, lineItemData,
-        vert = [{}, {}], vertTemp,
+        vert = [{}, {}], v1 = vert[1],
         pos, posIdx3, firstpos, firstPosIdx3,
         position = [],
         posFunc = m_this.position(),
-        strkWidthFunc = m_this.style.get('strokeWidth'),
-        strkColorFunc = m_this.style.get('strokeColor'),
-        strkOpacityFunc = m_this.style.get('strokeOpacity'),
-        lineCapFunc = m_this.style.get('lineCap'),
-        lineJoinFunc = m_this.style.get('lineJoin'),
-        strokeOffsetFunc = m_this.style.get('strokeOffset'),
+        strokeWidthFunc = m_this.style.get('strokeWidth'), strokeWidthVal,
+        strokeColorFunc = m_this.style.get('strokeColor'), strokeColorVal,
+        strokeOpacityFunc = m_this.style.get('strokeOpacity'), strokeOpacityVal,
+        lineCapFunc = m_this.style.get('lineCap'), lineCapVal,
+        lineJoinFunc = m_this.style.get('lineJoin'), lineJoinVal,
+        strokeOffsetFunc = m_this.style.get('strokeOffset'), strokeOffsetVal,
         miterLimit = m_this.style.get('miterLimit')(data),
         antialiasing = m_this.style.get('antialiasing')(data) || 0,
         order = m_this.featureVertices(),
@@ -370,7 +370,15 @@ var gl_lineFeature = function (arg) {
         strokeWidthBuf, strokeColorBuf, strokeOpacityBuf,
         dest, dest3,
         geom = m_mapper.geometryData(),
-        closedFunc = m_this.style.get('closed'), closed = [];
+        closedFunc = m_this.style.get('closed'), closedVal, closed = [];
+
+    closedVal = util.isFunction(m_this.style('closed')) ? undefined : closedFunc();
+    lineCapVal = util.isFunction(m_this.style('lineCap')) ? undefined : lineCapFunc();
+    lineJoinVal = util.isFunction(m_this.style('lineJoin')) ? undefined : lineJoinFunc();
+    strokeColorVal = util.isFunction(m_this.style('strokeColor')) ? undefined : strokeColorFunc();
+    strokeOffsetVal = util.isFunction(m_this.style('strokeOffset')) ? undefined : strokeOffsetFunc();
+    strokeOpacityVal = util.isFunction(m_this.style('strokeOpacity')) ? undefined : strokeOpacityFunc();
+    strokeWidthVal = util.isFunction(m_this.style('strokeWidth')) ? undefined : strokeWidthFunc();
 
     if (miterLimit !== undefined) {
       /* We impose a limit no matter what, since otherwise the growth is
@@ -395,7 +403,7 @@ var gl_lineFeature = function (arg) {
           firstpos = pos;
         }
       }
-      if (lineItem.length > 2 && closedFunc(data[i], i)) {
+      if (lineItem.length > 2 && (closedVal === undefined ? closedFunc(data[i], i) : closedVal)) {
         /* line is closed */
         if (pos.x !== firstpos.x || pos.y !== firstpos.y ||
             pos.z !== firstpos.z) {
@@ -442,28 +450,30 @@ var gl_lineFeature = function (arg) {
         /* swap entries in vert so that vert[0] is the first vertex, and
          * vert[1] will be reused for the second vertex */
         if (j) {
-          vertTemp = vert[0];
+          v1 = vert[0];
           vert[0] = vert[1];
-          vert[1] = vertTemp;
+          vert[1] = v1;
         }
-        vert[1].pos = j === lidx ? posIdx3 : firstPosIdx3;
-        vert[1].prev = lidx ? posIdx3 - 3 : (closed[i] ?
+        v1.pos = j === lidx ? posIdx3 : firstPosIdx3;
+        v1.prev = lidx ? posIdx3 - 3 : (closed[i] ?
             firstPosIdx3 + (lineItem.length - 3 + closed[i]) * 3 : posIdx3);
-        vert[1].next = j + 1 < lineItem.length ? posIdx3 + 3 : (closed[i] ?
+        v1.next = j + 1 < lineItem.length ? posIdx3 + 3 : (closed[i] ?
             (j !== lidx ? firstPosIdx3 + 3 : firstPosIdx3 + 6 - closed[i] * 3) :
             posIdx3);
-        vert[1].strokeWidth = strkWidthFunc(lineItemData, lidx, lineItem, i);
-        vert[1].strokeColor = strkColorFunc(lineItemData, lidx, lineItem, i);
-        vert[1].strokeOpacity = strkOpacityFunc(lineItemData, lidx, lineItem, i);
-        vert[1].strokeOffset = strokeOffsetFunc(lineItemData, lidx, lineItem, i) || 0;
-        if (vert[1].strokeOffset) {
-          vert[1].posStrokeOffset = Math.round(2048 + 1023 * Math.min(1, Math.max(-1, vert[1].strokeOffset))) & 0x7FF;
-          vert[1].negStrokeOffset = Math.round(2048 - 1023 * Math.min(1, Math.max(-1, vert[1].strokeOffset))) & 0x7FF;
+        v1.strokeWidth = strokeWidthVal === undefined ? strokeWidthFunc(lineItemData, lidx, lineItem, i) : strokeWidthVal;
+        v1.strokeColor = strokeColorVal === undefined ? strokeColorFunc(lineItemData, lidx, lineItem, i) : strokeColorVal;
+        v1.strokeOpacity = strokeOpacityVal === undefined ? strokeOpacityFunc(lineItemData, lidx, lineItem, i) : strokeOpacityVal;
+        v1.strokeOffset = (strokeOffsetVal === undefined ? strokeOffsetFunc(lineItemData, lidx, lineItem, i) : strokeOffsetVal) || 0;
+        if (v1.strokeOffset) {
+          v1.posStrokeOffset = Math.round(2048 + 1023 * Math.min(1, Math.max(-1, v1.strokeOffset))) & 0x7FF;
+          v1.negStrokeOffset = Math.round(2048 - 1023 * Math.min(1, Math.max(-1, v1.strokeOffset))) & 0x7FF;
+        } else {
+          v1.posStrokeOffset = v1.negStrokeOffset = 0;
         }
         if (!closed[i] && (!j || j === lineItem.length - 1)) {
-          vert[1].flags = flagsLineCap[lineCapFunc(lineItemData, lidx, lineItem, i)] || flagsLineCap.butt;
+          v1.flags = flagsLineCap[lineCapVal === undefined ? lineCapFunc(lineItemData, lidx, lineItem, i) : lineCapVal] || flagsLineCap.butt;
         } else {
-          vert[1].flags = flagsLineJoin[lineJoinFunc(lineItemData, lidx, lineItem, i)] || flagsLineJoin.miter;
+          v1.flags = flagsLineJoin[lineJoinVal === undefined ? lineJoinFunc(lineItemData, lidx, lineItem, i) : lineJoinVal] || flagsLineJoin.miter;
         }
 
         if (j) {
@@ -655,13 +665,11 @@ var gl_lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    if (m_actor) {
-      m_this.renderer().contextRenderer().removeActor(m_actor);
-    }
-
     createGLLines();
 
-    m_this.renderer().contextRenderer().addActor(m_actor);
+    if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
+      m_this.renderer().contextRenderer().addActor(m_actor);
+    }
     m_this.buildTime().modified();
   };
 
