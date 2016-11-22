@@ -1109,7 +1109,7 @@ var map = function (arg) {
     }
 
     var defaultOpts = {
-      center: m_this.center(undefined, null),
+      center: undefined,
       zoom: m_this.zoom(),
       rotation: m_this.rotation(),
       duration: 1000,
@@ -1155,8 +1155,8 @@ var map = function (arg) {
       opts.zCoord ? zoom2z(m_transition.start.zoom) : m_transition.start.zoom,
       m_transition.start.rotation
     ], [
-      m_transition.end.center.x,
-      m_transition.end.center.y,
+      m_transition.end.center ? m_transition.end.center.x : m_transition.start.center.x,
+      m_transition.end.center ? m_transition.end.center.y : m_transition.start.center.y,
       opts.zCoord ? zoom2z(m_transition.end.zoom) : m_transition.end.zoom,
       m_transition.end.rotation
     ]);
@@ -1192,8 +1192,10 @@ var map = function (arg) {
       m_transition.time = time - m_transition.start.time;
       if (time >= m_transition.end.time || next) {
         if (!next) {
-          var needZoom = m_zoom !== fix_zoom(m_transition.end.zoom);
-          m_this.center(m_transition.end.center, null, needZoom, needZoom);
+          if (m_transition.end.center) {
+            var needZoom = m_zoom !== fix_zoom(m_transition.end.zoom);
+            m_this.center(m_transition.end.center, null, needZoom, needZoom);
+          }
           m_this.zoom(m_transition.end.zoom, m_transition.zoomOrigin);
           m_this.rotation(fix_rotation(m_transition.end.rotation));
         }
