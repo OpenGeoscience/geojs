@@ -100,6 +100,9 @@ $(function () {
    * @param {array} datalines: an array of lines to show.
    */
   function show_lines(rawdata) {
+    if (!rawdata) {
+      return;
+    }
     var maxsegments = parseInt(lines, 10) || 10000, numlines, segments = 0;
     for (numlines = 0; numlines < rawdata.length && segments < maxsegments; numlines += 1) {
       segments += rawdata[numlines].data.length - 1;
@@ -261,7 +264,9 @@ $(function () {
     }
   }
 
-  map.createLayer('osm');
+  if (query.map !== 'false') {
+    map.createLayer('osm');
+  }
   layer = map.createLayer('feature', layerOptions);
   lineFeature = layer.createFeature('line', lineOptions)
     .line(function (d) {
