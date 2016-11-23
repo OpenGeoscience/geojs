@@ -4,8 +4,10 @@
 $(function () {
   'use strict';
 
+  // Get query parameters
   var query = utils.getQuery();
 
+  // Create a map centered on Clifton Park, NY
   var map = geo.map({
     node: '#map',
     center: {
@@ -14,12 +16,16 @@ $(function () {
     },
     zoom: 10
   });
-  var layer, lineFeature, lines, rawdata, skipdraw;
+  var osm, mapUrl, layer, lineFeature, lines, rawdata, skipdraw;
 
+  // By default, use the best renderer that supports lines.  This can be
+  // changed on with the 'renderer' query parameter to force a particular
+  // renderer
   var layerOptions = {
     renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
     features: query.renderer ? undefined : ['line']
   };
+  // Defaults for the line controls
   var defaultStyles = {
     lineCap: 'butt',
     lineJoin: 'miter',
@@ -31,14 +37,21 @@ $(function () {
   };
   var lineOptions = {
     style: $.extend({
+      // Our data set is a set of lines, some of which form closed loops.  If
+      // a line is a series of points where the first and last point coincide,
+      // flag it as closed so that the end is properly mitered
       closed: function (line, idx) {
         return (line.data[0][0] === line.data[line.data.length - 1][0] &&
                 line.data[0][1] === line.data[line.data.length - 1][1]);
       },
+      // If the query parameter 'debug=true' is added, pixels visited and
+      // discarded by the fragment shader will appear in red.  This slows down
+      // rendering
       debug: query.debug ? query.debug === 'true' : undefined
     }, defaultStyles)
   };
 
+  // Parse query parameters and adjust styles to match
   $.each(query, function (key, value) {
     var ctlvalue, ctlkey = key;
     switch (key) {
@@ -62,21 +75,25 @@ $(function () {
           lines = ctlvalue = parseInt(value, 10);
         }
         break;
+      case 'showmap':
+        ctlvalue = value !== 'false';
+        break;
       case 'miterLimit':
         value = value.length ? parseFloat(value) : undefined;
         if (!isNaN(value) && value > 0 && value !== undefined) {
           lineOptions.style[key] = ctlvalue = value;
         }
         break;
-      /* debug */
     }
     if (ctlvalue !== undefined) {
       $('#' + ctlkey).val(ctlvalue);
     }
   });
+  // When a preset button is clicked, show the preset.
   $('button.preset').on('click', select_preset);
 
-  /* Based on the current controls, fetch a data set and show it.
+  /**
+   * Based on the current controls, fetch a data set and show it.
    */
   function fetch_data() {
     var url = '../../data/roads.json';
@@ -94,15 +111,21 @@ $(function () {
     });
   }
 
-  /* Given a set of datalines, optionally truncate or expand it, then show it
-   * as a lineFeature.
+  /**
+   * Given a set of lines, optionally truncate or expand it, then show it as a
+   * lineFeature.
    *
-   * @param {array} datalines: an array of lines to show.
+   * @param {array} rawdata: an array of lines to show.  Each entry contains an
+   *    object that has a 'data' element which is an array of points that form
+   *    the line.
    */
   function show_lines(rawdata) {
     if (!rawdata) {
       return;
     }
+    // The number of lines specified in the control is used to determine the
+    // number of line segments that are shown.  Since lines can be composed of
+    // any number of segments, we have to keep a tally.
     var maxsegments = parseInt(lines, 10) || 10000, numlines, segments = 0;
     for (numlines = 0; numlines < rawdata.length && segments < maxsegments; numlines += 1) {
       segments += rawdata[numlines].data.length - 1;
@@ -217,6 +240,9 @@ $(function () {
         lines = parseInt(value);
         show_lines(rawdata);
         break;
+      case 'showmap':
+        set_osm_url(value);
+        break;
       case 'miterLimit':
         value = value.length ? parseFloat(value) : undefined;
         if (isNaN(value) || value <= 0 || value === undefined) {
@@ -229,10 +255,10 @@ $(function () {
         }
         break;
     }
-    // update the url to reflect the changes
+    // Update the url to reflect the changes
     query[param] = value;
     if (value === '' || (ctl.attr('placeholder') &&
-        value === ctl.attr('placeholder'))) {
+        '' + value === ctl.attr('placeholder'))) {
       delete query[param];
     }
     var newurl = window.location.protocol + '//' + window.location.host +
@@ -249,12 +275,17 @@ $(function () {
     var update;
     var ctl = $(evt.target);
     var keys = ['antialiasing', 'lineCap', 'lineJoin', 'lines', 'miterLimit',
-                'strokeColor', 'strokeOffset', 'strokeOpacity', 'strokeWidth'];
+                'showmap', 'strokeColor', 'strokeOffset', 'strokeOpacity',
+                'strokeWidth'];
     skipdraw = true;
     $.each(keys, function (idx, key) {
       var value = ctl.attr(key);
-      if (value !== '' && value !== undefined && $('#' + key).val() !== value) {
-        $('#' + key).val(value).trigger('change');
+      if (value !== undefined && $('#' + key).val() !== value) {
+        if (key === 'showmap') {
+          $('#' + key).prop('checked', value === 'true').trigger('change');
+        } else {
+          $('#' + key).val(value).trigger('change');
+        }
       }
       update = true;
     });
@@ -264,10 +295,29 @@ $(function () {
     }
   }
 
-  if (query.map !== 'false') {
-    map.createLayer('osm');
+  /**
+   * Set the map to either use the original default url or a blank white image.
+   *
+   * @param {string} value: 'false' to use a white image, anything else to use
+   *    the original url.
+   */
+  function set_osm_url(value) {
+    if (!mapUrl) {
+      mapUrl = {url: osm.url(), attribution: osm.attribution()};
+    }
+    osm.url(
+      value !== 'false' ? mapUrl.url :
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVQI12P4DwABAQEAG7buVgAAAABJRU5ErkJggg=='  /* white 1x1 */
+    );
+    osm.attribution(value !== 'false' ? mapUrl.attribution : '');
   }
+
+  // Create a tile layer
+  osm = map.createLayer('osm');
+  set_osm_url(query.showmap);
+  // Create a feature layer for the lines
   layer = map.createLayer('feature', layerOptions);
+  // Ceate a line feature
   lineFeature = layer.createFeature('line', lineOptions)
     .line(function (d) {
       return d.data;
@@ -275,16 +325,18 @@ $(function () {
     .position(function (d) {
       return {x: d[0], y: d[1]};
     });
-  /* Make some values available in the global context so curious people can
-   * play with them. */
+  // Make some values available in the global context so curious people can
+  // play with them.
   window.example = {
     map: map,
+    osm: osm,
     layer: layer,
     layerOptions: layerOptions,
     line: lineFeature,
     lineOptions: lineOptions
   };
 
+  // Load our data set
   fetch_data();
   $('#controls').on('change', change_controls);
 });
