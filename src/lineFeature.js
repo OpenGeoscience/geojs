@@ -13,7 +13,10 @@ var feature = require('./feature');
  *   Typically, the data is an array of lines, each of which is an array of
  *   points.  Only lines that have at least two points are rendered.  The
  *   position function is called for each point as position(linePoint,
-*    pointIndex, lineEntry, lineEntryIndex).
+ *   pointIndex, lineEntry, lineEntryIndex).
+ * @param {boolean} [arg.selectionAPI=false] True to send selection events on
+ *   mouse move, click, etc.
+ * @param {boolean} [arg.visible=true] True to show this feature.
  * @param {Object} [arg.style] Style object with default style options.
  * @param {Object|Function} [arg.style.strokeColor] Color to stroke each
  *   line.  The color can vary by point.  Colors can be css names or hex

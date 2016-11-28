@@ -61,6 +61,10 @@ $(function () {
           lineOptions.style[key] = ctlvalue = value;
         }
         break;
+      case 'hovertext':
+        ctlvalue = value === 'true';
+        lineOptions.selectionAPI = value;
+        break;
       case 'lineCap':
       case 'lineJoin':
       case 'strokeColor':
@@ -86,7 +90,11 @@ $(function () {
         break;
     }
     if (ctlvalue !== undefined) {
-      $('#' + ctlkey).val(ctlvalue);
+      if ($('#' + ctlkey).is('[type="checkbox"]')) {
+        $('#' + ctlkey).prop('checked', ctlvalue);
+      } else {
+        $('#' + ctlkey).val(ctlvalue);
+      }
     }
   });
   // When a preset button is clicked, show the preset.
@@ -223,6 +231,10 @@ $(function () {
           lineFeature.draw();
         }
         break;
+      case 'hovertext':
+        lineOptions.selectionAPI = processedValue;
+        lineFeature.selectionAPI(processedValue);
+        break;
       case 'lineCap':
       case 'lineJoin':
       case 'strokeColor':
@@ -317,6 +329,11 @@ $(function () {
   set_osm_url(query.showmap);
   // Create a feature layer for the lines
   layer = map.createLayer('feature', layerOptions);
+  // Create a tool-tip layer above the line layer
+  var uiLayer = map.createLayer('ui', {zIndex: 2});
+  var tooltip = uiLayer.createWidget('dom', {position: {x: 0, y: 0}});
+  var tooltipElem = $(tooltip.canvas()).attr('id', 'tooltip').addClass(
+      'hidden');
   // Ceate a line feature
   lineFeature = layer.createFeature('line', lineOptions)
     .line(function (d) {
@@ -324,7 +341,21 @@ $(function () {
     })
     .position(function (d) {
       return {x: d[0], y: d[1]};
+    })
+    // add hover events
+    .geoOn(geo.event.feature.mouseover, function (evt) {
+      var text = (evt.data.name ? evt.data.name : '') +
+                 (evt.data.highway ? ' (' + evt.data.highway + ')' : '');
+      if (text) {
+        tooltip.position(evt.mouse.geo);
+        tooltipElem.text(text);
+      }
+      tooltipElem.toggleClass('hidden', !text);
+    })
+    .geoOn(geo.event.feature.mouseout, function (evt) {
+      tooltipElem.addClass('hidden');
     });
+
   // Make some values available in the global context so curious people can
   // play with them.
   window.example = {
@@ -333,7 +364,10 @@ $(function () {
     layer: layer,
     layerOptions: layerOptions,
     line: lineFeature,
-    lineOptions: lineOptions
+    lineOptions: lineOptions,
+    tooltip: tooltip,
+    tooltipElem: tooltipElem,
+    ui: uiLayer
   };
 
   // Load our data set

@@ -30,6 +30,9 @@ block append mainContent
     .form-group(title="Antialiasing (a non-negative number).  Edges of lines will be antialiased by this many pixels.  Values larger than 2 tend to make things blurry.")
       label(for="antialiasing") antialiasing
       input#antialiasing(placeholder="1")
+    .form-group(title="Show road names and categories on hover.")
+      label(for="hovertext") Info on Hover
+      input#hovertext(type="checkbox", placeholder="false")
     .form-group(title="Show an OSM map underneath the lines.")
       label(for="showmap") Show Map
       input#showmap(type="checkbox", placeholder="true", checked="checked")
