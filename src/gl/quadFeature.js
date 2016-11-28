@@ -42,7 +42,7 @@ var gl_quadFeature = function (arg) {
     'uniform highp vec2 crop;',
     'void main(void) {',
     '  mediump vec4 color = texture2D(sampler2d, iTextureCoord);',
-    '  if (iTextureCoord.s > crop.s || 1.0 - iTextureCoord.t > crop.t) {',
+    '  if ((crop.s < 1.0 && iTextureCoord.s > crop.s) || (crop.t < 1.0 && 1.0 - iTextureCoord.t > crop.t)) {',
     '    discard;',
     '  }',
     '  color.w *= opacity;',
