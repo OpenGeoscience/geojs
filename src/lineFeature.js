@@ -1,5 +1,7 @@
 var inherit = require('./inherit');
 var feature = require('./feature');
+var timestamp = require('./timestamp');
+var transform = require('./transform');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -65,7 +67,9 @@ var lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      s_init = this._init;
+      s_init = this._init,
+      m_pointSearchTime = timestamp(),
+      m_pointSearchInfo;
 
   this.featureType = 'line';
 
@@ -107,6 +111,52 @@ var lineFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Cache information needed for point searches.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._updatePointSearchInfo = function () {
+    if (m_pointSearchTime.getMTime() >= m_this.dataTime().getMTime()) {
+      return;
+    }
+    m_pointSearchTime.modified();
+    m_pointSearchInfo = [];
+    var data = m_this.data(),
+        line = m_this.line(),
+        widthFunc = m_this.style.get('strokeWidth'),
+        posFunc = m_this.position(),
+        closedFunc = m_this.style.get('closed'),
+        gcs = m_this.gcs(),
+        mapgcs = m_this.layer().map().gcs();
+
+    data.forEach(function (d, index) {
+      var closed = closedFunc(d, index),
+          last, lastr2, first, record = [];
+
+      line(d, index).forEach(function (current, j) {
+        var p = posFunc(current, j, d, index);
+        if (gcs !== mapgcs) {
+          p = transform.transformCoordinates(gcs, mapgcs, p);
+        }
+        var r = Math.ceil(widthFunc(current, j, d, index) / 2) + 2;
+        var r2 = r * r;
+        if (last) {
+          record.push({u: p, v: last, r2: lastr2 > r2 ? lastr2 : r2});
+        }
+        last = p;
+        lastr2 = r2;
+        if (!first && closed) {
+          first = {p: p, r2: r2};
+        }
+        if (closed) {
+          record.push({u: last, v: first.p, r2: lastr2 > first.r2 ? lastr2 : first.r2});
+        }
+      });
+      m_pointSearchInfo.push(record);
+    });
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Returns an array of datum indices that contain the given point.
    * This is a slow implementation with runtime order of the number of
    * vertices.  A point is considered on a line segment if it is close to the
@@ -118,40 +168,34 @@ var lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (p) {
-    var data, pt, line, width, indices = [], found = [], pos;
-    data = m_this.data();
-    if (!data || !data.length) {
+    var data = m_this.data(), indices = [], found = [];
+    if (!data || !data.length || !m_this.layer()) {
       return {
-        found: [],
-        index: []
+        found: found,
+        index: indices
       };
     }
-
-    line = m_this.line();
-    width = m_this.style.get('strokeWidth');
-    pos = m_this.position();
-    pt = m_this.featureGcsToDisplay(p);
+    this._updatePointSearchInfo();
+    var map = m_this.layer().map(),
+        scale = map.unitsPerPixel(map.zoom()),
+        scale2 = scale * scale,
+        pt = transform.transformCoordinates(m_this.gcs(), map.gcs(), p),
+        i, j, record;
 
     // minimum l2 distance squared from
     // q -> line(u, v)
     function lineDist2(q, u, v) {
-      var t, l2 = dist2(u, v);
+      var t, vux = v.x - u.x, vuy = v.y - u.y, l2 = vux * vux + vuy * vuy;
 
       if (l2 < 1) {
         // u, v are within 1 pixel
         return dist2(q, u);
       }
 
-      t = ((q.x - u.x) * (v.x - u.x) + (q.y - u.y) * (v.y - u.y)) / l2;
+      t = ((q.x - u.x) * vux + (q.y - u.y) * vuy) / l2;
       if (t < 0) { return dist2(q, u); }
       if (t > 1) { return dist2(q, v); }
-      return dist2(
-        q,
-        {
-          x: u.x + t * (v.x - u.x),
-          y: u.y + t * (v.y - u.y)
-        }
-      );
+      return dist2(q, {x: u.x + t * vux, y: u.y + t * vuy});
     }
 
     // l2 distance squared from u to v
@@ -161,46 +205,16 @@ var lineFeature = function (arg) {
       return dx * dx + dy * dy;
     }
 
-    // for each line
-    data.forEach(function (d, index) {
-      var closed = m_this.style.get('closed')(d, index),
-          last, lastr, first;
-
-      try {
-        line(d, index).forEach(function (current, j) {
-
-          // get the screen coordinates of the current point
-          var p = pos(current, j, d, index);
-          var s = m_this.featureGcsToDisplay(p);
-          var r = Math.ceil(width(p, j, d, index) / 2) + 2;
-
-          if (last) {
-            var r2 = lastr > r ? lastr * lastr : r * r;
-            // test the line segment s -> last
-            if (lineDist2(pt, s, last) <= r2) {
-              // short circuit the loop here
-              throw 'found';
-            }
-          }
-
-          last = s;
-          lastr = r;
-          if (!first && closed) {
-            first = {s: s, r: r};
-          }
-        });
-        if (closed && lineDist2(pt, last, first.s) <= first.r) {
-          throw 'found';
+    for (i = 0; i < m_pointSearchInfo.length; i += 1) {
+      record = m_pointSearchInfo[i];
+      for (j = 0; j < record.length; j += 1) {
+        if (lineDist2(pt, record[j].u, record[j].v) <= record[j].r2 * scale2) {
+          found.push(data[i]);
+          indices.push(i);
+          break;
         }
-      } catch (err) {
-        if (err !== 'found') {
-          throw err;
-        }
-        found.push(d);
-        indices.push(index);
       }
-    });
-
+    }
     return {
       found: found,
       index: indices
