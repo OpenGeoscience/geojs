@@ -239,6 +239,7 @@ var gl_quadFeature = function (arg) {
     if (m_clrModelViewUniform) {
       m_clrModelViewUniform.setOrigin(m_quads.origin);
     }
+    m_this._updateTextures();
     m_this.buildTime().modified();
   };
 
@@ -329,8 +330,6 @@ var gl_quadFeature = function (arg) {
     var context = renderState.m_context,
         opacity = 1,
         crop = {x: 1, y: 1}, quadcrop;
-
-    m_this._updateTextures();
 
     context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
     $.each(m_quads.imgQuads, function (idx, quad) {
