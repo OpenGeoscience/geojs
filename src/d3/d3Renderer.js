@@ -314,6 +314,7 @@ var d3Renderer = function (arg) {
       } else {
         m_svg = d3.select(m_this.layer().node().get(0)).append('svg');
       }
+      m_svg.attr('display', 'block');
 
       // create a global svg definitions element
       m_defs = m_svg.append('defs');

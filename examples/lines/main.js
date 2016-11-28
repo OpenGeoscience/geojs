@@ -14,7 +14,7 @@ $(function () {
       x: -73.7593015,
       y: 42.8496799
     },
-    zoom: 10
+    zoom: 11
   });
   var osm, mapUrl, layer, lineFeature, lines, rawdata, skipdraw;
 
