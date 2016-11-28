@@ -138,6 +138,15 @@ var d3Renderer = function (arg) {
         } else if (key === 'fillOpacity') {
           k = 'fill-opacity';
           f = styles[key];
+        } else if (key === 'lineCap') {
+          k = 'stroke-linecap';
+          f = styles[key];
+        } else if (key === 'lineJoin') {
+          k = 'stroke-linejoin';
+          f = styles[key];
+        } else if (key === 'miterLimit') {
+          k = 'stroke-miterlimit';
+          f = styles[key];
         }
         if (k) {
           select.style(k, f);
