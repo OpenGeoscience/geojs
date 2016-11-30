@@ -73,7 +73,7 @@ var choroplethFeature = function (arg) {
     var scalarId, scalarValue;
 
     if (data === undefined) {
-      return m_this.choropleth.get('scalar')();
+      return m_this.choropleth.get('scalar')() || [];
     } else {
       scalarId = m_this.choropleth.get('accessors')().scalarId;
       scalarValue = m_this.choropleth.get('accessors')().scalarValue;

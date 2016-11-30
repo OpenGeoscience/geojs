@@ -7,6 +7,7 @@ enable_testing()
 
 set(BUILD_TESTING ON CACHE BOOL "Enable geojs testing")
 set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
+set(FFHEADLESS_TESTS ON CACHE BOOL "Generate headless Firefox unit tests (requires xvfb to be running).")
 set(ESLINT_TESTS ON CACHE BOOL "Generate eslint style tests for JS source files.")
 set(SELENIUM_TESTS ON CACHE BOOL "Generate selenium unit tests.")
 
@@ -70,6 +71,13 @@ add_test(
 )
 set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "notes-reset")
 
+add_test(
+  NAME "total-coverage"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  COMMAND npm run combine-coverage
+)
+set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "notes-reset")
+
 if(PHANTOMJS_TESTS)
   find_program(NPM_EXECUTABLE npm)
   add_test(
@@ -80,6 +88,24 @@ if(PHANTOMJS_TESTS)
   set_property(TEST "phantomjs" APPEND PROPERTY ENVIRONMENT "CTEST_NOTES_PATH=${CMAKE_CURRENT_BINARY_DIR}/notes")
   set_property(TEST "phantomjs" APPEND PROPERTY DEPENDS "notes-reset")
   set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "phantomjs")
+  set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "phantomjs")
+endif()
+
+if(FFHEADLESS_TESTS)
+  add_custom_target(
+    data_files
+    ALL
+    DEPENDS ${Girder_DOWNLOAD_FILES}
+  )
+
+  find_program(NPM_EXECUTABLE npm)
+  add_test(
+    NAME "ffheadless"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND npm run ffci
+  )
+  set_property(TEST "ffheadless" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
+  set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "ffheadless")
 endif()
 
 if(SELENIUM_TESTS)
