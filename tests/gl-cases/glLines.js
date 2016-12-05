@@ -32,8 +32,15 @@ describe('glLines', function () {
 
   var myMap;
 
-  it('lines', function (done) {
+  beforeEach(function () {
     imageTest.prepareImageTest();
+  });
+
+  afterEach(function () {
+    myMap.exit();
+  });
+
+  it('lines', function (done) {
 
     var mapOptions = {center: {y: 31.87798, x: -85.44956}, zoom: 10};
     myMap = common.createOsmMap(mapOptions, {}, true);
@@ -54,8 +61,5 @@ describe('glLines', function () {
     myMap.draw();
 
     imageTest.imageTest('glLines', 0.0015, done, myMap.onIdle, 0, 2);
-  });
-  it('clean up', function () {
-    myMap.exit();
   });
 });

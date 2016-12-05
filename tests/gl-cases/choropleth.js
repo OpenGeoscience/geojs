@@ -35,9 +35,15 @@ describe('choropleth', function () {
 
   var myMap;
 
-  it('choropleth', function (done) {
+  beforeEach(function () {
     imageTest.prepareImageTest();
+  });
 
+  afterEach(function () {
+    myMap.exit();
+  });
+
+  it('choropleth', function (done) {
     var mapOptions = {
       zoom: 4,
       center: {
@@ -64,8 +70,5 @@ describe('choropleth', function () {
     myMap.draw();
 
     imageTest.imageTest('choropleth', 0.001, done, myMap.onIdle, 0, 2);
-  });
-  it('clean up', function () {
-    myMap.exit();
   });
 });

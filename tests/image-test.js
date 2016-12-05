@@ -13,18 +13,19 @@ module.exports = {};
  * @param {number} threshold: allowed difference between this image and the
  *    base image.
  * @param {function} callback: a function to call when complete.
+ * @returns {object} jquery ajax promise.
  */
 function compareImage(name, canvas, threshold, callback) {
   if (threshold === undefined) {
     threshold = 0.001;
   }
-  $.ajax({
+  return $.ajax({
     url: '/testImage?compare=true&threshold=' + encodeURIComponent(threshold) + '&name=' + encodeURIComponent(name),
     data: '' + canvas.toDataURL(),
     method: 'PUT',
     contentType: 'image/png',
     dataType: 'json'
-  }).success(function (data) {
+  }).done(function (data) {
     expect(Number(data.misMatchPercentage) * 0.01).not.toBeGreaterThan(threshold);
     if (callback) {
       callback();
@@ -59,6 +60,8 @@ module.exports.prepareImageTest = function () {
  *    wait after the delay.
  */
 module.exports.imageTest = function (name, threshold, doneFunc, idleFunc, delay, rafCount) {
+  var deferred = $.Deferred();
+
   var readyFunc = function () {
     var result = $('<canvas>')[0];
     result.width = $('canvas')[0].width;
@@ -71,6 +74,7 @@ module.exports.imageTest = function (name, threshold, doneFunc, idleFunc, delay,
       if (doneFunc) {
         doneFunc();
       }
+      deferred.resolve();
     });
   };
 
@@ -101,4 +105,5 @@ module.exports.imageTest = function (name, threshold, doneFunc, idleFunc, delay,
   } else {
     readyFunc();
   }
+  return deferred;
 };
