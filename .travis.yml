@@ -9,6 +9,21 @@ node_js:
 
 addons:
   firefox: latest
+  apt:
+    packages:
+      # I suspect that not all of these are necessary
+      - mesa-utils
+      - xvfb
+      - libosmesa6
+
+      - libgif-dev
+      - libpng-dev
+
+      - freeglut3-dev
+      - libxmu-dev
+      - libxi-dev
+      - libxxf86vm-dev
+      - libxrandr-dev
 
 cache:
   directories:
