@@ -103,7 +103,7 @@ var gl_lineFeature = function (arg) {
           'varying vec4 info;',  /* near mode, far mode, offset */
           'varying vec4 angles;', /* near angle cos, sin, far angle cos, sin */
 
-          'const float PI = acos(-1.0);',
+          'const float PI = 3.14159265358979323846264;',
 
           'void main(void)',
           '{',
