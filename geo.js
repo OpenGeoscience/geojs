@@ -88,53 +88,53 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = $.extend({
 	  annotation: __webpack_require__(3),
-	  annotationLayer: __webpack_require__(206),
-	  camera: __webpack_require__(202),
+	  annotationLayer: __webpack_require__(207),
+	  camera: __webpack_require__(203),
 	  choroplethFeature: __webpack_require__(212),
 	  clock: __webpack_require__(214),
 	  contourFeature: __webpack_require__(215),
 	  domRenderer: __webpack_require__(216),
 	  event: __webpack_require__(5),
-	  feature: __webpack_require__(197),
-	  featureLayer: __webpack_require__(207),
+	  feature: __webpack_require__(198),
+	  featureLayer: __webpack_require__(208),
 	  fetchQueue: __webpack_require__(218),
 	  fileReader: __webpack_require__(219),
-	  geo_action: __webpack_require__(208),
+	  geo_action: __webpack_require__(6),
 	  geomFeature: __webpack_require__(220),
 	  graphFeature: __webpack_require__(221),
 	  heatmapFeature: __webpack_require__(222),
 	  imageTile: __webpack_require__(223),
 	  jsonReader: __webpack_require__(225),
-	  layer: __webpack_require__(201),
-	  lineFeature: __webpack_require__(196),
+	  layer: __webpack_require__(202),
+	  lineFeature: __webpack_require__(197),
 	  map: __webpack_require__(226),
 	  mapInteractor: __webpack_require__(210),
-	  object: __webpack_require__(199),
+	  object: __webpack_require__(200),
 	  osmLayer: __webpack_require__(228),
 	  pathFeature: __webpack_require__(231),
-	  pointFeature: __webpack_require__(203),
-	  polygonFeature: __webpack_require__(205),
+	  pointFeature: __webpack_require__(204),
+	  polygonFeature: __webpack_require__(206),
 	  quadFeature: __webpack_require__(211),
 	  pixelmapFeature: __webpack_require__(232),
 	  renderer: __webpack_require__(217),
-	  sceneObject: __webpack_require__(198),
+	  sceneObject: __webpack_require__(199),
 	  tile: __webpack_require__(224),
 	  tileCache: __webpack_require__(230),
 	  tileLayer: __webpack_require__(229),
-	  timestamp: __webpack_require__(200),
-	  transform: __webpack_require__(6),
+	  timestamp: __webpack_require__(201),
+	  transform: __webpack_require__(7),
 	  vectorFeature: __webpack_require__(233),
 	  inherit: __webpack_require__(4),
 	  version: __webpack_require__(234),
 	  sha: __webpack_require__(235),
 
-	  util: __webpack_require__(76),
+	  util: __webpack_require__(77),
 	  jQuery: $,
 	  d3: __webpack_require__(236),
 	  gl: __webpack_require__(248),
 	  canvas: __webpack_require__(261),
 	  gui: __webpack_require__(268)
-	}, __webpack_require__(195));
+	}, __webpack_require__(196));
 
 	if (window && !window.$) {
 	  window.$ = $;
@@ -10013,12 +10013,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(4);
 	var geo_event = __webpack_require__(5);
-	var transform = __webpack_require__(6);
-	var util = __webpack_require__(76);
-	var registerAnnotation = __webpack_require__(195).registerAnnotation;
-	var lineFeature = __webpack_require__(196);
-	var pointFeature = __webpack_require__(203);
-	var polygonFeature = __webpack_require__(205);
+	var geo_action = __webpack_require__(6);
+	var transform = __webpack_require__(7);
+	var util = __webpack_require__(77);
+	var registerAnnotation = __webpack_require__(196).registerAnnotation;
+	var lineFeature = __webpack_require__(197);
+	var pointFeature = __webpack_require__(204);
+	var polygonFeature = __webpack_require__(206);
 
 	var annotationId = 0;
 
@@ -10027,6 +10028,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  done: 'done',
 	  edit: 'edit'
 	};
+
+	var annotationActionOwner = 'annotationAction';
 
 	/////////////////////////////////////////////////////////////////////////////
 	/**
@@ -10134,6 +10137,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
+	   * Return actions needed for the specified state of this annotation.
+	   *
+	   * @param {string} state: the state to return actions for.  Defaults to
+	   *    the current state.
+	   * @returns {array}: a list of actions.
+	   */
+	  this.actions = function () {
+	    return [];
+	  };
+
+	  /**
+	   * Process any actions for this annotation.
+	   *
+	   * @param {object} evt: the action event.
+	   * @returns {boolean|string} true to update the annotation, 'done' if the
+	   *    annotation was completed (changed from create to done state), 'remove'
+	   *    if the annotation should be removed, falsy to not update anything.
+	   */
+	  this.processAction = function () {
+	  };
+
+	  /**
 	   * Set or get options.
 	   *
 	   * @param {string|object} arg1 if undefined, return the options object.  If
@@ -10233,7 +10258,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @returns {array} an array of coordinates.
 	   */
 	  this.coordinates = function (gcs) {
-	    var coord = this._coordinates();
+	    var coord = this._coordinates() || [];
 	    if (this.layer()) {
 	      var map = this.layer().map();
 	      gcs = (gcs === null ? map.gcs() : (
@@ -10392,18 +10417,80 @@ return /******/ (function(modules) { // webpackBootstrap
 	  annotation.call(this, 'rectangle', args);
 
 	  /**
+	   * Return actions needed for the specified state of this annotation.
+	   *
+	   * @param {string} state: the state to return actions for.  Defaults to
+	   *    the current state.
+	   * @returns {array}: a list of actions.
+	   */
+	  this.actions = function (state) {
+	    if (!state) {
+	      state = this.state();
+	    }
+	    switch (state) {
+	      case annotationState.create:
+	        return [{
+	          action: geo_action.annotation_rectangle,
+	          name: 'rectangle create',
+	          owner: annotationActionOwner,
+	          input: 'left',
+	          modifiers: {shift: false, ctrl: false},
+	          selectionRectangle: true
+	        }];
+	      default:
+	        return [];
+	    }
+	  };
+
+	  /**
+	   * Process any actions for this annotation.
+	   *
+	   * @param {object} evt: the action event.
+	   * @returns {boolean|string} true to update the annotation, 'done' if the
+	   *    annotation was completed (changed from create to done state), 'remove'
+	   *    if the annotation should be removed, falsy to not update anything.
+	   */
+	  this.processAction = function (evt) {
+	    var layer = this.layer();
+	    if (this.state() !== annotationState.create || !layer ||
+	        evt.state.action !== geo_action.annotation_rectangle) {
+	      return;
+	    }
+	    var map = layer.map();
+	    this.options('corners', [
+	      /* Keep in map gcs, not interface gcs to avoid wrapping issues */
+	      map.displayToGcs({x: evt.lowerLeft.x, y: evt.lowerLeft.y}, null),
+	      map.displayToGcs({x: evt.lowerLeft.x, y: evt.upperRight.y}, null),
+	      map.displayToGcs({x: evt.upperRight.x, y: evt.upperRight.y}, null),
+	      map.displayToGcs({x: evt.upperRight.x, y: evt.lowerLeft.y}, null)
+	    ]);
+	    this.state(annotationState.done);
+	    return 'done';
+	  };
+
+	  /**
 	   * Get a list of renderable features for this annotation.
 	   *
 	   * @returns {array} an array of features.
 	   */
 	  this.features = function () {
-	    var opt = this.options();
-	    return [{
-	      polygon: {
-	        polygon: opt.corners,
-	        style: opt.style
-	      }
-	    }];
+	    var opt = this.options(),
+	        state = this.state(),
+	        features;
+	    switch (state) {
+	      case annotationState.create:
+	        features = [];
+	        break;
+	      default:
+	        features = [{
+	          polygon: {
+	            polygon: opt.corners,
+	            style: opt.style
+	          }
+	        }];
+	        break;
+	    }
+	    return features;
 	  };
 
 	  /**
@@ -10432,7 +10519,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  this._geojsonCoordinates = function (gcs) {
 	    var src = this.coordinates(gcs);
-	    if (!src || src.length < 4) {
+	    if (!src || this.state() === annotationState.create || src.length < 4) {
 	      return;
 	    }
 	    var coor = [];
@@ -10861,6 +10948,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 	  state: annotationState,
+	  actionOwner: annotationActionOwner,
 	  annotation: annotation,
 	  pointAnnotation: pointAnnotation,
 	  polygonAnnotation: polygonAnnotation,
@@ -11403,9 +11491,36 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 6 */
+/***/ function(module, exports) {
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Common object containing all action types that are provided by the GeoJS
+	 * API.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	var geo_action = {
+	  momentum: 'geo_action_momentum',
+	  pan: 'geo_action_pan',
+	  rotate: 'geo_action_rotate',
+	  select: 'geo_action_select',
+	  unzoomselect: 'geo_action_unzoomselect',
+	  zoom: 'geo_action_zoom',
+	  zoomselect: 'geo_action_zoomselect',
+
+	  // annotation actions
+	  annotation_polygon: 'geo_annotation_polygon',
+	  annotation_rectangle: 'geo_annotation_rectangle'
+	};
+
+	module.exports = geo_action;
+
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var proj4 = __webpack_require__(7);
+	var proj4 = __webpack_require__(8);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -11903,28 +12018,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var proj4 = __webpack_require__(8);
-	proj4.defaultDatum = 'WGS84'; //default datum
-	proj4.Proj = __webpack_require__(9);
-	proj4.WGS84 = new proj4.Proj('WGS84');
-	proj4.Point = __webpack_require__(34);
-	proj4.toPoint = __webpack_require__(33);
-	proj4.defs = __webpack_require__(11);
-	proj4.transform = __webpack_require__(30);
-	proj4.mgrs = __webpack_require__(35);
-	proj4.version = __webpack_require__(36).version;
-	__webpack_require__(37)(proj4);
-	module.exports = proj4;
-
-/***/ },
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var proj = __webpack_require__(9);
-	var transform = __webpack_require__(30);
+	var proj4 = __webpack_require__(9);
+	proj4.defaultDatum = 'WGS84'; //default datum
+	proj4.Proj = __webpack_require__(10);
+	proj4.WGS84 = new proj4.Proj('WGS84');
+	proj4.Point = __webpack_require__(35);
+	proj4.toPoint = __webpack_require__(34);
+	proj4.defs = __webpack_require__(12);
+	proj4.transform = __webpack_require__(31);
+	proj4.mgrs = __webpack_require__(36);
+	proj4.version = __webpack_require__(37).version;
+	__webpack_require__(38)(proj4);
+	module.exports = proj4;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var proj = __webpack_require__(10);
+	var transform = __webpack_require__(31);
 	var wgs84 = proj('WGS84');
 
 	function transformer(from, to, coords) {
@@ -11989,13 +12104,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = proj4;
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var parseCode = __webpack_require__(10);
-	var extend = __webpack_require__(17);
-	var projections = __webpack_require__(18);
-	var deriveConstants = __webpack_require__(26);
+	var parseCode = __webpack_require__(11);
+	var extend = __webpack_require__(18);
+	var projections = __webpack_require__(19);
+	var deriveConstants = __webpack_require__(27);
 
 	function Projection(srsCode,callback) {
 	  if (!(this instanceof Projection)) {
@@ -12028,12 +12143,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var defs = __webpack_require__(11);
-	var wkt = __webpack_require__(16);
-	var projStr = __webpack_require__(13);
+	var defs = __webpack_require__(12);
+	var wkt = __webpack_require__(17);
+	var projStr = __webpack_require__(14);
 	function testObj(code){
 	  return typeof code === 'string';
 	}
@@ -12069,12 +12184,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = parse;
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var globals = __webpack_require__(12);
-	var parseProj = __webpack_require__(13);
-	var wkt = __webpack_require__(16);
+	var globals = __webpack_require__(13);
+	var parseProj = __webpack_require__(14);
+	var wkt = __webpack_require__(17);
 
 	function defs(name) {
 	  /*global console*/
@@ -12130,7 +12245,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports) {
 
 	module.exports = function(defs) {
@@ -12147,12 +12262,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var D2R = 0.01745329251994329577;
-	var PrimeMeridian = __webpack_require__(14);
-	var units = __webpack_require__(15);
+	var PrimeMeridian = __webpack_require__(15);
+	var units = __webpack_require__(16);
 
 	module.exports = function(defData) {
 	  var self = {};
@@ -12285,7 +12400,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports) {
 
 	exports.greenwich = 0.0; //"0dE",
@@ -12303,7 +12418,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.oslo = 10.722916666667; //"10d43'22.5\"E"
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports) {
 
 	exports.ft = {to_meter: 0.3048};
@@ -12311,11 +12426,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var D2R = 0.01745329251994329577;
-	var extend = __webpack_require__(17);
+	var extend = __webpack_require__(18);
 
 	function mapit(obj, key, v) {
 	  obj[key] = v.map(function(aa) {
@@ -12540,7 +12655,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports) {
 
 	module.exports = function(destination, source) {
@@ -12560,12 +12675,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var projs = [
-	  __webpack_require__(19),
-	  __webpack_require__(25)
+	  __webpack_require__(20),
+	  __webpack_require__(26)
 	];
 	var names = {};
 	var projStore = [];
@@ -12600,17 +12715,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var msfnz = __webpack_require__(20);
+	var msfnz = __webpack_require__(21);
 	var HALF_PI = Math.PI/2;
 	var EPSLN = 1.0e-10;
 	var R2D = 57.29577951308232088;
-	var adjust_lon = __webpack_require__(21);
+	var adjust_lon = __webpack_require__(22);
 	var FORTPI = Math.PI/4;
-	var tsfnz = __webpack_require__(23);
-	var phi2z = __webpack_require__(24);
+	var tsfnz = __webpack_require__(24);
+	var phi2z = __webpack_require__(25);
 	exports.init = function() {
 	  var con = this.b / this.a;
 	  this.es = 1 - con * con;
@@ -12703,7 +12818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports) {
 
 	module.exports = function(eccent, sinphi, cosphi) {
@@ -12712,7 +12827,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var TWO_PI = Math.PI * 2;
@@ -12721,14 +12836,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	// have drifted from their original location along the 180th meridian (due to
 	// floating point error) from changing their sign.
 	var SPI = 3.14159265359;
-	var sign = __webpack_require__(22);
+	var sign = __webpack_require__(23);
 
 	module.exports = function(x) {
 	  return (Math.abs(x) <= SPI) ? x : (x - (sign(x) * TWO_PI));
 	};
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports) {
 
 	module.exports = function(x) {
@@ -12736,7 +12851,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports) {
 
 	var HALF_PI = Math.PI/2;
@@ -12749,7 +12864,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports) {
 
 	var HALF_PI = Math.PI/2;
@@ -12770,7 +12885,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports) {
 
 	exports.init = function() {
@@ -12786,13 +12901,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Datum = __webpack_require__(27);
-	var Ellipsoid = __webpack_require__(28);
-	var extend = __webpack_require__(17);
-	var datum = __webpack_require__(29);
+	var Datum = __webpack_require__(28);
+	var Ellipsoid = __webpack_require__(29);
+	var extend = __webpack_require__(18);
+	var datum = __webpack_require__(30);
 	var EPSLN = 1.0e-10;
 	// ellipoid pj_set_ell.c
 	var SIXTH = 0.1666666666666666667;
@@ -12848,7 +12963,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports) {
 
 	exports.wgs84 = {
@@ -12933,7 +13048,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports) {
 
 	exports.MERIT = {
@@ -13153,7 +13268,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports) {
 
 	var HALF_PI = Math.PI/2;
@@ -13562,17 +13677,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var D2R = 0.01745329251994329577;
 	var R2D = 57.29577951308232088;
 	var PJD_3PARAM = 1;
 	var PJD_7PARAM = 2;
-	var datum_transform = __webpack_require__(31);
-	var adjust_axis = __webpack_require__(32);
-	var proj = __webpack_require__(9);
-	var toPoint = __webpack_require__(33);
+	var datum_transform = __webpack_require__(32);
+	var adjust_axis = __webpack_require__(33);
+	var proj = __webpack_require__(10);
+	var toPoint = __webpack_require__(34);
 	module.exports = function transform(source, dest, point) {
 	  var wgs84;
 	  if (Array.isArray(point)) {
@@ -13639,7 +13754,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports) {
 
 	var PJD_3PARAM = 1;
@@ -13744,7 +13859,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports) {
 
 	module.exports = function(crs, denorm, point) {
@@ -13801,7 +13916,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports) {
 
 	module.exports = function (array){
@@ -13819,10 +13934,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var mgrs = __webpack_require__(35);
+	var mgrs = __webpack_require__(36);
 
 	function Point(x, y, z) {
 	  if (!(this instanceof Point)) {
@@ -13859,7 +13974,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports) {
 
 	
@@ -14607,21 +14722,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports) {
 
 	module.exports = {
 		"_args": [
 			[
-				{
-					"raw": "proj4@^2.3.14",
-					"scope": null,
-					"escapedName": "proj4",
-					"name": "proj4",
-					"rawSpec": "^2.3.14",
-					"spec": ">=2.3.14 <3.0.0",
-					"type": "range"
-				},
+				"proj4@^2.3.14",
 				"/Users/jbeezley/git/geojs2"
 			]
 		],
@@ -14636,17 +14743,16 @@ return /******/ (function(modules) { // webpackBootstrap
 			"tmp": "tmp/proj4-2.3.15.tgz_1471808262546_0.6752060337457806"
 		},
 		"_npmUser": {
-			"name": "ahocevar",
-			"email": "andreas.hocevar@gmail.com"
+			"email": "andreas.hocevar@gmail.com",
+			"name": "ahocevar"
 		},
 		"_npmVersion": "3.8.6",
 		"_phantomChildren": {},
 		"_requested": {
-			"raw": "proj4@^2.3.14",
-			"scope": null,
-			"escapedName": "proj4",
 			"name": "proj4",
+			"raw": "proj4@^2.3.14",
 			"rawSpec": "^2.3.14",
+			"scope": null,
 			"spec": ">=2.3.14 <3.0.0",
 			"type": "range"
 		},
@@ -14709,8 +14815,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			"tin": "~0.4.0"
 		},
 		"directories": {
-			"test": "test",
-			"doc": "docs"
+			"doc": "docs",
+			"test": "test"
 		},
 		"dist": {
 			"shasum": "5ad06e8bca30be0ffa389a49e4565f51f06d089e",
@@ -14719,13 +14825,13 @@ return /******/ (function(modules) { // webpackBootstrap
 		"gitHead": "9fa5249c1f4183d5ddee3c4793dfd7b9f29f1886",
 		"homepage": "https://github.com/proj4js/proj4js#readme",
 		"jam": {
-			"main": "dist/proj4.js",
 			"include": [
-				"dist/proj4.js",
-				"README.md",
 				"AUTHORS",
-				"LICENSE.md"
-			]
+				"LICENSE.md",
+				"README.md",
+				"dist/proj4.js"
+			],
+			"main": "dist/proj4.js"
 		},
 		"license": "MIT",
 		"main": "lib/index.js",
@@ -14753,32 +14859,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var projs = [
-	  __webpack_require__(38),
-	  __webpack_require__(45),
+	  __webpack_require__(39),
 	  __webpack_require__(46),
-	  __webpack_require__(49),
+	  __webpack_require__(47),
 	  __webpack_require__(50),
 	  __webpack_require__(51),
 	  __webpack_require__(52),
 	  __webpack_require__(53),
 	  __webpack_require__(54),
-	  __webpack_require__(58),
-	  __webpack_require__(60),
+	  __webpack_require__(55),
+	  __webpack_require__(59),
 	  __webpack_require__(61),
 	  __webpack_require__(62),
-	  __webpack_require__(64),
+	  __webpack_require__(63),
 	  __webpack_require__(65),
 	  __webpack_require__(66),
 	  __webpack_require__(67),
 	  __webpack_require__(68),
-	  __webpack_require__(72),
+	  __webpack_require__(69),
 	  __webpack_require__(73),
 	  __webpack_require__(74),
-	  __webpack_require__(75)
+	  __webpack_require__(75),
+	  __webpack_require__(76)
 	];
 	module.exports = function(proj4){
 	  projs.forEach(function(proj){
@@ -14787,19 +14893,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var e0fn = __webpack_require__(39);
-	var e1fn = __webpack_require__(40);
-	var e2fn = __webpack_require__(41);
-	var e3fn = __webpack_require__(42);
-	var mlfn = __webpack_require__(43);
-	var adjust_lon = __webpack_require__(21);
+	var e0fn = __webpack_require__(40);
+	var e1fn = __webpack_require__(41);
+	var e2fn = __webpack_require__(42);
+	var e3fn = __webpack_require__(43);
+	var mlfn = __webpack_require__(44);
+	var adjust_lon = __webpack_require__(22);
 	var HALF_PI = Math.PI/2;
 	var EPSLN = 1.0e-10;
-	var sign = __webpack_require__(22);
-	var asinz = __webpack_require__(44);
+	var sign = __webpack_require__(23);
+	var asinz = __webpack_require__(45);
 
 	exports.init = function() {
 	  this.e0 = e0fn(this.es);
@@ -14928,7 +15034,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports) {
 
 	module.exports = function(x) {
@@ -14936,7 +15042,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports) {
 
 	module.exports = function(x) {
@@ -14944,7 +15050,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports) {
 
 	module.exports = function(x) {
@@ -14952,7 +15058,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports) {
 
 	module.exports = function(x) {
@@ -14960,7 +15066,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 43 */
+/* 44 */
 /***/ function(module, exports) {
 
 	module.exports = function(e0, e1, e2, e3, phi) {
@@ -14968,7 +15074,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 44 */
+/* 45 */
 /***/ function(module, exports) {
 
 	module.exports = function(x) {
@@ -14979,11 +15085,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 45 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var D2R = 0.01745329251994329577;
-	var tmerc = __webpack_require__(38);
+	var tmerc = __webpack_require__(39);
 	exports.dependsOn = 'tmerc';
 	exports.init = function() {
 	  if (!this.zone) {
@@ -15003,11 +15109,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 46 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var gauss = __webpack_require__(47);
-	var adjust_lon = __webpack_require__(21);
+	var gauss = __webpack_require__(48);
+	var adjust_lon = __webpack_require__(22);
 	exports.init = function() {
 	  gauss.init.apply(this);
 	  if (!this.rc) {
@@ -15066,11 +15172,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 47 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var FORTPI = Math.PI/4;
-	var srat = __webpack_require__(48);
+	var srat = __webpack_require__(49);
 	var HALF_PI = Math.PI/2;
 	var MAX_ITER = 20;
 	exports.init = function() {
@@ -15117,7 +15223,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports) {
 
 	module.exports = function(esinp, exp) {
@@ -15125,16 +15231,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 49 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var HALF_PI = Math.PI/2;
 	var EPSLN = 1.0e-10;
-	var sign = __webpack_require__(22);
-	var msfnz = __webpack_require__(20);
-	var tsfnz = __webpack_require__(23);
-	var phi2z = __webpack_require__(24);
-	var adjust_lon = __webpack_require__(21);
+	var sign = __webpack_require__(23);
+	var msfnz = __webpack_require__(21);
+	var tsfnz = __webpack_require__(24);
+	var phi2z = __webpack_require__(25);
+	var adjust_lon = __webpack_require__(22);
 	exports.ssfn_ = function(phit, sinphi, eccen) {
 	  sinphi *= eccen;
 	  return (Math.tan(0.5 * (HALF_PI + phit)) * Math.pow((1 - sinphi) / (1 + sinphi), 0.5 * eccen));
@@ -15297,7 +15403,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 50 */
+/* 51 */
 /***/ function(module, exports) {
 
 	/*
@@ -15383,12 +15489,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 51 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var tsfnz = __webpack_require__(23);
-	var adjust_lon = __webpack_require__(21);
-	var phi2z = __webpack_require__(24);
+	var tsfnz = __webpack_require__(24);
+	var adjust_lon = __webpack_require__(22);
+	var phi2z = __webpack_require__(25);
 	var HALF_PI = Math.PI/2;
 	var FORTPI = Math.PI/4;
 	var EPSLN = 1.0e-10;
@@ -15556,16 +15662,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Hotine_Oblique_Mercator", "Hotine Oblique Mercator", "Hotine_Oblique_Mercator_Azimuth_Natural_Origin", "Hotine_Oblique_Mercator_Azimuth_Center", "omerc"];
 
 /***/ },
-/* 52 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var EPSLN = 1.0e-10;
-	var msfnz = __webpack_require__(20);
-	var tsfnz = __webpack_require__(23);
+	var msfnz = __webpack_require__(21);
+	var tsfnz = __webpack_require__(24);
 	var HALF_PI = Math.PI/2;
-	var sign = __webpack_require__(22);
-	var adjust_lon = __webpack_require__(21);
-	var phi2z = __webpack_require__(24);
+	var sign = __webpack_require__(23);
+	var adjust_lon = __webpack_require__(22);
+	var phi2z = __webpack_require__(25);
 	exports.init = function() {
 
 	  // array of:  r_maj,r_min,lat1,lat2,c_lon,c_lat,false_east,false_north
@@ -15697,10 +15803,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 53 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var adjust_lon = __webpack_require__(21);
+	var adjust_lon = __webpack_require__(22);
 	exports.init = function() {
 	  this.a = 6377397.155;
 	  this.es = 0.006674372230614;
@@ -15801,18 +15907,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 54 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var mlfn = __webpack_require__(43);
-	var e0fn = __webpack_require__(39);
-	var e1fn = __webpack_require__(40);
-	var e2fn = __webpack_require__(41);
-	var e3fn = __webpack_require__(42);
-	var gN = __webpack_require__(55);
-	var adjust_lon = __webpack_require__(21);
-	var adjust_lat = __webpack_require__(56);
-	var imlfn = __webpack_require__(57);
+	var mlfn = __webpack_require__(44);
+	var e0fn = __webpack_require__(40);
+	var e1fn = __webpack_require__(41);
+	var e2fn = __webpack_require__(42);
+	var e3fn = __webpack_require__(43);
+	var gN = __webpack_require__(56);
+	var adjust_lon = __webpack_require__(22);
+	var adjust_lat = __webpack_require__(57);
+	var imlfn = __webpack_require__(58);
 	var HALF_PI = Math.PI/2;
 	var EPSLN = 1.0e-10;
 	exports.init = function() {
@@ -15909,7 +16015,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Cassini", "Cassini_Soldner", "cass"];
 
 /***/ },
-/* 55 */
+/* 56 */
 /***/ function(module, exports) {
 
 	module.exports = function(a, e, sinphi) {
@@ -15918,18 +16024,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 56 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var HALF_PI = Math.PI/2;
-	var sign = __webpack_require__(22);
+	var sign = __webpack_require__(23);
 
 	module.exports = function(x) {
 	  return (Math.abs(x) < HALF_PI) ? x : (x - (sign(x) * Math.PI));
 	};
 
 /***/ },
-/* 57 */
+/* 58 */
 /***/ function(module, exports) {
 
 	module.exports = function(ml, e0, e1, e2, e3) {
@@ -15950,14 +16056,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 58 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var HALF_PI = Math.PI/2;
 	var FORTPI = Math.PI/4;
 	var EPSLN = 1.0e-10;
-	var qsfnz = __webpack_require__(59);
-	var adjust_lon = __webpack_require__(21);
+	var qsfnz = __webpack_require__(60);
+	var adjust_lon = __webpack_require__(22);
 	/*
 	  reference
 	    "New Equal-Area Map Projections for Noncircular Regions", John P. Snyder,
@@ -16244,7 +16350,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 59 */
+/* 60 */
 /***/ function(module, exports) {
 
 	module.exports = function(eccent, sinphi) {
@@ -16259,14 +16365,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 60 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var EPSLN = 1.0e-10;
-	var msfnz = __webpack_require__(20);
-	var qsfnz = __webpack_require__(59);
-	var adjust_lon = __webpack_require__(21);
-	var asinz = __webpack_require__(44);
+	var msfnz = __webpack_require__(21);
+	var qsfnz = __webpack_require__(60);
+	var adjust_lon = __webpack_require__(22);
+	var asinz = __webpack_require__(45);
 	exports.init = function() {
 
 	  if (Math.abs(this.lat1 + this.lat2) < EPSLN) {
@@ -16386,12 +16492,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 61 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var adjust_lon = __webpack_require__(21);
+	var adjust_lon = __webpack_require__(22);
 	var EPSLN = 1.0e-10;
-	var asinz = __webpack_require__(44);
+	var asinz = __webpack_require__(45);
 
 	/*
 	  reference:
@@ -16491,13 +16597,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 62 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var adjust_lon = __webpack_require__(21);
-	var qsfnz = __webpack_require__(59);
-	var msfnz = __webpack_require__(20);
-	var iqsfnz = __webpack_require__(63);
+	var adjust_lon = __webpack_require__(22);
+	var qsfnz = __webpack_require__(60);
+	var msfnz = __webpack_require__(21);
+	var iqsfnz = __webpack_require__(64);
 	/*
 	  reference:  
 	    "Cartographic Projection Procedures for the UNIX Environment-
@@ -16560,7 +16666,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 63 */
+/* 64 */
 /***/ function(module, exports) {
 
 	var HALF_PI = Math.PI/2;
@@ -16597,11 +16703,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 64 */
+/* 65 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var adjust_lon = __webpack_require__(21);
-	var adjust_lat = __webpack_require__(56);
+	var adjust_lon = __webpack_require__(22);
+	var adjust_lat = __webpack_require__(57);
 	exports.init = function() {
 
 	  this.x0 = this.x0 || 0;
@@ -16644,18 +16750,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 65 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var e0fn = __webpack_require__(39);
-	var e1fn = __webpack_require__(40);
-	var e2fn = __webpack_require__(41);
-	var e3fn = __webpack_require__(42);
-	var adjust_lon = __webpack_require__(21);
-	var adjust_lat = __webpack_require__(56);
-	var mlfn = __webpack_require__(43);
+	var e0fn = __webpack_require__(40);
+	var e1fn = __webpack_require__(41);
+	var e2fn = __webpack_require__(42);
+	var e3fn = __webpack_require__(43);
+	var adjust_lon = __webpack_require__(22);
+	var adjust_lat = __webpack_require__(57);
+	var mlfn = __webpack_require__(44);
 	var EPSLN = 1.0e-10;
-	var gN = __webpack_require__(55);
+	var gN = __webpack_require__(56);
 	var MAX_ITER = 20;
 	exports.init = function() {
 	  /* Place parameters in static storage for common use
@@ -16777,7 +16883,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Polyconic", "poly"];
 
 /***/ },
-/* 66 */
+/* 67 */
 /***/ function(module, exports) {
 
 	var SEC_TO_RAD = 4.84813681109535993589914102357e-6;
@@ -17001,10 +17107,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["New_Zealand_Map_Grid", "nzmg"];
 
 /***/ },
-/* 67 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var adjust_lon = __webpack_require__(21);
+	var adjust_lon = __webpack_require__(22);
 	/*
 	  reference
 	    "New Equal-Area Map Projections for Noncircular Regions", John P. Snyder,
@@ -17052,18 +17158,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 68 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var adjust_lon = __webpack_require__(21);
-	var adjust_lat = __webpack_require__(56);
-	var pj_enfn = __webpack_require__(69);
+	var adjust_lon = __webpack_require__(22);
+	var adjust_lat = __webpack_require__(57);
+	var pj_enfn = __webpack_require__(70);
 	var MAX_ITER = 20;
-	var pj_mlfn = __webpack_require__(70);
-	var pj_inv_mlfn = __webpack_require__(71);
+	var pj_mlfn = __webpack_require__(71);
+	var pj_inv_mlfn = __webpack_require__(72);
 	var HALF_PI = Math.PI/2;
 	var EPSLN = 1.0e-10;
-	var asinz = __webpack_require__(44);
+	var asinz = __webpack_require__(45);
 	exports.init = function() {
 	  /* Place parameters in static storage for common use
 	    -------------------------------------------------*/
@@ -17163,7 +17269,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Sinusoidal", "sinu"];
 
 /***/ },
-/* 69 */
+/* 70 */
 /***/ function(module, exports) {
 
 	var C00 = 1;
@@ -17192,7 +17298,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 70 */
+/* 71 */
 /***/ function(module, exports) {
 
 	module.exports = function(phi, sphi, cphi, en) {
@@ -17202,10 +17308,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 71 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var pj_mlfn = __webpack_require__(70);
+	var pj_mlfn = __webpack_require__(71);
 	var EPSLN = 1.0e-10;
 	var MAX_ITER = 20;
 	module.exports = function(arg, es, en) {
@@ -17227,10 +17333,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 72 */
+/* 73 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var adjust_lon = __webpack_require__(21);
+	var adjust_lon = __webpack_require__(22);
 	var EPSLN = 1.0e-10;
 	exports.init = function() {};
 
@@ -17310,18 +17416,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 73 */
+/* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var e0fn = __webpack_require__(39);
-	var e1fn = __webpack_require__(40);
-	var e2fn = __webpack_require__(41);
-	var e3fn = __webpack_require__(42);
-	var msfnz = __webpack_require__(20);
-	var mlfn = __webpack_require__(43);
-	var adjust_lon = __webpack_require__(21);
-	var adjust_lat = __webpack_require__(56);
-	var imlfn = __webpack_require__(57);
+	var e0fn = __webpack_require__(40);
+	var e1fn = __webpack_require__(41);
+	var e2fn = __webpack_require__(42);
+	var e3fn = __webpack_require__(43);
+	var msfnz = __webpack_require__(21);
+	var mlfn = __webpack_require__(44);
+	var adjust_lon = __webpack_require__(22);
+	var adjust_lat = __webpack_require__(57);
+	var imlfn = __webpack_require__(58);
 	var EPSLN = 1.0e-10;
 	exports.init = function() {
 
@@ -17426,13 +17532,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 74 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var adjust_lon = __webpack_require__(21);
+	var adjust_lon = __webpack_require__(22);
 	var HALF_PI = Math.PI/2;
 	var EPSLN = 1.0e-10;
-	var asinz = __webpack_require__(44);
+	var asinz = __webpack_require__(45);
 	/* Initialize the Van Der Grinten projection
 	  ----------------------------------------*/
 	exports.init = function() {
@@ -17551,20 +17657,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Van_der_Grinten_I", "VanDerGrinten", "vandg"];
 
 /***/ },
-/* 75 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var adjust_lon = __webpack_require__(21);
+	var adjust_lon = __webpack_require__(22);
 	var HALF_PI = Math.PI/2;
 	var EPSLN = 1.0e-10;
-	var mlfn = __webpack_require__(43);
-	var e0fn = __webpack_require__(39);
-	var e1fn = __webpack_require__(40);
-	var e2fn = __webpack_require__(41);
-	var e3fn = __webpack_require__(42);
-	var gN = __webpack_require__(55);
-	var asinz = __webpack_require__(44);
-	var imlfn = __webpack_require__(57);
+	var mlfn = __webpack_require__(44);
+	var e0fn = __webpack_require__(40);
+	var e1fn = __webpack_require__(41);
+	var e2fn = __webpack_require__(42);
+	var e3fn = __webpack_require__(43);
+	var gN = __webpack_require__(56);
+	var asinz = __webpack_require__(45);
+	var imlfn = __webpack_require__(58);
 	exports.init = function() {
 	  this.sin_p12 = Math.sin(this.lat0);
 	  this.cos_p12 = Math.cos(this.lat0);
@@ -17754,7 +17860,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 76 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -17762,16 +17868,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @module geo.util
 	 */
-	var util = __webpack_require__(77);
-	$.extend(util, __webpack_require__(78));
-	util.DistanceGrid = __webpack_require__(79);
-	util.ClusterGroup = __webpack_require__(80);
+	var util = __webpack_require__(78);
+	$.extend(util, __webpack_require__(79));
+	util.DistanceGrid = __webpack_require__(80);
+	util.ClusterGroup = __webpack_require__(81);
 
 	module.exports = util;
 
 
 /***/ },
-/* 77 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -18028,8 +18134,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	     *    returned.
 	     */
 	    convertColor: function (color) {
-	      if (color.r !== undefined && color.g !== undefined &&
-	          color.b !== undefined) {
+	      if (color === undefined || (color.r !== undefined &&
+	          color.g !== undefined && color.b !== undefined)) {
 	        return color;
 	      }
 	      var opacity;
@@ -18424,6 +18530,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        ingcs: '+proj=longlat +axis=esu',
 	        gcs: '+proj=longlat +axis=enu',
 	        maxBounds: {left: 0, top: 0, right: width, bottom: height},
+	        unitsPerPixel: Math.pow(2, maxLevel),
 	        center: {x: width / 2, y: height / 2},
 	        min: minLevel,
 	        max: maxLevel,
@@ -18556,7 +18663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } else if (!stop && !m_originalRequestAnimationFrame) {
 	        m_originalRequestAnimationFrame = window.requestAnimationFrame;
 	        window.requestAnimationFrame = function (callback) {
-	          m_originalRequestAnimationFrame.call(window, function (timestamp) {
+	          return m_originalRequestAnimationFrame.call(window, function (timestamp) {
 	            var track = m_timingData.requestAnimationFrame, recent;
 	            /* Some environments have unsynchronized performance and time
 	             * counters.  The nowDelta factor compensates for this.  For
@@ -18765,7 +18872,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 78 */
+/* 79 */
 /***/ function(module, exports) {
 
 	/**
@@ -18981,7 +19088,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 79 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -19186,7 +19293,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 80 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19199,7 +19306,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  var $ = __webpack_require__(1);
-	  var vgl = __webpack_require__(81);
+	  var vgl = __webpack_require__(82);
 
 	  /**
 	   * This class manages a group of nearby points that are clustered as a
@@ -19334,7 +19441,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  function C(opts, width, height) {
 
-	    var DistanceGrid = __webpack_require__(79);
+	    var DistanceGrid = __webpack_require__(80);
 
 	    // store the options
 	    this._opts = $.extend({
@@ -19465,21 +19572,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 81 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {module.exports = global["vgl"] = __webpack_require__(82);
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
 /* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/* WEBPACK VAR INJECTION */(function(global) {module.exports = global["vgl"] = __webpack_require__(83);
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 83 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*** IMPORTS FROM imports-loader ***/
-	var mat4 = __webpack_require__(83);
-	var vec4 = __webpack_require__(107);
-	var vec3 = __webpack_require__(133);
-	var vec2 = __webpack_require__(166);
+	var mat4 = __webpack_require__(84);
+	var vec4 = __webpack_require__(108);
+	var vec3 = __webpack_require__(134);
+	var vec2 = __webpack_require__(167);
 	var $ = __webpack_require__(1);
 
 	(function (root, factory) {
@@ -32549,37 +32656,37 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 83 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  create: __webpack_require__(84)
-	  , clone: __webpack_require__(85)
-	  , copy: __webpack_require__(86)
-	  , identity: __webpack_require__(87)
-	  , transpose: __webpack_require__(88)
-	  , invert: __webpack_require__(89)
-	  , adjoint: __webpack_require__(90)
-	  , determinant: __webpack_require__(91)
-	  , multiply: __webpack_require__(92)
-	  , translate: __webpack_require__(93)
-	  , scale: __webpack_require__(94)
-	  , rotate: __webpack_require__(95)
-	  , rotateX: __webpack_require__(96)
-	  , rotateY: __webpack_require__(97)
-	  , rotateZ: __webpack_require__(98)
-	  , fromRotationTranslation: __webpack_require__(99)
-	  , fromQuat: __webpack_require__(100)
-	  , frustum: __webpack_require__(101)
-	  , perspective: __webpack_require__(102)
-	  , perspectiveFromFieldOfView: __webpack_require__(103)
-	  , ortho: __webpack_require__(104)
-	  , lookAt: __webpack_require__(105)
-	  , str: __webpack_require__(106)
+	  create: __webpack_require__(85)
+	  , clone: __webpack_require__(86)
+	  , copy: __webpack_require__(87)
+	  , identity: __webpack_require__(88)
+	  , transpose: __webpack_require__(89)
+	  , invert: __webpack_require__(90)
+	  , adjoint: __webpack_require__(91)
+	  , determinant: __webpack_require__(92)
+	  , multiply: __webpack_require__(93)
+	  , translate: __webpack_require__(94)
+	  , scale: __webpack_require__(95)
+	  , rotate: __webpack_require__(96)
+	  , rotateX: __webpack_require__(97)
+	  , rotateY: __webpack_require__(98)
+	  , rotateZ: __webpack_require__(99)
+	  , fromRotationTranslation: __webpack_require__(100)
+	  , fromQuat: __webpack_require__(101)
+	  , frustum: __webpack_require__(102)
+	  , perspective: __webpack_require__(103)
+	  , perspectiveFromFieldOfView: __webpack_require__(104)
+	  , ortho: __webpack_require__(105)
+	  , lookAt: __webpack_require__(106)
+	  , str: __webpack_require__(107)
 	}
 
 /***/ },
-/* 84 */
+/* 85 */
 /***/ function(module, exports) {
 
 	module.exports = create;
@@ -32611,7 +32718,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 85 */
+/* 86 */
 /***/ function(module, exports) {
 
 	module.exports = clone;
@@ -32644,7 +32751,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 86 */
+/* 87 */
 /***/ function(module, exports) {
 
 	module.exports = copy;
@@ -32677,7 +32784,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 87 */
+/* 88 */
 /***/ function(module, exports) {
 
 	module.exports = identity;
@@ -32709,7 +32816,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 88 */
+/* 89 */
 /***/ function(module, exports) {
 
 	module.exports = transpose;
@@ -32763,7 +32870,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 89 */
+/* 90 */
 /***/ function(module, exports) {
 
 	module.exports = invert;
@@ -32823,7 +32930,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 90 */
+/* 91 */
 /***/ function(module, exports) {
 
 	module.exports = adjoint;
@@ -32861,7 +32968,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 91 */
+/* 92 */
 /***/ function(module, exports) {
 
 	module.exports = determinant;
@@ -32896,7 +33003,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 92 */
+/* 93 */
 /***/ function(module, exports) {
 
 	module.exports = multiply;
@@ -32943,7 +33050,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 93 */
+/* 94 */
 /***/ function(module, exports) {
 
 	module.exports = translate;
@@ -32986,7 +33093,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 94 */
+/* 95 */
 /***/ function(module, exports) {
 
 	module.exports = scale;
@@ -33022,7 +33129,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 95 */
+/* 96 */
 /***/ function(module, exports) {
 
 	module.exports = rotate;
@@ -33091,7 +33198,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 96 */
+/* 97 */
 /***/ function(module, exports) {
 
 	module.exports = rotateX;
@@ -33140,7 +33247,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 97 */
+/* 98 */
 /***/ function(module, exports) {
 
 	module.exports = rotateY;
@@ -33189,7 +33296,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 98 */
+/* 99 */
 /***/ function(module, exports) {
 
 	module.exports = rotateZ;
@@ -33238,7 +33345,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 99 */
+/* 100 */
 /***/ function(module, exports) {
 
 	module.exports = fromRotationTranslation;
@@ -33296,7 +33403,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 100 */
+/* 101 */
 /***/ function(module, exports) {
 
 	module.exports = fromQuat;
@@ -33348,7 +33455,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 101 */
+/* 102 */
 /***/ function(module, exports) {
 
 	module.exports = frustum;
@@ -33389,7 +33496,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 102 */
+/* 103 */
 /***/ function(module, exports) {
 
 	module.exports = perspective;
@@ -33427,7 +33534,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 103 */
+/* 104 */
 /***/ function(module, exports) {
 
 	module.exports = perspectiveFromFieldOfView;
@@ -33473,7 +33580,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 104 */
+/* 105 */
 /***/ function(module, exports) {
 
 	module.exports = ortho;
@@ -33514,10 +33621,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 105 */
+/* 106 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var identity = __webpack_require__(87);
+	var identity = __webpack_require__(88);
 
 	module.exports = lookAt;
 
@@ -33609,7 +33716,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 106 */
+/* 107 */
 /***/ function(module, exports) {
 
 	module.exports = str;
@@ -33628,40 +33735,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 107 */
+/* 108 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  create: __webpack_require__(108),
-	  clone: __webpack_require__(109),
-	  fromValues: __webpack_require__(110),
-	  copy: __webpack_require__(111),
-	  set: __webpack_require__(112),
-	  add: __webpack_require__(113),
-	  subtract: __webpack_require__(114),
-	  multiply: __webpack_require__(115),
-	  divide: __webpack_require__(116),
-	  min: __webpack_require__(117),
-	  max: __webpack_require__(118),
-	  scale: __webpack_require__(119),
-	  scaleAndAdd: __webpack_require__(120),
-	  distance: __webpack_require__(121),
-	  squaredDistance: __webpack_require__(122),
-	  length: __webpack_require__(123),
-	  squaredLength: __webpack_require__(124),
-	  negate: __webpack_require__(125),
-	  inverse: __webpack_require__(126),
-	  normalize: __webpack_require__(127),
-	  dot: __webpack_require__(128),
-	  lerp: __webpack_require__(129),
-	  random: __webpack_require__(130),
-	  transformMat4: __webpack_require__(131),
-	  transformQuat: __webpack_require__(132)
+	  create: __webpack_require__(109),
+	  clone: __webpack_require__(110),
+	  fromValues: __webpack_require__(111),
+	  copy: __webpack_require__(112),
+	  set: __webpack_require__(113),
+	  add: __webpack_require__(114),
+	  subtract: __webpack_require__(115),
+	  multiply: __webpack_require__(116),
+	  divide: __webpack_require__(117),
+	  min: __webpack_require__(118),
+	  max: __webpack_require__(119),
+	  scale: __webpack_require__(120),
+	  scaleAndAdd: __webpack_require__(121),
+	  distance: __webpack_require__(122),
+	  squaredDistance: __webpack_require__(123),
+	  length: __webpack_require__(124),
+	  squaredLength: __webpack_require__(125),
+	  negate: __webpack_require__(126),
+	  inverse: __webpack_require__(127),
+	  normalize: __webpack_require__(128),
+	  dot: __webpack_require__(129),
+	  lerp: __webpack_require__(130),
+	  random: __webpack_require__(131),
+	  transformMat4: __webpack_require__(132),
+	  transformQuat: __webpack_require__(133)
 	}
 
 
 /***/ },
-/* 108 */
+/* 109 */
 /***/ function(module, exports) {
 
 	module.exports = create
@@ -33682,7 +33789,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 109 */
+/* 110 */
 /***/ function(module, exports) {
 
 	module.exports = clone
@@ -33704,7 +33811,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 110 */
+/* 111 */
 /***/ function(module, exports) {
 
 	module.exports = fromValues
@@ -33729,7 +33836,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 111 */
+/* 112 */
 /***/ function(module, exports) {
 
 	module.exports = copy
@@ -33751,7 +33858,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 112 */
+/* 113 */
 /***/ function(module, exports) {
 
 	module.exports = set
@@ -33776,7 +33883,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 113 */
+/* 114 */
 /***/ function(module, exports) {
 
 	module.exports = add
@@ -33799,7 +33906,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 114 */
+/* 115 */
 /***/ function(module, exports) {
 
 	module.exports = subtract
@@ -33822,7 +33929,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 115 */
+/* 116 */
 /***/ function(module, exports) {
 
 	module.exports = multiply
@@ -33845,7 +33952,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 116 */
+/* 117 */
 /***/ function(module, exports) {
 
 	module.exports = divide
@@ -33868,7 +33975,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 117 */
+/* 118 */
 /***/ function(module, exports) {
 
 	module.exports = min
@@ -33891,7 +33998,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 118 */
+/* 119 */
 /***/ function(module, exports) {
 
 	module.exports = max
@@ -33914,7 +34021,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 119 */
+/* 120 */
 /***/ function(module, exports) {
 
 	module.exports = scale
@@ -33937,7 +34044,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 120 */
+/* 121 */
 /***/ function(module, exports) {
 
 	module.exports = scaleAndAdd
@@ -33961,7 +34068,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 121 */
+/* 122 */
 /***/ function(module, exports) {
 
 	module.exports = distance
@@ -33983,7 +34090,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 122 */
+/* 123 */
 /***/ function(module, exports) {
 
 	module.exports = squaredDistance
@@ -34005,7 +34112,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 123 */
+/* 124 */
 /***/ function(module, exports) {
 
 	module.exports = length
@@ -34026,7 +34133,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 124 */
+/* 125 */
 /***/ function(module, exports) {
 
 	module.exports = squaredLength
@@ -34047,7 +34154,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 125 */
+/* 126 */
 /***/ function(module, exports) {
 
 	module.exports = negate
@@ -34069,7 +34176,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 126 */
+/* 127 */
 /***/ function(module, exports) {
 
 	module.exports = inverse
@@ -34091,7 +34198,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 127 */
+/* 128 */
 /***/ function(module, exports) {
 
 	module.exports = normalize
@@ -34121,7 +34228,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 128 */
+/* 129 */
 /***/ function(module, exports) {
 
 	module.exports = dot
@@ -34139,7 +34246,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 129 */
+/* 130 */
 /***/ function(module, exports) {
 
 	module.exports = lerp
@@ -34167,11 +34274,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 130 */
+/* 131 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var vecNormalize = __webpack_require__(127)
-	var vecScale = __webpack_require__(119)
+	var vecNormalize = __webpack_require__(128)
+	var vecScale = __webpack_require__(120)
 
 	module.exports = random
 
@@ -34197,7 +34304,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 131 */
+/* 132 */
 /***/ function(module, exports) {
 
 	module.exports = transformMat4
@@ -34221,7 +34328,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 132 */
+/* 133 */
 /***/ function(module, exports) {
 
 	module.exports = transformQuat
@@ -34254,46 +34361,46 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 133 */
+/* 134 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  create: __webpack_require__(134)
-	  , clone: __webpack_require__(135)
-	  , angle: __webpack_require__(136)
-	  , fromValues: __webpack_require__(137)
-	  , copy: __webpack_require__(140)
-	  , set: __webpack_require__(141)
-	  , add: __webpack_require__(142)
-	  , subtract: __webpack_require__(143)
-	  , multiply: __webpack_require__(144)
-	  , divide: __webpack_require__(145)
-	  , min: __webpack_require__(146)
-	  , max: __webpack_require__(147)
-	  , scale: __webpack_require__(148)
-	  , scaleAndAdd: __webpack_require__(149)
-	  , distance: __webpack_require__(150)
-	  , squaredDistance: __webpack_require__(151)
-	  , length: __webpack_require__(152)
-	  , squaredLength: __webpack_require__(153)
-	  , negate: __webpack_require__(154)
-	  , inverse: __webpack_require__(155)
-	  , normalize: __webpack_require__(138)
-	  , dot: __webpack_require__(139)
-	  , cross: __webpack_require__(156)
-	  , lerp: __webpack_require__(157)
-	  , random: __webpack_require__(158)
-	  , transformMat4: __webpack_require__(159)
-	  , transformMat3: __webpack_require__(160)
-	  , transformQuat: __webpack_require__(161)
-	  , rotateX: __webpack_require__(162)
-	  , rotateY: __webpack_require__(163)
-	  , rotateZ: __webpack_require__(164)
-	  , forEach: __webpack_require__(165)
+	  create: __webpack_require__(135)
+	  , clone: __webpack_require__(136)
+	  , angle: __webpack_require__(137)
+	  , fromValues: __webpack_require__(138)
+	  , copy: __webpack_require__(141)
+	  , set: __webpack_require__(142)
+	  , add: __webpack_require__(143)
+	  , subtract: __webpack_require__(144)
+	  , multiply: __webpack_require__(145)
+	  , divide: __webpack_require__(146)
+	  , min: __webpack_require__(147)
+	  , max: __webpack_require__(148)
+	  , scale: __webpack_require__(149)
+	  , scaleAndAdd: __webpack_require__(150)
+	  , distance: __webpack_require__(151)
+	  , squaredDistance: __webpack_require__(152)
+	  , length: __webpack_require__(153)
+	  , squaredLength: __webpack_require__(154)
+	  , negate: __webpack_require__(155)
+	  , inverse: __webpack_require__(156)
+	  , normalize: __webpack_require__(139)
+	  , dot: __webpack_require__(140)
+	  , cross: __webpack_require__(157)
+	  , lerp: __webpack_require__(158)
+	  , random: __webpack_require__(159)
+	  , transformMat4: __webpack_require__(160)
+	  , transformMat3: __webpack_require__(161)
+	  , transformQuat: __webpack_require__(162)
+	  , rotateX: __webpack_require__(163)
+	  , rotateY: __webpack_require__(164)
+	  , rotateZ: __webpack_require__(165)
+	  , forEach: __webpack_require__(166)
 	}
 
 /***/ },
-/* 134 */
+/* 135 */
 /***/ function(module, exports) {
 
 	module.exports = create;
@@ -34312,7 +34419,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 135 */
+/* 136 */
 /***/ function(module, exports) {
 
 	module.exports = clone;
@@ -34332,14 +34439,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 136 */
+/* 137 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = angle
 
-	var fromValues = __webpack_require__(137)
-	var normalize = __webpack_require__(138)
-	var dot = __webpack_require__(139)
+	var fromValues = __webpack_require__(138)
+	var normalize = __webpack_require__(139)
+	var dot = __webpack_require__(140)
 
 	/**
 	 * Get the angle between two 3D vectors
@@ -34365,7 +34472,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 137 */
+/* 138 */
 /***/ function(module, exports) {
 
 	module.exports = fromValues;
@@ -34387,7 +34494,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 138 */
+/* 139 */
 /***/ function(module, exports) {
 
 	module.exports = normalize;
@@ -34415,7 +34522,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 139 */
+/* 140 */
 /***/ function(module, exports) {
 
 	module.exports = dot;
@@ -34432,7 +34539,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 140 */
+/* 141 */
 /***/ function(module, exports) {
 
 	module.exports = copy;
@@ -34452,7 +34559,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 141 */
+/* 142 */
 /***/ function(module, exports) {
 
 	module.exports = set;
@@ -34474,7 +34581,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 142 */
+/* 143 */
 /***/ function(module, exports) {
 
 	module.exports = add;
@@ -34495,7 +34602,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 143 */
+/* 144 */
 /***/ function(module, exports) {
 
 	module.exports = subtract;
@@ -34516,7 +34623,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 144 */
+/* 145 */
 /***/ function(module, exports) {
 
 	module.exports = multiply;
@@ -34537,7 +34644,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 145 */
+/* 146 */
 /***/ function(module, exports) {
 
 	module.exports = divide;
@@ -34558,7 +34665,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 146 */
+/* 147 */
 /***/ function(module, exports) {
 
 	module.exports = min;
@@ -34579,7 +34686,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 147 */
+/* 148 */
 /***/ function(module, exports) {
 
 	module.exports = max;
@@ -34600,7 +34707,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 148 */
+/* 149 */
 /***/ function(module, exports) {
 
 	module.exports = scale;
@@ -34621,7 +34728,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 149 */
+/* 150 */
 /***/ function(module, exports) {
 
 	module.exports = scaleAndAdd;
@@ -34643,7 +34750,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 150 */
+/* 151 */
 /***/ function(module, exports) {
 
 	module.exports = distance;
@@ -34663,7 +34770,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 151 */
+/* 152 */
 /***/ function(module, exports) {
 
 	module.exports = squaredDistance;
@@ -34683,7 +34790,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 152 */
+/* 153 */
 /***/ function(module, exports) {
 
 	module.exports = length;
@@ -34702,7 +34809,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 153 */
+/* 154 */
 /***/ function(module, exports) {
 
 	module.exports = squaredLength;
@@ -34721,7 +34828,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 154 */
+/* 155 */
 /***/ function(module, exports) {
 
 	module.exports = negate;
@@ -34741,7 +34848,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 155 */
+/* 156 */
 /***/ function(module, exports) {
 
 	module.exports = inverse;
@@ -34761,7 +34868,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 156 */
+/* 157 */
 /***/ function(module, exports) {
 
 	module.exports = cross;
@@ -34785,7 +34892,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 157 */
+/* 158 */
 /***/ function(module, exports) {
 
 	module.exports = lerp;
@@ -34810,7 +34917,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 158 */
+/* 159 */
 /***/ function(module, exports) {
 
 	module.exports = random;
@@ -34836,7 +34943,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 159 */
+/* 160 */
 /***/ function(module, exports) {
 
 	module.exports = transformMat4;
@@ -34861,7 +34968,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 160 */
+/* 161 */
 /***/ function(module, exports) {
 
 	module.exports = transformMat3;
@@ -34883,7 +34990,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 161 */
+/* 162 */
 /***/ function(module, exports) {
 
 	module.exports = transformQuat;
@@ -34916,7 +35023,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 162 */
+/* 163 */
 /***/ function(module, exports) {
 
 	module.exports = rotateX;
@@ -34950,7 +35057,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 163 */
+/* 164 */
 /***/ function(module, exports) {
 
 	module.exports = rotateY;
@@ -34984,7 +35091,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 164 */
+/* 165 */
 /***/ function(module, exports) {
 
 	module.exports = rotateZ;
@@ -35018,12 +35125,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 165 */
+/* 166 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = forEach;
 
-	var vec = __webpack_require__(134)()
+	var vec = __webpack_require__(135)()
 
 	/**
 	 * Perform some operation over an array of vec3s.
@@ -35067,42 +35174,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 166 */
+/* 167 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  create: __webpack_require__(167)
-	  , clone: __webpack_require__(168)
-	  , fromValues: __webpack_require__(169)
-	  , copy: __webpack_require__(170)
-	  , set: __webpack_require__(171)
-	  , add: __webpack_require__(172)
-	  , subtract: __webpack_require__(173)
-	  , multiply: __webpack_require__(174)
-	  , divide: __webpack_require__(175)
-	  , min: __webpack_require__(176)
-	  , max: __webpack_require__(177)
-	  , scale: __webpack_require__(178)
-	  , scaleAndAdd: __webpack_require__(179)
-	  , distance: __webpack_require__(180)
-	  , squaredDistance: __webpack_require__(181)
-	  , length: __webpack_require__(182)
-	  , squaredLength: __webpack_require__(183)
-	  , negate: __webpack_require__(184)
-	  , normalize: __webpack_require__(185)
-	  , dot: __webpack_require__(186)
-	  , cross: __webpack_require__(187)
-	  , lerp: __webpack_require__(188)
-	  , random: __webpack_require__(189)
-	  , transformMat2: __webpack_require__(190)
-	  , transformMat2d: __webpack_require__(191)
-	  , transformMat3: __webpack_require__(192)
-	  , transformMat4: __webpack_require__(193)
-	  , forEach: __webpack_require__(194)
+	  create: __webpack_require__(168)
+	  , clone: __webpack_require__(169)
+	  , fromValues: __webpack_require__(170)
+	  , copy: __webpack_require__(171)
+	  , set: __webpack_require__(172)
+	  , add: __webpack_require__(173)
+	  , subtract: __webpack_require__(174)
+	  , multiply: __webpack_require__(175)
+	  , divide: __webpack_require__(176)
+	  , min: __webpack_require__(177)
+	  , max: __webpack_require__(178)
+	  , scale: __webpack_require__(179)
+	  , scaleAndAdd: __webpack_require__(180)
+	  , distance: __webpack_require__(181)
+	  , squaredDistance: __webpack_require__(182)
+	  , length: __webpack_require__(183)
+	  , squaredLength: __webpack_require__(184)
+	  , negate: __webpack_require__(185)
+	  , normalize: __webpack_require__(186)
+	  , dot: __webpack_require__(187)
+	  , cross: __webpack_require__(188)
+	  , lerp: __webpack_require__(189)
+	  , random: __webpack_require__(190)
+	  , transformMat2: __webpack_require__(191)
+	  , transformMat2d: __webpack_require__(192)
+	  , transformMat3: __webpack_require__(193)
+	  , transformMat4: __webpack_require__(194)
+	  , forEach: __webpack_require__(195)
 	}
 
 /***/ },
-/* 167 */
+/* 168 */
 /***/ function(module, exports) {
 
 	module.exports = create
@@ -35120,7 +35227,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 168 */
+/* 169 */
 /***/ function(module, exports) {
 
 	module.exports = clone
@@ -35139,7 +35246,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 169 */
+/* 170 */
 /***/ function(module, exports) {
 
 	module.exports = fromValues
@@ -35159,7 +35266,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 170 */
+/* 171 */
 /***/ function(module, exports) {
 
 	module.exports = copy
@@ -35178,7 +35285,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 171 */
+/* 172 */
 /***/ function(module, exports) {
 
 	module.exports = set
@@ -35198,7 +35305,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 172 */
+/* 173 */
 /***/ function(module, exports) {
 
 	module.exports = add
@@ -35218,7 +35325,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 173 */
+/* 174 */
 /***/ function(module, exports) {
 
 	module.exports = subtract
@@ -35238,7 +35345,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 174 */
+/* 175 */
 /***/ function(module, exports) {
 
 	module.exports = multiply
@@ -35258,7 +35365,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 175 */
+/* 176 */
 /***/ function(module, exports) {
 
 	module.exports = divide
@@ -35278,7 +35385,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 176 */
+/* 177 */
 /***/ function(module, exports) {
 
 	module.exports = min
@@ -35298,7 +35405,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 177 */
+/* 178 */
 /***/ function(module, exports) {
 
 	module.exports = max
@@ -35318,7 +35425,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 178 */
+/* 179 */
 /***/ function(module, exports) {
 
 	module.exports = scale
@@ -35338,7 +35445,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 179 */
+/* 180 */
 /***/ function(module, exports) {
 
 	module.exports = scaleAndAdd
@@ -35359,7 +35466,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 180 */
+/* 181 */
 /***/ function(module, exports) {
 
 	module.exports = distance
@@ -35378,7 +35485,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 181 */
+/* 182 */
 /***/ function(module, exports) {
 
 	module.exports = squaredDistance
@@ -35397,7 +35504,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 182 */
+/* 183 */
 /***/ function(module, exports) {
 
 	module.exports = length
@@ -35415,7 +35522,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 183 */
+/* 184 */
 /***/ function(module, exports) {
 
 	module.exports = squaredLength
@@ -35433,7 +35540,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 184 */
+/* 185 */
 /***/ function(module, exports) {
 
 	module.exports = negate
@@ -35452,7 +35559,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 185 */
+/* 186 */
 /***/ function(module, exports) {
 
 	module.exports = normalize
@@ -35478,7 +35585,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 186 */
+/* 187 */
 /***/ function(module, exports) {
 
 	module.exports = dot
@@ -35495,7 +35602,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 187 */
+/* 188 */
 /***/ function(module, exports) {
 
 	module.exports = cross
@@ -35517,7 +35624,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 188 */
+/* 189 */
 /***/ function(module, exports) {
 
 	module.exports = lerp
@@ -35540,7 +35647,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 189 */
+/* 190 */
 /***/ function(module, exports) {
 
 	module.exports = random
@@ -35561,7 +35668,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 190 */
+/* 191 */
 /***/ function(module, exports) {
 
 	module.exports = transformMat2
@@ -35583,7 +35690,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 191 */
+/* 192 */
 /***/ function(module, exports) {
 
 	module.exports = transformMat2d
@@ -35605,7 +35712,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 192 */
+/* 193 */
 /***/ function(module, exports) {
 
 	module.exports = transformMat3
@@ -35628,7 +35735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 193 */
+/* 194 */
 /***/ function(module, exports) {
 
 	module.exports = transformMat4
@@ -35652,12 +35759,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 194 */
+/* 195 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = forEach
 
-	var vec = __webpack_require__(167)()
+	var vec = __webpack_require__(168)()
 
 	/**
 	 * Perform some operation over an array of vec2s.
@@ -35699,7 +35806,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 195 */
+/* 196 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -36148,11 +36255,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 196 */
+/* 197 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(197);
+	var feature = __webpack_require__(198);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -36428,13 +36535,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 197 */
+/* 198 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(4);
-	var sceneObject = __webpack_require__(198);
-	var timestamp = __webpack_require__(200);
+	var sceneObject = __webpack_require__(199);
+	var timestamp = __webpack_require__(201);
 	var geo_event = __webpack_require__(5);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -36453,7 +36560,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  sceneObject.call(this);
 
-	  var util = __webpack_require__(76);
+	  var util = __webpack_require__(77);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -37060,7 +37167,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  // Check arguments
-	  if (!(layer instanceof __webpack_require__(201))) {
+	  if (!(layer instanceof __webpack_require__(202))) {
 	    console.warn('Invalid layer');
 	    return null;
 	  }
@@ -37084,11 +37191,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 198 */
+/* 199 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var object = __webpack_require__(199);
+	var object = __webpack_require__(200);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -37272,10 +37379,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 199 */
+/* 200 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var vgl = __webpack_require__(81);
+	var vgl = __webpack_require__(82);
 	var inherit = __webpack_require__(4);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -37457,10 +37564,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 200 */
+/* 201 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var vgl = __webpack_require__(81);
+	var vgl = __webpack_require__(82);
 	var inherit = __webpack_require__(4);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -37485,15 +37592,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 201 */
+/* 202 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var sceneObject = __webpack_require__(198);
-	var feature = __webpack_require__(197);
-	var checkRenderer = __webpack_require__(195).checkRenderer;
-	var rendererForFeatures = __webpack_require__(195).rendererForFeatures;
-	var rendererForAnnotations = __webpack_require__(195).rendererForAnnotations;
+	var sceneObject = __webpack_require__(199);
+	var feature = __webpack_require__(198);
+	var checkRenderer = __webpack_require__(196).checkRenderer;
+	var rendererForFeatures = __webpack_require__(196).rendererForFeatures;
+	var rendererForAnnotations = __webpack_require__(196).rendererForAnnotations;
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -37516,11 +37623,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  sceneObject.call(this, arg);
 
 	  var $ = __webpack_require__(1);
-	  var timestamp = __webpack_require__(200);
-	  var createRenderer = __webpack_require__(195).createRenderer;
-	  var newLayerId = __webpack_require__(76).newLayerId;
+	  var timestamp = __webpack_require__(201);
+	  var createRenderer = __webpack_require__(196).createRenderer;
+	  var newLayerId = __webpack_require__(77).newLayerId;
 	  var geo_event = __webpack_require__(5);
-	  var camera = __webpack_require__(202);
+	  var camera = __webpack_require__(203);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -38059,17 +38166,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 202 */
+/* 203 */
 /***/ function(module, exports, __webpack_require__) {
 
 	(function () {
 	  'use strict';
 
 	  var inherit = __webpack_require__(4);
-	  var object = __webpack_require__(199);
-	  var util = __webpack_require__(76);
-	  var mat4 = __webpack_require__(83);
-	  var vec4 = __webpack_require__(107);
+	  var object = __webpack_require__(200);
+	  var util = __webpack_require__(77);
+	  var mat4 = __webpack_require__(84);
+	  var vec4 = __webpack_require__(108);
 
 	  //////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -38367,10 +38474,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    /**
 	     * Getter/setter for the viewport.
+	     *
+	     * The viewport consists of a width and height in pixels, plus a left and
+	     * top offset in pixels.  The offsets are only used to determine if pixel
+	     * alignment is possible.
 	     */
 	    Object.defineProperty(this, 'viewport', {
 	      get: function () {
-	        return {width: this._viewport.width, height: this._viewport.height};
+	        return {
+	          width: this._viewport.width, height: this._viewport.height,
+	          left: this._viewport.left, top: this._viewport.top
+	        };
 	      },
 	      set: function (viewport) {
 	        if (!(viewport.width > 0 &&
@@ -38399,7 +38513,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	          ]);
 	        }
 
-	        this._viewport = {width: viewport.width, height: viewport.height};
+	        this._viewport = {
+	          width: viewport.width, height: viewport.height,
+	          left: viewport.left, top: viewport.top
+	        };
 	        this._update();
 	        this.geoTrigger(geo_event.camera.viewport, {
 	          camera: this,
@@ -38986,11 +39103,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 203 */
+/* 204 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(197);
+	var feature = __webpack_require__(198);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -39012,11 +39129,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  feature.call(this, arg);
 
 	  var $ = __webpack_require__(1);
-	  var timestamp = __webpack_require__(200);
-	  var ClusterGroup = __webpack_require__(80);
+	  var timestamp = __webpack_require__(201);
+	  var ClusterGroup = __webpack_require__(81);
 	  var geo_event = __webpack_require__(5);
-	  var util = __webpack_require__(76);
-	  var wigglemaps = __webpack_require__(204);
+	  var util = __webpack_require__(77);
+	  var wigglemaps = __webpack_require__(205);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -39437,7 +39554,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 204 */
+/* 205 */
 /***/ function(module, exports) {
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -39847,12 +39964,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 205 */
+/* 206 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(197);
+	var feature = __webpack_require__(198);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -39902,7 +40019,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  feature.call(this, arg);
 
-	  var util = __webpack_require__(76);
+	  var util = __webpack_require__(77);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -40276,16 +40393,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 206 */
+/* 207 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var featureLayer = __webpack_require__(207);
-	var geo_action = __webpack_require__(208);
+	var featureLayer = __webpack_require__(208);
 	var geo_annotation = __webpack_require__(3);
 	var geo_event = __webpack_require__(5);
-	var registry = __webpack_require__(195);
-	var transform = __webpack_require__(6);
+	var registry = __webpack_require__(196);
+	var transform = __webpack_require__(7);
 	var $ = __webpack_require__(1);
 	var Mousetrap = __webpack_require__(209);
 
@@ -40319,8 +40435,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  featureLayer.call(this, args);
 
 	  var mapInteractor = __webpack_require__(210);
-	  var timestamp = __webpack_require__(200);
-	  var util = __webpack_require__(76);
+	  var timestamp = __webpack_require__(201);
+	  var util = __webpack_require__(77);
 
 	  var m_this = this,
 	      s_init = this._init,
@@ -40328,7 +40444,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      s_update = this._update,
 	      m_buildTime = timestamp(),
 	      m_options,
-	      m_actions,
 	      m_mode = null,
 	      m_annotations = [],
 	      m_features = [];
@@ -40351,16 +40466,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    finalPointProximity: 10  // in pixels, 0 is exact
 	  }, args);
 
-	  m_actions = {
-	    rectangle: {
-	      action: geo_action.annotation_rectangle,
-	      owner: 'annotationLayer',
-	      input: 'left',
-	      modifiers: {shift: false, ctrl: false},
-	      selectionRectangle: true
-	    }
-	  };
-
 	  /**
 	   * Process a selection event.  If we are in rectangle-creation mode, this
 	   * creates a rectangle.
@@ -40368,22 +40473,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {geo.event} evt the selection event.
 	   */
 	  this._processSelection = function (evt) {
-	    if (m_this.mode() === 'rectangle') {
-	      m_this.mode(null);
-	      if (evt.state.action === geo_action.annotation_rectangle) {
-	        var map = m_this.map();
-	        var params = {
-	          corners: [
-	            /* Keep in map gcs, not interface gcs to avoid wrapping issues */
-	            map.displayToGcs({x: evt.lowerLeft.x, y: evt.lowerLeft.y}, null),
-	            map.displayToGcs({x: evt.lowerLeft.x, y: evt.upperRight.y}, null),
-	            map.displayToGcs({x: evt.upperRight.x, y: evt.upperRight.y}, null),
-	            map.displayToGcs({x: evt.upperRight.x, y: evt.lowerLeft.y}, null)
-	          ],
-	          layer: this
-	        };
-	        this.addAnnotation(geo_annotation.rectangleAnnotation(params));
-	      }
+	    var update;
+	    if (evt.state && evt.state.actionRecord &&
+	        evt.state.actionRecord.owner === geo_annotation.actionOwner &&
+	        this.currentAnnotation) {
+	      update = this.currentAnnotation.processAction(evt);
+	    }
+	    this._updateFromEvent(update);
+	  };
+
+	  /**
+	   * Handle updating the current annotation based on an update state.
+	   *
+	   * @param {string|undefined} update: truthy to update.  'done' if the
+	   *    annotation was completed and the mode should return to null.  'remove'
+	   *    to remove the current annotation and set the mode to null.  Falsy to do
+	   *    nothing.
+	   */
+	  this._updateFromEvent = function (update) {
+	    switch (update) {
+	      case 'remove':
+	        m_this.removeAnnotation(m_this.currentAnnotation, false);
+	        m_this.mode(null);
+	        break;
+	      case 'done':
+	        m_this.mode(null);
+	        break;
+	    }
+	    if (update) {
+	      m_this.modified();
+	      m_this._update();
+	      m_this.draw();
 	    }
 	  };
 
@@ -40413,20 +40533,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._handleMouseClick = function (evt) {
 	    if (this.mode() && this.currentAnnotation) {
 	      var update = this.currentAnnotation.mouseClick(evt);
-	      switch (update) {
-	        case 'remove':
-	          m_this.removeAnnotation(m_this.currentAnnotation, false);
-	          m_this.mode(null);
-	          break;
-	        case 'done':
-	          m_this.mode(null);
-	          break;
-	      }
-	      if (update) {
-	        m_this.modified();
-	        m_this._update();
-	        m_this.draw();
-	      }
+	      this._updateFromEvent(update);
 	    }
 	  };
 
@@ -40604,7 +40711,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return m_mode;
 	    }
 	    if (arg !== m_mode) {
-	      var createAnnotation, mapNode = m_this.map().node(), oldMode = m_mode;
+	      var createAnnotation, actions,
+	          mapNode = m_this.map().node(), oldMode = m_mode;
 	      m_mode = arg;
 	      mapNode.css('cursor', m_mode ? 'crosshair' : '');
 	      if (m_mode) {
@@ -40628,18 +40736,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	          createAnnotation = geo_annotation.polygonAnnotation;
 	          break;
 	        case 'rectangle':
-	          m_this.map().interactor().addAction(m_actions.rectangle);
+	          createAnnotation = geo_annotation.rectangleAnnotation;
 	          break;
 	      }
+	      m_this.map().interactor().removeAction(
+	        undefined, undefined, geo_annotation.actionOwner);
 	      if (createAnnotation) {
 	        this.currentAnnotation = createAnnotation({
 	          state: geo_annotation.state.create,
 	          layer: this
 	        });
 	        this.addAnnotation(m_this.currentAnnotation);
-	      }
-	      if (m_mode !== 'rectangle') {
-	        m_this.map().interactor().removeAction(m_actions.rectangle);
+	        actions = this.currentAnnotation.actions(geo_annotation.state.create);
+	        $.each(actions, function (idx, action) {
+	          m_this.map().interactor().addAction(action);
+	        });
 	      }
 	      m_this.geoTrigger(geo_event.annotation.mode, {
 	        mode: m_mode, oldMode: oldMode});
@@ -41034,13 +41145,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 207 */
+/* 208 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var layer = __webpack_require__(201);
+	var layer = __webpack_require__(202);
 	var geo_event = __webpack_require__(5);
-	var registry = __webpack_require__(195);
+	var registry = __webpack_require__(196);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -41299,33 +41410,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	inherit(featureLayer, layer);
 	registry.registerLayer('feature', featureLayer);
 	module.exports = featureLayer;
-
-
-/***/ },
-/* 208 */
-/***/ function(module, exports) {
-
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Common object containing all action types that are provided by the GeoJS
-	 * API.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var geo_action = {
-	  momentum: 'geo_action_momentum',
-	  pan: 'geo_action_pan',
-	  rotate: 'geo_action_rotate',
-	  select: 'geo_action_select',
-	  unzoomselect: 'geo_action_unzoomselect',
-	  zoom: 'geo_action_zoom',
-	  zoomselect: 'geo_action_zoomselect',
-
-	  // annotation actions
-	  annotation_polygon: 'geo_annotation_polygon',
-	  annotation_rectangle: 'geo_annotation_rectangle'
-	};
-
-	module.exports = geo_action;
 
 
 /***/ },
@@ -42377,8 +42461,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var object = __webpack_require__(199);
-	var util = __webpack_require__(76);
+	var object = __webpack_require__(200);
+	var util = __webpack_require__(77);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -42401,10 +42485,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var geo_event = __webpack_require__(5);
-	  var geo_action = __webpack_require__(208);
-	  var throttle = __webpack_require__(76).throttle;
-	  var debounce = __webpack_require__(76).debounce;
-	  var actionMatch = __webpack_require__(76).actionMatch;
+	  var geo_action = __webpack_require__(6);
+	  var throttle = __webpack_require__(77).throttle;
+	  var debounce = __webpack_require__(77).debounce;
+	  var actionMatch = __webpack_require__(77).actionMatch;
 	  var quadFeature = __webpack_require__(211);
 
 	  var m_options = args || {},
@@ -43809,11 +43893,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      if (m_state.handler) {
-	        window.requestAnimationFrame(m_state.handler);
+	        m_this.map().scheduleAnimationFrame(m_state.handler);
 	      }
 	    };
 	    if (m_state.handler) {
-	      window.requestAnimationFrame(m_state.handler);
+	      m_this.map().scheduleAnimationFrame(m_state.handler);
 	    }
 	  };
 
@@ -44025,7 +44109,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(197);
+	var feature = __webpack_require__(198);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -44071,8 +44155,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var quadFeature = function (arg) {
 	  'use strict';
 
-	  var transform = __webpack_require__(6);
-	  var util = __webpack_require__(76);
+	  var transform = __webpack_require__(7);
+	  var util = __webpack_require__(77);
 
 	  if (!(this instanceof quadFeature)) {
 	    return new quadFeature(arg);
@@ -44545,7 +44629,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(197);
+	var feature = __webpack_require__(198);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -44566,7 +44650,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  feature.call(this, arg);
 
 	  var $ = __webpack_require__(1);
-	  var ensureFunction = __webpack_require__(76).ensureFunction;
+	  var ensureFunction = __webpack_require__(77).ensureFunction;
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -44845,7 +44929,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var object = __webpack_require__(199);
+	var object = __webpack_require__(200);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -45148,7 +45232,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(197);
+	var feature = __webpack_require__(198);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -45167,7 +45251,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var $ = __webpack_require__(1);
-	  var util = __webpack_require__(76);
+	  var util = __webpack_require__(77);
 
 	  arg = arg || {};
 	  feature.call(this, arg);
@@ -45609,7 +45693,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var inherit = __webpack_require__(4);
 	var renderer = __webpack_require__(217);
-	var registerRenderer = __webpack_require__(195).registerRenderer;
+	var registerRenderer = __webpack_require__(196).registerRenderer;
 
 	/**
 	 * @class geo.domRenderer
@@ -45656,7 +45740,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var object = __webpack_require__(199);
+	var object = __webpack_require__(200);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -46018,8 +46102,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var featureLayer = __webpack_require__(207);
-	var object = __webpack_require__(199);
+	var featureLayer = __webpack_require__(208);
+	var object = __webpack_require__(200);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -46134,7 +46218,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(197);
+	var feature = __webpack_require__(198);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -46177,7 +46261,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(197);
+	var feature = __webpack_require__(198);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -46198,8 +46282,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  feature.call(this, arg);
 
 	  var $ = __webpack_require__(1);
-	  var util = __webpack_require__(76);
-	  var registry = __webpack_require__(195);
+	  var util = __webpack_require__(77);
+	  var registry = __webpack_require__(196);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -46417,8 +46501,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(197);
-	var transform = __webpack_require__(6);
+	var feature = __webpack_require__(198);
+	var transform = __webpack_require__(7);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -47055,7 +47139,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFileReader = __webpack_require__(195).registerFileReader;
+	var registerFileReader = __webpack_require__(196).registerFileReader;
 	var fileReader = __webpack_require__(219);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -47074,7 +47158,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var $ = __webpack_require__(1);
-	  var convertColor = __webpack_require__(76).convertColor;
+	  var convertColor = __webpack_require__(77).convertColor;
 
 	  var m_this = this;
 
@@ -47361,9 +47445,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
-	var vgl = __webpack_require__(81);
+	var vgl = __webpack_require__(82);
 	var inherit = __webpack_require__(4);
-	var sceneObject = __webpack_require__(198);
+	var sceneObject = __webpack_require__(199);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -47419,6 +47503,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {geo.camera?} camera The camera to control the view
 	 * @param {geo.mapInteractor?} interactor The UI event handler
 	 * @param {geo.clock?} clock The clock used to synchronize time events
+	 * @param {array} [animationQueue] An array used to synchonize animations.  If
+	 *   specified, this should be an empty array or the same array as passed to
+	 *   other map instances.
 	 * @param {boolean} [autoResize=true] Adjust map size on window resize
 	 * @param {boolean} [clampBoundsX=false] Prevent panning outside of the
 	 *   maximum bounds in the horizontal direction.
@@ -47444,10 +47531,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  sceneObject.call(this, arg);
 
-	  var camera = __webpack_require__(202);
-	  var transform = __webpack_require__(6);
-	  var util = __webpack_require__(76);
-	  var registry = __webpack_require__(195);
+	  var camera = __webpack_require__(203);
+	  var transform = __webpack_require__(7);
+	  var util = __webpack_require__(77);
+	  var registry = __webpack_require__(196);
 	  var geo_event = __webpack_require__(5);
 	  var mapInteractor = __webpack_require__(210);
 	  var clock = __webpack_require__(214);
@@ -47489,6 +47576,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_clampBoundsX,
 	      m_clampBoundsY,
 	      m_clampZoom,
+	      m_animationQueue = arg.animationQueue || [],
 	      m_origin,
 	      m_scale = {x: 1, y: 1, z: 1}; // constant and ignored for the moment
 
@@ -47513,7 +47601,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  m_unitsPerPixel = (arg.unitsPerPixel || (
 	    m_maxBounds.right - m_maxBounds.left) / 256);
 
-	  m_camera.viewport = {width: m_width, height: m_height};
+	  m_camera.viewport = {
+	    width: m_width, height: m_height,
+	    left: m_node.offset().left, top: m_node.offset().top
+	  };
 	  arg.center = util.normalizeCoordinates(arg.center);
 	  arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
 	  m_clampBoundsX = arg.clampBoundsX === undefined ? false : arg.clampBoundsX;
@@ -48045,7 +48136,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (newZoom !== m_zoom) {
 	      m_this.zoom(newZoom);
 	    }
-	    m_this.camera().viewport = {width: m_width, height: m_height};
+	    m_this.camera().viewport = {
+	      width: m_width, height: m_height,
+	      left: m_node.offset().left, top: m_node.offset().top
+	    };
 	    m_this.center(oldCenter);
 
 	    m_this.geoTrigger(geo_event.resize, {
@@ -48461,7 +48555,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    var defaultOpts = {
-	      center: m_this.center(undefined, null),
+	      center: undefined,
 	      zoom: m_this.zoom(),
 	      rotation: m_this.rotation(),
 	      duration: 1000,
@@ -48507,8 +48601,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      opts.zCoord ? zoom2z(m_transition.start.zoom) : m_transition.start.zoom,
 	      m_transition.start.rotation
 	    ], [
-	      m_transition.end.center.x,
-	      m_transition.end.center.y,
+	      m_transition.end.center ? m_transition.end.center.x : m_transition.start.center.x,
+	      m_transition.end.center ? m_transition.end.center.y : m_transition.start.center.y,
 	      opts.zCoord ? zoom2z(m_transition.end.zoom) : m_transition.end.zoom,
 	      m_transition.end.rotation
 	    ]);
@@ -48544,8 +48638,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_transition.time = time - m_transition.start.time;
 	      if (time >= m_transition.end.time || next) {
 	        if (!next) {
-	          var needZoom = m_zoom !== fix_zoom(m_transition.end.zoom);
-	          m_this.center(m_transition.end.center, null, needZoom, needZoom);
+	          if (m_transition.end.center) {
+	            var needZoom = m_zoom !== fix_zoom(m_transition.end.zoom);
+	            m_this.center(m_transition.end.center, null, needZoom, needZoom);
+	          }
 	          m_this.zoom(m_transition.end.zoom, m_transition.zoomOrigin);
 	          m_this.rotation(fix_rotation(m_transition.end.rotation));
 	        }
@@ -48585,7 +48681,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      m_this.rotation(p[3], undefined, true);
 
-	      window.requestAnimationFrame(anim);
+	      m_this.scheduleAnimationFrame(anim);
 	    }
 
 	    m_this.geoTrigger(geo_event.transitionstart, opts);
@@ -48601,7 +48697,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else if (animTime) {
 	      anim(animTime);
 	    } else {
-	      window.requestAnimationFrame(anim);
+	      m_this.scheduleAnimationFrame(anim);
 	    }
 	    return m_this;
 	  };
@@ -48921,6 +49017,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	    $a.appendTo(m_this.node());
 	    return m_this;
 	  };
+
+	  /**
+	   * Instead of each function using window.requestAnimationFrame, schedule all
+	   * such frames here.  This allows the callbacks to be reordered or removed as
+	   * needed and reduces overhead in Chrome a small amount.  Also, if the
+	   * animation queue is shared between map instances, the callbacks will be
+	   * called as one, providing better synchronization.
+	   *
+	   * @param {function} callback: function to call during the animation frame.
+	   *    It is called with an animation epoch, exactly as requestAnimationFrame.
+	   * @param {string|boolean} action: falsy to only add the callback if it is
+	   *    not already scheduled.  'remove' to remove the callback (use this
+	   *    instead of cancelAnimationFrame).  Any other truthy value moves the
+	   *    callback to the end of the list.
+	   * @returns {integer} An integer as returned by window.requestAnimationFrame.
+	   */
+	  this.scheduleAnimationFrame = function (callback, action) {
+	    if (!m_animationQueue.length) {
+	      /* By refering to requestAnimationFrame as a property of window, versus
+	       * explicitly using window.requestAnimationFrame, we prevent the
+	       * stripping of 'window' off of the reference and allow our tests to
+	       * override this if needed. */
+	      m_animationQueue.push(window['requestAnimationFrame'](processAnimationFrame));
+	    }
+	    var pos = m_animationQueue.indexOf(callback, 1);
+	    if (pos >= 0) {
+	      if (!action) {
+	        return;
+	      }
+	      m_animationQueue.splice(pos, 1);
+	      if (action === 'remove') {
+	        return;
+	      }
+	    }
+	    m_animationQueue.push(callback);
+	    return m_animationQueue[0];
+	  };
+
+	  /**
+	   * Sevice the callback during an animation frame.  This uses splice to modify
+	   * the animationQueue to allow multiple map instances to share the queue.
+	   */
+	  function processAnimationFrame() {
+	    var queue = m_animationQueue.splice(0, m_animationQueue.length);
+
+	    /* The first entry is the reference to the window.requestAnimationFrame. */
+	    for (var i = 1; i < queue.length; i += 1) {
+	      queue[i].apply(this, arguments);
+	    }
+	  }
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  //
@@ -49311,7 +49457,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  var _map = map(spec),
-	      layer = __webpack_require__(201);
+	      layer = __webpack_require__(202);
 
 	  /* If the spec is bad, we still end up with an object, but it won't have a
 	   * zoom function */
@@ -49340,8 +49486,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerLayer = __webpack_require__(195).registerLayer;
-	var layer = __webpack_require__(201);
+	var registerLayer = __webpack_require__(196).registerLayer;
+	var layer = __webpack_require__(202);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -49355,7 +49501,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var uiLayer = function (arg) {
 	  'use strict';
 
-	  var createWidget = __webpack_require__(195).createWidget;
+	  var createWidget = __webpack_require__(196).createWidget;
 
 	  // The widget stays fixed on the screen.
 	  arg.renderer = 'dom';
@@ -49430,7 +49576,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var $ = __webpack_require__(1);
 	  var inherit = __webpack_require__(4);
 	  var tileLayer = __webpack_require__(229);
-	  var registry = __webpack_require__(195);
+	  var registry = __webpack_require__(196);
 	  var quadFeature = __webpack_require__(211);
 
 	  //////////////////////////////////////////////////////////////////////////////
@@ -49525,7 +49671,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  var inherit = __webpack_require__(4);
-	  var featureLayer = __webpack_require__(207);
+	  var featureLayer = __webpack_require__(208);
 
 	  /**
 	   * Standard modulo operator where the output is in [0, b) for all inputs.
@@ -49664,10 +49810,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var $ = __webpack_require__(1);
 	    var geo_event = __webpack_require__(5);
-	    var transform = __webpack_require__(6);
+	    var transform = __webpack_require__(7);
 	    var tileCache = __webpack_require__(230);
 	    var fetchQueue = __webpack_require__(218);
-	    var adjustLayerForRenderer = __webpack_require__(195).adjustLayerForRenderer;
+	    var adjustLayerForRenderer = __webpack_require__(196).adjustLayerForRenderer;
 	    var Tile = __webpack_require__(224);
 
 	    if (!(this instanceof tileLayer)) {
@@ -51184,7 +51330,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(197);
+	var feature = __webpack_require__(198);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -51268,9 +51414,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(197);
+	var feature = __webpack_require__(198);
 	var geo_event = __webpack_require__(5);
-	var util = __webpack_require__(76);
+	var util = __webpack_require__(77);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -51724,7 +51870,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(197);
+	var feature = __webpack_require__(198);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -51831,14 +51977,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("0.10.4");
+	module.exports = ("0.10.5");
 
 
 /***/ },
 /* 235 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("dcce0b618cf679fe23941eab97a919320d08eb2f");
+	module.exports = ("9b6f4eb71e9150ae303b8cc659fe548c784c8793");
 
 
 /***/ },
@@ -51879,7 +52025,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
+	var registerFeature = __webpack_require__(196).registerFeature;
 	var graphFeature = __webpack_require__(221);
 
 	/**
@@ -51928,8 +52074,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
-	var lineFeature = __webpack_require__(196);
+	var registerFeature = __webpack_require__(196).registerFeature;
+	var lineFeature = __webpack_require__(197);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -51949,8 +52095,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var d3 = __webpack_require__(213);
 	  var object = __webpack_require__(240);
-	  var timestamp = __webpack_require__(200);
-	  var util = __webpack_require__(76);
+	  var timestamp = __webpack_require__(201);
+	  var util = __webpack_require__(77);
 
 	  arg = arg || {};
 	  lineFeature.call(this, arg);
@@ -52078,7 +52224,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var sceneObject = __webpack_require__(198);
+	var sceneObject = __webpack_require__(199);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -52092,7 +52238,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var d3_object = function (arg) {
 	  'use strict';
 
-	  var object = __webpack_require__(199);
+	  var object = __webpack_require__(200);
 	  var uniqueID = __webpack_require__(241);
 
 	  // this is used to extend other geojs classes, so only generate
@@ -52180,7 +52326,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
+	var registerFeature = __webpack_require__(196).registerFeature;
 	var pathFeature = __webpack_require__(231);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -52202,7 +52348,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var $ = __webpack_require__(1);
 	  var d3 = __webpack_require__(213);
 	  var object = __webpack_require__(240);
-	  var timestamp = __webpack_require__(200);
+	  var timestamp = __webpack_require__(201);
 
 	  arg = arg || {};
 	  pathFeature.call(this, arg);
@@ -52317,8 +52463,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
-	var pointFeature = __webpack_require__(203);
+	var registerFeature = __webpack_require__(196).registerFeature;
+	var pointFeature = __webpack_require__(204);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -52338,7 +52484,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var d3_object = __webpack_require__(240);
-	  var timestamp = __webpack_require__(200);
+	  var timestamp = __webpack_require__(201);
 
 	  arg = arg || {};
 	  pointFeature.call(this, arg);
@@ -52444,7 +52590,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
+	var registerFeature = __webpack_require__(196).registerFeature;
 	var quadFeature = __webpack_require__(211);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -52691,7 +52837,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerRenderer = __webpack_require__(195).registerRenderer;
+	var registerRenderer = __webpack_require__(196).registerRenderer;
 	var renderer = __webpack_require__(217);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -52708,7 +52854,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var d3 = __webpack_require__(213);
 	  var object = __webpack_require__(240);
-	  var util = __webpack_require__(76);
+	  var util = __webpack_require__(77);
 	  var geo_event = __webpack_require__(5);
 	  var d3Rescale = __webpack_require__(237);
 
@@ -52732,7 +52878,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_diagonal = null,
 	      m_scale = 1,
 	      m_transform = {dx: 0, dy: 0, rx: 0, ry: 0, rotation: 0},
-	      m_renderAnimFrameRef = null,
 	      m_renderIds = {},
 	      m_removeIds = {},
 	      m_svg = null,
@@ -53201,9 +53346,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_this._renderFeature(id, parentId);
 	    } else {
 	      m_renderIds[id] = true;
-	      if (m_renderAnimFrameRef === null) {
-	        m_renderAnimFrameRef = window.requestAnimationFrame(m_this._renderFrame);
-	      }
+	      m_this.layer().map().scheduleAnimationFrame(m_this._renderFrame);
 	    }
 	  };
 
@@ -53216,7 +53359,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_removeIds = {};
 	    var ids = m_renderIds;
 	    m_renderIds = {};
-	    m_renderAnimFrameRef = null;
 	    for (id in ids) {
 	      if (ids.hasOwnProperty(id)) {
 	        m_this._renderFeature(id);
@@ -53270,9 +53412,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._removeFeature = function (id) {
 	    m_removeIds[id] = true;
-	    if (m_renderAnimFrameRef === null) {
-	      m_renderAnimFrameRef = window.requestAnimationFrame(m_this._renderFrame);
-	    }
+	    m_this.layer().map().scheduleAnimationFrame(m_this._renderFrame);
 	    delete m_features[id];
 	    if (m_renderIds[id]) {
 	      delete m_renderIds[id];
@@ -53344,7 +53484,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var registerLayerAdjustment = __webpack_require__(195).registerLayerAdjustment;
+	var registerLayerAdjustment = __webpack_require__(196).registerLayerAdjustment;
 
 	var d3_tileLayer = function () {
 	  'use strict';
@@ -53440,7 +53580,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
+	var registerFeature = __webpack_require__(196).registerFeature;
 	var vectorFeature = __webpack_require__(233);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -53460,7 +53600,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var object = __webpack_require__(240);
-	  var timestamp = __webpack_require__(200);
+	  var timestamp = __webpack_require__(201);
 	  var d3 = __webpack_require__(213);
 
 	  arg = arg || {};
@@ -53770,7 +53910,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
+	var registerFeature = __webpack_require__(196).registerFeature;
 	var choroplethFeature = __webpack_require__(212);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -53900,7 +54040,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
+	var registerFeature = __webpack_require__(196).registerFeature;
 	var contourFeature = __webpack_require__(215);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -53921,9 +54061,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  contourFeature.call(this, arg);
 
-	  var vgl = __webpack_require__(81);
-	  var transform = __webpack_require__(6);
-	  var util = __webpack_require__(76);
+	  var vgl = __webpack_require__(82);
+	  var transform = __webpack_require__(7);
+	  var util = __webpack_require__(77);
 	  var object = __webpack_require__(251);
 
 	  object.call(this);
@@ -54210,7 +54350,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var gl_object = function (arg) {
 	  'use strict';
 
-	  var object = __webpack_require__(199);
+	  var object = __webpack_require__(200);
 
 	  // this is used to extend other geojs classes, so only generate
 	  // a new object when that is not the case... like if this === window
@@ -54265,9 +54405,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new ellipsoid(x, y, z);
 	  }
 
-	  var vgl = __webpack_require__(81);
-	  var util = __webpack_require__(76);
-	  var vec3 = __webpack_require__(133);
+	  var vgl = __webpack_require__(82);
+	  var util = __webpack_require__(77);
+	  var vec3 = __webpack_require__(134);
 
 	  x = vgl.defaultValue(x, 0.0);
 	  y = vgl.defaultValue(y, 0.0);
@@ -54468,7 +54608,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new gl_geomFeature(arg);
 	  }
 
-	  var vgl = __webpack_require__(81);
+	  var vgl = __webpack_require__(82);
 
 	  arg = arg || {};
 	  geomFeature.call(this, arg);
@@ -54580,8 +54720,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
-	var lineFeature = __webpack_require__(196);
+	var registerFeature = __webpack_require__(196).registerFeature;
+	var lineFeature = __webpack_require__(197);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -54600,9 +54740,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  lineFeature.call(this, arg);
 
-	  var vgl = __webpack_require__(81);
-	  var transform = __webpack_require__(6);
-	  var util = __webpack_require__(76);
+	  var vgl = __webpack_require__(82);
+	  var transform = __webpack_require__(7);
+	  var util = __webpack_require__(77);
 	  var object = __webpack_require__(251);
 
 	  object.call(this);
@@ -55020,8 +55160,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
-	var pointFeature = __webpack_require__(203);
+	var registerFeature = __webpack_require__(196).registerFeature;
+	var pointFeature = __webpack_require__(204);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -55040,9 +55180,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  pointFeature.call(this, arg);
 
-	  var vgl = __webpack_require__(81);
-	  var transform = __webpack_require__(6);
-	  var util = __webpack_require__(76);
+	  var vgl = __webpack_require__(82);
+	  var transform = __webpack_require__(7);
+	  var util = __webpack_require__(77);
 	  var object = __webpack_require__(251);
 
 	  object.call(this);
@@ -55570,8 +55710,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
-	var polygonFeature = __webpack_require__(205);
+	var registerFeature = __webpack_require__(196).registerFeature;
+	var polygonFeature = __webpack_require__(206);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -55590,10 +55730,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  polygonFeature.call(this, arg);
 
-	  var vgl = __webpack_require__(81);
+	  var vgl = __webpack_require__(82);
 	  var earcut = __webpack_require__(257);
-	  var transform = __webpack_require__(6);
-	  var util = __webpack_require__(76);
+	  var transform = __webpack_require__(7);
+	  var util = __webpack_require__(77);
 	  var object = __webpack_require__(251);
 
 	  object.call(this);
@@ -55911,11 +56051,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function (opts) {
 	    if (opts && opts.mayDelay) {
-	      m_updateAnimFrameRef = window.requestAnimationFrame(this._update);
+	      m_updateAnimFrameRef = m_this.layer().map().scheduleAnimationFrame(m_this._update);
 	      return;
 	    }
 	    if (m_updateAnimFrameRef) {
-	      window.cancelAnimationFrame(m_updateAnimFrameRef);
+	      m_this.layer().map().scheduleAnimationFrame(m_this._update, 'remove');
 	      m_updateAnimFrameRef = null;
 	    }
 	    s_update.call(m_this);
@@ -56607,7 +56747,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
+	var registerFeature = __webpack_require__(196).registerFeature;
 	var quadFeature = __webpack_require__(211);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -56628,7 +56768,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  quadFeature.call(this, arg);
 
 	  var $ = __webpack_require__(1);
-	  var vgl = __webpack_require__(81);
+	  var vgl = __webpack_require__(82);
 	  var object = __webpack_require__(251);
 
 	  object.call(this);
@@ -56650,7 +56790,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'uniform highp vec2 crop;',
 	    'void main(void) {',
 	    '  mediump vec4 color = texture2D(sampler2d, iTextureCoord);',
-	    '  if (iTextureCoord.s > crop.s || 1.0 - iTextureCoord.t > crop.t) {',
+	    '  if ((crop.s < 1.0 && iTextureCoord.s > crop.s) || (crop.t < 1.0 && 1.0 - iTextureCoord.t > crop.t)) {',
 	    '    discard;',
 	    '  }',
 	    '  color.w *= opacity;',
@@ -56847,6 +56987,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (m_clrModelViewUniform) {
 	      m_clrModelViewUniform.setOrigin(m_quads.origin);
 	    }
+	    m_this._updateTextures();
 	    m_this.buildTime().modified();
 	  };
 
@@ -56937,8 +57078,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var context = renderState.m_context,
 	        opacity = 1,
 	        crop = {x: 1, y: 1}, quadcrop;
-
-	    m_this._updateTextures();
 
 	    context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
 	    $.each(m_quads.imgQuads, function (idx, quad) {
@@ -57041,7 +57180,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 259 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var registerLayerAdjustment = __webpack_require__(195).registerLayerAdjustment;
+	var registerLayerAdjustment = __webpack_require__(196).registerLayerAdjustment;
 
 	var gl_tileLayer = function () {
 	  'use strict';
@@ -57146,7 +57285,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerRenderer = __webpack_require__(195).registerRenderer;
+	var registerRenderer = __webpack_require__(196).registerRenderer;
 	var renderer = __webpack_require__(217);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -57169,9 +57308,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  renderer.call(this, arg);
 
 	  var $ = __webpack_require__(1);
-	  var vgl = __webpack_require__(81);
-	  var mat4 = __webpack_require__(83);
-	  var util = __webpack_require__(76);
+	  var vgl = __webpack_require__(82);
+	  var mat4 = __webpack_require__(84);
+	  var util = __webpack_require__(77);
 	  var geo_event = __webpack_require__(5);
 
 	  var m_this = this,
@@ -57179,8 +57318,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_viewer = null,
 	      m_width = 0,
 	      m_height = 0,
-	      m_renderAnimFrameRef = null,
 	      m_lastZoom,
+	      m_updateCamera = false,
 	      s_init = this._init,
 	      s_exit = this._exit;
 
@@ -57235,6 +57374,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var canvas = $(document.createElement('canvas'));
 	    canvas.attr('class', 'webgl-canvas');
+	    canvas.css('display', 'block');
 	    $(m_this.layer().node().get(0)).append(canvas);
 	    m_viewer = vgl.viewer(canvas.get(0), arg.options);
 	    m_viewer.init();
@@ -57267,7 +57407,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.canvas().attr('height', h);
 	    renderWindow.positionAndResize(x, y, w, h);
 
-	    m_this._updateRendererCamera();
+	    m_updateCamera = true;
 	    m_this._render();
 
 	    return m_this;
@@ -57279,10 +57419,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._render = function () {
-	    if (m_renderAnimFrameRef) {
-	      window.cancelAnimationFrame(m_renderAnimFrameRef);
-	    }
-	    m_renderAnimFrameRef = window.requestAnimationFrame(this._renderFrame);
+	    /* If we are already scheduled to render, don't schedule again.  Rather,
+	     * mark that we should render after other animation frame requests occur.
+	     * It would be nice if we could just reschedule the call by removing and
+	     * readding the animation frame request, but this doesn't work for if the
+	     * reschedule occurs during another animation frame callback (it then waits
+	     * until a subsequent frame). */
+	    m_this.layer().map().scheduleAnimationFrame(this._renderFrame, true);
 	    return m_this;
 	  };
 
@@ -57290,7 +57433,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * This clears the render timer and actually renders.
 	   */
 	  this._renderFrame = function () {
-	    m_renderAnimFrameRef = null;
+	    if (m_updateCamera) {
+	      m_updateCamera = false;
+	      m_this._updateRendererCamera();
+	    }
 	    m_viewer.render();
 	  };
 
@@ -57335,8 +57481,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_lastZoom = map.zoom();
 	      cam.setViewMatrix(view, true);
 	      cam.setProjectionMatrix(proj);
+	      var viewport = camera.viewport;
+	      /* Test if we should align texels.  We won't if the projection matrix
+	       * is not simple, if there is a rotation that isn't a multiple of 90
+	       * degrees, if the viewport is not at an integer location, or if the zoom
+	       * level is not close to an integer.
+	       *   Note that the test for the viewport is strict (val % 1 is non-zero
+	       * if the value is not an integer), as, in general, the alignment is only
+	       * non-integral if a percent offset or calculation was used in css
+	       * somewhere.  The test for zoom level always has some allowance for
+	       * precision, as it is often the result of repeated computations. */
 	      if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
 	          proj[8] || proj[9] || proj[11] || proj[15] !== 1 || !ortho ||
+	          (viewport.left && viewport.left % 1) ||
+	          (viewport.top && viewport.top % 1) ||
 	          (parseFloat(m_lastZoom.toFixed(6)) !==
 	           parseFloat(m_lastZoom.toFixed(0)))) {
 	        /* Don't align texels */
@@ -57348,11 +57506,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * probably be divided by window.devicePixelRatio. */
 	        cam.viewAlignment = function () {
 	          var align = {
-	            roundx: 2.0 / camera.viewport.width,
-	            roundy: 2.0 / camera.viewport.height
+	            roundx: 2.0 / viewport.width,
+	            roundy: 2.0 / viewport.height
 	          };
-	          align.dx = (camera.viewport.width % 2) ? align.roundx * 0.5 : 0;
-	          align.dy = (camera.viewport.height % 2) ? align.roundy * 0.5 : 0;
+	          align.dx = (viewport.width % 2) ? align.roundx * 0.5 : 0;
+	          align.dy = (viewport.height % 2) ? align.roundy * 0.5 : 0;
 	          return align;
 	        };
 	      }
@@ -57363,7 +57521,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // produce a pan
 	  m_this.layer().geoOn(geo_event.pan, function (evt) {
 	    void (evt);
-	    m_this._updateRendererCamera();
+	    m_updateCamera = true;
 	  });
 
 	  // Connect to parallelprojection event
@@ -57376,10 +57534,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (!vglRenderer || !vglRenderer.camera()) {
 	        console.log('Parallel projection event triggered on unconnected VGL ' +
 	                    'renderer.');
+	        return;
 	      }
 	      camera = vglRenderer.camera();
 	      camera.setEnableParallelProjection(evt.parallelProjection);
-	      m_this._updateRendererCamera();
+	      m_updateCamera = true;
 	    }
 	  });
 
@@ -57458,7 +57617,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerRenderer = __webpack_require__(195).registerRenderer;
+	var registerRenderer = __webpack_require__(196).registerRenderer;
 	var renderer = __webpack_require__(217);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -57517,6 +57676,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.context2d = canvas[0].getContext('2d');
 
 	    canvas.attr('class', 'canvas-canvas');
+	    canvas.css('display', 'block');
 	    $(m_this.layer().node().get(0)).append(canvas);
 
 	    m_this.canvas(canvas);
@@ -57634,9 +57794,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
+	var registerFeature = __webpack_require__(196).registerFeature;
 	var heatmapFeature = __webpack_require__(222);
-	var timestamp = __webpack_require__(200);
+	var timestamp = __webpack_require__(201);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -58122,7 +58282,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var sceneObject = __webpack_require__(198);
+	var sceneObject = __webpack_require__(199);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -58135,7 +58295,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var canvas_object = function (arg) {
 	  'use strict';
 
-	  var object = __webpack_require__(199);
+	  var object = __webpack_require__(200);
 
 	  // this is used to extend other geojs classes, so only generate
 	  // a new object when that is not the case... like if this === window
@@ -58178,7 +58338,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
+	var registerFeature = __webpack_require__(196).registerFeature;
 	var pixelmapFeature = __webpack_require__(232);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -58218,7 +58378,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(195).registerFeature;
+	var registerFeature = __webpack_require__(196).registerFeature;
 	var quadFeature = __webpack_require__(211);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -58383,7 +58543,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 267 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var registerLayerAdjustment = __webpack_require__(195).registerLayerAdjustment;
+	var registerLayerAdjustment = __webpack_require__(196).registerLayerAdjustment;
 
 	var canvas_tileLayer = function () {
 	  'use strict';
@@ -58502,7 +58662,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var widget = __webpack_require__(270);
 	var inherit = __webpack_require__(4);
-	var registerWidget = __webpack_require__(195).registerWidget;
+	var registerWidget = __webpack_require__(196).registerWidget;
 
 	var domWidget = function (arg) {
 	  'use strict';
@@ -58561,7 +58721,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
-	var sceneObject = __webpack_require__(198);
+	var sceneObject = __webpack_require__(199);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -58580,7 +58740,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  sceneObject.call(this, arg);
 
 	  var geo_event = __webpack_require__(5);
-	  var createFeature = __webpack_require__(195).createFeature;
+	  var createFeature = __webpack_require__(196).createFeature;
 
 	  var m_this = this,
 	      s_exit = this._exit,
@@ -58782,7 +58942,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var svgWidget = __webpack_require__(272);
 	var inherit = __webpack_require__(4);
-	var registerWidget = __webpack_require__(195).registerWidget;
+	var registerWidget = __webpack_require__(196).registerWidget;
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -59074,7 +59234,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var domWidget = __webpack_require__(269);
 	var inherit = __webpack_require__(4);
-	var registerWidget = __webpack_require__(195).registerWidget;
+	var registerWidget = __webpack_require__(196).registerWidget;
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -59165,7 +59325,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var svgWidget = __webpack_require__(272);
 	var inherit = __webpack_require__(4);
-	var registerWidget = __webpack_require__(195).registerWidget;
+	var registerWidget = __webpack_require__(196).registerWidget;
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
