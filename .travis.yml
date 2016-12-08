@@ -42,8 +42,8 @@ script:
   - npm run build
   - npm run docs
   - mkdir _build
-  - bash -c 'GEOJS_SERVE_TEST=true npm run start-test >/tmp/geojs_output.log 2>&1' &
-  - until grep -s 'Forever processing file' /tmp/geojs_output.log; do sleep 1; done
+  # - bash -c 'GEOJS_SERVE_TEST=true npm run start-test >/tmp/geojs_output.log 2>&1' &
+  # - until grep -s 'Forever processing file' /tmp/geojs_output.log; do sleep 1; done
   # Adding TEST_SAVE_IMAGE=all will allow image tests with no baseline images
   # to pass.  Only use this during development.
   # - export TEST_SAVE_IMAGE=all

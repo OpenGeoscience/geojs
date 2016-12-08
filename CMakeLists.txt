@@ -111,9 +111,13 @@ if(FFHEADLESS_TESTS)
 endif()
 
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz"
-  COMMAND TEST_SAVE_IMAGE=all npm run ffci
-  COMMAND tar -zcvf "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz" --exclude=*-test.png --exclude=*-diff.png -C "${CMAKE_CURRENT_BINARY_DIR}/images" .
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  # Make sure we have the data files
+  COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target data_files
+  # Run the ffheadless test, asking to save all images
+  COMMAND TEST_SAVE_IMAGE=all npm run ffci
+  # Make a tarball of all of the images
+  COMMAND tar -zcvf "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz" --exclude=*-test.png --exclude=*-diff.png -C "${CMAKE_CURRENT_BINARY_DIR}/images" .
   COMMENT "Create baseline images, then tar them into a single file"
   VERBATIM
 )
@@ -121,6 +125,7 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz"
 add_custom_target(baseline_images DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz")
 
 add_test(NAME baseline_images CONFIGURATIONS "baseline_images" COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target baseline_images)
+set_property(TEST "baseline_images" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
 
 if(SELENIUM_TESTS)
 
