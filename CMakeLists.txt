@@ -91,13 +91,14 @@ if(PHANTOMJS_TESTS)
   set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "phantomjs")
 endif()
 
-if(FFHEADLESS_TESTS)
-  add_custom_target(
-    data_files
-    ALL
-    DEPENDS ${Girder_DOWNLOAD_FILES}
-  )
+add_custom_target(
+  data_files
+  ALL
+  DEPENDS ${Girder_DOWNLOAD_FILES}
+)
+add_test(NAME get_data_files COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target data_files)
 
+if(FFHEADLESS_TESTS)
   find_program(NPM_EXECUTABLE npm)
   add_test(
     NAME "ffheadless"
@@ -106,7 +107,20 @@ if(FFHEADLESS_TESTS)
   )
   set_property(TEST "ffheadless" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
   set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "ffheadless")
+  set_property(TEST "ffheadless" APPEND PROPERTY DEPENDS "get_data_files")
 endif()
+
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz"
+  COMMAND TEST_SAVE_IMAGE=all npm run ffci
+  COMMAND tar -zcvf "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz" --exclude=*-test.png --exclude=*-diff.png -C "${CMAKE_CURRENT_BINARY_DIR}/images" .
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  COMMENT "Create baseline images, then tar them into a single file"
+  VERBATIM
+)
+
+add_custom_target(baseline_images DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz")
+
+add_test(NAME baseline_images CONFIGURATIONS "baseline_images" COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target baseline_images)
 
 if(SELENIUM_TESTS)
 
