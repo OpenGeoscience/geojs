@@ -88,6 +88,8 @@ Many of these tests compare against a baseline image.  If a test is changed or
 added, new baselines can be generated and optionally uploaded via the script
 built into ``test/baseline_images.py``.
 
+Unless an image comparison tests, images are not automatically saved.  To save all images, add the environment variable ``TEST_SAVE_IMAGE=all`` to the test command.  Images are saved in the ``images`` subdirectory of the build directory.
+
 .. note::
 
     Typically, CMake is used to build outside of the source tree.  This
