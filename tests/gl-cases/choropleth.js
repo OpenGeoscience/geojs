@@ -69,6 +69,6 @@ describe('choropleth', function () {
          .choropleth({});
     myMap.draw();
 
-    imageTest.imageTest('choropleth', 0.001, done, myMap.onIdle, 0, 2);
+    imageTest.imageTest('choropleth', null, 0.001, done, myMap.onIdle, 0, 2);
   });
 });

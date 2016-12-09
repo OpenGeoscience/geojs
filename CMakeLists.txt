@@ -111,6 +111,16 @@ if(FFHEADLESS_TESTS)
   set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "ffheadless")
   set_property(TEST "ffheadless" APPEND PROPERTY DEPENDS "get_data_files")
 
+  add_test(
+    NAME "examplesheadless"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND npm run examplesci
+  )
+  set_property(TEST "examplesheadless" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
+  set_property(TEST "examplesheadless" APPEND PROPERTY ENVIRONMENT "TEST_SAVE_IMAGE=${TEST_SAVE_IMAGE}")
+  set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "examplesheadless")
+  set_property(TEST "examplesheadless" APPEND PROPERTY DEPENDS "get_data_files")
+
   configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/baseline_images.py"
     "${CMAKE_CURRENT_BINARY_DIR}/test/baseline_images.py"
@@ -124,8 +134,10 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz"
   COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target data_files
   # Run the ffheadless test, asking to save all images
   COMMAND TEST_SAVE_IMAGE=all npm run ffci
+  # Run the examplesheadless test, asking to save all images
+  COMMAND TEST_SAVE_IMAGE=all npm run examplesci
   # Make a tarball of all of the images
-  COMMAND tar -zcvf "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz" --exclude=*-test.png --exclude=*-diff.png --exclude=*-base.png -C "${CMAKE_CURRENT_BINARY_DIR}/images" .
+  COMMAND tar -zcvf "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz" --exclude=*-test.png --exclude=*-diff.png --exclude=*-base.png --exclude=*-screen.png -C "${CMAKE_CURRENT_BINARY_DIR}/images" .
   COMMENT "Create baseline images, then tar them into a single file"
   VERBATIM
 )

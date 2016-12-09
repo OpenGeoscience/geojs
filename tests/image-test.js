@@ -19,9 +19,18 @@ function compareImage(name, canvas, threshold, callback) {
   if (threshold === undefined) {
     threshold = 0.001;
   }
+  var data, params = '';
+  if (canvas.screenCoordinates) {
+    params = '&screen=true&left=' + encodeURIComponent(canvas.left) +
+             '&top=' + encodeURIComponent(canvas.top) +
+             '&width=' + encodeURIComponent(canvas.width) +
+             '&height=' + encodeURIComponent(canvas.height);
+  } else {
+    data = '' + canvas.toDataURL();
+  }
   return $.ajax({
-    url: '/testImage?compare=true&threshold=' + encodeURIComponent(threshold) + '&name=' + encodeURIComponent(name),
-    data: '' + canvas.toDataURL(),
+    url: '/testImage?compare=true&threshold=' + encodeURIComponent(threshold) + '&name=' + encodeURIComponent(name) + params,
+    data: data,
     method: 'PUT',
     contentType: 'image/png',
     dataType: 'json'
@@ -41,14 +50,26 @@ module.exports.prepareImageTest = function () {
   window.contextPreserveDrawingBuffer = true;
   $('#map').remove();
   var map = $('<div id="map"/>').css({width: '800px', height: '600px'});
-  $('body').append(map);
+  $('body').prepend(map);
+};
+
+module.exports.prepareIframeTest = function () {
+  window.contextPreserveDrawingBuffer = true;
+  $('#map').remove();
+  var map = $('<iframe id="map"/>').css({
+    width: '800px', height: '600px', border: 0});
+  $('body').prepend(map);
 };
 
 /**
- * Compare a composite of all canvas elements with a base image.
+ * Compare a screen region or a composite of all canvas elements with a base
+ * image.
  *
  * @param {string} name: name of the base image.  This is probably the name of
  *    the test.
+ * @param {string|null} elemSelector: if present, ask the server to take a
+ *    screenshot of the current display and crop it to the bounds of the
+ *    specified element.  If falsy, make a composite of all canvas elements.
  * @param {number} threshold: allowed difference between this image and the
  *    base image.
  * @param {function} doneFunc: a function to call when complete.  Optional.
@@ -58,20 +79,40 @@ module.exports.prepareImageTest = function () {
  * @param {number} delay: additional delay in milliseconds to wait after idle.
  * @param {integer} rafCount: additional number of renderAnimationFrames to
  *    wait after the delay.
+ * @param {string|null} elemSelector: if present, wait until this selector
+ *    selects at least one existing element.
  */
-module.exports.imageTest = function (name, threshold, doneFunc, idleFunc, delay, rafCount) {
+module.exports.imageTest = function (name, elemSelector, threshold, doneFunc, idleFunc, delay, rafCount, readySelector) {
   var deferred = $.Deferred();
 
   var readyFunc = function () {
-    var result = $('<canvas>')[0];
-    result.width = $('canvas')[0].width;
-    result.height = $('canvas')[0].height;
-    var context = result.getContext('2d');
-    context.fillStyle = 'white';
-    context.fillRect(0, 0, result.width, result.height);
-    $('canvas').each(function () {
-      context.drawImage($(this)[0], 0, 0);
-    });
+    var result;
+    if (!elemSelector) {
+      result = $('<canvas>')[0];
+      result.width = $('canvas')[0].width;
+      result.height = $('canvas')[0].height;
+      var context = result.getContext('2d');
+      context.fillStyle = 'white';
+      context.fillRect(0, 0, result.width, result.height);
+      $('canvas').each(function () {
+        context.drawImage($(this)[0], 0, 0);
+      });
+    } else {
+      var innerScreenX = window.mozInnerScreenX !== undefined ?
+            window.mozInnerScreenX :
+            (window.outerWidth - window.innerWidth) / 2 + window.screenX,
+          innerScreenY = window.mozInnerScreenY !== undefined ?
+            window.mozInnerScreenY :
+            window.outerHeight - window.innerHeight -
+            (window.outerWidth - window.innerWidth) / 2 + window.screenY;
+      result = {
+        screenCoordinates: true,
+        left: $(elemSelector).offset().left + innerScreenX,
+        top: $(elemSelector).offset().top + innerScreenY,
+        width: $(elemSelector).outerWidth(true),
+        height: $(elemSelector).outerHeight(true)
+      };
+    }
     compareImage(name, result, threshold, function () {
       if (doneFunc) {
         doneFunc();
@@ -99,7 +140,27 @@ module.exports.imageTest = function (name, threshold, doneFunc, idleFunc, delay,
 
   if (delay) {
     var delayFunc = readyFunc;
-    readyFunc = window.setTimeout(delayFunc, delay);
+    readyFunc = function () {
+      window.setTimeout(delayFunc, delay);
+    };
+  }
+
+  if (readySelector) {
+    var selFunc = readyFunc;
+    var selWaitFunc;
+    selWaitFunc = function () {
+      var base$ = $,
+          base = $('iframe#map');
+      if (base.length) {
+        base$ = base[0].contentWindow.$;
+      }
+      if (!base$ || !base$(readySelector).length) {
+        window.setTimeout(selWaitFunc, 10);
+        return;
+      }
+      selFunc();
+    };
+    readyFunc = selWaitFunc;
   }
 
   if (idleFunc) {

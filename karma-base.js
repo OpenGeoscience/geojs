@@ -53,6 +53,29 @@ function saveImage(name, image, always) {
   }
 }
 
+/* Use ImageMagick's import tool to get a portion of the screen.  The caller is
+ * responsible for identifying the useful portion of the screen.
+ *
+ * @param {string} name: base name for the image.
+ * @param {number} left: left screen coordinate
+ * @param {number} top: top screen coordinate
+ * @param {number} width: width in pixels of area to fetch.
+ * @param {number} height: height in pixels of area to fetch.
+ * @returns: a base64-encoded image.
+ */
+function getScreenImage(name, left, top, width, height) {
+  var child_process = require('child_process');
+  var dest = path.resolve(image_path, name + '-screen.png');
+  child_process.execSync(
+     'import -window root ' +
+    '-crop ' + width + 'x' + height + (left >= 0 ? '+' : '') + left +
+    (top >= 0 ? '+' : '') + top + ' +repage ' +
+    '\'' + dest.replace(/'/g, "'\\''") + '\'');
+  var xvfbImage = new Buffer(fs.readFileSync(dest)).toString('base64');
+  xvfbImage = 'data:image/png;base64,' + xvfbImage;
+  return xvfbImage;
+}
+
 /* Compare an image to a base image.  If it violates a threshold, save the
  * image and a diff between it and the base image.  Returns the resemble
  * results.
@@ -64,17 +87,6 @@ function saveImage(name, image, always) {
  * @param {function} callback: a function to call when complete.
  */
 function compareImage(name, image, threshold, callback) {
-  /* Note, we could read the xvfb frame buffer using imageMagick, which would
-   * get the entire browser display, including it's window border, tabs, search
-   * bar, and non-canvas elements.  It might be worth install a kiosk extension
-   * to FireFox (or use Chrome in Kiosk mode), and exclude the portions of the
-   * window that are used for Karma information.
-  var child_process = require('child_process');
-  var dest = path.resolve(image_path, name + '-xvfb.png');
-  child_process.execSync('import -window root \'' + dest.replace(/'/g, "'\\''") + '\'');
-  var xvfbImage = new Buffer(fs.readFileSync(dest)).toString('base64');
-  xvfbImage = 'data:image/png;base64,' + xvfbImage;
-   */
   var resemble = require('node-resemble');
   var src = path.resolve('dist/data/base-images', name + '.png');
   if (!fs.existsSync(src)) {
@@ -138,7 +150,13 @@ var notes_middleware = function (config) {
       if (request.method === 'PUT') {
         return getRawBody(request).then(function (body) {
           var name = query.name;
-          var image = '' + body;
+          var image;
+          if (query.screen === 'true') {
+            image = getScreenImage(name, query.left, query.top,
+                                   query.width, query.height);
+          } else {
+            image = '' + body;
+          }
           saveImage(name, image);
           if (query.compare === 'true') {
             compareImage(name, image, query.threshold, function (results) {
@@ -172,6 +190,7 @@ module.exports = {
     {pattern: 'tests/data/**/*', included: false},
     {pattern: 'tests/cases/**/*.js', included: false, served: false, watched: true},
     {pattern: 'tests/gl-cases/**/*.js', included: false, served: false, watched: true},
+    {pattern: 'tests/example-cases/**/*.js', included: false, served: false, watched: true},
     {pattern: 'dist/data/**/*', included: false},
     {pattern: 'dist/examples/**/*', included: false}
   ],
