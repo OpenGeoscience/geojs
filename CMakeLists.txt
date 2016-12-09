@@ -8,6 +8,7 @@ enable_testing()
 set(BUILD_TESTING ON CACHE BOOL "Enable geojs testing")
 set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
 set(FFHEADLESS_TESTS ON CACHE BOOL "Generate headless Firefox unit tests (requires xvfb to be running).")
+set(TEST_SAVE_IMAGE "none" CACHE STRING "Save headless test images even if there aren't errors.  Valid options are none, all, or the a comma-separated list of test names.")
 set(ESLINT_TESTS ON CACHE BOOL "Generate eslint style tests for JS source files.")
 set(SELENIUM_TESTS ON CACHE BOOL "Generate selenium unit tests.")
 
@@ -106,6 +107,7 @@ if(FFHEADLESS_TESTS)
     COMMAND npm run ffci
   )
   set_property(TEST "ffheadless" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
+  set_property(TEST "ffheadless" APPEND PROPERTY ENVIRONMENT "TEST_SAVE_IMAGE=${TEST_SAVE_IMAGE}")
   set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "ffheadless")
   set_property(TEST "ffheadless" APPEND PROPERTY DEPENDS "get_data_files")
 
@@ -123,7 +125,7 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz"
   # Run the ffheadless test, asking to save all images
   COMMAND TEST_SAVE_IMAGE=all npm run ffci
   # Make a tarball of all of the images
-  COMMAND tar -zcvf "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz" --exclude=*-test.png --exclude=*-diff.png -C "${CMAKE_CURRENT_BINARY_DIR}/images" .
+  COMMAND tar -zcvf "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz" --exclude=*-test.png --exclude=*-diff.png --exclude=*-base.png -C "${CMAKE_CURRENT_BINARY_DIR}/images" .
   COMMENT "Create baseline images, then tar them into a single file"
   VERBATIM
 )

@@ -74,6 +74,7 @@ additional data which can be downloaded by using CMake and running ctest.
 For example, running ::
 
     cmake /path/to/geojs
+    make
     xvfb-run -s '-ac -screen 0 1280x1024x24' ctest -VV -R ffheadless
 
 will run the headless WebGL tests.  After the data for tests is downloaded,
@@ -88,7 +89,10 @@ Many of these tests compare against a baseline image.  If a test is changed or
 added, new baselines can be generated and optionally uploaded via the script
 built into ``test/baseline_images.py``.
 
-Unless an image comparison tests, images are not automatically saved.  To save all images, add the environment variable ``TEST_SAVE_IMAGE=all`` to the test command.  Images are saved in the ``images`` subdirectory of the build directory.
+Unless an image comparison tests, images are not automatically saved.  To save
+all images, add the environment variable ``TEST_SAVE_IMAGE=all`` to the test 
+command or set this parameter in CMake.  Images are saved in the ``images``
+subdirectory of the build directory.
 
 .. note::
 

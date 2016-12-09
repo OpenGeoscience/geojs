@@ -67,6 +67,8 @@ module.exports.imageTest = function (name, threshold, doneFunc, idleFunc, delay,
     result.width = $('canvas')[0].width;
     result.height = $('canvas')[0].height;
     var context = result.getContext('2d');
+    context.fillStyle = 'white';
+    context.fillRect(0, 0, result.width, result.height);
     $('canvas').each(function () {
       context.drawImage($(this)[0], 0, 0);
     });

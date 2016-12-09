@@ -89,6 +89,7 @@ function compareImage(name, image, threshold, callback) {
       console.log('Image comparison: ' + name + ', delta: ' +
                   Number(results.misMatchPercentage) * 0.01);
       var passed = (Number(results.misMatchPercentage) <= threshold * 100);
+      saveImage(name + '-base', refImage, !passed);
       saveImage(name + '-test', image, !passed);
       saveImage(name + '-diff', results.getImageDataUrl(), !passed);
       results.passed = passed;
