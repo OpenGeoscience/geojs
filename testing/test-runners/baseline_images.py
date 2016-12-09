@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
+import girder_client
 import md5
 import os
-import requests
 import subprocess
 import time
 
@@ -56,7 +56,9 @@ def upload_baselines(args):
         build: the build directory where the tarball is located.
         dest: the root url of the Girder instance.
         folder: the Girder folder ID to upload to.
-        token: a Girder authentication token.
+        apikey: a Girder authentication token.  Optional.
+        username: a Girder username.  Optional.
+        password: a Girder username.  Optional.
         verbose: the verbosity level.
     """
     buildPath = os.path.abspath(os.path.expanduser(args.get('build')))
@@ -64,41 +66,19 @@ def upload_baselines(args):
     tarSize = os.path.getsize(tarPath)
     # Get the folder we want to upload to to ensure it exists
     apiRoot = args['dest'].rstrip('/') + '/api/v1/'
-    headers = {}
-    if args.get('token'):
-        headers['Girder-Token'] = args['token']
-    if args['verbose'] >= 2:
-        print('Testing folder access')
-    data = requests.get(
-        apiRoot + 'folder/%s' % args['folder'], headers=headers)
-    if not data.json()['name']:
-        raise Exception('Failed to get folder\'s name')
-    if args['verbose'] >= 2:
-        print('Received folder information')
-    tarData = open(tarPath, 'rb').read()
+    gc = girder_client.GirderClient(apiUrl=apiRoot)
+    if args.get('apikey'):
+        gc.authenticate(apiKey=args.get('apikey'))
+    elif args.get('username') and args.get('password'):
+        gc.authenticate(username=args.get('username'),
+                        password=args.get('password'))
+    else:
+        gc.authenticate(username=args.get('username'), interactive=True)
     name = 'Baseline Images %s.tgz' % time.strftime(
         '%Y-%m-%d %H:%M:%S', time.localtime(os.path.getmtime(tarPath)))
-    data = requests.post(
-        apiRoot + 'file', headers=headers,
-        data={
-            'parentType': 'folder',
-            'parentId': args['folder'],
-            'name': name,
-            'size': tarSize
-        })
-    upload = data.json()
-    if '_id' not in upload:
-        raise Exception('Failed to start upload: %r' % upload)
-    if args['verbose'] >= 1:
-        print('Started upload %s' % upload['_id'])
-    data = requests.post(
-        apiRoot + 'file/chunk', headers=headers,
-        params={
-            'offset': 0,
-            'uploadId': upload['_id'],
-        },
-        files={'chunk': tarData})
-    uploadedFile = data.json()
+    uploadedFile = gc.uploadFile(
+        parentId=args['folder'], parentType='folder', name=name,
+        stream=open(tarPath), size=tarSize, mimeType='application/tar+gzip')
     if args['verbose'] >= 1:
         print('Upload to file %s' % uploadedFile['_id'])
     testDataPath = os.path.abspath('testing/test-data')
@@ -107,7 +87,7 @@ def upload_baselines(args):
     open(os.path.join(testDataPath, 'base-images.tgz.url'), 'w').write(
         apiRoot + 'file/%s/download' % uploadedFile['_id'])
     open(os.path.join(testDataPath, 'base-images.tgz.md5'), 'w').write(
-        md5.new(tarData).hexdigest())
+        md5.new(open(tarPath).read()).hexdigest())
     if args['verbose'] >= 1:
         print('test-data references updated')
 
@@ -132,7 +112,7 @@ if __name__ == '__main__':
         '--no-generate', dest='make', action='store_false',
         help='Don\'t generate baseline images.')
     parser.add_argument(
-        '--build', '-b', default='_build',
+        '--build', '-b', default='.',
         help='The build directory.  This is created if baseline images are '
         'generated and the directory does not exist.')
     parser.add_argument(
@@ -143,13 +123,20 @@ if __name__ == '__main__':
         help='Don\'t upload the baseline image tarball.')
     parser.add_argument(
         '--dest', '-d', default='https://data.kitware.com',
-        help='Destination for upload.  Must be a girder server.')
+        help='Destination for upload.  Must be a Girder server.  /api/v1 is '
+        'added to this destination to reach the Girder api.')
     parser.add_argument(
         '--folder', '-f', default='5841a0488d777f5cdd826f1b',
         help='Destination folder ID.')
     parser.add_argument(
-        '--token', '-t',
-        help='Upload authentication token.')
+        '--apikey', '-a',
+        help='Girder API key.  If neither an API key nor a username and '
+        'password are given, an interactive prompt requests a username and '
+        'password.')
+    parser.add_argument(
+        '--username', '--user', help='Girder username.  Optional.')
+    parser.add_argument(
+        '--password', '--pass', help='Girder password.  Optional.')
     parser.add_argument('--verbose', '-v', action='count', default=0)
 
     args = vars(parser.parse_args())
