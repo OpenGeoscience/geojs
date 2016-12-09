@@ -108,6 +108,12 @@ if(FFHEADLESS_TESTS)
   set_property(TEST "ffheadless" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
   set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "ffheadless")
   set_property(TEST "ffheadless" APPEND PROPERTY DEPENDS "get_data_files")
+
+  configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/baseline_images.py"
+    "${CMAKE_CURRENT_BINARY_DIR}/test/baseline_images.py"
+    COPYONLY
+  )
 endif()
 
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz"
