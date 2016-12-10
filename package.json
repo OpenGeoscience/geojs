@@ -16,6 +16,16 @@
     "hammerjs": "^2.0.8"
   },
   "devDependencies": {
+<<<<<<< HEAD
+=======
+    "babel-core": "^6.0.0",
+    "babel-loader": "^6.0.0",
+    "babel-plugin-istanbul": "2.0.0",
+    "babel-polyfill": "6.13.0",
+    "babel-preset-react": "^6.16.0",
+    "babel-preset-stage-2": "^6.18.0",
+    "blanket": "~1.2",
+>>>>>>> Fixed build that works with vtk.js
     "body-parser": "^1.15.0",
     "bootstrap": "^3.3.6",
     "bootswatch": "^3.3.6",
@@ -78,6 +88,7 @@
     "raw-body": "^2.1.6",
     "sinon": "1.17.3",
     "string-replace-webpack-plugin": "^0.1.3",
+    "string-replace-loader": "1.0.5",
     "style-loader": "^0.13.1",
     "stylus": "^0.54.5",
     "stylus-loader": "^2.4.0",
@@ -85,10 +96,10 @@
     "typeface-lato": "^0.0.44",
     "url-loader": "^0.5.7",
     "vgl": "0.3.10",
+    "vtk.js": "github:kitware/vtk-js",
     "webpack": "^1.12.14",
     "webpack-dev-server": "^1.14.1",
-    "xmlbuilder": "^8.2.2",
-    "vtk.js": "^2.0.0"
+    "xmlbuilder": "^8.2.2"
   },
   "scripts": {
     "build": "webpack --config webpack.config.js && webpack --config external.config.js",

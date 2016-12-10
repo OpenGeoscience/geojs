@@ -9,6 +9,12 @@ var loaders = base.module.loaders.concat([{
   test: /\.pug$/,
   loader: 'pug'
 }, {
+  test: /\.css$/,
+  loader: 'style-loader!css-loader'
+}, {
+  test: /\.jade$/,
+  loader: 'jade'
+}, {
   test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
   loader: 'url?limit=10000&mimetype=application/font-woff'
 }, {

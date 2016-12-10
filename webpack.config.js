@@ -2,6 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 var exec = require('child_process').execSync;
 var sha = '';
+var loaders = require('./node_modules/vtk.js/Utilities/config/webpack.loaders.js');
 
 if (!exec) {
   console.warn('Node 0.12 or greater is required for detecting the git hash.');
@@ -66,7 +67,8 @@ module.exports = {
     }, {
       test: /vgl\.js$/,
       loader: 'expose?vgl!imports?mat4=gl-mat4,vec4=gl-vec4,vec3=gl-vec3,vec2=gl-vec2,$=jquery'
-    }]
+    }
+    ].concat(loaders)
   },
 
   // These are plugins that we want to run in Karma as well

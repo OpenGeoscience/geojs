@@ -1,6 +1,9 @@
 var inherit = require('../inherit');
 var registerRenderer = require('../registry').registerRenderer;
 var renderer = require('../renderer');
+var vtkOpenGLRenderWindow = require('vtk.js/Sources/Rendering/OpenGL/RenderWindow');
+var vtkRenderer = require('vtk.js/Sources/Rendering/Core/Renderer');
+var vtkRenderWindow = require('vtk.js/Sources/Rendering/Core/RenderWindow');
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -38,6 +41,10 @@ var vtkjsRenderer = function (arg) {
       s_init = this._init,
       s_exit = this._exit;
 
+  const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({ background: [0, 0, 0] });
+  const vtkjsren = fullScreenRenderer.getRenderer();
+  const renderWindow = fullScreenRenderer.getRenderWindow();
+
   /// TODO: Move this API to the base class
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -63,7 +70,7 @@ var vtkjsRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.contextRenderer = function () {
-    return m_contextRenderer;
+    return renderWindow.getRenderer();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -72,7 +79,7 @@ var vtkjsRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.api = function () {
-    return 'vgl';
+    return 'vtkjs';
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -142,6 +149,7 @@ var vtkjsRenderer = function (arg) {
      * until a subsequent frame). */
     // m_this.layer().map().scheduleAnimationFrame(this._renderFrame, true);
     // return m_this;
+    renderWindow.render();
   };
 
   /**
@@ -153,6 +161,7 @@ var vtkjsRenderer = function (arg) {
     //   m_this._updateRendererCamera();
     // }
     // m_viewer.render();
+    renderWindow.render();
   };
 
   ////////////////////////////////////////////////////////////////////////////

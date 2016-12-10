@@ -1,6 +1,17 @@
+var vtkjs = require('vtk.js');
 var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
+
+// import vtkActor                   from 'vtk.js/Sources/Rendering/Core/Actor';
+// import vtkSphereSource            from 'vtk.js/Sources/Filters/Sources/SphereSource';
+// import vtkMapper                  from 'vtk.js/Sources/Rendering/Core/Mapper';
+
+var vtkActor = require('vtk.js/Sources/Rendering/Core/Actor');
+
+// import vtkActor                   from '../../../../../Sources/Rendering/Core/Actor';
+// import vtkSphereSource            from '../../../../../Sources/Filters/Sources/SphereSource';
+// import vtkMapper                  from '../../../../../Sources/Rendering/Core/Mapper';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -194,15 +205,19 @@ var vtkjs_pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
 
-    // if (m_actor) {
-    //   m_this.renderer().contextRenderer().removeActor(m_actor);
-    // }
+    if (m_actor) {
+      m_this.renderer().contextRenderer().removeActor(m_actor);
+    }
 
-    // createGLPoints();
-
-    // m_this.renderer().contextRenderer().addActor(m_actor);
-    // m_this.renderer().contextRenderer().render();
-    // m_this.buildTime().modified();
+    const sphereSource = vtkSphereSource.newInstance();
+    const actor = vtkActor.newInstance();
+    const mapper = vtkMapper.newInstance();
+    actor.getProperty().setEdgeVisibility(true);
+    mapper.setInputConnection(sphereSource.getOutputPort());
+    actor.setMapper(mapper);
+    m_this.renderer().contextRenderer().addActor(actor);
+    m_actor = actor;
+    m_this.buildTime().modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////

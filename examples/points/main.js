@@ -73,7 +73,7 @@ $(function () {
   var svgLayer = map.createLayer(
     'feature',
     {
-      renderer: 'd3'
+      renderer: 'vtkjs'
     }
   );
 
