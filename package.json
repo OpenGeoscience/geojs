@@ -87,7 +87,8 @@
     "vgl": "0.3.10",
     "webpack": "^1.12.14",
     "webpack-dev-server": "^1.14.1",
-    "xmlbuilder": "^8.2.2"
+    "xmlbuilder": "^8.2.2",
+    "vtk.js": "^2.0.0"
   },
   "scripts": {
     "build": "webpack --config webpack.config.js && webpack --config external.config.js",
