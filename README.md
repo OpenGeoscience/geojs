@@ -11,7 +11,7 @@ Primarily developed by [Kitware](http://www.kitware.com) and
 [Geospatial Visualization](https://en.wikipedia.org/wiki/Geovisualization),
 [Scientific Visualization](https://en.wikipedia.org/wiki/Scientific_visualization) and
 [Infovis](https://en.wikipedia.org/wiki/Information_visualization).
-GeoJS is not just a GIS library as users can create scientific plots
+GeoJS is more than just a GIS library as users can create scientific plots
 such as vector and contour and can embed infovis plots using [D3.js](https://github.com/d3/d3).
 *GeoJS aims for high-performance visualization and interactive data exploration of scientific
 and geospatial location aware datasets*.
@@ -22,10 +22,10 @@ such as [Pixelmap](http://opengeoscience.github.io/geojs/examples/pixelmap),
 [Heatmap](http://opengeoscience.github.io/geojs/examples/heatmap), and
 [Choropleth] http://opengeoscience.github.io/geojs/examples/choropleth).
 
-GeoJS can read and render data from [GeoJSON](http://opengeoscience.github.io/geojs/examples/geoJSON) file,
-and [WMS](http://opengeoscience.github.io/geojs/examples/wms) server.
+GeoJS can read and render data from [GeoJSON](http://opengeoscience.github.io/geojs/examples/geoJSON) files,
+and [WMS](http://opengeoscience.github.io/geojs/examples/wms) servers.
 Additional features includes [Annotations](http://opengeoscience.github.io/geojs/examples/annotations),
-[Legend](http://opengeoscience.github.io/geojs/examples/legend),
+[Legends](http://opengeoscience.github.io/geojs/examples/legend),
 [Animated Transitions](http://opengeoscience.github.io/geojs/examples/transitions), and
 [Widgets](http://opengeoscience.github.io/geojs/examples/widgets).
 
