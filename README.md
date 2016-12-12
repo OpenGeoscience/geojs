@@ -20,7 +20,7 @@ GeoJS supports features such as *Point*, *Line*, *Polygon*, and advanced feature
 such as [Pixelmap](http://opengeoscience.github.io/geojs/examples/pixelmap),
 [Contour](http://opengeoscience.github.io/geojs/examples/contour),
 [Heatmap](http://opengeoscience.github.io/geojs/examples/heatmap), and
-[Choropleth] http://opengeoscience.github.io/geojs/examples/choropleth).
+[Choropleth](http://opengeoscience.github.io/geojs/examples/choropleth).
 
 GeoJS can read and render data from [GeoJSON](http://opengeoscience.github.io/geojs/examples/geoJSON) files,
 and [WMS](http://opengeoscience.github.io/geojs/examples/wms) servers.
@@ -29,6 +29,30 @@ Additional features includes [Annotations](http://opengeoscience.github.io/geojs
 [Animated Transitions](http://opengeoscience.github.io/geojs/examples/transitions), and
 [Widgets](http://opengeoscience.github.io/geojs/examples/widgets).
 
-**For live examples visit [Github.io](http://opengeoscience.github.io/geojs/examples/index.html)**
 
-![Historical hurricane data Visualization in GeoJS](http://opengeoscience.github.io/geojs/examples/hurricanes/thumb.jpg)
+Examples
+========
+For live examples visit [Github.io](http://opengeoscience.github.io/geojs/examples/index.html)
+
+[![Historical hurricane data Visualization in GeoJS](http://opengeoscience.github.io/geojs/examples/hurricanes/thumb.jpg)](http://opengeoscience.github.io/geojs/examples/hurricanes)
+
+Documentation
+=============
+You can find more information on GeoJS installation and usage in our [Documentation](http://geojs.readthedocs.org/en/latest/index.html).
+
+
+Support
+=======
+We would love to get your feedback and bug reports. Please send us an email at
+[geojs-developers](http://public.kitware.com/mailman/listinfo/geojs-developers)
+for questions related to feature requests, roadmap or in-depth
+technical discussions. Use [geojs-users](http://public.kitware.com/mailman/listinfo/geojs-users)
+if you have general questions or bug reports on GeoJS.
+
+
+Get Involved
+============
+GeoJS is developed to meet needs of developers and domain-specific researchers,
+and we are always open for collaboration. We have been doing open source development
+for the last 17 year and understand and appreciate what it takes to develop open
+source software. So fork GeoJS, do great things and let us know if we can help.
