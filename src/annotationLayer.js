@@ -200,14 +200,24 @@ var annotationLayer = function (args) {
    * Add an annotation to the layer.  The annotation could be in any state.
    *
    * @param {object} annotation the annotation to add.
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform
    */
-  this.addAnnotation = function (annotation) {
+  this.addAnnotation = function (annotation, gcs) {
     var pos = $.inArray(annotation, m_annotations);
     if (pos < 0) {
       m_this.geoTrigger(geo_event.annotation.add_before, {
         annotation: annotation
       });
       m_annotations.push(annotation);
+      annotation.layer(this);
+      var map = this.map();
+      gcs = (gcs === null ? map.gcs() : (
+             gcs === undefined ? map.ingcs() : gcs));
+      if (gcs !== map.gcs()) {
+        annotation._coordinates(transform.transformCoordinates(
+            gcs, map.gcs(), annotation._coordinates()));
+      }
       this.modified();
       this._update();
       this.draw();
@@ -348,7 +358,7 @@ var annotationLayer = function (args) {
           state: geo_annotation.state.create,
           layer: this
         });
-        this.addAnnotation(m_this.currentAnnotation);
+        this.addAnnotation(m_this.currentAnnotation, null);
         actions = this.currentAnnotation.actions(geo_annotation.state.create);
         $.each(actions, function (idx, action) {
           m_this.map().interactor().addAction(action);
@@ -528,7 +538,7 @@ var annotationLayer = function (args) {
         options.state = geo_annotation.state.done;
         options.layer = m_this;
         options.updated = 'new';
-        m_this.addAnnotation(registry.createAnnotation(type, options));
+        m_this.addAnnotation(registry.createAnnotation(type, options), null);
       }
     });
   };
