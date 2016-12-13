@@ -141,6 +141,13 @@ describe('geo.annotationLayer', function () {
       expect(addAnnotationBeforeEvent).toBe(2);
       expect(addAnnotationEvent).toBe(2);
       expect(lastAddAnnotationEvent.annotation).toBe(rect);
+      expect(layer.annotations()[1]._coordinates()[1]).not.toEqual({x: 1, y: 0});
+      layer.removeAnnotation(rect);
+      rect = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
+      layer.addAnnotation(rect, map.gcs());
+      expect(layer.annotations()[1]._coordinates()[1]).toEqual({x: 1, y: 0});
     });
     it('annotationById', function () {
       expect(layer.annotationById()).toBe(undefined);
