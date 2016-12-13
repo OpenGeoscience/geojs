@@ -89,10 +89,16 @@ Many of these tests compare against a baseline image.  If a test is changed or
 added, new baselines can be generated and optionally uploaded via the script
 built into ``test/baseline_images.py``.
 
-Unless an image comparison tests, images are not automatically saved.  To save
-all images, add the environment variable ``TEST_SAVE_IMAGE=all`` to the test 
-command or set this parameter in CMake.  Images are saved in the ``images``
-subdirectory of the build directory.
+If a test fails, the specific test will be reported by the test runner, and the
+base and test images are saved in the ``images`` subdirectory of the build
+directory.  The images have the base name of the test and end in ``-base.png``
+for the reference image, ``-test.png`` for the current test, and ``-diff.png``
+for a difference image where areas that are different are highlight (using 
+resemblejs, the default highlight color is pink).
+
+Unless an image comparison test fails, images are not automatically saved.  To
+save all images, add the environment variable ``TEST_SAVE_IMAGE=all`` to the 
+test command or set this parameter in CMake.
 
 .. note::
 
