@@ -4,8 +4,6 @@
 module.exports = {
   choroplethFeature: require('./choroplethFeature'),
   contourFeature: require('./contourFeature'),
-  ellipsoid: require('./ellipsoid'),
-  geomFeature: require('./geomFeature'),
   lineFeature: require('./lineFeature'),
   pointFeature: require('./pointFeature'),
   polygonFeature: require('./polygonFeature'),
