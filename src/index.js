@@ -44,7 +44,6 @@ module.exports = $.extend({
   fetchQueue: require('./fetchQueue'),
   fileReader: require('./fileReader'),
   geo_action: require('./action'),
-  geomFeature: require('./geomFeature'),
   graphFeature: require('./graphFeature'),
   heatmapFeature: require('./heatmapFeature'),
   imageTile: require('./imageTile'),
