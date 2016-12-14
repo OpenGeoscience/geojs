@@ -35,7 +35,6 @@ module.exports = $.extend({
   annotationLayer: require('./annotationLayer'),
   camera: require('./camera'),
   choroplethFeature: require('./choroplethFeature'),
-  clock: require('./clock'),
   contourFeature: require('./contourFeature'),
   domRenderer: require('./domRenderer'),
   event: require('./event'),
