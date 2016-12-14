@@ -31,6 +31,9 @@ For testing WebGL in a headless environment, the additional packages are needed:
 * `xvfb <https://www.x.org/archive/X11R7.6/doc/man/man1/Xvfb.1.xhtml>`_
 * `Firefox <http://www.mozilla.org/firefox>`_
 
+For an example on how to install all packages for a specific OS, see
+:ref:`Ubuntu 14.04 Provisioning <ubuntu-development>`.
+
 
 Getting the source code
 -----------------------

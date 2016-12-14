@@ -67,7 +67,7 @@ Headless WebGL testing
 ----------------------
 
 To fully test code that uses WebGL, a browser with WebGL is required.
-If xvfb, osmesa, and Firefox are installed, some tests can be run in a virtual 
+If xvfb, osmesa, and Firefox are installed, some tests can be run in a virtual
 frame buffer that doesn't require a display.  May of these tests depend on
 additional data which can be downloaded by using CMake and running ctest.
 
@@ -81,7 +81,7 @@ will run the headless WebGL tests.  After the data for tests is downloaded,
 the tests can also be run via ``npm run test-webgl``, which assumes that
 ``xvfb-run`` is available.
 
-The headless unit tests that require WebGL should be placed in the 
+The headless unit tests that require WebGL should be placed in the
 ``tests/gl-cases/`` directory.  When tests are run in a normal browser via
 ``npm run start``, the webgl tests are included.
 
@@ -93,11 +93,11 @@ If a test fails, the specific test will be reported by the test runner, and the
 base and test images are saved in the ``images`` subdirectory of the build
 directory.  The images have the base name of the test and end in ``-base.png``
 for the reference image, ``-test.png`` for the current test, and ``-diff.png``
-for a difference image where areas that are different are highlight (using 
+for a difference image where areas that are different are highlight (using
 resemblejs, the default highlight color is pink).
 
 Unless an image comparison test fails, images are not automatically saved.  To
-save all images, add the environment variable ``TEST_SAVE_IMAGE=all`` to the 
+save all images, add the environment variable ``TEST_SAVE_IMAGE=all`` to the
 test command or set this parameter in CMake.
 
 .. note::
@@ -256,3 +256,4 @@ revision, then the revision number should be changed in the unit test source
 before running this script.  Note: you must have write permission in the MIDAS
 GeoJS community before you can upload new images.  Contact a community administrator
 for an invitation.
+
