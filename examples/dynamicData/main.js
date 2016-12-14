@@ -6,9 +6,10 @@ $(function () {
   var map = geo.map({node: '#map', zoom: 3});
 
   // Add and start a clock
-  var clock = map.clock();
+  var clock = geo.clock();
   var omega = 10000;
 
+  clock.object(map);
   clock.start(0)
     .step(1)
     .end(omega)

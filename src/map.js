@@ -56,7 +56,6 @@ var sceneObject = require('./sceneObject');
  * *** Advanced parameters ***
  * @param {geo.camera?} camera The camera to control the view
  * @param {geo.mapInteractor?} interactor The UI event handler
- * @param {geo.clock?} clock The clock used to synchronize time events
  * @param {array} [animationQueue] An array used to synchonize animations.  If
  *   specified, this should be an empty array or the same array as passed to
  *   other map instances.
@@ -91,7 +90,6 @@ var map = function (arg) {
   var registry = require('./registry');
   var geo_event = require('./event');
   var mapInteractor = require('./mapInteractor');
-  var clock = require('./clock');
   var uiLayer = require('./ui/uiLayer');
 
   ////////////////////////////////////////////////////////////////////////////
@@ -119,7 +117,6 @@ var map = function (arg) {
       m_validZoomRange = {min: 0, max: 16, origMin: 0},
       m_transition = null,
       m_queuedTransition = null,
-      m_clock = null,
       m_discreteZoom = arg.discreteZoom ? true : false,
       m_allowRotation = (typeof arg.allowRotation === 'function' ?
                          arg.allowRotation : (arg.allowRotation === undefined ?
@@ -987,23 +984,6 @@ var map = function (arg) {
         m_node.attr('tabindex', 0);
       }
       m_interactor.map(m_this);
-    }
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get or set the map clock
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.clock = function (arg) {
-    if (arg === undefined) {
-      return m_clock;
-    }
-    m_clock = arg;
-
-    if (m_clock) {
-      m_clock.object(m_this);
     }
     return m_this;
   };
@@ -1972,7 +1952,6 @@ var map = function (arg) {
   if (arg.interactor !== null) {
     this.interactor(arg.interactor || mapInteractor({discreteZoom: m_discreteZoom}));
   }
-  this.clock(arg.clock || clock());
 
   function resizeSelf() {
     m_this.resize(0, 0, m_node.width(), m_node.height());

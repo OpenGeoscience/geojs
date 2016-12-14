@@ -159,9 +159,7 @@ the instrumentation is in place and the page is loaded.  The ``startTest`` funct
 be called with function as an argument that should be called when page is ready to
 run the unit tests.  This is provided as a convenience for the default behavior
 of :py:func:`selenium_test.BaseTest.wait` with no arguments.  Developers can
-extend this behavior as necessary to provide more complicated use cases.  As an
-example, see the ``d3Animation`` test case which sets a custom variable in a callback
-script for a test that is run asynchronously.
+extend this behavior as necessary to provide more complicated use cases.
 
 The compiled version of these
 tests are placed inside the deployment root so the users can manually see the test
