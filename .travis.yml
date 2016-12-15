@@ -1,7 +1,29 @@
 language: node_js
-sudo: false
+# At this time, the travis trusty sudo environment works, but the sudo: false
+# environment doesn't (it might with a bunch of apt packages).
+sudo: required
+dist: trusty
+
 node_js:
   - '0.12'
+
+addons:
+  firefox: latest
+  apt:
+    packages:
+      # I suspect that not all of these are necessary
+      - mesa-utils
+      - xvfb
+      - libosmesa6
+
+      - libgif-dev
+      - libpng-dev
+
+      - freeglut3-dev
+      - libxmu-dev
+      - libxi-dev
+      - libxxf86vm-dev
+      - libxrandr-dev
 
 cache:
   directories:
@@ -11,6 +33,10 @@ cache:
 before_install:
   - CACHE="${HOME}/cache" CMAKE_VERSION=3.5.0 CMAKE_SHORT_VERSION=3.5 source ./scripts/install_cmake.sh
   - npm prune
+
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
 
 script:
   - npm run build

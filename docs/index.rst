@@ -25,6 +25,7 @@ If you have any questions or comments, feel free to join us on our
     quickstart
     users
     developers
+    provisioning
     testingutils
 
 Indices and tables
