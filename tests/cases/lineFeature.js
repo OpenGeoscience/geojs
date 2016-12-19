@@ -9,6 +9,7 @@ var vgl = require('vgl');
 var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
 var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
 var waitForIt = require('../test-utils').waitForIt;
+var logCanvas2D = require('../test-utils').logCanvas2D;
 
 describe('geo.lineFeature', function () {
   'use strict';
@@ -209,6 +210,13 @@ describe('geo.lineFeature', function () {
           strokeWidth: function (d) {
             return d.width ? d.width : 5;
           },
+          lineCap: function (d, i, line, idx) {
+            return ['butt', 'round', 'square'][idx % 3];
+          },
+          lineJoin: function (d, i, line, idx) {
+            return ['miter', 'bevel', 'round'][idx % 3];
+          },
+          miterLimit: 5,
           closed: function (item) {
             return item.closed;
           }
@@ -217,6 +225,53 @@ describe('geo.lineFeature', function () {
       line.draw();
       stepAnimationFrame();
       expect(layer.node().find('path').length).toBe(7);
+      var paths = layer.node().find('path');
+      expect(paths.eq(0).css('stroke-linecap')).toBe('butt');
+      expect(paths.eq(1).css('stroke-linecap')).toBe('round');
+      expect(paths.eq(2).css('stroke-linecap')).toBe('square');
+      expect(paths.eq(0).css('stroke-linejoin')).toBe('miter');
+      expect(paths.eq(1).css('stroke-linejoin')).toBe('bevel');
+      expect(paths.eq(2).css('stroke-linejoin')).toBe('round');
+      expect(paths.eq(0).css('stroke-miterlimit')).toBe('5');
+      unmockAnimationFrame();
+    });
+  });
+
+  /* This is a basic integration test of geo.canvas.lineFeature. */
+  describe('geo.canvas.lineFeature', function () {
+    var map, layer, line;
+    it('basic usage', function () {
+      mockAnimationFrame();
+      logCanvas2D();
+      map = create_map();
+      layer = map.createLayer('feature', {renderer: 'canvas'});
+      line = layer.createFeature('line', {
+        line: function (item) {
+          return item.coord;
+        },
+        style: {
+          strokeWidth: function (d) {
+            return d.width ? d.width : 5;
+          },
+          lineCap: function (d, i, line, idx) {
+            return ['butt', 'round', 'square'][idx % 3];
+          },
+          lineJoin: function (d, i, line, idx) {
+            return ['miter', 'bevel', 'round'][idx % 3];
+          },
+          miterLimit: 5,
+          closed: function (item) {
+            return item.closed;
+          }
+        }
+      }).data(testLines);
+      line.draw();
+      stepAnimationFrame();
+      var counts = $.extend({}, window._canvasLog.counts);
+      expect(counts.beginPath).not.toBeLessThan(6);
+      expect(counts.moveTo).not.toBeLessThan(6);
+      expect(counts.lineTo).not.toBeLessThan(15);
+      expect(counts.stroke).not.toBeLessThan(6);
       unmockAnimationFrame();
     });
   });
@@ -237,6 +292,16 @@ describe('geo.lineFeature', function () {
           strokeWidth: function (d) {
             return d.width ? d.width : 5;
           },
+          lineCap: function (d, i, line, idx) {
+            return ['butt', 'round', 'square'][idx % 3];
+          },
+          lineJoin: function (d, i, line, idx) {
+            return ['miter', 'bevel', 'round'][idx % 3];
+          },
+          strokeOffset: function (d, i, line, idx) {
+            return idx === 2 ? -0.5 : 0;
+          },
+          miterLimit: 5,
           closed: function (item) {
             return item.closed;
           }
