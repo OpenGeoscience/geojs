@@ -1,3 +1,5 @@
+var $ = require('jquery');
+
 describe('glLines', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
@@ -30,6 +32,28 @@ describe('glLines', function () {
     {'type': 'Feature', 'properties': {'LINEARID': '110685801265', 'FULLNAME': 'S Eufaula Ave', 'RTTYP': 'M', 'MTFCC': 'S1200'}, 'geometry': {'type': 'LineString', 'coordinates': [[-85.15816, 31.86909], [-85.15806, 31.86918], [-85.15796, 31.86931], [-85.15783, 31.86945], [-85.15752, 31.86977], [-85.15701, 31.870255], [-85.1564, 31.87087], [-85.15622, 31.87103], [-85.15601, 31.87123], [-85.15534, 31.871922], [-85.15468, 31.87258], [-85.15391, 31.87336], [-85.1534, 31.8739], [-85.15316, 31.874155], [-85.15299, 31.874324], [-85.15237, 31.87494], [-85.15199, 31.87533], [-85.15105, 31.87628], [-85.1508, 31.87653], [-85.15056, 31.87677], [-85.15028, 31.87706], [-85.15018, 31.87718], [-85.14964, 31.87771], [-85.1494, 31.87792], [-85.14873, 31.87859], [-85.14824, 31.87908], [-85.14779, 31.879528], [-85.14747, 31.87986], [-85.14732, 31.88004], [-85.14679, 31.88074]]}}
   ];
 
+  var ReferenceLineData = [
+    [[-86.00, 31.5], [-86.00, 32.3]], [[-86.00, 32.3], [-85.95, 32.3]], [[-85.95, 32.3], [-85.95, 31.5]],
+    [[-85.85, 31.5], [-85.80, 32.3]], [[-85.80, 32.3], [-85.75, 31.5]], [[-85.75, 31.5], [-85.70, 32.3]],
+    [[-85.65, 31.6], [-85.60, 32.0]], [[-85.60, 32.0], [-85.55, 31.6]],
+    [[-85.45, 31.6], [-85.45, 31.8]], [[-85.45, 31.8], [-85.40, 31.6]], [[-85.40, 31.6], [-85.40, 31.8]],
+    [[-85.30, 31.8], [-85.275, 32.0]], [[-85.275, 32.0], [-85.25, 31.8]],
+    [[-85.15, 31.5], [-85.15, 32.3]],
+    [[-85.00, 31.5], [-85.00, 31.9]], [[-85.00, 31.9], [-85.00, 32.3]],
+    [[-84.85, 31.5], [-84.75, 31.9]], [[-84.75, 31.9], [-84.85, 32.3]]
+  ];
+
+  var LineData = [
+    [[-86.00, 31.5], [-86.00, 32.3], [-85.95, 32.3], [-85.95, 31.5]],
+    [[-85.85, 31.5], [-85.80, 32.3], [-85.75, 31.5], [-85.70, 32.3]],
+    [[-85.65, 31.6], [-85.60, 32.0], [-85.55, 31.6]],
+    [[-85.45, 31.6], [-85.45, 31.8], [-85.40, 31.6], [-85.40, 31.8]],
+    [[-85.30, 31.8], [-85.275, 32.0], [-85.25, 31.8]],
+    [[-85.15, 31.5], [-85.15, 32.3]],
+    [[-85.00, 31.5], [-85.00, 31.9], [-85.00, 32.3]],
+    [[-84.85, 31.5], [-84.75, 31.9], [-84.85, 32.3]]
+  ];
+
   var myMap;
 
   beforeEach(function () {
@@ -41,8 +65,7 @@ describe('glLines', function () {
   });
 
   it('lines', function (done) {
-
-    var mapOptions = {center: {y: 31.87798, x: -85.44956}, zoom: 10};
+    var mapOptions = {center: {x: -85.44956, y: 31.87798}, zoom: 10};
     myMap = common.createOsmMap(mapOptions, {}, true);
 
     var layer = myMap.createLayer('feature');
@@ -61,5 +84,63 @@ describe('glLines', function () {
     myMap.draw();
 
     imageTest.imageTest('glLines', 0.0015, done, myMap.onIdle, 0, 2);
+  });
+
+  it('lines with different options', function (done) {
+    var mapOptions = {center: {x: -85.44956, y: 31.87798}, zoom: 9};
+    myMap = common.createOsmMap(mapOptions, {}, true);
+
+    var layer = myMap.createLayer('feature', {renderer: 'vgl'});
+    var baseStyle = {
+      antialiasing: 2,
+      miterLimit: 5
+    };
+
+    layer.createFeature('line', {style: baseStyle})
+      .data(LineData)
+      .line(function (d) {
+        return d;
+      })
+      .position(function (d, index, item, itemIdx) {
+        return {x: d[0], y: d[1]};
+      })
+      .style($.extend({
+        lineCap: function (d, i, line, idx) {
+          return ['butt', 'round', 'square'][idx % 3];
+        },
+        lineJoin: function (d, i, line, idx) {
+          return ['miter', 'bevel', 'round', 'miter-clip'][idx % 4];
+        },
+        strokeColor: 'black',
+        strokeWidth: function (d, i, line, idx) {
+          if (idx === 6) {
+            return i === 1 ? 12 : 24;
+          }
+          return 24;
+        },
+        strokeOpacity: 0.5,
+        strokeOffset: function (d, i, line, idx) {
+          return idx === 2 ? -0.5 : 0;
+        },
+        closed: false
+      }, baseStyle));
+    layer.createFeature('line', {style: baseStyle})
+      .data(ReferenceLineData)
+      .line(function (d) {
+        return d;
+      })
+      .position(function (d, index, item, itemIdx) {
+        return {x: d[0], y: d[1]};
+      })
+      .style($.extend({
+        strokeColor: 'blue',
+        strokeWidth: 8,
+        strokeOpacity: 1
+      }, baseStyle));
+
+    myMap.draw();
+
+    imageTest.imageTest('glLinesOpts', 0.0015, done, myMap.onIdle, 0, 2);
+
   });
 });

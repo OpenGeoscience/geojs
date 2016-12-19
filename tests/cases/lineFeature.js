@@ -1,4 +1,5 @@
-// Test geo.lineFeature, geo.d3.lineFeature, and geo.gl.lineFeature
+// Test geo.lineFeature, geo.d3.lineFeature, geo.canvas.lineFeature, and
+// geo.gl.lineFeature
 
 var geo = require('../test-utils').geo;
 var $ = require('jquery');
