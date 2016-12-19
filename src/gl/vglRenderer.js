@@ -90,6 +90,17 @@ var vglRenderer = function (arg) {
     canvas.attr('class', 'webgl-canvas');
     canvas.css('display', 'block');
     $(m_this.layer().node().get(0)).append(canvas);
+
+    if (window.contextPreserveDrawingBuffer) {
+      var elem = canvas.get(0);
+      var getContext = elem.getContext;
+      elem.getContext = function (contextType, contextAttributes) {
+        contextAttributes = contextAttributes || {};
+        contextAttributes.preserveDrawingBuffer = true;
+        return getContext.call(elem, contextType, contextAttributes);
+      };
+    }
+
     m_viewer = vgl.viewer(canvas.get(0), arg.options);
     m_viewer.init();
     m_contextRenderer = m_viewer.renderWindow().activeRenderer();

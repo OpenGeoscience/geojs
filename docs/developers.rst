@@ -7,32 +7,8 @@ Developer's guide
     This guide assumes you have cloned and built the geojs repository
     according to the :ref:`Quick start guide <project-setup-guide>`.
 
-The selenium testing infrastructure of Geojs is run via CTest, it assumes
-that the testing "server" is started prior to execution.  To start the
-server, just run ::
-
-    npm run start-test
-
-This will start a server on the default port of ``30100``.  The port
-and selenium host names are configurable with cmake.  For example inside
-the Kitware firewall, you can run the following to test on the selenium
-node on ``garant`` ::
-
-    cmake -DSELENIUM_TESTS=ON -DSELENIUM_HOST=garant /path/to/geojs
-    make
-    ctest -VV
-
-You may need to also set the variable ``TESTING_HOST`` to your computer's
-IP address reachable by the selenium node.
-
-.. note::
-
-    Typically, CMake is used to build outside of the source tree.  This
-    means you would create a new directory somewhare and point cmake
-    to the geojs source directory.  You may need to rerun ``cmake`` and
-    ``make`` after making changes to your code for everything to
-    build correctly.  Try running ``ccmake /path/to/geojs`` for a full
-    list of configuration options.
+    To run all of the tests, you will need the optional packages and python
+    modules listed there.
 
 Geojs employs several different frameworks for unit testing.  These
 frameworks have been designed to make it easy for developers to
@@ -48,6 +24,15 @@ located in the ``.eslintrc`` file in the root of the repository.  These
 tests are preformed automatically for every file added to the build; no
 additional configuration is required.  You can run a quick check of the
 code style outside of CMake by running ``npm run lint``.
+
+Code coverage
+-------------
+
+Code coverage information is generated automatically for all headless unit tests
+by Karma's test runner when running ``npm run test``.  The coverage information is
+submitted to `codecov <https://codecov.io/github/OpenGeoscience/geojs>`_ and
+`cdash <http://my.cdash.org/index.php?project=geojs>`_ after every
+successful Travis run.
 
 Headless browser testing
 ------------------------
@@ -78,8 +63,72 @@ instrumentation after running.  Ideally, each test should be runnable
 independently and use jasmines ``beforeEach`` and ``afterEach`` methods
 for setup and tear down.
 
+Headless WebGL testing
+----------------------
+
+To fully test code that uses WebGL, a browser with WebGL is required.
+If xvfb, osmesa, and Firefox are installed, some tests can be run in a virtual
+frame buffer that doesn't require a display.  May of these tests depend on
+additional data which can be downloaded by using CMake and running ctest.
+
+For example, running ::
+
+    cmake /path/to/geojs
+    make
+    xvfb-run -s '-ac -screen 0 1280x1024x24' ctest -VV -R ffheadless
+
+will run the headless WebGL tests.  After the data for tests is downloaded,
+the tests can also be run via ``npm run test-webgl``, which assumes that
+``xvfb-run`` is available.
+
+The headless unit tests that require WebGL should be placed in the
+``tests/gl-cases/`` directory.  When tests are run in a normal browser via
+``npm run start``, the webgl tests are included.
+
+Many of these tests compare against a baseline image.  If a test is changed or
+added, new baselines can be generated and optionally uploaded via the script
+built into ``test/baseline_images.py``.
+
+If a test fails, the specific test will be reported by the test runner, and the
+base and test images are saved in the ``images`` subdirectory of the build
+directory.  The images have the base name of the test and end in ``-base.png``
+for the reference image, ``-test.png`` for the current test, and ``-diff.png``
+for a difference image where areas that are different are highlight (using
+resemblejs, the default highlight color is pink).
+
+Unless an image comparison test fails, images are not automatically saved.  To
+save all images, add the environment variable ``TEST_SAVE_IMAGE=all`` to the
+test command or set this parameter in CMake.
+
+.. note::
+
+    Typically, CMake is used to build outside of the source tree.  This
+    means you would create a new directory somewhere and point cmake
+    to the geojs source directory.  You may need to rerun ``cmake`` and
+    ``make`` after making changes to your code for everything to
+    build correctly.  Try running ``ccmake /path/to/geojs`` for a full
+    list of configuration options.
+
 Selenium testing
 ----------------
+
+The selenium testing infrastructure of Geojs is run via CTest, it assumes
+that the testing "server" is started prior to execution.  To start the
+server, just run ::
+
+    npm run start-test
+
+This will start a server on the default port of ``30100``.  The port
+and selenium host names are configurable with cmake.  For example inside
+the Kitware firewall, you can run the following to test on the selenium
+node on ``garant`` ::
+
+    cmake -DSELENIUM_TESTS=ON -DSELENIUM_HOST=garant /path/to/geojs
+    make
+    ctest -VV
+
+You may need to also set the variable ``TESTING_HOST`` to your computer's
+IP address reachable by the selenium node.
 
 Most tests for geojs require a full browser with webgl support.
 For these test, a framework based on `Selenium <http://docs.seleniumhq.org/>`_
@@ -110,9 +159,7 @@ the instrumentation is in place and the page is loaded.  The ``startTest`` funct
 be called with function as an argument that should be called when page is ready to
 run the unit tests.  This is provided as a convenience for the default behavior
 of :py:func:`selenium_test.BaseTest.wait` with no arguments.  Developers can
-extend this behavior as necessary to provide more complicated use cases.  As an
-example, see the ``d3Animation`` test case which sets a custom variable in a callback
-script for a test that is run asynchronously.
+extend this behavior as necessary to provide more complicated use cases.
 
 The compiled version of these
 tests are placed inside the deployment root so the users can manually see the test
@@ -208,11 +255,3 @@ before running this script.  Note: you must have write permission in the MIDAS
 GeoJS community before you can upload new images.  Contact a community administrator
 for an invitation.
 
-Code coverage
--------------
-
-Code coverage information is generated automatically for all headless unit tests
-by Karma's test runner when running ``npm run test``.  The coverage information is
-submitted to `codecov <https://codecov.io/github/OpenGeoscience/geojs>`_ and
-`cdash <http://my.cdash.org/index.php?project=geojs>`_ after every
-successful Travis run.

@@ -334,18 +334,6 @@ geo_event.parallelprojection = 'geo_parallelprojection';
 
 ////////////////////////////////////////////////////////////////////////////
 /**
- * @namespace
- */
-////////////////////////////////////////////////////////////////////////////
-geo_event.clock = {
-  play: 'geo_clock_play',
-  stop: 'geo_clock_stop',
-  pause: 'geo_clock_pause',
-  change: 'geo_clock_change'
-};
-
-////////////////////////////////////////////////////////////////////////////
-/**
  * This event object provides mouse/keyboard events that can be handled
  * by the features.  This provides a similar interface as core events,
  * but with different names so the events don't interfere.  Subclasses

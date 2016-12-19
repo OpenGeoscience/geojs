@@ -7,6 +7,8 @@ enable_testing()
 
 set(BUILD_TESTING ON CACHE BOOL "Enable geojs testing")
 set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
+set(FFHEADLESS_TESTS ON CACHE BOOL "Generate headless Firefox unit tests (requires xvfb to be running).")
+set(TEST_SAVE_IMAGE "none" CACHE STRING "Save headless test images even if there aren't errors.  Valid options are none, all, or the a comma-separated list of test names.")
 set(ESLINT_TESTS ON CACHE BOOL "Generate eslint style tests for JS source files.")
 set(SELENIUM_TESTS ON CACHE BOOL "Generate selenium unit tests.")
 
@@ -70,6 +72,13 @@ add_test(
 )
 set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "notes-reset")
 
+add_test(
+  NAME "total-coverage"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  COMMAND npm run combine-coverage
+)
+set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "notes-reset")
+
 if(PHANTOMJS_TESTS)
   find_program(NPM_EXECUTABLE npm)
   add_test(
@@ -80,7 +89,51 @@ if(PHANTOMJS_TESTS)
   set_property(TEST "phantomjs" APPEND PROPERTY ENVIRONMENT "CTEST_NOTES_PATH=${CMAKE_CURRENT_BINARY_DIR}/notes")
   set_property(TEST "phantomjs" APPEND PROPERTY DEPENDS "notes-reset")
   set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "phantomjs")
+  set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "phantomjs")
 endif()
+
+add_custom_target(
+  data_files
+  ALL
+  DEPENDS ${Girder_DOWNLOAD_FILES}
+)
+add_test(NAME get_data_files COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target data_files)
+
+if(FFHEADLESS_TESTS)
+  find_program(NPM_EXECUTABLE npm)
+  add_test(
+    NAME "ffheadless"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND npm run ffci
+  )
+  set_property(TEST "ffheadless" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
+  set_property(TEST "ffheadless" APPEND PROPERTY ENVIRONMENT "TEST_SAVE_IMAGE=${TEST_SAVE_IMAGE}")
+  set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "ffheadless")
+  set_property(TEST "ffheadless" APPEND PROPERTY DEPENDS "get_data_files")
+
+  configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/baseline_images.py"
+    "${CMAKE_CURRENT_BINARY_DIR}/test/baseline_images.py"
+    COPYONLY
+  )
+endif()
+
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  # Make sure we have the data files.
+  COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target data_files
+  # Run the ffheadless test, asking to save all images
+  COMMAND TEST_SAVE_IMAGE=all npm run ffci
+  # Make a tarball of all of the images
+  COMMAND tar -zcvf "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz" --exclude=*-test.png --exclude=*-diff.png --exclude=*-base.png -C "${CMAKE_CURRENT_BINARY_DIR}/images" .
+  COMMENT "Create baseline images, then tar them into a single file"
+  VERBATIM
+)
+
+add_custom_target(baseline_images DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz")
+
+add_test(NAME baseline_images CONFIGURATIONS "baseline_images" COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target baseline_images)
+set_property(TEST "baseline_images" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
 
 if(SELENIUM_TESTS)
 

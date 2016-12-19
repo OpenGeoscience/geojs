@@ -1,6 +1,3 @@
-var inherit = require('./inherit');
-var object = require('./object');
-
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Stores the current time for a map, triggers time keeping events, and
@@ -11,16 +8,14 @@ var object = require('./object');
  * @returns {geo.clock}
  */
 //////////////////////////////////////////////////////////////////////////////
-var clock = function (opts) {
+geo.clock = function (opts) {
   'use strict';
 
-  if (!(this instanceof clock)) {
-    return new clock(opts);
+  if (!(this instanceof geo.clock)) {
+    return new geo.clock(opts);
   }
+  geo.object.call(this, opts);
   opts = opts || {};
-  object.call(this, opts);
-
-  var geo_event = require('./event');
 
   //////////////////////////////////////////////////////////////////////////////
   /**
@@ -59,7 +54,7 @@ var clock = function (opts) {
    */
   //////////////////////////////////////////////////////////////////////////////
   this._attached = function () {
-    return (m_object instanceof object);
+    return (m_object instanceof geo.object);
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -76,7 +71,7 @@ var clock = function (opts) {
 
     if (m_now !== previous &&
         m_this._attached()) {
-      m_this.object().geoTrigger(geo_event.clock.change, {
+      m_this.object().geoTrigger(geo.event.clock.change, {
         previous: previous,
         current: m_now,
         clock: m_this
@@ -269,7 +264,7 @@ var clock = function (opts) {
           window.setTimeout(frame, 1000 / m_this.framerate());
         }
       } else if (m_this._attached()) {
-        m_this.object().geoTrigger(geo_event.clock[m_this.state()], {
+        m_this.object().geoTrigger(geo.event.clock[m_this.state()], {
           current: m_this.now(),
           clock: m_this
         });
@@ -278,7 +273,7 @@ var clock = function (opts) {
 
     // trigger the play event
     if (m_this._attached()) {
-      m_this.object().geoTrigger(geo_event.clock.play, {
+      m_this.object().geoTrigger(geo.event.clock.play, {
         current: m_this.now(),
         clock: m_this
       });
@@ -291,7 +286,13 @@ var clock = function (opts) {
       window.setTimeout(frame, 1000 / m_this.framerate());
     }
   };
+
 };
 
-inherit(clock, object);
-module.exports = clock;
+geo.inherit(geo.clock, geo.object);
+geo.event.clock = {
+  play: 'geo_clock_play',
+  stop: 'geo_clock_stop',
+  pause: 'geo_clock_pause',
+  change: 'geo_clock_change'
+};

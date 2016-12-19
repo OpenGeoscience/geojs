@@ -263,8 +263,12 @@ module.exports.logCanvas2D = function logCanvas2D(enable) {
   var log = {enable: enable, counts: {}, log: []};
 
   var proto = CanvasRenderingContext2D.prototype;
-  $.each(proto, function (key) {
-    var orig = proto[key];
+  $.each(Object.keys(proto), function (idx, key) {
+    try {
+      var orig = proto[key];
+    } catch (err) {
+      return;
+    }
     if (orig && orig.constructor && orig.call && orig.apply) {
       proto[key] = function () {
         log.counts[key] = (log.counts[key] || 0) + 1;

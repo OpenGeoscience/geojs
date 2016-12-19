@@ -215,11 +215,6 @@ documentation for each of the classes.
     `geo.jsonReader <http://opengeoscience.github.io/geojs/apidocs/geo.jsonReader.html>`_,
     which is an extendable geojson reader.
 
-`geo.clock <http://opengeoscience.github.io/geojs/apidocs/geo.clock.html>`_
-    The clock object is attached to the map and is resposible for maintaining a user
-    definable concept of time.  The clock can run, paused, and restarted.  The
-    clock triggers events on the map to synchronize animations.
-
 The API documentation is in the process of being updated.  You can always find the latest version
 at `http://opengeoscience.github.io/geojs/apidocs/geo.html <http://opengeoscience.github.io/geojs/apidocs/geo.html>`_.
 
