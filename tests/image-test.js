@@ -41,7 +41,7 @@ module.exports.prepareImageTest = function () {
   window.contextPreserveDrawingBuffer = true;
   $('#map').remove();
   var map = $('<div id="map"/>').css({width: '800px', height: '600px'});
-  $('body').css({overflow: 'hidden'}).append(map);
+  $('body').append(map);
 };
 
 /**
