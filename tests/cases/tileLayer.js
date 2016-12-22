@@ -1333,6 +1333,10 @@ describe('geo.tileLayer', function () {
   });
 
   describe('HTML renderering', function () {
+    afterAll(function () {
+      $('.geo-test-container').remove();
+    });
+
     function layer_html(opts) {
       var node = $('<div class="geo-test-container" style="display: none"/>'), m, l;
       opts = opts || {};

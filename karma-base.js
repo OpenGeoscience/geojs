@@ -171,10 +171,14 @@ module.exports = {
     test_case,
     {pattern: 'tests/data/**/*', included: false},
     {pattern: 'tests/cases/**/*.js', included: false, served: false, watched: true},
-    {pattern: 'tests/gl-cases/**/*.js', included: false, served: false, watched: true}
+    {pattern: 'tests/gl-cases/**/*.js', included: false, served: false, watched: true},
+    {pattern: 'dist/data/**/*', included: false},
+    {pattern: 'dist/examples/**/*', included: false}
   ],
   proxies: {
-    '/data/': '/base/tests/data/'
+    '/data/': '/base/tests/data/',
+    '/distdata/': '/base/dist/data/',
+    '/examples/': '/base/dist/examples/'
   },
   browsers: [
     'PhantomJS'

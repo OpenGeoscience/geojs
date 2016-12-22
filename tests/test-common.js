@@ -72,7 +72,7 @@ module.exports = {
     // Load at most n rows of the cities dataset.
     $.ajax({
       type: 'GET',
-      url: '/data/cities.csv',
+      url: '/distdata/cities.csv',
       dataType: 'text',
       success: function (data) {
         function processCSVData(csvdata) {

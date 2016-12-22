@@ -1,26 +1,39 @@
-window.startTest = function (done) {
-  'use strict';
+var $ = require('jquery');
 
-  var mapOptions = { center: { y: 40.0, x: -105.0 } };
+describe('glLinesSpeed', function () {
+  var imageTest = require('../image-test');
+  var common = require('../test-common');
 
-  var myMap = window.geoTests.createOsmMap(mapOptions);
+  var myMap;
 
-  var layer = myMap.createLayer('feature');
-  var feature = layer.createFeature('line', {
-    selectionAPI: false,
-    dynamicDraw: true
+  beforeEach(function () {
+    imageTest.prepareImageTest();
   });
 
-  window.geoTests.loadCitiesData(function (citieslatlon) {
+  afterEach(function () {
+    myMap.exit();
+  });
+
+  it('speed test', function (done) {
     var numLines = 100000,
         lines = [], i, j, times = [], starttime, stoptime, totaltime = 0,
-        frames = 0, animTimes = [];
+        frames = 0, animTimes = [], firsttime;
+
+    var mapOptions = {center: {x: -105.0, y: 40.0}};
+    myMap = common.createOsmMap(mapOptions, {}, true);
+
+    var layer = myMap.createLayer('feature');
+    var feature = layer.createFeature('line', {
+      selectionAPI: false,
+      dynamicDraw: true
+    });
 
     function postLoadTest() {
       times.sort(function (a, b) { return a - b; });
       if (times.length > 5) {
         times = times.slice(1, times.length - 1);
       }
+      totaltime = 0;
       for (i = 0; i < times.length; i += 1) {
         totaltime += times[i];
       }
@@ -28,6 +41,7 @@ window.startTest = function (done) {
       console.log('Load time ' + totaltime + ' ms (average across ' +
                   times.length + ' loads)');
       console.log(times);
+      expect(totaltime).toBeLessThan(1000);
       /* Test animation time. */
       starttime = new Date().getTime();
       animationFrame();
@@ -61,6 +75,7 @@ window.startTest = function (done) {
       fps = 1000.0 / frametime;
       console.log('Usable framerate ' + fps);
       console.log(animTimes);
+      expect(fps).toBeGreaterThan(1.5);
       $('#map').append($('<div style="display: none" id="framerateResults">')
         .attr('results', fps));
 
@@ -80,7 +95,7 @@ window.startTest = function (done) {
       myMap.draw();
       stoptime = new Date().getTime();
       times.push(stoptime - starttime);
-      if (times.length < 12 && stoptime - starttime < 10000) {
+      if (times.length < 12 && stoptime - firsttime < 10000) {
         window.setTimeout(loadTest, 1);
       } else {
         postLoadTest();
@@ -112,25 +127,27 @@ window.startTest = function (done) {
       }
     }
 
-    /* Connect various cities with lines */
-    for (j = 1; lines.length < numLines; j += 1) {
-      for (i = 0; i < citieslatlon.length - j && lines.length < numLines;
-           i += j + 1) {
-        lines.push([{
-          x: citieslatlon[i].lon,
-          y: citieslatlon[i].lat,
-          z: citieslatlon[i].elev,
-          strokeColor: {r: 0, g: 0, b: 1}
-        }, {
-          x: citieslatlon[i + j].lon,
-          y: citieslatlon[i + j].lat,
-          z: citieslatlon[i + j].elev,
-          strokeColor: {r: 1, g: 1, b: 0}
-        }]);
+    common.loadCitiesData(function (citieslatlon) {
+      /* Connect various cities with lines */
+      for (j = 1; lines.length < numLines; j += 1) {
+        for (i = 0; i < citieslatlon.length - j && lines.length < numLines;
+             i += j + 1) {
+          lines.push([{
+            x: citieslatlon[i].lon,
+            y: citieslatlon[i].lat,
+            z: citieslatlon[i].elev,
+            strokeColor: {r: 0, g: 0, b: 1}
+          }, {
+            x: citieslatlon[i + j].lon,
+            y: citieslatlon[i + j].lat,
+            z: citieslatlon[i + j].elev,
+            strokeColor: {r: 1, g: 1, b: 0}
+          }]);
+        }
       }
-    }
 
-    loadTest();
-
-  });
-};
+      firsttime = new Date().getTime();
+      loadTest();
+    });
+  }, 30000);
+});

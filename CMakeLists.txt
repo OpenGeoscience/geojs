@@ -208,9 +208,6 @@ if(SELENIUM_TESTS)
   set_property(TEST "selenium:glPointsSpeed" APPEND PROPERTY ENVIRONMENT "LOAD_SPEED_THRESHOLD=1000")
   set_property(TEST "selenium:glPointsSpeed" APPEND PROPERTY ENVIRONMENT "FRAMERATE_THRESHOLD=5")
 
-  set_property(TEST "selenium:glLinesSpeed" APPEND PROPERTY ENVIRONMENT "LOAD_SPEED_THRESHOLD=1000")
-  set_property(TEST "selenium:glLinesSpeed" APPEND PROPERTY ENVIRONMENT "FRAMERATE_THRESHOLD=2")
-
   add_custom_target(
     selenium_tests
     ALL
