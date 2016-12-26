@@ -3,15 +3,10 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
 
-// import vtkActor                   from 'vtk.js/Sources/Rendering/Core/Actor';
-// import vtkSphereSource            from 'vtk.js/Sources/Filters/Sources/SphereSource';
-// import vtkMapper                  from 'vtk.js/Sources/Rendering/Core/Mapper';
 
 var vtkActor = require('vtk.js/Sources/Rendering/Core/Actor');
-
-// import vtkActor                   from '../../../../../Sources/Rendering/Core/Actor';
-// import vtkSphereSource            from '../../../../../Sources/Filters/Sources/SphereSource';
-// import vtkMapper                  from '../../../../../Sources/Rendering/Core/Mapper';
+var vtkMapper = require('vtk.js/Sources/Rendering/Core/Mapper');
+var vtkSphereSource = require('vtk.js/Sources/Filters/Sources/SphereSource');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -229,14 +224,14 @@ var vtkjs_pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
 
-    // s_update.call(m_this);
+    s_update.call(m_this);
 
-    // // For now build if the data or style changes. In the future we may
-    // // we able to partially update the data using dynamic gl buffers.
-    // if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
-    //     m_this.updateTime().getMTime() < m_this.getMTime()) {
-    //   m_this._build();
-    // }
+    // For now build if the data or style changes. In the future we may
+    // we able to partially update the data using dynamic gl buffers.
+    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
+        m_this.updateTime().getMTime() < m_this.getMTime()) {
+      m_this._build();
+    }
 
     // // Update uniforms
     // m_pixelWidthUniform.set(2.0 / m_this.renderer().width());
@@ -246,7 +241,7 @@ var vtkjs_pointFeature = function (arg) {
     // m_actor.setVisible(m_this.visible());
     // m_actor.material().setBinNumber(m_this.bin());
 
-    // m_this.updateTime().modified();
+    m_this.updateTime().modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////

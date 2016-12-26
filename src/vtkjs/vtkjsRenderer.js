@@ -2,6 +2,7 @@ var inherit = require('../inherit');
 var registerRenderer = require('../registry').registerRenderer;
 var renderer = require('../renderer');
 var vtkOpenGLRenderWindow = require('vtk.js/Sources/Rendering/OpenGL/RenderWindow');
+var vtkFullScreenRenderWindow = require('vtk.js/Sources/Testing/FullScreenRenderWindow');
 var vtkRenderer = require('vtk.js/Sources/Rendering/Core/Renderer');
 var vtkRenderWindow = require('vtk.js/Sources/Rendering/Core/RenderWindow');
 
@@ -70,7 +71,7 @@ var vtkjsRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.contextRenderer = function () {
-    return renderWindow.getRenderer();
+    return renderWindow.getRenderers()[0];
   };
 
   ////////////////////////////////////////////////////////////////////////////
