@@ -176,8 +176,8 @@ module.exports = {
     {pattern: 'dist/examples/**/*', included: false}
   ],
   proxies: {
-    '/data/': '/base/tests/data/',
-    '/distdata/': '/base/dist/data/',
+    '/testdata/': '/base/tests/data/',
+    '/data/': '/base/dist/data/',
     '/examples/': '/base/dist/examples/'
   },
   browsers: [

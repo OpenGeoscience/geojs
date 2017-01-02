@@ -28,13 +28,13 @@ module.exports = {
     $.extend(true, mapDefaults, mapOpts);
 
     var osmDefaults = {
-      baseUrl: '/data/tiles/',
+      baseUrl: '/testdata/tiles/',
       attribution: null
     };
 
     if (notiles) {
       osmDefaults.url = function () {
-        return '/data/white.jpg';
+        return '/testdata/white.jpg';
       };
       delete osmDefaults.baseUrl;
     }
@@ -72,7 +72,7 @@ module.exports = {
     // Load at most n rows of the cities dataset.
     $.ajax({
       type: 'GET',
-      url: '/distdata/cities.csv',
+      url: '/data/cities.csv',
       dataType: 'text',
       success: function (data) {
         function processCSVData(csvdata) {
