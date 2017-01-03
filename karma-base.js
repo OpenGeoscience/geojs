@@ -183,50 +183,62 @@ var notes_middleware = function (config) {
   };
 };
 
-module.exports = {
-  autoWatch: false,
-  files: [
-    test_case,
-    {pattern: 'tests/data/**/*', included: false},
-    {pattern: 'tests/cases/**/*.js', included: false, served: false, watched: true},
-    {pattern: 'tests/gl-cases/**/*.js', included: false, served: false, watched: true},
-    {pattern: 'tests/example-cases/**/*.js', included: false, served: false, watched: true},
-    {pattern: 'dist/data/**/*', included: false},
-    {pattern: 'dist/examples/**/*', included: false}
-  ],
-  proxies: {
-    '/testdata/': '/base/tests/data/',
-    '/data/': '/base/dist/data/',
-    '/examples/': '/base/dist/examples/'
-  },
-  browsers: [
-    'PhantomJS'
-  ],
-  browserNoActivityTimeout: 30000,
-  reporters: [
-    'progress',
-    'kjhtml'
-  ],
-  middleware: [
-    'notes'
-  ],
-  plugins: [
-    {'middleware:notes': ['factory', notes_middleware]},
-    'karma-*'
-  ],
-  preprocessors: {},
-  frameworks: [
-    'jasmine', 'sinon'
-  ],
-  webpack: {
-    cache: true,
-    devtool: 'inline-source-map',
-    module: {
-      loaders: webpack_config.module.loaders
+module.exports = function (config) {
+  var newConfig = {
+    autoWatch: false,
+    files: [
+      test_case,
+      {pattern: 'tests/data/**/*', included: false},
+      {pattern: 'tests/cases/**/*.js', included: false, served: false, watched: true},
+      {pattern: 'tests/gl-cases/**/*.js', included: false, served: false, watched: true},
+      {pattern: 'tests/example-cases/**/*.js', included: false, served: false, watched: true},
+      {pattern: 'dist/data/**/*', included: false},
+      {pattern: 'dist/examples/**/*', included: false}
+    ],
+    proxies: {
+      '/testdata/': '/base/tests/data/',
+      '/data/': '/base/dist/data/',
+      '/examples/': '/base/dist/examples/'
     },
-    resolve: webpack_config.resolve,
-    plugins: webpack_config.exposed_plugins
-  }
-};
+    browsers: [
+      'PhantomJS'
+    ],
+    customLaunchers: {
+      FirefoxWithProxy: {
+        base: 'Firefox',
+        prefs: {
+          'network.proxy.type': 2,
+          'network.proxy.autoconfig_url': config.protocol + '//' + config.hostname + ':' + config.port + '/testdata/proxy-for-tests.pac'
+        }
+      }
+    },
+    browserNoActivityTimeout: 30000,
+    reporters: [
+      'progress',
+      'kjhtml'
+    ],
+    middleware: [
+      'notes'
+    ],
+    plugins: [
+      {'middleware:notes': ['factory', notes_middleware]},
+      'karma-*'
+    ],
+    preprocessors: {},
+    frameworks: [
+      'jasmine', 'sinon'
+    ],
+    webpack: {
+      cache: true,
+      devtool: 'inline-source-map',
+      module: {
+        loaders: webpack_config.module.loaders
+      },
+      resolve: webpack_config.resolve,
+      plugins: webpack_config.exposed_plugins
+    }
+  };
+  newConfig.preprocessors[test_case] = ['webpack', 'sourcemap'];
 
-module.exports.preprocessors[test_case] = ['webpack', 'sourcemap'];
+  return newConfig;
+};
