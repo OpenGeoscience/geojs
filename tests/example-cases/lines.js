@@ -13,7 +13,7 @@ describe('lines example', function () {
     imageTest.imageTest('exampleLines', '#map', 0.0015, done, null, 0, 2, '#map.ready');
   }, 10000);
   it('more lines', function (done) {
-    base$ = $('iframe#map')[0].contentWindow.$;
+    base$ = $('iframe#map')[0].contentWindow.jQuery;
     base$('#lines').val(100000).trigger('change');
     imageTest.imageTest('exampleLines100k', '#map', 0.0015, done, null, 0, 2, '#map.ready');
   }, 10000);

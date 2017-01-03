@@ -149,13 +149,13 @@ module.exports.imageTest = function (name, elemSelector, threshold, doneFunc, id
     var selFunc = readyFunc;
     var selWaitFunc;
     selWaitFunc = function () {
-      var base$ = $,
+      var baseJquery = $,
           base = $('iframe#map');
       if (base.length) {
-        base$ = base[0].contentWindow.$;
+        baseJquery = base[0].contentWindow.jQuery;
       }
-      if (!base$ || !base$(readySelector).length) {
-        window.setTimeout(selWaitFunc, 10);
+      if (!baseJquery || !baseJquery(readySelector).length) {
+        window.setTimeout(selWaitFunc, 50);
         return;
       }
       selFunc();

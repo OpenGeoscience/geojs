@@ -99,6 +99,16 @@ add_custom_target(
 )
 add_test(NAME get_data_files COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target data_files)
 
+add_custom_command(OUTPUT "${GEOJS_DEPLOY_DIR}/examples/bundle.js"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  COMMAND npm run build-examples
+  COMMENT "Build examples"
+  VERBATIM
+)
+add_custom_target(examples DEPENDS "${GEOJS_DEPLOY_DIR}/examples/bundle.js")
+add_test(NAME build_examples COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target examples)
+set_property(TEST "build_examples" APPEND PROPERTY DEPENDS "get_data_files")
+
 if(FFHEADLESS_TESTS)
   find_program(NPM_EXECUTABLE npm)
   add_test(
@@ -119,7 +129,7 @@ if(FFHEADLESS_TESTS)
   set_property(TEST "examplesheadless" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
   set_property(TEST "examplesheadless" APPEND PROPERTY ENVIRONMENT "TEST_SAVE_IMAGE=${TEST_SAVE_IMAGE}")
   set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "examplesheadless")
-  set_property(TEST "examplesheadless" APPEND PROPERTY DEPENDS "get_data_files")
+  set_property(TEST "examplesheadless" APPEND PROPERTY DEPENDS "build_examples")
 
   configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/baseline_images.py"
@@ -134,6 +144,8 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz"
   COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target data_files
   # Run the ffheadless test, asking to save all images
   COMMAND TEST_SAVE_IMAGE=all npm run ffci
+  # Build examples to make sure that they are available.
+  COMMAND npm run build-examples
   # Run the examplesheadless test, asking to save all images
   COMMAND TEST_SAVE_IMAGE=all npm run examplesci
   # Make a tarball of all of the images
