@@ -144,7 +144,9 @@ $(function () {
     lineFeature.draw();
     var text = 'Shown: ' + segments;
     $('#lines-shown').text(text).attr('title', text);
-    $('#map').addClass('ready');
+    map.onIdle(function () {
+      $('#map').addClass('ready');
+    });
   }
 
   /**

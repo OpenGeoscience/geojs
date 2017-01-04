@@ -9,7 +9,7 @@ describe('lines example', function () {
   });
 
   it('basic', function (done) {
-    $('#map').attr('src', '/examples/lines/index.html?showmap=false');
+    $('#map').attr('src', '/examples/lines/index.html');
     imageTest.imageTest('exampleLines', '#map', 0.0015, done, null, 0, 2, '#map.ready');
   }, 10000);
   it('more lines', function (done) {

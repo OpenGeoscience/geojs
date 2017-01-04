@@ -183,6 +183,27 @@ var notes_middleware = function (config) {
   };
 };
 
+/**
+ * Express style middleware to handle REST requests for OSM tiles on the test
+ * server.
+ */
+var osmtiles_middleware = function (config) {
+  return function (request, response, next) {
+    var match = request.url.match(/.*http:\/\/[a-c]\.tile.openstreetmap.org\/([0-9]+\/[0-9]+\/[0-9]+.png)$/);
+    /* Serve tiles if they have been proxied */
+    if (match && request.method === 'GET') {
+      var imagePath = 'dist/data/tiles/' + match[1];
+      var img = new Buffer(fs.readFileSync(imagePath));
+      response.setHeader('Content-Type', 'image/png');
+      response.setHeader('Content-Length', img.length);
+      response.setHeader('Access-Control-Allow-Origin', '*');
+      response.writeHead(200);
+      return response.end(img);
+    }
+    next();
+  };
+};
+
 module.exports = function (config) {
   var newConfig = {
     autoWatch: false,
@@ -218,10 +239,12 @@ module.exports = function (config) {
       'kjhtml'
     ],
     middleware: [
-      'notes'
+      'notes',
+      'osmtiles'
     ],
     plugins: [
       {'middleware:notes': ['factory', notes_middleware]},
+      {'middleware:osmtiles': ['factory', osmtiles_middleware]},
       'karma-*'
     ],
     preprocessors: {},
@@ -239,6 +262,5 @@ module.exports = function (config) {
     }
   };
   newConfig.preprocessors[test_case] = ['webpack', 'sourcemap'];
-
   return newConfig;
 };
