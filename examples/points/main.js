@@ -82,18 +82,18 @@ $(function () {
   var svgColor = 'blue';
 
   // Generate some data for vgl
-  var data = d3.range(2).map(function (i) {
-    return {
-      x: -95,             // longitude
-      y: 39.5 + 4.5 * i,  // latitude
-      c: vglColor,        // fill color
-      opacity: 0.1        // fill opacity
-    };
-  });
+  // var data = d3.range(2).map(function (i) {
+  //   return {
+  //     x: -95,             // longitude
+  //     y: 39.5 + 4.5 * i,  // latitude
+  //     c: vglColor,        // fill color
+  //     opacity: 0.1        // fill opacity
+  //   };
+  // });
   // makePoints(data, vglLayer, vglColor);
 
   // Generate some data for svg
-  data = d3.range(2).map(function (i) {
+  var data = d3.range(1).map(function (i) {
     return {
       x: -101,            // longitude
       y: 39.5 + 4.5 * i,  // latitude

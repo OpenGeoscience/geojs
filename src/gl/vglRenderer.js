@@ -244,6 +244,10 @@ var vglRenderer = function (arg) {
       }
       m_lastZoom = map.zoom();
       cam.setViewMatrix(view, true);
+
+      console.debug(view);
+      console.debug(proj);
+
       cam.setProjectionMatrix(proj);
       var viewport = camera.viewport;
       /* Test if we should align texels.  We won't if the projection matrix

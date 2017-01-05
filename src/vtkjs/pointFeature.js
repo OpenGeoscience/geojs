@@ -7,6 +7,7 @@ var pointFeature = require('../pointFeature');
 var vtkActor = require('vtk.js/Sources/Rendering/Core/Actor');
 var vtkMapper = require('vtk.js/Sources/Rendering/Core/Mapper');
 var vtkSphereSource = require('vtk.js/Sources/Filters/Sources/SphereSource');
+var vtkPlaneSource = require('vtk.js/Sources/Filters/Sources/PlaneSource');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -38,8 +39,7 @@ var vtkjs_pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
-      m_actor = null,
-      m_mapper = null,
+      m_actors = [],
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
@@ -64,20 +64,50 @@ var vtkjs_pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
+    var i, j, i3, posVal, posFunc,
+        radius, radiusVal, nonzeroZ,
+        numPts = m_this.data().length,
+        position = new Array(numPts * 3),
+        data = m_this.data(),
+        posFunc = m_this.position(),
+        radFunc = m_this.style.get('radius');
 
-    if (m_actor) {
-      m_this.renderer().contextRenderer().removeActor(m_actor);
+    if (m_actors) {
+      m_this.renderer().contextRenderer().removeActor(m_actors);
     }
 
-    const sphereSource = vtkSphereSource.newInstance();
-    const actor = vtkActor.newInstance();
-    const mapper = vtkMapper.newInstance();
-    actor.getProperty().setEdgeVisibility(true);
-    mapper.setInputConnection(sphereSource.getOutputPort());
-    actor.setMapper(mapper);
-    m_this.renderer().contextRenderer().addActor(actor);
-    m_actor = actor;
-    m_this.buildTime().modified();
+     /* It is more efficient to do a transform on a single array rather than on
+     * an array of arrays or an array of objects. */
+    for (i = i3 = 0; i < numPts; i += 1, i3 += 3)
+    {
+      posVal = posFunc(data[i]);
+      position[i3] = posVal.x;
+      position[i3 + 1] = posVal.y;
+      position[i3 + 2] = posVal.z || 0;
+      nonzeroZ = nonzeroZ || position[i3 + 2];
+    }
+    // position = transform.transformCoordinates(
+    //               m_this.gcs(), m_this.layer().map().gcs(),
+    //               position, 3);
+    /* Some transforms modify the z-coordinate.  If we started with all zero z
+     * coordinates, don't modify them.  This could be changed if the
+     * z-coordinate space of the gl cube is scaled appropriately. */
+    if (!nonzeroZ && m_this.gcs() !== m_this.layer().map().gcs()) {
+      for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
+        position[i3 + 2] = 0;
+        var source = vtkSphereSource.newInstance();
+        source.setCenter(position[i3], position[i3 + 1], position[i3 + 2]);
+        source.setRadius(100.0);
+        var actor = vtkActor.newInstance();
+        var mapper = vtkMapper.newInstance();
+        actor.getProperty().setEdgeVisibility(true);
+        mapper.setInputConnection(source.getOutputPort());
+        actor.setMapper(mapper);
+        m_this.renderer().contextRenderer().addActor(actor);
+        m_actors.push(actor);
+      }
+      m_this.buildTime().modified();
+    }
 
     console.debug("built vtkjs point feature");
   };
@@ -107,7 +137,7 @@ var vtkjs_pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    m_this.renderer().contextRenderer().removeActor(m_actor);
+    m_this.renderer().contextRenderer().removeActor(m_actors);
     s_exit();
   };
 
