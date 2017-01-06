@@ -86,28 +86,32 @@ var vtkjs_pointFeature = function (arg) {
       position[i3 + 2] = posVal.z || 0;
       nonzeroZ = nonzeroZ || position[i3 + 2];
     }
-    // position = transform.transformCoordinates(
-    //               m_this.gcs(), m_this.layer().map().gcs(),
-    //               position, 3);
-    /* Some transforms modify the z-coordinate.  If we started with all zero z
-     * coordinates, don't modify them.  This could be changed if the
-     * z-coordinate space of the gl cube is scaled appropriately. */
+    position = transform.transformCoordinates(
+                  m_this.gcs(), m_this.layer().map().gcs(),
+                  position, 3);
+
     if (!nonzeroZ && m_this.gcs() !== m_this.layer().map().gcs()) {
       for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
         position[i3 + 2] = 0;
-        var source = vtkSphereSource.newInstance();
-        source.setCenter(position[i3], position[i3 + 1], position[i3 + 2]);
-        source.setRadius(100.0);
-        var actor = vtkActor.newInstance();
-        var mapper = vtkMapper.newInstance();
-        actor.getProperty().setEdgeVisibility(true);
-        mapper.setInputConnection(source.getOutputPort());
-        actor.setMapper(mapper);
-        m_this.renderer().contextRenderer().addActor(actor);
-        m_actors.push(actor);
       }
-      m_this.buildTime().modified();
     }
+    /* Some transforms modify the z-coordinate.  If we started with all zero z
+     * coordinates, don't modify them.  This could be changed if the
+     * z-coordinate space of the gl cube is scaled appropriately. */
+    for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
+      var source = vtkSphereSource.newInstance();
+      source.setCenter(position[i3], position[i3 + 1], position[i3 + 2]);
+      source.setRadius(100000.0);
+      var actor = vtkActor.newInstance();
+      var mapper = vtkMapper.newInstance();
+      actor.getProperty().setEdgeVisibility(true);
+      mapper.setInputConnection(source.getOutputPort());
+      actor.setMapper(mapper);
+      m_this.renderer().contextRenderer().addActor(actor);
+      m_actors.push(actor);
+    }
+    m_this.buildTime().modified();
+
 
     console.debug("built vtkjs point feature");
   };
