@@ -128,6 +128,7 @@ $(function () {
    *    the line.
    */
   function show_lines(rawdata) {
+    $('#map').removeClass('ready');
     if (!rawdata) {
       return;
     }
@@ -143,6 +144,9 @@ $(function () {
     lineFeature.draw();
     var text = 'Shown: ' + segments;
     $('#lines-shown').text(text).attr('title', text);
+    map.onIdle(function () {
+      $('#map').addClass('ready');
+    });
   }
 
   /**

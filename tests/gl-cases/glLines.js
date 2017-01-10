@@ -83,7 +83,7 @@ describe('glLines', function () {
          .style(style);
     myMap.draw();
 
-    imageTest.imageTest('glLines', 0.0015, done, myMap.onIdle, 0, 2);
+    imageTest.imageTest('glLines', null, 0.0015, done, myMap.onIdle, 0, 2);
   });
 
   it('lines with different options', function (done) {
@@ -140,7 +140,7 @@ describe('glLines', function () {
 
     myMap.draw();
 
-    imageTest.imageTest('glLinesOpts', 0.0015, done, myMap.onIdle, 0, 2);
+    imageTest.imageTest('glLinesOpts', null, 0.0015, done, myMap.onIdle, 0, 2);
 
   });
 });

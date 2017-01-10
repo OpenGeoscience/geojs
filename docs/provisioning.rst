@@ -24,6 +24,7 @@ convenience in configuring CMake options) ::
     sudo apt-get install --yes \
         cmake \
         firefox \
+        imagemagick \
         git \
         libjpeg8-dev \
         libpango1.0-dev \

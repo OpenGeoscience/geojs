@@ -109,6 +109,12 @@ test command or set this parameter in CMake.
     build correctly.  Try running ``ccmake /path/to/geojs`` for a full
     list of configuration options.
 
+Examples should be tested by creating an entry in the ``tests/example-cases/``
+directory.  To run these tests in a normal browser, run 
+``npm run start`` and browse to `<http://localhost:9876/debug.html?test=all>`_.
+Since the browser's direct screen output is used, the browser must be running 
+on the same machine as the ``npm run start`` command.
+
 Selenium testing
 ----------------
 

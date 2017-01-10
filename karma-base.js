@@ -53,6 +53,29 @@ function saveImage(name, image, always) {
   }
 }
 
+/* Use ImageMagick's import tool to get a portion of the screen.  The caller is
+ * responsible for identifying the useful portion of the screen.
+ *
+ * @param {string} name: base name for the image.
+ * @param {number} left: left screen coordinate
+ * @param {number} top: top screen coordinate
+ * @param {number} width: width in pixels of area to fetch.
+ * @param {number} height: height in pixels of area to fetch.
+ * @returns: a base64-encoded image.
+ */
+function getScreenImage(name, left, top, width, height) {
+  var child_process = require('child_process');
+  var dest = path.resolve(image_path, name + '-screen.png');
+  child_process.execSync(
+     'import -window root ' +
+    '-crop ' + width + 'x' + height + (left >= 0 ? '+' : '') + left +
+    (top >= 0 ? '+' : '') + top + ' +repage ' +
+    '\'' + dest.replace(/'/g, "'\\''") + '\'');
+  var xvfbImage = new Buffer(fs.readFileSync(dest)).toString('base64');
+  xvfbImage = 'data:image/png;base64,' + xvfbImage;
+  return xvfbImage;
+}
+
 /* Compare an image to a base image.  If it violates a threshold, save the
  * image and a diff between it and the base image.  Returns the resemble
  * results.
@@ -64,17 +87,6 @@ function saveImage(name, image, always) {
  * @param {function} callback: a function to call when complete.
  */
 function compareImage(name, image, threshold, callback) {
-  /* Note, we could read the xvfb frame buffer using imageMagick, which would
-   * get the entire browser display, including it's window border, tabs, search
-   * bar, and non-canvas elements.  It might be worth install a kiosk extension
-   * to FireFox (or use Chrome in Kiosk mode), and exclude the portions of the
-   * window that are used for Karma information.
-  var child_process = require('child_process');
-  var dest = path.resolve(image_path, name + '-xvfb.png');
-  child_process.execSync('import -window root \'' + dest.replace(/'/g, "'\\''") + '\'');
-  var xvfbImage = new Buffer(fs.readFileSync(dest)).toString('base64');
-  xvfbImage = 'data:image/png;base64,' + xvfbImage;
-   */
   var resemble = require('node-resemble');
   var src = path.resolve('dist/data/base-images', name + '.png');
   if (!fs.existsSync(src)) {
@@ -138,7 +150,13 @@ var notes_middleware = function (config) {
       if (request.method === 'PUT') {
         return getRawBody(request).then(function (body) {
           var name = query.name;
-          var image = '' + body;
+          var image;
+          if (query.screen === 'true') {
+            image = getScreenImage(name, query.left, query.top,
+                                   query.width, query.height);
+          } else {
+            image = '' + body;
+          }
           saveImage(name, image);
           if (query.compare === 'true') {
             compareImage(name, image, query.threshold, function (results) {
@@ -165,49 +183,84 @@ var notes_middleware = function (config) {
   };
 };
 
-module.exports = {
-  autoWatch: false,
-  files: [
-    test_case,
-    {pattern: 'tests/data/**/*', included: false},
-    {pattern: 'tests/cases/**/*.js', included: false, served: false, watched: true},
-    {pattern: 'tests/gl-cases/**/*.js', included: false, served: false, watched: true},
-    {pattern: 'dist/data/**/*', included: false},
-    {pattern: 'dist/examples/**/*', included: false}
-  ],
-  proxies: {
-    '/testdata/': '/base/tests/data/',
-    '/data/': '/base/dist/data/',
-    '/examples/': '/base/dist/examples/'
-  },
-  browsers: [
-    'PhantomJS'
-  ],
-  browserNoActivityTimeout: 30000,
-  reporters: [
-    'progress',
-    'kjhtml'
-  ],
-  middleware: [
-    'notes'
-  ],
-  plugins: [
-    {'middleware:notes': ['factory', notes_middleware]},
-    'karma-*'
-  ],
-  preprocessors: {},
-  frameworks: [
-    'jasmine', 'sinon'
-  ],
-  webpack: {
-    cache: true,
-    devtool: 'inline-source-map',
-    module: {
-      loaders: webpack_config.module.loaders
-    },
-    resolve: webpack_config.resolve,
-    plugins: webpack_config.exposed_plugins
-  }
+/**
+ * Express style middleware to handle REST requests for OSM tiles on the test
+ * server.
+ */
+var osmtiles_middleware = function (config) {
+  return function (request, response, next) {
+    var match = request.url.match(/.*http:\/\/[a-c]\.tile.openstreetmap.org\/([0-9]+\/[0-9]+\/[0-9]+.png)$/);
+    /* Serve tiles if they have been proxied */
+    if (match && request.method === 'GET') {
+      var imagePath = 'dist/data/tiles/' + match[1];
+      var img = new Buffer(fs.readFileSync(imagePath));
+      response.setHeader('Content-Type', 'image/png');
+      response.setHeader('Content-Length', img.length);
+      response.setHeader('Access-Control-Allow-Origin', '*');
+      response.writeHead(200);
+      return response.end(img);
+    }
+    next();
+  };
 };
 
-module.exports.preprocessors[test_case] = ['webpack', 'sourcemap'];
+module.exports = function (config) {
+  var newConfig = {
+    autoWatch: false,
+    files: [
+      test_case,
+      {pattern: 'tests/data/**/*', included: false},
+      {pattern: 'tests/cases/**/*.js', included: false, served: false, watched: true},
+      {pattern: 'tests/gl-cases/**/*.js', included: false, served: false, watched: true},
+      {pattern: 'tests/example-cases/**/*.js', included: false, served: false, watched: true},
+      {pattern: 'dist/data/**/*', included: false},
+      {pattern: 'dist/examples/**/*', included: false}
+    ],
+    proxies: {
+      '/testdata/': '/base/tests/data/',
+      '/data/': '/base/dist/data/',
+      '/examples/': '/base/dist/examples/'
+    },
+    browsers: [
+      'PhantomJS'
+    ],
+    customLaunchers: {
+      FirefoxWithProxy: {
+        base: 'Firefox',
+        prefs: {
+          'network.proxy.type': 2,
+          'network.proxy.autoconfig_url': config.protocol + '//' + config.hostname + ':' + config.port + '/testdata/proxy-for-tests.pac'
+        }
+      }
+    },
+    browserNoActivityTimeout: 30000,
+    reporters: [
+      'progress',
+      'kjhtml'
+    ],
+    middleware: [
+      'notes',
+      'osmtiles'
+    ],
+    plugins: [
+      {'middleware:notes': ['factory', notes_middleware]},
+      {'middleware:osmtiles': ['factory', osmtiles_middleware]},
+      'karma-*'
+    ],
+    preprocessors: {},
+    frameworks: [
+      'jasmine', 'sinon'
+    ],
+    webpack: {
+      cache: true,
+      devtool: 'inline-source-map',
+      module: {
+        loaders: webpack_config.module.loaders
+      },
+      resolve: webpack_config.resolve,
+      plugins: webpack_config.exposed_plugins
+    }
+  };
+  newConfig.preprocessors[test_case] = ['webpack', 'sourcemap'];
+  return newConfig;
+};
