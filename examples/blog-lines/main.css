@@ -1,0 +1,54 @@
+#map {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+table {
+  border-collapse: collapse;
+  border: 1px solid black;
+  color: black;
+}
+table td, table th {
+  border: 1px solid black !important;
+}
+table tr th {
+  min-width: 240px;
+  text-align: center;
+}
+.unsupported:after {
+  content: 'Unsupported';
+}
+.unsupported {
+  text-align: center;
+}
+.leaflet div,.mapbox div {
+  overflow: hidden;
+}
+table tr>td:first-child {
+  padding: 10px;
+}
+#lines_list {
+  display: none;
+}
+#lines_list #info {
+  min-height: 3.6em;
+}
+#main_list span {
+  display: inline-block;
+  width: 322px;
+  height: 266px;
+  overflow: hidden;
+}
+#main_list span .entry {
+  border: 1px solid black;
+  width: 322px;
+  height: 242px;
+}
+#main_list span .entry.unsupported {
+  line-height: 240px;
+}
+#main_list span .title {
+  font-weight: bold;
+  width: 322px;
+  height: 24px;
+}
