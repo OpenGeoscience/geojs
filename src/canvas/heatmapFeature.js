@@ -349,7 +349,7 @@ var canvas_heatmapFeature = function (arg) {
 
       context2d.setTransform(1, 0, 0, 1, 0, 0);
       context2d.clearRect(0, 0, viewport.width, viewport.height);
-      layer.canvas().css({transform: '', 'transform-origin': '0px 0px'});
+      layer.canvas().css({transform: ''});
 
       m_this._createCircle();
       m_this._computeGradient();

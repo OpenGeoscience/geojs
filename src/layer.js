@@ -386,9 +386,7 @@ var layer = function (arg) {
       m_canvas = m_renderer.canvas();
     }
 
-    if (!m_this.active()) {
-      m_node.css('pointerEvents', 'none');
-    }
+    m_node.toggleClass('active', m_this.active());
 
     m_initialized = true;
 
@@ -481,10 +479,8 @@ var layer = function (arg) {
 
   // Create top level div for the layer
   m_node = $(document.createElement('div'));
+  m_node.addClass('geojs-layer');
   m_node.attr('id', m_name);
-  m_node.css('position', 'absolute');
-  m_node.css('width', '100%');
-  m_node.css('height', '100%');
   m_this.opacity(m_opacity);
 
   // set the z-index

@@ -1332,7 +1332,7 @@ describe('geo.tileLayer', function () {
     });
   });
 
-  describe('HTML renderering', function () {
+  describe('HTML rendering', function () {
     function layer_html(opts) {
       var node = $('<div class="geo-test-container" style="display: none"/>'), m, l;
       opts = opts || {};
