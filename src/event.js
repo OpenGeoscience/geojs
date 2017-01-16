@@ -283,6 +283,22 @@ geo_event.actionwheel = 'geo_actionwheel';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Triggered when an action is triggered via the keyboard.
+ *
+ * @property {object} move The movement that would happen if the action is
+ *      passed through, possibly containing zoomDelta, zoom (absolute),
+ *      rotationDelta (in radians), rotation (absolute in radians), panX (in
+ *      display pixels), panY (in display pixels).  Set move.cancel to cancel
+ *      the entire movement.
+ * @property {string} action Action based on key
+ * @property {number} factor Factor based on metakeys [0-2].
+ * @property {object} event The triggering event
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.keyaction = 'geo_keyaction';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Triggered before a map navigation animation begins.  Set
  * <code>event.geo.cancelAnimation</code> to cancel the animation
  * of the navigation.  This will cause the map to navigate to the

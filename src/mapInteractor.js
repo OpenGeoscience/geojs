@@ -1,6 +1,7 @@
 var inherit = require('./inherit');
 var object = require('./object');
 var util = require('./util');
+var Mousetrap = require('mousetrap');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -29,10 +30,11 @@ var mapInteractor = function (args) {
   var actionMatch = require('./util').actionMatch;
   var quadFeature = require('./quadFeature');
 
-  var m_options = args || {},
+  var m_options,
       m_this = this,
       m_mouse,
-      m_keyboard,
+      m_keyHandler,
+      m_boundKeys,
       m_state,
       m_queue,
       $node,
@@ -147,6 +149,50 @@ var mapInteractor = function (args) {
         cancelOnMove: true
       },
 
+      keyboard: {
+        actions: {
+          /* Specific actions can be disabled by removing them from this object
+           * or stting an empty list as the key bindings.  Additional actions
+           * can be added to the dictionary, each of which gets a list of key
+           * bindings.  See Mousetrap documentation for special key names. */
+          'zoom.in': ['plus', 'shift+plus', 'shift+ctrl+plus', '=', 'shift+=', 'shift+ctrl+='],
+          'zoom.out': ['-', 'shift+-', 'shift+ctrl+-', '_', 'shift+_', 'shift+ctrl+_'],
+          'zoom.0': ['1'],
+          'zoom.3': ['2'],
+          'zoom.6': ['3'],
+          'zoom.9': ['4'],
+          'zoom.12': ['5'],
+          'zoom.15': ['6'],
+          'zoom.18': ['7'],
+          'pan.left': ['left', 'shift+left', 'shift+ctrl+left'],
+          'pan.right': ['right', 'shift+right', 'shift+ctrl+right'],
+          'pan.up': ['up', 'shift+up', 'shift+ctrl+up'],
+          'pan.down': ['down', 'shift+down', 'shift+ctrl+down'],
+          'rotate.ccw': ['<', 'shift+<', 'shift+ctrl+<', '.', 'shift+.', 'shift+ctrl+.'],
+          'rotate.cw': ['>', 'shift+>', 'shift+ctrl+>', ',', 'shift+,', 'shift+ctrl+,'],
+          'rotate.0': ['0']
+        },
+        meta: {
+          /* the metakeys that are down during a key event determine the
+           * magnitude of the action, where 0 is the default small action
+           * (1-pixel pan, small zoom, small rotation), 1 is a middle-sized
+           * action, and 2 is the largest action.  Metakeys that aren't listed
+           * are ignored.  Metakeys include shift, ctrl, alt, and meta (alt is
+           * either the alt or option key, and meta is either windows or
+           * command). */
+          0: {shift: false, ctrl: false},
+          1: {shift: true, ctrl: true},
+          2: {shift: true, ctrl: false}
+        },
+        /* if focusHighlight is truthy, then a class is added to the map such
+         * that when the map gets focus, it is indicated inside the border of
+         * the map -- browsers usually show focus on the outside, which isn't
+         * useful if the map is full window.  It might be desireable to change
+         * this so it is only present if the focus is reached via the keyboard
+         * (which would propably require detecting keyup events). */
+        focusHighlight: true
+      },
+
       wheelScaleX: 1,
       wheelScaleY: 1,
       zoomScale: 1,
@@ -169,10 +215,10 @@ var mapInteractor = function (args) {
         ease: function (t) { return (2 - t) * t; }
       }
     },
-    m_options
+    args || {}
   );
-  /* We don't want to merge the original arrays array with a array passed in
-   * the args, so override that as necessary for actions. */
+  /* We don't want to merge the original arrays with arrays passed in the args,
+   * so override that as necessary for actions. */
   if (args && args.actions) {
     m_options.actions = $.extend(true, [], args.actions);
   }
@@ -357,11 +403,6 @@ var mapInteractor = function (args) {
     }
   };
 
-  // default keyboard object
-  // (keyboard events not implemented yet)
-  m_keyboard = {
-  };
-
   // The interactor state determines what actions are taken in response to
   // core browser events.
   //
@@ -409,6 +450,120 @@ var mapInteractor = function (args) {
    */
   m_queue = {};
 
+  /**
+   * Process keys that we've captured.  Metakeys determine the magnitude of
+   * the action.
+   *
+   * @param {string} action: the basic action to take.
+   * @param {object} evt: the event with metakeys.
+   * @param {object} keys: keys used to trigger the event.  keys.simualted is
+   *    true if artificially triggered.
+   */
+  this._handleKeys = function (action, evt, keys) {
+    if (keys && keys.simulated === true) {
+      evt = keys;
+    }
+    var meta = m_options.keyboard.meta || {0: {}},
+        map = m_this.map(),
+        mapSize = map.size(),
+        actionBase = action, actionValue = '',
+        value, factor, move = {};
+
+    for (value in meta) {
+      if (meta.hasOwnProperty(value)) {
+        if ((meta[value].shift === undefined || evt.shiftKey === !!meta[value].shift) &&
+            (meta[value].ctrl === undefined || evt.ctrlKey === !!meta[value].ctrl) &&
+            (meta[value].alt === undefined || evt.altKey === !!meta[value].alt) &&
+            (meta[value].meta === undefined || evt.metaKey === !!meta[value].meta)) {
+          factor = value;
+        }
+      }
+    }
+    console.log(JSON.stringify([meta, evt, factor]));  //DWM::
+    if (factor === undefined) {
+      /* metakeys don't match, so don't trigger an event. */
+      return;
+    }
+
+    evt.stopPropagation();
+    evt.preventDefault();
+
+    if (action.indexOf('.') >= 0) {
+      actionBase = action.substr(0, action.indexOf('.'));
+      actionValue = action.substr(action.indexOf('.') + 1);
+    }
+    switch (actionBase) {
+      case 'zoom':
+        switch (actionValue) {
+          case 'in':
+            move.zoomDelta = [0.05, 0.25, 1][factor];
+            break;
+          case 'out':
+            move.zoomDelta = -[0.05, 0.25, 1][factor];
+            break;
+          default:
+            if (!isNaN(parseFloat(actionValue))) {
+              move.zoom = parseFloat(actionValue);
+            }
+            break;
+        }
+        break;
+      case 'pan':
+        switch (actionValue) {
+          case 'down':
+            move.panY = -Math.max(1, [0, 0.05, 0.5][factor] * mapSize.height);
+            break;
+          case 'left':
+            move.panX = Math.max(1, [0, 0.05, 0.5][factor] * mapSize.width);
+            break;
+          case 'right':
+            move.panX = -Math.max(1, [0, 0.05, 0.5][factor] * mapSize.width);
+            break;
+          case 'up':
+            move.panY = Math.max(1, [0, 0.05, 0.5][factor] * mapSize.height);
+            break;
+        }
+        break;
+      case 'rotate':
+        switch (actionValue) {
+          case 'ccw':
+            move.rotationDelta = [1, 5, 90][factor] * Math.PI / 180;
+            break;
+          case 'cw':
+            move.rotationDelta = -[1, 5, 90][factor] * Math.PI / 180;
+            break;
+          default:
+            if (!isNaN(parseFloat(actionValue))) {
+              move.rotation = parseFloat(actionValue);
+            }
+            break;
+        }
+        break;
+    }
+    map.geoTrigger(geo_event.keyaction, {
+      move: move,
+      action: action,
+      factor: factor,
+      event: evt
+    });
+    if (move.cancel) {
+      return;
+    }
+    if (move.zoom !== undefined) {
+      map.zoom(move.zoom);
+    } else if (move.zoomDelta) {
+      map.zoom(map.zoom() + move.zoomDelta);
+    }
+    if (move.rotation !== undefined) {
+      map.rotation(move.rotation);
+    } else if (move.rotationDelta) {
+      map.rotation(map.rotation() + move.rotationDelta);
+    }
+    if (move.panX || move.panY) {
+      map.pan({x: move.panX || 0, y: move.panY || 0});
+    }
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Connects events to a map.  If the map is not set, then this does nothing.
@@ -443,6 +598,28 @@ var mapInteractor = function (args) {
     })) {
       $node.on('contextmenu.geojs', function () { return false; });
     }
+
+    if (m_options.keyboard && m_options.keyboard.actions) {
+      m_keyHandler = Mousetrap($node[0]);
+      var bound = [];
+      for (var keyAction in m_options.keyboard.actions) {
+        if (m_options.keyboard.actions.hasOwnProperty(keyAction)) {
+          m_keyHandler.bind(
+            m_options.keyboard.actions[keyAction],
+            (function (action) {
+              return function (evt, keys) {
+                m_this._handleKeys(action, evt, keys);
+              };
+            })(keyAction)
+          );
+          bound = bound.concat(m_options.keyboard.actions[keyAction]);
+        }
+      }
+      m_boundKeys = bound;
+    }
+    $node.toggleClass('highlight-focus',
+      m_boundKeys && m_boundKeys.length && m_options.keyboard.focusHighlight);
+
     return m_this;
   };
 
@@ -453,12 +630,20 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._disconnectEvents = function () {
+    if (m_boundKeys) {
+      if (m_keyHandler) {
+        m_boundKeys.every(m_keyHandler.unbind, m_keyHandler);
+      }
+      m_boundKeys = null;
+      m_keyHandler = null;
+    }
     if ($node) {
       $node.off('.geojs');
       $node = null;
     }
     m_this._handleMouseWheel = function () {};
     m_callZoom = function () {};
+
     return m_this;
   };
 
@@ -1454,6 +1639,9 @@ var mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   this.destroy = function () {
     m_this._disconnectEvents();
+    if (m_this.map()) {
+      $(m_this.map().node()).removeClass('highlight-focus');
+    }
     m_this.map(null);
   };
 
@@ -1468,11 +1656,14 @@ var mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get current keyboard information
+   * Get/set current keyboard information
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.keyboard = function () {
-    return $.extend(true, {}, m_keyboard);
+  this.keyboard = function (newValue) {
+    if (newValue === undefined) {
+      return $.extend(true, {}, m_options.keyboard || {});
+    }
+    return m_this.options({keyboard: newValue});
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1587,6 +1778,24 @@ var mapInteractor = function (args) {
 
     if (!m_this.map()) {
       return m_this;
+    }
+
+    if (type === 'keyboard' && m_keyHandler) {
+      /* Mousetrap passes through the keys we send, but not an event object,
+       * so we construct an artifical event object as the keys, and use that.
+       */
+      var keys = {
+        shiftKey: options.shift || options.shiftKey || false,
+        ctrlKey: options.ctrl || options.ctrlKey || false,
+        altKey: options.alt || options.altKey || false,
+        metaKey: options.meta || options.metaKey || false,
+        toString: function () { return options.keys; },
+        stopPropagation: function () {},
+        preventDefault: function () {},
+        simulated: true
+      };
+      m_keyHandler.trigger(keys);
+      return;
     }
 
     page = options.page || {};

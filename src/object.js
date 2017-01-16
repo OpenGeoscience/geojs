@@ -123,7 +123,7 @@ var object = function () {
   //////////////////////////////////////////////////////////////////////////////
   /**
    *  Remove handlers from an event (or an array of events).  If no event is
-   *  provided all hanlders will be removed.
+   *  provided all handlers will be removed.
    *
    *  @param {string?} event An event from {geo.events}
    *  @param {object?} arg A function or array of functions to remove from the events
