@@ -27,6 +27,7 @@ $(function () {
   };
   // Defaults for the line controls
   var defaultStyles = {
+    antialiasing: 2,
     lineCap: 'butt',
     lineJoin: 'miter',
     miterLimit: 10,
