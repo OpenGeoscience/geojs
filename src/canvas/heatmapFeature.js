@@ -38,6 +38,7 @@ var canvas_heatmapFeature = function (arg) {
       m_typedClampedBuffer,
       m_typedBufferData,
       m_heatMapPosition,
+      m_heatMapTransform,
       s_exit = this._exit,
       s_init = this._init,
       s_update = this._update,
@@ -349,7 +350,9 @@ var canvas_heatmapFeature = function (arg) {
 
       context2d.setTransform(1, 0, 0, 1, 0, 0);
       context2d.clearRect(0, 0, viewport.width, viewport.height);
-      layer.canvas().css({transform: '', 'transform-origin': '0px 0px'});
+      m_heatMapTransform = '';
+      map.scheduleAnimationFrame(m_this._setTransform, false);
+      layer.canvas().css({transform: ''});
 
       m_this._createCircle();
       m_this._computeGradient();
@@ -410,6 +413,16 @@ var canvas_heatmapFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Update the css transform for the layer as part of an animation frame.
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._setTransform = function () {
+    m_this.layer().canvas()[0].style.transform = m_heatMapTransform;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Animate pan (and zoom)
    * @protected
    */
@@ -434,8 +447,9 @@ var canvas_heatmapFeature = function (arg) {
         ' scale(' + scale + ')' +
         ' rotate(' + ((rotation - m_heatMapPosition.rotation) * 180 / Math.PI) + 'deg)';
 
-    m_this.layer().canvas()[0].style.transform = transform;
+    map.scheduleAnimationFrame(m_this._setTransform);
 
+    m_heatMapTransform = transform;
     m_heatMapPosition.lastScale = scale;
     m_heatMapPosition.lastOrigin.x = origin.x;
     m_heatMapPosition.lastOrigin.y = origin.y;

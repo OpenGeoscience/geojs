@@ -24,7 +24,6 @@ var canvasRenderer = function (arg) {
   renderer.call(this, arg);
 
   var m_this = this,
-      m_renderAnimFrameRef = null,
       m_clearCanvas = true,
       s_init = this._init,
       s_exit = this._exit;
@@ -57,8 +56,7 @@ var canvasRenderer = function (arg) {
     var canvas = $(document.createElement('canvas'));
     m_this.context2d = canvas[0].getContext('2d');
 
-    canvas.attr('class', 'canvas-canvas');
-    canvas.css('display', 'block');
+    canvas.addClass('canvas-canvas');
     $(m_this.layer().node().get(0)).append(canvas);
 
     m_this.canvas(canvas);
@@ -89,30 +87,33 @@ var canvasRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._render = function () {
-    if (m_renderAnimFrameRef === null) {
-      m_renderAnimFrameRef = window.requestAnimationFrame(function () {
-        m_renderAnimFrameRef = null;
-
-        var layer = m_this.layer(),
-            map = layer.map(),
-            camera = map.camera(),
-            viewport = camera._viewport;
-
-        // Clear the canvas.
-        if (m_clearCanvas) {
-          m_this.context2d.setTransform(1, 0, 0, 1, 0, 0);
-          m_this.context2d.clearRect(0, 0, viewport.width, viewport.height);
-        }
-
-        var features = layer.features();
-        for (var i = 0; i < features.length; i += 1) {
-          if (features[i].visible()) {
-            features[i]._renderOnCanvas(m_this.context2d, map);
-          }
-        }
-      });
-    }
+    m_this.layer().map().scheduleAnimationFrame(this._renderFrame);
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Render during an animation frame callback.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._renderFrame = function () {
+    var layer = m_this.layer(),
+        map = layer.map(),
+        camera = map.camera(),
+        viewport = camera._viewport;
+
+    // Clear the canvas.
+    if (m_clearCanvas) {
+      m_this.context2d.setTransform(1, 0, 0, 1, 0, 0);
+      m_this.context2d.clearRect(0, 0, viewport.width, viewport.height);
+    }
+
+    var features = layer.features();
+    for (var i = 0; i < features.length; i += 1) {
+      if (features[i].visible()) {
+        features[i]._renderOnCanvas(m_this.context2d, map);
+      }
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
