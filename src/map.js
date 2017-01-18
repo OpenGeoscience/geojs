@@ -894,7 +894,7 @@ var map = function (arg) {
       throw 'Map require DIV node';
     }
 
-    m_node.css('position', 'relative');
+    m_node.addClass('geojs-map');
     return m_this;
   };
 
@@ -1518,19 +1518,7 @@ var map = function (arg) {
     // generate a new attribution node
     var $a = $('<div/>')
       .addClass('geo-attribution')
-      .css({
-        position: 'absolute',
-        right: '0px',
-        bottom: '0px',
-        'padding-right': '5px',
-        cursor: 'auto',
-        font: '11px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif',
-        'z-index': '1001',
-        background: 'rgba(255,255,255,0.7)',
-        clear: 'both',
-        display: 'block',
-        'pointer-events': 'auto'
-      }).on('mousedown', function (evt) {
+      .on('mousedown', function (evt) {
         evt.stopPropagation();
       });
 
@@ -1540,9 +1528,6 @@ var map = function (arg) {
       if (content) {
         $('<span/>')
           .addClass('geo-attribution-layer')
-          .css({
-            'padding-left': '5px'
-          })
           .html(content)
           .appendTo($a);
       }
