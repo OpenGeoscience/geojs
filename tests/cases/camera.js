@@ -337,6 +337,11 @@ describe('geo.camera', function () {
     var idparent = 'geo-test-parent',
         idnode = 'geo-test-node';
 
+    afterAll(function () {
+      $('#' + idparent).remove();
+      $('#' + idnode).remove();
+    });
+
     /**
      * Generate a node on the current page with known transforms.
      */

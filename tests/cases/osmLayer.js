@@ -126,7 +126,7 @@ describe('geo.core.osmLayer', function () {
       var layer;
       it('creation', function () {
         map = create_map();
-        layer = map.createLayer('osm', {renderer: null, url: '/data/white.jpg'});
+        layer = map.createLayer('osm', {renderer: null, url: '/testdata/white.jpg'});
         expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
       });
       waitForIt('.geo-tile-container', function () {
@@ -137,7 +137,7 @@ describe('geo.core.osmLayer', function () {
       });
       it('mapOpacity', function () {
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: null, mapOpacity: 0.5, url: '/data/white.jpg'});
+        layer = map.createLayer('osm', {renderer: null, mapOpacity: 0.5, url: '/testdata/white.jpg'});
         expect(layer.canvas().css('opacity')).toBe('0.5');
       });
       waitForIt('.geo-tile-container', function () {
@@ -159,7 +159,7 @@ describe('geo.core.osmLayer', function () {
       var layer;
       it('creation', function () {
         map = create_map();
-        layer = map.createLayer('osm', {renderer: 'd3', url: '/data/white.jpg'});
+        layer = map.createLayer('osm', {renderer: 'd3', url: '/testdata/white.jpg'});
       });
       waitForIt('.d3QuadFeature', function () {
         return map.node().find('.d3QuadFeature').length > 0;
@@ -185,7 +185,7 @@ describe('geo.core.osmLayer', function () {
     describe('vgl', function () {
       it('creation', function () {
         map = create_map();
-        map.createLayer('osm', {renderer: 'vgl', url: '/data/white.jpg'});
+        map.createLayer('osm', {renderer: 'vgl', url: '/testdata/white.jpg'});
         expect(map.node().find('.webgl-canvas').length).toBe(1);
       });
       it('destruction', destroy_map);
@@ -194,10 +194,10 @@ describe('geo.core.osmLayer', function () {
       var layer;
       it('vgl to null', function () {
         map = create_map();
-        layer = map.createLayer('osm', {renderer: 'vgl', url: '/data/white.jpg'});
+        layer = map.createLayer('osm', {renderer: 'vgl', url: '/testdata/white.jpg'});
         expect(map.node().find('.webgl-canvas').length).toBe(1);
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: null, url: '/data/white.jpg'});
+        layer = map.createLayer('osm', {renderer: null, url: '/testdata/white.jpg'});
         expect(map.node().find('.webgl-canvas').length).toBe(0);
         expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
       });
@@ -207,7 +207,7 @@ describe('geo.core.osmLayer', function () {
       it('null to d3', function () {
         expect(map.node().find('[data-tile-layer="0"]').is('div')).toBe(true);
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: 'd3', url: '/data/white.jpg'});
+        layer = map.createLayer('osm', {renderer: 'd3', url: '/testdata/white.jpg'});
         expect(map.node().find('[data-tile-layer="0"]').length).toBe(0);
       });
       waitForIt('.d3QuadFeature', function () {
@@ -215,14 +215,14 @@ describe('geo.core.osmLayer', function () {
       });
       it('d3 to canvas', function () {
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: 'canvas', url: '/data/white.jpg'});
+        layer = map.createLayer('osm', {renderer: 'canvas', url: '/testdata/white.jpg'});
         expect(map.node().find('.d3QuadFature').length).toBe(0);
         expect(map.node().find('.canvas-canvas').length).toBe(1);
       });
       it('canvas to vgl', function () {
         expect(map.node().find('.canvas-canvas').length).toBe(1);
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: 'vgl', url: '/data/white.jpg'});
+        layer = map.createLayer('osm', {renderer: 'vgl', url: '/testdata/white.jpg'});
         expect(map.node().find('.canvas-canvas').length).toBe(0);
         expect(map.node().find('.webgl-canvas').length).toBe(1);
       });
@@ -245,7 +245,7 @@ describe('geo.core.osmLayer', function () {
           if (angle) {
             map.rotation(parseFloat(angle) * Math.PI / 180);
           }
-          layer = map.createLayer('osm', {renderer: null, url: '/data/white.jpg'});
+          layer = map.createLayer('osm', {renderer: null, url: '/testdata/white.jpg'});
           expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
         });
         waitForIt('null tiles to load', function () {
@@ -258,7 +258,7 @@ describe('geo.core.osmLayer', function () {
             positions[ref] = $(this)[0].getBoundingClientRect();
           });
           map.deleteLayer(layer);
-          layer = map.createLayer('osm', {renderer: 'd3', url: '/data/white.jpg'});
+          layer = map.createLayer('osm', {renderer: 'd3', url: '/testdata/white.jpg'});
           expect(map.node().find('[data-tile-layer="0"]').length).toBe(0);
         });
         waitForIt('d3 tiles to load', function () {
@@ -292,7 +292,7 @@ describe('geo.core.osmLayer', function () {
       expect(params.layer.tilesMaxBounds(3)).toEqual({x: 1543, y: 709});
       map = create_map(params.map);
       map.createLayer('osm', $.extend(
-        {}, params.layer, {renderer: null, url: '/data/white.jpg', zoom: 3}));
+        {}, params.layer, {renderer: null, url: '/testdata/white.jpg', zoom: 3}));
       expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
     });
     waitForIt('.geo-tile-container', function () {
@@ -310,7 +310,7 @@ describe('geo.core.osmLayer', function () {
       mapinfo.map = map;
       layer = map.createLayer('osm', {
         renderer: 'd3',
-        url: '/data/white.jpg'
+        url: '/testdata/white.jpg'
       });
     });
     waitForIt('tiles to load', function () {
@@ -340,7 +340,7 @@ describe('geo.core.osmLayer', function () {
       mapinfo.map = map;
       layer = map.createLayer('osm', {
         renderer: 'canvas',
-        url: '/data/white.jpg'
+        url: '/testdata/white.jpg'
       });
     });
     waitForIt('tiles to load', function () {
@@ -368,7 +368,7 @@ describe('geo.core.osmLayer', function () {
       map = create_map();
       layer = map.createLayer('osm', {
         renderer: 'canvas',
-        url: '/data/white.jpg',
+        url: '/testdata/white.jpg',
         tilesMaxBounds: function (level) {
           var scale = Math.pow(2, 5 - level);
           // pick some bounds that could be valid at level 5
@@ -392,7 +392,7 @@ describe('geo.core.osmLayer', function () {
       mapinfo.map = map;
       layer = map.createLayer('osm', {
         renderer: 'vgl',
-        url: '/data/white.jpg'
+        url: '/testdata/white.jpg'
       });
     });
     waitForIt('tiles to load', function () {
@@ -415,7 +415,7 @@ describe('geo.core.osmLayer', function () {
       map = create_map();
       layer = map.createLayer('osm', {
         renderer: 'vgl',
-        url: '/data/white.jpg',
+        url: '/testdata/white.jpg',
         tilesMaxBounds: function (level) {
           var scale = Math.pow(2, 5 - level);
           // pick some bounds that could be valid at level 5

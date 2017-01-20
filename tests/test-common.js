@@ -28,13 +28,13 @@ module.exports = {
     $.extend(true, mapDefaults, mapOpts);
 
     var osmDefaults = {
-      baseUrl: '/data/tiles/',
+      baseUrl: '/testdata/tiles/',
       attribution: null
     };
 
     if (notiles) {
       osmDefaults.url = function () {
-        return '/data/white.jpg';
+        return '/testdata/white.jpg';
       };
       delete osmDefaults.baseUrl;
     }

@@ -138,6 +138,15 @@ var d3Renderer = function (arg) {
         } else if (key === 'fillOpacity') {
           k = 'fill-opacity';
           f = styles[key];
+        } else if (key === 'lineCap') {
+          k = 'stroke-linecap';
+          f = styles[key];
+        } else if (key === 'lineJoin') {
+          k = 'stroke-linejoin';
+          f = styles[key];
+        } else if (key === 'miterLimit') {
+          k = 'stroke-miterlimit';
+          f = styles[key];
         }
         if (k) {
           select.style(k, f);
@@ -305,6 +314,7 @@ var d3Renderer = function (arg) {
       } else {
         m_svg = d3.select(m_this.layer().node().get(0)).append('svg');
       }
+      m_svg.attr('display', 'block');
 
       // create a global svg definitions element
       m_defs = m_svg.append('defs');
