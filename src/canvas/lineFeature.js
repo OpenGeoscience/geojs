@@ -63,8 +63,12 @@ var canvas_lineFeature = function (arg) {
       cur.opacity = strokeOpacityFunc(line[0], 0, d, i);
       cur.linecap = lineCapFunc(line[0], 0, d, i);
       cur.linejoin = lineJoinFunc(line[0], 0, d, i);
-      cur.strokeStyle = 'rgba(' + (cur.color.g * 255) + ', ' + (cur.color.g * 255) + ', ' + (cur.color.b * 255) + ', ' + (cur.opacity !== undefined ? cur.opacity : 1) + ')';
-      if (last.strokeStyle !== cur.strokeStyle || last.width !== cur.width || last.linecap !== cur.linecap || last.linejoin !== cur.linejoin || last.miterlimit !== cur.miterlimit) {
+      cur.strokeStyle = 'rgba(' + (cur.color.g * 255) + ', ' +
+          (cur.color.g * 255) + ', ' + (cur.color.b * 255) + ', ' +
+          (cur.opacity !== undefined ? cur.opacity : 1) + ')';
+      if (last.strokeStyle !== cur.strokeStyle || last.width !== cur.width ||
+          last.linecap !== cur.linecap || last.linejoin !== cur.linejoin ||
+          last.miterlimit !== cur.miterlimit) {
         if (last.strokeStyle !== undefined) {
           context2d.stroke();
         }

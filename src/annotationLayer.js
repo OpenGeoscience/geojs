@@ -326,7 +326,7 @@ var annotationLayer = function (args) {
       var createAnnotation, actions,
           mapNode = m_this.map().node(), oldMode = m_mode;
       m_mode = arg;
-      mapNode.css('cursor', m_mode ? 'crosshair' : '');
+      mapNode.toggleClass('annotation-input', !!m_mode);
       if (m_mode) {
         Mousetrap(mapNode[0]).bind('esc', function () { m_this.mode(null); });
       } else {

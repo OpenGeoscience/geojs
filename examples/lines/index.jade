@@ -29,7 +29,7 @@ block append mainContent
       input#miterLimit(placeholder="10")
     .form-group(title="Antialiasing (a non-negative number).  Edges of lines will be antialiased by this many pixels.  Values larger than 2 tend to make things blurry.")
       label(for="antialiasing") antialiasing
-      input#antialiasing(placeholder="1")
+      input#antialiasing(placeholder="2")
     .form-group(title="Show road names and categories on hover.")
       label(for="hovertext") Info on Hover
       input#hovertext(type="checkbox", placeholder="false")
@@ -38,8 +38,8 @@ block append mainContent
       input#showmap(type="checkbox", placeholder="true", checked="checked")
     .form-group
       .shortlabel Presets
-      button.preset(strokeColor='{"residential":"blue","service":"green","other":"black"}', strokeWidth='{"residential":4,"service":1,"other":8}', lineCap='round', antialiasing=2, showmap='true', title='Properties based on road category') Categories
-      button.preset(strokeColor='', strokeWidth='{"residential":1,"service":0.25,"other":3}', lineCap='round', lineJoin='', miterLimit='', antialiasing=2, showmap='false', title='Thin lines based on road category') Thin
+      button.preset(strokeColor='{"residential":"blue","service":"green","other":"black"}', strokeWidth='{"residential":4,"service":1,"other":8}', lineCap='round', showmap='true', title='Properties based on road category') Categories
+      button.preset(strokeColor='', strokeWidth='{"residential":1,"service":0.25,"other":3}', lineCap='round', lineJoin='', miterLimit='', showmap='false', title='Thin lines based on road category') Thin
       button.preset(strokeColor='line:red,orange,yellow,green,blue,indigo,violet', strokeWidth='line:1,2,4,8,16', lineCap='line:butt,round,square', lineJoin='line:miter,bevel,round,miter-clip', miterLimit=4, title='Properties varied by line') Lines
       button.preset(strokeColor='red,orange,yellow,green,blue,indigo,violet', strokeWidth='1,2,4,8,16', lineCap='butt,round,square', lineJoin='miter,bevel,round,miter-clip', miterLimit=4, title='Properties varied by line segment') Segments
 

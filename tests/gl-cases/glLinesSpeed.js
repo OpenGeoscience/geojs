@@ -89,6 +89,7 @@ describe('glLinesSpeed', function () {
           strokeColor: function (d) {
             return d.strokeColor;
           },
+          antialiasing: 0,
           strokeWidth: 5,
           strokeOpacity: 0.05
         });

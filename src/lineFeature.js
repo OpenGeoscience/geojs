@@ -275,6 +275,8 @@ var lineFeature = function (arg) {
         strokeColor: { r: 1.0, g: 0.8431372549, b: 0.0 },
         strokeStyle: 'solid',
         strokeOpacity: 1.0,
+        // Values of 2 and above appear smoothest.
+        antialiasing: 2.0,
         closed: false,
         line: function (d) { return d; },
         position: function (d) { return d; }

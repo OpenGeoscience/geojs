@@ -1332,7 +1332,7 @@ describe('geo.tileLayer', function () {
     });
   });
 
-  describe('HTML renderering', function () {
+  describe('HTML rendering', function () {
     afterAll(function () {
       $('.geo-test-container').remove();
     });

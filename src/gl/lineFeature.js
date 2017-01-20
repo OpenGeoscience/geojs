@@ -105,6 +105,12 @@ var gl_lineFeature = function (arg) {
 
           'const float PI = 3.14159265358979323846264;',
 
+          'vec4 viewCoord(vec3 c) {',
+          '  vec4 result = projectionMatrix * modelViewMatrix * vec4(c.xyz, 1);',
+          '  if (result.w != 0.0)  result = result / result.w;',
+          '  return result;',
+          '}',
+
           'void main(void)',
           '{',
           /* If any vertex has been deliberately set to a negative opacity,
@@ -117,14 +123,10 @@ var gl_lineFeature = function (arg) {
            * calculate the angles between the lines formed by prev-pos and
            * pos-next, and between pos-next and next-far, plus know the angle
            *   (prev)---(pos)---(next)---(far) => A---B---C---D */
-          '  vec4 A = projectionMatrix * modelViewMatrix * vec4(prev.xyz, 1);',
-          '  if (A.w != 0.0)  A = A / A.w;',
-          '  vec4 B = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
-          '  if (B.w != 0.0)  B = B / B.w;',
-          '  vec4 C = projectionMatrix * modelViewMatrix * vec4(next.xyz, 1);',
-          '  if (C.w != 0.0)  C = C / C.w;',
-          '  vec4 D = projectionMatrix * modelViewMatrix * vec4(far.xyz, 1);',
-          '  if (D.w != 0.0)  D = D / D.w;',
+          '  vec4 A = viewCoord(prev);',
+          '  vec4 B = viewCoord(pos);',
+          '  vec4 C = viewCoord(next);',
+          '  vec4 D = viewCoord(far);',
           // calculate line segment vector and angle
           '  vec2 deltaCB = C.xy - B.xy;',
           '  if (deltaCB == vec2(0.0, 0.0)) {',
@@ -138,6 +140,10 @@ var gl_lineFeature = function (arg) {
           '  int vertex = int(mod(flags, 4.0));',
           '  int nearMode = int(mod(floor(flags / 4.0), 8.0));',
           '  int farMode = int(mod(floor(flags / 32.0), 8.0));',
+          // we use 11 bits of the flags for the offset, where -1023 to 1023
+          // maps to -1 to 1.  The 11 bits are a signed value, so simply
+          // selecting the bits will result in an unsigned values that may be
+          // greater than 1, in which case we have to subtract appropriately.
           '  float offset = mod(floor(flags / 256.0), 2048.0) / 1023.0;',
           '  if (offset > 1.0)  offset -= 2048.0 / 1023.0;',
           // by default, offset by the width and don't extend lines.  Later,
@@ -465,6 +471,9 @@ var gl_lineFeature = function (arg) {
         v1.strokeOpacity = strokeOpacityVal === undefined ? strokeOpacityFunc(lineItemData, lidx, lineItem, i) : strokeOpacityVal;
         v1.strokeOffset = (strokeOffsetVal === undefined ? strokeOffsetFunc(lineItemData, lidx, lineItem, i) : strokeOffsetVal) || 0;
         if (v1.strokeOffset) {
+          /* we use 11 bits to store the offset, and we want to store values
+           * from -1 to 1, so multiply our values by 1023, and use some bit
+           * manipulation to ensure that it is packed properly */
           v1.posStrokeOffset = Math.round(2048 + 1023 * Math.min(1, Math.max(-1, v1.strokeOffset))) & 0x7FF;
           v1.negStrokeOffset = Math.round(2048 - 1023 * Math.min(1, Math.max(-1, v1.strokeOffset))) & 0x7FF;
         } else {

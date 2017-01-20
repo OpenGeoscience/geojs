@@ -30,6 +30,8 @@
 var $ = require('jquery');
 require('./polyfills');
 
+require('./main.styl');
+
 module.exports = $.extend({
   annotation: require('./annotation'),
   annotationLayer: require('./annotationLayer'),

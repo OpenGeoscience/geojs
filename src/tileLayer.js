@@ -779,17 +779,15 @@ module.exports = (function () {
       // apply a transform to place the image correctly
       container.append(tile.image);
       container.css({
-        position: 'absolute',
         left: (bounds.left - parseInt(div.attr('offsetx') || 0, 10)) + 'px',
         top: (bounds.top - parseInt(div.attr('offsety') || 0, 10)) + 'px'
       });
 
       crop = this.tileCropFromBounds(tile);
       if (crop) {
-        container.css({
+        container.addClass('crop').css({
           width: crop.x + 'px',
-          height: crop.y + 'px',
-          overflow: 'hidden'
+          height: crop.y + 'px'
         });
       }
 
@@ -1005,11 +1003,7 @@ module.exports = (function () {
       if (!node) {
         node = $(
           '<div class=geo-tile-layer data-tile-layer="' + level.toFixed() + '"/>'
-        ).css({
-          'transform-origin': '0px 0px',
-          'line-height': 0,
-          'font-size': 0
-        }).get(0);
+        ).get(0);
         this.canvas().append(node);
       }
       return node;
