@@ -479,7 +479,6 @@ var mapInteractor = function (args) {
         }
       }
     }
-    console.log(JSON.stringify([meta, evt, factor]));  //DWM::
     if (factor === undefined) {
       /* metakeys don't match, so don't trigger an event. */
       return;
