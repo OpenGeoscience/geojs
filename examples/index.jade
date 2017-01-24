@@ -3,7 +3,7 @@ extends ./common/templates/index.jade
 mixin thumbnail(ex)
   .col-md-4
     .thumbnail
-      a(href="#{ex.path}")
+      a(href="#{ex.path}/")
         img(src="#{ex.path}/thumb.jpg" onerror="this.src='osm/thumb.jpg';")
         .caption
           h3= ex.title
