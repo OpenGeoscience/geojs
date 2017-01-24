@@ -30,6 +30,37 @@
 var registerFeature = require('../registry').registerFeature;
 var lineFeature = require('../lineFeature');
 
+var MAX_MITER_LIMIT = 100;
+
+/* Flags are passed to the vertex shader in a float.  Since a 32-bit float has
+ * 24 bits of mantissa, including the sign bit, a maximum of 23 bits of flags
+ * can be passed in a float without loss or complication. */
+/* vertex flags specify which direction a vertex needs to be offset */
+var flagsVertex = {  // uses 2 bits
+  corner: 0,
+  near: 1,
+  far: 3
+};
+var flagsLineCap = {  // uses 3 bits with flagsLineJoin
+  butt: 0,
+  square: 1,
+  round: 2
+};
+var flagsLineJoin = {  // uses 3 bits with flagsLineCap
+  passthrough: 3,
+  miter: 4,
+  bevel: 5,
+  round: 6,
+  'miter-clip': 7
+};
+var flagsNearLineShift = 2, flagsFarLineShift = 5;
+var flagsNearOffsetShift = 8;  // uses 11 bits
+/* Fixed flags */
+var flagsDebug = {  // uses 1 bit
+  normal: 0,
+  debug: 1
+};
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of lineFeature
@@ -61,11 +92,14 @@ var gl_lineFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
-      m_actor = null,
-      m_mapper = null,
-      m_material = null,
-      m_pixelWidthUnif = null,
-      m_aspectUniform = null,
+      m_actor,
+      m_mapper,
+      m_material,
+      m_pixelWidthUnif,
+      m_aspectUniform,
+      m_miterLimitUniform,
+      m_antialiasingUniform,
+      m_flagsUniform,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
       s_init = this._init,
       s_update = this._update;
@@ -78,7 +112,8 @@ var gl_lineFeature = function (arg) {
           'attribute vec3 pos;',
           'attribute vec3 prev;',
           'attribute vec3 next;',
-          'attribute float offset;',
+          'attribute vec3 far;',
+          'attribute float flags;',
 
           'attribute vec3 strokeColor;',
           'attribute float strokeOpacity;',
@@ -88,8 +123,21 @@ var gl_lineFeature = function (arg) {
           'uniform mat4 projectionMatrix;',
           'uniform float pixelWidth;',
           'uniform float aspect;',
+          'uniform float miterLimit;',
+          'uniform float antialiasing;',
 
           'varying vec4 strokeColorVar;',
+          'varying vec4 subpos;',  /* px, py, length - px, width */
+          'varying vec4 info;',  /* near mode, far mode, offset */
+          'varying vec4 angles;', /* near angle cos, sin, far angle cos, sin */
+
+          'const float PI = 3.14159265358979323846264;',
+
+          'vec4 viewCoord(vec3 c) {',
+          '  vec4 result = projectionMatrix * modelViewMatrix * vec4(c.xyz, 1);',
+          '  if (result.w != 0.0)  result = result / result.w;',
+          '  return result;',
+          '}',
 
           'void main(void)',
           '{',
@@ -99,38 +147,128 @@ var gl_lineFeature = function (arg) {
           '    gl_Position = vec4(2, 2, 0, 1);',
           '    return;',
           '  }',
-          '  const float PI = 3.14159265358979323846264;',
-          '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
-          '  if (worldPos.w != 0.0) {',
-          '    worldPos = worldPos/worldPos.w;',
+          /* convert coordinates.  We have four values, since we need to
+           * calculate the angles between the lines formed by prev-pos and
+           * pos-next, and between pos-next and next-far, plus know the angle
+           *   (prev)---(pos)---(next)---(far) => A---B---C---D */
+          '  vec4 A = viewCoord(prev);',
+          '  vec4 B = viewCoord(pos);',
+          '  vec4 C = viewCoord(next);',
+          '  vec4 D = viewCoord(far);',
+          // calculate line segment vector and angle
+          '  vec2 deltaCB = C.xy - B.xy;',
+          '  if (deltaCB == vec2(0.0, 0.0)) {',
+          '    gl_Position = vec4(2, 2, 0, 1);',
+          '    return;',
           '  }',
-          '  vec4 worldNext = projectionMatrix * modelViewMatrix * vec4(next.xyz, 1);',
-          '  if (worldNext.w != 0.0) {',
-          '    worldNext = worldNext/worldNext.w;',
-          '  }',
-          '  vec4 worldPrev = projectionMatrix* modelViewMatrix * vec4(prev.xyz, 1);',
-          '  if (worldPrev.w != 0.0) {',
-          '    worldPrev = worldPrev/worldPrev.w;',
-          '  }',
+          '  float angleCB = atan(deltaCB.y / aspect, deltaCB.x);',
+          // values we need to pass along
           '  strokeColorVar = vec4(strokeColor, strokeOpacity);',
-          '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
-          '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
-          '  float angleNext = 0.0, anglePrev = 0.0;',
-          '  if (deltaNext.xy != vec2(0.0, 0.0))',
-          '    angleNext = atan(deltaNext.y / aspect, deltaNext.x);',
-          '  if (deltaPrev.xy == vec2(0.0, 0.0)) anglePrev = angleNext;',
-          '  else  anglePrev = atan(deltaPrev.y / aspect, deltaPrev.x);',
-          '  if (deltaNext.xy == vec2(0.0, 0.0)) angleNext = anglePrev;',
-          '  float angle = (anglePrev + angleNext) / 2.0;',
-          '  if (abs(anglePrev - angleNext) >= PI)',
-          '    angle += PI;',
-          '  float cosAngle = cos(anglePrev - angle);',
-          '  if (cosAngle &lt; 0.1) { cosAngle = sign(cosAngle) * 1.0; angle = 0.0; }',
-          '  float distance = (offset * strokeWidth * pixelWidth) /',
-          '                    cosAngle;',
-          '  worldPos.x += distance * sin(angle);',
-          '  worldPos.y -= distance * cos(angle) * aspect;',
-          '  gl_Position = worldPos;',
+          // extract values from our flags field
+          '  int vertex = int(mod(flags, 4.0));',
+          '  int nearMode = int(mod(floor(flags / 4.0), 8.0));',
+          '  int farMode = int(mod(floor(flags / 32.0), 8.0));',
+          // we use 11 bits of the flags for the offset, where -1023 to 1023
+          // maps to -1 to 1.  The 11 bits are a signed value, so simply
+          // selecting the bits will result in an unsigned values that may be
+          // greater than 1, in which case we have to subtract appropriately.
+          '  float offset = mod(floor(flags / 256.0), 2048.0) / 1023.0;',
+          '  if (offset > 1.0)  offset -= 2048.0 / 1023.0;',
+          // by default, offset by the width and don't extend lines.  Later,
+          // calculate line extensions based on end cap and end join modes
+          '  float yOffset = strokeWidth + antialiasing;',
+          '  if (vertex == 0 || vertex == 2)  yOffset *= -1.0;',
+          '  yOffset += strokeWidth * offset;',
+          '  float xOffset = 0.0;',
+          // end caps
+          '  if (nearMode == 0) {',
+          '    xOffset = antialiasing;',
+          '  } else if (nearMode == 1 || nearMode == 2) {',
+          '    xOffset = strokeWidth + antialiasing;',
+          '  }',
+
+          // If joining lines, calculate the angles in screen space formed by
+          // the near end (A-B-C) and far end (B-C-D), and determine how much
+          // space is needed for the particular join.
+          //   This could be changed: if the lines are not a uniform width and
+          // offset, then the functional join angle is not simply half the
+          // angle between the two lines, but rather half the angle of the
+          // inside edge of the the two lines.
+          '  float cosABC, sinABC, cosBCD, sinBCD;',  // of half angles
+          // handle near end
+          '  if (nearMode >= 4) {',
+          '    float angleBA = atan((B.y - A.y) / aspect, B.x - A.x);',
+          '    if (A.xy == B.xy)  angleBA = angleCB;',
+          '    float angleABC = angleCB - angleBA;',
+          // ensure angle is in the range [-PI, PI], then take the half angle
+          '    angleABC = (mod(angleABC + PI, 2.0 * PI) - PI) / 2.0;',
+          '    cosABC = cos(angleABC);  sinABC = sin(angleABC);',
+          // if this angle is close to flat, pass-through the join
+          '    if (nearMode >= 4 &amp;&amp; cosABC > 0.999999) {',
+          '      nearMode = 3;',
+          '    }',
+          // miter, miter-clip
+          '    if (nearMode == 4 || nearMode == 7) {',
+          '      if (cosABC == 0.0 || 1.0 / cosABC > miterLimit) {',
+          '        if (nearMode == 4) {',
+          '          nearMode = 5;',
+          '        } else {',
+          '          xOffset = miterLimit * strokeWidth * (1.0 - offset * sign(sinABC)) + antialiasing;',
+          '        }',
+          '      } else {',
+          // we add an extra 1.0 to the xOffset to make sure that fragment
+          // shader is doing the clipping
+          '        xOffset = abs(sinABC / cosABC) * strokeWidth * (1.0 - offset * sign(sinABC)) + antialiasing + 1.0;',
+          '        nearMode = 4;',
+          '      }',
+          '    }',
+          // bevel or round join
+          '    if (nearMode == 5 || nearMode == 6) {',
+          '      xOffset = strokeWidth * (1.0 - offset * sign(sinABC)) + antialiasing;',
+          '    }',
+          '  }',
+
+          // handle far end
+          '  if (farMode >= 4) {',
+          '    float angleDC = atan((D.y - C.y) / aspect, D.x - C.x);',
+          '    if (D.xy == C.xy)  angleDC = angleCB;',
+          '    float angleBCD = angleDC - angleCB;',
+          // ensure angle is in the range [-PI, PI], then take the half angle
+          '    angleBCD = (mod(angleBCD + PI, 2.0 * PI) - PI) / 2.0;',
+          '    cosBCD = cos(angleBCD);  sinBCD = sin(angleBCD);',
+          // if this angle is close to flat, pass-through the join
+          '    if (farMode >= 4 &amp;&amp; cosBCD > 0.999999) {',
+          '      farMode = 3;',
+          '    }',
+          // miter, miter-clip
+          '    if (farMode == 4 || farMode == 7) {',
+          '      if (cosBCD == 0.0 || 1.0 / cosBCD > miterLimit) {',
+          '        if (farMode == 4)  farMode = 5;',
+          '      } else {',
+          '        farMode = 4;',
+          '      }',
+          '    }',
+          '  }',
+
+          // compute the location of a vertex to include everything that might
+          // need to be rendered
+          '  xOffset *= -1.0;',
+          '  gl_Position = vec4(',
+          '    B.x + (xOffset * cos(angleCB) - yOffset * sin(angleCB)) * pixelWidth,',
+          '    B.y + (xOffset * sin(angleCB) + yOffset * cos(angleCB)) * pixelWidth * aspect,',
+          '    B.z, 1);',
+          // store other values needed to determine which pixels to plot.
+          '  float lineLength = length(vec2(deltaCB.x, deltaCB.y / aspect)) / pixelWidth;',
+
+          '  if (vertex == 0 || vertex == 1) {',
+          '    subpos = vec4(xOffset, yOffset, lineLength - xOffset, strokeWidth);',
+          '    info = vec4(float(nearMode), float(farMode), offset, 0.0);',
+          '    angles = vec4(cosABC, sinABC, cosBCD, sinBCD);',
+          '  } else {',
+          '    subpos = vec4(lineLength - xOffset, -yOffset, xOffset, strokeWidth);',
+          '    info = vec4(float(farMode), float(nearMode), -offset, 0.0);',
+          '    angles = vec4(cosBCD, -sinBCD, cosABC, -sinABC);',
+          '  }',
           '}'
         ].join('\n'),
         shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
@@ -138,14 +276,104 @@ var gl_lineFeature = function (arg) {
     return shader;
   }
 
-  function createFragmentShader() {
+  function createFragmentShader(allowDebug) {
     var fragmentShaderSource = [
           '#ifdef GL_ES',
           '  precision highp float;',
           '#endif',
           'varying vec4 strokeColorVar;',
+          'varying vec4 subpos;',
+          'varying vec4 info;',
+          'varying vec4 angles;',
+          'uniform float antialiasing;',
+          'uniform float miterLimit;',
+          'uniform float fixedFlags;',
           'void main () {',
-          '  gl_FragColor = strokeColorVar;',
+          '  vec4 color = strokeColorVar;',
+          allowDebug ? '  bool debug = bool(mod(fixedFlags, 2.0));' : '',
+          '  float opacity = 1.0;',
+          '  int nearMode = int(info.x);',
+          '  int farMode = int(info.y);',
+          '  float cosABC = angles.x;',
+          '  float sinABC = angles.y;',
+          '  float cosBCD = angles.z;',
+          '  float sinBCD = angles.w;',
+          // never render on the opposite side of a miter.  This uses a bit of
+          // slop, via pow(smoothstep()) instead of step(), since there are
+          // precision issues in this calculation.  This doesn't wholy solve
+          // the precision issue; sometimes pixels are missed or double
+          // rendered along the inside seam of a miter.
+          '  if (nearMode >= 4) {',
+          '    float dist = cosABC * subpos.x - sinABC * subpos.y;',
+          '    opacity = min(opacity, pow(smoothstep(-0.02, 0.02, dist), 0.5));',
+          '    if (opacity == 0.0) {',
+          allowDebug ? 'if (debug) {color.r=255.0/255.0;gl_FragColor=color;return;}' : '',
+          '      discard;',
+          '    }',
+          '  }',
+          '  if (farMode >= 4) {',
+          '    float dist = cosBCD * subpos.z - sinBCD * subpos.y;',
+          '    opacity = min(opacity, pow(smoothstep(-0.02, 0.02, dist), 0.5));',
+          '    if (opacity == 0.0) {',
+          allowDebug ? 'if (debug) {color.r=254.0/255.0;gl_FragColor=color;return;}' : '',
+          '      discard;',
+          '    }',
+          '  }',
+          // butt or square cap
+          '  if ((nearMode == 0 || nearMode == 1) &amp;&amp; subpos.x &lt; antialiasing) {',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, subpos.x + subpos.w * float(nearMode)));',
+          '  }',
+          '  if ((farMode == 0 || farMode == 1) &amp;&amp; subpos.z &lt; antialiasing) {',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, subpos.z + subpos.w * float(farMode)));',
+          '  }',
+          // round cap
+          '  if (nearMode == 2 &amp;&amp; subpos.x &lt;= 0.0) {',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, subpos.w - sqrt(pow(subpos.x, 2.0) + pow(subpos.y - info.z * subpos.w, 2.0))));',
+          '  }',
+          '  if (farMode == 2 &amp;&amp; subpos.z &lt;= 0.0) {',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, subpos.w - sqrt(pow(subpos.z, 2.0) + pow(subpos.y - info.z * subpos.w, 2.0))));',
+          '  }',
+          // bevel and clip joins
+          '  if ((nearMode == 5 || nearMode == 7) &amp;&amp; subpos.x &lt; antialiasing) {',
+          '    float dist = (sinABC * subpos.x + cosABC * subpos.y) * sign(sinABC);',
+          '    float w = subpos.w * (1.0 - info.z * sign(sinABC));',
+          '    float maxDist;',
+          '    if (nearMode == 5)  maxDist = cosABC * w;',
+          '    else                maxDist = miterLimit * w;',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, maxDist + dist));',
+          '  }',
+          '  if ((farMode == 5 || farMode == 7) &amp;&amp; subpos.z &lt; antialiasing) {',
+          '    float dist = (sinBCD * subpos.z + cosBCD * subpos.y) * sign(sinBCD);',
+          '    float w = subpos.w * (1.0 - info.z * sign(sinBCD));',
+          '    float maxDist;',
+          '    if (farMode == 5)  maxDist = cosBCD * w;',
+          '    else               maxDist = miterLimit * w;',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, maxDist + dist));',
+          '  }',
+          // round join
+          '  if (nearMode == 6 &amp;&amp; subpos.x &lt;= 0.0) {',
+          '    float w = subpos.w * (1.0 - info.z * sign(sinABC));',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, w - sqrt(pow(subpos.x, 2.0) + pow(subpos.y, 2.0))));',
+          '  }',
+          '  if (farMode == 6 &amp;&amp; subpos.z &lt;= 0.0) {',
+          '    float w = subpos.w * (1.0 - info.z * sign(sinBCD));',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, w - sqrt(pow(subpos.z, 2.0) + pow(subpos.y, 2.0))));',
+          '  }',
+          // antialias along main edges
+          '  if (antialiasing > 0.0) {',
+          '    if (subpos.y > subpos.w * (1.0 + info.z) - antialiasing) {',
+          '      opacity = min(opacity, smoothstep(antialiasing, -antialiasing, subpos.y - subpos.w * (1.0 + info.z)));',
+          '    }',
+          '    if (subpos.y &lt; subpos.w * (-1.0 + info.z) + antialiasing) {',
+          '      opacity = min(opacity, smoothstep(-antialiasing, antialiasing, subpos.y - subpos.w * (-1.0 + info.z)));',
+          '    }',
+          '  }',
+          '  if (opacity == 0.0) {',
+          allowDebug ? 'if (debug) {color.r=253.0/255.0;gl_FragColor=color;return;}' : '',
+          '    discard;',
+          '  }',
+          '  color.a *= opacity;',
+          '  gl_FragColor = color;',
           '}'
         ].join('\n'),
         shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
@@ -155,23 +383,45 @@ var gl_lineFeature = function (arg) {
 
   function createGLLines() {
     var data = m_this.data(),
-        i, j, k, v, lidx,
+        i, j, k, v, v2, lidx,
         numSegments = 0, len,
         lineItem, lineItemData,
-        vert = [{}, {}], vertTemp,
+        vert = [{}, {}], v1 = vert[1],
         pos, posIdx3, firstpos, firstPosIdx3,
         position = [],
         posFunc = m_this.position(),
-        strkWidthFunc = m_this.style.get('strokeWidth'),
-        strkColorFunc = m_this.style.get('strokeColor'),
-        strkOpacityFunc = m_this.style.get('strokeOpacity'),
+        strokeWidthFunc = m_this.style.get('strokeWidth'), strokeWidthVal,
+        strokeColorFunc = m_this.style.get('strokeColor'), strokeColorVal,
+        strokeOpacityFunc = m_this.style.get('strokeOpacity'), strokeOpacityVal,
+        lineCapFunc = m_this.style.get('lineCap'), lineCapVal,
+        lineJoinFunc = m_this.style.get('lineJoin'), lineJoinVal,
+        strokeOffsetFunc = m_this.style.get('strokeOffset'), strokeOffsetVal,
+        miterLimit = m_this.style.get('miterLimit')(data),
+        antialiasing = m_this.style.get('antialiasing')(data) || 0,
         order = m_this.featureVertices(),
-        posBuf, nextBuf, prevBuf, offsetBuf, indicesBuf,
+        posBuf, prevBuf, nextBuf, farBuf, flagsBuf, indicesBuf,
+        fixedFlags = (flagsDebug[m_this.style.get('debug')(data) ? 'debug' : 'normal'] || 0),
         strokeWidthBuf, strokeColorBuf, strokeOpacityBuf,
         dest, dest3,
         geom = m_mapper.geometryData(),
-        closedFunc = m_this.style.get('closed'), closed = [];
+        closedFunc = m_this.style.get('closed'), closedVal, closed = [];
 
+    closedVal = util.isFunction(m_this.style('closed')) ? undefined : closedFunc();
+    lineCapVal = util.isFunction(m_this.style('lineCap')) ? undefined : lineCapFunc();
+    lineJoinVal = util.isFunction(m_this.style('lineJoin')) ? undefined : lineJoinFunc();
+    strokeColorVal = util.isFunction(m_this.style('strokeColor')) ? undefined : strokeColorFunc();
+    strokeOffsetVal = util.isFunction(m_this.style('strokeOffset')) ? undefined : strokeOffsetFunc();
+    strokeOpacityVal = util.isFunction(m_this.style('strokeOpacity')) ? undefined : strokeOpacityFunc();
+    strokeWidthVal = util.isFunction(m_this.style('strokeWidth')) ? undefined : strokeWidthFunc();
+
+    if (miterLimit !== undefined) {
+      /* We impose a limit no matter what, since otherwise the growth is
+       * unbounded.  Values less than 1 make no sense, since we are using the
+       * SVG definition of miter length. */
+      m_miterLimitUniform.set(Math.max(1, Math.min(MAX_MITER_LIMIT, miterLimit)));
+    }
+    m_flagsUniform.set(fixedFlags);
+    m_antialiasingUniform.set(antialiasing);
     for (i = 0; i &lt; data.length; i += 1) {
       lineItem = m_this.line()(data[i], i);
       if (lineItem.length &lt; 2) {
@@ -187,7 +437,7 @@ var gl_lineFeature = function (arg) {
           firstpos = pos;
         }
       }
-      if (lineItem.length > 2 &amp;&amp; closedFunc(data[i], i)) {
+      if (lineItem.length > 2 &amp;&amp; (closedVal === undefined ? closedFunc(data[i], i) : closedVal)) {
         /* line is closed */
         if (pos.x !== firstpos.x || pos.y !== firstpos.y ||
             pos.z !== firstpos.z) {
@@ -205,9 +455,10 @@ var gl_lineFeature = function (arg) {
 
     len = numSegments * order.length;
     posBuf = util.getGeomBuffer(geom, 'pos', len * 3);
-    nextBuf = util.getGeomBuffer(geom, 'next', len * 3);
     prevBuf = util.getGeomBuffer(geom, 'prev', len * 3);
-    offsetBuf = util.getGeomBuffer(geom, 'offset', len);
+    nextBuf = util.getGeomBuffer(geom, 'next', len * 3);
+    farBuf = util.getGeomBuffer(geom, 'far', len * 3);
+    flagsBuf = util.getGeomBuffer(geom, 'flags', len);
     strokeWidthBuf = util.getGeomBuffer(geom, 'strokeWidth', len);
     strokeColorBuf = util.getGeomBuffer(geom, 'strokeColor', len * 3);
     strokeOpacityBuf = util.getGeomBuffer(geom, 'strokeOpacity', len);
@@ -233,33 +484,71 @@ var gl_lineFeature = function (arg) {
         /* swap entries in vert so that vert[0] is the first vertex, and
          * vert[1] will be reused for the second vertex */
         if (j) {
-          vertTemp = vert[0];
+          v1 = vert[0];
           vert[0] = vert[1];
-          vert[1] = vertTemp;
+          vert[1] = v1;
         }
-        vert[1].pos = j === lidx ? posIdx3 : firstPosIdx3;
-        vert[1].prev = lidx ? posIdx3 - 3 : (closed[i] ?
+        v1.pos = j === lidx ? posIdx3 : firstPosIdx3;
+        v1.prev = lidx ? posIdx3 - 3 : (closed[i] ?
             firstPosIdx3 + (lineItem.length - 3 + closed[i]) * 3 : posIdx3);
-        vert[1].next = j + 1 &lt; lineItem.length ? posIdx3 + 3 : (closed[i] ?
+        v1.next = j + 1 &lt; lineItem.length ? posIdx3 + 3 : (closed[i] ?
             (j !== lidx ? firstPosIdx3 + 3 : firstPosIdx3 + 6 - closed[i] * 3) :
             posIdx3);
-        vert[1].strokeWidth = strkWidthFunc(lineItemData, lidx, lineItem, i);
-        vert[1].strokeColor = strkColorFunc(lineItemData, lidx, lineItem, i);
-        vert[1].strokeOpacity = strkOpacityFunc(lineItemData, lidx, lineItem, i);
+        v1.strokeWidth = strokeWidthVal === undefined ? strokeWidthFunc(lineItemData, lidx, lineItem, i) : strokeWidthVal;
+        v1.strokeColor = strokeColorVal === undefined ? strokeColorFunc(lineItemData, lidx, lineItem, i) : strokeColorVal;
+        v1.strokeOpacity = strokeOpacityVal === undefined ? strokeOpacityFunc(lineItemData, lidx, lineItem, i) : strokeOpacityVal;
+        v1.strokeOffset = (strokeOffsetVal === undefined ? strokeOffsetFunc(lineItemData, lidx, lineItem, i) : strokeOffsetVal) || 0;
+        if (v1.strokeOffset) {
+          /* we use 11 bits to store the offset, and we want to store values
+           * from -1 to 1, so multiply our values by 1023, and use some bit
+           * manipulation to ensure that it is packed properly */
+          v1.posStrokeOffset = Math.round(2048 + 1023 * Math.min(1, Math.max(-1, v1.strokeOffset))) &amp; 0x7FF;
+          v1.negStrokeOffset = Math.round(2048 - 1023 * Math.min(1, Math.max(-1, v1.strokeOffset))) &amp; 0x7FF;
+        } else {
+          v1.posStrokeOffset = v1.negStrokeOffset = 0;
+        }
+        if (!closed[i] &amp;&amp; (!j || j === lineItem.length - 1)) {
+          v1.flags = flagsLineCap[lineCapVal === undefined ? lineCapFunc(lineItemData, lidx, lineItem, i) : lineCapVal] || flagsLineCap.butt;
+        } else {
+          v1.flags = flagsLineJoin[lineJoinVal === undefined ? lineJoinFunc(lineItemData, lidx, lineItem, i) : lineJoinVal] || flagsLineJoin.miter;
+        }
+
         if (j) {
           for (k = 0; k &lt; order.length; k += 1, dest += 1, dest3 += 3) {
             v = vert[order[k][0]];
+            v2 = vert[1 - order[k][0]];
             posBuf[dest3] = position[v.pos];
             posBuf[dest3 + 1] = position[v.pos + 1];
             posBuf[dest3 + 2] = position[v.pos + 2];
-            prevBuf[dest3] = position[v.prev];
-            prevBuf[dest3 + 1] = position[v.prev + 1];
-            prevBuf[dest3 + 2] = position[v.prev + 2];
-            nextBuf[dest3] = position[v.next];
-            nextBuf[dest3 + 1] = position[v.next + 1];
-            nextBuf[dest3 + 2] = position[v.next + 2];
-            offsetBuf[dest] = order[k][1];
-            /* We can ignore the indices (they will all be zero) */
+            if (!order[k][0]) {
+              prevBuf[dest3] = position[v.prev];
+              prevBuf[dest3 + 1] = position[v.prev + 1];
+              prevBuf[dest3 + 2] = position[v.prev + 2];
+              nextBuf[dest3] = position[v.next];
+              nextBuf[dest3 + 1] = position[v.next + 1];
+              nextBuf[dest3 + 2] = position[v.next + 2];
+              farBuf[dest3] = position[v2.next];
+              farBuf[dest3 + 1] = position[v2.next + 1];
+              farBuf[dest3 + 2] = position[v2.next + 2];
+              flagsBuf[dest] = (flagsVertex[order[k][1]] |
+                (v.flags &lt;&lt; flagsNearLineShift) |
+                (v2.flags &lt;&lt; flagsFarLineShift) |
+                (v.negStrokeOffset &lt;&lt; flagsNearOffsetShift));
+            } else {
+              prevBuf[dest3] = position[v.next];
+              prevBuf[dest3 + 1] = position[v.next + 1];
+              prevBuf[dest3 + 2] = position[v.next + 2];
+              nextBuf[dest3] = position[v.prev];
+              nextBuf[dest3 + 1] = position[v.prev + 1];
+              nextBuf[dest3 + 2] = position[v.prev + 2];
+              farBuf[dest3] = position[v2.prev];
+              farBuf[dest3 + 1] = position[v2.prev + 1];
+              farBuf[dest3 + 2] = position[v2.prev + 2];
+              flagsBuf[dest] = (flagsVertex[order[k][1]] |
+                (v.flags &lt;&lt; flagsNearLineShift) |
+                (v2.flags &lt;&lt; flagsFarLineShift) |
+                (v.posStrokeOffset &lt;&lt; flagsNearOffsetShift));
+            }
             strokeWidthBuf[dest] = v.strokeWidth;
             strokeColorBuf[dest3] = v.strokeColor.r;
             strokeColorBuf[dest3 + 1] = v.strokeColor.g;
@@ -283,7 +572,9 @@ var gl_lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.featureVertices = function () {
-    return [[0, 1], [1, -1], [0, -1], [0, 1], [1, 1], [1, -1]];
+    // return [[0, -1], [0, 1], [1, -1], [1, 1], [1, -1], [0, 1]];
+    return [[0, 'corner', -1], [0, 'near', 1], [1, 'far', -1],
+            [1, 'corner', 1], [1, 'near', -1], [0, 'far', 1]];
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -305,12 +596,13 @@ var gl_lineFeature = function (arg) {
   this._init = function (arg) {
     var prog = vgl.shaderProgram(),
         vs = createVertexShader(),
-        fs = createFragmentShader(),
+        fs = createFragmentShader(((arg || {}).style || {}).debug !== undefined),
         // Vertex attributes
         posAttr = vgl.vertexAttribute('pos'),
         prvAttr = vgl.vertexAttribute('prev'),
         nxtAttr = vgl.vertexAttribute('next'),
-        offAttr = vgl.vertexAttribute('offset'),
+        farAttr = vgl.vertexAttribute('far'),
+        flagsAttr = vgl.vertexAttribute('flags'),
         strkWidthAttr = vgl.vertexAttribute('strokeWidth'),
         strkColorAttr = vgl.vertexAttribute('strokeColor'),
         strkOpacityAttr = vgl.vertexAttribute('strokeOpacity'),
@@ -319,20 +611,21 @@ var gl_lineFeature = function (arg) {
         prjUnif = new vgl.projectionUniform('projectionMatrix'),
         geom = vgl.geometryData(),
         // Sources
-        posData = vgl.sourceDataP3fv({'name': 'pos'}),
+        posData = vgl.sourceDataP3fv({name: 'pos'}),
         prvPosData = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Four, {'name': 'prev'}),
+            3, vgl.vertexAttributeKeysIndexed.Four, {name: 'prev'}),
         nxtPosData = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Five, {'name': 'next'}),
-        offPosData = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Six, {'name': 'offset'}),
+            3, vgl.vertexAttributeKeysIndexed.Five, {name: 'next'}),
+        farPosData = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Six, {name: 'far'}),
+        flagsData = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Seven, {name: 'flags'}),
         strkWidthData = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.One, {'name': 'strokeWidth'}),
+            1, vgl.vertexAttributeKeysIndexed.One, {name: 'strokeWidth'}),
         strkColorData = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Two, {'name': 'strokeColor'}),
+            3, vgl.vertexAttributeKeysIndexed.Two, {name: 'strokeColor'}),
         strkOpacityData = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Three,
-            {'name': 'strokeOpacity'}),
+            1, vgl.vertexAttributeKeysIndexed.Three, {name: 'strokeOpacity'}),
         // Primitive indices
         triangles = vgl.triangles();
 
@@ -340,6 +633,9 @@ var gl_lineFeature = function (arg) {
                           1.0 / m_this.renderer().width());
     m_aspectUniform = new vgl.floatUniform('aspect',
         m_this.renderer().width() / m_this.renderer().height());
+    m_miterLimitUniform = new vgl.floatUniform('miterLimit', 10);
+    m_antialiasingUniform = new vgl.floatUniform('antialiasing', 0);
+    m_flagsUniform = new vgl.floatUniform('fixedFlags', 0);
 
     s_init.call(m_this, arg);
     m_material = vgl.material();
@@ -351,12 +647,16 @@ var gl_lineFeature = function (arg) {
     prog.addVertexAttribute(strkOpacityAttr, vgl.vertexAttributeKeysIndexed.Three);
     prog.addVertexAttribute(prvAttr, vgl.vertexAttributeKeysIndexed.Four);
     prog.addVertexAttribute(nxtAttr, vgl.vertexAttributeKeysIndexed.Five);
-    prog.addVertexAttribute(offAttr, vgl.vertexAttributeKeysIndexed.Six);
+    prog.addVertexAttribute(farAttr, vgl.vertexAttributeKeysIndexed.Six);
+    prog.addVertexAttribute(flagsAttr, vgl.vertexAttributeKeysIndexed.Seven);
 
     prog.addUniform(mviUnif);
     prog.addUniform(prjUnif);
     prog.addUniform(m_pixelWidthUnif);
     prog.addUniform(m_aspectUniform);
+    prog.addUniform(m_miterLimitUniform);
+    prog.addUniform(m_antialiasingUniform);
+    prog.addUniform(m_flagsUniform);
 
     prog.addShader(fs);
     prog.addShader(vs);
@@ -371,10 +671,11 @@ var gl_lineFeature = function (arg) {
     geom.addSource(posData);
     geom.addSource(prvPosData);
     geom.addSource(nxtPosData);
+    geom.addSource(farPosData);
     geom.addSource(strkWidthData);
     geom.addSource(strkColorData);
     geom.addSource(strkOpacityData);
-    geom.addSource(offPosData);
+    geom.addSource(flagsData);
     geom.addPrimitive(triangles);
     m_mapper.setGeometryData(geom);
   };
@@ -401,13 +702,11 @@ var gl_lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    if (m_actor) {
-      m_this.renderer().contextRenderer().removeActor(m_actor);
-    }
-
     createGLLines();
 
-    m_this.renderer().contextRenderer().addActor(m_actor);
+    if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
+      m_this.renderer().contextRenderer().addActor(m_actor);
+    }
     m_this.buildTime().modified();
   };
 
@@ -470,13 +769,13 @@ module.exports = gl_lineFeature;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="geo.module_util.html">geo.util</a></li></ul><h3>Classes</h3><ul><li><a href="geo.annotation.html">geo.annotation</a></li><li><a href="geo.annotationLayer.html">geo.annotationLayer</a></li><li><a href="geo.camera.html">geo.camera</a></li><li><a href="geo.canvas.heatmapFeature.html">geo.canvas.heatmapFeature</a></li><li><a href="geo.canvas.object.html">geo.canvas.object</a></li><li><a href="geo.canvas.pixelmapFeature.html">geo.canvas.pixelmapFeature</a></li><li><a href="geo.canvas.quadFeature.html">geo.canvas.quadFeature</a></li><li><a href="geo.canvas.renderer.html">geo.canvas.renderer</a></li><li><a href="geo.choroplethFeature.html">geo.choroplethFeature</a></li><li><a href="geo.clock.html">geo.clock</a></li><li><a href="geo.contourFeature.html">geo.contourFeature</a></li><li><a href="geo.d3.graphFeature.html">geo.d3.graphFeature</a></li><li><a href="geo.d3.lineFeature.html">geo.d3.lineFeature</a></li><li><a href="geo.d3.object.html">geo.d3.object</a></li><li><a href="geo.d3.pathFeature.html">geo.d3.pathFeature</a></li><li><a href="geo.d3.pointFeature.html">geo.d3.pointFeature</a></li><li><a href="geo.d3.quadFeature.html">geo.d3.quadFeature</a></li><li><a href="geo.d3.renderer.html">geo.d3.renderer</a></li><li><a href="geo.d3.vectorFeature.html">geo.d3.vectorFeature</a></li><li><a href="geo.domRenderer.html">geo.domRenderer</a></li><li><a href="geo.feature.html">geo.feature</a></li><li><a href="geo.featureLayer.html">geo.featureLayer</a></li><li><a href="geo.fetchQueue.html">geo.fetchQueue</a></li><li><a href="geo.fileReader.html">geo.fileReader</a></li><li><a href="geo.geomFeature.html">geo.geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">geo.gl.choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">geo.gl.contourFeature</a></li><li><a href="geo.gl.ellipsoid.html">geo.gl.ellipsoid</a></li><li><a href="geo.gl.geomFeature.html">geo.gl.geomFeature</a></li><li><a href="geo.gl.lineFeature.html">geo.gl.lineFeature</a></li><li><a href="geo.gl.object.html">geo.gl.object</a></li><li><a href="geo.gl.pointFeature.html">geo.gl.pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">geo.gl.polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">geo.gl.quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">geo.gl.vglRenderer</a></li><li><a href="geo.greaphFeature.html">geo.greaphFeature</a></li><li><a href="geo.gui.legendWidget.html">geo.gui.legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">geo.gui.sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">geo.gui.svgWidget</a></li><li><a href="geo.gui.uiLayer.html">geo.gui.uiLayer</a></li><li><a href="geo.gui.widget.html">geo.gui.widget</a></li><li><a href="geo.heatmapFeature.html">geo.heatmapFeature</a></li><li><a href="geo.imageTile.html">geo.imageTile</a></li><li><a href="geo.jsonReader.html">geo.jsonReader</a></li><li><a href="geo.layer.html">geo.layer</a></li><li><a href="geo.lineFeature.html">geo.lineFeature</a></li><li><a href="geo.map.html">geo.map</a></li><li><a href="geo.mapInteractor.html">geo.mapInteractor</a></li><li><a href="geo.object.html">geo.object</a></li><li><a href="geo.osmLayer.html">geo.osmLayer</a></li><li><a href="geo.pathFeature.html">geo.pathFeature</a></li><li><a href="geo.pixelmapFeature.html">geo.pixelmapFeature</a></li><li><a href="geo.pointFeature.html">geo.pointFeature</a></li><li><a href="geo.polygonFeature.html">geo.polygonFeature</a></li><li><a href="geo.quadFeature.html">geo.quadFeature</a></li><li><a href="geo.renderer.html">geo.renderer</a></li><li><a href="geo.sceneObject.html">geo.sceneObject</a></li><li><a href="geo.tile.html">geo.tile</a></li><li><a href="geo.tileCache.html">geo.tileCache</a></li><li><a href="geo.tileLayer.html">geo.tileLayer</a></li><li><a href="geo.timestamp.html">geo.timestamp</a></li><li><a href="geo.transform.html">geo.transform</a></li><li><a href="geo.util.ClusterGroup.html">geo.util.ClusterGroup</a></li><li><a href="geo.vectorFeature.html">geo.vectorFeature</a></li></ul><h3>Namespaces</h3><ul><li><a href="-_anonymous_-geo.util.html"><anonymous>~geo.util</a></li><li><a href="geo.canvas.html">geo.canvas</a></li><li><a href="geo.d3.html">geo.d3</a></li><li><a href="geo.event.html">geo.event</a></li><li><a href="geo.event.annotation.html">geo.event.annotation</a></li><li><a href="geo.event.camera.html">geo.event.camera</a></li><li><a href="geo.event.feature.html">geo.event.feature</a></li><li><a href="geo.event.pixelmap.html">geo.event.pixelmap</a></li><li><a href="geo.gl.html">geo.gl</a></li><li><a href="geo.gui.html">geo.gui</a></li><li><a href="geo_event.clock.html">geo_event.clock</a></li></ul><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#__render">__render</a></li><li><a href="global.html#_addPolygonFeature">_addPolygonFeature</a></li><li><a href="global.html#_animatePan">_animatePan</a></li><li><a href="global.html#_appendChild">_appendChild</a></li><li><a href="global.html#_bindMouseHandlers">_bindMouseHandlers</a></li><li><a href="global.html#_boundingBox">_boundingBox</a></li><li><a href="global.html#_build">_build</a></li><li><a href="global.html#_checkForStroke">_checkForStroke</a></li><li><a href="global.html#_clusterData">_clusterData</a></li><li><a href="global.html#_colorize">_colorize</a></li><li><a href="global.html#_computeGradient">_computeGradient</a></li><li><a href="global.html#_computePixelmap">_computePixelmap</a></li><li><a href="global.html#_connectEvents">_connectEvents</a></li><li><a href="global.html#_coordinates">_coordinates</a></li><li><a href="global.html#_createCanvas">_createCanvas</a></li><li><a href="global.html#_createCircle">_createCircle</a></li><li><a href="global.html#_createFeature">_createFeature</a></li><li><a href="global.html#_definitions">_definitions</a></li><li><a href="global.html#_deleteFeature">_deleteFeature</a></li><li><a href="global.html#_disconnectEvents">_disconnectEvents</a></li><li><a href="global.html#_drawFeatures">_drawFeatures</a></li><li><a href="global.html#_exit">_exit</a></li><li><a href="global.html#_feature">_feature</a></li><li><a href="global.html#_featureArray">_featureArray</a></li><li><a href="global.html#_featureToPolygons">_featureToPolygons</a></li><li><a href="global.html#_forward">_forward</a></li><li><a href="global.html#_generateQuads">_generateQuads</a></li><li><a href="global.html#_generateScale">_generateScale</a></li><li><a href="global.html#_geojsonCoordinates">_geojsonCoordinates</a></li><li><a href="global.html#_geojsonFeatureToAnnotation">_geojsonFeatureToAnnotation</a></li><li><a href="global.html#_geojsonGeometryType">_geojsonGeometryType</a></li><li><a href="global.html#_geojsonStyles">_geojsonStyles</a></li><li><a href="global.html#_getArrayBuffer">_getArrayBuffer</a></li><li><a href="global.html#_getLoopData">_getLoopData</a></li><li><a href="global.html#_getMouseButton">_getMouseButton</a></li><li><a href="global.html#_getMouseModifiers">_getMouseModifiers</a></li><li><a href="global.html#_getMousePosition">_getMousePosition</a></li><li><a href="global.html#_getString">_getString</a></li><li><a href="global.html#_handleBrush">_handleBrush</a></li><li><a href="global.html#_handleBrushend">_handleBrushend</a></li><li><a href="global.html#_handleDoubleClick">_handleDoubleClick</a></li><li><a href="global.html#_handleMouseClick">_handleMouseClick</a></li><li><a href="global.html#_handleMouseclick">_handleMouseclick</a></li><li><a href="global.html#_handleMouseDown">_handleMouseDown</a></li><li><a href="global.html#_handleMouseMove">_handleMouseMove</a></li><li><a href="global.html#_handleMousemove">_handleMousemove</a></li><li><a href="global.html#_handleMouseMoveDocument">_handleMouseMoveDocument</a></li><li><a href="global.html#_handleMouseUp">_handleMouseUp</a></li><li><a href="global.html#_handleMouseUpDocument">_handleMouseUpDocument</a></li><li><a href="global.html#_handleMouseWheel">_handleMouseWheel</a></li><li><a href="global.html#_handleZoom">_handleZoom</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_inverse">_inverse</a></li><li><a href="global.html#_objectListAdd">_objectListAdd</a></li><li><a href="global.html#_objectListEnd">_objectListEnd</a></li><li><a href="global.html#_objectListGet">_objectListGet</a></li><li><a href="global.html#_objectListStart">_objectListStart</a></li><li><a href="global.html#_position">_position</a></li><li><a href="global.html#_positionToQuad">_positionToQuad</a></li><li><a href="global.html#_preparePixelmap">_preparePixelmap</a></li><li><a href="global.html#_processSelection">_processSelection</a></li><li><a href="global.html#_removeFeature">_removeFeature</a></li><li><a href="global.html#_render">_render</a></li><li><a href="global.html#_renderBinnedData">_renderBinnedData</a></li><li><a href="global.html#_renderColorQuads">_renderColorQuads</a></li><li><a href="global.html#_renderFrame">_renderFrame</a></li><li><a href="global.html#_renderImageQuads">_renderImageQuads</a></li><li><a href="global.html#_renderOnCanvas">_renderOnCanvas</a></li><li><a href="global.html#_renderPoints">_renderPoints</a></li><li><a href="global.html#_resize">_resize</a></li><li><a href="global.html#_setClickMaybe">_setClickMaybe</a></li><li><a href="global.html#_style">_style</a></li><li><a href="global.html#_unbindMouseHandlers">_unbindMouseHandlers</a></li><li><a href="global.html#_update">_update</a></li><li><a href="global.html#_updateFromEvent">_updateFromEvent</a></li><li><a href="global.html#_updateRangeTree">_updateRangeTree</a></li><li><a href="global.html#_updateTextures">_updateTextures</a></li><li><a href="global.html#_wipePolygons">_wipePolygons</a></li><li><a href="global.html#actions">actions</a></li><li><a href="global.html#active">active</a></li><li><a href="global.html#actors">actors</a></li><li><a href="global.html#addAction">addAction</a></li><li><a href="global.html#addAnnotation">addAnnotation</a></li><li><a href="global.html#addChild">addChild</a></li><li><a href="global.html#addFeature">addFeature</a></li><li><a href="global.html#addPromise">addPromise</a></li><li><a href="global.html#allowRotation">allowRotation</a></li><li><a href="global.html#annotationById">annotationById</a></li><li><a href="global.html#annotations">annotations</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#attribution">attribution</a></li><li><a href="global.html#bin">bin</a></li><li><a href="global.html#binned">binned</a></li><li><a href="global.html#bounds">bounds</a></li><li><a href="global.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li><li><a href="global.html#boxSearch">boxSearch</a></li><li><a href="global.html#buildTime">buildTime</a></li><li><a href="global.html#camera">camera</a></li><li><a href="global.html#cancel">cancel</a></li><li><a href="global.html#canRead">canRead</a></li><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#center">center</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#choropleth">choropleth</a></li><li><a href="global.html#clampBoundsX">clampBoundsX</a></li><li><a href="global.html#clampBoundsY">clampBoundsY</a></li><li><a href="global.html#clampZoom">clampZoom</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clock">clock</a></li><li><a href="global.html#clustering">clustering</a></li><li><a href="global.html#color">color</a></li><li><a href="global.html#computeGeodeticSurfaceNormal">computeGeodeticSurfaceNormal</a></li><li><a href="global.html#contextRenderer">contextRenderer</a></li><li><a href="global.html#contour">contour</a></li><li><a href="global.html#coordinates">coordinates</a></li><li><a href="global.html#createChoropleth">createChoropleth</a></li><li><a href="global.html#createContours">createContours</a></li><li><a href="global.html#createFeature">createFeature</a></li><li><a href="global.html#createLayer">createLayer</a></li><li><a href="global.html#createWidget">createWidget</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#dataTime">dataTime</a></li><li><a href="global.html#deleteFeature">deleteFeature</a></li><li><a href="global.html#deleteLayer">deleteLayer</a></li><li><a href="global.html#deleteWidget">deleteWidget</a></li><li><a href="global.html#delta">delta</a></li><li><a href="global.html#dependentFeatures">dependentFeatures</a></li><li><a href="global.html#destroy">destroy</a></li><li><a href="global.html#discreteZoom">discreteZoom</a></li><li><a href="global.html#displayDistance">displayDistance</a></li><li><a href="global.html#displayToGcs">displayToGcs</a></li><li><a href="global.html#displayToWorld">displayToWorld</a></li><li><a href="global.html#draw">draw</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#exit">exit</a></li><li><a href="global.html#featureGcsToDisplay">featureGcsToDisplay</a></li><li><a href="global.html#features">features</a></li><li><a href="global.html#featureVertices">featureVertices</a></li><li><a href="global.html#fileReader">fileReader</a></li><li><a href="global.html#forward">forward</a></li><li><a href="global.html#framerate">framerate</a></li><li><a href="global.html#fromLocal">fromLocal</a></li><li><a href="global.html#gcs">gcs</a></li><li><a href="global.html#gcsPosition">gcsPosition</a></li><li><a href="global.html#gcsToDisplay">gcsToDisplay</a></li><li><a href="global.html#gcsToWorld">gcsToWorld</a></li><li><a href="global.html#geo_action">geo_action</a></li><li><a href="global.html#geojson">geojson</a></li><li><a href="global.html#geometry">geometry</a></li><li><a href="global.html#geoOff">geoOff</a></li><li><a href="global.html#geoOn">geoOn</a></li><li><a href="global.html#geoTrigger">geoTrigger</a></li><li><a href="global.html#globals">globals</a></li><li><a href="global.html#hasAction">hasAction</a></li><li><a href="global.html#height">height</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#ingcs">ingcs</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#intensity">intensity</a></li><li><a href="global.html#interactor">interactor</a></li><li><a href="global.html#inverse">inverse</a></li><li><a href="global.html#isInViewport">isInViewport</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#layer">layer</a></li><li><a href="global.html#layers">layers</a></li><li><a href="global.html#line">line</a></li><li><a href="global.html#linkFeatures">linkFeatures</a></li><li><a href="global.html#links">links</a></li><li><a href="global.html#loop">loop</a></li><li><a href="global.html#map">map</a></li><li><a href="global.html#maximumRadius">maximumRadius</a></li><li><a href="global.html#maxIndex">maxIndex</a></li><li><a href="global.html#maxIntensity">maxIntensity</a></li><li><a href="global.html#minimumRadius">minimumRadius</a></li><li><a href="global.html#minIntensity">minIntensity</a></li><li><a href="global.html#mode">mode</a></li><li><a href="global.html#modified">modified</a></li><li><a href="global.html#mouse">mouse</a></li><li><a href="global.html#mouseClick">mouseClick</a></li><li><a href="global.html#mouseMove">mouseMove</a></li><li><a href="global.html#moveDown">moveDown</a></li><li><a href="global.html#moveToBottom">moveToBottom</a></li><li><a href="global.html#moveToTop">moveToTop</a></li><li><a href="global.html#moveUp">moveUp</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#node">node</a></li><li><a href="global.html#nodeFeature">nodeFeature</a></li><li><a href="global.html#nodes">nodes</a></li><li><a href="global.html#now">now</a></li><li><a href="global.html#object">object</a></li><li><a href="global.html#onIdle">onIdle</a></li><li><a href="global.html#opacity">opacity</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#origin">origin</a></li><li><a href="global.html#pan">pan</a></li><li><a href="global.html#parent">parent</a></li><li><a href="global.html#parentCanvas">parentCanvas</a></li><li><a href="global.html#pause">pause</a></li><li><a href="global.html#pointAnnotation">pointAnnotation</a></li><li><a href="global.html#pointSearch">pointSearch</a></li><li><a href="global.html#polygonAnnotation">polygonAnnotation</a></li><li><a href="global.html#position">position</a></li><li><a href="global.html#processAction">processAction</a></li><li><a href="global.html#radii">radii</a></li><li><a href="global.html#radiiSquared">radiiSquared</a></li><li><a href="global.html#read">read</a></li><li><a href="global.html#rectangleAnnotation">rectangleAnnotation</a></li><li><a href="global.html#removeAction">removeAction</a></li><li><a href="global.html#removeAllAnnotations">removeAllAnnotations</a></li><li><a href="global.html#removeAnnotation">removeAnnotation</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#removeFeature">removeFeature</a></li><li><a href="global.html#renderer">renderer</a></li><li><a href="global.html#rendererName">rendererName</a></li><li><a href="global.html#reposition">reposition</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#resize">resize</a></li><li><a href="global.html#rotatedSize">rotatedSize</a></li><li><a href="global.html#rotation">rotation</a></li><li><a href="global.html#scalar">scalar</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#scaleFactor">scaleFactor</a></li><li><a href="global.html#scheduleAnimationFrame">scheduleAnimationFrame</a></li><li><a href="global.html#select">select</a></li><li><a href="global.html#selectionAPI">selectionAPI</a></li><li><a href="global.html#simulateEvent">simulateEvent</a></li><li><a href="global.html#size">size</a></li><li><a href="global.html#source">source</a></li><li><a href="global.html#springBack">springBack</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#state">state</a></li><li><a href="global.html#step">step</a></li><li><a href="global.html#stepBackward">stepBackward</a></li><li><a href="global.html#stepForward">stepForward</a></li><li><a href="global.html#sticky">sticky</a></li><li><a href="global.html#style">style</a></li><li><a href="global.html#target">target</a></li><li><a href="global.html#toLocal">toLocal</a></li><li><a href="global.html#transformGeometry">transformGeometry</a></li><li><a href="global.html#transformPoint">transformPoint</a></li><li><a href="global.html#transition">transition</a></li><li><a href="global.html#transitionCancel">transitionCancel</a></li><li><a href="global.html#type">type</a></li><li><a href="global.html#unitsPerPixel">unitsPerPixel</a></li><li><a href="global.html#updateAttribution">updateAttribution</a></li><li><a href="global.html#updateDelay">updateDelay</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#url">url</a></li><li><a href="global.html#validateAttribute">validateAttribute</a></li><li><a href="global.html#verticesPerFeature">verticesPerFeature</a></li><li><a href="global.html#visible">visible</a></li><li><a href="global.html#width">width</a></li><li><a href="global.html#worldToDisplay">worldToDisplay</a></li><li><a href="global.html#worldToGcs">worldToGcs</a></li><li><a href="global.html#zIndex">zIndex</a></li><li><a href="global.html#zoom">zoom</a></li><li><a href="global.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li><li><a href="global.html#zoomRange">zoomRange</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="geo.module_util.html">geo.util</a></li></ul><h3>Classes</h3><ul><li><a href="geo.annotation.html">geo.annotation</a></li><li><a href="geo.annotationLayer.html">geo.annotationLayer</a></li><li><a href="geo.camera.html">geo.camera</a></li><li><a href="geo.canvas.heatmapFeature.html">geo.canvas.heatmapFeature</a></li><li><a href="geo.canvas.lineFeature.html">geo.canvas.lineFeature</a></li><li><a href="geo.canvas.object.html">geo.canvas.object</a></li><li><a href="geo.canvas.pixelmapFeature.html">geo.canvas.pixelmapFeature</a></li><li><a href="geo.canvas.quadFeature.html">geo.canvas.quadFeature</a></li><li><a href="geo.canvas.renderer.html">geo.canvas.renderer</a></li><li><a href="geo.choroplethFeature.html">geo.choroplethFeature</a></li><li><a href="geo.contourFeature.html">geo.contourFeature</a></li><li><a href="geo.d3.graphFeature.html">geo.d3.graphFeature</a></li><li><a href="geo.d3.lineFeature.html">geo.d3.lineFeature</a></li><li><a href="geo.d3.object.html">geo.d3.object</a></li><li><a href="geo.d3.pathFeature.html">geo.d3.pathFeature</a></li><li><a href="geo.d3.pointFeature.html">geo.d3.pointFeature</a></li><li><a href="geo.d3.quadFeature.html">geo.d3.quadFeature</a></li><li><a href="geo.d3.renderer.html">geo.d3.renderer</a></li><li><a href="geo.d3.vectorFeature.html">geo.d3.vectorFeature</a></li><li><a href="geo.domRenderer.html">geo.domRenderer</a></li><li><a href="geo.feature.html">geo.feature</a></li><li><a href="geo.featureLayer.html">geo.featureLayer</a></li><li><a href="geo.fetchQueue.html">geo.fetchQueue</a></li><li><a href="geo.fileReader.html">geo.fileReader</a></li><li><a href="geo.gl.choroplethFeature.html">geo.gl.choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">geo.gl.contourFeature</a></li><li><a href="geo.gl.lineFeature.html">geo.gl.lineFeature</a></li><li><a href="geo.gl.object.html">geo.gl.object</a></li><li><a href="geo.gl.pointFeature.html">geo.gl.pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">geo.gl.polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">geo.gl.quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">geo.gl.vglRenderer</a></li><li><a href="geo.graphFeature.html">geo.graphFeature</a></li><li><a href="geo.gui.legendWidget.html">geo.gui.legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">geo.gui.sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">geo.gui.svgWidget</a></li><li><a href="geo.gui.uiLayer.html">geo.gui.uiLayer</a></li><li><a href="geo.gui.widget.html">geo.gui.widget</a></li><li><a href="geo.heatmapFeature.html">geo.heatmapFeature</a></li><li><a href="geo.imageTile.html">geo.imageTile</a></li><li><a href="geo.jsonReader.html">geo.jsonReader</a></li><li><a href="geo.layer.html">geo.layer</a></li><li><a href="geo.lineFeature.html">geo.lineFeature</a></li><li><a href="geo.map.html">geo.map</a></li><li><a href="geo.mapInteractor.html">geo.mapInteractor</a></li><li><a href="geo.object.html">geo.object</a></li><li><a href="geo.osmLayer.html">geo.osmLayer</a></li><li><a href="geo.pathFeature.html">geo.pathFeature</a></li><li><a href="geo.pixelmapFeature.html">geo.pixelmapFeature</a></li><li><a href="geo.pointFeature.html">geo.pointFeature</a></li><li><a href="geo.polygonFeature.html">geo.polygonFeature</a></li><li><a href="geo.quadFeature.html">geo.quadFeature</a></li><li><a href="geo.renderer.html">geo.renderer</a></li><li><a href="geo.sceneObject.html">geo.sceneObject</a></li><li><a href="geo.tile.html">geo.tile</a></li><li><a href="geo.tileCache.html">geo.tileCache</a></li><li><a href="geo.tileLayer.html">geo.tileLayer</a></li><li><a href="geo.timestamp.html">geo.timestamp</a></li><li><a href="geo.transform.html">geo.transform</a></li><li><a href="geo.util.ClusterGroup.html">geo.util.ClusterGroup</a></li><li><a href="geo.vectorFeature.html">geo.vectorFeature</a></li></ul><h3>Namespaces</h3><ul><li><a href="-_anonymous_-geo.util.html"><anonymous>~geo.util</a></li><li><a href="geo.canvas.html">geo.canvas</a></li><li><a href="geo.d3.html">geo.d3</a></li><li><a href="geo.event.html">geo.event</a></li><li><a href="geo.event.annotation.html">geo.event.annotation</a></li><li><a href="geo.event.camera.html">geo.event.camera</a></li><li><a href="geo.event.feature.html">geo.event.feature</a></li><li><a href="geo.event.pixelmap.html">geo.event.pixelmap</a></li><li><a href="geo.gl.html">geo.gl</a></li><li><a href="geo.gui.html">geo.gui</a></li></ul><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#__render">__render</a></li><li><a href="global.html#_addPolygonFeature">_addPolygonFeature</a></li><li><a href="global.html#_animatePan">_animatePan</a></li><li><a href="global.html#_appendChild">_appendChild</a></li><li><a href="global.html#_bindMouseHandlers">_bindMouseHandlers</a></li><li><a href="global.html#_boundingBox">_boundingBox</a></li><li><a href="global.html#_build">_build</a></li><li><a href="global.html#_checkForStroke">_checkForStroke</a></li><li><a href="global.html#_clusterData">_clusterData</a></li><li><a href="global.html#_colorize">_colorize</a></li><li><a href="global.html#_computeGradient">_computeGradient</a></li><li><a href="global.html#_computePixelmap">_computePixelmap</a></li><li><a href="global.html#_connectEvents">_connectEvents</a></li><li><a href="global.html#_coordinates">_coordinates</a></li><li><a href="global.html#_createCanvas">_createCanvas</a></li><li><a href="global.html#_createCircle">_createCircle</a></li><li><a href="global.html#_createFeature">_createFeature</a></li><li><a href="global.html#_definitions">_definitions</a></li><li><a href="global.html#_deleteFeature">_deleteFeature</a></li><li><a href="global.html#_disconnectEvents">_disconnectEvents</a></li><li><a href="global.html#_drawFeatures">_drawFeatures</a></li><li><a href="global.html#_exit">_exit</a></li><li><a href="global.html#_feature">_feature</a></li><li><a href="global.html#_featureArray">_featureArray</a></li><li><a href="global.html#_featureToPolygons">_featureToPolygons</a></li><li><a href="global.html#_forward">_forward</a></li><li><a href="global.html#_generateQuads">_generateQuads</a></li><li><a href="global.html#_generateScale">_generateScale</a></li><li><a href="global.html#_geojsonCoordinates">_geojsonCoordinates</a></li><li><a href="global.html#_geojsonFeatureToAnnotation">_geojsonFeatureToAnnotation</a></li><li><a href="global.html#_geojsonGeometryType">_geojsonGeometryType</a></li><li><a href="global.html#_geojsonStyles">_geojsonStyles</a></li><li><a href="global.html#_getArrayBuffer">_getArrayBuffer</a></li><li><a href="global.html#_getLoopData">_getLoopData</a></li><li><a href="global.html#_getMouseButton">_getMouseButton</a></li><li><a href="global.html#_getMouseModifiers">_getMouseModifiers</a></li><li><a href="global.html#_getMousePosition">_getMousePosition</a></li><li><a href="global.html#_getString">_getString</a></li><li><a href="global.html#_handleBrush">_handleBrush</a></li><li><a href="global.html#_handleBrushend">_handleBrushend</a></li><li><a href="global.html#_handleDoubleClick">_handleDoubleClick</a></li><li><a href="global.html#_handleKeys">_handleKeys</a></li><li><a href="global.html#_handleMouseClick">_handleMouseClick</a></li><li><a href="global.html#_handleMouseclick">_handleMouseclick</a></li><li><a href="global.html#_handleMouseDown">_handleMouseDown</a></li><li><a href="global.html#_handleMouseMove">_handleMouseMove</a></li><li><a href="global.html#_handleMousemove">_handleMousemove</a></li><li><a href="global.html#_handleMouseMoveDocument">_handleMouseMoveDocument</a></li><li><a href="global.html#_handleMouseUp">_handleMouseUp</a></li><li><a href="global.html#_handleMouseUpDocument">_handleMouseUpDocument</a></li><li><a href="global.html#_handleMouseWheel">_handleMouseWheel</a></li><li><a href="global.html#_handleZoom">_handleZoom</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_inverse">_inverse</a></li><li><a href="global.html#_objectListAdd">_objectListAdd</a></li><li><a href="global.html#_objectListEnd">_objectListEnd</a></li><li><a href="global.html#_objectListGet">_objectListGet</a></li><li><a href="global.html#_objectListStart">_objectListStart</a></li><li><a href="global.html#_position">_position</a></li><li><a href="global.html#_positionToQuad">_positionToQuad</a></li><li><a href="global.html#_preparePixelmap">_preparePixelmap</a></li><li><a href="global.html#_processSelection">_processSelection</a></li><li><a href="global.html#_removeFeature">_removeFeature</a></li><li><a href="global.html#_render">_render</a></li><li><a href="global.html#_renderBinnedData">_renderBinnedData</a></li><li><a href="global.html#_renderColorQuads">_renderColorQuads</a></li><li><a href="global.html#_renderFrame">_renderFrame</a></li><li><a href="global.html#_renderImageQuads">_renderImageQuads</a></li><li><a href="global.html#_renderOnCanvas">_renderOnCanvas</a></li><li><a href="global.html#_renderPoints">_renderPoints</a></li><li><a href="global.html#_resize">_resize</a></li><li><a href="global.html#_setClickMaybe">_setClickMaybe</a></li><li><a href="global.html#_setTransform">_setTransform</a></li><li><a href="global.html#_style">_style</a></li><li><a href="global.html#_unbindMouseHandlers">_unbindMouseHandlers</a></li><li><a href="global.html#_update">_update</a></li><li><a href="global.html#_updateFromEvent">_updateFromEvent</a></li><li><a href="global.html#_updatePointSearchInfo">_updatePointSearchInfo</a></li><li><a href="global.html#_updateRangeTree">_updateRangeTree</a></li><li><a href="global.html#_updateTextures">_updateTextures</a></li><li><a href="global.html#_wipePolygons">_wipePolygons</a></li><li><a href="global.html#actions">actions</a></li><li><a href="global.html#active">active</a></li><li><a href="global.html#actors">actors</a></li><li><a href="global.html#addAction">addAction</a></li><li><a href="global.html#addAnnotation">addAnnotation</a></li><li><a href="global.html#addChild">addChild</a></li><li><a href="global.html#addFeature">addFeature</a></li><li><a href="global.html#addPromise">addPromise</a></li><li><a href="global.html#allowRotation">allowRotation</a></li><li><a href="global.html#annotationById">annotationById</a></li><li><a href="global.html#annotations">annotations</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#attribution">attribution</a></li><li><a href="global.html#bin">bin</a></li><li><a href="global.html#binned">binned</a></li><li><a href="global.html#bounds">bounds</a></li><li><a href="global.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li><li><a href="global.html#boxSearch">boxSearch</a></li><li><a href="global.html#buildTime">buildTime</a></li><li><a href="global.html#camera">camera</a></li><li><a href="global.html#cancel">cancel</a></li><li><a href="global.html#canRead">canRead</a></li><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#center">center</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#choropleth">choropleth</a></li><li><a href="global.html#clampBoundsX">clampBoundsX</a></li><li><a href="global.html#clampBoundsY">clampBoundsY</a></li><li><a href="global.html#clampZoom">clampZoom</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clustering">clustering</a></li><li><a href="global.html#color">color</a></li><li><a href="global.html#contextRenderer">contextRenderer</a></li><li><a href="global.html#contour">contour</a></li><li><a href="global.html#coordinates">coordinates</a></li><li><a href="global.html#createChoropleth">createChoropleth</a></li><li><a href="global.html#createContours">createContours</a></li><li><a href="global.html#createFeature">createFeature</a></li><li><a href="global.html#createLayer">createLayer</a></li><li><a href="global.html#createWidget">createWidget</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#dataTime">dataTime</a></li><li><a href="global.html#deleteFeature">deleteFeature</a></li><li><a href="global.html#deleteLayer">deleteLayer</a></li><li><a href="global.html#deleteWidget">deleteWidget</a></li><li><a href="global.html#delta">delta</a></li><li><a href="global.html#dependentFeatures">dependentFeatures</a></li><li><a href="global.html#destroy">destroy</a></li><li><a href="global.html#discreteZoom">discreteZoom</a></li><li><a href="global.html#displayDistance">displayDistance</a></li><li><a href="global.html#displayToGcs">displayToGcs</a></li><li><a href="global.html#displayToWorld">displayToWorld</a></li><li><a href="global.html#draw">draw</a></li><li><a href="global.html#exit">exit</a></li><li><a href="global.html#featureGcsToDisplay">featureGcsToDisplay</a></li><li><a href="global.html#features">features</a></li><li><a href="global.html#featureVertices">featureVertices</a></li><li><a href="global.html#fileReader">fileReader</a></li><li><a href="global.html#forward">forward</a></li><li><a href="global.html#fromLocal">fromLocal</a></li><li><a href="global.html#gcs">gcs</a></li><li><a href="global.html#gcsPosition">gcsPosition</a></li><li><a href="global.html#gcsToDisplay">gcsToDisplay</a></li><li><a href="global.html#gcsToWorld">gcsToWorld</a></li><li><a href="global.html#geo_action">geo_action</a></li><li><a href="global.html#geojson">geojson</a></li><li><a href="global.html#geoOff">geoOff</a></li><li><a href="global.html#geoOn">geoOn</a></li><li><a href="global.html#geoTrigger">geoTrigger</a></li><li><a href="global.html#globals">globals</a></li><li><a href="global.html#hasAction">hasAction</a></li><li><a href="global.html#height">height</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#ingcs">ingcs</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#intensity">intensity</a></li><li><a href="global.html#interactor">interactor</a></li><li><a href="global.html#inverse">inverse</a></li><li><a href="global.html#isInViewport">isInViewport</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#layer">layer</a></li><li><a href="global.html#layers">layers</a></li><li><a href="global.html#line">line</a></li><li><a href="global.html#linkFeatures">linkFeatures</a></li><li><a href="global.html#links">links</a></li><li><a href="global.html#map">map</a></li><li><a href="global.html#maxIndex">maxIndex</a></li><li><a href="global.html#maxIntensity">maxIntensity</a></li><li><a href="global.html#minIntensity">minIntensity</a></li><li><a href="global.html#mode">mode</a></li><li><a href="global.html#modified">modified</a></li><li><a href="global.html#mouse">mouse</a></li><li><a href="global.html#mouseClick">mouseClick</a></li><li><a href="global.html#mouseMove">mouseMove</a></li><li><a href="global.html#moveDown">moveDown</a></li><li><a href="global.html#moveToBottom">moveToBottom</a></li><li><a href="global.html#moveToTop">moveToTop</a></li><li><a href="global.html#moveUp">moveUp</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#node">node</a></li><li><a href="global.html#nodeFeature">nodeFeature</a></li><li><a href="global.html#nodes">nodes</a></li><li><a href="global.html#onIdle">onIdle</a></li><li><a href="global.html#opacity">opacity</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#origin">origin</a></li><li><a href="global.html#pan">pan</a></li><li><a href="global.html#parent">parent</a></li><li><a href="global.html#parentCanvas">parentCanvas</a></li><li><a href="global.html#pause">pause</a></li><li><a href="global.html#pointAnnotation">pointAnnotation</a></li><li><a href="global.html#pointSearch">pointSearch</a></li><li><a href="global.html#polygonAnnotation">polygonAnnotation</a></li><li><a href="global.html#position">position</a></li><li><a href="global.html#processAction">processAction</a></li><li><a href="global.html#read">read</a></li><li><a href="global.html#rectangleAnnotation">rectangleAnnotation</a></li><li><a href="global.html#removeAction">removeAction</a></li><li><a href="global.html#removeAllAnnotations">removeAllAnnotations</a></li><li><a href="global.html#removeAnnotation">removeAnnotation</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#removeFeature">removeFeature</a></li><li><a href="global.html#renderer">renderer</a></li><li><a href="global.html#rendererName">rendererName</a></li><li><a href="global.html#reposition">reposition</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#resize">resize</a></li><li><a href="global.html#rotatedSize">rotatedSize</a></li><li><a href="global.html#rotation">rotation</a></li><li><a href="global.html#scalar">scalar</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#scaleFactor">scaleFactor</a></li><li><a href="global.html#scheduleAnimationFrame">scheduleAnimationFrame</a></li><li><a href="global.html#select">select</a></li><li><a href="global.html#selectionAPI">selectionAPI</a></li><li><a href="global.html#simulateEvent">simulateEvent</a></li><li><a href="global.html#size">size</a></li><li><a href="global.html#source">source</a></li><li><a href="global.html#springBack">springBack</a></li><li><a href="global.html#state">state</a></li><li><a href="global.html#sticky">sticky</a></li><li><a href="global.html#style">style</a></li><li><a href="global.html#target">target</a></li><li><a href="global.html#toLocal">toLocal</a></li><li><a href="global.html#transition">transition</a></li><li><a href="global.html#transitionCancel">transitionCancel</a></li><li><a href="global.html#type">type</a></li><li><a href="global.html#unitsPerPixel">unitsPerPixel</a></li><li><a href="global.html#updateAttribution">updateAttribution</a></li><li><a href="global.html#updateDelay">updateDelay</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#url">url</a></li><li><a href="global.html#validateAttribute">validateAttribute</a></li><li><a href="global.html#verticesPerFeature">verticesPerFeature</a></li><li><a href="global.html#visible">visible</a></li><li><a href="global.html#width">width</a></li><li><a href="global.html#worldToDisplay">worldToDisplay</a></li><li><a href="global.html#worldToGcs">worldToGcs</a></li><li><a href="global.html#zIndex">zIndex</a></li><li><a href="global.html#zoom">zoom</a></li><li><a href="global.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li><li><a href="global.html#zoomRange">zoomRange</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Dec 05 2016 15:00:13 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jan 24 2017 12:49:58 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+    <title>Line Feature</title>
+    <!-- include the main bundle-->
+    <script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
+    <!-- include example sources-->
+    <!-- Include example specific files-->
+    <link rel="stylesheet" href="main.css">
+    <script type="text/javascript" src="main.js"></script>
+  </head>
+  <body>
+    <!-- Add a navbar-->
+    <nav role="navigation" class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" data-toggle="collapse" data-target="gj-navbar-collapse" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a href="https://github.com/OpenGeoscience/geojs" target="gj-homepage" class="navbar-brand">GeoJS</a>
+        </div>
+        <div id="gj-navbar-collapse" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="docs/main.html" target="gj-docco" class="gj-show-source-link">Source</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#about-modal" class="gj-show-about-link">About</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- Add an about modal dialog-->
+    <div id="about-modal" class="modal fade">
+      <div class="modal-dialog modal-md">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Line Feature</h4>
+          </div>
+          <div class="modal-body">
+            <p class="text-left">This example shows the variations that are available for line features.</p>
+            <p class="text-right">© 2014, Kitware, Inc.</p>
+          </div>
+          <div class="modal-footer">
+            <button data-dismiss="modal" data-target="#about-modal" class="btn btn-primary">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Add the default main content element-->
+    <div id="map"></div>
+    <div id="controls">
+      <div title="Number of lines segments.  Leave blank for a small default value." class="form-group">
+        <label for="lines">Number of Lines</label>
+        <input id="lines" type="number" min="1" step="100"><span id="lines-shown"></span>
+      </div>
+      <div title="Stroke Color (any css color).  A comma-separated list will cycle through the listed colors.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to colors, with undefined values using the 'other' entry." class="form-group">
+        <label for="strokeColor">strokeColor</label>
+        <input id="strokeColor" placeholder="black">
+      </div>
+      <div title="Stroke Opacity (a number in the range [0, 1]).  A comma-separated list will cycle through the listed opacities.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to opacities, with undefined values using the 'other' entry." class="form-group">
+        <label for="strokeOpacity">strokeOpacity</label>
+        <input id="strokeOpacity" placeholder="1">
+      </div>
+      <div title="Stroke Width (a positive number).  A comma-separated list will cycle through the listed widths.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to widths, with undefined values using the 'other' entry." class="form-group">
+        <label for="strokeWidth">strokeWidth</label>
+        <input id="strokeWidth" placeholder="2">
+      </div>
+      <div title="Stroke Offset (a number in the range [-1, 1]).  A comma-separated list will cycle through the listed offsets.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to offsets, with undefined values using the 'other' entry." class="form-group">
+        <label for="strokeOffset">strokeOffset</label>
+        <input id="strokeOffset" placeholder="0">
+      </div>
+      <div title="Line Cap (one of 'butt', 'round', or 'square').  A comma-separated list will cycle through the listed line caps.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to line caps, with undefined values using the 'other' entry." class="form-group">
+        <label for="lineCap">lineCap</label>
+        <input id="lineCap" placeholder="butt">
+      </div>
+      <div title="Line Join (one of 'miter', 'bevel', 'round', or 'miter-clip').  A comma-separated list will cycle through the listed line joins.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to line joins, with undefined values using the 'other' entry." class="form-group">
+        <label for="lineJoin">lineJoin</label>
+        <input id="lineJoin" placeholder="miter">
+      </div>
+      <div title="Miter Limit (a positive number).  Any miter whose length relative to the stroke with longer than this value will either be beveled or clipped." class="form-group">
+        <label for="miterLimit">miterLimit</label>
+        <input id="miterLimit" placeholder="10">
+      </div>
+      <div title="Antialiasing (a non-negative number).  Edges of lines will be antialiased by this many pixels.  Values larger than 2 tend to make things blurry." class="form-group">
+        <label for="antialiasing">antialiasing</label>
+        <input id="antialiasing" placeholder="2">
+      </div>
+      <div title="Show road names and categories on hover." class="form-group">
+        <label for="hovertext">Info on Hover</label>
+        <input id="hovertext" type="checkbox" placeholder="false">
+      </div>
+      <div title="Show an OSM map underneath the lines." class="form-group">
+        <label for="showmap">Show Map</label>
+        <input id="showmap" type="checkbox" placeholder="true" checked="checked">
+      </div>
+      <div class="form-group">
+        <div class="shortlabel">Presets</div>
+        <button strokeColor="{&quot;residential&quot;:&quot;blue&quot;,&quot;service&quot;:&quot;green&quot;,&quot;other&quot;:&quot;black&quot;}" strokeWidth="{&quot;residential&quot;:4,&quot;service&quot;:1,&quot;other&quot;:8}" lineCap="round" showmap="true" title="Properties based on road category" class="preset">Categories</button>
+        <button strokeColor="" strokeWidth="{&quot;residential&quot;:1,&quot;service&quot;:0.25,&quot;other&quot;:3}" lineCap="round" lineJoin="" miterLimit="" showmap="false" title="Thin lines based on road category" class="preset">Thin</button>
+        <button strokeColor="line:red,orange,yellow,green,blue,indigo,violet" strokeWidth="line:1,2,4,8,16" lineCap="line:butt,round,square" lineJoin="line:miter,bevel,round,miter-clip" miterLimit="4" title="Properties varied by line" class="preset">Lines</button>
+        <button strokeColor="red,orange,yellow,green,blue,indigo,violet" strokeWidth="1,2,4,8,16" lineCap="butt,round,square" lineJoin="miter,bevel,round,miter-clip" miterLimit="4" title="Properties varied by line segment" class="preset">Segments</button>
+      </div>
+    </div>
+  </body>
+</html>

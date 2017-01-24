@@ -62,9 +62,10 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> clock = map.clock();
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> clock = geo.clock();
   <span class="hljs-keyword">var</span> omega = <span class="hljs-number">10000</span>;
 
+  clock.object(map);
   clock.start(<span class="hljs-number">0</span>)
     .step(<span class="hljs-number">1</span>)
     .end(omega)
