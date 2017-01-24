@@ -974,6 +974,9 @@ var map = function (arg) {
     if (arg === undefined) {
       return m_interactor;
     }
+    if (m_interactor && m_interactor !== arg) {
+      m_interactor.destroy();
+    }
     m_interactor = arg;
 
     // this makes it possible to set a null interactor
