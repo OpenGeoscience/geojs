@@ -56,7 +56,9 @@ var sceneObject = require('./sceneObject');
  * *** Advanced parameters ***
  * @param {geo.camera?} camera The camera to control the view
  * @param {geo.mapInteractor?} interactor The UI event handler
- * @param {geo.clock?} clock The clock used to synchronize time events
+ * @param {array} [animationQueue] An array used to synchonize animations.  If
+ *   specified, this should be an empty array or the same array as passed to
+ *   other map instances.
  * @param {boolean} [autoResize=true] Adjust map size on window resize
  * @param {boolean} [clampBoundsX=false] Prevent panning outside of the
  *   maximum bounds in the horizontal direction.
@@ -88,7 +90,6 @@ var map = function (arg) {
   var registry = require('./registry');
   var geo_event = require('./event');
   var mapInteractor = require('./mapInteractor');
-  var clock = require('./clock');
   var uiLayer = require('./ui/uiLayer');
 
   ////////////////////////////////////////////////////////////////////////////
@@ -116,7 +117,6 @@ var map = function (arg) {
       m_validZoomRange = {min: 0, max: 16, origMin: 0},
       m_transition = null,
       m_queuedTransition = null,
-      m_clock = null,
       m_discreteZoom = arg.discreteZoom ? true : false,
       m_allowRotation = (typeof arg.allowRotation === 'function' ?
                          arg.allowRotation : (arg.allowRotation === undefined ?
@@ -127,6 +127,7 @@ var map = function (arg) {
       m_clampBoundsX,
       m_clampBoundsY,
       m_clampZoom,
+      m_animationQueue = arg.animationQueue || [],
       m_origin,
       m_scale = {x: 1, y: 1, z: 1}; // constant and ignored for the moment
 
@@ -151,7 +152,10 @@ var map = function (arg) {
   m_unitsPerPixel = (arg.unitsPerPixel || (
     m_maxBounds.right - m_maxBounds.left) / 256);
 
-  m_camera.viewport = {width: m_width, height: m_height};
+  m_camera.viewport = {
+    width: m_width, height: m_height,
+    left: m_node.offset().left, top: m_node.offset().top
+  };
   arg.center = util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
   m_clampBoundsX = arg.clampBoundsX === undefined ? false : arg.clampBoundsX;
@@ -683,7 +687,10 @@ var map = function (arg) {
     if (newZoom !== m_zoom) {
       m_this.zoom(newZoom);
     }
-    m_this.camera().viewport = {width: m_width, height: m_height};
+    m_this.camera().viewport = {
+      width: m_width, height: m_height,
+      left: m_node.offset().left, top: m_node.offset().top
+    };
     m_this.center(oldCenter);
 
     m_this.geoTrigger(geo_event.resize, {
@@ -887,7 +894,7 @@ var map = function (arg) {
       throw 'Map require DIV node';
     }
 
-    m_node.css('position', 'relative');
+    m_node.addClass('geojs-map');
     return m_this;
   };
 
@@ -967,6 +974,9 @@ var map = function (arg) {
     if (arg === undefined) {
       return m_interactor;
     }
+    if (m_interactor && m_interactor !== arg) {
+      m_interactor.destroy();
+    }
     m_interactor = arg;
 
     // this makes it possible to set a null interactor
@@ -977,23 +987,6 @@ var map = function (arg) {
         m_node.attr('tabindex', 0);
       }
       m_interactor.map(m_this);
-    }
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get or set the map clock
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.clock = function (arg) {
-    if (arg === undefined) {
-      return m_clock;
-    }
-    m_clock = arg;
-
-    if (m_clock) {
-      m_clock.object(m_this);
     }
     return m_this;
   };
@@ -1099,7 +1092,7 @@ var map = function (arg) {
     }
 
     var defaultOpts = {
-      center: m_this.center(undefined, null),
+      center: undefined,
       zoom: m_this.zoom(),
       rotation: m_this.rotation(),
       duration: 1000,
@@ -1145,8 +1138,8 @@ var map = function (arg) {
       opts.zCoord ? zoom2z(m_transition.start.zoom) : m_transition.start.zoom,
       m_transition.start.rotation
     ], [
-      m_transition.end.center.x,
-      m_transition.end.center.y,
+      m_transition.end.center ? m_transition.end.center.x : m_transition.start.center.x,
+      m_transition.end.center ? m_transition.end.center.y : m_transition.start.center.y,
       opts.zCoord ? zoom2z(m_transition.end.zoom) : m_transition.end.zoom,
       m_transition.end.rotation
     ]);
@@ -1182,8 +1175,10 @@ var map = function (arg) {
       m_transition.time = time - m_transition.start.time;
       if (time >= m_transition.end.time || next) {
         if (!next) {
-          var needZoom = m_zoom !== fix_zoom(m_transition.end.zoom);
-          m_this.center(m_transition.end.center, null, needZoom, needZoom);
+          if (m_transition.end.center) {
+            var needZoom = m_zoom !== fix_zoom(m_transition.end.zoom);
+            m_this.center(m_transition.end.center, null, needZoom, needZoom);
+          }
           m_this.zoom(m_transition.end.zoom, m_transition.zoomOrigin);
           m_this.rotation(fix_rotation(m_transition.end.rotation));
         }
@@ -1223,7 +1218,7 @@ var map = function (arg) {
       }
       m_this.rotation(p[3], undefined, true);
 
-      window.requestAnimationFrame(anim);
+      m_this.scheduleAnimationFrame(anim);
     }
 
     m_this.geoTrigger(geo_event.transitionstart, opts);
@@ -1239,7 +1234,7 @@ var map = function (arg) {
     } else if (animTime) {
       anim(animTime);
     } else {
-      window.requestAnimationFrame(anim);
+      m_this.scheduleAnimationFrame(anim);
     }
     return m_this;
   };
@@ -1526,19 +1521,7 @@ var map = function (arg) {
     // generate a new attribution node
     var $a = $('<div/>')
       .addClass('geo-attribution')
-      .css({
-        position: 'absolute',
-        right: '0px',
-        bottom: '0px',
-        'padding-right': '5px',
-        cursor: 'auto',
-        font: '11px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif',
-        'z-index': '1001',
-        background: 'rgba(255,255,255,0.7)',
-        clear: 'both',
-        display: 'block',
-        'pointer-events': 'auto'
-      }).on('mousedown', function (evt) {
+      .on('mousedown', function (evt) {
         evt.stopPropagation();
       });
 
@@ -1548,9 +1531,6 @@ var map = function (arg) {
       if (content) {
         $('<span/>')
           .addClass('geo-attribution-layer')
-          .css({
-            'padding-left': '5px'
-          })
           .html(content)
           .appendTo($a);
       }
@@ -1559,6 +1539,56 @@ var map = function (arg) {
     $a.appendTo(m_this.node());
     return m_this;
   };
+
+  /**
+   * Instead of each function using window.requestAnimationFrame, schedule all
+   * such frames here.  This allows the callbacks to be reordered or removed as
+   * needed and reduces overhead in Chrome a small amount.  Also, if the
+   * animation queue is shared between map instances, the callbacks will be
+   * called as one, providing better synchronization.
+   *
+   * @param {function} callback: function to call during the animation frame.
+   *    It is called with an animation epoch, exactly as requestAnimationFrame.
+   * @param {string|boolean} action: falsy to only add the callback if it is
+   *    not already scheduled.  'remove' to remove the callback (use this
+   *    instead of cancelAnimationFrame).  Any other truthy value moves the
+   *    callback to the end of the list.
+   * @returns {integer} An integer as returned by window.requestAnimationFrame.
+   */
+  this.scheduleAnimationFrame = function (callback, action) {
+    if (!m_animationQueue.length) {
+      /* By refering to requestAnimationFrame as a property of window, versus
+       * explicitly using window.requestAnimationFrame, we prevent the
+       * stripping of 'window' off of the reference and allow our tests to
+       * override this if needed. */
+      m_animationQueue.push(window['requestAnimationFrame'](processAnimationFrame));
+    }
+    var pos = m_animationQueue.indexOf(callback, 1);
+    if (pos >= 0) {
+      if (!action) {
+        return;
+      }
+      m_animationQueue.splice(pos, 1);
+      if (action === 'remove') {
+        return;
+      }
+    }
+    m_animationQueue.push(callback);
+    return m_animationQueue[0];
+  };
+
+  /**
+   * Sevice the callback during an animation frame.  This uses splice to modify
+   * the animationQueue to allow multiple map instances to share the queue.
+   */
+  function processAnimationFrame() {
+    var queue = m_animationQueue.splice(0, m_animationQueue.length);
+
+    /* The first entry is the reference to the window.requestAnimationFrame. */
+    for (var i = 1; i < queue.length; i += 1) {
+      queue[i].apply(this, arguments);
+    }
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   //
@@ -1910,7 +1940,6 @@ var map = function (arg) {
   if (arg.interactor !== null) {
     this.interactor(arg.interactor || mapInteractor({discreteZoom: m_discreteZoom}));
   }
-  this.clock(arg.clock || clock());
 
   function resizeSelf() {
     m_this.resize(0, 0, m_node.width(), m_node.height());

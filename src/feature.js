@@ -31,7 +31,7 @@ var feature = function (arg) {
 
   var m_this = this,
       s_exit = this._exit,
-      m_selectionAPI = arg.selectionAPI === undefined ? false : arg.selectionAPI,
+      m_selectionAPI = arg.selectionAPI === undefined ? false : !!arg.selectionAPI,
       m_style = {},
       m_layer = arg.layer === undefined ? null : arg.layer,
       m_gcs = arg.gcs,
@@ -532,12 +532,21 @@ var feature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Query if the selection API is enabled for this feature.
+   * Query or set if the selection API is enabled for this feature.
    * @returns {bool}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.selectionAPI = function () {
-    return m_selectionAPI;
+  this.selectionAPI = function (arg) {
+    if (arg === undefined) {
+      return m_selectionAPI;
+    }
+    arg = !!arg;
+    if (arg !== m_selectionAPI) {
+      m_selectionAPI = arg;
+      this._unbindMouseHandlers();
+      this._bindMouseHandlers();
+    }
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////

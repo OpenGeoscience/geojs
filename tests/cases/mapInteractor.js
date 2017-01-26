@@ -136,6 +136,9 @@ describe('mapInteractor', function () {
     map.gcs = function (arg) {
       return 'EPSG:3857';
     };
+    map.scheduleAnimationFrame = function (callback) {
+      return window['requestAnimationFrame'](callback);
+    };
     return map;
   }
 
@@ -1327,6 +1330,7 @@ describe('mapInteractor', function () {
   });
 
   it('Test momentum', function () {
+    mockAnimationFrame();
     var map = mockedMap('#mapNode1'), start;
 
     var interactor = geo.mapInteractor({
@@ -1338,7 +1342,6 @@ describe('mapInteractor', function () {
       }],
       throttle: false
     });
-    mockAnimationFrame();
     mockDate();
     // initiate a pan and release
     interactor.simulateEvent(
@@ -1380,6 +1383,7 @@ describe('mapInteractor', function () {
   });
 
   it('Test springback', function () {
+    mockAnimationFrame();
     $('#mapNode1').css({width: '400px', height: '400px'});
     var map = mockedMap('#mapNode1'), start;
 
@@ -1393,7 +1397,6 @@ describe('mapInteractor', function () {
       }],
       throttle: false
     });
-    mockAnimationFrame();
     mockDate();
     // pan past the max bounds
     interactor.simulateEvent(
@@ -1599,5 +1602,84 @@ describe('mapInteractor', function () {
         'mousemove', {map: {x: 47, y: 57}});
       expect(lastmap).toEqual({x:47, y: 57});
     });
+  });
+
+  it('Test keyboard interaction and event and propagation', function () {
+    var map = mockedMap('#mapNode1'),
+        interactor = geo.mapInteractor({map: map}),
+        keyboardSettings,
+        cancel = false,
+        lastmove,
+        triggered = 0;
+
+    // check the zoom event was called
+    interactor.simulateEvent('keyboard', {keys: 'shift+plus', shift: true});
+    expect(map.info.zoom).toBe(1);
+    expect(map.info.zoomArgs).toBe(3);
+    expect(map.zoom()).toBe(2);
+
+    // check the zoom event was called with a smaller factor
+    interactor.simulateEvent('keyboard', {keys: 'plus'});
+    expect(map.info.zoom).toBe(2);
+    expect(map.info.zoomArgs).toBe(2.05);
+    expect(map.zoom()).toBe(2);
+
+    // check the zoom event is not called with the wrong meta keys
+    interactor.simulateEvent('keyboard', {keys: 'plus', shift: false, ctrl: true});
+    expect(map.info.zoom).toBe(2);
+
+    // check that the keyaction is triggered
+    map.geoOn(geo.event.keyaction, function (evt) {
+      if (cancel) {
+        evt.move.cancel = true;
+      }
+      lastmove = evt.move;
+      triggered += 1;
+    });
+    interactor.simulateEvent('keyboard', {keys: 'plus'});
+    expect(map.info.zoom).toBe(3);
+    expect(triggered).toBe(1);
+    // check that the action can be canceled
+    cancel = true;
+    interactor.simulateEvent('keyboard', {keys: 'plus'});
+    expect(map.info.zoom).toBe(3);
+    expect(triggered).toBe(2);
+    cancel = false;
+    // test a variety of keyboard events
+    var keyTests = {
+      '1': {zoom: 0},
+      '2': {zoom: 3},
+      'plus': {zoomDelta: 0.05},
+      '-': {zoomDelta: -0.05},
+      '0': {rotation: 0},
+      '>': {rotationDelta: -1 * Math.PI / 180},
+      '<': {rotationDelta: 1 * Math.PI / 180},
+      'up': {panY: 1},
+      'down': {panY: -1},
+      'left': {panX: 1},
+      'right': {panX: -1}
+    };
+    for (var key in keyTests) {
+      if (keyTests.hasOwnProperty(key)) {
+        triggered = 0;
+        interactor.simulateEvent('keyboard', {keys: key});
+        expect(triggered).toBe(1);
+        for (var prop in keyTests[key]) {
+          if (keyTests[key].hasOwnProperty(prop)) {
+            expect(lastmove[prop]).toBe(keyTests[key][prop]);
+          }
+        }
+      }
+    }
+
+    // test modifying the keyboard settings and the focus highlight class
+    keyboardSettings = interactor.keyboard();
+    expect(keyboardSettings.focusHighlight).not.toBe(undefined);
+    keyboardSettings.focusHighlight = false;
+    expect(interactor.keyboard(keyboardSettings)).toBe(interactor);
+    expect(map.node().hasClass('highlight-focus')).toBe(false);
+    keyboardSettings.focusHighlight = true;
+    expect(interactor.keyboard(keyboardSettings)).toBe(interactor);
+    expect(map.node().hasClass('highlight-focus')).toBe(true);
   });
 });

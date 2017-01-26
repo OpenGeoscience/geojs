@@ -2,6 +2,37 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var lineFeature = require('../lineFeature');
 
+var MAX_MITER_LIMIT = 100;
+
+/* Flags are passed to the vertex shader in a float.  Since a 32-bit float has
+ * 24 bits of mantissa, including the sign bit, a maximum of 23 bits of flags
+ * can be passed in a float without loss or complication. */
+/* vertex flags specify which direction a vertex needs to be offset */
+var flagsVertex = {  // uses 2 bits
+  corner: 0,
+  near: 1,
+  far: 3
+};
+var flagsLineCap = {  // uses 3 bits with flagsLineJoin
+  butt: 0,
+  square: 1,
+  round: 2
+};
+var flagsLineJoin = {  // uses 3 bits with flagsLineCap
+  passthrough: 3,
+  miter: 4,
+  bevel: 5,
+  round: 6,
+  'miter-clip': 7
+};
+var flagsNearLineShift = 2, flagsFarLineShift = 5;
+var flagsNearOffsetShift = 8;  // uses 11 bits
+/* Fixed flags */
+var flagsDebug = {  // uses 1 bit
+  normal: 0,
+  debug: 1
+};
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of lineFeature
@@ -33,11 +64,14 @@ var gl_lineFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
-      m_actor = null,
-      m_mapper = null,
-      m_material = null,
-      m_pixelWidthUnif = null,
-      m_aspectUniform = null,
+      m_actor,
+      m_mapper,
+      m_material,
+      m_pixelWidthUnif,
+      m_aspectUniform,
+      m_miterLimitUniform,
+      m_antialiasingUniform,
+      m_flagsUniform,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
       s_init = this._init,
       s_update = this._update;
@@ -50,7 +84,8 @@ var gl_lineFeature = function (arg) {
           'attribute vec3 pos;',
           'attribute vec3 prev;',
           'attribute vec3 next;',
-          'attribute float offset;',
+          'attribute vec3 far;',
+          'attribute float flags;',
 
           'attribute vec3 strokeColor;',
           'attribute float strokeOpacity;',
@@ -60,8 +95,21 @@ var gl_lineFeature = function (arg) {
           'uniform mat4 projectionMatrix;',
           'uniform float pixelWidth;',
           'uniform float aspect;',
+          'uniform float miterLimit;',
+          'uniform float antialiasing;',
 
           'varying vec4 strokeColorVar;',
+          'varying vec4 subpos;',  /* px, py, length - px, width */
+          'varying vec4 info;',  /* near mode, far mode, offset */
+          'varying vec4 angles;', /* near angle cos, sin, far angle cos, sin */
+
+          'const float PI = 3.14159265358979323846264;',
+
+          'vec4 viewCoord(vec3 c) {',
+          '  vec4 result = projectionMatrix * modelViewMatrix * vec4(c.xyz, 1);',
+          '  if (result.w != 0.0)  result = result / result.w;',
+          '  return result;',
+          '}',
 
           'void main(void)',
           '{',
@@ -71,38 +119,128 @@ var gl_lineFeature = function (arg) {
           '    gl_Position = vec4(2, 2, 0, 1);',
           '    return;',
           '  }',
-          '  const float PI = 3.14159265358979323846264;',
-          '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
-          '  if (worldPos.w != 0.0) {',
-          '    worldPos = worldPos/worldPos.w;',
+          /* convert coordinates.  We have four values, since we need to
+           * calculate the angles between the lines formed by prev-pos and
+           * pos-next, and between pos-next and next-far, plus know the angle
+           *   (prev)---(pos)---(next)---(far) => A---B---C---D */
+          '  vec4 A = viewCoord(prev);',
+          '  vec4 B = viewCoord(pos);',
+          '  vec4 C = viewCoord(next);',
+          '  vec4 D = viewCoord(far);',
+          // calculate line segment vector and angle
+          '  vec2 deltaCB = C.xy - B.xy;',
+          '  if (deltaCB == vec2(0.0, 0.0)) {',
+          '    gl_Position = vec4(2, 2, 0, 1);',
+          '    return;',
           '  }',
-          '  vec4 worldNext = projectionMatrix * modelViewMatrix * vec4(next.xyz, 1);',
-          '  if (worldNext.w != 0.0) {',
-          '    worldNext = worldNext/worldNext.w;',
-          '  }',
-          '  vec4 worldPrev = projectionMatrix* modelViewMatrix * vec4(prev.xyz, 1);',
-          '  if (worldPrev.w != 0.0) {',
-          '    worldPrev = worldPrev/worldPrev.w;',
-          '  }',
+          '  float angleCB = atan(deltaCB.y / aspect, deltaCB.x);',
+          // values we need to pass along
           '  strokeColorVar = vec4(strokeColor, strokeOpacity);',
-          '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
-          '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
-          '  float angleNext = 0.0, anglePrev = 0.0;',
-          '  if (deltaNext.xy != vec2(0.0, 0.0))',
-          '    angleNext = atan(deltaNext.y / aspect, deltaNext.x);',
-          '  if (deltaPrev.xy == vec2(0.0, 0.0)) anglePrev = angleNext;',
-          '  else  anglePrev = atan(deltaPrev.y / aspect, deltaPrev.x);',
-          '  if (deltaNext.xy == vec2(0.0, 0.0)) angleNext = anglePrev;',
-          '  float angle = (anglePrev + angleNext) / 2.0;',
-          '  if (abs(anglePrev - angleNext) >= PI)',
-          '    angle += PI;',
-          '  float cosAngle = cos(anglePrev - angle);',
-          '  if (cosAngle < 0.1) { cosAngle = sign(cosAngle) * 1.0; angle = 0.0; }',
-          '  float distance = (offset * strokeWidth * pixelWidth) /',
-          '                    cosAngle;',
-          '  worldPos.x += distance * sin(angle);',
-          '  worldPos.y -= distance * cos(angle) * aspect;',
-          '  gl_Position = worldPos;',
+          // extract values from our flags field
+          '  int vertex = int(mod(flags, 4.0));',
+          '  int nearMode = int(mod(floor(flags / 4.0), 8.0));',
+          '  int farMode = int(mod(floor(flags / 32.0), 8.0));',
+          // we use 11 bits of the flags for the offset, where -1023 to 1023
+          // maps to -1 to 1.  The 11 bits are a signed value, so simply
+          // selecting the bits will result in an unsigned values that may be
+          // greater than 1, in which case we have to subtract appropriately.
+          '  float offset = mod(floor(flags / 256.0), 2048.0) / 1023.0;',
+          '  if (offset > 1.0)  offset -= 2048.0 / 1023.0;',
+          // by default, offset by the width and don't extend lines.  Later,
+          // calculate line extensions based on end cap and end join modes
+          '  float yOffset = strokeWidth + antialiasing;',
+          '  if (vertex == 0 || vertex == 2)  yOffset *= -1.0;',
+          '  yOffset += strokeWidth * offset;',
+          '  float xOffset = 0.0;',
+          // end caps
+          '  if (nearMode == 0) {',
+          '    xOffset = antialiasing;',
+          '  } else if (nearMode == 1 || nearMode == 2) {',
+          '    xOffset = strokeWidth + antialiasing;',
+          '  }',
+
+          // If joining lines, calculate the angles in screen space formed by
+          // the near end (A-B-C) and far end (B-C-D), and determine how much
+          // space is needed for the particular join.
+          //   This could be changed: if the lines are not a uniform width and
+          // offset, then the functional join angle is not simply half the
+          // angle between the two lines, but rather half the angle of the
+          // inside edge of the the two lines.
+          '  float cosABC, sinABC, cosBCD, sinBCD;',  // of half angles
+          // handle near end
+          '  if (nearMode >= 4) {',
+          '    float angleBA = atan((B.y - A.y) / aspect, B.x - A.x);',
+          '    if (A.xy == B.xy)  angleBA = angleCB;',
+          '    float angleABC = angleCB - angleBA;',
+          // ensure angle is in the range [-PI, PI], then take the half angle
+          '    angleABC = (mod(angleABC + PI, 2.0 * PI) - PI) / 2.0;',
+          '    cosABC = cos(angleABC);  sinABC = sin(angleABC);',
+          // if this angle is close to flat, pass-through the join
+          '    if (nearMode >= 4 && cosABC > 0.999999) {',
+          '      nearMode = 3;',
+          '    }',
+          // miter, miter-clip
+          '    if (nearMode == 4 || nearMode == 7) {',
+          '      if (cosABC == 0.0 || 1.0 / cosABC > miterLimit) {',
+          '        if (nearMode == 4) {',
+          '          nearMode = 5;',
+          '        } else {',
+          '          xOffset = miterLimit * strokeWidth * (1.0 - offset * sign(sinABC)) + antialiasing;',
+          '        }',
+          '      } else {',
+          // we add an extra 1.0 to the xOffset to make sure that fragment
+          // shader is doing the clipping
+          '        xOffset = abs(sinABC / cosABC) * strokeWidth * (1.0 - offset * sign(sinABC)) + antialiasing + 1.0;',
+          '        nearMode = 4;',
+          '      }',
+          '    }',
+          // bevel or round join
+          '    if (nearMode == 5 || nearMode == 6) {',
+          '      xOffset = strokeWidth * (1.0 - offset * sign(sinABC)) + antialiasing;',
+          '    }',
+          '  }',
+
+          // handle far end
+          '  if (farMode >= 4) {',
+          '    float angleDC = atan((D.y - C.y) / aspect, D.x - C.x);',
+          '    if (D.xy == C.xy)  angleDC = angleCB;',
+          '    float angleBCD = angleDC - angleCB;',
+          // ensure angle is in the range [-PI, PI], then take the half angle
+          '    angleBCD = (mod(angleBCD + PI, 2.0 * PI) - PI) / 2.0;',
+          '    cosBCD = cos(angleBCD);  sinBCD = sin(angleBCD);',
+          // if this angle is close to flat, pass-through the join
+          '    if (farMode >= 4 && cosBCD > 0.999999) {',
+          '      farMode = 3;',
+          '    }',
+          // miter, miter-clip
+          '    if (farMode == 4 || farMode == 7) {',
+          '      if (cosBCD == 0.0 || 1.0 / cosBCD > miterLimit) {',
+          '        if (farMode == 4)  farMode = 5;',
+          '      } else {',
+          '        farMode = 4;',
+          '      }',
+          '    }',
+          '  }',
+
+          // compute the location of a vertex to include everything that might
+          // need to be rendered
+          '  xOffset *= -1.0;',
+          '  gl_Position = vec4(',
+          '    B.x + (xOffset * cos(angleCB) - yOffset * sin(angleCB)) * pixelWidth,',
+          '    B.y + (xOffset * sin(angleCB) + yOffset * cos(angleCB)) * pixelWidth * aspect,',
+          '    B.z, 1);',
+          // store other values needed to determine which pixels to plot.
+          '  float lineLength = length(vec2(deltaCB.x, deltaCB.y / aspect)) / pixelWidth;',
+
+          '  if (vertex == 0 || vertex == 1) {',
+          '    subpos = vec4(xOffset, yOffset, lineLength - xOffset, strokeWidth);',
+          '    info = vec4(float(nearMode), float(farMode), offset, 0.0);',
+          '    angles = vec4(cosABC, sinABC, cosBCD, sinBCD);',
+          '  } else {',
+          '    subpos = vec4(lineLength - xOffset, -yOffset, xOffset, strokeWidth);',
+          '    info = vec4(float(farMode), float(nearMode), -offset, 0.0);',
+          '    angles = vec4(cosBCD, -sinBCD, cosABC, -sinABC);',
+          '  }',
           '}'
         ].join('\n'),
         shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
@@ -110,14 +248,104 @@ var gl_lineFeature = function (arg) {
     return shader;
   }
 
-  function createFragmentShader() {
+  function createFragmentShader(allowDebug) {
     var fragmentShaderSource = [
           '#ifdef GL_ES',
           '  precision highp float;',
           '#endif',
           'varying vec4 strokeColorVar;',
+          'varying vec4 subpos;',
+          'varying vec4 info;',
+          'varying vec4 angles;',
+          'uniform float antialiasing;',
+          'uniform float miterLimit;',
+          'uniform float fixedFlags;',
           'void main () {',
-          '  gl_FragColor = strokeColorVar;',
+          '  vec4 color = strokeColorVar;',
+          allowDebug ? '  bool debug = bool(mod(fixedFlags, 2.0));' : '',
+          '  float opacity = 1.0;',
+          '  int nearMode = int(info.x);',
+          '  int farMode = int(info.y);',
+          '  float cosABC = angles.x;',
+          '  float sinABC = angles.y;',
+          '  float cosBCD = angles.z;',
+          '  float sinBCD = angles.w;',
+          // never render on the opposite side of a miter.  This uses a bit of
+          // slop, via pow(smoothstep()) instead of step(), since there are
+          // precision issues in this calculation.  This doesn't wholy solve
+          // the precision issue; sometimes pixels are missed or double
+          // rendered along the inside seam of a miter.
+          '  if (nearMode >= 4) {',
+          '    float dist = cosABC * subpos.x - sinABC * subpos.y;',
+          '    opacity = min(opacity, pow(smoothstep(-0.02, 0.02, dist), 0.5));',
+          '    if (opacity == 0.0) {',
+          allowDebug ? 'if (debug) {color.r=255.0/255.0;gl_FragColor=color;return;}' : '',
+          '      discard;',
+          '    }',
+          '  }',
+          '  if (farMode >= 4) {',
+          '    float dist = cosBCD * subpos.z - sinBCD * subpos.y;',
+          '    opacity = min(opacity, pow(smoothstep(-0.02, 0.02, dist), 0.5));',
+          '    if (opacity == 0.0) {',
+          allowDebug ? 'if (debug) {color.r=254.0/255.0;gl_FragColor=color;return;}' : '',
+          '      discard;',
+          '    }',
+          '  }',
+          // butt or square cap
+          '  if ((nearMode == 0 || nearMode == 1) && subpos.x < antialiasing) {',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, subpos.x + subpos.w * float(nearMode)));',
+          '  }',
+          '  if ((farMode == 0 || farMode == 1) && subpos.z < antialiasing) {',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, subpos.z + subpos.w * float(farMode)));',
+          '  }',
+          // round cap
+          '  if (nearMode == 2 && subpos.x <= 0.0) {',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, subpos.w - sqrt(pow(subpos.x, 2.0) + pow(subpos.y - info.z * subpos.w, 2.0))));',
+          '  }',
+          '  if (farMode == 2 && subpos.z <= 0.0) {',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, subpos.w - sqrt(pow(subpos.z, 2.0) + pow(subpos.y - info.z * subpos.w, 2.0))));',
+          '  }',
+          // bevel and clip joins
+          '  if ((nearMode == 5 || nearMode == 7) && subpos.x < antialiasing) {',
+          '    float dist = (sinABC * subpos.x + cosABC * subpos.y) * sign(sinABC);',
+          '    float w = subpos.w * (1.0 - info.z * sign(sinABC));',
+          '    float maxDist;',
+          '    if (nearMode == 5)  maxDist = cosABC * w;',
+          '    else                maxDist = miterLimit * w;',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, maxDist + dist));',
+          '  }',
+          '  if ((farMode == 5 || farMode == 7) && subpos.z < antialiasing) {',
+          '    float dist = (sinBCD * subpos.z + cosBCD * subpos.y) * sign(sinBCD);',
+          '    float w = subpos.w * (1.0 - info.z * sign(sinBCD));',
+          '    float maxDist;',
+          '    if (farMode == 5)  maxDist = cosBCD * w;',
+          '    else               maxDist = miterLimit * w;',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, maxDist + dist));',
+          '  }',
+          // round join
+          '  if (nearMode == 6 && subpos.x <= 0.0) {',
+          '    float w = subpos.w * (1.0 - info.z * sign(sinABC));',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, w - sqrt(pow(subpos.x, 2.0) + pow(subpos.y, 2.0))));',
+          '  }',
+          '  if (farMode == 6 && subpos.z <= 0.0) {',
+          '    float w = subpos.w * (1.0 - info.z * sign(sinBCD));',
+          '    opacity = min(opacity, smoothstep(-antialiasing, antialiasing, w - sqrt(pow(subpos.z, 2.0) + pow(subpos.y, 2.0))));',
+          '  }',
+          // antialias along main edges
+          '  if (antialiasing > 0.0) {',
+          '    if (subpos.y > subpos.w * (1.0 + info.z) - antialiasing) {',
+          '      opacity = min(opacity, smoothstep(antialiasing, -antialiasing, subpos.y - subpos.w * (1.0 + info.z)));',
+          '    }',
+          '    if (subpos.y < subpos.w * (-1.0 + info.z) + antialiasing) {',
+          '      opacity = min(opacity, smoothstep(-antialiasing, antialiasing, subpos.y - subpos.w * (-1.0 + info.z)));',
+          '    }',
+          '  }',
+          '  if (opacity == 0.0) {',
+          allowDebug ? 'if (debug) {color.r=253.0/255.0;gl_FragColor=color;return;}' : '',
+          '    discard;',
+          '  }',
+          '  color.a *= opacity;',
+          '  gl_FragColor = color;',
           '}'
         ].join('\n'),
         shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
@@ -127,23 +355,45 @@ var gl_lineFeature = function (arg) {
 
   function createGLLines() {
     var data = m_this.data(),
-        i, j, k, v, lidx,
+        i, j, k, v, v2, lidx,
         numSegments = 0, len,
         lineItem, lineItemData,
-        vert = [{}, {}], vertTemp,
+        vert = [{}, {}], v1 = vert[1],
         pos, posIdx3, firstpos, firstPosIdx3,
         position = [],
         posFunc = m_this.position(),
-        strkWidthFunc = m_this.style.get('strokeWidth'),
-        strkColorFunc = m_this.style.get('strokeColor'),
-        strkOpacityFunc = m_this.style.get('strokeOpacity'),
+        strokeWidthFunc = m_this.style.get('strokeWidth'), strokeWidthVal,
+        strokeColorFunc = m_this.style.get('strokeColor'), strokeColorVal,
+        strokeOpacityFunc = m_this.style.get('strokeOpacity'), strokeOpacityVal,
+        lineCapFunc = m_this.style.get('lineCap'), lineCapVal,
+        lineJoinFunc = m_this.style.get('lineJoin'), lineJoinVal,
+        strokeOffsetFunc = m_this.style.get('strokeOffset'), strokeOffsetVal,
+        miterLimit = m_this.style.get('miterLimit')(data),
+        antialiasing = m_this.style.get('antialiasing')(data) || 0,
         order = m_this.featureVertices(),
-        posBuf, nextBuf, prevBuf, offsetBuf, indicesBuf,
+        posBuf, prevBuf, nextBuf, farBuf, flagsBuf, indicesBuf,
+        fixedFlags = (flagsDebug[m_this.style.get('debug')(data) ? 'debug' : 'normal'] || 0),
         strokeWidthBuf, strokeColorBuf, strokeOpacityBuf,
         dest, dest3,
         geom = m_mapper.geometryData(),
-        closedFunc = m_this.style.get('closed'), closed = [];
+        closedFunc = m_this.style.get('closed'), closedVal, closed = [];
 
+    closedVal = util.isFunction(m_this.style('closed')) ? undefined : closedFunc();
+    lineCapVal = util.isFunction(m_this.style('lineCap')) ? undefined : lineCapFunc();
+    lineJoinVal = util.isFunction(m_this.style('lineJoin')) ? undefined : lineJoinFunc();
+    strokeColorVal = util.isFunction(m_this.style('strokeColor')) ? undefined : strokeColorFunc();
+    strokeOffsetVal = util.isFunction(m_this.style('strokeOffset')) ? undefined : strokeOffsetFunc();
+    strokeOpacityVal = util.isFunction(m_this.style('strokeOpacity')) ? undefined : strokeOpacityFunc();
+    strokeWidthVal = util.isFunction(m_this.style('strokeWidth')) ? undefined : strokeWidthFunc();
+
+    if (miterLimit !== undefined) {
+      /* We impose a limit no matter what, since otherwise the growth is
+       * unbounded.  Values less than 1 make no sense, since we are using the
+       * SVG definition of miter length. */
+      m_miterLimitUniform.set(Math.max(1, Math.min(MAX_MITER_LIMIT, miterLimit)));
+    }
+    m_flagsUniform.set(fixedFlags);
+    m_antialiasingUniform.set(antialiasing);
     for (i = 0; i < data.length; i += 1) {
       lineItem = m_this.line()(data[i], i);
       if (lineItem.length < 2) {
@@ -159,7 +409,7 @@ var gl_lineFeature = function (arg) {
           firstpos = pos;
         }
       }
-      if (lineItem.length > 2 && closedFunc(data[i], i)) {
+      if (lineItem.length > 2 && (closedVal === undefined ? closedFunc(data[i], i) : closedVal)) {
         /* line is closed */
         if (pos.x !== firstpos.x || pos.y !== firstpos.y ||
             pos.z !== firstpos.z) {
@@ -177,9 +427,10 @@ var gl_lineFeature = function (arg) {
 
     len = numSegments * order.length;
     posBuf = util.getGeomBuffer(geom, 'pos', len * 3);
-    nextBuf = util.getGeomBuffer(geom, 'next', len * 3);
     prevBuf = util.getGeomBuffer(geom, 'prev', len * 3);
-    offsetBuf = util.getGeomBuffer(geom, 'offset', len);
+    nextBuf = util.getGeomBuffer(geom, 'next', len * 3);
+    farBuf = util.getGeomBuffer(geom, 'far', len * 3);
+    flagsBuf = util.getGeomBuffer(geom, 'flags', len);
     strokeWidthBuf = util.getGeomBuffer(geom, 'strokeWidth', len);
     strokeColorBuf = util.getGeomBuffer(geom, 'strokeColor', len * 3);
     strokeOpacityBuf = util.getGeomBuffer(geom, 'strokeOpacity', len);
@@ -205,33 +456,71 @@ var gl_lineFeature = function (arg) {
         /* swap entries in vert so that vert[0] is the first vertex, and
          * vert[1] will be reused for the second vertex */
         if (j) {
-          vertTemp = vert[0];
+          v1 = vert[0];
           vert[0] = vert[1];
-          vert[1] = vertTemp;
+          vert[1] = v1;
         }
-        vert[1].pos = j === lidx ? posIdx3 : firstPosIdx3;
-        vert[1].prev = lidx ? posIdx3 - 3 : (closed[i] ?
+        v1.pos = j === lidx ? posIdx3 : firstPosIdx3;
+        v1.prev = lidx ? posIdx3 - 3 : (closed[i] ?
             firstPosIdx3 + (lineItem.length - 3 + closed[i]) * 3 : posIdx3);
-        vert[1].next = j + 1 < lineItem.length ? posIdx3 + 3 : (closed[i] ?
+        v1.next = j + 1 < lineItem.length ? posIdx3 + 3 : (closed[i] ?
             (j !== lidx ? firstPosIdx3 + 3 : firstPosIdx3 + 6 - closed[i] * 3) :
             posIdx3);
-        vert[1].strokeWidth = strkWidthFunc(lineItemData, lidx, lineItem, i);
-        vert[1].strokeColor = strkColorFunc(lineItemData, lidx, lineItem, i);
-        vert[1].strokeOpacity = strkOpacityFunc(lineItemData, lidx, lineItem, i);
+        v1.strokeWidth = strokeWidthVal === undefined ? strokeWidthFunc(lineItemData, lidx, lineItem, i) : strokeWidthVal;
+        v1.strokeColor = strokeColorVal === undefined ? strokeColorFunc(lineItemData, lidx, lineItem, i) : strokeColorVal;
+        v1.strokeOpacity = strokeOpacityVal === undefined ? strokeOpacityFunc(lineItemData, lidx, lineItem, i) : strokeOpacityVal;
+        v1.strokeOffset = (strokeOffsetVal === undefined ? strokeOffsetFunc(lineItemData, lidx, lineItem, i) : strokeOffsetVal) || 0;
+        if (v1.strokeOffset) {
+          /* we use 11 bits to store the offset, and we want to store values
+           * from -1 to 1, so multiply our values by 1023, and use some bit
+           * manipulation to ensure that it is packed properly */
+          v1.posStrokeOffset = Math.round(2048 + 1023 * Math.min(1, Math.max(-1, v1.strokeOffset))) & 0x7FF;
+          v1.negStrokeOffset = Math.round(2048 - 1023 * Math.min(1, Math.max(-1, v1.strokeOffset))) & 0x7FF;
+        } else {
+          v1.posStrokeOffset = v1.negStrokeOffset = 0;
+        }
+        if (!closed[i] && (!j || j === lineItem.length - 1)) {
+          v1.flags = flagsLineCap[lineCapVal === undefined ? lineCapFunc(lineItemData, lidx, lineItem, i) : lineCapVal] || flagsLineCap.butt;
+        } else {
+          v1.flags = flagsLineJoin[lineJoinVal === undefined ? lineJoinFunc(lineItemData, lidx, lineItem, i) : lineJoinVal] || flagsLineJoin.miter;
+        }
+
         if (j) {
           for (k = 0; k < order.length; k += 1, dest += 1, dest3 += 3) {
             v = vert[order[k][0]];
+            v2 = vert[1 - order[k][0]];
             posBuf[dest3] = position[v.pos];
             posBuf[dest3 + 1] = position[v.pos + 1];
             posBuf[dest3 + 2] = position[v.pos + 2];
-            prevBuf[dest3] = position[v.prev];
-            prevBuf[dest3 + 1] = position[v.prev + 1];
-            prevBuf[dest3 + 2] = position[v.prev + 2];
-            nextBuf[dest3] = position[v.next];
-            nextBuf[dest3 + 1] = position[v.next + 1];
-            nextBuf[dest3 + 2] = position[v.next + 2];
-            offsetBuf[dest] = order[k][1];
-            /* We can ignore the indices (they will all be zero) */
+            if (!order[k][0]) {
+              prevBuf[dest3] = position[v.prev];
+              prevBuf[dest3 + 1] = position[v.prev + 1];
+              prevBuf[dest3 + 2] = position[v.prev + 2];
+              nextBuf[dest3] = position[v.next];
+              nextBuf[dest3 + 1] = position[v.next + 1];
+              nextBuf[dest3 + 2] = position[v.next + 2];
+              farBuf[dest3] = position[v2.next];
+              farBuf[dest3 + 1] = position[v2.next + 1];
+              farBuf[dest3 + 2] = position[v2.next + 2];
+              flagsBuf[dest] = (flagsVertex[order[k][1]] |
+                (v.flags << flagsNearLineShift) |
+                (v2.flags << flagsFarLineShift) |
+                (v.negStrokeOffset << flagsNearOffsetShift));
+            } else {
+              prevBuf[dest3] = position[v.next];
+              prevBuf[dest3 + 1] = position[v.next + 1];
+              prevBuf[dest3 + 2] = position[v.next + 2];
+              nextBuf[dest3] = position[v.prev];
+              nextBuf[dest3 + 1] = position[v.prev + 1];
+              nextBuf[dest3 + 2] = position[v.prev + 2];
+              farBuf[dest3] = position[v2.prev];
+              farBuf[dest3 + 1] = position[v2.prev + 1];
+              farBuf[dest3 + 2] = position[v2.prev + 2];
+              flagsBuf[dest] = (flagsVertex[order[k][1]] |
+                (v.flags << flagsNearLineShift) |
+                (v2.flags << flagsFarLineShift) |
+                (v.posStrokeOffset << flagsNearOffsetShift));
+            }
             strokeWidthBuf[dest] = v.strokeWidth;
             strokeColorBuf[dest3] = v.strokeColor.r;
             strokeColorBuf[dest3 + 1] = v.strokeColor.g;
@@ -255,7 +544,9 @@ var gl_lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.featureVertices = function () {
-    return [[0, 1], [1, -1], [0, -1], [0, 1], [1, 1], [1, -1]];
+    // return [[0, -1], [0, 1], [1, -1], [1, 1], [1, -1], [0, 1]];
+    return [[0, 'corner', -1], [0, 'near', 1], [1, 'far', -1],
+            [1, 'corner', 1], [1, 'near', -1], [0, 'far', 1]];
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -277,12 +568,13 @@ var gl_lineFeature = function (arg) {
   this._init = function (arg) {
     var prog = vgl.shaderProgram(),
         vs = createVertexShader(),
-        fs = createFragmentShader(),
+        fs = createFragmentShader(((arg || {}).style || {}).debug !== undefined),
         // Vertex attributes
         posAttr = vgl.vertexAttribute('pos'),
         prvAttr = vgl.vertexAttribute('prev'),
         nxtAttr = vgl.vertexAttribute('next'),
-        offAttr = vgl.vertexAttribute('offset'),
+        farAttr = vgl.vertexAttribute('far'),
+        flagsAttr = vgl.vertexAttribute('flags'),
         strkWidthAttr = vgl.vertexAttribute('strokeWidth'),
         strkColorAttr = vgl.vertexAttribute('strokeColor'),
         strkOpacityAttr = vgl.vertexAttribute('strokeOpacity'),
@@ -291,20 +583,21 @@ var gl_lineFeature = function (arg) {
         prjUnif = new vgl.projectionUniform('projectionMatrix'),
         geom = vgl.geometryData(),
         // Sources
-        posData = vgl.sourceDataP3fv({'name': 'pos'}),
+        posData = vgl.sourceDataP3fv({name: 'pos'}),
         prvPosData = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Four, {'name': 'prev'}),
+            3, vgl.vertexAttributeKeysIndexed.Four, {name: 'prev'}),
         nxtPosData = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Five, {'name': 'next'}),
-        offPosData = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Six, {'name': 'offset'}),
+            3, vgl.vertexAttributeKeysIndexed.Five, {name: 'next'}),
+        farPosData = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Six, {name: 'far'}),
+        flagsData = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Seven, {name: 'flags'}),
         strkWidthData = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.One, {'name': 'strokeWidth'}),
+            1, vgl.vertexAttributeKeysIndexed.One, {name: 'strokeWidth'}),
         strkColorData = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Two, {'name': 'strokeColor'}),
+            3, vgl.vertexAttributeKeysIndexed.Two, {name: 'strokeColor'}),
         strkOpacityData = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Three,
-            {'name': 'strokeOpacity'}),
+            1, vgl.vertexAttributeKeysIndexed.Three, {name: 'strokeOpacity'}),
         // Primitive indices
         triangles = vgl.triangles();
 
@@ -312,6 +605,9 @@ var gl_lineFeature = function (arg) {
                           1.0 / m_this.renderer().width());
     m_aspectUniform = new vgl.floatUniform('aspect',
         m_this.renderer().width() / m_this.renderer().height());
+    m_miterLimitUniform = new vgl.floatUniform('miterLimit', 10);
+    m_antialiasingUniform = new vgl.floatUniform('antialiasing', 0);
+    m_flagsUniform = new vgl.floatUniform('fixedFlags', 0);
 
     s_init.call(m_this, arg);
     m_material = vgl.material();
@@ -323,12 +619,16 @@ var gl_lineFeature = function (arg) {
     prog.addVertexAttribute(strkOpacityAttr, vgl.vertexAttributeKeysIndexed.Three);
     prog.addVertexAttribute(prvAttr, vgl.vertexAttributeKeysIndexed.Four);
     prog.addVertexAttribute(nxtAttr, vgl.vertexAttributeKeysIndexed.Five);
-    prog.addVertexAttribute(offAttr, vgl.vertexAttributeKeysIndexed.Six);
+    prog.addVertexAttribute(farAttr, vgl.vertexAttributeKeysIndexed.Six);
+    prog.addVertexAttribute(flagsAttr, vgl.vertexAttributeKeysIndexed.Seven);
 
     prog.addUniform(mviUnif);
     prog.addUniform(prjUnif);
     prog.addUniform(m_pixelWidthUnif);
     prog.addUniform(m_aspectUniform);
+    prog.addUniform(m_miterLimitUniform);
+    prog.addUniform(m_antialiasingUniform);
+    prog.addUniform(m_flagsUniform);
 
     prog.addShader(fs);
     prog.addShader(vs);
@@ -343,10 +643,11 @@ var gl_lineFeature = function (arg) {
     geom.addSource(posData);
     geom.addSource(prvPosData);
     geom.addSource(nxtPosData);
+    geom.addSource(farPosData);
     geom.addSource(strkWidthData);
     geom.addSource(strkColorData);
     geom.addSource(strkOpacityData);
-    geom.addSource(offPosData);
+    geom.addSource(flagsData);
     geom.addPrimitive(triangles);
     m_mapper.setGeometryData(geom);
   };
@@ -373,13 +674,11 @@ var gl_lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    if (m_actor) {
-      m_this.renderer().contextRenderer().removeActor(m_actor);
-    }
-
     createGLLines();
 
-    m_this.renderer().contextRenderer().addActor(m_actor);
+    if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
+      m_this.renderer().contextRenderer().addActor(m_actor);
+    }
     m_this.buildTime().modified();
   };
 

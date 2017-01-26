@@ -263,8 +263,12 @@ module.exports.logCanvas2D = function logCanvas2D(enable) {
   var log = {enable: enable, counts: {}, log: []};
 
   var proto = CanvasRenderingContext2D.prototype;
-  $.each(proto, function (key) {
-    var orig = proto[key];
+  $.each(Object.keys(proto), function (idx, key) {
+    try {
+      var orig = proto[key];
+    } catch (err) {
+      return;
+    }
     if (orig && orig.constructor && orig.call && orig.apply) {
       proto[key] = function () {
         log.counts[key] = (log.counts[key] || 0) + 1;
@@ -341,6 +345,7 @@ module.exports.mockAnimationFrame = function (mockDate) {
     animFrameIndex += 1;
     var id = animFrameIndex;
     animFrameCallbacks.push({id: id, callback: callback});
+    return id;
   }
 
   /* Replace window.cancelAnimationFrame with this function.
@@ -405,4 +410,20 @@ module.exports.unmockDate = function () {
  */
 module.exports.advanceDate = function (delta) {
   startDate += delta;
+};
+
+/* Decode query components into a dictionary of values.
+ *
+ * @returns {object}: the query parameters as a dictionary.
+ */
+module.exports.getQuery = function () {
+  var query = document.location.search.replace(/(^\?)/, '').split(
+    '&').map(function (n) {
+      n = n.split('=');
+      if (n[0]) {
+        this[decodeURIComponent(n[0].replace(/\+/g, '%20'))] = decodeURIComponent(n[1].replace(/\+/g, '%20'));
+      }
+      return this;
+    }.bind({}))[0];
+  return query;
 };

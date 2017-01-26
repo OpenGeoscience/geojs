@@ -390,8 +390,8 @@ describe('geo.core.map', function () {
       expect(closeToEqual(zc.center, {x: 0, y: 0})).toBe(true);
     });
     it('transition', function () {
-      var m = create_map(), start, wasCalled;
       mockAnimationFrame();
+      var m = create_map(), start, wasCalled;
       expect(m.transition()).toBe(null);
       start = new Date().getTime();
       m.transition({

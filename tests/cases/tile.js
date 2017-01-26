@@ -36,7 +36,7 @@ describe('geo.tile', function () {
     var t = geo.tile({
       index: {x: 13, y: 14},
       size: {x: 116, y: 117},
-      url: '/data/sample.json',
+      url: '/testdata/sample.json',
       overlap: {x: 1, y: 3}
     });
 
@@ -52,7 +52,7 @@ describe('geo.tile', function () {
       var t = geo.tile({
         index: {x: 0, y: 0},
         size: {x: 10, y: 10},
-        url: '/data/sample.json'
+        url: '/testdata/sample.json'
       });
 
       expect(t.bottom).toEqual(10);
@@ -63,7 +63,7 @@ describe('geo.tile', function () {
       t = geo.tile({
         index: {x: 5, y: 6},
         size: {x: 10, y: 10},
-        url: '/data/sample.json'
+        url: '/testdata/sample.json'
       });
       expect(t.bottom).toEqual(70);
       expect(t.left).toEqual(50);
@@ -75,7 +75,7 @@ describe('geo.tile', function () {
       var t = geo.tile({
         index: {x: 1, y: 2},
         size: {x: 7, y: 11},
-        url: '/data/sample.json'
+        url: '/testdata/sample.json'
       });
 
       expect(t.bottom).toEqual(33);
@@ -91,7 +91,7 @@ describe('geo.tile', function () {
       var t = geo.tile({
         index: {x: 0, y: 0},
         size: {x: 10, y: 10},
-        url: '/data/sample.json',
+        url: '/testdata/sample.json',
         overlap: {x: 1, y: 2}
       });
 
@@ -103,7 +103,7 @@ describe('geo.tile', function () {
       t = geo.tile({
         index: {x: 5, y: 6},
         size: {x: 10, y: 10},
-        url: '/data/sample.json',
+        url: '/testdata/sample.json',
         overlap: {x: 1, y: 2}
       });
       expect(t.bottom).toEqual(72);
@@ -116,7 +116,7 @@ describe('geo.tile', function () {
       var t = geo.tile({
         index: {x: 1, y: 2},
         size: {x: 7, y: 11},
-        url: '/data/sample.json',
+        url: '/testdata/sample.json',
         overlap: {x: 1, y: 2}
       });
 
@@ -133,7 +133,7 @@ describe('geo.tile', function () {
       var t = geo.tile({
         index: {x: 0, y: 0},
         size: {x: 10, y: 10},
-        url: '/data/sample.json'
+        url: '/testdata/sample.json'
       });
 
       var called = false;
@@ -177,7 +177,7 @@ describe('geo.tile', function () {
       t = geo.tile({
         index: {x: 1, y: 2},
         size: {x: 10, y: 10},
-        url: '/data/sample.json'
+        url: '/testdata/sample.json'
       });
     });
 

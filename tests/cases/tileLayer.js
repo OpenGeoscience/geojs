@@ -375,7 +375,7 @@ describe('geo.tileLayer', function () {
       expect(l.activeTiles).toEqual({});
     });
     it('url', function () {
-      var m = map(), l, mtime, url = '/data/white.jpg';
+      var m = map(), l, mtime, url = '/testdata/white.jpg';
       opts.map = m;
       l = geo.tileLayer(opts);
       expect(l.url() instanceof Function).toBe(true);
@@ -599,7 +599,7 @@ describe('geo.tileLayer', function () {
           topDown: true,
           wrapX: false,
           wrapY: false,
-          url: function () { return '/data/white.jpg'; }
+          url: function () { return '/testdata/white.jpg'; }
         });
         expect(l.cache.size).toBe(2);
 
@@ -615,7 +615,7 @@ describe('geo.tileLayer', function () {
       });
     });
     it('prefetch', function (done) {
-      var l = geo.tileLayer({map: map(), url: function () { return '/data/white.jpg'; }}),
+      var l = geo.tileLayer({map: map(), url: function () { return '/testdata/white.jpg'; }}),
           d1 = new $.Deferred(),
           d2 = new $.Deferred();
 
@@ -1224,7 +1224,7 @@ describe('geo.tileLayer', function () {
               wrapX: false,
               wrapY: false,
               topDown: true,
-              url: function () { return '/data/white.jpg'; }
+              url: function () { return '/testdata/white.jpg'; }
             });
 
         tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50}, true);
@@ -1239,7 +1239,7 @@ describe('geo.tileLayer', function () {
               wrapX: false,
               wrapY: false,
               topDown: true,
-              url: function () { return '/data/white.jpg'; }
+              url: function () { return '/testdata/white.jpg'; }
             });
 
         tiles = l._getTiles(0, {left: 50, right: 500, bottom: 500, top: 50});
@@ -1254,7 +1254,7 @@ describe('geo.tileLayer', function () {
               wrapX: true,
               wrapY: false,
               topDown: true,
-              url: function () { return '/data/white.jpg'; }
+              url: function () { return '/testdata/white.jpg'; }
             });
 
         tiles = l._getTiles(0, {left: 50, right: 500, bottom: 500, top: 50});
@@ -1270,7 +1270,7 @@ describe('geo.tileLayer', function () {
               wrapX: false,
               wrapY: true,
               topDown: true,
-              url: function () { return '/data/white.jpg'; }
+              url: function () { return '/testdata/white.jpg'; }
             });
 
         tiles = l._getTiles(0, {left: 50, right: 500, bottom: 500, top: 50});
@@ -1286,7 +1286,7 @@ describe('geo.tileLayer', function () {
               wrapX: true,
               wrapY: true,
               topDown: true,
-              url: function () { return '/data/white.jpg'; }
+              url: function () { return '/testdata/white.jpg'; }
             });
 
         tiles = l._getTiles(0, {left: 50, right: 500, bottom: 500, top: 50});
@@ -1301,7 +1301,7 @@ describe('geo.tileLayer', function () {
               wrapX: false,
               wrapY: false,
               topDown: true,
-              url: '/data/white.jpg?s={s}&x={x}&y={y}&z={z}'
+              url: '/testdata/white.jpg?s={s}&x={x}&y={y}&z={z}'
             });
 
         tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50});
@@ -1319,7 +1319,7 @@ describe('geo.tileLayer', function () {
               wrapX: false,
               wrapY: false,
               topDown: true,
-              baseUrl: '/data/white.jpg?test='
+              baseUrl: '/testdata/white.jpg?test='
             });
 
         tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50});
@@ -1332,7 +1332,11 @@ describe('geo.tileLayer', function () {
     });
   });
 
-  describe('HTML renderering', function () {
+  describe('HTML rendering', function () {
+    afterAll(function () {
+      $('.geo-test-container').remove();
+    });
+
     function layer_html(opts) {
       var node = $('<div class="geo-test-container" style="display: none"/>'), m, l;
       opts = opts || {};
@@ -1366,7 +1370,7 @@ describe('geo.tileLayer', function () {
 
     describe('drawTile', function () {
       function test_draw(tile) {
-        var l = layer_html({url: function () { return '/data/white.jpg'; }});
+        var l = layer_html({url: function () { return '/testdata/white.jpg'; }});
         l.drawTile(l._getTileCached(tile));
         l.drawTile(l._getTileCached(tile)); // draw it twice, but should only add one
         return l;
@@ -1428,7 +1432,7 @@ describe('geo.tileLayer', function () {
 
         var l = layer_html({url: function () { return 'not a valid url'; }}), t;
         t = l._getTileCached({x: 0, y: 0, level: 0});
-        t.image = $('<img src="/data/white.jpg"/>').get(0);
+        t.image = $('<img src="/testdata/white.jpg"/>').get(0);
         l.drawTile(t);
         t.catch(spy);
 
@@ -1443,7 +1447,7 @@ describe('geo.tileLayer', function () {
       it('cropped tile', function () {
         var w = 5602, h = 4148;
         var l = layer_html({
-          url: function () { return '/data/white.jpg'; },
+          url: function () { return '/testdata/white.jpg'; },
           tilesMaxBounds: function (level) {
             var scale = Math.pow(2, 5 - level);
             return {
@@ -1464,7 +1468,7 @@ describe('geo.tileLayer', function () {
 
       function setup(bds, opts) {
         var l = layer_html($.extend(
-            true, {url: function () { return '/data/white.jpg'; }}, opts || {}));
+            true, {url: function () { return '/testdata/white.jpg'; }}, opts || {}));
         l._getViewBounds = function () {
           return bds || {
             left: -50,
@@ -1539,7 +1543,7 @@ describe('geo.tileLayer', function () {
       });
     });
     it('clear all tiles', function () {
-      var l = layer_html({url: function () { return '/data/white.jpg'; }}), tiles;
+      var l = layer_html({url: function () { return '/testdata/white.jpg'; }}), tiles;
 
       tiles = [
         l._getTileCached({x: 0, y: 0, level: 0}),
@@ -1558,7 +1562,7 @@ describe('geo.tileLayer', function () {
       expect(l.cache.length).toBe(5);
     });
     it('reset the layer', function () {
-      var l = layer_html({url: function () { return '/data/white.jpg'; }}), tiles;
+      var l = layer_html({url: function () { return '/testdata/white.jpg'; }}), tiles;
 
       tiles = [
         l._getTileCached({x: 0, y: 0, level: 0}),
@@ -1579,7 +1583,7 @@ describe('geo.tileLayer', function () {
   });
 
   it('Overloading draw method', function () {
-    var l = geo.tileLayer({map: map(), url: function () { return '/data/white.jpg'; }}),
+    var l = geo.tileLayer({map: map(), url: function () { return '/testdata/white.jpg'; }}),
         called = 0;
     l._drawTile = function () { called += 1; };
     l.drawTile(l._getTile({x: 0, y: 0, level: 0}));

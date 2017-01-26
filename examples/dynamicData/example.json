@@ -2,7 +2,7 @@
   "path": "dynamicData",
   "title": "Dynamic Data",
   "exampleCss": ["main.css"],
-  "exampleJs": ["main.js"],
+  "exampleJs": ["main.js", "clock.js"],
   "about": {
     "text": "Rendering data that changes with time."
   },

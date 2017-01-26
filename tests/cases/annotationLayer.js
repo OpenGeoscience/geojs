@@ -75,13 +75,13 @@ describe('geo.annotationLayer', function () {
       expect(layer.mode()).toBe('polygon');
       expect(layer.annotations().length).toBe(1);
       expect(layer.annotations()[0].id()).not.toBe(id);
-      expect(map.interactor().hasAction(undefined, undefined, 'annotationLayer')).toBeNull();
+      expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).toBeNull();
       expect(layer.mode('rectangle')).toBe(layer);
       expect(layer.mode()).toBe('rectangle');
-      expect(map.interactor().hasAction(undefined, undefined, 'annotationLayer')).not.toBeNull();
+      expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).not.toBeNull();
       expect(layer.mode(null)).toBe(layer);
       expect(layer.mode()).toBe(null);
-      expect(map.interactor().hasAction(undefined, undefined, 'annotationLayer')).toBeNull();
+      expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).toBeNull();
     });
     it('annotations', function () {
       var poly = geo.annotation.polygonAnnotation({
@@ -141,6 +141,13 @@ describe('geo.annotationLayer', function () {
       expect(addAnnotationBeforeEvent).toBe(2);
       expect(addAnnotationEvent).toBe(2);
       expect(lastAddAnnotationEvent.annotation).toBe(rect);
+      expect(layer.annotations()[1]._coordinates()[1]).not.toEqual({x: 1, y: 0});
+      layer.removeAnnotation(rect);
+      rect = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
+      layer.addAnnotation(rect, map.gcs());
+      expect(layer.annotations()[1]._coordinates()[1]).toEqual({x: 1, y: 0});
     });
     it('annotationById', function () {
       expect(layer.annotationById()).toBe(undefined);
@@ -380,8 +387,12 @@ describe('geo.annotationLayer', function () {
       });
       expect(layer.annotations().length).toBe(0);
       layer.mode('rectangle');
+      expect(layer.annotations()[0].state()).toBe(geo.annotation.state.create);
       layer._processSelection({
-        state: {action: geo.geo_action.annotation_rectangle},
+        state: {
+          action: geo.geo_action.annotation_rectangle,
+          actionRecord: {owner: geo.annotation.actionOwner}
+        },
         lowerLeft: {x: 10, y: 10},
         lowerRight: {x: 20, y: 10},
         upperLeft: {x: 10, y: 5},
@@ -389,6 +400,7 @@ describe('geo.annotationLayer', function () {
       });
       expect(layer.annotations().length).toBe(1);
       expect(layer.annotations()[0].type()).toBe('rectangle');
+      expect(layer.annotations()[0].state()).toBe(geo.annotation.state.done);
     });
     it('_geojsonFeatureToAnnotation', function () {
       map.deleteLayer(layer);

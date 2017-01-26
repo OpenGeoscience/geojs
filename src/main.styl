@@ -1,0 +1,68 @@
+@import '~nib/index.styl'
+
+.geojs-map
+  position relative
+
+  .geo-attribution
+    position absolute
+    right 0px
+    bottom 0px
+    padding-right 5px
+    cursor auto
+    font 11px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif
+    z-index 1001
+    background rgba(255,255,255,0.7)
+    clear both
+    display block
+    pointer-events auto
+
+    .geo-attribution-layer
+      padding-left 5px
+
+  .canvas-canvas
+    display block
+    transform-origin 0px 0px
+  .webgl-canvas
+    display block
+
+  .geojs-layer
+    position absolute
+    width 100%
+    height 100%
+    pointer-events none
+    &.active
+      pointer-events auto
+
+  .geo-tile-layer
+    transform-origin 0px 0px
+    line-height 0
+    font-size 0
+
+  &.annotation-input
+    cursor crosshair
+
+  &.highlight-focus
+    &:after
+      content ""
+      display block
+      position absolute
+      box-sizing border-box
+      left 0px
+      top 0px
+      right 0px
+      bottom 0px
+      // Highlight is technically a css2 color.  We may need to specify it
+      // explicitly.  #3B66A6 seems close
+      border 3px solid Highlight
+      opacity 1
+      transition opacity 0s
+      visibility hidden
+    &:focus:after
+      visibility visible
+      transition opacity 2.5s ease-in
+      opacity 0
+
+.geo-tile-container
+  position absolute
+  &.crop
+    overflow hidden

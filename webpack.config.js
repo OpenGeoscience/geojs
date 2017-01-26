@@ -56,6 +56,12 @@ module.exports = {
       test: /\.json$/,
       loader: 'json-loader'
     }, {
+      test: /\.styl$/,
+      loader: 'style-loader!css-loader!stylus-loader'
+    }, {
+      test: /\.css$/,
+      loader: 'style-loader!css-loader'
+    }, {
       test: /vgl\.js$/,
       loader: 'expose?vgl!imports?mat4=gl-mat4,vec4=gl-vec4,vec3=gl-vec3,vec2=gl-vec2,$=jquery'
     }]

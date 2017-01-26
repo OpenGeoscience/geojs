@@ -1,6 +1,5 @@
 var inherit = require('./inherit');
 var featureLayer = require('./featureLayer');
-var geo_action = require('./action');
 var geo_annotation = require('./annotation');
 var geo_event = require('./event');
 var registry = require('./registry');
@@ -47,7 +46,6 @@ var annotationLayer = function (args) {
       s_update = this._update,
       m_buildTime = timestamp(),
       m_options,
-      m_actions,
       m_mode = null,
       m_annotations = [],
       m_features = [];
@@ -70,16 +68,6 @@ var annotationLayer = function (args) {
     finalPointProximity: 10  // in pixels, 0 is exact
   }, args);
 
-  m_actions = {
-    rectangle: {
-      action: geo_action.annotation_rectangle,
-      owner: 'annotationLayer',
-      input: 'left',
-      modifiers: {shift: false, ctrl: false},
-      selectionRectangle: true
-    }
-  };
-
   /**
    * Process a selection event.  If we are in rectangle-creation mode, this
    * creates a rectangle.
@@ -87,22 +75,37 @@ var annotationLayer = function (args) {
    * @param {geo.event} evt the selection event.
    */
   this._processSelection = function (evt) {
-    if (m_this.mode() === 'rectangle') {
-      m_this.mode(null);
-      if (evt.state.action === geo_action.annotation_rectangle) {
-        var map = m_this.map();
-        var params = {
-          corners: [
-            /* Keep in map gcs, not interface gcs to avoid wrapping issues */
-            map.displayToGcs({x: evt.lowerLeft.x, y: evt.lowerLeft.y}, null),
-            map.displayToGcs({x: evt.lowerLeft.x, y: evt.upperRight.y}, null),
-            map.displayToGcs({x: evt.upperRight.x, y: evt.upperRight.y}, null),
-            map.displayToGcs({x: evt.upperRight.x, y: evt.lowerLeft.y}, null)
-          ],
-          layer: this
-        };
-        this.addAnnotation(geo_annotation.rectangleAnnotation(params));
-      }
+    var update;
+    if (evt.state && evt.state.actionRecord &&
+        evt.state.actionRecord.owner === geo_annotation.actionOwner &&
+        this.currentAnnotation) {
+      update = this.currentAnnotation.processAction(evt);
+    }
+    this._updateFromEvent(update);
+  };
+
+  /**
+   * Handle updating the current annotation based on an update state.
+   *
+   * @param {string|undefined} update: truthy to update.  'done' if the
+   *    annotation was completed and the mode should return to null.  'remove'
+   *    to remove the current annotation and set the mode to null.  Falsy to do
+   *    nothing.
+   */
+  this._updateFromEvent = function (update) {
+    switch (update) {
+      case 'remove':
+        m_this.removeAnnotation(m_this.currentAnnotation, false);
+        m_this.mode(null);
+        break;
+      case 'done':
+        m_this.mode(null);
+        break;
+    }
+    if (update) {
+      m_this.modified();
+      m_this._update();
+      m_this.draw();
     }
   };
 
@@ -132,20 +135,7 @@ var annotationLayer = function (args) {
   this._handleMouseClick = function (evt) {
     if (this.mode() && this.currentAnnotation) {
       var update = this.currentAnnotation.mouseClick(evt);
-      switch (update) {
-        case 'remove':
-          m_this.removeAnnotation(m_this.currentAnnotation, false);
-          m_this.mode(null);
-          break;
-        case 'done':
-          m_this.mode(null);
-          break;
-      }
-      if (update) {
-        m_this.modified();
-        m_this._update();
-        m_this.draw();
-      }
+      this._updateFromEvent(update);
     }
   };
 
@@ -210,14 +200,24 @@ var annotationLayer = function (args) {
    * Add an annotation to the layer.  The annotation could be in any state.
    *
    * @param {object} annotation the annotation to add.
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform
    */
-  this.addAnnotation = function (annotation) {
+  this.addAnnotation = function (annotation, gcs) {
     var pos = $.inArray(annotation, m_annotations);
     if (pos < 0) {
       m_this.geoTrigger(geo_event.annotation.add_before, {
         annotation: annotation
       });
       m_annotations.push(annotation);
+      annotation.layer(this);
+      var map = this.map();
+      gcs = (gcs === null ? map.gcs() : (
+             gcs === undefined ? map.ingcs() : gcs));
+      if (gcs !== map.gcs()) {
+        annotation._coordinates(transform.transformCoordinates(
+            gcs, map.gcs(), annotation._coordinates()));
+      }
       this.modified();
       this._update();
       this.draw();
@@ -323,9 +323,10 @@ var annotationLayer = function (args) {
       return m_mode;
     }
     if (arg !== m_mode) {
-      var createAnnotation, mapNode = m_this.map().node(), oldMode = m_mode;
+      var createAnnotation, actions,
+          mapNode = m_this.map().node(), oldMode = m_mode;
       m_mode = arg;
-      mapNode.css('cursor', m_mode ? 'crosshair' : '');
+      mapNode.toggleClass('annotation-input', !!m_mode);
       if (m_mode) {
         Mousetrap(mapNode[0]).bind('esc', function () { m_this.mode(null); });
       } else {
@@ -347,18 +348,21 @@ var annotationLayer = function (args) {
           createAnnotation = geo_annotation.polygonAnnotation;
           break;
         case 'rectangle':
-          m_this.map().interactor().addAction(m_actions.rectangle);
+          createAnnotation = geo_annotation.rectangleAnnotation;
           break;
       }
+      m_this.map().interactor().removeAction(
+        undefined, undefined, geo_annotation.actionOwner);
       if (createAnnotation) {
         this.currentAnnotation = createAnnotation({
           state: geo_annotation.state.create,
           layer: this
         });
-        this.addAnnotation(m_this.currentAnnotation);
-      }
-      if (m_mode !== 'rectangle') {
-        m_this.map().interactor().removeAction(m_actions.rectangle);
+        this.addAnnotation(m_this.currentAnnotation, null);
+        actions = this.currentAnnotation.actions(geo_annotation.state.create);
+        $.each(actions, function (idx, action) {
+          m_this.map().interactor().addAction(action);
+        });
       }
       m_this.geoTrigger(geo_event.annotation.mode, {
         mode: m_mode, oldMode: oldMode});
@@ -534,7 +538,7 @@ var annotationLayer = function (args) {
         options.state = geo_annotation.state.done;
         options.layer = m_this;
         options.updated = 'new';
-        m_this.addAnnotation(registry.createAnnotation(type, options));
+        m_this.addAnnotation(registry.createAnnotation(type, options), null);
       }
     });
   };

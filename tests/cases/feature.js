@@ -275,6 +275,12 @@ describe('geo.feature', function () {
       expect(feat.selectionAPI()).toBe(false);
       feat = geo.feature({layer: layer, renderer: layer.renderer(), selectionAPI: true});
       expect(feat.selectionAPI()).toBe(true);
+      expect(feat.selectionAPI(false)).toBe(feat);
+      expect(feat.selectionAPI()).toBe(false);
+      expect(feat.selectionAPI('not false')).toBe(feat);
+      expect(feat.selectionAPI()).toBe(true);
+      expect(feat.selectionAPI(0)).toBe(feat);
+      expect(feat.selectionAPI()).toBe(false);
     });
   });
 });

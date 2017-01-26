@@ -252,8 +252,8 @@
      *    returned.
      */
     convertColor: function (color) {
-      if (color.r !== undefined && color.g !== undefined &&
-          color.b !== undefined) {
+      if (color === undefined || (color.r !== undefined &&
+          color.g !== undefined && color.b !== undefined)) {
         return color;
       }
       var opacity;
@@ -781,7 +781,7 @@
       } else if (!stop && !m_originalRequestAnimationFrame) {
         m_originalRequestAnimationFrame = window.requestAnimationFrame;
         window.requestAnimationFrame = function (callback) {
-          m_originalRequestAnimationFrame.call(window, function (timestamp) {
+          return m_originalRequestAnimationFrame.call(window, function (timestamp) {
             var track = m_timingData.requestAnimationFrame, recent;
             /* Some environments have unsynchronized performance and time
              * counters.  The nowDelta factor compensates for this.  For

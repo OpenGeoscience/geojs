@@ -35,6 +35,7 @@ var d3_lineFeature = function (arg) {
   var m_this = this,
       s_init = this._init,
       m_buildTime = timestamp(),
+      m_maxIdx = 0,
       s_update = this._update;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -59,7 +60,7 @@ var d3_lineFeature = function (arg) {
         s_style = m_this.style(),
         m_renderer = m_this.renderer(),
         pos_func = m_this.position(),
-        line;
+        line, i;
 
     s_update.call(m_this);
     s_style.fill = function () { return false; };
@@ -105,6 +106,10 @@ var d3_lineFeature = function (arg) {
 
       m_renderer._drawFeatures(m_style);
     });
+    for (i = data.length; i < m_maxIdx; i += 1) {
+      m_renderer._removeFeature(m_this._d3id() + i);
+    }
+    m_maxIdx = data.length;
 
     m_buildTime.modified();
     m_this.updateTime().modified();

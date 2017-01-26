@@ -32,8 +32,8 @@ var vglRenderer = function (arg) {
       m_viewer = null,
       m_width = 0,
       m_height = 0,
-      m_renderAnimFrameRef = null,
       m_lastZoom,
+      m_updateCamera = false,
       s_init = this._init,
       s_exit = this._exit;
 
@@ -87,8 +87,19 @@ var vglRenderer = function (arg) {
     s_init.call(m_this);
 
     var canvas = $(document.createElement('canvas'));
-    canvas.attr('class', 'webgl-canvas');
+    canvas.addClass('webgl-canvas');
     $(m_this.layer().node().get(0)).append(canvas);
+
+    if (window.contextPreserveDrawingBuffer) {
+      var elem = canvas.get(0);
+      var getContext = elem.getContext;
+      elem.getContext = function (contextType, contextAttributes) {
+        contextAttributes = contextAttributes || {};
+        contextAttributes.preserveDrawingBuffer = true;
+        return getContext.call(elem, contextType, contextAttributes);
+      };
+    }
+
     m_viewer = vgl.viewer(canvas.get(0), arg.options);
     m_viewer.init();
     m_contextRenderer = m_viewer.renderWindow().activeRenderer();
@@ -120,7 +131,7 @@ var vglRenderer = function (arg) {
     m_this.canvas().attr('height', h);
     renderWindow.positionAndResize(x, y, w, h);
 
-    m_this._updateRendererCamera();
+    m_updateCamera = true;
     m_this._render();
 
     return m_this;
@@ -132,10 +143,13 @@ var vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._render = function () {
-    if (m_renderAnimFrameRef) {
-      window.cancelAnimationFrame(m_renderAnimFrameRef);
-    }
-    m_renderAnimFrameRef = window.requestAnimationFrame(this._renderFrame);
+    /* If we are already scheduled to render, don't schedule again.  Rather,
+     * mark that we should render after other animation frame requests occur.
+     * It would be nice if we could just reschedule the call by removing and
+     * readding the animation frame request, but this doesn't work for if the
+     * reschedule occurs during another animation frame callback (it then waits
+     * until a subsequent frame). */
+    m_this.layer().map().scheduleAnimationFrame(this._renderFrame, true);
     return m_this;
   };
 
@@ -143,7 +157,10 @@ var vglRenderer = function (arg) {
    * This clears the render timer and actually renders.
    */
   this._renderFrame = function () {
-    m_renderAnimFrameRef = null;
+    if (m_updateCamera) {
+      m_updateCamera = false;
+      m_this._updateRendererCamera();
+    }
     m_viewer.render();
   };
 
@@ -188,8 +205,20 @@ var vglRenderer = function (arg) {
       m_lastZoom = map.zoom();
       cam.setViewMatrix(view, true);
       cam.setProjectionMatrix(proj);
+      var viewport = camera.viewport;
+      /* Test if we should align texels.  We won't if the projection matrix
+       * is not simple, if there is a rotation that isn't a multiple of 90
+       * degrees, if the viewport is not at an integer location, or if the zoom
+       * level is not close to an integer.
+       *   Note that the test for the viewport is strict (val % 1 is non-zero
+       * if the value is not an integer), as, in general, the alignment is only
+       * non-integral if a percent offset or calculation was used in css
+       * somewhere.  The test for zoom level always has some allowance for
+       * precision, as it is often the result of repeated computations. */
       if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
           proj[8] || proj[9] || proj[11] || proj[15] !== 1 || !ortho ||
+          (viewport.left && viewport.left % 1) ||
+          (viewport.top && viewport.top % 1) ||
           (parseFloat(m_lastZoom.toFixed(6)) !==
            parseFloat(m_lastZoom.toFixed(0)))) {
         /* Don't align texels */
@@ -201,11 +230,11 @@ var vglRenderer = function (arg) {
          * probably be divided by window.devicePixelRatio. */
         cam.viewAlignment = function () {
           var align = {
-            roundx: 2.0 / camera.viewport.width,
-            roundy: 2.0 / camera.viewport.height
+            roundx: 2.0 / viewport.width,
+            roundy: 2.0 / viewport.height
           };
-          align.dx = (camera.viewport.width % 2) ? align.roundx * 0.5 : 0;
-          align.dy = (camera.viewport.height % 2) ? align.roundy * 0.5 : 0;
+          align.dx = (viewport.width % 2) ? align.roundx * 0.5 : 0;
+          align.dy = (viewport.height % 2) ? align.roundy * 0.5 : 0;
           return align;
         };
       }
@@ -216,7 +245,7 @@ var vglRenderer = function (arg) {
   // produce a pan
   m_this.layer().geoOn(geo_event.pan, function (evt) {
     void (evt);
-    m_this._updateRendererCamera();
+    m_updateCamera = true;
   });
 
   // Connect to parallelprojection event
@@ -229,10 +258,11 @@ var vglRenderer = function (arg) {
       if (!vglRenderer || !vglRenderer.camera()) {
         console.log('Parallel projection event triggered on unconnected VGL ' +
                     'renderer.');
+        return;
       }
       camera = vglRenderer.camera();
       camera.setEnableParallelProjection(evt.parallelProjection);
-      m_this._updateRendererCamera();
+      m_updateCamera = true;
     }
   });
 

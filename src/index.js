@@ -30,12 +30,13 @@
 var $ = require('jquery');
 require('./polyfills');
 
+require('./main.styl');
+
 module.exports = $.extend({
   annotation: require('./annotation'),
   annotationLayer: require('./annotationLayer'),
   camera: require('./camera'),
   choroplethFeature: require('./choroplethFeature'),
-  clock: require('./clock'),
   contourFeature: require('./contourFeature'),
   domRenderer: require('./domRenderer'),
   event: require('./event'),
@@ -44,7 +45,6 @@ module.exports = $.extend({
   fetchQueue: require('./fetchQueue'),
   fileReader: require('./fileReader'),
   geo_action: require('./action'),
-  geomFeature: require('./geomFeature'),
   graphFeature: require('./graphFeature'),
   gridFeature: require('./gridFeature'),
   heatmapFeature: require('./heatmapFeature'),
