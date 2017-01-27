@@ -265,6 +265,20 @@ describe('geo.core.map', function () {
       m.rotation(17);
       expect(m.rotation()).toBeCloseTo(17 - Math.PI * 4);
     });
+    it('fileReader', function () {
+      var m = create_map();
+      expect(m.fileReader()).toBe(null);
+      var layerCount = m.layers().length;
+      expect(m.fileReader('jsonReader')).toBe(m);
+      expect(m.fileReader()).not.toBe(null);
+      expect(m.layers().length).toBe(layerCount + 1);
+      expect(m.layers()[m.layers().length - 1].renderer().api()).not.toBe('d3');
+      expect(m.fileReader('jsonReader', {renderer: 'd3'})).toBe(m);
+      expect(m.layers()[m.layers().length - 1].renderer().api()).toBe('d3');
+      var r = geo.createFileReader('jsonReader', {layer: m.layers()[m.layers().length - 1]});
+      expect(m.fileReader(r)).toBe(m);
+      expect(m.fileReader()).toBe(r);
+    });
   });
 
   describe('Public utility methods', function () {
@@ -583,6 +597,31 @@ describe('geo.core.map', function () {
       expect(m.size()).toEqual({width: 500, height: 500});
       $(window).trigger('resize');
       expect(m.size()).toEqual({width: 400, height: 400});
+    });
+    it('dragover', function () {
+      var m = create_map();
+      var evt = $.Event('dragover');
+      evt.originalEvent = new window.Event('dragover');
+      evt.originalEvent.dataTransfer = {};
+      $(m.node()).trigger(evt);
+      expect(evt.originalEvent.dataTransfer.dropEffect).not.toBe('copy');
+      m.fileReader('jsonReader');
+      evt = $.Event('dragover');
+      evt.originalEvent = new window.Event('dragover');
+      evt.originalEvent.dataTransfer = {};
+      $(m.node()).trigger(evt);
+      expect(evt.originalEvent.dataTransfer.dropEffect).toBe('copy');
+    });
+    it('drop', function () {
+      var m = create_map();
+      m.fileReader('jsonReader', {renderer: 'd3'});
+      var evt = $.Event('drop');
+      evt.originalEvent = new window.Event('drop');
+      evt.originalEvent.dataTransfer = {files: [{
+        geometry: {coordinates: [1, 2], type: 'Point'}, type: 'Feature'
+      }]};
+      $(m.node()).trigger(evt);
+      expect(m.layers()[0].features().length).toBe(1);
     });
   });
 });
