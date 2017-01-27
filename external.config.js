@@ -14,7 +14,8 @@ module.exports = {
   },
   resolve: {
     alias: {
-      d3: 'd3/d3.js'
+      d3: 'd3/d3.js',
+      hammerjs: 'hammerjs/hammer.js'
     }
   },
   plugins: [

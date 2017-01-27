@@ -37,11 +37,13 @@ module.exports = {
       proj4: 'proj4/lib',
       vgl: 'vgl/vgl.js',
       d3: 'd3/d3.js',
+      hammerjs: 'hammerjs/hammer.js',
       mousetrap: 'mousetrap/mousetrap.js'
     }
   },
   externals: {
-    d3: 'd3'
+    d3: 'd3',
+    hammerjs: 'hammerjs'
   },
   plugins: [
     define_plugin,

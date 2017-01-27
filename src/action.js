@@ -11,6 +11,7 @@ var geo_action = {
   select: 'geo_action_select',
   unzoomselect: 'geo_action_unzoomselect',
   zoom: 'geo_action_zoom',
+  zoomrotate: 'geo_action_zoom_rotate',
   zoomselect: 'geo_action_zoomselect',
 
   // annotation actions
