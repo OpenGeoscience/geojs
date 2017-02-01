@@ -860,26 +860,31 @@ var map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Attach a file reader to a layer in the map to be used as a drop target.
+   * Get, set, or create and set a file reader to a layer in the map to be used
+   * as a drop target.
+   *
+   * @param {string|object|undefined} readerOrName: undefined to get the
+   *    current reader, an instance of a file reader to set the reader, or a
+   *    name to create a file reader (see utils.createFileReader for options).
+   * @param {object} opts: options for creating a file reader.  If this
+   *    includes layer, use that layer, otherwise create a layer using these
+   *    options.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.fileReader = function (readerType, opts) {
-    var layer, renderer;
-    opts = opts || {};
-    if (!readerType) {
+  this.fileReader = function (readerOrName, opts) {
+    if (readerOrName === undefined) {
       return m_fileReader;
     }
-    layer = opts.layer;
-    if (!layer) {
-      renderer = opts.renderer;
-      if (!renderer) {
-        renderer = 'd3';
+    if (typeof readerOrName === 'string') {
+      opts = opts || {};
+      if (!opts.layer) {
+        opts.layer = m_this.createLayer('feature', $.extend({}, opts));
       }
-      layer = m_this.createLayer('feature', {renderer: renderer});
+      opts.renderer = opts.layer.renderer().api();
+      m_fileReader = registry.createFileReader(readerOrName, opts);
+    } else {
+      m_fileReader = readerOrName;
     }
-    opts.layer = layer;
-    opts.renderer = renderer;
-    m_fileReader = registry.createFileReader(readerType, opts);
     return m_this;
   };
 
@@ -891,7 +896,7 @@ var map = function (arg) {
   this._init = function () {
 
     if (m_node === undefined || m_node === null) {
-      throw 'Map require DIV node';
+      throw new Error('Map require DIV node');
     }
 
     m_node.addClass('geojs-map');

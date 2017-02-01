@@ -185,7 +185,7 @@ var d3Renderer = function (arg) {
     m_width = width;
     m_height = height;
     if (!m_width || !m_height) {
-      throw 'Map layer has size 0';
+      throw new Error('Map layer has size 0');
     }
     m_diagonal = Math.pow(width * width + height * height, 0.5);
     m_corners = {

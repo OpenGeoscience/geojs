@@ -28,7 +28,7 @@ var widget = function (arg) {
   arg.position = arg.position === undefined ? { left: 0, top: 0 } : arg.position;
 
   if (arg.parent !== undefined && !(arg.parent instanceof widget)) {
-    throw 'Parent must be of type geo.gui.widget';
+    throw new Error('Parent must be of type geo.gui.widget');
   }
 
   this._init = function () {
@@ -88,7 +88,7 @@ var widget = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._createCanvas = function () {
-    throw 'Must be defined in derived classes';
+    throw new Error('Must be defined in derived classes');
   };
 
   ////////////////////////////////////////////////////////////////////////////
