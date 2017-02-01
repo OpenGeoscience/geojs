@@ -7,12 +7,17 @@ var path = require('path');
  * Return URL friendly browser string
  */
 function browser(b) {
+  /* The browser string starts with the basic browser name (Firefox, PhantomJS,
+   * etc.  Split on the first space or dash to isolate this name. */
   return b.toLowerCase().split(/[ /-]/)[0];
 }
 
 function subdir_name(b) {
   var subdir = browser(b);
   if (process.env.GEOJS_TEST_CASE) {
+    /* Use thes test case and as part of the name so that different tests end
+     * up in different coverage directories.  Get the last file name without
+     * extenskon from the test case for this purpose. */
     var parts = /^(.+\/)*(([^\/]+)\.[^\/.]*|[^\/.]+)$/.exec(process.env.GEOJS_TEST_CASE);
     if (parts) {
       subdir += '_' + (parts[3] || parts[2]);

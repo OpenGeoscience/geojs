@@ -1682,4 +1682,7 @@ describe('mapInteractor', function () {
     expect(interactor.keyboard(keyboardSettings)).toBe(interactor);
     expect(map.node().hasClass('highlight-focus')).toBe(true);
   });
+  it('Test touch interaction', function () {
+    //DWM::
+  });
 });
