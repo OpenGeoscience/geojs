@@ -1546,6 +1546,68 @@ var map = function (arg) {
   };
 
   /**
+   * Get a screen-shot of all or some of the canvas layers of map.  Note that
+   * webGL layers are rerendered, even if
+   *   window.contextPreserveDrawingBuffer = true;
+   * is set before creating the map object.  Chrome, at least, may not keep the
+   * drawing buffers if the tab loses focus (and returning focus won't
+   * necessarily rerender).
+   *
+   * @param {object|array|undefined} layers: either a layer, a list of
+   *      layers, or falsy to get all layers.
+   * @param {string} type: see canvas.toDataURL.  Defaults to 'image/png'.
+   *    Alternately, 'canvas' to return the canvas element (this can be used
+   *    to get the results as a blob, which can be faster for some operations
+   *    but is not supported as widely).
+   * @param {Number} encoderOptions: see canvas.toDataURL.
+   * @returns {string}: data URL with the result.
+   */
+  this.screenshot = function (layers, type, encoderOptions) {
+    // ensure layers is a list of all the layres we want to include
+    if (!layers) {
+      layers = m_this.layers();
+    } else if (!Array.isArray(layers)) {
+      layers = [layers];
+    }
+    // filter to only the included layers
+    layers = layers.filter(function (l) { return m_this.layers().indexOf(l) >= 0; });
+    // sort layers by z-index
+    layers = layers.sort(
+      function (a, b) { return (a.zIndex() - b.zIndex()); }
+    );
+    // create a new canvas element
+    var result = document.createElement('canvas');
+    result.width = m_width;
+    result.height = m_height;
+    var context = result.getContext('2d');
+    // start with a white background
+    context.fillStyle = 'white';
+    context.fillRect(0, 0, result.width, result.height);
+    // for each layer, copy all canvases to our new canvas.  If we ever support
+    // non-canvases, add them here.  It looks like some support could be added
+    // with a library such as rasterizehtml (avialable on npm).
+    layers.forEach(function (layer) {
+      $('canvas', layer.node()).each(function () {
+        if (layer.renderer().api() === 'vgl') {
+          layer.renderer()._renderFrame();
+        }
+        var transform = $(this).css('transform');
+        // if the canvas is being transformed, apply the same transformation
+        if (transform && transform.substr(0, 7) === 'matrix(') {
+          context.setTransform.apply(context, transform.substr(7, transform.length - 8).split(',').map(parseFloat));
+        } else {
+          context.setTransform(1, 0, 0, 1, 0, 0);
+        }
+        context.drawImage($(this)[0], 0, 0);
+      });
+    });
+    if (type !== 'canvas') {
+      result = result.toDataURL(type, encoderOptions);
+    }
+    return result;
+  };
+
+  /**
    * Instead of each function using window.requestAnimationFrame, schedule all
    * such frames here.  This allows the callbacks to be reordered or removed as
    * needed and reduces overhead in Chrome a small amount.  Also, if the
