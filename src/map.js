@@ -899,7 +899,11 @@ var map = function (arg) {
       throw new Error('Map require DIV node');
     }
 
+    if (m_node.data('data-geojs-map') && $.isFunction(m_node.data('data-geojs-map').exit)) {
+      m_node.data('data-geojs-map').exit();
+    }
     m_node.addClass('geojs-map');
+    m_node.data('data-geojs-map', m_this);
     return m_this;
   };
 
@@ -923,13 +927,15 @@ var map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.exit = function () {
     var i, layers = m_this.children();
-    for (i = 0; i < layers.length; i += 1) {
+    for (i = layers.length - 1; i >= 0; i -= 1) {
       layers[i]._exit();
+      m_this.removeChild(layers[i]);
     }
     if (m_this.interactor()) {
       m_this.interactor().destroy();
       m_this.interactor(null);
     }
+    m_this.node().data('data-geojs-map', null);
     m_this.node().off('.geo');
     /* make sure the map node has nothing left in it */
     m_this.node().empty();
@@ -1560,7 +1566,8 @@ var map = function (arg) {
    *    to get the results as a blob, which can be faster for some operations
    *    but is not supported as widely).
    * @param {Number} encoderOptions: see canvas.toDataURL.
-   * @returns {string}: data URL with the result.
+   * @returns {string|HTMLCanvasElement}: data URL with the result or the
+   *    HTMLCanvasElement with the result.
    */
   this.screenshot = function (layers, type, encoderOptions) {
     // ensure layers is a list of all the layres we want to include
