@@ -623,6 +623,12 @@ describe('geo.core.map', function () {
       expect(dataUrl3).not.toEqual(dataUrl);
       expect(dataUrl3).not.toEqual(dataUrl2);
       layer2.opacity(1);
+      // we can ask for no or different backgrounds
+      dataUrl2 = m.screenshot(null, undefined, undefined, {background: false});
+      expect(dataUrl2).not.toEqual(dataUrl);
+      dataUrl3 = m.screenshot(null, undefined, undefined, {background: 'red'});
+      expect(dataUrl3).not.toEqual(dataUrl);
+      expect(dataUrl3).not.toEqual(dataUrl2);
       // asking for layers out of order shouldn't matter
       dataUrl3 = m.screenshot([layer2, layer1]);
       expect(dataUrl3).toEqual(dataUrl);

@@ -1566,10 +1566,16 @@ var map = function (arg) {
    *    to get the results as a blob, which can be faster for some operations
    *    but is not supported as widely).
    * @param {Number} encoderOptions: see canvas.toDataURL.
+   * @param {object} opts: additional screenshot options:
+   *    background: if false or null, don't prefill the background.  If
+   *        undefined, use the default (white).  Otherwise, a css color or
+   *        CanvasRenderingContext2D.fillStyle to fill the initial canvas.
+   *        This could match the background of the browser page, for instance.
    * @returns {string|HTMLCanvasElement}: data URL with the result or the
    *    HTMLCanvasElement with the result.
    */
-  this.screenshot = function (layers, type, encoderOptions) {
+  this.screenshot = function (layers, type, encoderOptions, opts) {
+    opts = opts || {};
     // ensure layers is a list of all the layres we want to include
     if (!layers) {
       layers = m_this.layers();
@@ -1587,9 +1593,11 @@ var map = function (arg) {
     result.width = m_width;
     result.height = m_height;
     var context = result.getContext('2d');
-    // start with a white background
-    context.fillStyle = 'white';
-    context.fillRect(0, 0, result.width, result.height);
+    // optionally start with a white or custom background
+    if (opts.background !== false && opts.background !== null) {
+      context.fillStyle = opts.background !== undefined ? opts.background : 'white';
+      context.fillRect(0, 0, result.width, result.height);
+    }
     // for each layer, copy all canvases to our new canvas.  If we ever support
     // non-canvases, add them here.  It looks like some support could be added
     // with a library such as rasterizehtml (avialable on npm).
