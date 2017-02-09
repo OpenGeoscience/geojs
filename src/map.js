@@ -899,7 +899,11 @@ var map = function (arg) {
       throw new Error('Map require DIV node');
     }
 
+    if (m_node.data('data-geojs-map') && $.isFunction(m_node.data('data-geojs-map').exit)) {
+      m_node.data('data-geojs-map').exit();
+    }
     m_node.addClass('geojs-map');
+    m_node.data('data-geojs-map', m_this);
     return m_this;
   };
 
@@ -923,13 +927,15 @@ var map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.exit = function () {
     var i, layers = m_this.children();
-    for (i = 0; i < layers.length; i += 1) {
+    for (i = layers.length - 1; i >= 0; i -= 1) {
       layers[i]._exit();
+      m_this.removeChild(layers[i]);
     }
     if (m_this.interactor()) {
       m_this.interactor().destroy();
       m_this.interactor(null);
     }
+    m_this.node().data('data-geojs-map', null);
     m_this.node().off('.geo');
     /* make sure the map node has nothing left in it */
     m_this.node().empty();
@@ -1543,6 +1549,82 @@ var map = function (arg) {
 
     $a.appendTo(m_this.node());
     return m_this;
+  };
+
+  /**
+   * Get a screen-shot of all or some of the canvas layers of map.  Note that
+   * webGL layers are rerendered, even if
+   *   window.contextPreserveDrawingBuffer = true;
+   * is set before creating the map object.  Chrome, at least, may not keep the
+   * drawing buffers if the tab loses focus (and returning focus won't
+   * necessarily rerender).
+   *
+   * @param {object|array|undefined} layers: either a layer, a list of
+   *      layers, or falsy to get all layers.
+   * @param {string} type: see canvas.toDataURL.  Defaults to 'image/png'.
+   *    Alternately, 'canvas' to return the canvas element (this can be used
+   *    to get the results as a blob, which can be faster for some operations
+   *    but is not supported as widely).
+   * @param {Number} encoderOptions: see canvas.toDataURL.
+   * @param {object} opts: additional screenshot options:
+   *    background: if false or null, don't prefill the background.  If
+   *        undefined, use the default (white).  Otherwise, a css color or
+   *        CanvasRenderingContext2D.fillStyle to fill the initial canvas.
+   *        This could match the background of the browser page, for instance.
+   * @returns {string|HTMLCanvasElement}: data URL with the result or the
+   *    HTMLCanvasElement with the result.
+   */
+  this.screenshot = function (layers, type, encoderOptions, opts) {
+    opts = opts || {};
+    // ensure layers is a list of all the layres we want to include
+    if (!layers) {
+      layers = m_this.layers();
+    } else if (!Array.isArray(layers)) {
+      layers = [layers];
+    }
+    // filter to only the included layers
+    layers = layers.filter(function (l) { return m_this.layers().indexOf(l) >= 0; });
+    // sort layers by z-index
+    layers = layers.sort(
+      function (a, b) { return (a.zIndex() - b.zIndex()); }
+    );
+    // create a new canvas element
+    var result = document.createElement('canvas');
+    result.width = m_width;
+    result.height = m_height;
+    var context = result.getContext('2d');
+    // optionally start with a white or custom background
+    if (opts.background !== false && opts.background !== null) {
+      context.fillStyle = opts.background !== undefined ? opts.background : 'white';
+      context.fillRect(0, 0, result.width, result.height);
+    }
+    // for each layer, copy all canvases to our new canvas.  If we ever support
+    // non-canvases, add them here.  It looks like some support could be added
+    // with a library such as rasterizehtml (avialable on npm).
+    layers.forEach(function (layer) {
+      $('canvas', layer.node()).each(function () {
+        var opacity = layer.opacity();
+        if (opacity <= 0) {
+          return;
+        }
+        context.globalAlpha = opacity;
+        if (layer.renderer().api() === 'vgl') {
+          layer.renderer()._renderFrame();
+        }
+        var transform = $(this).css('transform');
+        // if the canvas is being transformed, apply the same transformation
+        if (transform && transform.substr(0, 7) === 'matrix(') {
+          context.setTransform.apply(context, transform.substr(7, transform.length - 8).split(',').map(parseFloat));
+        } else {
+          context.setTransform(1, 0, 0, 1, 0, 0);
+        }
+        context.drawImage($(this)[0], 0, 0);
+      });
+    });
+    if (type !== 'canvas') {
+      result = result.toDataURL(type, encoderOptions);
+    }
+    return result;
   };
 
   /**

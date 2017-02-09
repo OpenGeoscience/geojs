@@ -54,7 +54,6 @@ module.exports.prepareImageTest = function () {
 };
 
 module.exports.prepareIframeTest = function () {
-  window.contextPreserveDrawingBuffer = true;
   $('#map').remove();
   var map = $('<iframe id="map"/>').css({
     width: '800px', height: '600px', border: 0});
@@ -88,15 +87,7 @@ module.exports.imageTest = function (name, elemSelector, threshold, doneFunc, id
   var readyFunc = function () {
     var result;
     if (!elemSelector) {
-      result = $('<canvas>')[0];
-      result.width = $('canvas')[0].width;
-      result.height = $('canvas')[0].height;
-      var context = result.getContext('2d');
-      context.fillStyle = 'white';
-      context.fillRect(0, 0, result.width, result.height);
-      $('canvas').each(function () {
-        context.drawImage($(this)[0], 0, 0);
-      });
+      result = $('#map').data('data-geojs-map').screenshot(null, 'canvas');
     } else {
       var innerScreenX = window.mozInnerScreenX !== undefined ?
             window.mozInnerScreenX :

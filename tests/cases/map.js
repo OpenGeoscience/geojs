@@ -566,6 +566,78 @@ describe('geo.core.map', function () {
       expect(wasCalled).toBe(true);
       unmockAnimationFrame();
     });
+    it('node class and data attribute', function () {
+      var selector = '#map-create-map';
+      var m = create_map();
+      expect($(selector).hasClass('geojs-map')).toBe(true);
+      expect($(selector).data('data-geojs-map')).toBe(m);
+      m.createLayer('feature');
+      expect(m.layers().length).toBe(1);
+      var m2 = geo.map({node: selector});
+      expect($(selector).data('data-geojs-map')).toBe(m2);
+      m2.createLayer('feature');
+      expect(m.layers().length).toBe(0);
+      expect(m2.layers().length).toBe(1);
+    });
+    it('screenshot', function () {
+      var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
+      var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
+      var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
+
+      mockAnimationFrame();
+
+      var m = create_map({
+        width: 64, height: 48, zoom: 2, center: {x: 7.5, y: 7.5}});
+      var layer1 = m.createLayer('feature', {renderer: 'canvas'});
+      var l1 = layer1.createFeature('line', {
+        style: {strokeWidth: 5, strokeColor: 'blue'}});
+      l1.data([[{x: 0, y: 0}, {x: 5, y: 0}],
+               [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}],
+               [{x: 10, y: 0}, {x: 15, y: 2}, {x: 12, y: 5}]]);
+      var layer2 = m.createLayer('feature', {renderer: 'canvas'});
+      var l2 = layer2.createFeature('line', {
+        style: {strokeWidth: 5, strokeColor: 'black'}});
+      l2.data([[{x: 10, y: 10}, {x: 15, y: 10}],
+               [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}]]);
+
+      m.draw();
+      stepAnimationFrame(new Date().getTime());
+      var dataUrl, dataUrl2, dataUrl3;
+      dataUrl = m.screenshot();
+      expect(dataUrl.substr(0, 22)).toBe('data:image/png;base64,');
+      dataUrl2 = m.screenshot(null, 'image/jpeg');
+      expect(dataUrl2.substr(0, 23)).toBe('data:image/jpeg;base64,');
+      expect(dataUrl2.length).toBeLessThan(dataUrl.length);
+      dataUrl2 = m.screenshot(layer1);
+      expect(dataUrl2.substr(0, 22)).toBe('data:image/png;base64,');
+      expect(dataUrl2).not.toEqual(dataUrl);
+      dataUrl3 = m.screenshot([layer1]);
+      expect(dataUrl3).toEqual(dataUrl2);
+      // making a layer transparent is as good as not asking for it
+      layer2.opacity(0);
+      dataUrl3 = m.screenshot();
+      expect(dataUrl3).toEqual(dataUrl2);
+      // a partial opacity should get different results than full
+      layer2.opacity(0.5);
+      dataUrl3 = m.screenshot();
+      expect(dataUrl3).not.toEqual(dataUrl);
+      expect(dataUrl3).not.toEqual(dataUrl2);
+      layer2.opacity(1);
+      // we can ask for no or different backgrounds
+      dataUrl2 = m.screenshot(null, undefined, undefined, {background: false});
+      expect(dataUrl2).not.toEqual(dataUrl);
+      dataUrl3 = m.screenshot(null, undefined, undefined, {background: 'red'});
+      expect(dataUrl3).not.toEqual(dataUrl);
+      expect(dataUrl3).not.toEqual(dataUrl2);
+      // asking for layers out of order shouldn't matter
+      dataUrl3 = m.screenshot([layer2, layer1]);
+      expect(dataUrl3).toEqual(dataUrl);
+      layer2.canvas().css('transform', 'translate(10px, 20px) scale(1.2) rotate(5deg)');
+      stepAnimationFrame(new Date().getTime());
+      dataUrl2 = m.screenshot();
+      expect(dataUrl2).not.toEqual(dataUrl);
+      unmockAnimationFrame();
+    });
   });
 
   describe('Public non-class methods', function () {
