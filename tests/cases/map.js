@@ -613,6 +613,16 @@ describe('geo.core.map', function () {
       expect(dataUrl2).not.toEqual(dataUrl);
       dataUrl3 = m.screenshot([layer1]);
       expect(dataUrl3).toEqual(dataUrl2);
+      // making a layer transparent is as good as not asking for it
+      layer2.opacity(0);
+      dataUrl3 = m.screenshot();
+      expect(dataUrl3).toEqual(dataUrl2);
+      // a partial opacity should get different results than full
+      layer2.opacity(0.5);
+      dataUrl3 = m.screenshot();
+      expect(dataUrl3).not.toEqual(dataUrl);
+      expect(dataUrl3).not.toEqual(dataUrl2);
+      layer2.opacity(1);
       // asking for layers out of order shouldn't matter
       dataUrl3 = m.screenshot([layer2, layer1]);
       expect(dataUrl3).toEqual(dataUrl);

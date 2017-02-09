@@ -1595,6 +1595,11 @@ var map = function (arg) {
     // with a library such as rasterizehtml (avialable on npm).
     layers.forEach(function (layer) {
       $('canvas', layer.node()).each(function () {
+        var opacity = layer.opacity();
+        if (opacity <= 0) {
+          return;
+        }
+        context.globalAlpha = opacity;
         if (layer.renderer().api() === 'vgl') {
           layer.renderer()._renderFrame();
         }
