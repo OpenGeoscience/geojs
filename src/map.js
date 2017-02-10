@@ -1552,6 +1552,27 @@ var map = function (arg) {
   };
 
   /**
+   * Draw a layer image to a canvas contex.  The layer's opacity and transform
+   * is applied.
+   *
+   * @param {context} context: the 2d canvas context to draw into.
+   * @param {number} opacity: the opacity in the range [0, 1].
+   * @param {jquery element} elem: the element that might have a transform.
+   * @param {HTMLImageObject} img: the image or canvas to draw to the canvas.
+   */
+  function drawLayerImageToContext(context, opacity, elem, img) {
+    context.globalAlpha = opacity;
+    var transform = elem.css('transform');
+    // if the canvas is being transformed, apply the same transformation
+    if (transform && transform.substr(0, 7) === 'matrix(') {
+      context.setTransform.apply(context, transform.substr(7, transform.length - 8).split(',').map(parseFloat));
+    } else {
+      context.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    context.drawImage(img, 0, 0);
+  }
+
+  /**
    * Get a screen-shot of all or some of the canvas layers of map.  Note that
    * webGL layers are rerendered, even if
    *   window.contextPreserveDrawingBuffer = true;
@@ -1571,11 +1592,37 @@ var map = function (arg) {
    *        undefined, use the default (white).  Otherwise, a css color or
    *        CanvasRenderingContext2D.fillStyle to fill the initial canvas.
    *        This could match the background of the browser page, for instance.
-   * @returns {string|HTMLCanvasElement}: data URL with the result or the
-   *    HTMLCanvasElement with the result.
+   *    wait: if 'idle', wait for the map to be idle and one animation frame to
+   *        occur.  If truthy, wait for an animation frame to occur.
+   *        Otherwise, take the screenshot as sson as possible.
+   * @returns {deferred}: a jQuery Deferred object.  The done function receives
+   *    either a data URL or the HTMLCanvasElement with the result.
    */
   this.screenshot = function (layers, type, encoderOptions, opts) {
+    var defer;
     opts = opts || {};
+    /* if asked to wait, return a Deferred that will do so, calling the
+     * screenshow function without waiting once it is done. */
+    if (opts.wait) {
+      var optsWithoutWait = $.extend({}, opts, {wait: false});
+      defer = $.Deferred();
+
+      var waitForRAF = function () {
+        window.requestAnimationFrame(function () {
+          defer.resolve();
+        });
+      };
+
+      if (opts.wait === 'idle') {
+        m_this.onIdle(waitForRAF);
+      } else {
+        waitForRAF();
+      }
+      return defer.then(function () {
+        return m_this.screenshot(layers, type, encoderOptions, optsWithoutWait);
+      });
+    }
+    defer = $.when();
     // ensure layers is a list of all the layres we want to include
     if (!layers) {
       layers = m_this.layers();
@@ -1598,33 +1645,40 @@ var map = function (arg) {
       context.fillStyle = opts.background !== undefined ? opts.background : 'white';
       context.fillRect(0, 0, result.width, result.height);
     }
-    // for each layer, copy all canvases to our new canvas.  If we ever support
-    // non-canvases, add them here.  It looks like some support could be added
-    // with a library such as rasterizehtml (avialable on npm).
+    // for each layer, copy to our new canvas.
     layers.forEach(function (layer) {
+      var opacity = layer.opacity();
+      if (opacity <= 0) {
+        return;
+      }
       $('canvas', layer.node()).each(function () {
-        var opacity = layer.opacity();
-        if (opacity <= 0) {
-          return;
-        }
-        context.globalAlpha = opacity;
         if (layer.renderer().api() === 'vgl') {
           layer.renderer()._renderFrame();
         }
-        var transform = $(this).css('transform');
-        // if the canvas is being transformed, apply the same transformation
-        if (transform && transform.substr(0, 7) === 'matrix(') {
-          context.setTransform.apply(context, transform.substr(7, transform.length - 8).split(',').map(parseFloat));
-        } else {
-          context.setTransform(1, 0, 0, 1, 0, 0);
-        }
-        context.drawImage($(this)[0], 0, 0);
+        drawLayerImageToContext(context, opacity, $(this), $(this)[0]);
       });
+      $('svg', layer.node()).each(function () {
+        var elem = $(this);
+        defer = defer.then(function () {
+          return util.svgToImage(elem).done(function (img) {
+            drawLayerImageToContext(context, opacity, elem, img);
+          });
+        });
+      });
+      // non-canvas and non-svg should be added here
     });
-    if (type !== 'canvas') {
-      result = result.toDataURL(type, encoderOptions);
-    }
-    return result;
+    defer = defer.then(function () {
+      var canvas = result;
+      if (type !== 'canvas') {
+        result = result.toDataURL(type, encoderOptions);
+      }
+      m_this.geoTrigger(geo_event.screenshot.ready, {
+        canvas: canvas,
+        screenshot: result
+      });
+      return result;
+    });
+    return defer;
   };
 
   /**

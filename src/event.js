@@ -385,6 +385,26 @@ geo_event.pixelmap = {
 
 ////////////////////////////////////////////////////////////////////////////
 /**
+ * These events are triggered by the map screenshot feature.
+ * @namespace geo.event.pixelmap
+ */
+////////////////////////////////////////////////////////////////////////////
+geo_event.screenshot = {
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Triggered when a scrrenshot has been completed.
+   *
+   * @namespace geo.event.screenshot
+   * @property {object} canvas The canvas used to take the screenshot
+   * @property {string|object} screenshot the screenshot as a dataURL string or
+   *      the canvas, depending on the screenshot request.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  ready: 'geo_screenshot_ready'
+};
+
+////////////////////////////////////////////////////////////////////////////
+/**
  * These events are triggered by the camera when it's internal state is
  * mutated.
  * @namespace geo.event.camera

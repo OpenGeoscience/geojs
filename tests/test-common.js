@@ -28,7 +28,7 @@ module.exports = {
     $.extend(true, mapDefaults, mapOpts);
 
     var osmDefaults = {
-      baseUrl: '/testdata/tiles/',
+      baseUrl: '/data/tiles/',
       attribution: null
     };
 

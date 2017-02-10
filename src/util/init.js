@@ -687,6 +687,60 @@
     },
 
     /**
+     * Convert an svg element to an image.  This attempts to localize any
+     * images within the svg.  If there are other external references, the
+     * image may not work due to security considerations.
+     *
+     * @param {selector|svg element} elem: either a jquery selector or an html
+     *      svg element.  If this contains multiple svgs, only the first one is
+     *      used.
+     * @returns {deferred}: a jquery deferred object which receives an HTML
+     *      Image element when resolved.
+     */
+    svgToImage: function (elem) {
+      var deferList = [];
+
+      elem = $(elem).eq(0).clone();
+      $('image', elem).each(function () {
+        var src = $(this);
+        if (src.attr('href').substr(0, 4) === 'http') {
+          var img = new Image();
+          img.crossOrigin = 'anonymous';
+          var defer = $.Deferred();
+          img.onload = function () {
+            var cvs = document.createElement('canvas');
+            cvs.width = img.naturalWidth;
+            cvs.height = img.naturalHeight;
+            cvs.getContext('2d').drawImage(img, 0, 0);
+            src.attr('href', cvs.toDataURL('image/png'));
+            if (src.attr('href').substr(0, 10) !== 'data:image') {
+              src.remove();
+            }
+            defer.resolve();
+          };
+          img.onerror = function () {
+            src.remove();
+            defer.resolve();
+          };
+          img.src = src.attr('href');
+          deferList.push(defer);
+        }
+      });
+      var defer = $.Deferred();
+      $.when.apply($, deferList).then(function () {
+        var img = new Image();
+        img.onload = function () {
+          defer.resolve(img);
+        };
+        img.onerror = function () {
+          defer.reject();
+        };
+        img.src = 'data:image/svg+xml;base64,' + btoa(new XMLSerializer().serializeToString(elem[0]));
+      });
+      return defer;
+    },
+
+    /**
      * Report on one or all of the tracked timings.
      *
      * @param {string} name name to report on, or undefined to report all.

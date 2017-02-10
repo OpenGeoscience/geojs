@@ -579,64 +579,133 @@ describe('geo.core.map', function () {
       expect(m.layers().length).toBe(0);
       expect(m2.layers().length).toBe(1);
     });
-    it('screenshot', function () {
-      var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
-      var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
-      var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
-      mockAnimationFrame();
+  });
+  describe('screenshot', function () {
+    var m, layer1, layer2, l1, l2;
+    var ss = {};
 
-      var m = create_map({
+    it('basic', function (done) {
+      m = create_map({
         width: 64, height: 48, zoom: 2, center: {x: 7.5, y: 7.5}});
-      var layer1 = m.createLayer('feature', {renderer: 'canvas'});
-      var l1 = layer1.createFeature('line', {
+      layer1 = m.createLayer('feature', {renderer: 'canvas'});
+      l1 = layer1.createFeature('line', {
         style: {strokeWidth: 5, strokeColor: 'blue'}});
       l1.data([[{x: 0, y: 0}, {x: 5, y: 0}],
                [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}],
                [{x: 10, y: 0}, {x: 15, y: 2}, {x: 12, y: 5}]]);
-      var layer2 = m.createLayer('feature', {renderer: 'canvas'});
-      var l2 = layer2.createFeature('line', {
+      layer2 = m.createLayer('feature', {renderer: 'canvas'});
+      l2 = layer2.createFeature('line', {
         style: {strokeWidth: 5, strokeColor: 'black'}});
       l2.data([[{x: 10, y: 10}, {x: 15, y: 10}],
                [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}]]);
 
       m.draw();
-      stepAnimationFrame(new Date().getTime());
-      var dataUrl, dataUrl2, dataUrl3;
-      dataUrl = m.screenshot();
-      expect(dataUrl.substr(0, 22)).toBe('data:image/png;base64,');
-      dataUrl2 = m.screenshot(null, 'image/jpeg');
-      expect(dataUrl2.substr(0, 23)).toBe('data:image/jpeg;base64,');
-      expect(dataUrl2.length).toBeLessThan(dataUrl.length);
-      dataUrl2 = m.screenshot(layer1);
-      expect(dataUrl2.substr(0, 22)).toBe('data:image/png;base64,');
-      expect(dataUrl2).not.toEqual(dataUrl);
-      dataUrl3 = m.screenshot([layer1]);
-      expect(dataUrl3).toEqual(dataUrl2);
+      window.requestAnimationFrame(function () {
+        m.screenshot().then(function (result) {
+          expect(result.substr(0, 22)).toBe('data:image/png;base64,');
+          ss.basic = result;
+          done();
+        });
+      });
+    });
+    it('jpeg', function (done) {
+      m.screenshot(null, 'image/jpeg').then(function (result) {
+        expect(result.substr(0, 23)).toBe('data:image/jpeg;base64,');
+        expect(result.length).toBeLessThan(ss.basic.length);
+        done();
+      });
+    });
+    it('one layer', function (done) {
+      m.screenshot(layer1).then(function (result) {
+        expect(result.substr(0, 22)).toBe('data:image/png;base64,');
+        expect(result).not.toEqual(ss.basic);
+        ss.onelayer = result;
+        done();
+      });
+    });
+    it('one layer in a list', function (done) {
+      m.screenshot([layer1]).then(function (result) {
+        expect(result).toEqual(ss.onelayer);
+        done();
+      });
+    });
+    it('transparent layer', function (done) {
       // making a layer transparent is as good as not asking for it
       layer2.opacity(0);
-      dataUrl3 = m.screenshot();
-      expect(dataUrl3).toEqual(dataUrl2);
-      // a partial opacity should get different results than full
+      m.screenshot().then(function (result) {
+        expect(result).toEqual(ss.onelayer);
+        done();
+      });
+    });
+    it('partial opacity', function (done) {
+      // making a layer transparent is as good as not asking for it
       layer2.opacity(0.5);
-      dataUrl3 = m.screenshot();
-      expect(dataUrl3).not.toEqual(dataUrl);
-      expect(dataUrl3).not.toEqual(dataUrl2);
-      layer2.opacity(1);
-      // we can ask for no or different backgrounds
-      dataUrl2 = m.screenshot(null, undefined, undefined, {background: false});
-      expect(dataUrl2).not.toEqual(dataUrl);
-      dataUrl3 = m.screenshot(null, undefined, undefined, {background: 'red'});
-      expect(dataUrl3).not.toEqual(dataUrl);
-      expect(dataUrl3).not.toEqual(dataUrl2);
-      // asking for layers out of order shouldn't matter
-      dataUrl3 = m.screenshot([layer2, layer1]);
-      expect(dataUrl3).toEqual(dataUrl);
-      layer2.canvas().css('transform', 'translate(10px, 20px) scale(1.2) rotate(5deg)');
-      stepAnimationFrame(new Date().getTime());
-      dataUrl2 = m.screenshot();
-      expect(dataUrl2).not.toEqual(dataUrl);
-      unmockAnimationFrame();
+      m.screenshot().then(function (result) {
+        expect(result).not.toEqual(ss.basic);
+        expect(result).not.toEqual(ss.onelayer);
+        layer2.opacity(1);
+        done();
+      });
+    });
+    it('no background', function (done) {
+      m.screenshot(null, undefined, undefined, {background: false}).then(function (result) {
+        expect(result).not.toEqual(ss.basic);
+        ss.nobackground = result;
+        done();
+      });
+    });
+    it('red background', function (done) {
+      m.screenshot(null, undefined, undefined, {background: 'red'}).then(function (result) {
+        expect(result).not.toEqual(ss.basic);
+        expect(result).not.toEqual(ss.nobackground);
+        done();
+      });
+    });
+    it('layers in a different order', function (done) {
+      m.screenshot([layer2, layer1]).then(function (result) {
+        // the order doesn't matter
+        expect(result).toEqual(ss.basic);
+        done();
+      });
+    });
+    it('transformed layer', function (done) {
+      layer2.canvas().css('transform', 'matrix(2, -0.4, 0.4, 2, -100, 120)');
+      m.screenshot().then(function (result) {
+        expect(result).not.toEqual(ss.basic);
+        layer2.canvas().css('transform', 'none');
+        done();
+      });
+    });
+    it('wait for idle', function (done) {
+      var defer = $.Deferred();
+      var waited;
+      m.addPromise(defer);
+      m.screenshot(null, undefined, undefined, {wait: 'idle'}).then(function (result) {
+
+        expect(result).toEqual(ss.basic);
+        expect(waited).toBe(true);
+        done();
+      });
+      window.setTimeout(function () {
+        waited = true;
+        defer.resolve();
+      }, 50);
+    });
+    /* note that svg layers are not tested here, as the phantomjs browser
+     * doesn't support the necessary behavior. */
+    it('screenshot ready event', function (done) {
+      var readyEvent = 0, lastEvent;
+      m.geoOn(geo.event.screenshot.ready, function (evt) {
+        readyEvent += 1;
+        lastEvent = evt;
+      });
+      m.screenshot().then(function () {
+        expect(readyEvent).toBe(1);
+        expect(lastEvent.screenshot).toEqual(ss.basic);
+        expect(lastEvent.canvas.toDataURL()).toEqual(ss.basic);
+        done();
+      });
     });
   });
 
