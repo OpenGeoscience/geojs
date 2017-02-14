@@ -285,7 +285,7 @@ describe('geo.core.map', function () {
     /* Count the number of jquery events bounds to an element using a
      * particular namespace.
      *
-     * @param {jquery element|dom element} elem the element to check.
+     * @param {object} elem the jquery or dom element to check.
      * @param {string} namespace the namespace to count.
      * @returns {number} the number of bounds events.
      */

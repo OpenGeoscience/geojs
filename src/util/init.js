@@ -691,9 +691,8 @@
      * images within the svg.  If there are other external references, the
      * image may not work due to security considerations.
      *
-     * @param {selector|svg element} elem: either a jquery selector or an html
-     *      svg element.  If this contains multiple svgs, only the first one is
-     *      used.
+     * @param {object} elem: either a jquery selector or an html svg element.
+     *      If this contains multiple svgs, only the first one is used.
      * @returns {deferred}: a jquery deferred object which receives an HTML
      *      Image element when resolved.
      */

@@ -1557,7 +1557,7 @@ var map = function (arg) {
    *
    * @param {context} context: the 2d canvas context to draw into.
    * @param {number} opacity: the opacity in the range [0, 1].
-   * @param {jquery element} elem: the element that might have a transform.
+   * @param {object} elem: the element that might have a transform.
    * @param {HTMLImageObject} img: the image or canvas to draw to the canvas.
    */
   function drawLayerImageToContext(context, opacity, elem, img) {
