@@ -1651,13 +1651,13 @@ var map = function (arg) {
       if (opacity <= 0) {
         return;
       }
-      $('canvas', layer.node()).each(function () {
+      layer.node().children('canvas').each(function () {
         if (layer.renderer().api() === 'vgl') {
           layer.renderer()._renderFrame();
         }
         drawLayerImageToContext(context, opacity, $(this), $(this)[0]);
       });
-      $('svg', layer.node()).each(function () {
+      layer.node().children('svg').each(function () {
         var elem = $(this);
         defer = defer.then(function () {
           return util.svgToImage(elem).done(function (img) {
