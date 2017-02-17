@@ -41,4 +41,14 @@ describe('osmLayer', function () {
 
     imageTest.imageTest('osmLayerD3', null, 0.0015, done, myMap.onIdle, 0, 2);
   });
+
+  it('html renderer', function (done) {
+    myMap = common.createOsmMap({}, {
+      renderer: null,
+      attribution: '&copy; <a href="http://some-unvisited-domain.org">OpenStreetMap</a> contributors'
+    });
+    myMap.draw();
+
+    imageTest.imageTest('osmLayerHTML', null, 0.0015, done, myMap.onIdle, 0, 2);
+  });
 });

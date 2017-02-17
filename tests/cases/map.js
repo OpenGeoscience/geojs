@@ -613,6 +613,13 @@ describe('geo.core.map', function () {
       m.screenshot(null, 'image/jpeg').then(function (result) {
         expect(result.substr(0, 23)).toBe('data:image/jpeg;base64,');
         expect(result.length).toBeLessThan(ss.basic.length);
+        ss.jpeg = result;
+        done();
+      });
+    });
+    it('jpegi via single parameter', function (done) {
+      m.screenshot({type: 'image/jpeg'}).then(function (result) {
+        expect(result).toEqual(ss.jpeg);
         done();
       });
     });

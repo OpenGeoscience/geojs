@@ -1547,7 +1547,10 @@ var map = function (arg) {
       }
     });
 
-    $a.appendTo(m_this.node());
+    /* Only add the element if there is at least one attribution */
+    if ($('span', $a).length) {
+      $a.appendTo(m_this.node());
+    }
     return m_this;
   };
 
@@ -1580,8 +1583,10 @@ var map = function (arg) {
    * drawing buffers if the tab loses focus (and returning focus won't
    * necessarily rerender).
    *
-   * @param {object|array|undefined} layers: either a layer, a list of
-   *      layers, or falsy to get all layers.
+   * @param {object|array|undefined} layers: either a layer, a list of layers,
+   *    falsy to get all layers, or an object that contains optional values of
+   *    layers, type, encoderOptions, and values listed in the opts param
+   *    (this last form allows a single argument for the function).
    * @param {string} type: see canvas.toDataURL.  Defaults to 'image/png'.
    *    Alternately, 'canvas' to return the canvas element (this can be used
    *    to get the results as a blob, which can be faster for some operations
@@ -1595,11 +1600,21 @@ var map = function (arg) {
    *    wait: if 'idle', wait for the map to be idle and one animation frame to
    *        occur.  If truthy, wait for an animation frame to occur.
    *        Otherwise, take the screenshot as sson as possible.
+   *    attribution: if null or unspecified, include the attribution only if
+   *        all layers are used.  If false, never include the attribution.  If
+   *        true, always include it.
    * @returns {deferred}: a jQuery Deferred object.  The done function receives
    *    either a data URL or the HTMLCanvasElement with the result.
    */
   this.screenshot = function (layers, type, encoderOptions, opts) {
     var defer;
+
+    if (layers && !Array.isArray(layers) && !layers.renderer) {
+      type = type || layers.type;
+      encoderOptions = encoderOptions || layers.encoderOptions;
+      opts = opts || layers;
+      layers = layers.layers;
+    }
     opts = opts || {};
     /* if asked to wait, return a Deferred that will do so, calling the
      * screenshow function without waiting once it is done. */
@@ -1626,6 +1641,9 @@ var map = function (arg) {
     // ensure layers is a list of all the layres we want to include
     if (!layers) {
       layers = m_this.layers();
+      if (opts.attribution === null || opts.attribution === undefined) {
+        opts.attribution = true;
+      }
     } else if (!Array.isArray(layers)) {
       layers = [layers];
     }
@@ -1657,16 +1675,24 @@ var map = function (arg) {
         }
         drawLayerImageToContext(context, opacity, $(this), $(this)[0]);
       });
-      layer.node().children('svg').each(function () {
-        var elem = $(this);
+      if (layer.node().children().not('canvas').length) {
         defer = defer.then(function () {
-          return util.svgToImage(elem).done(function (img) {
-            drawLayerImageToContext(context, opacity, elem, img);
+          return util.htmlToImage(layer.node(), 1).done(function (img) {
+            drawLayerImageToContext(context, 1, $([]), img);
+          });
+        });
+      }
+    });
+    if (opts.attribution) {
+      m_this.node().find('.geo-attribution').each(function () {
+        var attrElem = $(this);
+        defer = defer.then(function () {
+          return util.htmlToImage(attrElem, 1).done(function (img) {
+            drawLayerImageToContext(context, 1, $([]), img);
           });
         });
       });
-      // non-canvas and non-svg should be added here
-    });
+    }
     defer = defer.then(function () {
       var canvas = result;
       if (type !== 'canvas') {
