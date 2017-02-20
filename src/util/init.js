@@ -809,7 +809,9 @@
       });
 
       $.when.apply($, deferList).then(function () {
-        var svg = $('<svg xmlns="http://www.w3.org/2000/svg"><foreignObject width="100%" height="100%"></foreignObject></svg>');
+        var svg = $('<svg xmlns="http://www.w3.org/2000/svg">' +
+                    '<foreignObject width="100%" height="100%">' +
+                    '</foreignObject></svg>');
         svg.attr({
           width: parent.width() + 'px',
           height: parent.height() + 'px',
@@ -824,7 +826,9 @@
         img.onerror = function () {
           defer.reject();
         };
-        img.src = 'data:image/svg+xml;base64,' + btoa(geo.util.escapeUnicodeHTML(new XMLSerializer().serializeToString(svg[0])));
+        img.src = 'data:image/svg+xml;base64,' +
+            btoa(geo.util.escapeUnicodeHTML(
+                new XMLSerializer().serializeToString(svg[0])));
       });
       return defer;
     },
