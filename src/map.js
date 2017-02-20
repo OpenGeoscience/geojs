@@ -1547,9 +1547,33 @@ var map = function (arg) {
       }
     });
 
-    $a.appendTo(m_this.node());
+    /* Only add the element if there is at least one attribution */
+    if ($('span', $a).length) {
+      $a.appendTo(m_this.node());
+    }
     return m_this;
   };
+
+  /**
+   * Draw a layer image to a canvas context.  The layer's opacity and transform
+   * is applied.
+   *
+   * @param {context} context: the 2d canvas context to draw into.
+   * @param {number} opacity: the opacity in the range [0, 1].
+   * @param {object} elem: the element that might have a transform.
+   * @param {HTMLImageObject} img: the image or canvas to draw to the canvas.
+   */
+  function drawLayerImageToContext(context, opacity, elem, img) {
+    context.globalAlpha = opacity;
+    var transform = elem.css('transform');
+    // if the canvas is being transformed, apply the same transformation
+    if (transform && transform.substr(0, 7) === 'matrix(') {
+      context.setTransform.apply(context, transform.substr(7, transform.length - 8).split(',').map(parseFloat));
+    } else {
+      context.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    context.drawImage(img, 0, 0);
+  }
 
   /**
    * Get a screen-shot of all or some of the canvas layers of map.  Note that
@@ -1559,8 +1583,10 @@ var map = function (arg) {
    * drawing buffers if the tab loses focus (and returning focus won't
    * necessarily rerender).
    *
-   * @param {object|array|undefined} layers: either a layer, a list of
-   *      layers, or falsy to get all layers.
+   * @param {object|array|undefined} layers: either a layer, a list of layers,
+   *    falsy to get all layers, or an object that contains optional values of
+   *    layers, type, encoderOptions, and values listed in the opts param
+   *    (this last form allows a single argument for the function).
    * @param {string} type: see canvas.toDataURL.  Defaults to 'image/png'.
    *    Alternately, 'canvas' to return the canvas element (this can be used
    *    to get the results as a blob, which can be faster for some operations
@@ -1571,14 +1597,53 @@ var map = function (arg) {
    *        undefined, use the default (white).  Otherwise, a css color or
    *        CanvasRenderingContext2D.fillStyle to fill the initial canvas.
    *        This could match the background of the browser page, for instance.
-   * @returns {string|HTMLCanvasElement}: data URL with the result or the
-   *    HTMLCanvasElement with the result.
+   *    wait: if 'idle', wait for the map to be idle and one animation frame to
+   *        occur.  If truthy, wait for an animation frame to occur.
+   *        Otherwise, take the screenshot as sson as possible.
+   *    attribution: if null or unspecified, include the attribution only if
+   *        all layers are used.  If false, never include the attribution.  If
+   *        true, always include it.
+   * @returns {deferred}: a jQuery Deferred object.  The done function receives
+   *    either a data URL or the HTMLCanvasElement with the result.
    */
   this.screenshot = function (layers, type, encoderOptions, opts) {
+    var defer;
+
+    if (layers && !Array.isArray(layers) && !layers.renderer) {
+      type = type || layers.type;
+      encoderOptions = encoderOptions || layers.encoderOptions;
+      opts = opts || layers;
+      layers = layers.layers;
+    }
     opts = opts || {};
-    // ensure layers is a list of all the layres we want to include
+    /* if asked to wait, return a Deferred that will do so, calling the
+     * screenshot function without waiting once it is done. */
+    if (opts.wait) {
+      var optsWithoutWait = $.extend({}, opts, {wait: false});
+      defer = $.Deferred();
+
+      var waitForRAF = function () {
+        window.requestAnimationFrame(function () {
+          defer.resolve();
+        });
+      };
+
+      if (opts.wait === 'idle') {
+        m_this.onIdle(waitForRAF);
+      } else {
+        waitForRAF();
+      }
+      return defer.then(function () {
+        return m_this.screenshot(layers, type, encoderOptions, optsWithoutWait);
+      });
+    }
+    defer = $.when();
+    // ensure layers is a list of all the layers we want to include
     if (!layers) {
       layers = m_this.layers();
+      if (opts.attribution === null || opts.attribution === undefined) {
+        opts.attribution = true;
+      }
     } else if (!Array.isArray(layers)) {
       layers = [layers];
     }
@@ -1598,33 +1663,48 @@ var map = function (arg) {
       context.fillStyle = opts.background !== undefined ? opts.background : 'white';
       context.fillRect(0, 0, result.width, result.height);
     }
-    // for each layer, copy all canvases to our new canvas.  If we ever support
-    // non-canvases, add them here.  It looks like some support could be added
-    // with a library such as rasterizehtml (avialable on npm).
+    // for each layer, copy to our new canvas.
     layers.forEach(function (layer) {
-      $('canvas', layer.node()).each(function () {
-        var opacity = layer.opacity();
-        if (opacity <= 0) {
-          return;
-        }
-        context.globalAlpha = opacity;
+      var opacity = layer.opacity();
+      if (opacity <= 0) {
+        return;
+      }
+      layer.node().children('canvas').each(function () {
         if (layer.renderer().api() === 'vgl') {
           layer.renderer()._renderFrame();
         }
-        var transform = $(this).css('transform');
-        // if the canvas is being transformed, apply the same transformation
-        if (transform && transform.substr(0, 7) === 'matrix(') {
-          context.setTransform.apply(context, transform.substr(7, transform.length - 8).split(',').map(parseFloat));
-        } else {
-          context.setTransform(1, 0, 0, 1, 0, 0);
-        }
-        context.drawImage($(this)[0], 0, 0);
+        drawLayerImageToContext(context, opacity, $(this), $(this)[0]);
       });
+      if (layer.node().children().not('canvas').length) {
+        defer = defer.then(function () {
+          return util.htmlToImage(layer.node(), 1).done(function (img) {
+            drawLayerImageToContext(context, 1, $([]), img);
+          });
+        });
+      }
     });
-    if (type !== 'canvas') {
-      result = result.toDataURL(type, encoderOptions);
+    if (opts.attribution) {
+      m_this.node().find('.geo-attribution').each(function () {
+        var attrElem = $(this);
+        defer = defer.then(function () {
+          return util.htmlToImage(attrElem, 1).done(function (img) {
+            drawLayerImageToContext(context, 1, $([]), img);
+          });
+        });
+      });
     }
-    return result;
+    defer = defer.then(function () {
+      var canvas = result;
+      if (type !== 'canvas') {
+        result = result.toDataURL(type, encoderOptions);
+      }
+      m_this.geoTrigger(geo_event.screenshot.ready, {
+        canvas: canvas,
+        screenshot: result
+      });
+      return result;
+    });
+    return defer;
   };
 
   /**
