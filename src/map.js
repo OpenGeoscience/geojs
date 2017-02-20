@@ -1555,7 +1555,7 @@ var map = function (arg) {
   };
 
   /**
-   * Draw a layer image to a canvas contex.  The layer's opacity and transform
+   * Draw a layer image to a canvas context.  The layer's opacity and transform
    * is applied.
    *
    * @param {context} context: the 2d canvas context to draw into.
@@ -1617,7 +1617,7 @@ var map = function (arg) {
     }
     opts = opts || {};
     /* if asked to wait, return a Deferred that will do so, calling the
-     * screenshow function without waiting once it is done. */
+     * screenshot function without waiting once it is done. */
     if (opts.wait) {
       var optsWithoutWait = $.extend({}, opts, {wait: false});
       defer = $.Deferred();
@@ -1638,7 +1638,7 @@ var map = function (arg) {
       });
     }
     defer = $.when();
-    // ensure layers is a list of all the layres we want to include
+    // ensure layers is a list of all the layers we want to include
     if (!layers) {
       layers = m_this.layers();
       if (opts.attribution === null || opts.attribution === undefined) {
