@@ -1681,5 +1681,14 @@ describe('mapInteractor', function () {
     keyboardSettings.focusHighlight = true;
     expect(interactor.keyboard(keyboardSettings)).toBe(interactor);
     expect(map.node().hasClass('highlight-focus')).toBe(true);
+
+    // test creating a interactor with a different set of keyboard actions
+    interactor = geo.mapInteractor({map: map, keyboard: {actions: {'zoom.0': ['1']}}});
+    triggered = 0;
+    interactor.simulateEvent('keyboard', {keys: '1'});
+    expect(triggered).toBe(1);
+    triggered = 0;
+    interactor.simulateEvent('keyboard', {keys: '2'});
+    expect(triggered).toBe(0);
   });
 });
