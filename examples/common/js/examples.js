@@ -53,4 +53,10 @@ $(function () {
        */
     });
   });
+  $('.gj-screenshot-link').keypress(function (evt) {
+    if (evt.which === 13) {
+      $('.gj-screenshot-link').click();
+      return false;
+    }
+  });
 });
