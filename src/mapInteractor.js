@@ -152,7 +152,7 @@ var mapInteractor = function (args) {
       keyboard: {
         actions: {
           /* Specific actions can be disabled by removing them from this object
-           * or stting an empty list as the key bindings.  Additional actions
+           * or setting an empty list as the key bindings.  Additional actions
            * can be added to the dictionary, each of which gets a list of key
            * bindings.  See Mousetrap documentation for special key names. */
           'zoom.in': ['plus', 'shift+plus', 'shift+ctrl+plus', '=', 'shift+=', 'shift+ctrl+='],
@@ -224,6 +224,9 @@ var mapInteractor = function (args) {
   }
   if (args && args.momentum && args.momentum.actions) {
     m_options.momentum.actions = $.extend(true, [], args.momentum.actions);
+  }
+  if (args && args.keyboard && args.keyboard.actions !== undefined) {
+    m_options.keyboard.actions = $.extend(true, {}, args.keyboard.actions);
   }
 
   // options supported:
