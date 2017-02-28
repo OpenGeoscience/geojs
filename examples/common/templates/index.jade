@@ -35,6 +35,15 @@ html(lang="en")
           .collapse.navbar-collapse#gj-navbar-collapse
             block headerButtons
             ul.nav.navbar-nav.navbar-right
+              block screenShode
+                li
+                  a.gj-screenshot-link
+                    | Screenshot
+                li.gj-screenshot-waiting
+                  a ...
+                li.gj-screenshot-result
+                  a.gj-screenshot-download(download='screenshot.png')
+                    img
               block showSource
                 if docHTML
                   li
