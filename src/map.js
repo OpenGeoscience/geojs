@@ -1660,8 +1660,27 @@ var map = function (arg) {
     var context = result.getContext('2d');
     // optionally start with a white or custom background
     if (opts.background !== false && opts.background !== null) {
-      context.fillStyle = opts.background !== undefined ? opts.background : 'white';
-      context.fillRect(0, 0, result.width, result.height);
+      var background = opts.background;
+      if (opts.background === undefined) {
+        /* If we are using the map's current background, start with white as a
+         * fallback, then fill with the backgrounds of all parents and the map
+         * node.  Since each may be partially transparent, this is required to
+         * match the web page's color.  It won't use background patterns. */
+        context.fillStyle = 'white';
+        context.fillRect(0, 0, result.width, result.height);
+        m_this.node().parents().get().reverse().forEach(function (elem) {
+          background = window.getComputedStyle(elem).backgroundColor;
+          if (background && background !== 'transparent') {
+            context.fillStyle = background;
+            context.fillRect(0, 0, result.width, result.height);
+          }
+        });
+        background = window.getComputedStyle(m_this.node()[0]).backgroundColor;
+      }
+      if (background && background !== 'transparent') {
+        context.fillStyle = background;
+        context.fillRect(0, 0, result.width, result.height);
+      }
     }
     // for each layer, copy to our new canvas.
     layers.forEach(function (layer) {

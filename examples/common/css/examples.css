@@ -19,6 +19,9 @@ html, body {
   overflow: hidden;
 }
 
+.gj-screenshot-link {
+  cursor: pointer;
+}
 li.gj-screenshot-result,li.gj-screenshot-waiting {
   display: none;
 }
