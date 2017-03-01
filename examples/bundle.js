@@ -19630,8 +19630,8 @@
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../node_modules/css-loader/index.js!./../node_modules/stylus-loader/index.js!./main.styl", function() {
-				var newContent = require("!!./../node_modules/css-loader/index.js!./../node_modules/stylus-loader/index.js!./main.styl");
+			module.hot.accept("!!../node_modules/css-loader/index.js!../node_modules/stylus-loader/index.js!./main.styl", function() {
+				var newContent = require("!!../node_modules/css-loader/index.js!../node_modules/stylus-loader/index.js!./main.styl");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -19727,7 +19727,7 @@
 			};
 		},
 		isOldIE = memoize(function() {
-			return /msie [6-9]\b/.test(window.navigator.userAgent.toLowerCase());
+			return /msie [6-9]\b/.test(self.navigator.userAgent.toLowerCase());
 		}),
 		getHeadElement = memoize(function () {
 			return document.head || document.getElementsByTagName("head")[0];
@@ -21320,6 +21320,26 @@
 	  /* The image associated with the pixel map url has been prepared and rendered
 	   * once. */
 	  prepared: 'geo_pixelmap_prepared'
+	};
+	
+	////////////////////////////////////////////////////////////////////////////
+	/**
+	 * These events are triggered by the map screenshot feature.
+	 * @namespace geo.event.pixelmap
+	 */
+	////////////////////////////////////////////////////////////////////////////
+	geo_event.screenshot = {
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Triggered when a scrrenshot has been completed.
+	   *
+	   * @namespace geo.event.screenshot
+	   * @property {object} canvas The canvas used to take the screenshot
+	   * @property {string|object} screenshot the screenshot as a dataURL string or
+	   *      the canvas, depending on the screenshot request.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  ready: 'geo_screenshot_ready'
 	};
 	
 	////////////////////////////////////////////////////////////////////////////
@@ -24561,7 +24581,7 @@
 /* 46 */
 /***/ function(module, exports) {
 
-	module.exports = '2.3.17';
+	module.exports = '2.3.16';
 
 
 /***/ },
@@ -24846,8 +24866,8 @@
 	
 	exports.init = function() {
 	  var zone = adjust_zone(this.zone, this.long0);
-	  if (zone === undefined) {
-	    throw new Error('unknown utm zone');
+	  if (!zone) {
+	    return;
 	  }
 	
 	  this.lat0 = 0;
@@ -24871,16 +24891,17 @@
 	var adjust_lon = __webpack_require__(30);
 	
 	module.exports = function(zone, lon) {
-	  if (zone === undefined) {
+	  if (!zone) {
 	    zone = Math.floor((adjust_lon(lon) + Math.PI) * 30 / Math.PI);
 	
 	    if (zone < 0) {
 	      return 0;
-	    } else if (zone >= 60) {
+	    }
+	    else if (zone >= 60) {
 	      return 59;
 	    }
-	    return zone;
-	  } else {
+	  }
+	  else {
 	    if (zone > 0 && zone <= 60) {
 	      return zone - 1;
 	    }
@@ -28333,6 +28354,163 @@
 	        } : undefined
 	      };
 	      return {map: mapParams, layer: layerParams};
+	    },
+	
+	    /**
+	     * Escape any character in a string that has a code point >= 127.
+	     *
+	     * @param {string} text: the string to escape.
+	     * @returns {string}: the escaped string.
+	     */
+	    escapeUnicodeHTML: function (text) {
+	      return text.replace(/./g, function (k) {
+	        var code = k.charCodeAt();
+	        if (code < 127) {
+	          return k;
+	        }
+	        return '&#' + code.toString(10) + ';';
+	      });
+	    },
+	
+	    /**
+	     * Check svg image and html img tags.  If the source is set, load images
+	     * explicitly and convert them to local data:image references.
+	     *
+	     * @param {selector} elem: a jquery selector that may contain images.
+	     * @returns {array}: a list of deferred objects that resolve when images
+	     *      are dereferences.
+	     */
+	    dereferenceElements: function (elem) {
+	      var deferList = [];
+	
+	      $('img,image', elem).each(function () {
+	        var src = $(this);
+	        var key = src.is('image') ? 'href' : 'src';
+	        if (src.attr(key)) {
+	          var img = new Image();
+	          if (src.attr(key).substr(0, 4) === 'http' || src[0].crossOrigin) {
+	            img.crossOrigin = src[0].crossOrigin || 'anonymous';
+	          }
+	          var defer = $.Deferred();
+	          img.onload = function () {
+	            var cvs = document.createElement('canvas');
+	            cvs.width = img.naturalWidth;
+	            cvs.height = img.naturalHeight;
+	            cvs.getContext('2d').drawImage(img, 0, 0);
+	            src.attr(key, cvs.toDataURL('image/png'));
+	            if (src.attr(key).substr(0, 10) !== 'data:image') {
+	              src.remove();
+	            }
+	            defer.resolve();
+	          };
+	          img.onerror = function () {
+	            src.remove();
+	            defer.resolve();
+	          };
+	          img.src = src.attr(key);
+	          deferList.push(defer);
+	        }
+	      });
+	      return deferList;
+	    },
+	
+	    /**
+	     * Convert an html element to an image.  This attempts to localize any
+	     * images within the element.  If there are other external references, the
+	     * image may not work due to security considerations.
+	     *
+	     * @param {object} elem: either a jquery selector or an html element.  This
+	     *      may contain multiple elements.  The direct parent and grandparent
+	     *      of the element are used for class information.
+	     * @param {number} parents: number of layers up to travel to get class
+	     *      information.
+	     * @returns {deferred}: a jquery deferred object which receives an HTML
+	     *      Image element when resolved.
+	     */
+	    htmlToImage: function (elem, parents) {
+	      var defer = $.Deferred(), container;
+	
+	      var parent = $(elem);
+	      elem = $(elem).clone();
+	      while (parents && parents > 0) {
+	        parent = parent.parent();
+	        if (parent.is('div')) {
+	          /* Create a containing div with the parent's class and id (so css
+	           * will be used), but override size and background. */
+	          container = $('<div>').attr({
+	            'class': parent.attr('class'),
+	            id: parent.attr('id')
+	          }).css({
+	            width: '100%',
+	            height: '100%',
+	            background: 'none',
+	            margin: 0
+	          });
+	          container.append(elem);
+	          elem = container;
+	        }
+	        parents -= 1;
+	      }
+	      // canvas elements won't render properly here.
+	      $('canvas', elem).remove();
+	      container = $('<div xmlns="http://www.w3.org/1999/xhtml">');
+	      container.css({
+	        width: parent.width() + 'px',
+	        height: parent.height() + 'px'
+	      });
+	      container.append($('<head>'));
+	      var body = $('<body>');
+	      container.append(body);
+	      /* We must specify the new body as having no background, or we'll clobber
+	       * other layers. */
+	      body.css({
+	        width: parent.width() + 'px',
+	        height: parent.height() + 'px',
+	        background: 'none',
+	        margin: 0
+	      });
+	      body.append(elem);
+	      var deferList = geo.util.dereferenceElements(elem);
+	      /* Get styles and links in order, as order matters in css */
+	      $('style,link[rel="stylesheet"]').each(function () {
+	        var styleElem;
+	        if ($(this).is('style')) {
+	          styleElem = $(this).clone();
+	        } else {
+	          var fetch = $.Deferred();
+	          styleElem = $('<style type="text/css">');
+	          $.get($(this).attr('href')).done(function (css) {
+	            styleElem.text(css);
+	            fetch.resolve();
+	          });
+	          deferList.push(fetch);
+	        }
+	        $('head', container).append(styleElem);
+	      });
+	
+	      $.when.apply($, deferList).then(function () {
+	        var svg = $('<svg xmlns="http://www.w3.org/2000/svg">' +
+	                    '<foreignObject width="100%" height="100%">' +
+	                    '</foreignObject></svg>');
+	        svg.attr({
+	          width: parent.width() + 'px',
+	          height: parent.height() + 'px',
+	          'text-rendering': 'optimizeLegibility'
+	        });
+	        $('foreignObject', svg).append(container);
+	
+	        var img = new Image();
+	        img.onload = function () {
+	          defer.resolve(img);
+	        };
+	        img.onerror = function () {
+	          defer.reject();
+	        };
+	        img.src = 'data:image/svg+xml;base64,' +
+	            btoa(geo.util.escapeUnicodeHTML(
+	                new XMLSerializer().serializeToString(svg[0])));
+	      });
+	      return defer;
 	    },
 	
 	    /**
@@ -52451,7 +52629,7 @@
 	      keyboard: {
 	        actions: {
 	          /* Specific actions can be disabled by removing them from this object
-	           * or stting an empty list as the key bindings.  Additional actions
+	           * or setting an empty list as the key bindings.  Additional actions
 	           * can be added to the dictionary, each of which gets a list of key
 	           * bindings.  See Mousetrap documentation for special key names. */
 	          'zoom.in': ['plus', 'shift+plus', 'shift+ctrl+plus', '=', 'shift+=', 'shift+ctrl+='],
@@ -52523,6 +52701,9 @@
 	  }
 	  if (args && args.momentum && args.momentum.actions) {
 	    m_options.momentum.actions = $.extend(true, [], args.momentum.actions);
+	  }
+	  if (args && args.keyboard && args.keyboard.actions !== undefined) {
+	    m_options.keyboard.actions = $.extend(true, {}, args.keyboard.actions);
 	  }
 	
 	  // options supported:
@@ -55865,7 +56046,7 @@
 	  arg = arg || {};
 	
 	  if (!(arg.layer instanceof featureLayer)) {
-	    throw 'fileReader must be given a feature layer';
+	    throw new Error('fileReader must be given a feature layer');
 	  }
 	
 	  var m_layer = arg.layer;
@@ -57999,26 +58180,31 @@
 	
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Attach a file reader to a layer in the map to be used as a drop target.
+	   * Get, set, or create and set a file reader to a layer in the map to be used
+	   * as a drop target.
+	   *
+	   * @param {string|object|undefined} readerOrName: undefined to get the
+	   *    current reader, an instance of a file reader to set the reader, or a
+	   *    name to create a file reader (see utils.createFileReader for options).
+	   * @param {object} opts: options for creating a file reader.  If this
+	   *    includes layer, use that layer, otherwise create a layer using these
+	   *    options.
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
-	  this.fileReader = function (readerType, opts) {
-	    var layer, renderer;
-	    opts = opts || {};
-	    if (!readerType) {
+	  this.fileReader = function (readerOrName, opts) {
+	    if (readerOrName === undefined) {
 	      return m_fileReader;
 	    }
-	    layer = opts.layer;
-	    if (!layer) {
-	      renderer = opts.renderer;
-	      if (!renderer) {
-	        renderer = 'd3';
+	    if (typeof readerOrName === 'string') {
+	      opts = opts || {};
+	      if (!opts.layer) {
+	        opts.layer = m_this.createLayer('feature', $.extend({}, opts));
 	      }
-	      layer = m_this.createLayer('feature', {renderer: renderer});
+	      opts.renderer = opts.layer.renderer().api();
+	      m_fileReader = registry.createFileReader(readerOrName, opts);
+	    } else {
+	      m_fileReader = readerOrName;
 	    }
-	    opts.layer = layer;
-	    opts.renderer = renderer;
-	    m_fileReader = registry.createFileReader(readerType, opts);
 	    return m_this;
 	  };
 	
@@ -58030,10 +58216,14 @@
 	  this._init = function () {
 	
 	    if (m_node === undefined || m_node === null) {
-	      throw 'Map require DIV node';
+	      throw new Error('Map require DIV node');
 	    }
 	
+	    if (m_node.data('data-geojs-map') && $.isFunction(m_node.data('data-geojs-map').exit)) {
+	      m_node.data('data-geojs-map').exit();
+	    }
 	    m_node.addClass('geojs-map');
+	    m_node.data('data-geojs-map', m_this);
 	    return m_this;
 	  };
 	
@@ -58057,13 +58247,15 @@
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.exit = function () {
 	    var i, layers = m_this.children();
-	    for (i = 0; i < layers.length; i += 1) {
+	    for (i = layers.length - 1; i >= 0; i -= 1) {
 	      layers[i]._exit();
+	      m_this.removeChild(layers[i]);
 	    }
 	    if (m_this.interactor()) {
 	      m_this.interactor().destroy();
 	      m_this.interactor(null);
 	    }
+	    m_this.node().data('data-geojs-map', null);
 	    m_this.node().off('.geo');
 	    /* make sure the map node has nothing left in it */
 	    m_this.node().empty();
@@ -58675,8 +58867,183 @@
 	      }
 	    });
 	
-	    $a.appendTo(m_this.node());
+	    /* Only add the element if there is at least one attribution */
+	    if ($('span', $a).length) {
+	      $a.appendTo(m_this.node());
+	    }
 	    return m_this;
+	  };
+	
+	  /**
+	   * Draw a layer image to a canvas context.  The layer's opacity and transform
+	   * is applied.
+	   *
+	   * @param {context} context: the 2d canvas context to draw into.
+	   * @param {number} opacity: the opacity in the range [0, 1].
+	   * @param {object} elem: the element that might have a transform.
+	   * @param {HTMLImageObject} img: the image or canvas to draw to the canvas.
+	   */
+	  function drawLayerImageToContext(context, opacity, elem, img) {
+	    context.globalAlpha = opacity;
+	    var transform = elem.css('transform');
+	    // if the canvas is being transformed, apply the same transformation
+	    if (transform && transform.substr(0, 7) === 'matrix(') {
+	      context.setTransform.apply(context, transform.substr(7, transform.length - 8).split(',').map(parseFloat));
+	    } else {
+	      context.setTransform(1, 0, 0, 1, 0, 0);
+	    }
+	    context.drawImage(img, 0, 0);
+	  }
+	
+	  /**
+	   * Get a screen-shot of all or some of the canvas layers of map.  Note that
+	   * webGL layers are rerendered, even if
+	   *   window.contextPreserveDrawingBuffer = true;
+	   * is set before creating the map object.  Chrome, at least, may not keep the
+	   * drawing buffers if the tab loses focus (and returning focus won't
+	   * necessarily rerender).
+	   *
+	   * @param {object|array|undefined} layers: either a layer, a list of layers,
+	   *    falsy to get all layers, or an object that contains optional values of
+	   *    layers, type, encoderOptions, and values listed in the opts param
+	   *    (this last form allows a single argument for the function).
+	   * @param {string} type: see canvas.toDataURL.  Defaults to 'image/png'.
+	   *    Alternately, 'canvas' to return the canvas element (this can be used
+	   *    to get the results as a blob, which can be faster for some operations
+	   *    but is not supported as widely).
+	   * @param {Number} encoderOptions: see canvas.toDataURL.
+	   * @param {object} opts: additional screenshot options:
+	   *    background: if false or null, don't prefill the background.  If
+	   *        undefined, use the default (white).  Otherwise, a css color or
+	   *        CanvasRenderingContext2D.fillStyle to fill the initial canvas.
+	   *        This could match the background of the browser page, for instance.
+	   *    wait: if 'idle', wait for the map to be idle and one animation frame to
+	   *        occur.  If truthy, wait for an animation frame to occur.
+	   *        Otherwise, take the screenshot as sson as possible.
+	   *    attribution: if null or unspecified, include the attribution only if
+	   *        all layers are used.  If false, never include the attribution.  If
+	   *        true, always include it.
+	   * @returns {deferred}: a jQuery Deferred object.  The done function receives
+	   *    either a data URL or the HTMLCanvasElement with the result.
+	   */
+	  this.screenshot = function (layers, type, encoderOptions, opts) {
+	    var defer;
+	
+	    if (layers && !Array.isArray(layers) && !layers.renderer) {
+	      type = type || layers.type;
+	      encoderOptions = encoderOptions || layers.encoderOptions;
+	      opts = opts || layers;
+	      layers = layers.layers;
+	    }
+	    opts = opts || {};
+	    /* if asked to wait, return a Deferred that will do so, calling the
+	     * screenshot function without waiting once it is done. */
+	    if (opts.wait) {
+	      var optsWithoutWait = $.extend({}, opts, {wait: false});
+	      defer = $.Deferred();
+	
+	      var waitForRAF = function () {
+	        window.requestAnimationFrame(function () {
+	          defer.resolve();
+	        });
+	      };
+	
+	      if (opts.wait === 'idle') {
+	        m_this.onIdle(waitForRAF);
+	      } else {
+	        waitForRAF();
+	      }
+	      return defer.then(function () {
+	        return m_this.screenshot(layers, type, encoderOptions, optsWithoutWait);
+	      });
+	    }
+	    defer = $.when();
+	    // ensure layers is a list of all the layers we want to include
+	    if (!layers) {
+	      layers = m_this.layers();
+	      if (opts.attribution === null || opts.attribution === undefined) {
+	        opts.attribution = true;
+	      }
+	    } else if (!Array.isArray(layers)) {
+	      layers = [layers];
+	    }
+	    // filter to only the included layers
+	    layers = layers.filter(function (l) { return m_this.layers().indexOf(l) >= 0; });
+	    // sort layers by z-index
+	    layers = layers.sort(
+	      function (a, b) { return (a.zIndex() - b.zIndex()); }
+	    );
+	    // create a new canvas element
+	    var result = document.createElement('canvas');
+	    result.width = m_width;
+	    result.height = m_height;
+	    var context = result.getContext('2d');
+	    // optionally start with a white or custom background
+	    if (opts.background !== false && opts.background !== null) {
+	      var background = opts.background;
+	      if (opts.background === undefined) {
+	        /* If we are using the map's current background, start with white as a
+	         * fallback, then fill with the backgrounds of all parents and the map
+	         * node.  Since each may be partially transparent, this is required to
+	         * match the web page's color.  It won't use background patterns. */
+	        context.fillStyle = 'white';
+	        context.fillRect(0, 0, result.width, result.height);
+	        m_this.node().parents().get().reverse().forEach(function (elem) {
+	          background = window.getComputedStyle(elem).backgroundColor;
+	          if (background && background !== 'transparent') {
+	            context.fillStyle = background;
+	            context.fillRect(0, 0, result.width, result.height);
+	          }
+	        });
+	        background = window.getComputedStyle(m_this.node()[0]).backgroundColor;
+	      }
+	      if (background && background !== 'transparent') {
+	        context.fillStyle = background;
+	        context.fillRect(0, 0, result.width, result.height);
+	      }
+	    }
+	    // for each layer, copy to our new canvas.
+	    layers.forEach(function (layer) {
+	      var opacity = layer.opacity();
+	      if (opacity <= 0) {
+	        return;
+	      }
+	      layer.node().children('canvas').each(function () {
+	        if (layer.renderer().api() === 'vgl') {
+	          layer.renderer()._renderFrame();
+	        }
+	        drawLayerImageToContext(context, opacity, $(this), $(this)[0]);
+	      });
+	      if (layer.node().children().not('canvas').length) {
+	        defer = defer.then(function () {
+	          return util.htmlToImage(layer.node(), 1).done(function (img) {
+	            drawLayerImageToContext(context, 1, $([]), img);
+	          });
+	        });
+	      }
+	    });
+	    if (opts.attribution) {
+	      m_this.node().find('.geo-attribution').each(function () {
+	        var attrElem = $(this);
+	        defer = defer.then(function () {
+	          return util.htmlToImage(attrElem, 1).done(function (img) {
+	            drawLayerImageToContext(context, 1, $([]), img);
+	          });
+	        });
+	      });
+	    }
+	    defer = defer.then(function () {
+	      var canvas = result;
+	      if (type !== 'canvas') {
+	        result = result.toDataURL(type, encoderOptions);
+	      }
+	      m_this.geoTrigger(geo_event.screenshot.ready, {
+	        canvas: canvas,
+	        screenshot: result
+	      });
+	      return result;
+	    });
+	    return defer;
 	  };
 	
 	  /**
@@ -61631,14 +61998,14 @@
 /* 241 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("0.11.0");
+	module.exports = ("0.11.1");
 
 
 /***/ },
 /* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("5360086142062ece2d891146b32b375971b29455");
+	module.exports = ("e8370cf069ed34fd556d2e92b5d7471eef8d9e97");
 
 
 /***/ },
@@ -62682,7 +63049,7 @@
 	    m_width = width;
 	    m_height = height;
 	    if (!m_width || !m_height) {
-	      throw 'Map layer has size 0';
+	      throw new Error('Map layer has size 0');
 	    }
 	    m_diagonal = Math.pow(width * width + height * height, 0.5);
 	    m_corners = {
@@ -68529,7 +68896,7 @@
 	  arg.position = arg.position === undefined ? { left: 0, top: 0 } : arg.position;
 	
 	  if (arg.parent !== undefined && !(arg.parent instanceof widget)) {
-	    throw 'Parent must be of type geo.gui.widget';
+	    throw new Error('Parent must be of type geo.gui.widget');
 	  }
 	
 	  this._init = function () {
@@ -68589,7 +68956,7 @@
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._createCanvas = function () {
-	    throw 'Must be defined in derived classes';
+	    throw new Error('Must be defined in derived classes');
 	  };
 	
 	  ////////////////////////////////////////////////////////////////////////////
@@ -69467,8 +69834,8 @@
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../../../css-loader/index.js!./bootstrap.css", function() {
-				var newContent = require("!!./../../../css-loader/index.js!./bootstrap.css");
+			module.hot.accept("!!../../../css-loader/index.js!./bootstrap.css", function() {
+				var newContent = require("!!../../../css-loader/index.js!./bootstrap.css");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -69537,8 +69904,8 @@
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../../css-loader/index.js!./bootstrap.css", function() {
-				var newContent = require("!!./../../css-loader/index.js!./bootstrap.css");
+			module.hot.accept("!!../../css-loader/index.js!./bootstrap.css", function() {
+				var newContent = require("!!../../css-loader/index.js!./bootstrap.css");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -72045,8 +72412,8 @@
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../../css-loader/index.js!./codemirror.css", function() {
-				var newContent = require("!!./../../css-loader/index.js!./codemirror.css");
+			module.hot.accept("!!../../css-loader/index.js!./codemirror.css", function() {
+				var newContent = require("!!../../css-loader/index.js!./codemirror.css");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -72085,8 +72452,8 @@
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../../../css-loader/index.js!./lint.css", function() {
-				var newContent = require("!!./../../../css-loader/index.js!./lint.css");
+			module.hot.accept("!!../../../css-loader/index.js!./lint.css", function() {
+				var newContent = require("!!../../../css-loader/index.js!./lint.css");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -72125,8 +72492,8 @@
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../../../css-loader/index.js!./foldgutter.css", function() {
-				var newContent = require("!!./../../../css-loader/index.js!./foldgutter.css");
+			module.hot.accept("!!../../../css-loader/index.js!./foldgutter.css", function() {
+				var newContent = require("!!../../../css-loader/index.js!./foldgutter.css");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -72954,17 +73321,18 @@
 	var gecko = /gecko\/\d/i.test(userAgent)
 	var ie_upto10 = /MSIE \d/.test(userAgent)
 	var ie_11up = /Trident\/(?:[7-9]|\d{2,})\..*rv:(\d+)/.exec(userAgent)
-	var ie = ie_upto10 || ie_11up
-	var ie_version = ie && (ie_upto10 ? document.documentMode || 6 : ie_11up[1])
-	var webkit = /WebKit\//.test(userAgent)
+	var edge = /Edge\/(\d+)/.exec(userAgent)
+	var ie = ie_upto10 || ie_11up || edge
+	var ie_version = ie && (ie_upto10 ? document.documentMode || 6 : +(edge || ie_11up)[1])
+	var webkit = !edge && /WebKit\//.test(userAgent)
 	var qtwebkit = webkit && /Qt\/\d+\.\d+/.test(userAgent)
-	var chrome = /Chrome\//.test(userAgent)
+	var chrome = !edge && /Chrome\//.test(userAgent)
 	var presto = /Opera\//.test(userAgent)
 	var safari = /Apple Computer/.test(navigator.vendor)
 	var mac_geMountainLion = /Mac OS X 1\d\D([8-9]|\d\d)\D/.test(userAgent)
 	var phantom = /PhantomJS/.test(userAgent)
 	
-	var ios = /AppleWebKit/.test(userAgent) && /Mobile\/\w+/.test(userAgent)
+	var ios = !edge && /AppleWebKit/.test(userAgent) && /Mobile\/\w+/.test(userAgent)
 	// This is woefully incomplete. Suggestions for alternative methods welcome.
 	var mobile = ios || /Android|webOS|BlackBerry|Opera Mini|Opera Mobi|IEMobile/i.test(userAgent)
 	var mac = ios || /Mac/.test(platform)
@@ -73098,11 +73466,11 @@
 	  }
 	}
 	
-	function Delayed() {this.id = null}
-	Delayed.prototype.set = function(ms, f) {
+	var Delayed = function() {this.id = null};
+	Delayed.prototype.set = function (ms, f) {
 	  clearTimeout(this.id)
 	  this.id = setTimeout(f, ms)
-	}
+	};
 	
 	function indexOf(array, elt) {
 	  for (var i = 0; i < array.length; ++i)
@@ -73195,6 +73563,23 @@
 	// of code points as a group.
 	var extendingChars = /[\u0300-\u036f\u0483-\u0489\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u064b-\u065e\u0670\u06d6-\u06dc\u06de-\u06e4\u06e7\u06e8\u06ea-\u06ed\u0711\u0730-\u074a\u07a6-\u07b0\u07eb-\u07f3\u0816-\u0819\u081b-\u0823\u0825-\u0827\u0829-\u082d\u0900-\u0902\u093c\u0941-\u0948\u094d\u0951-\u0955\u0962\u0963\u0981\u09bc\u09be\u09c1-\u09c4\u09cd\u09d7\u09e2\u09e3\u0a01\u0a02\u0a3c\u0a41\u0a42\u0a47\u0a48\u0a4b-\u0a4d\u0a51\u0a70\u0a71\u0a75\u0a81\u0a82\u0abc\u0ac1-\u0ac5\u0ac7\u0ac8\u0acd\u0ae2\u0ae3\u0b01\u0b3c\u0b3e\u0b3f\u0b41-\u0b44\u0b4d\u0b56\u0b57\u0b62\u0b63\u0b82\u0bbe\u0bc0\u0bcd\u0bd7\u0c3e-\u0c40\u0c46-\u0c48\u0c4a-\u0c4d\u0c55\u0c56\u0c62\u0c63\u0cbc\u0cbf\u0cc2\u0cc6\u0ccc\u0ccd\u0cd5\u0cd6\u0ce2\u0ce3\u0d3e\u0d41-\u0d44\u0d4d\u0d57\u0d62\u0d63\u0dca\u0dcf\u0dd2-\u0dd4\u0dd6\u0ddf\u0e31\u0e34-\u0e3a\u0e47-\u0e4e\u0eb1\u0eb4-\u0eb9\u0ebb\u0ebc\u0ec8-\u0ecd\u0f18\u0f19\u0f35\u0f37\u0f39\u0f71-\u0f7e\u0f80-\u0f84\u0f86\u0f87\u0f90-\u0f97\u0f99-\u0fbc\u0fc6\u102d-\u1030\u1032-\u1037\u1039\u103a\u103d\u103e\u1058\u1059\u105e-\u1060\u1071-\u1074\u1082\u1085\u1086\u108d\u109d\u135f\u1712-\u1714\u1732-\u1734\u1752\u1753\u1772\u1773\u17b7-\u17bd\u17c6\u17c9-\u17d3\u17dd\u180b-\u180d\u18a9\u1920-\u1922\u1927\u1928\u1932\u1939-\u193b\u1a17\u1a18\u1a56\u1a58-\u1a5e\u1a60\u1a62\u1a65-\u1a6c\u1a73-\u1a7c\u1a7f\u1b00-\u1b03\u1b34\u1b36-\u1b3a\u1b3c\u1b42\u1b6b-\u1b73\u1b80\u1b81\u1ba2-\u1ba5\u1ba8\u1ba9\u1c2c-\u1c33\u1c36\u1c37\u1cd0-\u1cd2\u1cd4-\u1ce0\u1ce2-\u1ce8\u1ced\u1dc0-\u1de6\u1dfd-\u1dff\u200c\u200d\u20d0-\u20f0\u2cef-\u2cf1\u2de0-\u2dff\u302a-\u302f\u3099\u309a\ua66f-\ua672\ua67c\ua67d\ua6f0\ua6f1\ua802\ua806\ua80b\ua825\ua826\ua8c4\ua8e0-\ua8f1\ua926-\ua92d\ua947-\ua951\ua980-\ua982\ua9b3\ua9b6-\ua9b9\ua9bc\uaa29-\uaa2e\uaa31\uaa32\uaa35\uaa36\uaa43\uaa4c\uaab0\uaab2-\uaab4\uaab7\uaab8\uaabe\uaabf\uaac1\uabe5\uabe8\uabed\udc00-\udfff\ufb1e\ufe00-\ufe0f\ufe20-\ufe26\uff9e\uff9f]/
 	function isExtendingChar(ch) { return ch.charCodeAt(0) >= 768 && extendingChars.test(ch) }
+	
+	// Returns a number from the range [`0`; `str.length`] unless `pos` is outside that range.
+	function skipExtendingChars(str, pos, dir) {
+	  while ((dir < 0 ? pos > 0 : pos < str.length) && isExtendingChar(str.charAt(pos))) { pos += dir }
+	  return pos
+	}
+	
+	// Returns the value from the range [`from`; `to`] that satisfies
+	// `pred` and is closest to `from`. Assumes that at least `to` satisfies `pred`.
+	function findFirst(pred, from, to) {
+	  for (;;) {
+	    if (Math.abs(from - to) <= 1) { return pred(from) ? from : to }
+	    var mid = Math.floor((from + to) / 2)
+	    if (pred(mid)) { to = mid }
+	    else { from = mid }
+	  }
+	}
 	
 	// The display handles the DOM integration, both for input reading
 	// and content drawing. It holds references to DOM nodes and
@@ -73383,14 +73768,20 @@
 	}
 	
 	// A Pos instance represents a position within the text.
-	function Pos (line, ch) {
-	  if (!(this instanceof Pos)) { return new Pos(line, ch) }
-	  this.line = line; this.ch = ch
+	function Pos(line, ch, sticky) {
+	  if ( sticky === void 0 ) sticky = null;
+	
+	  if (!(this instanceof Pos)) { return new Pos(line, ch, sticky) }
+	  this.line = line
+	  this.ch = ch
+	  this.sticky = sticky
 	}
 	
 	// Compare two positions, return 0 if they are the same, a negative
 	// number when a is less, and a positive number otherwise.
 	function cmp(a, b) { return a.line - b.line || a.ch - b.ch }
+	
+	function equalCursorPos(a, b) { return a.sticky == b.sticky && cmp(a, b) == 0 }
 	
 	function copyPos(x) {return Pos(x.line, x.ch)}
 	function maxPos(a, b) { return cmp(a, b) < 0 ? b : a }
@@ -73587,7 +73978,7 @@
 	      if (dto > 0 || !mk.inclusiveRight && !dto)
 	        { newParts.push({from: m.to, to: p.to}) }
 	      parts.splice.apply(parts, newParts)
-	      j += newParts.length - 1
+	      j += newParts.length - 3
 	    }
 	  }
 	  return parts
@@ -73669,6 +74060,13 @@
 	  var merged
 	  while (merged = collapsedSpanAtStart(line))
 	    { line = merged.find(-1, true).line }
+	  return line
+	}
+	
+	function visualLineEnd(line) {
+	  var merged
+	  while (merged = collapsedSpanAtEnd(line))
+	    { line = merged.find(1, true).line }
 	  return line
 	}
 	
@@ -73803,84 +74201,23 @@
 	  if (!found) { f(from, to, "ltr") }
 	}
 	
-	function bidiLeft(part) { return part.level % 2 ? part.to : part.from }
-	function bidiRight(part) { return part.level % 2 ? part.from : part.to }
-	
-	function lineLeft(line) { var order = getOrder(line); return order ? bidiLeft(order[0]) : 0 }
-	function lineRight(line) {
-	  var order = getOrder(line)
-	  if (!order) { return line.text.length }
-	  return bidiRight(lst(order))
-	}
-	
-	function compareBidiLevel(order, a, b) {
-	  var linedir = order[0].level
-	  if (a == linedir) { return true }
-	  if (b == linedir) { return false }
-	  return a < b
-	}
-	
 	var bidiOther = null
-	function getBidiPartAt(order, pos) {
+	function getBidiPartAt(order, ch, sticky) {
 	  var found
 	  bidiOther = null
 	  for (var i = 0; i < order.length; ++i) {
 	    var cur = order[i]
-	    if (cur.from < pos && cur.to > pos) { return i }
-	    if ((cur.from == pos || cur.to == pos)) {
-	      if (found == null) {
-	        found = i
-	      } else if (compareBidiLevel(order, cur.level, order[found].level)) {
-	        if (cur.from != cur.to) { bidiOther = found }
-	        return i
-	      } else {
-	        if (cur.from != cur.to) { bidiOther = i }
-	        return found
-	      }
+	    if (cur.from < ch && cur.to > ch) { return i }
+	    if (cur.to == ch) {
+	      if (cur.from != cur.to && sticky == "before") { found = i }
+	      else { bidiOther = i }
+	    }
+	    if (cur.from == ch) {
+	      if (cur.from != cur.to && sticky != "before") { found = i }
+	      else { bidiOther = i }
 	    }
 	  }
-	  return found
-	}
-	
-	function moveInLine(line, pos, dir, byUnit) {
-	  if (!byUnit) { return pos + dir }
-	  do { pos += dir }
-	  while (pos > 0 && isExtendingChar(line.text.charAt(pos)))
-	  return pos
-	}
-	
-	// This is needed in order to move 'visually' through bi-directional
-	// text -- i.e., pressing left should make the cursor go left, even
-	// when in RTL text. The tricky part is the 'jumps', where RTL and
-	// LTR text touch each other. This often requires the cursor offset
-	// to move more than one unit, in order to visually move one unit.
-	function moveVisually(line, start, dir, byUnit) {
-	  var bidi = getOrder(line)
-	  if (!bidi) { return moveLogically(line, start, dir, byUnit) }
-	  var pos = getBidiPartAt(bidi, start), part = bidi[pos]
-	  var target = moveInLine(line, start, part.level % 2 ? -dir : dir, byUnit)
-	
-	  for (;;) {
-	    if (target > part.from && target < part.to) { return target }
-	    if (target == part.from || target == part.to) {
-	      if (getBidiPartAt(bidi, target) == pos) { return target }
-	      part = bidi[pos += dir]
-	      return (dir > 0) == part.level % 2 ? part.to : part.from
-	    } else {
-	      part = bidi[pos += dir]
-	      if (!part) { return null }
-	      if ((dir > 0) == part.level % 2)
-	        { target = moveInLine(line, part.to, -1, byUnit) }
-	      else
-	        { target = moveInLine(line, part.from, 1, byUnit) }
-	    }
-	  }
-	}
-	
-	function moveLogically(line, start, dir, byUnit) {
-	  var target = start + dir
-	  if (byUnit) { while (target > 0 && isExtendingChar(line.text.charAt(target))) { target += dir } }
-	  return target < 0 || target > line.text.length ? null : target
+	  return found != null ? found : bidiOther
 	}
 	
 	// Bidirectional ordering algorithm
@@ -74046,10 +74383,6 @@
 	      lst(order).to -= m[0].length
 	      order.push(new BidiSpan(0, len - m[0].length, len))
 	    }
-	    if (order[0].level == 2)
-	      { order.unshift(new BidiSpan(1, order[0].to, order[0].to)) }
-	    if (order[0].level != lst(order).level)
-	      { order.push(new BidiSpan(order[0].level, len, len)) }
 	
 	    return order
 	  }
@@ -74062,6 +74395,111 @@
 	  var order = line.order
 	  if (order == null) { order = line.order = bidiOrdering(line.text) }
 	  return order
+	}
+	
+	function moveCharLogically(line, ch, dir) {
+	  var target = skipExtendingChars(line.text, ch + dir, dir)
+	  return target < 0 || target > line.text.length ? null : target
+	}
+	
+	function moveLogically(line, start, dir) {
+	  var ch = moveCharLogically(line, start.ch, dir)
+	  return ch == null ? null : new Pos(start.line, ch, dir < 0 ? "after" : "before")
+	}
+	
+	function endOfLine(visually, cm, lineObj, lineNo, dir) {
+	  if (visually) {
+	    var order = getOrder(lineObj)
+	    if (order) {
+	      var part = dir < 0 ? lst(order) : order[0]
+	      var moveInStorageOrder = (dir < 0) == (part.level == 1)
+	      var sticky = moveInStorageOrder ? "after" : "before"
+	      var ch
+	      // With a wrapped rtl chunk (possibly spanning multiple bidi parts),
+	      // it could be that the last bidi part is not on the last visual line,
+	      // since visual lines contain content order-consecutive chunks.
+	      // Thus, in rtl, we are looking for the first (content-order) character
+	      // in the rtl chunk that is on the last line (that is, the same line
+	      // as the last (content-order) character).
+	      if (part.level > 0) {
+	        var prep = prepareMeasureForLine(cm, lineObj)
+	        ch = dir < 0 ? lineObj.text.length - 1 : 0
+	        var targetTop = measureCharPrepared(cm, prep, ch).top
+	        ch = findFirst(function (ch) { return measureCharPrepared(cm, prep, ch).top == targetTop; }, (dir < 0) == (part.level == 1) ? part.from : part.to - 1, ch)
+	        if (sticky == "before") { ch = moveCharLogically(lineObj, ch, 1, true) }
+	      } else { ch = dir < 0 ? part.to : part.from }
+	      return new Pos(lineNo, ch, sticky)
+	    }
+	  }
+	  return new Pos(lineNo, dir < 0 ? lineObj.text.length : 0, dir < 0 ? "before" : "after")
+	}
+	
+	function moveVisually(cm, line, start, dir) {
+	  var bidi = getOrder(line)
+	  if (!bidi) { return moveLogically(line, start, dir) }
+	  if (start.ch >= line.text.length) {
+	    start.ch = line.text.length
+	    start.sticky = "before"
+	  } else if (start.ch <= 0) {
+	    start.ch = 0
+	    start.sticky = "after"
+	  }
+	  var partPos = getBidiPartAt(bidi, start.ch, start.sticky), part = bidi[partPos]
+	  if (part.level % 2 == 0 && (dir > 0 ? part.to > start.ch : part.from < start.ch)) {
+	    // Case 1: We move within an ltr part. Even with wrapped lines,
+	    // nothing interesting happens.
+	    return moveLogically(line, start, dir)
+	  }
+	
+	  var mv = function (pos, dir) { return moveCharLogically(line, pos instanceof Pos ? pos.ch : pos, dir); }
+	  var prep
+	  var getWrappedLineExtent = function (ch) {
+	    if (!cm.options.lineWrapping) { return {begin: 0, end: line.text.length} }
+	    prep = prep || prepareMeasureForLine(cm, line)
+	    return wrappedLineExtentChar(cm, line, prep, ch)
+	  }
+	  var wrappedLineExtent = getWrappedLineExtent(start.sticky == "before" ? mv(start, -1) : start.ch)
+	
+	  if (part.level % 2 == 1) {
+	    var ch = mv(start, -dir)
+	    if (ch != null && (dir > 0 ? ch >= part.from && ch >= wrappedLineExtent.begin : ch <= part.to && ch <= wrappedLineExtent.end)) {
+	      // Case 2: We move within an rtl part on the same visual line
+	      var sticky = dir < 0 ? "before" : "after"
+	      return new Pos(start.line, ch, sticky)
+	    }
+	  }
+	
+	  // Case 3: Could not move within this bidi part in this visual line, so leave
+	  // the current bidi part
+	
+	  var searchInVisualLine = function (partPos, dir, wrappedLineExtent) {
+	    var getRes = function (ch, moveInStorageOrder) { return moveInStorageOrder
+	      ? new Pos(start.line, mv(ch, 1), "before")
+	      : new Pos(start.line, ch, "after"); }
+	
+	    for (; partPos >= 0 && partPos < bidi.length; partPos += dir) {
+	      var part = bidi[partPos]
+	      var moveInStorageOrder = (dir > 0) == (part.level != 1)
+	      var ch = moveInStorageOrder ? wrappedLineExtent.begin : mv(wrappedLineExtent.end, -1)
+	      if (part.from <= ch && ch < part.to) { return getRes(ch, moveInStorageOrder) }
+	      ch = moveInStorageOrder ? part.from : mv(part.to, -1)
+	      if (wrappedLineExtent.begin <= ch && ch < wrappedLineExtent.end) { return getRes(ch, moveInStorageOrder) }
+	    }
+	  }
+	
+	  // Case 3a: Look for other bidi parts on the same visual line
+	  var res = searchInVisualLine(partPos + dir, dir, wrappedLineExtent)
+	  if (res) { return res }
+	
+	  // Case 3b: Look for other bidi parts on the next visual line
+	  var nextCh = dir > 0 ? wrappedLineExtent.end : mv(wrappedLineExtent.begin, -1)
+	  if (nextCh != null && !(dir > 0 && nextCh == line.text.length)) {
+	    res = searchInVisualLine(dir > 0 ? 0 : bidi.length - 1, dir, getWrappedLineExtent(nextCh))
+	    if (res) { return res }
+	  }
+	
+	  // Case 4: Nowhere to move
+	  return null
 	}
 	
 	// EVENT HANDLING
@@ -74352,74 +74790,72 @@
 	  this.tabSize = tabSize || 8
 	  this.lastColumnPos = this.lastColumnValue = 0
 	  this.lineStart = 0
-	}
+	};
 	
-	StringStream.prototype = {
-	  eol: function() {return this.pos >= this.string.length},
-	  sol: function() {return this.pos == this.lineStart},
-	  peek: function() {return this.string.charAt(this.pos) || undefined},
-	  next: function() {
-	    if (this.pos < this.string.length)
-	      { return this.string.charAt(this.pos++) }
-	  },
-	  eat: function(match) {
-	    var ch = this.string.charAt(this.pos)
-	    var ok
-	    if (typeof match == "string") { ok = ch == match }
-	    else { ok = ch && (match.test ? match.test(ch) : match(ch)) }
-	    if (ok) {++this.pos; return ch}
-	  },
-	  eatWhile: function(match) {
-	    var start = this.pos
-	    while (this.eat(match)){}
-	    return this.pos > start
-	  },
-	  eatSpace: function() {
+	StringStream.prototype.eol = function () {return this.pos >= this.string.length};
+	StringStream.prototype.sol = function () {return this.pos == this.lineStart};
+	StringStream.prototype.peek = function () {return this.string.charAt(this.pos) || undefined};
+	StringStream.prototype.next = function () {
+	  if (this.pos < this.string.length)
+	    { return this.string.charAt(this.pos++) }
+	};
+	StringStream.prototype.eat = function (match) {
+	  var ch = this.string.charAt(this.pos)
+	  var ok
+	  if (typeof match == "string") { ok = ch == match }
+	  else { ok = ch && (match.test ? match.test(ch) : match(ch)) }
+	  if (ok) {++this.pos; return ch}
+	};
+	StringStream.prototype.eatWhile = function (match) {
+	  var start = this.pos
+	  while (this.eat(match)){}
+	  return this.pos > start
+	};
+	StringStream.prototype.eatSpace = function () {
 	    var this$1 = this;
 	
-	    var start = this.pos
-	    while (/[\s\u00a0]/.test(this.string.charAt(this.pos))) { ++this$1.pos }
-	    return this.pos > start
-	  },
-	  skipToEnd: function() {this.pos = this.string.length},
-	  skipTo: function(ch) {
-	    var found = this.string.indexOf(ch, this.pos)
-	    if (found > -1) {this.pos = found; return true}
-	  },
-	  backUp: function(n) {this.pos -= n},
-	  column: function() {
-	    if (this.lastColumnPos < this.start) {
-	      this.lastColumnValue = countColumn(this.string, this.start, this.tabSize, this.lastColumnPos, this.lastColumnValue)
-	      this.lastColumnPos = this.start
-	    }
-	    return this.lastColumnValue - (this.lineStart ? countColumn(this.string, this.lineStart, this.tabSize) : 0)
-	  },
-	  indentation: function() {
-	    return countColumn(this.string, null, this.tabSize) -
-	      (this.lineStart ? countColumn(this.string, this.lineStart, this.tabSize) : 0)
-	  },
-	  match: function(pattern, consume, caseInsensitive) {
-	    if (typeof pattern == "string") {
-	      var cased = function (str) { return caseInsensitive ? str.toLowerCase() : str; }
-	      var substr = this.string.substr(this.pos, pattern.length)
-	      if (cased(substr) == cased(pattern)) {
-	        if (consume !== false) { this.pos += pattern.length }
-	        return true
-	      }
-	    } else {
-	      var match = this.string.slice(this.pos).match(pattern)
-	      if (match && match.index > 0) { return null }
-	      if (match && consume !== false) { this.pos += match[0].length }
-	      return match
-	    }
-	  },
-	  current: function(){return this.string.slice(this.start, this.pos)},
-	  hideFirstChars: function(n, inner) {
-	    this.lineStart += n
-	    try { return inner() }
-	    finally { this.lineStart -= n }
+	  var start = this.pos
+	  while (/[\s\u00a0]/.test(this.string.charAt(this.pos))) { ++this$1.pos }
+	  return this.pos > start
+	};
+	StringStream.prototype.skipToEnd = function () {this.pos = this.string.length};
+	StringStream.prototype.skipTo = function (ch) {
+	  var found = this.string.indexOf(ch, this.pos)
+	  if (found > -1) {this.pos = found; return true}
+	};
+	StringStream.prototype.backUp = function (n) {this.pos -= n};
+	StringStream.prototype.column = function () {
+	  if (this.lastColumnPos < this.start) {
+	    this.lastColumnValue = countColumn(this.string, this.start, this.tabSize, this.lastColumnPos, this.lastColumnValue)
+	    this.lastColumnPos = this.start
 	  }
-	}
+	  return this.lastColumnValue - (this.lineStart ? countColumn(this.string, this.lineStart, this.tabSize) : 0)
+	};
+	StringStream.prototype.indentation = function () {
+	  return countColumn(this.string, null, this.tabSize) -
+	    (this.lineStart ? countColumn(this.string, this.lineStart, this.tabSize) : 0)
+	};
+	StringStream.prototype.match = function (pattern, consume, caseInsensitive) {
+	  if (typeof pattern == "string") {
+	    var cased = function (str) { return caseInsensitive ? str.toLowerCase() : str; }
+	    var substr = this.string.substr(this.pos, pattern.length)
+	    if (cased(substr) == cased(pattern)) {
+	      if (consume !== false) { this.pos += pattern.length }
+	      return true
+	    }
+	  } else {
+	    var match = this.string.slice(this.pos).match(pattern)
+	    if (match && match.index > 0) { return null }
+	    if (match && consume !== false) { this.pos += match[0].length }
+	    return match
+	  }
+	};
+	StringStream.prototype.current = function (){return this.string.slice(this.start, this.pos)};
+	StringStream.prototype.hideFirstChars = function (n, inner) {
+	  this.lineStart += n
+	  try { return inner() }
+	  finally { this.lineStart -= n }
+	};
 	
 	// Compute a style array (an array starting with a mode generation
 	// -- for invalidation -- followed by pairs of end positions and
@@ -74624,13 +75060,14 @@
 	
 	// Line objects. These hold state related to a line, including
 	// highlighting info (the styles array).
-	function Line(text, markedSpans, estimateHeight) {
+	var Line = function(text, markedSpans, estimateHeight) {
 	  this.text = text
 	  attachMarkedSpans(this, markedSpans)
 	  this.height = estimateHeight ? estimateHeight(this) : 1
-	}
+	};
+	
+	Line.prototype.lineNo = function () { return lineNo(this) };
 	eventMixin(Line)
-	Line.prototype.lineNo = function() { return lineNo(this) }
 	
 	// Change the content (text, markers) of a line. Automatically
 	// invalidates cached information and tries to re-estimate the
@@ -75550,6 +75987,19 @@
 	// Returns a box for a given cursor position, which may have an
 	// 'other' property containing the position of the secondary cursor
 	// on a bidi boundary.
+	// A cursor Pos(line, char, "before") is on the same visual line as `char - 1`
+	// and after `char - 1` in writing order of `char - 1`
+	// A cursor Pos(line, char, "after") is on the same visual line as `char`
+	// and before `char` in writing order of `char`
+	// Examples (upper-case letters are RTL, lower-case are LTR):
+	//     Pos(0, 1, ...)
+	//     before   after
+	// ab     a|b     a|b
+	// aB     a|B     aB|
+	// Ab     |Ab     A|b
+	// AB     B|A     B|A
+	// Every position after the last character on a line is considered to stick
+	// to the last character on the line.
 	function cursorCoords(cm, pos, context, lineObj, preparedMeasure, varHeight) {
 	  lineObj = lineObj || getLine(cm.doc, pos.line)
 	  if (!preparedMeasure) { preparedMeasure = prepareMeasureForLine(cm, lineObj) }
@@ -75558,25 +76008,24 @@
 	    if (right) { m.left = m.right; } else { m.right = m.left }
 	    return intoCoordSystem(cm, lineObj, m, context)
 	  }
-	  function getBidi(ch, partPos) {
-	    var part = order[partPos], right = part.level % 2
-	    if (ch == bidiLeft(part) && partPos && part.level < order[partPos - 1].level) {
-	      part = order[--partPos]
-	      ch = bidiRight(part) - (part.level % 2 ? 0 : 1)
-	      right = true
-	    } else if (ch == bidiRight(part) && partPos < order.length - 1 && part.level < order[partPos + 1].level) {
-	      part = order[++partPos]
-	      ch = bidiLeft(part) - part.level % 2
-	      right = false
-	    }
-	    if (right && ch == part.to && ch > part.from) { return get(ch - 1) }
-	    return get(ch, right)
+	  var order = getOrder(lineObj), ch = pos.ch, sticky = pos.sticky
+	  if (ch >= lineObj.text.length) {
+	    ch = lineObj.text.length
+	    sticky = "before"
+	  } else if (ch <= 0) {
+	    ch = 0
+	    sticky = "after"
 	  }
-	  var order = getOrder(lineObj), ch = pos.ch
-	  if (!order) { return get(ch) }
-	  var partPos = getBidiPartAt(order, ch)
-	  var val = getBidi(ch, partPos)
-	  if (bidiOther != null) { val.other = getBidi(ch, bidiOther) }
+	  if (!order) { return get(sticky == "before" ? ch - 1 : ch, sticky == "before") }
+	
+	  function getBidi(ch, partPos, invert) {
+	    var part = order[partPos], right = (part.level % 2) != 0
+	    return get(invert ? ch - 1 : ch, right != invert)
+	  }
+	  var partPos = getBidiPartAt(order, ch, sticky)
+	  var other = bidiOther
+	  var val = getBidi(ch, partPos, sticky == "before")
+	  if (other != null) { val.other = getBidi(ch, other, sticky != "before") }
 	  return val
 	}
 	
@@ -75597,8 +76046,8 @@
 	// the right of the character position, for example). When outside
 	// is true, that means the coordinates lie outside the line's
 	// vertical range.
-	function PosWithInfo(line, ch, outside, xRel) {
-	  var pos = Pos(line, ch)
+	function PosWithInfo(line, ch, sticky, outside, xRel) {
+	  var pos = Pos(line, ch, sticky)
 	  pos.xRel = xRel
 	  if (outside) { pos.outside = true }
 	  return pos
@@ -75609,10 +76058,10 @@
 	function coordsChar(cm, x, y) {
 	  var doc = cm.doc
 	  y += cm.display.viewOffset
-	  if (y < 0) { return PosWithInfo(doc.first, 0, true, -1) }
+	  if (y < 0) { return PosWithInfo(doc.first, 0, null, true, -1) }
 	  var lineN = lineAtHeight(doc, y), last = doc.first + doc.size - 1
 	  if (lineN > last)
-	    { return PosWithInfo(doc.first + doc.size - 1, getLine(doc, last).text.length, true, 1) }
+	    { return PosWithInfo(doc.first + doc.size - 1, getLine(doc, last).text.length, null, true, 1) }
 	  if (x < 0) { x = 0 }
 	
 	  var lineObj = getLine(doc, lineN)
@@ -75627,57 +76076,68 @@
 	  }
 	}
 	
+	function wrappedLineExtent(cm, lineObj, preparedMeasure, y) {
+	  var measure = function (ch) { return intoCoordSystem(cm, lineObj, measureCharPrepared(cm, preparedMeasure, ch), "line"); }
+	  var end = lineObj.text.length
+	  var begin = findFirst(function (ch) { return measure(ch - 1).bottom <= y; }, end, 0)
+	  end = findFirst(function (ch) { return measure(ch).top > y; }, begin, end)
+	  return {begin: begin, end: end}
+	}
+	
+	function wrappedLineExtentChar(cm, lineObj, preparedMeasure, target) {
+	  var targetTop = intoCoordSystem(cm, lineObj, measureCharPrepared(cm, preparedMeasure, target), "line").top
+	  return wrappedLineExtent(cm, lineObj, preparedMeasure, targetTop)
+	}
+	
 	function coordsCharInner(cm, lineObj, lineNo, x, y) {
-	  var innerOff = y - heightAtLine(lineObj)
-	  var wrongLine = false, adjust = 2 * cm.display.wrapper.clientWidth
+	  y -= heightAtLine(lineObj)
+	  var begin = 0, end = lineObj.text.length
 	  var preparedMeasure = prepareMeasureForLine(cm, lineObj)
-	
-	  function getX(ch) {
-	    var sp = cursorCoords(cm, Pos(lineNo, ch), "line", lineObj, preparedMeasure)
-	    wrongLine = true
-	    if (innerOff > sp.bottom) { return sp.left - adjust }
-	    else if (innerOff < sp.top) { return sp.left + adjust }
-	    else { wrongLine = false }
-	    return sp.left
-	  }
-	
-	  var bidi = getOrder(lineObj), dist = lineObj.text.length
-	  var from = lineLeft(lineObj), to = lineRight(lineObj)
-	  var fromX = getX(from), fromOutside = wrongLine, toX = getX(to), toOutside = wrongLine
-	
-	  if (x > toX) { return PosWithInfo(lineNo, to, toOutside, 1) }
-	  // Do a binary search between these bounds.
-	  for (;;) {
-	    if (bidi ? to == from || to == moveVisually(lineObj, from, 1) : to - from <= 1) {
-	      var ch = x < fromX || x - fromX <= toX - x ? from : to
-	      var outside = ch == from ? fromOutside : toOutside
-	      var xDiff = x - (ch == from ? fromX : toX)
-	      // This is a kludge to handle the case where the coordinates
-	      // are after a line-wrapped line. We should replace it with a
-	      // more general handling of cursor positions around line
-	      // breaks. (Issue #4078)
-	      if (toOutside && !bidi && !/\s/.test(lineObj.text.charAt(ch)) && xDiff > 0 &&
-	          ch < lineObj.text.length && preparedMeasure.view.measure.heights.length > 1) {
-	        var charSize = measureCharPrepared(cm, preparedMeasure, ch, "right")
-	        if (innerOff <= charSize.bottom && innerOff >= charSize.top && Math.abs(x - charSize.right) < xDiff) {
-	          outside = false
-	          ch++
-	          xDiff = x - charSize.right
-	        }
+	  var pos
+	  var order = getOrder(lineObj)
+	  if (order) {
+	    if (cm.options.lineWrapping) {
+	      ;var assign;
+	      ((assign = wrappedLineExtent(cm, lineObj, preparedMeasure, y), begin = assign.begin, end = assign.end, assign))
+	    }
+	    pos = new Pos(lineNo, begin)
+	    var beginLeft = cursorCoords(cm, pos, "line", lineObj, preparedMeasure).left
+	    var dir = beginLeft < x ? 1 : -1
+	    var prevDiff, diff = beginLeft - x, prevPos
+	    do {
+	      prevDiff = diff
+	      prevPos = pos
+	      pos = moveVisually(cm, lineObj, pos, dir)
+	      if (pos == null || pos.ch < begin || end <= (pos.sticky == "before" ? pos.ch - 1 : pos.ch)) {
+	        pos = prevPos
+	        break
 	      }
-	      while (isExtendingChar(lineObj.text.charAt(ch))) { ++ch }
-	      var pos = PosWithInfo(lineNo, ch, outside, xDiff < -1 ? -1 : xDiff > 1 ? 1 : 0)
-	      return pos
+	      diff = cursorCoords(cm, pos, "line", lineObj, preparedMeasure).left - x
+	    } while ((dir < 0) != (diff < 0) && (Math.abs(diff) <= Math.abs(prevDiff)))
+	    if (Math.abs(diff) > Math.abs(prevDiff)) {
+	      if ((diff < 0) == (prevDiff < 0)) { throw new Error("Broke out of infinite loop in coordsCharInner") }
+	      pos = prevPos
 	    }
-	    var step = Math.ceil(dist / 2), middle = from + step
-	    if (bidi) {
-	      middle = from
-	      for (var i = 0; i < step; ++i) { middle = moveVisually(lineObj, middle, 1) }
-	    }
-	    var middleX = getX(middle)
-	    if (middleX > x) {to = middle; toX = middleX; if (toOutside = wrongLine) { toX += 1000; } dist = step}
-	    else {from = middle; fromX = middleX; fromOutside = wrongLine; dist -= step}
+	  } else {
+	    var ch = findFirst(function (ch) {
+	      var box = intoCoordSystem(cm, lineObj, measureCharPrepared(cm, preparedMeasure, ch), "line")
+	      if (box.top > y) {
+	        // For the cursor stickiness
+	        end = Math.min(ch, end)
+	        return true
+	      }
+	      else if (box.bottom <= y) { return false }
+	      else if (box.left > x) { return true }
+	      else if (box.right < x) { return false }
+	      else { return (x - box.left < box.right - x) }
+	    }, begin, end)
+	    ch = skipExtendingChars(lineObj.text, ch, 1)
+	    pos = new Pos(lineNo, ch, ch == end ? "before" : "after")
 	  }
+	  var coords = cursorCoords(cm, pos, "line", lineObj, preparedMeasure)
+	  if (y < coords.top || coords.bottom < y) { pos.outside = true }
+	  pos.xRel = x < coords.left ? -1 : (x > coords.right ? 1 : 0)
+	  return pos
 	}
 	
 	var measureText
@@ -76264,7 +76724,7 @@
 	    this.horiz.style.left = measure.barLeft + "px"
 	    var totalWidth = measure.viewWidth - measure.barLeft - (needsV ? sWidth : 0)
 	    this.horiz.firstChild.style.width =
-	      (measure.scrollWidth - measure.clientWidth + totalWidth) + "px"
+	      Math.max(0, measure.scrollWidth - measure.clientWidth + totalWidth) + "px"
 	  } else {
 	    this.horiz.style.display = ""
 	    this.horiz.firstChild.style.width = "0"
@@ -77149,63 +77609,61 @@
 	// (and non-touching) ranges, sorted, and an integer that indicates
 	// which one is the primary selection (the one that's scrolled into
 	// view, that getCursor returns, etc).
-	function Selection(ranges, primIndex) {
+	var Selection = function(ranges, primIndex) {
 	  this.ranges = ranges
 	  this.primIndex = primIndex
-	}
+	};
 	
-	Selection.prototype = {
-	  primary: function() { return this.ranges[this.primIndex] },
-	  equals: function(other) {
+	Selection.prototype.primary = function () { return this.ranges[this.primIndex] };
+	
+	Selection.prototype.equals = function (other) {
 	    var this$1 = this;
 	
-	    if (other == this) { return true }
-	    if (other.primIndex != this.primIndex || other.ranges.length != this.ranges.length) { return false }
-	    for (var i = 0; i < this.ranges.length; i++) {
-	      var here = this$1.ranges[i], there = other.ranges[i]
-	      if (cmp(here.anchor, there.anchor) != 0 || cmp(here.head, there.head) != 0) { return false }
-	    }
-	    return true
-	  },
-	  deepCopy: function() {
-	    var this$1 = this;
-	
-	    var out = []
-	    for (var i = 0; i < this.ranges.length; i++)
-	      { out[i] = new Range(copyPos(this$1.ranges[i].anchor), copyPos(this$1.ranges[i].head)) }
-	    return new Selection(out, this.primIndex)
-	  },
-	  somethingSelected: function() {
-	    var this$1 = this;
-	
-	    for (var i = 0; i < this.ranges.length; i++)
-	      { if (!this$1.ranges[i].empty()) { return true } }
-	    return false
-	  },
-	  contains: function(pos, end) {
-	    var this$1 = this;
-	
-	    if (!end) { end = pos }
-	    for (var i = 0; i < this.ranges.length; i++) {
-	      var range = this$1.ranges[i]
-	      if (cmp(end, range.from()) >= 0 && cmp(pos, range.to()) <= 0)
-	        { return i }
-	    }
-	    return -1
+	  if (other == this) { return true }
+	  if (other.primIndex != this.primIndex || other.ranges.length != this.ranges.length) { return false }
+	  for (var i = 0; i < this.ranges.length; i++) {
+	    var here = this$1.ranges[i], there = other.ranges[i]
+	    if (!equalCursorPos(here.anchor, there.anchor) || !equalCursorPos(here.head, there.head)) { return false }
 	  }
-	}
+	  return true
+	};
 	
-	function Range(anchor, head) {
+	Selection.prototype.deepCopy = function () {
+	    var this$1 = this;
+	
+	  var out = []
+	  for (var i = 0; i < this.ranges.length; i++)
+	    { out[i] = new Range(copyPos(this$1.ranges[i].anchor), copyPos(this$1.ranges[i].head)) }
+	  return new Selection(out, this.primIndex)
+	};
+	
+	Selection.prototype.somethingSelected = function () {
+	    var this$1 = this;
+	
+	  for (var i = 0; i < this.ranges.length; i++)
+	    { if (!this$1.ranges[i].empty()) { return true } }
+	  return false
+	};
+	
+	Selection.prototype.contains = function (pos, end) {
+	    var this$1 = this;
+	
+	  if (!end) { end = pos }
+	  for (var i = 0; i < this.ranges.length; i++) {
+	    var range = this$1.ranges[i]
+	    if (cmp(end, range.from()) >= 0 && cmp(pos, range.to()) <= 0)
+	      { return i }
+	  }
+	  return -1
+	};
+	
+	var Range = function(anchor, head) {
 	  this.anchor = anchor; this.head = head
-	}
+	};
 	
-	Range.prototype = {
-	  from: function() { return minPos(this.anchor, this.head) },
-	  to: function() { return maxPos(this.anchor, this.head) },
-	  empty: function() {
-	    return this.head.line == this.anchor.line && this.head.ch == this.anchor.ch
-	  }
-	}
+	Range.prototype.from = function () { return minPos(this.anchor, this.head) };
+	Range.prototype.to = function () { return maxPos(this.anchor, this.head) };
+	Range.prototype.empty = function () { return this.head.line == this.anchor.line && this.head.ch == this.anchor.ch };
 	
 	// Take an unsorted, potentially overlapping set of ranges, and
 	// build a selection out of it. 'Consumes' ranges array (modifying
@@ -78144,7 +78602,7 @@
 	//
 	// See also http://marijnhaverbeke.nl/blog/codemirror-line-tree.html
 	
-	function LeafChunk(lines) {
+	var LeafChunk = function(lines) {
 	  var this$1 = this;
 	
 	  this.lines = lines
@@ -78155,45 +78613,47 @@
 	    height += lines[i].height
 	  }
 	  this.height = height
-	}
+	};
 	
-	LeafChunk.prototype = {
-	  chunkSize: function() { return this.lines.length },
-	  // Remove the n lines at offset 'at'.
-	  removeInner: function(at, n) {
+	LeafChunk.prototype.chunkSize = function () { return this.lines.length };
+	
+	// Remove the n lines at offset 'at'.
+	LeafChunk.prototype.removeInner = function (at, n) {
 	    var this$1 = this;
 	
-	    for (var i = at, e = at + n; i < e; ++i) {
-	      var line = this$1.lines[i]
-	      this$1.height -= line.height
-	      cleanUpLine(line)
-	      signalLater(line, "delete")
-	    }
-	    this.lines.splice(at, n)
-	  },
-	  // Helper used to collapse a small branch into a single leaf.
-	  collapse: function(lines) {
-	    lines.push.apply(lines, this.lines)
-	  },
-	  // Insert the given array of lines at offset 'at', count them as
-	  // having the given height.
-	  insertInner: function(at, lines, height) {
-	    var this$1 = this;
-	
-	    this.height += height
-	    this.lines = this.lines.slice(0, at).concat(lines).concat(this.lines.slice(at))
-	    for (var i = 0; i < lines.length; ++i) { lines[i].parent = this$1 }
-	  },
-	  // Used to iterate over a part of the tree.
-	  iterN: function(at, n, op) {
-	    var this$1 = this;
-	
-	    for (var e = at + n; at < e; ++at)
-	      { if (op(this$1.lines[at])) { return true } }
+	  for (var i = at, e = at + n; i < e; ++i) {
+	    var line = this$1.lines[i]
+	    this$1.height -= line.height
+	    cleanUpLine(line)
+	    signalLater(line, "delete")
 	  }
-	}
+	  this.lines.splice(at, n)
+	};
 	
-	function BranchChunk(children) {
+	// Helper used to collapse a small branch into a single leaf.
+	LeafChunk.prototype.collapse = function (lines) {
+	  lines.push.apply(lines, this.lines)
+	};
+	
+	// Insert the given array of lines at offset 'at', count them as
+	// having the given height.
+	LeafChunk.prototype.insertInner = function (at, lines, height) {
+	    var this$1 = this;
+	
+	  this.height += height
+	  this.lines = this.lines.slice(0, at).concat(lines).concat(this.lines.slice(at))
+	  for (var i = 0; i < lines.length; ++i) { lines[i].parent = this$1 }
+	};
+	
+	// Used to iterate over a part of the tree.
+	LeafChunk.prototype.iterN = function (at, n, op) {
+	    var this$1 = this;
+	
+	  for (var e = at + n; at < e; ++at)
+	    { if (op(this$1.lines[at])) { return true } }
+	};
+	
+	var BranchChunk = function(children) {
 	  var this$1 = this;
 	
 	  this.children = children
@@ -78206,123 +78666,120 @@
 	  this.size = size
 	  this.height = height
 	  this.parent = null
-	}
+	};
 	
-	BranchChunk.prototype = {
-	  chunkSize: function() { return this.size },
-	  removeInner: function(at, n) {
+	BranchChunk.prototype.chunkSize = function () { return this.size };
+	
+	BranchChunk.prototype.removeInner = function (at, n) {
 	    var this$1 = this;
 	
-	    this.size -= n
-	    for (var i = 0; i < this.children.length; ++i) {
-	      var child = this$1.children[i], sz = child.chunkSize()
-	      if (at < sz) {
-	        var rm = Math.min(n, sz - at), oldHeight = child.height
-	        child.removeInner(at, rm)
-	        this$1.height -= oldHeight - child.height
-	        if (sz == rm) { this$1.children.splice(i--, 1); child.parent = null }
-	        if ((n -= rm) == 0) { break }
-	        at = 0
-	      } else { at -= sz }
-	    }
-	    // If the result is smaller than 25 lines, ensure that it is a
-	    // single leaf node.
-	    if (this.size - n < 25 &&
-	        (this.children.length > 1 || !(this.children[0] instanceof LeafChunk))) {
-	      var lines = []
-	      this.collapse(lines)
-	      this.children = [new LeafChunk(lines)]
-	      this.children[0].parent = this
-	    }
-	  },
-	  collapse: function(lines) {
-	    var this$1 = this;
-	
-	    for (var i = 0; i < this.children.length; ++i) { this$1.children[i].collapse(lines) }
-	  },
-	  insertInner: function(at, lines, height) {
-	    var this$1 = this;
-	
-	    this.size += lines.length
-	    this.height += height
-	    for (var i = 0; i < this.children.length; ++i) {
-	      var child = this$1.children[i], sz = child.chunkSize()
-	      if (at <= sz) {
-	        child.insertInner(at, lines, height)
-	        if (child.lines && child.lines.length > 50) {
-	          // To avoid memory thrashing when child.lines is huge (e.g. first view of a large file), it's never spliced.
-	          // Instead, small slices are taken. They're taken in order because sequential memory accesses are fastest.
-	          var remaining = child.lines.length % 25 + 25
-	          for (var pos = remaining; pos < child.lines.length;) {
-	            var leaf = new LeafChunk(child.lines.slice(pos, pos += 25))
-	            child.height -= leaf.height
-	            this$1.children.splice(++i, 0, leaf)
-	            leaf.parent = this$1
-	          }
-	          child.lines = child.lines.slice(0, remaining)
-	          this$1.maybeSpill()
-	        }
-	        break
-	      }
-	      at -= sz
-	    }
-	  },
-	  // When a node has grown, check whether it should be split.
-	  maybeSpill: function() {
-	    if (this.children.length <= 10) { return }
-	    var me = this
-	    do {
-	      var spilled = me.children.splice(me.children.length - 5, 5)
-	      var sibling = new BranchChunk(spilled)
-	      if (!me.parent) { // Become the parent node
-	        var copy = new BranchChunk(me.children)
-	        copy.parent = me
-	        me.children = [copy, sibling]
-	        me = copy
-	     } else {
-	        me.size -= sibling.size
-	        me.height -= sibling.height
-	        var myIndex = indexOf(me.parent.children, me)
-	        me.parent.children.splice(myIndex + 1, 0, sibling)
-	      }
-	      sibling.parent = me.parent
-	    } while (me.children.length > 10)
-	    me.parent.maybeSpill()
-	  },
-	  iterN: function(at, n, op) {
-	    var this$1 = this;
-	
-	    for (var i = 0; i < this.children.length; ++i) {
-	      var child = this$1.children[i], sz = child.chunkSize()
-	      if (at < sz) {
-	        var used = Math.min(n, sz - at)
-	        if (child.iterN(at, used, op)) { return true }
-	        if ((n -= used) == 0) { break }
-	        at = 0
-	      } else { at -= sz }
-	    }
+	  this.size -= n
+	  for (var i = 0; i < this.children.length; ++i) {
+	    var child = this$1.children[i], sz = child.chunkSize()
+	    if (at < sz) {
+	      var rm = Math.min(n, sz - at), oldHeight = child.height
+	      child.removeInner(at, rm)
+	      this$1.height -= oldHeight - child.height
+	      if (sz == rm) { this$1.children.splice(i--, 1); child.parent = null }
+	      if ((n -= rm) == 0) { break }
+	      at = 0
+	    } else { at -= sz }
 	  }
-	}
+	  // If the result is smaller than 25 lines, ensure that it is a
+	  // single leaf node.
+	  if (this.size - n < 25 &&
+	      (this.children.length > 1 || !(this.children[0] instanceof LeafChunk))) {
+	    var lines = []
+	    this.collapse(lines)
+	    this.children = [new LeafChunk(lines)]
+	    this.children[0].parent = this
+	  }
+	};
+	
+	BranchChunk.prototype.collapse = function (lines) {
+	    var this$1 = this;
+	
+	  for (var i = 0; i < this.children.length; ++i) { this$1.children[i].collapse(lines) }
+	};
+	
+	BranchChunk.prototype.insertInner = function (at, lines, height) {
+	    var this$1 = this;
+	
+	  this.size += lines.length
+	  this.height += height
+	  for (var i = 0; i < this.children.length; ++i) {
+	    var child = this$1.children[i], sz = child.chunkSize()
+	    if (at <= sz) {
+	      child.insertInner(at, lines, height)
+	      if (child.lines && child.lines.length > 50) {
+	        // To avoid memory thrashing when child.lines is huge (e.g. first view of a large file), it's never spliced.
+	        // Instead, small slices are taken. They're taken in order because sequential memory accesses are fastest.
+	        var remaining = child.lines.length % 25 + 25
+	        for (var pos = remaining; pos < child.lines.length;) {
+	          var leaf = new LeafChunk(child.lines.slice(pos, pos += 25))
+	          child.height -= leaf.height
+	          this$1.children.splice(++i, 0, leaf)
+	          leaf.parent = this$1
+	        }
+	        child.lines = child.lines.slice(0, remaining)
+	        this$1.maybeSpill()
+	      }
+	      break
+	    }
+	    at -= sz
+	  }
+	};
+	
+	// When a node has grown, check whether it should be split.
+	BranchChunk.prototype.maybeSpill = function () {
+	  if (this.children.length <= 10) { return }
+	  var me = this
+	  do {
+	    var spilled = me.children.splice(me.children.length - 5, 5)
+	    var sibling = new BranchChunk(spilled)
+	    if (!me.parent) { // Become the parent node
+	      var copy = new BranchChunk(me.children)
+	      copy.parent = me
+	      me.children = [copy, sibling]
+	      me = copy
+	   } else {
+	      me.size -= sibling.size
+	      me.height -= sibling.height
+	      var myIndex = indexOf(me.parent.children, me)
+	      me.parent.children.splice(myIndex + 1, 0, sibling)
+	    }
+	    sibling.parent = me.parent
+	  } while (me.children.length > 10)
+	  me.parent.maybeSpill()
+	};
+	
+	BranchChunk.prototype.iterN = function (at, n, op) {
+	    var this$1 = this;
+	
+	  for (var i = 0; i < this.children.length; ++i) {
+	    var child = this$1.children[i], sz = child.chunkSize()
+	    if (at < sz) {
+	      var used = Math.min(n, sz - at)
+	      if (child.iterN(at, used, op)) { return true }
+	      if ((n -= used) == 0) { break }
+	      at = 0
+	    } else { at -= sz }
+	  }
+	};
 	
 	// Line widgets are block elements displayed above or below a line.
 	
-	function LineWidget(doc, node, options) {
+	var LineWidget = function(doc, node, options) {
 	  var this$1 = this;
 	
 	  if (options) { for (var opt in options) { if (options.hasOwnProperty(opt))
 	    { this$1[opt] = options[opt] } } }
 	  this.doc = doc
 	  this.node = node
-	}
-	eventMixin(LineWidget)
+	};
 	
-	function adjustScrollWhenAboveVisible(cm, line, diff) {
-	  if (heightAtLine(line) < ((cm.curOp && cm.curOp.scrollTop) || cm.doc.scrollTop))
-	    { addToScrollPos(cm, null, diff) }
-	}
-	
-	LineWidget.prototype.clear = function() {
-	  var this$1 = this;
+	LineWidget.prototype.clear = function () {
+	    var this$1 = this;
 	
 	  var cm = this.doc.cm, ws = this.line.widgets, line = this.line, no = lineNo(line)
 	  if (no == null || !ws) { return }
@@ -78330,21 +78787,36 @@
 	  if (!ws.length) { line.widgets = null }
 	  var height = widgetHeight(this)
 	  updateLineHeight(line, Math.max(0, line.height - height))
-	  if (cm) { runInOp(cm, function () {
-	    adjustScrollWhenAboveVisible(cm, line, -height)
-	    regLineChange(cm, no, "widget")
-	  }) }
-	}
-	LineWidget.prototype.changed = function() {
+	  if (cm) {
+	    runInOp(cm, function () {
+	      adjustScrollWhenAboveVisible(cm, line, -height)
+	      regLineChange(cm, no, "widget")
+	    })
+	    signalLater(cm, "lineWidgetCleared", cm, this, no)
+	  }
+	};
+	
+	LineWidget.prototype.changed = function () {
+	    var this$1 = this;
+	
 	  var oldH = this.height, cm = this.doc.cm, line = this.line
 	  this.height = null
 	  var diff = widgetHeight(this) - oldH
 	  if (!diff) { return }
 	  updateLineHeight(line, line.height + diff)
-	  if (cm) { runInOp(cm, function () {
-	    cm.curOp.forceUpdate = true
-	    adjustScrollWhenAboveVisible(cm, line, diff)
-	  }) }
+	  if (cm) {
+	    runInOp(cm, function () {
+	      cm.curOp.forceUpdate = true
+	      adjustScrollWhenAboveVisible(cm, line, diff)
+	      signalLater(cm, "lineWidgetChanged", cm, this$1, lineNo(line))
+	    })
+	  }
+	};
+	eventMixin(LineWidget)
+	
+	function adjustScrollWhenAboveVisible(cm, line, diff) {
+	  if (heightAtLine(line) < ((cm.curOp && cm.curOp.scrollTop) || cm.doc.scrollTop))
+	    { addToScrollPos(cm, null, diff) }
 	}
 	
 	function addLineWidget(doc, handle, node, options) {
@@ -78364,6 +78836,7 @@
 	    }
 	    return true
 	  })
+	  signalLater(cm, "lineWidgetAdded", cm, widget, typeof handle == "number" ? handle : lineNo(handle))
 	  return widget
 	}
 	
@@ -78384,17 +78857,16 @@
 	// when they overlap (they may nest, but not partially overlap).
 	var nextMarkerId = 0
 	
-	function TextMarker(doc, type) {
+	var TextMarker = function(doc, type) {
 	  this.lines = []
 	  this.type = type
 	  this.doc = doc
 	  this.id = ++nextMarkerId
-	}
-	eventMixin(TextMarker)
+	};
 	
 	// Clear the marker.
-	TextMarker.prototype.clear = function() {
-	  var this$1 = this;
+	TextMarker.prototype.clear = function () {
+	    var this$1 = this;
 	
 	  if (this.explicitlyCleared) { return }
 	  var cm = this.doc.cm, withOp = cm && !cm.curOp
@@ -78432,18 +78904,18 @@
 	    this.doc.cantEdit = false
 	    if (cm) { reCheckSelection(cm.doc) }
 	  }
-	  if (cm) { signalLater(cm, "markerCleared", cm, this) }
+	  if (cm) { signalLater(cm, "markerCleared", cm, this, min, max) }
 	  if (withOp) { endOperation(cm) }
 	  if (this.parent) { this.parent.clear() }
-	}
+	};
 	
 	// Find the position of the marker in the document. Returns a {from,
 	// to} object by default. Side can be passed to get a specific side
 	// -- 0 (both), -1 (left), or 1 (right). When lineObj is true, the
 	// Pos objects returned contain a line object, rather than a line
 	// number (used to prevent looking up the same line twice).
-	TextMarker.prototype.find = function(side, lineObj) {
-	  var this$1 = this;
+	TextMarker.prototype.find = function (side, lineObj) {
+	    var this$1 = this;
 	
 	  if (side == null && this.type == "bookmark") { side = 1 }
 	  var from, to
@@ -78460,11 +78932,13 @@
 	    }
 	  }
 	  return from && {from: from, to: to}
-	}
+	};
 	
 	// Signals that the marker's widget changed, and surrounding layout
 	// should be recomputed.
-	TextMarker.prototype.changed = function() {
+	TextMarker.prototype.changed = function () {
+	    var this$1 = this;
+	
 	  var pos = this.find(-1, true), widget = this, cm = this.doc.cm
 	  if (!pos || !cm) { return }
 	  runInOp(cm, function () {
@@ -78482,24 +78956,27 @@
 	      if (dHeight)
 	        { updateLineHeight(line, line.height + dHeight) }
 	    }
+	    signalLater(cm, "markerChanged", cm, this$1)
 	  })
-	}
+	};
 	
-	TextMarker.prototype.attachLine = function(line) {
+	TextMarker.prototype.attachLine = function (line) {
 	  if (!this.lines.length && this.doc.cm) {
 	    var op = this.doc.cm.curOp
 	    if (!op.maybeHiddenMarkers || indexOf(op.maybeHiddenMarkers, this) == -1)
 	      { (op.maybeUnhiddenMarkers || (op.maybeUnhiddenMarkers = [])).push(this) }
 	  }
 	  this.lines.push(line)
-	}
-	TextMarker.prototype.detachLine = function(line) {
+	};
+	
+	TextMarker.prototype.detachLine = function (line) {
 	  this.lines.splice(indexOf(this.lines, line), 1)
 	  if (!this.lines.length && this.doc.cm) {
 	    var op = this.doc.cm.curOp
 	    ;(op.maybeHiddenMarkers || (op.maybeHiddenMarkers = [])).push(this)
 	  }
-	}
+	};
+	eventMixin(TextMarker)
 	
 	// Create a marker, wire it up to the right lines, and
 	function markText(doc, from, to, options, type) {
@@ -78577,28 +79054,29 @@
 	// A shared marker spans multiple linked documents. It is
 	// implemented as a meta-marker-object controlling multiple normal
 	// markers.
-	function SharedTextMarker(markers, primary) {
+	var SharedTextMarker = function(markers, primary) {
 	  var this$1 = this;
 	
 	  this.markers = markers
 	  this.primary = primary
 	  for (var i = 0; i < markers.length; ++i)
 	    { markers[i].parent = this$1 }
-	}
-	eventMixin(SharedTextMarker)
+	};
 	
-	SharedTextMarker.prototype.clear = function() {
-	  var this$1 = this;
+	SharedTextMarker.prototype.clear = function () {
+	    var this$1 = this;
 	
 	  if (this.explicitlyCleared) { return }
 	  this.explicitlyCleared = true
 	  for (var i = 0; i < this.markers.length; ++i)
 	    { this$1.markers[i].clear() }
 	  signalLater(this, "clear")
-	}
-	SharedTextMarker.prototype.find = function(side, lineObj) {
+	};
+	
+	SharedTextMarker.prototype.find = function (side, lineObj) {
 	  return this.primary.find(side, lineObj)
-	}
+	};
+	eventMixin(SharedTextMarker)
 	
 	function markTextShared(doc, from, to, options, type) {
 	  options = copyObj(options)
@@ -79533,19 +80011,13 @@
 	  var line = getLine(cm.doc, lineN)
 	  var visual = visualLine(line)
 	  if (visual != line) { lineN = lineNo(visual) }
-	  var order = getOrder(visual)
-	  var ch = !order ? 0 : order[0].level % 2 ? lineRight(visual) : lineLeft(visual)
-	  return Pos(lineN, ch)
+	  return endOfLine(true, cm, visual, lineN, 1)
 	}
 	function lineEnd(cm, lineN) {
-	  var merged, line = getLine(cm.doc, lineN)
-	  while (merged = collapsedSpanAtEnd(line)) {
-	    line = merged.find(1, true).line
-	    lineN = null
-	  }
-	  var order = getOrder(line)
-	  var ch = !order ? line.text.length : order[0].level % 2 ? lineLeft(line) : lineRight(line)
-	  return Pos(lineN == null ? lineNo(line) : lineN, ch)
+	  var line = getLine(cm.doc, lineN)
+	  var visual = visualLineEnd(line)
+	  if (visual != line) { lineN = lineNo(visual) }
+	  return endOfLine(true, cm, line, lineN, -1)
 	}
 	function lineStartSmart(cm, pos) {
 	  var start = lineStart(cm, pos.line)
@@ -79554,7 +80026,7 @@
 	  if (!order || order[0].level == 0) {
 	    var firstNonWS = Math.max(0, line.text.search(/\S/))
 	    var inWS = pos.line == start.line && pos.ch <= firstNonWS && pos.ch
-	    return Pos(start.line, inWS ? 0 : firstNonWS)
+	    return Pos(start.line, inWS ? 0 : firstNonWS, start.sticky)
 	  }
 	  return start
 	}
@@ -80746,7 +81218,7 @@
 	      } else {
 	        lineObj = line
 	      }
-	      return intoCoordSystem(this, lineObj, {top: 0, left: 0}, mode || "page", includeWidgets).top +
+	      return intoCoordSystem(this, lineObj, {top: 0, left: 0}, mode || "page", includeWidgets || end).top +
 	        (end ? this.doc.height - heightAtLine(lineObj) : 0)
 	    },
 	
@@ -80878,7 +81350,7 @@
 	      var start = pos.ch, end = pos.ch
 	      if (line) {
 	        var helper = this.getHelper(pos, "wordChars")
-	        if ((pos.xRel < 0 || end == line.length) && start) { --start; } else { ++end }
+	        if ((pos.sticky == "before" || end == line.length) && start) { --start; } else { ++end }
 	        var startChar = line.charAt(start)
 	        var check = isWordChar(startChar, helper)
 	          ? function (ch) { return isWordChar(ch, helper); }
@@ -81009,22 +81481,30 @@
 	// position. The resulting position will have a hitSide=true
 	// property if it reached the end of the document.
 	function findPosH(doc, pos, dir, unit, visually) {
-	  var line = pos.line, ch = pos.ch, origDir = dir
-	  var lineObj = getLine(doc, line)
+	  var oldPos = pos
+	  var origDir = dir
+	  var lineObj = getLine(doc, pos.line)
 	  function findNextLine() {
-	    var l = line + dir
+	    var l = pos.line + dir
 	    if (l < doc.first || l >= doc.first + doc.size) { return false }
-	    line = l
+	    pos = new Pos(l, pos.ch, pos.sticky)
 	    return lineObj = getLine(doc, l)
 	  }
 	  function moveOnce(boundToLine) {
-	    var next = (visually ? moveVisually : moveLogically)(lineObj, ch, dir, true)
+	    var next
+	    if (visually) {
+	      next = moveVisually(doc.cm, lineObj, pos, dir)
+	    } else {
+	      next = moveLogically(lineObj, pos, dir)
+	    }
 	    if (next == null) {
-	      if (!boundToLine && findNextLine()) {
-	        if (visually) { ch = (dir < 0 ? lineRight : lineLeft)(lineObj) }
-	        else { ch = dir < 0 ? lineObj.text.length : 0 }
-	      } else { return false }
-	    } else { ch = next }
+	      if (!boundToLine && findNextLine())
+	        { pos = endOfLine(visually, doc.cm, lineObj, pos.line, dir) }
+	      else
+	        { return false }
+	    } else {
+	      pos = next
+	    }
 	    return true
 	  }
 	
@@ -81037,14 +81517,14 @@
 	    var helper = doc.cm && doc.cm.getHelper(pos, "wordChars")
 	    for (var first = true;; first = false) {
 	      if (dir < 0 && !moveOnce(!first)) { break }
-	      var cur = lineObj.text.charAt(ch) || "\n"
+	      var cur = lineObj.text.charAt(pos.ch) || "\n"
 	      var type = isWordChar(cur, helper) ? "w"
 	        : group && cur == "\n" ? "n"
 	        : !group || /\s/.test(cur) ? null
 	        : "p"
 	      if (group && !first && !type) { type = "s" }
 	      if (sawType && sawType != type) {
-	        if (dir < 0) {dir = 1; moveOnce()}
+	        if (dir < 0) {dir = 1; moveOnce(); pos.sticky = "after"}
 	        break
 	      }
 	
@@ -81052,8 +81532,8 @@
 	      if (dir > 0 && !moveOnce(!first)) { break }
 	    }
 	  }
-	  var result = skipAtomic(doc, Pos(line, ch), pos, origDir, true)
-	  if (!cmp(pos, result)) { result.hitSide = true }
+	  var result = skipAtomic(doc, pos, oldPos, origDir, true)
+	  if (equalCursorPos(oldPos, result)) { result.hitSide = true }
 	  return result
 	}
 	
@@ -81396,6 +81876,7 @@
 	};
 	
 	ContentEditableInput.prototype.onKeyPress = function (e) {
+	  if (e.charCode == 0) { return }
 	  e.preventDefault()
 	  if (!this.cm.isReadOnly())
 	    { operation(this.cm, applyTextInput)(this.cm, String.fromCharCode(e.charCode == null ? e.keyCode : e.charCode), 0) }
@@ -81860,10 +82341,14 @@
 	      if (!ie || (ie && ie_version < 9)) { prepareSelectAllHack() }
 	      var i = 0, poll = function () {
 	        if (display.selForContextMenu == cm.doc.sel && te.selectionStart == 0 &&
-	            te.selectionEnd > 0 && input.prevInput == "\u200b")
-	          { operation(cm, selectAll)(cm) }
-	        else if (i++ < 10) { display.detectingSelectAll = setTimeout(poll, 500) }
-	        else { display.input.reset() }
+	            te.selectionEnd > 0 && input.prevInput == "\u200b") {
+	          operation(cm, selectAll)(cm)
+	        } else if (i++ < 10) {
+	          display.detectingSelectAll = setTimeout(poll, 500)
+	        } else {
+	          display.selForContextMenu = null
+	          display.input.reset()
+	        }
 	      }
 	      display.detectingSelectAll = setTimeout(poll, 200)
 	    }
@@ -82039,7 +82524,7 @@
 	
 	addLegacyProps(CodeMirror)
 	
-	CodeMirror.version = "5.23.0"
+	CodeMirror.version = "5.24.2"
 	
 	return CodeMirror;
 	
@@ -82685,12 +83170,13 @@
 	    if (type == "variable") {register(value); return cont(classNameAfter);}
 	  }
 	  function classNameAfter(type, value) {
-	    if (value == "extends" || value == "implements") return cont(isTS ? typeexpr : expression, classNameAfter);
+	    if (value == "extends" || value == "implements" || (isTS && type == ","))
+	      return cont(isTS ? typeexpr : expression, classNameAfter);
 	    if (type == "{") return cont(pushlex("}"), classBody, poplex);
 	  }
 	  function classBody(type, value) {
 	    if (type == "variable" || cx.style == "keyword") {
-	      if ((value == "static" || value == "get" || value == "set" ||
+	      if ((value == "async" || value == "static" || value == "get" || value == "set" ||
 	           (isTS && (value == "public" || value == "private" || value == "protected" || value == "readonly" || value == "abstract"))) &&
 	          cx.stream.match(/^\s+[\w$\xa1-\uffff]/, false)) {
 	        cx.marked = "keyword";
@@ -82699,6 +83185,8 @@
 	      cx.marked = "property";
 	      return cont(isTS ? classfield : functiondef, classBody);
 	    }
+	    if (type == "[")
+	      return cont(expression, expect("]"), isTS ? classfield : functiondef, classBody)
 	    if (value == "*") {
 	      cx.marked = "keyword";
 	      return cont(classBody);
@@ -83693,8 +84181,8 @@
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../../../node_modules/css-loader/index.js!./examples.css", function() {
-				var newContent = require("!!./../../../node_modules/css-loader/index.js!./examples.css");
+			module.hot.accept("!!../../../node_modules/css-loader/index.js!./examples.css", function() {
+				var newContent = require("!!../../../node_modules/css-loader/index.js!./examples.css");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -83712,7 +84200,7 @@
 	
 	
 	// module
-	exports.push([module.id, "html, body {\n  height: 100%;\n  width: 100%;\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n\n.navbar {\n  margin: 0;\n}\n\n#map {\n  width: 100%;\n  height: calc(100% - 60px);\n  overflow: hidden;\n}\n", ""]);
+	exports.push([module.id, "html, body {\n  height: 100%;\n  width: 100%;\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n\n.navbar {\n  margin: 0;\n}\n\n#map {\n  width: 100%;\n  height: calc(100% - 60px);\n  overflow: hidden;\n}\n\n.gj-screenshot-link {\n  cursor: pointer;\n}\nli.gj-screenshot-result,li.gj-screenshot-waiting {\n  display: none;\n}\nli a.gj-screenshot-download {\n  padding: 0;\n}\nli.gj-screenshot-result img {\n  max-height: 60px;\n  max-width: 120px;\n}\n", ""]);
 	
 	// exports
 
@@ -83757,6 +84245,32 @@
 	};
 	
 	window.utils = exampleUtils;
+	
+	/* Add a function to take a screenshot.  Show the screenshot so that a user can
+	 * click on it to save it or right-click to copy it. */
+	$(function () {
+	  $('.gj-screenshot-link').on('click', function () {
+	    $('.gj-screenshot-result').hide();
+	    $('.gj-screenshot-waiting').show();
+	    var map = $('#map').data('data-geojs-map');
+	    map.screenshot({wait:'idle'}).then(function (res) {
+	      $('.gj-screenshot-waiting').hide();
+	      $('.gj-screenshot-result img').attr({src: res});
+	      $('.gj-screenshot-download').attr({href: res});
+	      $('.gj-screenshot-result').show();
+	      /* If you want to trigger an automatic download, enable this line (and,
+	       * perhaps, always hide the waiting and result elements).
+	      $('.gj-screenshot-download')[0].click();
+	       */
+	    });
+	  });
+	  $('.gj-screenshot-link').keypress(function (evt) {
+	    if (evt.which === 13) {
+	      $('.gj-screenshot-link').click();
+	      return false;
+	    }
+	  });
+	});
 
 
 /***/ }
