@@ -10022,8 +10022,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../node_modules/css-loader/index.js!./../node_modules/stylus-loader/index.js!./main.styl", function() {
-				var newContent = require("!!./../node_modules/css-loader/index.js!./../node_modules/stylus-loader/index.js!./main.styl");
+			module.hot.accept("!!../node_modules/css-loader/index.js!../node_modules/stylus-loader/index.js!./main.styl", function() {
+				var newContent = require("!!../node_modules/css-loader/index.js!../node_modules/stylus-loader/index.js!./main.styl");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -10119,7 +10119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			};
 		},
 		isOldIE = memoize(function() {
-			return /msie [6-9]\b/.test(window.navigator.userAgent.toLowerCase());
+			return /msie [6-9]\b/.test(self.navigator.userAgent.toLowerCase());
 		}),
 		getHeadElement = memoize(function () {
 			return document.head || document.getElementsByTagName("head")[0];
@@ -11712,6 +11712,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /* The image associated with the pixel map url has been prepared and rendered
 	   * once. */
 	  prepared: 'geo_pixelmap_prepared'
+	};
+
+	////////////////////////////////////////////////////////////////////////////
+	/**
+	 * These events are triggered by the map screenshot feature.
+	 * @namespace geo.event.pixelmap
+	 */
+	////////////////////////////////////////////////////////////////////////////
+	geo_event.screenshot = {
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Triggered when a scrrenshot has been completed.
+	   *
+	   * @namespace geo.event.screenshot
+	   * @property {object} canvas The canvas used to take the screenshot
+	   * @property {string|object} screenshot the screenshot as a dataURL string or
+	   *      the canvas, depending on the screenshot request.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  ready: 'geo_screenshot_ready'
 	};
 
 	////////////////////////////////////////////////////////////////////////////
@@ -14953,7 +14973,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 42 */
 /***/ function(module, exports) {
 
-	module.exports = '2.3.17';
+	module.exports = '2.3.16';
 
 
 /***/ },
@@ -15238,8 +15258,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.init = function() {
 	  var zone = adjust_zone(this.zone, this.long0);
-	  if (zone === undefined) {
-	    throw new Error('unknown utm zone');
+	  if (!zone) {
+	    return;
 	  }
 
 	  this.lat0 = 0;
@@ -15263,16 +15283,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	var adjust_lon = __webpack_require__(26);
 
 	module.exports = function(zone, lon) {
-	  if (zone === undefined) {
+	  if (!zone) {
 	    zone = Math.floor((adjust_lon(lon) + Math.PI) * 30 / Math.PI);
 
 	    if (zone < 0) {
 	      return 0;
-	    } else if (zone >= 60) {
+	    }
+	    else if (zone >= 60) {
 	      return 59;
 	    }
-	    return zone;
-	  } else {
+	  }
+	  else {
 	    if (zone > 0 && zone <= 60) {
 	      return zone - 1;
 	    }
@@ -18725,6 +18746,163 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } : undefined
 	      };
 	      return {map: mapParams, layer: layerParams};
+	    },
+
+	    /**
+	     * Escape any character in a string that has a code point >= 127.
+	     *
+	     * @param {string} text: the string to escape.
+	     * @returns {string}: the escaped string.
+	     */
+	    escapeUnicodeHTML: function (text) {
+	      return text.replace(/./g, function (k) {
+	        var code = k.charCodeAt();
+	        if (code < 127) {
+	          return k;
+	        }
+	        return '&#' + code.toString(10) + ';';
+	      });
+	    },
+
+	    /**
+	     * Check svg image and html img tags.  If the source is set, load images
+	     * explicitly and convert them to local data:image references.
+	     *
+	     * @param {selector} elem: a jquery selector that may contain images.
+	     * @returns {array}: a list of deferred objects that resolve when images
+	     *      are dereferences.
+	     */
+	    dereferenceElements: function (elem) {
+	      var deferList = [];
+
+	      $('img,image', elem).each(function () {
+	        var src = $(this);
+	        var key = src.is('image') ? 'href' : 'src';
+	        if (src.attr(key)) {
+	          var img = new Image();
+	          if (src.attr(key).substr(0, 4) === 'http' || src[0].crossOrigin) {
+	            img.crossOrigin = src[0].crossOrigin || 'anonymous';
+	          }
+	          var defer = $.Deferred();
+	          img.onload = function () {
+	            var cvs = document.createElement('canvas');
+	            cvs.width = img.naturalWidth;
+	            cvs.height = img.naturalHeight;
+	            cvs.getContext('2d').drawImage(img, 0, 0);
+	            src.attr(key, cvs.toDataURL('image/png'));
+	            if (src.attr(key).substr(0, 10) !== 'data:image') {
+	              src.remove();
+	            }
+	            defer.resolve();
+	          };
+	          img.onerror = function () {
+	            src.remove();
+	            defer.resolve();
+	          };
+	          img.src = src.attr(key);
+	          deferList.push(defer);
+	        }
+	      });
+	      return deferList;
+	    },
+
+	    /**
+	     * Convert an html element to an image.  This attempts to localize any
+	     * images within the element.  If there are other external references, the
+	     * image may not work due to security considerations.
+	     *
+	     * @param {object} elem: either a jquery selector or an html element.  This
+	     *      may contain multiple elements.  The direct parent and grandparent
+	     *      of the element are used for class information.
+	     * @param {number} parents: number of layers up to travel to get class
+	     *      information.
+	     * @returns {deferred}: a jquery deferred object which receives an HTML
+	     *      Image element when resolved.
+	     */
+	    htmlToImage: function (elem, parents) {
+	      var defer = $.Deferred(), container;
+
+	      var parent = $(elem);
+	      elem = $(elem).clone();
+	      while (parents && parents > 0) {
+	        parent = parent.parent();
+	        if (parent.is('div')) {
+	          /* Create a containing div with the parent's class and id (so css
+	           * will be used), but override size and background. */
+	          container = $('<div>').attr({
+	            'class': parent.attr('class'),
+	            id: parent.attr('id')
+	          }).css({
+	            width: '100%',
+	            height: '100%',
+	            background: 'none',
+	            margin: 0
+	          });
+	          container.append(elem);
+	          elem = container;
+	        }
+	        parents -= 1;
+	      }
+	      // canvas elements won't render properly here.
+	      $('canvas', elem).remove();
+	      container = $('<div xmlns="http://www.w3.org/1999/xhtml">');
+	      container.css({
+	        width: parent.width() + 'px',
+	        height: parent.height() + 'px'
+	      });
+	      container.append($('<head>'));
+	      var body = $('<body>');
+	      container.append(body);
+	      /* We must specify the new body as having no background, or we'll clobber
+	       * other layers. */
+	      body.css({
+	        width: parent.width() + 'px',
+	        height: parent.height() + 'px',
+	        background: 'none',
+	        margin: 0
+	      });
+	      body.append(elem);
+	      var deferList = geo.util.dereferenceElements(elem);
+	      /* Get styles and links in order, as order matters in css */
+	      $('style,link[rel="stylesheet"]').each(function () {
+	        var styleElem;
+	        if ($(this).is('style')) {
+	          styleElem = $(this).clone();
+	        } else {
+	          var fetch = $.Deferred();
+	          styleElem = $('<style type="text/css">');
+	          $.get($(this).attr('href')).done(function (css) {
+	            styleElem.text(css);
+	            fetch.resolve();
+	          });
+	          deferList.push(fetch);
+	        }
+	        $('head', container).append(styleElem);
+	      });
+
+	      $.when.apply($, deferList).then(function () {
+	        var svg = $('<svg xmlns="http://www.w3.org/2000/svg">' +
+	                    '<foreignObject width="100%" height="100%">' +
+	                    '</foreignObject></svg>');
+	        svg.attr({
+	          width: parent.width() + 'px',
+	          height: parent.height() + 'px',
+	          'text-rendering': 'optimizeLegibility'
+	        });
+	        $('foreignObject', svg).append(container);
+
+	        var img = new Image();
+	        img.onload = function () {
+	          defer.resolve(img);
+	        };
+	        img.onerror = function () {
+	          defer.reject();
+	        };
+	        img.src = 'data:image/svg+xml;base64,' +
+	            btoa(geo.util.escapeUnicodeHTML(
+	                new XMLSerializer().serializeToString(svg[0])));
+	      });
+	      return defer;
 	    },
 
 	    /**
@@ -42843,7 +43021,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      keyboard: {
 	        actions: {
 	          /* Specific actions can be disabled by removing them from this object
-	           * or stting an empty list as the key bindings.  Additional actions
+	           * or setting an empty list as the key bindings.  Additional actions
 	           * can be added to the dictionary, each of which gets a list of key
 	           * bindings.  See Mousetrap documentation for special key names. */
 	          'zoom.in': ['plus', 'shift+plus', 'shift+ctrl+plus', '=', 'shift+=', 'shift+ctrl+='],
@@ -42915,6 +43093,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  if (args && args.momentum && args.momentum.actions) {
 	    m_options.momentum.actions = $.extend(true, [], args.momentum.actions);
+	  }
+	  if (args && args.keyboard && args.keyboard.actions !== undefined) {
+	    m_options.keyboard.actions = $.extend(true, {}, args.keyboard.actions);
 	  }
 
 	  // options supported:
@@ -46263,7 +46444,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 
 	  if (!(arg.layer instanceof featureLayer)) {
-	    throw 'fileReader must be given a feature layer';
+	    throw new Error('fileReader must be given a feature layer');
 	  }
 
 	  var m_layer = arg.layer;
@@ -48397,26 +48578,31 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Attach a file reader to a layer in the map to be used as a drop target.
+	   * Get, set, or create and set a file reader to a layer in the map to be used
+	   * as a drop target.
+	   *
+	   * @param {string|object|undefined} readerOrName: undefined to get the
+	   *    current reader, an instance of a file reader to set the reader, or a
+	   *    name to create a file reader (see utils.createFileReader for options).
+	   * @param {object} opts: options for creating a file reader.  If this
+	   *    includes layer, use that layer, otherwise create a layer using these
+	   *    options.
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
-	  this.fileReader = function (readerType, opts) {
-	    var layer, renderer;
-	    opts = opts || {};
-	    if (!readerType) {
+	  this.fileReader = function (readerOrName, opts) {
+	    if (readerOrName === undefined) {
 	      return m_fileReader;
 	    }
-	    layer = opts.layer;
-	    if (!layer) {
-	      renderer = opts.renderer;
-	      if (!renderer) {
-	        renderer = 'd3';
+	    if (typeof readerOrName === 'string') {
+	      opts = opts || {};
+	      if (!opts.layer) {
+	        opts.layer = m_this.createLayer('feature', $.extend({}, opts));
 	      }
-	      layer = m_this.createLayer('feature', {renderer: renderer});
+	      opts.renderer = opts.layer.renderer().api();
+	      m_fileReader = registry.createFileReader(readerOrName, opts);
+	    } else {
+	      m_fileReader = readerOrName;
 	    }
-	    opts.layer = layer;
-	    opts.renderer = renderer;
-	    m_fileReader = registry.createFileReader(readerType, opts);
 	    return m_this;
 	  };
 
@@ -48428,10 +48614,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._init = function () {
 
 	    if (m_node === undefined || m_node === null) {
-	      throw 'Map require DIV node';
+	      throw new Error('Map require DIV node');
 	    }
 
+	    if (m_node.data('data-geojs-map') && $.isFunction(m_node.data('data-geojs-map').exit)) {
+	      m_node.data('data-geojs-map').exit();
+	    }
 	    m_node.addClass('geojs-map');
+	    m_node.data('data-geojs-map', m_this);
 	    return m_this;
 	  };
 
@@ -48455,13 +48645,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.exit = function () {
 	    var i, layers = m_this.children();
-	    for (i = 0; i < layers.length; i += 1) {
+	    for (i = layers.length - 1; i >= 0; i -= 1) {
 	      layers[i]._exit();
+	      m_this.removeChild(layers[i]);
 	    }
 	    if (m_this.interactor()) {
 	      m_this.interactor().destroy();
 	      m_this.interactor(null);
 	    }
+	    m_this.node().data('data-geojs-map', null);
 	    m_this.node().off('.geo');
 	    /* make sure the map node has nothing left in it */
 	    m_this.node().empty();
@@ -49073,8 +49265,183 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    });
 
-	    $a.appendTo(m_this.node());
+	    /* Only add the element if there is at least one attribution */
+	    if ($('span', $a).length) {
+	      $a.appendTo(m_this.node());
+	    }
 	    return m_this;
+	  };
+
+	  /**
+	   * Draw a layer image to a canvas context.  The layer's opacity and transform
+	   * is applied.
+	   *
+	   * @param {context} context: the 2d canvas context to draw into.
+	   * @param {number} opacity: the opacity in the range [0, 1].
+	   * @param {object} elem: the element that might have a transform.
+	   * @param {HTMLImageObject} img: the image or canvas to draw to the canvas.
+	   */
+	  function drawLayerImageToContext(context, opacity, elem, img) {
+	    context.globalAlpha = opacity;
+	    var transform = elem.css('transform');
+	    // if the canvas is being transformed, apply the same transformation
+	    if (transform && transform.substr(0, 7) === 'matrix(') {
+	      context.setTransform.apply(context, transform.substr(7, transform.length - 8).split(',').map(parseFloat));
+	    } else {
+	      context.setTransform(1, 0, 0, 1, 0, 0);
+	    }
+	    context.drawImage(img, 0, 0);
+	  }
+
+	  /**
+	   * Get a screen-shot of all or some of the canvas layers of map.  Note that
+	   * webGL layers are rerendered, even if
+	   *   window.contextPreserveDrawingBuffer = true;
+	   * is set before creating the map object.  Chrome, at least, may not keep the
+	   * drawing buffers if the tab loses focus (and returning focus won't
+	   * necessarily rerender).
+	   *
+	   * @param {object|array|undefined} layers: either a layer, a list of layers,
+	   *    falsy to get all layers, or an object that contains optional values of
+	   *    layers, type, encoderOptions, and values listed in the opts param
+	   *    (this last form allows a single argument for the function).
+	   * @param {string} type: see canvas.toDataURL.  Defaults to 'image/png'.
+	   *    Alternately, 'canvas' to return the canvas element (this can be used
+	   *    to get the results as a blob, which can be faster for some operations
+	   *    but is not supported as widely).
+	   * @param {Number} encoderOptions: see canvas.toDataURL.
+	   * @param {object} opts: additional screenshot options:
+	   *    background: if false or null, don't prefill the background.  If
+	   *        undefined, use the default (white).  Otherwise, a css color or
+	   *        CanvasRenderingContext2D.fillStyle to fill the initial canvas.
+	   *        This could match the background of the browser page, for instance.
+	   *    wait: if 'idle', wait for the map to be idle and one animation frame to
+	   *        occur.  If truthy, wait for an animation frame to occur.
+	   *        Otherwise, take the screenshot as sson as possible.
+	   *    attribution: if null or unspecified, include the attribution only if
+	   *        all layers are used.  If false, never include the attribution.  If
+	   *        true, always include it.
+	   * @returns {deferred}: a jQuery Deferred object.  The done function receives
+	   *    either a data URL or the HTMLCanvasElement with the result.
+	   */
+	  this.screenshot = function (layers, type, encoderOptions, opts) {
+	    var defer;
+
+	    if (layers && !Array.isArray(layers) && !layers.renderer) {
+	      type = type || layers.type;
+	      encoderOptions = encoderOptions || layers.encoderOptions;
+	      opts = opts || layers;
+	      layers = layers.layers;
+	    }
+	    opts = opts || {};
+	    /* if asked to wait, return a Deferred that will do so, calling the
+	     * screenshot function without waiting once it is done. */
+	    if (opts.wait) {
+	      var optsWithoutWait = $.extend({}, opts, {wait: false});
+	      defer = $.Deferred();
+
+	      var waitForRAF = function () {
+	        window.requestAnimationFrame(function () {
+	          defer.resolve();
+	        });
+	      };
+
+	      if (opts.wait === 'idle') {
+	        m_this.onIdle(waitForRAF);
+	      } else {
+	        waitForRAF();
+	      }
+	      return defer.then(function () {
+	        return m_this.screenshot(layers, type, encoderOptions, optsWithoutWait);
+	      });
+	    }
+	    defer = $.when();
+	    // ensure layers is a list of all the layers we want to include
+	    if (!layers) {
+	      layers = m_this.layers();
+	      if (opts.attribution === null || opts.attribution === undefined) {
+	        opts.attribution = true;
+	      }
+	    } else if (!Array.isArray(layers)) {
+	      layers = [layers];
+	    }
+	    // filter to only the included layers
+	    layers = layers.filter(function (l) { return m_this.layers().indexOf(l) >= 0; });
+	    // sort layers by z-index
+	    layers = layers.sort(
+	      function (a, b) { return (a.zIndex() - b.zIndex()); }
+	    );
+	    // create a new canvas element
+	    var result = document.createElement('canvas');
+	    result.width = m_width;
+	    result.height = m_height;
+	    var context = result.getContext('2d');
+	    // optionally start with a white or custom background
+	    if (opts.background !== false && opts.background !== null) {
+	      var background = opts.background;
+	      if (opts.background === undefined) {
+	        /* If we are using the map's current background, start with white as a
+	         * fallback, then fill with the backgrounds of all parents and the map
+	         * node.  Since each may be partially transparent, this is required to
+	         * match the web page's color.  It won't use background patterns. */
+	        context.fillStyle = 'white';
+	        context.fillRect(0, 0, result.width, result.height);
+	        m_this.node().parents().get().reverse().forEach(function (elem) {
+	          background = window.getComputedStyle(elem).backgroundColor;
+	          if (background && background !== 'transparent') {
+	            context.fillStyle = background;
+	            context.fillRect(0, 0, result.width, result.height);
+	          }
+	        });
+	        background = window.getComputedStyle(m_this.node()[0]).backgroundColor;
+	      }
+	      if (background && background !== 'transparent') {
+	        context.fillStyle = background;
+	        context.fillRect(0, 0, result.width, result.height);
+	      }
+	    }
+	    // for each layer, copy to our new canvas.
+	    layers.forEach(function (layer) {
+	      var opacity = layer.opacity();
+	      if (opacity <= 0) {
+	        return;
+	      }
+	      layer.node().children('canvas').each(function () {
+	        if (layer.renderer().api() === 'vgl') {
+	          layer.renderer()._renderFrame();
+	        }
+	        drawLayerImageToContext(context, opacity, $(this), $(this)[0]);
+	      });
+	      if (layer.node().children().not('canvas').length) {
+	        defer = defer.then(function () {
+	          return util.htmlToImage(layer.node(), 1).done(function (img) {
+	            drawLayerImageToContext(context, 1, $([]), img);
+	          });
+	        });
+	      }
+	    });
+	    if (opts.attribution) {
+	      m_this.node().find('.geo-attribution').each(function () {
+	        var attrElem = $(this);
+	        defer = defer.then(function () {
+	          return util.htmlToImage(attrElem, 1).done(function (img) {
+	            drawLayerImageToContext(context, 1, $([]), img);
+	          });
+	        });
+	      });
+	    }
+	    defer = defer.then(function () {
+	      var canvas = result;
+	      if (type !== 'canvas') {
+	        result = result.toDataURL(type, encoderOptions);
+	      }
+	      m_this.geoTrigger(geo_event.screenshot.ready, {
+	        canvas: canvas,
+	        screenshot: result
+	      });
+	      return result;
+	    });
+	    return defer;
 	  };
 
 	  /**
@@ -52029,14 +52396,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("0.11.0");
+	module.exports = ("0.11.1");
 
 
 /***/ },
 /* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("7ca9c4b94f6a204030dd994d55a40dc56c592820");
+	module.exports = ("b8314e39b0cc017a96e8cdf6b2413f74ce31a958");
 
 
 /***/ },
@@ -53080,7 +53447,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_width = width;
 	    m_height = height;
 	    if (!m_width || !m_height) {
-	      throw 'Map layer has size 0';
+	      throw new Error('Map layer has size 0');
 	    }
 	    m_diagonal = Math.pow(width * width + height * height, 0.5);
 	    m_corners = {
@@ -58927,7 +59294,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg.position = arg.position === undefined ? { left: 0, top: 0 } : arg.position;
 
 	  if (arg.parent !== undefined && !(arg.parent instanceof widget)) {
-	    throw 'Parent must be of type geo.gui.widget';
+	    throw new Error('Parent must be of type geo.gui.widget');
 	  }
 
 	  this._init = function () {
@@ -58987,7 +59354,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._createCanvas = function () {
-	    throw 'Must be defined in derived classes';
+	    throw new Error('Must be defined in derived classes');
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
