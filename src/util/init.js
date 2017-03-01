@@ -765,7 +765,17 @@
       while (parents && parents > 0) {
         parent = parent.parent();
         if (parent.is('div')) {
-          container = $('<div>').attr('class', parent.attr('class')).css({width: '100%', height: '100%'});
+          /* Create a containing div with the parent's class and id (so css
+           * will be used), but override size and background. */
+          container = $('<div>').attr({
+            'class': parent.attr('class'),
+            id: parent.attr('id')
+          }).css({
+            width: '100%',
+            height: '100%',
+            background: 'none',
+            margin: 0
+          });
           container.append(elem);
           elem = container;
         }
@@ -781,8 +791,8 @@
       container.append($('<head>'));
       var body = $('<body>');
       container.append(body);
-      // we must specify the new body as have no background, or we'll clobber
-      // other layers
+      /* We must specify the new body as having no background, or we'll clobber
+       * other layers. */
       body.css({
         width: parent.width() + 'px',
         height: parent.height() + 'px',
