@@ -1691,4 +1691,131 @@ describe('mapInteractor', function () {
     interactor.simulateEvent('keyboard', {keys: '2'});
     expect(triggered).toBe(0);
   });
+
+  it('Test touch interactions', function () {
+    var map = mockedMap('#mapNode1'),
+        interactor = geo.mapInteractor({map: map});
+
+    expect(interactor.hasTouchSupport()).toBe(true);
+
+    // check the pan event was called
+    interactor.simulateEvent(
+      'panstart', {touch: true, center: {x: 20, y: 20}});
+    interactor.simulateEvent(
+      'panmove', {touch: true, center: {x: 30, y: 20}});
+    interactor.simulateEvent(
+      'panend', {touch: true, center: {x: 40, y: 20}});
+    expect(map.info.pan).toBe(2);
+    expect(map.info.panArgs.x).toBe(10);
+    expect(map.info.panArgs.y).toBe(0);
+
+    // A two-pointer event will end the action
+    interactor.simulateEvent(
+      'panstart', {touch: true, center: {x: 20, y: 20}});
+    interactor.simulateEvent(
+      'hammer.input', {touch: true, center: {x: 30, y: 20}, pointers: [1]});
+    interactor.simulateEvent(
+      'panmove', {touch: true, center: {x: 30, y: 20}});
+    expect(map.info.pan).toBe(4);
+    interactor.simulateEvent(
+      'hammer.input', {touch: true, center: {x: 40, y: 20}, pointers: [1, 2]});
+    interactor.simulateEvent(
+      'panmove', {touch: true, center: {x: 50, y: 20}});
+    interactor.simulateEvent(
+      'panend', {touch: true, center: {x: 60, y: 20}});
+    expect(map.info.pan).toBe(4);
+    expect(map.info.panArgs.x).toBe(10);
+    expect(map.info.panArgs.y).toBe(0);
+
+    // check the two-fingered pan event was called
+    interactor.simulateEvent(
+      'rotatestart', {touch: true, center: {x: 20, y: 20}});
+    // first movement exceeds the threshold, but doesn't register
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 31, y: 21}});
+    // second movement will result in a pan
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 42, y: 22}});
+    interactor.simulateEvent(
+      'rotateend', {touch: true, center: {x: 53, y: 23}});
+    expect(map.info.pan).toBe(5);
+    expect(map.info.panArgs.x).toBe(11);
+    expect(map.info.panArgs.y).toBe(1);
+
+    // a spurious event will end the action
+    interactor.simulateEvent(
+      'rotatestart', {touch: true, center: {x: 20, y: 20}});
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 30, y: 20}});
+    interactor.simulateEvent(
+      'spurious', {touch: true, center: {x: 30, y: 20}});
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 40, y: 20}});
+    interactor.simulateEvent(
+      'rotateend', {touch: true, center: {x: 50, y: 20}});
+    expect(map.info.pan).toBe(5);
+
+    // a mouse move will end the action
+    interactor.simulateEvent(
+      'rotatestart', {touch: true, center: {x: 20, y: 20}});
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 30, y: 20}});
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 30, y: 20}, pointerType: 'mouse'});
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 40, y: 20}});
+    interactor.simulateEvent(
+      'rotateend', {touch: true, center: {x: 50, y: 20}});
+    expect(map.info.pan).toBe(5);
+
+    // a zero-threshold will result in a faster pan
+    interactor.options({zoomrotateMinimumPan: 0});
+    interactor.simulateEvent(
+      'rotatestart', {touch: true, center: {x: 20, y: 20}});
+    // first movement will result in a pan
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 32, y: 22}});
+    expect(map.info.pan).toBe(6);
+    expect(map.info.panArgs.x).toBe(12);
+    expect(map.info.panArgs.y).toBe(2);
+    // second movement will result in a pan
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 44, y: 23}});
+    interactor.simulateEvent(
+      'rotateend', {touch: true, center: {x: 53, y: 23}});
+    expect(map.info.pan).toBe(7);
+    expect(map.info.panArgs.x).toBe(12);
+    expect(map.info.panArgs.y).toBe(1);
+
+    // check the two-fingered rotate event was called
+    interactor.simulateEvent(
+      'rotatestart', {touch: true, center: {x: 20, y: 20}, rotation: 30});
+    // first movement exceeds the threshold, but doesn't register
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 20, y: 20}, rotation: 35});
+    // second movement will result in a rotation
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 20, y: 20}, rotation: 40});
+    interactor.simulateEvent(
+      'rotateend', {touch: true, center: {x: 20, y: 20}, rotation: 45});
+    expect(map.info.rotation).toBe(1);
+    expect(map.info.rotationArgs).toBe(0.1 + 5 * Math.PI / 180);
+
+    // check the two-fingered scale event was called
+    interactor.simulateEvent(
+      'rotatestart', {touch: true, center: {x: 20, y: 20}, scale: 1});
+    // first movement exceeds the threshold, but doesn't change the zoom
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 20, y: 20}, scale: 1.1});
+    expect(map.info.zoom).toBe(1);
+    expect(map.info.zoomArgs).toBe(2);
+    // second movement will result in a zoom
+    interactor.simulateEvent(
+      'rotatemove', {touch: true, center: {x: 20, y: 20}, scale: 1.2});
+    expect(map.info.zoom).toBe(2);
+    expect(map.info.zoomArgs).toBe(2 + Math.log2(1.2) - Math.log2(1.1));
+    interactor.simulateEvent(
+      'rotateend', {touch: true, center: {x: 20, y: 20}, scale: 1.3});
+    expect(map.info.zoom).toBe(2);
+  });
 });

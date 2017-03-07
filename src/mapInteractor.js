@@ -219,7 +219,7 @@ var mapInteractor = function (args) {
        * geo_action.zoomrotate action will reverse the rotation direction.
        * This helps reduce chatter when zooms and pans are combined with
        * rotations. */
-      zoomrotateReverseRotation: 2.0 * Math.PI / 180,
+      zoomrotateReverseRotation: 4.0 * Math.PI / 180,
       /* The minimum zoom factor change (increasing or descreasing) before the
        * geo_action.zoomrotate action will allow zoom.  Set to 0 to always
        * include zoom. */
@@ -762,7 +762,7 @@ var mapInteractor = function (args) {
         recog.push([Hammer.Pan, {direction: Hammer.DIRECTION_ALL}]);
         touchEvents = touchEvents.concat(['panstart', 'panend', 'panmove']);
       }
-      var hammerParams = {recognizers: recog};
+      var hammerParams = {recognizers: recog, preventDefault: true};
       m_touchHandler = {
         manager: new Hammer.Manager($node[0], hammerParams),
         touchSupport: m_this.hasTouchSupport(),
@@ -778,7 +778,8 @@ var mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Disonnects events to a map.  If the map is not set, then this does nothing.
+   * Disiconnects events to a map.  If the map is not set, then this does
+   * nothing.
    * @returns {geo.mapInteractor}
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -1149,10 +1150,10 @@ var mapInteractor = function (args) {
    * @param {object} evt: the mouse event that triggered this.
    */
   this._handleZoomrotate = function (evt) {
-    /* Only zoom if we have once execeed the initial zoom threshold. */
+    /* Only zoom if we have once exceeded the initial zoom threshold. */
     var deltaZoom = Math.log2(evt.scale);
     if (!m_state.zoomrotateAllowZoom && deltaZoom &&
-        Math.abs(deltaZoom) >= m_options.zoomrotateMinimumZoom) {
+        Math.abs(deltaZoom) >= Math.log2(1 + m_options.zoomrotateMinimumZoom)) {
       if (m_options.zoomrotateMinimumZoom) {
         m_state.initialZoom -= deltaZoom;
       }
@@ -1162,7 +1163,7 @@ var mapInteractor = function (args) {
       var zoom = m_state.initialZoom + deltaZoom;
       m_this.map().zoom(zoom, m_state.origin);
     }
-    /* Only rotate if we have once execeed the initial rotation threshold.  The
+    /* Only rotate if we have once exceeded the initial rotation threshold.  The
      * first time this happens (if the threshold is greater than zero), set the
      * start of rotation to the current position, so that there is no sudden
      * jump. */
@@ -1177,7 +1178,10 @@ var mapInteractor = function (args) {
     }
     if (m_state.zoomrotateAllowRotation) {
       var theta = m_state.initialRotation + deltaTheta;
-      deltaTheta = theta - m_this.map().rotation();
+      /* Compute the delta in the range of [-PI, PI).  This is involed to work
+       * around modulo returning a signed value. */
+      deltaTheta = ((theta - m_this.map().rotation()) % (Math.PI * 2) +
+                    Math.PI * 3) % (Math.PI * 2) - Math.PI;
       /* If we reverse direction, don't rotate until some threshold is
        * exceeded.  This helps prevent rotation bouncing while panning. */
       if (deltaTheta && (deltaTheta * (m_state.lastRotationDelta || 0) >= 0 || Math.abs(deltaTheta) >= m_options.zoomrotateReverseRotation)) {
@@ -1199,7 +1203,6 @@ var mapInteractor = function (args) {
     if (!m_state.zoomrotateAllowPan && deltaPan2 &&
         deltaPan2 >= m_options.zoomrotateMinimumPan * m_options.zoomrotateMinimumPan) {
       if (m_options.zoomrotateMinimumPan) {
-        // m_state.origin = m_this.mouse();
         deltaX = deltaY = 0;
         m_state.initialEventGeo = m_this.mouse().geo;
       } else {
@@ -1208,7 +1211,6 @@ var mapInteractor = function (args) {
       m_state.zoomrotateAllowPan = true;
     }
     if (m_state.zoomrotateAllowPan && (deltaX || deltaY)) {
-      // m_state.origin = m_this.mouse();
       m_this.map().pan({x: deltaX, y: deltaY});
     }
   };
@@ -1372,7 +1374,7 @@ var mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Based on the screen coodinates of a selection, zoom or unzoom and
+   * Based on the screen coordinates of a selection, zoom or unzoom and
    * recenter.
    *
    * @private
@@ -1731,7 +1733,7 @@ var mapInteractor = function (args) {
 
       if (action) {
         // if we were moving because of momentum or a transition, cancel it and
-        // recompute where the mouse action is occuring.
+        // recompute where the mouse action is occurring.
         var recompute = m_this.map().transitionCancel('wheel.' + action);
         recompute |= m_this.cancel(geo_action.momentum, true);
         if (recompute) {
@@ -2024,7 +2026,7 @@ var mapInteractor = function (args) {
 
     if (type === 'keyboard' && m_keyHandler) {
       /* Mousetrap passes through the keys we send, but not an event object,
-       * so we construct an artifical event object as the keys, and use that.
+       * so we construct an artificial event object as the keys, and use that.
        */
       var keys = {
         shiftKey: options.shift || options.shiftKey || false,
@@ -2069,6 +2071,13 @@ var mapInteractor = function (args) {
         ctrlKey: options.modifiers.indexOf('ctrl') >= 0,
         metaKey: options.modifiers.indexOf('meta') >= 0,
         shiftKey: options.modifiers.indexOf('shift') >= 0,
+
+        center: options.center,
+        rotation: options.touch ? options.rotation || 0 : options.rotation,
+        scale: options.touch ? options.scale || 1 : options.scale,
+        pointers: options.pointers,
+        pointerType: options.pointerType,
+
         originalEvent: {
           deltaX: options.wheelDelta.x,
           deltaY: options.wheelDelta.y,
@@ -2079,7 +2088,11 @@ var mapInteractor = function (args) {
         }
       }
     );
-    $node.trigger(evt);
+    if (options.touch && m_touchHandler) {
+      m_this._handleTouch(evt);
+    } else {
+      $node.trigger(evt);
+    }
     if (type.indexOf('.geojs') >= 0) {
       $(document).trigger(evt);
     }
