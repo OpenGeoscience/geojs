@@ -1689,10 +1689,13 @@ var map = function (arg) {
         return;
       }
       layer.node().children('canvas').each(function () {
-        if (layer.renderer().api() === 'vgl') {
-          layer.renderer()._renderFrame();
-        }
-        drawLayerImageToContext(context, opacity, $(this), $(this)[0]);
+        var canvasElem = $(this);
+        defer = defer.then(function () {
+          if (layer.renderer().api() === 'vgl') {
+            layer.renderer()._renderFrame();
+          }
+          drawLayerImageToContext(context, opacity, canvasElem, canvasElem[0]);
+        });
       });
       if (layer.node().children().not('canvas').length) {
         defer = defer.then(function () {

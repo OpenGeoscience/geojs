@@ -23,7 +23,6 @@ and testing of geojs.
 * `Girder Client <http://girder.readthedocs.io>`_
 * `Pillow <http://pillow.readthedocs.io>`_
 * `Requests <http://docs.python-requests.org/en/latest/>`_
-* `Selenium <http://docs.seleniumhq.org/>`_
 
 For testing WebGL in a headless environment, the additional packages are needed:
 

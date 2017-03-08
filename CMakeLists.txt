@@ -10,7 +10,6 @@ set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
 set(FFHEADLESS_TESTS ON CACHE BOOL "Generate headless Firefox unit tests (requires xvfb to be running).")
 set(TEST_SAVE_IMAGE "none" CACHE STRING "Save headless test images even if there aren't errors.  Valid options are none, all, or the a comma-separated list of test names.")
 set(ESLINT_TESTS ON CACHE BOOL "Generate eslint style tests for JS source files.")
-set(SELENIUM_TESTS ON CACHE BOOL "Generate selenium unit tests.")
 
 site_name(HOSTNAME)
 
@@ -37,11 +36,6 @@ function(add_geojs_test test_name)
   set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "${test_name}")
 endfunction()
 
-set(MIDAS_BASE_URL "https://midas3.kitware.com/midas" CACHE STRING "MIDAS data store URL.")
-mark_as_advanced(MIDAS_BASE_URL)
-set(MIDAS_COMMUNITY "GeoJS" CACHE STRING "MIDAS community hosting test images.")
-mark_as_advanced(MIDAS_COMMUNITY)
-
 # set variables for girder.cmake
 set(Girder_KEY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-data")
 set(Girder_DATA_DIR "${GEOJS_DEPLOY_DIR}/data")
@@ -51,11 +45,6 @@ add_download_target()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs_test_runner.py.in
                ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
-)
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-test-utils.js
-               ${GEOJS_DEPLOY_DIR}/test/lib/selenium-test-utils.js
-               COPYONLY
 )
 
 # Generate notes to send along with the test reports
@@ -158,87 +147,6 @@ add_custom_target(baseline_images DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/base-imag
 
 add_test(NAME baseline_images CONFIGURATIONS "baseline_images" COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target baseline_images)
 set_property(TEST "baseline_images" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
-
-if(SELENIUM_TESTS)
-
-  find_package(PythonInterp REQUIRED)
-  set(FIREFOX_TESTS ON CACHE BOOL "Turn on Firefox selenium tests.")
-  set(CHROME_TESTS OFF CACHE BOOL "Turn on Chrome selenium tests.")
-  set(DATA_REPO_PATH "" CACHE PATH "Local path to the geojs data repository (optional).")
-  set(SELENIUM_TEST_DIR "${GEOJS_DEPLOY_DIR}/test/selenium")
-  set(SELENIUM_HOST localhost CACHE STRING "The selenium test server host.")
-  mark_as_advanced(SELENIUM_HOST)
-  set(SELENIUM_PORT 4444 CACHE STRING "The selenium test server port.")
-  mark_as_advanced(SELENIUM_PORT)
-
-  configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/selenium-blanket.js
-    ${GEOJS_DEPLOY_DIR}/test/lib/selenium-blanket.js
-    COPYONLY
-  )
-  configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium_test.py.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/test/selenium_test.py"
-  )
-  configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/midas_handler.py"
-    "${CMAKE_CURRENT_BINARY_DIR}/test/midas_handler.py"
-    COPYONLY
-  )
-  configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/upload_test_cases.py"
-    "${CMAKE_CURRENT_BINARY_DIR}/test/upload_test_cases.py"
-    COPYONLY
-  )
-  file(GLOB SELENIUM_TEST_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/selenium-tests/*
-  )
-  foreach(dir ${SELENIUM_TEST_DIRS})
-    if(IS_DIRECTORY "${dir}" AND EXISTS "${dir}/include.js")
-      set(html "${dir}/include.html")
-      set(js "${dir}/include.js")
-      set(css "${dir}/include.css")
-      get_filename_component(f "${dir}" NAME_WE)
-      set(test_dir "${SELENIUM_TEST_DIR}/${f}")
-      set(output_html "${test_dir}/index.html")
-
-      add_custom_command(OUTPUT "${output_html}"
-        COMMAND ${CMAKE_COMMAND} -DHTML_INCLUDE="${html}"
-                                 -DJS_INCLUDE="${js}"
-                                 -DCSS_INCLUDE="${css}"
-                                 -DOUTPUT_HTML="${output_html}"
-                                 -DTEMPLATE_HTML="${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-template.html.in"
-                                 -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-selenium-test.cmake
-        COMMAND ${CMAKE_COMMAND} -E touch "${output_html}"
-        DEPENDS "${html}" "${js}" "${css}" "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-template.html.in"
-        COMMENT "Generating selenium test ${f}"
-      )
-      list(APPEND SELENIUM_TEST_FILES "${output_html}")
-
-      add_test(
-        NAME "selenium:${f}"
-        WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
-        COMMAND ${PYTHON_EXECUTABLE} -m unittest discover -v -s "${dir}"
-      )
-
-      set_property(TEST "selenium:${f}" APPEND PROPERTY DEPENDS "notes-reset")
-      set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "selenium:${f}")
-      set_property(TEST "selenium:${f}" APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/test")
-      set_property(TEST "selenium:${f}" APPEND PROPERTY ENVIRONMENT "FIREFOX_TESTS=${FIREFOX_TESTS}")
-      set_property(TEST "selenium:${f}" APPEND PROPERTY ENVIRONMENT "CHROME_TESTS=${CHROME_TESTS}")
-    endif()
-  endforeach()
-
-  set_property(TEST "selenium:glPointsSpeed" APPEND PROPERTY ENVIRONMENT "LOAD_SPEED_THRESHOLD=1000")
-  set_property(TEST "selenium:glPointsSpeed" APPEND PROPERTY ENVIRONMENT "FRAMERATE_THRESHOLD=5")
-
-  add_custom_target(
-    selenium_tests
-    ALL
-    DEPENDS ${SELENIUM_TEST_FILES} ${Girder_DOWNLOAD_FILES}
-  )
-
-endif()
 
 if(${ESLINT_TESTS})
 
