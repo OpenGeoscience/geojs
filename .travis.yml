@@ -31,6 +31,7 @@ cache:
     - "$HOME/cache"
 
 before_install:
+  - nvm install 4
   # Start xvfb with a specific resolution and pixel depth
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x24"
   - CACHE="${HOME}/cache" CMAKE_VERSION=3.5.0 CMAKE_SHORT_VERSION=3.5 source ./scripts/install_cmake.sh

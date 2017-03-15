@@ -8,6 +8,7 @@ set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
 set(coverage_file "${CTEST_SOURCE_DIRECTORY}/dist/cobertura/cobertura-coverage.xml")
 
 ctest_start("Continuous")
+ctest_configure()
 ctest_build()
 ctest_test(PARALLEL_LEVEL 1 RETURN_VALUE res)
 if(EXISTS "${coverage_file}")
