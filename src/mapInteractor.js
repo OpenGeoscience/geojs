@@ -1184,7 +1184,8 @@ var mapInteractor = function (args) {
                     Math.PI * 3) % (Math.PI * 2) - Math.PI;
       /* If we reverse direction, don't rotate until some threshold is
        * exceeded.  This helps prevent rotation bouncing while panning. */
-      if (deltaTheta && (deltaTheta * (m_state.lastRotationDelta || 0) >= 0 || Math.abs(deltaTheta) >= m_options.zoomrotateReverseRotation)) {
+      if (deltaTheta && (deltaTheta * (m_state.lastRotationDelta || 0) >= 0 ||
+          Math.abs(deltaTheta) >= m_options.zoomrotateReverseRotation)) {
         m_this.map().rotation(theta, m_state.origin);
         m_state.lastRotationDelta = deltaTheta;
       }
