@@ -101,6 +101,16 @@ describe('geo.choroplethFeature', function () {
       restoreVGLRenderer();
     });
 
+    it('direct creation', function () {
+      mockVGLRenderer();
+      var map, layer, choropleth;
+      map = create_map();
+      layer = map.createLayer('feature', {renderer: 'vgl'});
+      choropleth = geo.choroplethFeature({layer: layer});
+      expect(choropleth instanceof geo.choroplethFeature).toBe(true);
+      restoreVGLRenderer();
+    });
+
     it('multipolygon', function () {
       mockVGLRenderer();
       var map, layer, choropleth, scalarData = [
