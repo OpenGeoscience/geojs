@@ -5,7 +5,7 @@ sudo: required
 dist: trusty
 
 node_js:
-  - '0.12'
+  - 4
 
 addons:
   firefox: latest
