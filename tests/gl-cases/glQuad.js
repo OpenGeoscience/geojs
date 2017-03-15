@@ -117,7 +117,6 @@ describe('glQuad', function () {
 
       myMap.draw();
 
-      // use a short delay to allow all of the images to load
       imageTest.imageTest('glQuad', null, 0.0015, done, myMap.onIdle, 0, 2);
     };
 

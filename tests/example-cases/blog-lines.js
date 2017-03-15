@@ -32,7 +32,7 @@ describe('blog-lines example', function () {
 
   it('basic', function (done) {
     $('#map').attr('src', '/examples/blog-lines/index.html?mode=select');
-    imageTest.imageTest('exampleBlogLines', '#map', 0.0015, done, ready, 500, 2);
+    imageTest.imageTest('exampleBlogLines', '#map', 0.0015, done, ready, 500, 2, '.leaflet-pane');
   }, 10000);
   it('round line cap', function (done) {
     $('#map')[0].contentWindow.scrollTo(0, 130);
@@ -41,7 +41,10 @@ describe('blog-lines example', function () {
     imageTest.imageTest('exampleBlogLinesRoundCap', '#map', 0.0015, done, ready, 500, 2, '.mapboxgl-canvas');
   }, 20000);
   it('10,000 lines in geojs', function (done) {
+    // remove previous contents to ensure we detect new contents
+    base$ = $('iframe#map')[0].contentWindow.jQuery;
+    base$('.geojs-map.ready').remove();
     $('#map').attr('src', '/examples/blog-lines/index.html?renderer=vgl&data=roads&lines=10000&x=-73.7593015&y=42.8496799&zoom=13&strokeOpacity=1&strokeWidth=2&antialiasing=2&referenceLines=false');
-    imageTest.imageTest('exampleBlogLines10k', '#map', 0.0015, done, null, 1000, 2);
+    imageTest.imageTest('exampleBlogLines10k', '#map', 0.0015, done, null, 1000, 2, '.geojs-map.ready');
   }, 10000);
 });

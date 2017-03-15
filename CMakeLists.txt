@@ -109,6 +109,8 @@ if(FFHEADLESS_TESTS)
   set_property(TEST "ffheadless" APPEND PROPERTY ENVIRONMENT "TEST_SAVE_IMAGE=${TEST_SAVE_IMAGE}")
   set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "ffheadless")
   set_property(TEST "ffheadless" APPEND PROPERTY DEPENDS "get_data_files")
+  # We use some of the example images in the ffheadless tests
+  set_property(TEST "ffheadless" APPEND PROPERTY DEPENDS "build_examples")
 
   add_test(
     NAME "examplesheadless"
