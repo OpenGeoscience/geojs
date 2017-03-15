@@ -41,7 +41,7 @@ describe('glPointsSpeed', function () {
       console.log('Load time ' + totaltime + ' ms (average across ' +
                   times.length + ' loads)');
       console.log(times);
-      expect(totaltime).toBeLessThan(1000);
+      expect(totaltime).toBeLessThan(2000);
       /* Test animation time. */
       starttime = new Date().getTime();
       animationFrame();
@@ -75,7 +75,7 @@ describe('glPointsSpeed', function () {
       fps = 1000.0 / frametime;
       console.log('Usable framerate ' + fps);
       console.log(animTimes);
-      expect(fps).toBeGreaterThan(5);
+      expect(fps).toBeGreaterThan(2.5);
       $('#map').append($('<div style="display: none" id="framerateResults">')
         .attr('results', fps));
 
