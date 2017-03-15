@@ -3,7 +3,6 @@
 describe('glQuad', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
-  var geo = require('../test-utils').geo;
 
   var myMap;
 
@@ -114,32 +113,12 @@ describe('glQuad', function () {
             return d.previewImage !== undefined ? d.previewImage : previewImage;
           }
         })
-        .geoOn(geo.event.feature.mouseover, function (evt) {
-          if (evt.data.orig_opacity === undefined) {
-            evt.data.orig_opacity = (evt.data.opacity || null);
-          }
-          evt.data.opacity = 0.5;
-          // we either have to clear the internal cache on the item, or have
-          // asked for it not to have been cached to begin with.
-          delete evt.data._cachedQuad;
-          this.modified();
-          layer.map().draw();
-        })
-        .geoOn(geo.event.feature.mouseout, function (evt) {
-          if (evt.data.orig_opacity === undefined) {
-            evt.data.orig_opacity = (evt.data.opacity || null);
-          }
-          evt.data.opacity = evt.data.orig_opacity || undefined;
-          delete evt.data._cachedQuad;
-          this.modified();
-          layer.map().draw();
-        })
         .draw();
 
       myMap.draw();
 
       // use a short delay to allow all of the images to load
-      imageTest.imageTest('glQuad', null, 0.0015, done, myMap.onIdle, 1000, 2);
+      imageTest.imageTest('glQuad', null, 0.0015, done, myMap.onIdle, 0, 2);
     };
 
     previewImage.src = '/data/grid.jpg';

@@ -114,7 +114,7 @@ describe('points', function () {
              .style('strokeOpacity', 0.2);
       myMap.draw();
       // use a short delay to allow images to load
-      imageTest.imageTest('glPointsWithQuad', null, 0.0015, done, myMap.onIdle, 1000, 2);
+      imageTest.imageTest('glPointsWithQuad', null, 0.0015, done, myMap.onIdle, 0, 2);
     }, 1000);
   });
 
