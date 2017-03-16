@@ -142,5 +142,5 @@ describe('glLines', function () {
 
     imageTest.imageTest('glLinesOpts', null, 0.0015, done, myMap.onIdle, 0, 2);
 
-  });
+  }, 10000);
 });

@@ -129,7 +129,7 @@ $(function () {
    *    the line.
    */
   function show_lines(rawdata) {
-    $('#map').removeClass('ready');
+    $('#map').removeClass('ready').attr('segments', '');
     if (!rawdata) {
       return;
     }
@@ -146,7 +146,7 @@ $(function () {
     var text = 'Shown: ' + segments;
     $('#lines-shown').text(text).attr('title', text);
     map.onIdle(function () {
-      $('#map').addClass('ready');
+      $('#map').addClass('ready').attr('segments', maxsegments);
     });
   }
 
@@ -291,9 +291,9 @@ $(function () {
   function select_preset(evt) {
     var update;
     var ctl = $(evt.target);
-    var keys = ['antialiasing', 'lineCap', 'lineJoin', 'lines', 'miterLimit',
-                'showmap', 'strokeColor', 'strokeOffset', 'strokeOpacity',
-                'strokeWidth'];
+    var keys = [
+      'antialiasing', 'lineCap', 'lineJoin', 'lines', 'miterLimit', 'showmap',
+      'strokeColor', 'strokeOffset', 'strokeOpacity', 'strokeWidth'];
     skipdraw = true;
     $.each(keys, function (idx, key) {
       var value = ctl.attr(key);

@@ -1,5 +1,4 @@
 Pillow
-selenium
 requests
 sphinx_rtd_theme
 graphviz

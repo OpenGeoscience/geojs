@@ -7,8 +7,7 @@ Provisioning for Development
 Ubuntu 14.04
 -------------
 
-This shows how to set up a build and test environment in Ubuntu 14.04, using
-all but the Selenium-based tests.
+This shows how to set up a build and test environment in Ubuntu 14.04.
 
 These instructions will probably work for any Ubuntu release from 14.04
 onward.  They assume a basic installation, as, for instance, from the
@@ -64,9 +63,9 @@ Run the headless WebGL tests ::
 
     xvfb-run -s '-ac -screen 0 1280x1024x24' ctest -VV -R ffheadless
 
-Run all but the Selenium tests ::
+Run all tests ::
 
-    xvfb-run -s '-ac -screen 0 1280x1024x24' ctest --output-on-failure -E selenium
+    xvfb-run -s '-ac -screen 0 1280x1024x24' ctest --output-on-failure
 
 Install python packages ::
 
