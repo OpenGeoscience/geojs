@@ -107,7 +107,6 @@ def run_test(repo, commit, testdir, branch):
     s, out = _communicate(
         ' '.join([
             cmake,
-            '-D', 'SELENIUM_TESTS=ON',
             '-D', 'CHROME_TESTS=OFF',
             '-D', 'FIREFOX_TESTS=ON',
             '-D', 'COVERAGE_TESTS=OFF',

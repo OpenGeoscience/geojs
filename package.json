@@ -16,7 +16,6 @@
     "hammerjs": "^2.0.8"
   },
   "devDependencies": {
-    "blanket": "~1.2",
     "body-parser": "^1.15.0",
     "bootstrap": "^3.3.6",
     "bootswatch": "^3.3.6",

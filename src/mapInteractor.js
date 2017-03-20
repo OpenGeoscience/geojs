@@ -1118,7 +1118,6 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseMove = function (evt) {
-
     if (m_paused) {
       return;
     }

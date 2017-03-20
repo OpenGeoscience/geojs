@@ -418,7 +418,7 @@ var d3Renderer = function (arg) {
     m_svg.attr('width', w);
     m_svg.attr('height', h);
     m_this._setTransform();
-    m_this.layer().geoTrigger(geo_event.d3Rescale, { scale: m_scale }, true);
+    m_this.layer().geoTrigger(d3Rescale, { scale: m_scale }, true);
   };
 
   ////////////////////////////////////////////////////////////////////////////
