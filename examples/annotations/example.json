@@ -4,6 +4,6 @@
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
   "about": {
-    "text": "This example shows how to add annotations, such as marked rectangles, to a map.  Left click to add a polygon, right click to add a rectangle."
+    "text": "This example shows how to add annotations, such as marked rectangles, to a map."
   }
 }
