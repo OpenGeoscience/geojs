@@ -55,6 +55,7 @@ var layer = function (arg) {
       m_active = arg.active === undefined ? true : arg.active,
       m_opacity = arg.opacity === undefined ? 1 : arg.opacity,
       m_attribution = arg.attribution || null,
+      m_visible = arg.visible === undefined ? true : arg.visible,
       m_zIndex;
 
   m_rendererName = checkRenderer(m_rendererName);
@@ -350,6 +351,28 @@ var layer = function (arg) {
       return m_this;
     }
     return m_attribution;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set visibility of the layer
+   *
+   * @param {boolean|undefined} val: undefined to return the visibility, a
+   *    boolean to change the visibility.
+   * @return {boolean|object} either the visibility (if getting) or the layer
+   *    (if setting).
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.visible = function (val) {
+    if (val === undefined) {
+      return m_visible;
+    }
+    if (m_visible !== val) {
+      m_visible = val;
+      m_node.css('display', m_visible ? '' : 'none');
+      m_this.modified();
+    }
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////

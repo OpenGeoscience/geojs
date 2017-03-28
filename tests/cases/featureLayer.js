@@ -127,6 +127,19 @@ describe('geo.featureLayer', function () {
       expect(layer.features().length).toBe(2);
       expect(layer.features()).toEqual([feat2, feat1]);
     });
+    it('visible', function () {
+      expect(layer.visible()).toBe(true);
+      expect(feat1.visible()).toBe(true);
+      expect(feat1.visible(undefined, true)).toBe(true);
+      expect(layer.visible(false)).toBe(layer);
+      expect(layer.visible()).toBe(false);
+      expect(feat1.visible()).toBe(false);
+      expect(feat1.visible(undefined, true)).toBe(true);
+      expect(layer.visible(true)).toBe(layer);
+      expect(layer.visible()).toBe(true);
+      expect(feat1.visible()).toBe(true);
+      expect(feat1.visible(undefined, true)).toBe(true);
+    });
     it('draw', function () {
       sinon.stub(feat1, 'draw', function () {});
       expect(layer.draw()).toBe(layer);

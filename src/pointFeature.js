@@ -224,10 +224,6 @@ var pointFeature = function (arg) {
         strokeWidth = m_this.style.get('strokeWidth'),
         radius = m_this.style.get('radius');
 
-    if (!m_this.selectionAPI()) {
-      return [];
-    }
-
     data = m_this.data();
     if (!data || !data.length) {
       return {

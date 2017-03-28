@@ -339,13 +339,14 @@ var pixelmapFeature = function (arg) {
       m_quadFeature = m_this.layer().createFeature('quad', {
         selectionAPI: false,
         gcs: m_this.gcs(),
-        visible: m_this.visible()
+        visible: m_this.visible(undefined, true)
       });
       m_this.dependentFeatures([m_quadFeature]);
-      m_quadFeature.style({image: m_info.canvas,
-                           position: m_this.style.get('position')})
-                   .data([{}])
-                   .draw();
+      m_quadFeature.style({
+        image: m_info.canvas,
+        position: m_this.style.get('position')})
+      .data([{}])
+      .draw();
     }
     /* If we prepared the pixelmap and rendered it, send a prepared event */
     if (prepared) {

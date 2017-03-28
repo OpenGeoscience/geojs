@@ -373,11 +373,11 @@ var gl_quadFeature = function (arg) {
       m_this._build();
     }
     if (m_actor_color) {
-      m_actor_color.setVisible(m_this.visible());
+      m_actor_color.setVisible(m_this.visible(undefined, true));
       m_actor_color.material().setBinNumber(m_this.bin());
     }
     if (m_actor_image) {
-      m_actor_image.setVisible(m_this.visible());
+      m_actor_image.setVisible(m_this.visible(undefined, true));
       m_actor_image.material().setBinNumber(m_this.bin());
     }
     m_this.updateTime().modified();

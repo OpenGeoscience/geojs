@@ -30,6 +30,7 @@ var featureLayer = function (arg) {
       s_init = this._init,
       s_exit = this._exit,
       s_update = this._update,
+      s_visible = this.visible,
       s_draw = this.draw;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -231,13 +232,45 @@ var featureLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
-    // Call sceneObject.draw, which calls draw on all child objects.
-    s_draw();
+    if (m_this.visible()) {
+      // Call sceneObject.draw, which calls draw on all child objects.
+      s_draw();
 
-    // Now call render on the renderer. In certain cases it may not do
-    // anything if the if the child objects are drawn on the screen already.
-    if (m_this.renderer()) {
-      m_this.renderer()._render();
+      // Now call render on the renderer. In certain cases it may not do
+      // anything if the child objects are drawn on the screen already.
+      if (m_this.renderer()) {
+        m_this.renderer()._render();
+      }
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set visibility of the layer
+   *
+   * @param {boolean|undefined} val: undefined to return the visibility, a
+   *    boolean to change the visibility.
+   * @return {boolean|object} either the visibility (if getting) or the layer
+   *    (if setting).
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.visible = function (val) {
+    if (val === undefined) {
+      return s_visible();
+    }
+    if (m_this.visible() !== val) {
+      s_visible(val);
+
+      // take a copy of the features; changing visible could mutate them.
+      var features = m_features.slice(), i;
+
+      for (i = 0; i < features.length; i += 1) {
+        features[i].visible(features[i].visible(undefined, true), true);
+      }
+      if (val) {
+        m_this.draw();
+      }
     }
     return m_this;
   };

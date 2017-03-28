@@ -198,6 +198,20 @@ describe('geo.feature', function () {
       feat.dependentFeatures([]);
       expect(feat.visible(true)).toBe(feat);
       expect(depFeat.visible()).toBe(false);
+
+      // the layer can control the visibility
+      expect(feat.visible()).toBe(true);
+      expect(feat.visible(undefined, true)).toBe(true);
+      layer.visible(false);
+      expect(feat.visible()).toBe(false);
+      expect(feat.visible(undefined, true)).toBe(true);
+      expect(feat.visible(false, true)).toBe(feat);
+      expect(feat.visible()).toBe(false);
+      expect(feat.visible(undefined, true)).toBe(false);
+      layer.visible(true);
+      expect(feat.visible()).toBe(false);
+      expect(feat.visible(true, true)).toBe(feat);
+      expect(feat.visible()).toBe(true);
     });
   });
   describe('Check class accessors', function () {
