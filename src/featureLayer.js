@@ -31,6 +31,7 @@ var featureLayer = function (arg) {
       s_exit = this._exit,
       s_update = this._update,
       s_visible = this.visible,
+      s_selectionAPI = this.selectionAPI,
       s_draw = this.draw;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -270,6 +271,33 @@ var featureLayer = function (arg) {
       }
       if (val) {
         m_this.draw();
+      }
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set selectionAPI of the layer
+   *
+   * @param {boolean|undefined} val: undefined to return the selectionAPI
+   *    state, or a boolean to change it.
+   * @return {boolean|object} either the selectionAPI state (if getting) or the
+   *    layer (if setting).
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.selectionAPI = function (val) {
+    if (val === undefined) {
+      return s_selectionAPI();
+    }
+    if (m_this.selectionAPI() !== val) {
+      s_selectionAPI(val);
+
+      // take a copy of the features; changing selectionAPI could mutate them.
+      var features = m_features.slice(), i;
+
+      for (i = 0; i < features.length; i += 1) {
+        features[i].selectionAPI(features[i].selectionAPI(undefined, true), true);
       }
     }
     return m_this;

@@ -56,6 +56,7 @@ var layer = function (arg) {
       m_opacity = arg.opacity === undefined ? 1 : arg.opacity,
       m_attribution = arg.attribution || null,
       m_visible = arg.visible === undefined ? true : arg.visible,
+      m_selectionAPI = arg.selectionAPI === undefined ? true : arg.selectionAPI,
       m_zIndex;
 
   m_rendererName = checkRenderer(m_rendererName);
@@ -193,20 +194,27 @@ var layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get whether or not the layer is active.  An active layer will receive
+   * Get/Set whether or not the layer is active.  An active layer will receive
    * native mouse when the layer is on top.  Non-active layers will never
    * receive native mouse events.
    *
-   * @returns {Boolean}
+   * @returns {Boolean|object}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.active = function () {
-    return m_active;
+  this.active = function (arg) {
+    if (arg === undefined) {
+      return m_active;
+    }
+    if (m_active !== arg) {
+      m_active = arg;
+      m_node.toggleClass('active', m_active);
+    }
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set root node of the layer
+   * Get root node of the layer
    *
    * @returns {div}
    */
@@ -371,6 +379,26 @@ var layer = function (arg) {
       m_visible = val;
       m_node.css('display', m_visible ? '' : 'none');
       m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set selectionAPI of the layer
+   *
+   * @param {boolean|undefined} val: undefined to return the selectionAPI
+   *    state, or a boolean to change it.
+   * @return {boolean|object} either the selectionAPI state (if getting) or the
+   *    layer (if setting).
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.selectionAPI = function (val) {
+    if (val === undefined) {
+      return m_selectionAPI;
+    }
+    if (m_selectionAPI !== val) {
+      m_selectionAPI = val;
     }
     return m_this;
   };

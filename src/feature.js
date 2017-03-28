@@ -53,7 +53,7 @@ var feature = function (arg) {
 
     // Don't bind handlers for improved performance on features that don't
     // require it.
-    if (!m_selectionAPI) {
+    if (!this.selectionAPI()) {
       return;
     }
 
@@ -545,16 +545,26 @@ var feature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Query or set if the selection API is enabled for this feature.
-   * @returns {bool}
+   * Get/Set if the selection API is enabled for this feature.
+   *
+   * @param {boolean|undefined} val: undefined to return the selectionAPI
+   *    state, or a boolean to change the state.
+   * @param {boolean} direct: if true, when getting the selectionAPI state,
+   *    disregard the state of the parent layer, and when setting, refresh the
+   *    state regardless of whether it has changed or not.
+   * @return {boolean|object} either the selectionAPI state (if getting) or the
+   *    feature (if setting).
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.selectionAPI = function (arg) {
+  this.selectionAPI = function (arg, direct) {
     if (arg === undefined) {
+      if (!direct && m_layer && m_layer.selectionAPI && !m_layer.selectionAPI()) {
+        return false;
+      }
       return m_selectionAPI;
     }
     arg = !!arg;
-    if (arg !== m_selectionAPI) {
+    if (arg !== m_selectionAPI || direct) {
       m_selectionAPI = arg;
       this._unbindMouseHandlers();
       this._bindMouseHandlers();

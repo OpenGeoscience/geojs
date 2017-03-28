@@ -295,6 +295,21 @@ describe('geo.feature', function () {
       expect(feat.selectionAPI()).toBe(true);
       expect(feat.selectionAPI(0)).toBe(feat);
       expect(feat.selectionAPI()).toBe(false);
+
+      // the layer can control the visibility
+      feat.selectionAPI(true);
+      expect(feat.selectionAPI()).toBe(true);
+      expect(feat.selectionAPI(undefined, true)).toBe(true);
+      layer.selectionAPI(false);
+      expect(feat.selectionAPI()).toBe(false);
+      expect(feat.selectionAPI(undefined, true)).toBe(true);
+      expect(feat.selectionAPI(false, true)).toBe(feat);
+      expect(feat.selectionAPI()).toBe(false);
+      expect(feat.selectionAPI(undefined, true)).toBe(false);
+      layer.selectionAPI(true);
+      expect(feat.selectionAPI()).toBe(false);
+      expect(feat.selectionAPI(true, true)).toBe(feat);
+      expect(feat.selectionAPI()).toBe(true);
     });
   });
 });

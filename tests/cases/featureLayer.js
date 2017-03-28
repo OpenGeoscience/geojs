@@ -140,6 +140,30 @@ describe('geo.featureLayer', function () {
       expect(feat1.visible()).toBe(true);
       expect(feat1.visible(undefined, true)).toBe(true);
     });
+    it('selectionAPI', function () {
+      feat1.selectionAPI(true);
+      expect(layer.selectionAPI()).toBe(true);
+      expect(feat1.selectionAPI()).toBe(true);
+      expect(feat1.selectionAPI(undefined, true)).toBe(true);
+      expect(layer.selectionAPI(false)).toBe(layer);
+      expect(layer.selectionAPI()).toBe(false);
+      expect(feat1.selectionAPI()).toBe(false);
+      expect(feat1.selectionAPI(undefined, true)).toBe(true);
+      expect(layer.selectionAPI(true)).toBe(layer);
+      expect(layer.selectionAPI()).toBe(true);
+      expect(feat1.selectionAPI()).toBe(true);
+      expect(feat1.selectionAPI(undefined, true)).toBe(true);
+    });
+    it('active', function () {
+      expect(layer.active()).toBe(true);
+      expect(layer.node().hasClass('active')).toBe(true);
+      expect(layer.active(false)).toBe(layer);
+      expect(layer.active()).toBe(false);
+      expect(layer.node().hasClass('active')).toBe(false);
+      expect(layer.active(true)).toBe(layer);
+      expect(layer.active()).toBe(true);
+      expect(layer.node().hasClass('active')).toBe(true);
+    });
     it('draw', function () {
       sinon.stub(feat1, 'draw', function () {});
       expect(layer.draw()).toBe(layer);
