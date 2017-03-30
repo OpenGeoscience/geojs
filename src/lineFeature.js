@@ -72,6 +72,14 @@ var lineFeature = function (arg) {
       m_pointSearchInfo;
 
   this.featureType = 'line';
+  this._subcomponentStyles = {
+    lineCap: true,
+    lineJoin: true,
+    strokeColor: true,
+    strokeOffset: true,
+    strokeOpacity: true,
+    strokeWidth: true
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**

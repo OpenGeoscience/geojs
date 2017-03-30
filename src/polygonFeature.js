@@ -68,6 +68,16 @@ var polygonFeature = function (arg) {
       m_coordinates = [];
 
   this.featureType = 'polygon';
+  this._subcomponentStyles = {
+    fillColor: true,
+    fillOpacity: true,
+    lineCap: true,
+    lineJoin: true,
+    strokeColor: true,
+    strokeOffset: true,
+    strokeOpacity: true,
+    strokeWidth: true
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -277,10 +287,15 @@ var polygonFeature = function (arg) {
     }
     var polyStyle = m_this.style();
     m_lineFeature.style({
+      antialiasing: polyStyle.antialiasing,
       closed: true,
+      lineCap: polyStyle.lineCap,
+      lineJoin: polyStyle.lineJoin,
+      miterLimit: polyStyle.miterLimit,
       strokeWidth: polyStyle.strokeWidth,
       strokeStyle: polyStyle.strokeStyle,
       strokeColor: polyStyle.strokeColor,
+      strokeOffset: polyStyle.strokeOffset,
       strokeOpacity: function (d) {
         return m_this.style.get('stroke')(d[2], d[3]) ? m_this.style.get('strokeOpacity')(d[0], d[1], d[2], d[3]) : 0;
       }

@@ -254,7 +254,15 @@ describe('geo.pointFeature', function () {
 
   /* This is a basic integration test of geo.gl.pointFeature. */
   describe('geo.gl.pointFeature', function () {
-    var map, layer, point, point2, glCounts;
+    var map, layer, point, point2, glCounts, i, count = 0;
+    var array1 = new Array(testPoints.length),
+        array2 = new Array(testPoints.length),
+        array3 = new Array(testPoints.length);
+    for (i = 0; i < testPoints.length; i += 1) {
+      array1[i] = i + 1;
+      array2[i] = i % 2 ? true : false;
+      array3[i] = {r: 0.5, g: 0.5, b: 0.5};
+    }
     it('basic usage', function () {
       mockVGLRenderer();
       map = create_map();
@@ -289,6 +297,33 @@ describe('geo.pointFeature', function () {
     });
     waitForIt('next render gl B', function () {
       return vgl.mockCounts().drawArrays >= (glCounts.drawArrays || 0) + 1;
+    });
+    it('updateStyleFromArray single', function () {
+      point.draw = function () {
+        count += 1;
+      };
+      glCounts = $.extend({}, vgl.mockCounts());
+      point.updateStyleFromArray('radius', array1, true);
+      expect(count).toBe(0);
+    });
+    waitForIt('next render gl C', function () {
+      return vgl.mockCounts().drawArrays >= (glCounts.drawArrays || 0) + 1;
+    });
+    it('updateStyleFromArray multiple', function () {
+      glCounts = $.extend({}, vgl.mockCounts());
+      point.updateStyleFromArray({stroke: array2, strokeColor: array3}, null, true);
+      expect(count).toBe(0);
+    });
+    waitForIt('next render gl D', function () {
+      return vgl.mockCounts().drawArrays >= (glCounts.drawArrays || 0) + 1;
+    });
+    it('updateStyleFromArray non-optimized', function () {
+      point.updateStyleFromArray('unknown', array1, true);
+      expect(count).toBe(1);
+      // a different length array will trigger a slow draw, too.
+      point.data(testPoints.slice(0, 18));
+      point.updateStyleFromArray('radius', array1, true);
+      expect(count).toBe(2);
     });
     it('_exit', function () {
       expect(point.actors().length).toBe(1);

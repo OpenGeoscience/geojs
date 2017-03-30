@@ -44,6 +44,10 @@ var feature = function (arg) {
       m_dependentFeatures = [],
       m_selectedFeatures = [];
 
+  // subclasses can add keys to this for styles that apply to subcomponents of
+  // data items, such as individual vertices on lines or polygons.
+  this._subcomponentStyles = {};
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Private method to bind mouse handlers on the map element.
@@ -352,6 +356,67 @@ var feature = function (arg) {
       out = util.ensureFunction(m_style[key]);
     }
     return out;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set style(s) from array(s).  For each style, the array should have one
+   * value per data item.  The values are not converted or validated.  Color
+   * values should be objects with r, g, b values on a scale of [0, 1].  If
+   * invalidate values are given the behavior is undefined.
+   *   For features where this._subcomponentStyles is an object and a style
+   * name is a key in that object, and the first entry of the styleArray is
+   * itself an array, then each entry of the array is expected to be an array,
+   * and values are used from these subarrays.  This allows a style to apply,
+   * for instance, per vertex of a data item rather than per data item.
+   *
+   * @param {string|object} keyOrObject: either the name of a single style or
+   *    an object where the keys are the names of styles and the values are
+   *    each arrays.
+   * @param {array} styleArray: if keyOrObject is a string, an array of values
+   *    for the style.  If keyOrObject is an object, this parameter is ignored.
+   * @param {boolean} refresh: true to redraw the feature when it has been
+   *    updated.  If an object with styles is passed, the redraw is only done
+   *    once.
+   * @returns {object} the feature
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateStyleFromArray = function (keyOrObject, styleArray, refresh) {
+    if (typeof keyOrObject !== 'string') {
+      $.each(keyOrObject, function (key, value) {
+        m_this.updateStyleFromArray(key, value);
+      });
+    } else {
+      var fallback;
+      if (keyOrObject.toLowerCase().match(/color$/)) {
+        fallback = {r: 0, g: 0, b: 0};
+      }
+      if (!Array.isArray(styleArray)) {
+        return m_this;
+      }
+      if (m_this._subcomponentStyles[keyOrObject]) {
+        if (styleArray.length && Array.isArray(styleArray[0])) {
+          m_this.style(keyOrObject, function (v, j, d, i) {
+            var val = (styleArray[i] || [])[j];
+            return val !== undefined ? val : fallback;
+          });
+        } else {
+          m_this.style(keyOrObject, function (v, j, d, i) {
+            var val = styleArray[i];
+            return val !== undefined ? val : fallback;
+          });
+        }
+      } else {
+        m_this.style(keyOrObject, function (d, i) {
+          var val = styleArray[i];
+          return val !== undefined ? val : fallback;
+        });
+      }
+    }
+    if (refresh && m_this.visible()) {
+      m_this.draw();
+    }
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
