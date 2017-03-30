@@ -38,6 +38,11 @@ var gl_pointFeature = function (arg) {
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
+      /* If you are drawing very large points, you will often get better
+       * performance using a different primitiveShape.  The 'sprite' shape uses
+       * the least memory, but has hardware-specific limitations to its size.
+       * 'triangle' seems to be fastest on low-powered hardware, but 'square'
+       * visits fewer fragments. */
       m_primitiveShape = 'sprite', // arg can change this, below
       s_init = this._init,
       s_update = this._update,
@@ -529,6 +534,7 @@ var gl_pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
+    m_actor = null;
     s_exit();
   };
 
