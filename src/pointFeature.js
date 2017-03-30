@@ -25,7 +25,7 @@ var pointFeature = function (arg) {
   var ClusterGroup = require('./util/clustering');
   var geo_event = require('./event');
   var util = require('./util');
-  var wigglemaps = require('./util/wigglemaps');
+  var kdbush = require('kdbush');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -195,7 +195,6 @@ var pointFeature = function (arg) {
     // create an array of positions in geo coordinates
     pts = m_this.data().map(function (d, i) {
       var pt = position(d);
-      pt.idx = i;
 
       // store the maximum point radius
       m_maxRadius = Math.max(
@@ -203,10 +202,10 @@ var pointFeature = function (arg) {
         radius(d, i) + (stroke(d, i) ? strokeWidth(d, i) : 0)
       );
 
-      return pt;
+      return [pt.x, pt.y];
     });
 
-    m_rangeTree = new wigglemaps.RangeTree(pts);
+    m_rangeTree = kdbush(pts);
     m_rangeTreeTime.modified();
   };
 
@@ -219,7 +218,7 @@ var pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (p) {
-    var min, max, data, idx = [], box, found = [], ifound = [], map, pt,
+    var min, max, data, idx = [], found = [], ifound = [], map, pt,
         corners,
         stroke = m_this.style.get('stroke'),
         strokeWidth = m_this.style.get('strokeWidth'),
@@ -256,13 +255,7 @@ var pointFeature = function (arg) {
     };
 
     // Find points inside the bounding box
-    box = new wigglemaps.Box(
-      wigglemaps.vect(min.x, min.y),
-      wigglemaps.vect(max.x, max.y)
-    );
-    m_rangeTree.search(box).forEach(function (q) {
-      idx.push(q.idx);
-    });
+    idx = m_rangeTree.range(min.x, min.y, max.x, max.y);
 
     // Filter by circular region
     idx.forEach(function (i) {
