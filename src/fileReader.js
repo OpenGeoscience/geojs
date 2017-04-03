@@ -26,7 +26,7 @@ var fileReader = function (arg) {
   arg = arg || {};
 
   if (!(arg.layer instanceof featureLayer)) {
-    throw 'fileReader must be given a feature layer';
+    throw new Error('fileReader must be given a feature layer');
   }
 
   var m_layer = arg.layer;

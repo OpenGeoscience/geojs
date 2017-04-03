@@ -35,6 +35,7 @@ var mapInteractor = function (args) {
       m_mouse,
       m_keyHandler,
       m_boundKeys,
+      m_touchHandler,
       m_state,
       m_queue,
       $node,
@@ -140,6 +141,16 @@ var mapInteractor = function (args) {
         selectionRectangle: geo_event.unzoomselect,
         owner: 'geo.mapInteractor',
         name: 'drag unzoom'
+      }, {
+        action: geo_action.pan,
+        input: 'pan',
+        owner: 'geo.mapInteractor',
+        name: 'touch pan'
+      }, {
+        action: geo_action.zoomrotate,
+        input: 'rotate',
+        owner: 'geo.mapInteractor',
+        name: 'touch zoom and rotate'
       }],
 
       click: {
@@ -152,7 +163,7 @@ var mapInteractor = function (args) {
       keyboard: {
         actions: {
           /* Specific actions can be disabled by removing them from this object
-           * or stting an empty list as the key bindings.  Additional actions
+           * or setting an empty list as the key bindings.  Additional actions
            * can be added to the dictionary, each of which gets a list of key
            * bindings.  See Mousetrap documentation for special key names. */
           'zoom.in': ['plus', 'shift+plus', 'shift+ctrl+plus', '=', 'shift+=', 'shift+ctrl+='],
@@ -192,11 +203,35 @@ var mapInteractor = function (args) {
          * (which would propably require detecting keyup events). */
         focusHighlight: true
       },
-
+      /* Set alwaysTouch to false to only add touch support on devices that
+       * report touch support.  Set to true to add touch support on all
+       * devices. */
+      alwaysTouch: false,
       wheelScaleX: 1,
       wheelScaleY: 1,
       zoomScale: 1,
       rotateWheelScale: 6 * Math.PI / 180,
+      /* The minimum angle of rotation (in radians) before the
+       * geo_action.zoomrotate action will allow rotation.  Set to 0 to always
+       * include rotation. */
+      zoomrotateMinimumRotation: 5.0 * Math.PI / 180,
+      /* The minimum angle of rotation (in radians) before the
+       * geo_action.zoomrotate action will reverse the rotation direction.
+       * This helps reduce chatter when zooms and pans are combined with
+       * rotations. */
+      zoomrotateReverseRotation: 4.0 * Math.PI / 180,
+      /* The minimum zoom factor change (increasing or descreasing) before the
+       * geo_action.zoomrotate action will allow zoom.  Set to 0 to always
+       * include zoom. */
+      zoomrotateMinimumZoom: 0.05,
+      /* The minimum number of pixels before the geo_action.zoomrotate action
+       * will allow panning.  Set to 0 to always include panning. */
+      zoomrotateMinimumPan: 5,
+      /* The touch pan delay prevents a touch pan event from immediately
+       * following a rotate (including zoom) event.  No touch pan event is
+       * processed within this number of milliseconds of a non-pan touch
+       * event. */
+      touchPanDelay: 50,
       momentum: {
         enabled: true,
         maxSpeed: 2.5,
@@ -224,6 +259,9 @@ var mapInteractor = function (args) {
   }
   if (args && args.momentum && args.momentum.actions) {
     m_options.momentum.actions = $.extend(true, [], args.momentum.actions);
+  }
+  if (args && args.keyboard && args.keyboard.actions !== undefined) {
+    m_options.keyboard.actions = $.extend(true, {}, args.keyboard.actions);
   }
 
   // options supported:
@@ -563,6 +601,90 @@ var mapInteractor = function (args) {
     }
   };
 
+  /**
+   * Check if this browser has touch support.
+   * Copied from https://github.com/hammerjs/touchemulator under the MIT
+   * license.
+   *
+   * @returns {boolean}: true if there is touch support.
+   */
+  this.hasTouchSupport = function () {
+    return ('ontouchstart' in window) || // touch events
+           (window.Modernizr && window.Modernizr.touch) || // modernizr
+           (navigator.msMaxTouchPoints || navigator.maxTouchPoints) > 1; // pointer events
+  };
+
+  /**
+   * Handle touch events.
+   *
+   * @param {object} evt: the touch event.
+   */
+  this._handleTouch = function (evt) {
+    var endIfBound = false;
+    if (evt.pointerType === 'mouse' && m_touchHandler.touchSupport) {
+      endIfBound = true;
+    }
+    if (evt.type === 'hammer.input') {
+      if (m_touchHandler.lastEventType === 'pan' && evt.pointers.length !== 1) {
+        endIfBound = true;
+        m_touchHandler.lastEventType = null;
+      } else {
+        return;
+      }
+    }
+    var evtType = /^(.*)(start|end|move)$/.exec(evt.type);
+    if (!evtType || evtType.length !== 3) {
+      endIfBound = true;
+    }
+    if (endIfBound) {
+      if (m_state.boundDocumentHandlers && m_touchHandler.lastEvent) {
+        m_this._handleMouseUpDocument(m_touchHandler.lastEvent);
+      }
+      return;
+    }
+    evt.which = evtType[1];
+    var time = (new Date()).valueOf();
+    if (evt.which === 'pan' && m_touchHandler.lastEventType !== 'pan' &&
+        time - m_touchHandler.lastTime < m_options.touchPanDelay) {
+      return;
+    }
+    m_touchHandler.lastTime = time;
+    m_touchHandler.lastEventType = evt.which;
+    m_touchHandler.lastEvent = evt;
+    /* convert touch events to have page locations */
+    var offset = $node.offset();
+    if (evt.pageX === undefined && evt.center !== undefined && evt.center.x !== undefined) {
+      evt.pageX = evt.center.x + offset.left;
+      evt.pageY = evt.center.y + offset.top;
+    }
+    /* start events should occur *before* the triggering delta.  By using the
+     * mouse handlers, we get all of the action properties we expect (and
+     * actions can be changed or defined as we see fit). */
+    if (evtType[2] === 'start') {
+      m_this._handleMouseDown(evt);
+      m_this._setClickMaybe(false);
+      if (m_state.boundDocumentHandlers) {
+        $(document).on('mousemove.geojs', m_this._handleMouseUpDocument);
+      }
+    }
+    /* start and move events both trigger a movement */
+    if (evtType[2] === 'start' || evtType[2] === 'move') {
+      if (m_state.boundDocumentHandlers) {
+        m_this._handleMouseMoveDocument(evt);
+      } else {
+        m_this._handleMouseMove(evt);
+      }
+    }
+    if (evtType[2] === 'end' || evtType[2] === 'cancel') {
+      if (m_state.boundDocumentHandlers) {
+        m_this._handleMouseUpDocument(evt);
+      } else {
+        m_this._handleMouseUp(evt);
+      }
+      m_touchHandler.lastEvent = null;
+    }
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Connects events to a map.  If the map is not set, then this does nothing.
@@ -584,6 +706,14 @@ var mapInteractor = function (args) {
     m_this._handleMouseWheel = throttled_wheel();
     m_callZoom = debounced_zoom();
 
+    // catalog what inputs we are using
+    util.adjustActions(m_options.actions);
+    var usedInputs = {};
+    ['right', 'pan', 'rotate'].forEach(function (input) {
+      usedInputs[input] = m_options.actions.some(function (action) {
+        return action.input[input];
+      });
+    });
     // add event handlers
     $node.on('wheel.geojs', m_this._handleMouseWheel);
     $node.on('mousemove.geojs', m_this._handleMouseMove);
@@ -591,13 +721,11 @@ var mapInteractor = function (args) {
     $node.on('mouseup.geojs', m_this._handleMouseUp);
     // Disable dragging images and such
     $node.on('dragstart', function () { return false; });
-    util.adjustActions(m_options.actions);
-    if (m_options.actions.some(function (action) {
-      return action.input.right;
-    })) {
+    if (usedInputs.right) {
       $node.on('contextmenu.geojs', function () { return false; });
     }
 
+    // bind keyboard events
     if (m_options.keyboard && m_options.keyboard.actions) {
       m_keyHandler = Mousetrap($node[0]);
       var bound = [];
@@ -619,12 +747,39 @@ var mapInteractor = function (args) {
     $node.toggleClass('highlight-focus',
       m_boundKeys && m_boundKeys.length && m_options.keyboard.focusHighlight);
 
+    // bind touch events
+    if ((m_this.hasTouchSupport() || m_options.alwaysTouch) &&
+        (usedInputs.pan || usedInputs.rotate) &&
+        __webpack_modules__[require.resolveWeak('hammerjs')]) { // eslint-disable-line
+      var Hammer = require('hammerjs');
+      var recog = [],
+          touchEvents = ['hammer.input'];
+      if (usedInputs.rotate) {
+        recog.push([Hammer.Rotate, {enable: true}]);
+        touchEvents = touchEvents.concat(['rotatestart', 'rotateend', 'rotatemove']);
+      }
+      if (usedInputs.pan) {
+        recog.push([Hammer.Pan, {direction: Hammer.DIRECTION_ALL}]);
+        touchEvents = touchEvents.concat(['panstart', 'panend', 'panmove']);
+      }
+      var hammerParams = {recognizers: recog, preventDefault: true};
+      m_touchHandler = {
+        manager: new Hammer.Manager($node[0], hammerParams),
+        touchSupport: m_this.hasTouchSupport(),
+        lastTime: 0
+      };
+      touchEvents.forEach(function (touchEvent) {
+        m_touchHandler.manager.on(touchEvent, m_this._handleTouch);
+      });
+    }
+
     return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Disonnects events to a map.  If the map is not set, then this does nothing.
+   * Disiconnects events to a map.  If the map is not set, then this does
+   * nothing.
    * @returns {geo.mapInteractor}
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -635,6 +790,10 @@ var mapInteractor = function (args) {
       }
       m_boundKeys = null;
       m_keyHandler = null;
+    }
+    if (m_touchHandler) {
+      m_touchHandler.manager.destroy();
+      m_touchHandler = null;
     }
     if ($node) {
       $node.off('.geojs');
@@ -723,12 +882,22 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._getMouseButton = function (evt) {
-    if (evt.which === 1) {
-      m_mouse.buttons.left = evt.type !== 'mouseup';
-    } else if (evt.which === 3) {
-      m_mouse.buttons.right = evt.type !== 'mouseup';
-    } else if (evt.which === 2) {
-      m_mouse.buttons.middle = evt.type !== 'mouseup';
+    for (var prop in m_mouse.buttons) {
+      if (m_mouse.buttons.hasOwnProperty(prop)) {
+        m_mouse.buttons[prop] = false;
+      }
+    }
+    if (evt.type !== 'mouseup') {
+      switch (evt.which) {
+        case 1: m_mouse.buttons.left = true; break;
+        case 2: m_mouse.buttons.middle = true; break;
+        case 3: m_mouse.buttons.right = true; break;
+        default:
+          if (evt.which) {
+            m_mouse.buttons[evt.which] = true;
+          }
+          break;
+      }
     }
   };
 
@@ -875,12 +1044,12 @@ var mapInteractor = function (args) {
       }
     }
     actionRecord = actionMatch(m_mouse.buttons, m_mouse.modifiers,
-                              m_options.actions);
+                               m_options.actions);
     action = (actionRecord || {}).action;
 
+    var map = m_this.map();
     // cancel transitions and momentum on click
-    m_this.map().transitionCancel(
-        '_handleMouseDown' + (action ? '.' + action : ''));
+    map.transitionCancel('_handleMouseDown' + (action ? '.' + action : ''));
     m_this.cancel(geo_action.momentum);
 
     m_mouse.velocity = {
@@ -899,6 +1068,9 @@ var mapInteractor = function (args) {
         action: action,
         actionRecord: actionRecord,
         origin: $.extend(true, {}, m_mouse),
+        initialZoom: map.zoom(),
+        initialRotation: map.rotation(),
+        initialEventRotation: evt.rotation,
         delta: {x: 0, y: 0}
       };
 
@@ -906,20 +1078,20 @@ var mapInteractor = function (args) {
         // Make sure the old selection layer is gone.
         if (m_selectionLayer) {
           m_selectionLayer.clear();
-          m_this.map().deleteLayer(m_selectionLayer);
+          map.deleteLayer(m_selectionLayer);
           m_selectionLayer = null;
         }
-        m_selectionLayer = m_this.map().createLayer(
+        m_selectionLayer = map.createLayer(
           'feature', {features: [quadFeature.capabilities.color]});
         m_selectionQuad = m_selectionLayer.createFeature(
-          'quad', {gcs: m_this.map().gcs()});
+          'quad', {gcs: map.gcs()});
         m_selectionQuad.style({
           opacity: 0.25,
           color: {r: 0.3, g: 0.3, b: 0.3}
         });
-        m_this.map().geoTrigger(geo_event.brushstart, m_this._getSelection());
+        map.geoTrigger(geo_event.brushstart, m_this._getSelection());
       }
-      m_this.map().geoTrigger(geo_event.actiondown, {
+      map.geoTrigger(geo_event.actiondown, {
         state: m_this.state(), mouse: m_this.mouse(), event: evt});
 
       // bind temporary handlers to document
@@ -946,7 +1118,6 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseMove = function (evt) {
-
     if (m_paused) {
       return;
     }
@@ -970,6 +1141,78 @@ var mapInteractor = function (args) {
     }
 
     m_this.map().geoTrigger(geo_event.mousemove, m_this.mouse());
+  };
+
+  /**
+   * Handle the zoomrotate action.
+   *
+   * @param {object} evt: the mouse event that triggered this.
+   */
+  this._handleZoomrotate = function (evt) {
+    /* Only zoom if we have once exceeded the initial zoom threshold. */
+    var deltaZoom = Math.log2(evt.scale);
+    if (!m_state.zoomrotateAllowZoom && deltaZoom &&
+        Math.abs(deltaZoom) >= Math.log2(1 + m_options.zoomrotateMinimumZoom)) {
+      if (m_options.zoomrotateMinimumZoom) {
+        m_state.initialZoom -= deltaZoom;
+      }
+      m_state.zoomrotateAllowZoom = true;
+    }
+    if (m_state.zoomrotateAllowZoom && deltaZoom) {
+      var zoom = m_state.initialZoom + deltaZoom;
+      m_this.map().zoom(zoom, m_state.origin);
+    }
+    /* Only rotate if we have once exceeded the initial rotation threshold.  The
+     * first time this happens (if the threshold is greater than zero), set the
+     * start of rotation to the current position, so that there is no sudden
+     * jump. */
+    var deltaTheta = (evt.rotation - m_state.initialEventRotation) * Math.PI / 180;
+    if (!m_state.zoomrotateAllowRotation && deltaTheta &&
+        Math.abs(deltaTheta) >= m_options.zoomrotateMinimumRotation) {
+      if (m_options.zoomrotateMinimumRotation) {
+        m_state.initialEventRotation = evt.rotation;
+        deltaTheta = 0;
+      }
+      m_state.zoomrotateAllowRotation = true;
+    }
+    if (m_state.zoomrotateAllowRotation) {
+      var theta = m_state.initialRotation + deltaTheta;
+      /* Compute the delta in the range of [-PI, PI).  This is involed to work
+       * around modulo returning a signed value. */
+      deltaTheta = ((theta - m_this.map().rotation()) % (Math.PI * 2) +
+                    Math.PI * 3) % (Math.PI * 2) - Math.PI;
+      /* If we reverse direction, don't rotate until some threshold is
+       * exceeded.  This helps prevent rotation bouncing while panning. */
+      if (deltaTheta && (deltaTheta * (m_state.lastRotationDelta || 0) >= 0 ||
+          Math.abs(deltaTheta) >= m_options.zoomrotateReverseRotation)) {
+        m_this.map().rotation(theta, m_state.origin);
+        m_state.lastRotationDelta = deltaTheta;
+      }
+    }
+    /* Only pan if we have once exceed the initial pan threshold. */
+    var panOrigin = m_state.origin.page;
+    if (m_state.initialEventGeo) {
+      var offset = $node.offset();
+      panOrigin = m_this.map().gcsToDisplay(m_state.initialEventGeo);
+      panOrigin.x += offset.left;
+      panOrigin.y += offset.top;
+    }
+    var x = evt.pageX, deltaX = x - panOrigin.x,
+        y = evt.pageY, deltaY = y - panOrigin.y,
+        deltaPan2 = deltaX * deltaX + deltaY * deltaY;
+    if (!m_state.zoomrotateAllowPan && deltaPan2 &&
+        deltaPan2 >= m_options.zoomrotateMinimumPan * m_options.zoomrotateMinimumPan) {
+      if (m_options.zoomrotateMinimumPan) {
+        deltaX = deltaY = 0;
+        m_state.initialEventGeo = m_this.mouse().geo;
+      } else {
+        m_state.initialEventGeo = m_state.origin.geo;
+      }
+      m_state.zoomrotateAllowPan = true;
+    }
+    if (m_state.zoomrotateAllowPan && (deltaX || deltaY)) {
+      m_this.map().pan({x: deltaX, y: deltaY});
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1030,6 +1273,8 @@ var mapInteractor = function (args) {
       cx = m_mouse.map.x - m_this.map().size().width / 2;
       cy = m_mouse.map.y - m_this.map().size().height / 2;
       m_this.map().rotation(m_state.origin.rotation + Math.atan2(cy, cx));
+    } else if (m_state.action === geo_action.zoomrotate) {
+      m_this._handleZoomrotate(evt);
     } else if (m_state.actionRecord.selectionRectangle) {
       // Get the bounds of the current selection
       selectionObj = m_this._getSelection();
@@ -1129,7 +1374,7 @@ var mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Based on the screen coodinates of a selection, zoom or unzoom and
+   * Based on the screen coordinates of a selection, zoom or unzoom and
    * recenter.
    *
    * @private
@@ -1488,7 +1733,7 @@ var mapInteractor = function (args) {
 
       if (action) {
         // if we were moving because of momentum or a transition, cancel it and
-        // recompute where the mouse action is occuring.
+        // recompute where the mouse action is occurring.
         var recompute = m_this.map().transitionCancel('wheel.' + action);
         recompute |= m_this.cancel(geo_action.momentum, true);
         if (recompute) {
@@ -1781,7 +2026,7 @@ var mapInteractor = function (args) {
 
     if (type === 'keyboard' && m_keyHandler) {
       /* Mousetrap passes through the keys we send, but not an event object,
-       * so we construct an artifical event object as the keys, and use that.
+       * so we construct an artificial event object as the keys, and use that.
        */
       var keys = {
         shiftKey: options.shift || options.shiftKey || false,
@@ -1826,6 +2071,13 @@ var mapInteractor = function (args) {
         ctrlKey: options.modifiers.indexOf('ctrl') >= 0,
         metaKey: options.modifiers.indexOf('meta') >= 0,
         shiftKey: options.modifiers.indexOf('shift') >= 0,
+
+        center: options.center,
+        rotation: options.touch ? options.rotation || 0 : options.rotation,
+        scale: options.touch ? options.scale || 1 : options.scale,
+        pointers: options.pointers,
+        pointerType: options.pointerType,
+
         originalEvent: {
           deltaX: options.wheelDelta.x,
           deltaY: options.wheelDelta.y,
@@ -1836,7 +2088,11 @@ var mapInteractor = function (args) {
         }
       }
     );
-    $node.trigger(evt);
+    if (options.touch && m_touchHandler) {
+      m_this._handleTouch(evt);
+    } else {
+      $node.trigger(evt);
+    }
     if (type.indexOf('.geojs') >= 0) {
       $(document).trigger(evt);
     }

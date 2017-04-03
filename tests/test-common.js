@@ -28,7 +28,7 @@ module.exports = {
     $.extend(true, mapDefaults, mapOpts);
 
     var osmDefaults = {
-      baseUrl: '/testdata/tiles/',
+      baseUrl: '/data/tiles/',
       attribution: null
     };
 
@@ -54,7 +54,7 @@ module.exports = {
       throttle: 0
     });
 
-    if (osmDefaults.m_baseUrl) {
+    if (osmDefaults.baseUrl) {
       // change the zoom range to represent the
       // tiles present in the local dataset
       map.zoomRange({

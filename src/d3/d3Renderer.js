@@ -185,7 +185,7 @@ var d3Renderer = function (arg) {
     m_width = width;
     m_height = height;
     if (!m_width || !m_height) {
-      throw 'Map layer has size 0';
+      throw new Error('Map layer has size 0');
     }
     m_diagonal = Math.pow(width * width + height * height, 0.5);
     m_corners = {
@@ -418,7 +418,7 @@ var d3Renderer = function (arg) {
     m_svg.attr('width', w);
     m_svg.attr('height', h);
     m_this._setTransform();
-    m_this.layer().geoTrigger(geo_event.d3Rescale, { scale: m_scale }, true);
+    m_this.layer().geoTrigger(d3Rescale, { scale: m_scale }, true);
   };
 
   ////////////////////////////////////////////////////////////////////////////

@@ -265,13 +265,27 @@ describe('geo.core.map', function () {
       m.rotation(17);
       expect(m.rotation()).toBeCloseTo(17 - Math.PI * 4);
     });
+    it('fileReader', function () {
+      var m = create_map();
+      expect(m.fileReader()).toBe(null);
+      var layerCount = m.layers().length;
+      expect(m.fileReader('jsonReader')).toBe(m);
+      expect(m.fileReader()).not.toBe(null);
+      expect(m.layers().length).toBe(layerCount + 1);
+      expect(m.layers()[m.layers().length - 1].renderer().api()).not.toBe('d3');
+      expect(m.fileReader('jsonReader', {renderer: 'd3'})).toBe(m);
+      expect(m.layers()[m.layers().length - 1].renderer().api()).toBe('d3');
+      var r = geo.createFileReader('jsonReader', {layer: m.layers()[m.layers().length - 1]});
+      expect(m.fileReader(r)).toBe(m);
+      expect(m.fileReader()).toBe(r);
+    });
   });
 
   describe('Public utility methods', function () {
     /* Count the number of jquery events bounds to an element using a
      * particular namespace.
      *
-     * @param {jquery element|dom element} elem the element to check.
+     * @param {object} elem the jquery or dom element to check.
      * @param {string} namespace the namespace to count.
      * @returns {number} the number of bounds events.
      */
@@ -552,6 +566,154 @@ describe('geo.core.map', function () {
       expect(wasCalled).toBe(true);
       unmockAnimationFrame();
     });
+    it('node class and data attribute', function () {
+      var selector = '#map-create-map';
+      var m = create_map();
+      expect($(selector).hasClass('geojs-map')).toBe(true);
+      expect($(selector).data('data-geojs-map')).toBe(m);
+      m.createLayer('feature');
+      expect(m.layers().length).toBe(1);
+      var m2 = geo.map({node: selector});
+      expect($(selector).data('data-geojs-map')).toBe(m2);
+      m2.createLayer('feature');
+      expect(m.layers().length).toBe(0);
+      expect(m2.layers().length).toBe(1);
+    });
+
+  });
+  describe('screenshot', function () {
+    var m, layer1, layer2, l1, l2;
+    var ss = {};
+
+    it('basic', function (done) {
+      m = create_map({
+        width: 64, height: 48, zoom: 2, center: {x: 7.5, y: 7.5}});
+      layer1 = m.createLayer('feature', {renderer: 'canvas'});
+      l1 = layer1.createFeature('line', {
+        style: {strokeWidth: 5, strokeColor: 'blue'}});
+      l1.data([[{x: 0, y: 0}, {x: 5, y: 0}],
+               [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}],
+               [{x: 10, y: 0}, {x: 15, y: 2}, {x: 12, y: 5}]]);
+      layer2 = m.createLayer('feature', {renderer: 'canvas'});
+      l2 = layer2.createFeature('line', {
+        style: {strokeWidth: 5, strokeColor: 'black'}});
+      l2.data([[{x: 10, y: 10}, {x: 15, y: 10}],
+               [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}]]);
+
+      m.draw();
+      window.requestAnimationFrame(function () {
+        m.screenshot().then(function (result) {
+          expect(result.substr(0, 22)).toBe('data:image/png;base64,');
+          ss.basic = result;
+          done();
+        });
+      });
+    });
+    it('jpeg', function (done) {
+      m.screenshot(null, 'image/jpeg').then(function (result) {
+        expect(result.substr(0, 23)).toBe('data:image/jpeg;base64,');
+        expect(result.length).toBeLessThan(ss.basic.length);
+        ss.jpeg = result;
+        done();
+      });
+    });
+    it('jpegi via single parameter', function (done) {
+      m.screenshot({type: 'image/jpeg'}).then(function (result) {
+        expect(result).toEqual(ss.jpeg);
+        done();
+      });
+    });
+    it('one layer', function (done) {
+      m.screenshot(layer1).then(function (result) {
+        expect(result.substr(0, 22)).toBe('data:image/png;base64,');
+        expect(result).not.toEqual(ss.basic);
+        ss.onelayer = result;
+        done();
+      });
+    });
+    it('one layer in a list', function (done) {
+      m.screenshot([layer1]).then(function (result) {
+        expect(result).toEqual(ss.onelayer);
+        done();
+      });
+    });
+    it('transparent layer', function (done) {
+      // making a layer transparent is as good as not asking for it
+      layer2.opacity(0);
+      m.screenshot().then(function (result) {
+        expect(result).toEqual(ss.onelayer);
+        done();
+      });
+    });
+    it('partial opacity', function (done) {
+      // making a layer transparent is as good as not asking for it
+      layer2.opacity(0.5);
+      m.screenshot().then(function (result) {
+        expect(result).not.toEqual(ss.basic);
+        expect(result).not.toEqual(ss.onelayer);
+        layer2.opacity(1);
+        done();
+      });
+    });
+    it('no background', function (done) {
+      m.screenshot(null, undefined, undefined, {background: false}).then(function (result) {
+        expect(result).not.toEqual(ss.basic);
+        ss.nobackground = result;
+        done();
+      });
+    });
+    it('red background', function (done) {
+      m.screenshot(null, undefined, undefined, {background: 'red'}).then(function (result) {
+        expect(result).not.toEqual(ss.basic);
+        expect(result).not.toEqual(ss.nobackground);
+        done();
+      });
+    });
+    it('layers in a different order', function (done) {
+      m.screenshot([layer2, layer1]).then(function (result) {
+        // the order doesn't matter
+        expect(result).toEqual(ss.basic);
+        done();
+      });
+    });
+    it('transformed layer', function (done) {
+      layer2.canvas().css('transform', 'matrix(2, -0.4, 0.4, 2, -100, 120)');
+      m.screenshot().then(function (result) {
+        expect(result).not.toEqual(ss.basic);
+        layer2.canvas().css('transform', 'none');
+        done();
+      });
+    });
+    it('wait for idle', function (done) {
+      var defer = $.Deferred();
+      var waited;
+      m.addPromise(defer);
+      m.screenshot(null, undefined, undefined, {wait: 'idle'}).then(function (result) {
+
+        expect(result).toEqual(ss.basic);
+        expect(waited).toBe(true);
+        done();
+      });
+      window.setTimeout(function () {
+        waited = true;
+        defer.resolve();
+      }, 50);
+    });
+    /* note that svg layers are not tested here, as the phantomjs browser
+     * doesn't support the necessary behavior. */
+    it('screenshot ready event', function (done) {
+      var readyEvent = 0, lastEvent;
+      m.geoOn(geo.event.screenshot.ready, function (evt) {
+        readyEvent += 1;
+        lastEvent = evt;
+      });
+      m.screenshot().then(function () {
+        expect(readyEvent).toBe(1);
+        expect(lastEvent.screenshot).toEqual(ss.basic);
+        expect(lastEvent.canvas.toDataURL()).toEqual(ss.basic);
+        done();
+      });
+    });
   });
 
   describe('Public non-class methods', function () {
@@ -583,6 +745,31 @@ describe('geo.core.map', function () {
       expect(m.size()).toEqual({width: 500, height: 500});
       $(window).trigger('resize');
       expect(m.size()).toEqual({width: 400, height: 400});
+    });
+    it('dragover', function () {
+      var m = create_map();
+      var evt = $.Event('dragover');
+      evt.originalEvent = new window.Event('dragover');
+      evt.originalEvent.dataTransfer = {};
+      $(m.node()).trigger(evt);
+      expect(evt.originalEvent.dataTransfer.dropEffect).not.toBe('copy');
+      m.fileReader('jsonReader');
+      evt = $.Event('dragover');
+      evt.originalEvent = new window.Event('dragover');
+      evt.originalEvent.dataTransfer = {};
+      $(m.node()).trigger(evt);
+      expect(evt.originalEvent.dataTransfer.dropEffect).toBe('copy');
+    });
+    it('drop', function () {
+      var m = create_map();
+      m.fileReader('jsonReader', {renderer: 'd3'});
+      var evt = $.Event('drop');
+      evt.originalEvent = new window.Event('drop');
+      evt.originalEvent.dataTransfer = {files: [{
+        geometry: {coordinates: [1, 2], type: 'Point'}, type: 'Feature'
+      }]};
+      $(m.node()).trigger(evt);
+      expect(m.layers()[0].features().length).toBe(1);
     });
   });
 });

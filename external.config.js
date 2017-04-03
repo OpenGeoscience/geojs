@@ -14,7 +14,8 @@ module.exports = {
   },
   resolve: {
     alias: {
-      d3: 'd3/d3.js'
+      d3: 'd3/d3.js',
+      hammerjs: 'hammerjs/hammer.js'
     }
   },
   plugins: [
@@ -27,6 +28,8 @@ module.exports = {
   module: {
     loaders: [{
       test: require.resolve('d3'), loader: 'expose?d3'
+    }, {
+      test: require.resolve('hammerjs'), loader: 'expose?hammerjs'
     }]
   }
 };

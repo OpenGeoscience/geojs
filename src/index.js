@@ -25,6 +25,10 @@
  * earcut
  * @copyright 2016, Mapbox
  * @license ISC
+ *
+ * kdbush
+ * @copyright 2017, Vladimir Agafonkin
+ * @license ISC
  */
 
 var $ = require('jquery');

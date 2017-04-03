@@ -319,7 +319,7 @@ var quadFeature = function (arg) {
         }
         return;
       }
-      var quad, reload, image, prev_onload,
+      var quad, reload, image, prev_onload, prev_onerror,
           pos, img, opacity, previewColor, previewImage, quadinfo = {};
 
       pos = m_this._positionToQuad(posFunc, depthFunc, d, i);
@@ -337,10 +337,12 @@ var quadFeature = function (arg) {
         origin = pos.ll;
         origindiag2 = diag2;
       }
-      pos = [pos.ll[0], pos.ll[1], pos.ll[2],
-             pos.lr[0], pos.lr[1], pos.lr[2],
-             pos.ul[0], pos.ul[1], pos.ul[2],
-             pos.ur[0], pos.ur[1], pos.ur[2]];
+      pos = [
+        pos.ll[0], pos.ll[1], pos.ll[2],
+        pos.lr[0], pos.lr[1], pos.lr[2],
+        pos.ul[0], pos.ul[1], pos.ul[2],
+        pos.ur[0], pos.ur[1], pos.ur[2]
+      ];
       img = imgFunc.call(m_this, d, i);
       if (!img) {
         quad = {
@@ -396,6 +398,8 @@ var quadFeature = function (arg) {
           }
           reload = loadedFunc.call(m_this, d, i);
           if (reload) {
+            // add a promise to the layer if this image might complete
+            var defer = util.isReadyImage(image, true) ? null : $.Deferred();
             prev_onload = image.onload;
             image.onload = function () {
               if (previewColor !== undefined) {
@@ -408,10 +412,25 @@ var quadFeature = function (arg) {
               m_this.modified();
               m_this._update();
               m_this.layer().draw();
+              if (defer) {
+                defer.resolve();
+              }
               if (prev_onload) {
                 return prev_onload.apply(this, arguments);
               }
             };
+            prev_onerror = image.onerror;
+            image.onerror = function () {
+              if (defer) {
+                defer.reject();
+              }
+              if (prev_onerror) {
+                return prev_onerror.apply(this, arguments);
+              }
+            };
+            if (defer) {
+              m_this.layer().addPromise(defer.promise());
+            }
           } else if (previewColor === undefined && !quad.image) {
             return;
           }

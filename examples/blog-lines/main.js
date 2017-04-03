@@ -299,6 +299,7 @@ function geojsLinesTest(opts) {
 
   var geo = libraryReference(opts);
 
+  $(opts.node).removeClass('ready');
   // create the map
   var map = geo.map({
     node: opts.node,
@@ -357,6 +358,12 @@ function geojsLinesTest(opts) {
   }
 
   map.draw();
+
+  map.onIdle(function () {
+    map.scheduleAnimationFrame(function () {
+      $(opts.node).addClass('ready');
+    }, 'readyFlag');
+  });
 
   // return references to the various objects
   return {

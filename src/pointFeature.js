@@ -25,7 +25,7 @@ var pointFeature = function (arg) {
   var ClusterGroup = require('./util/clustering');
   var geo_event = require('./event');
   var util = require('./util');
-  var wigglemaps = require('./util/wigglemaps');
+  var kdbush = require('kdbush');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -62,10 +62,9 @@ var pointFeature = function (arg) {
       m_clusterTree = null;
       m_clustering = false;
       s_data(m_allData);
-      m_allData = null;
-    } else if (!m_clustering && val) {
+    } else if (val && m_clustering !== val) {
       // Generate the cluster tree
-      m_clustering = true;
+      m_clustering = val;
       m_this._clusterData();
     }
     return m_this;
@@ -158,12 +157,14 @@ var pointFeature = function (arg) {
     if (val === undefined) {
       return m_this.style('position');
     } else {
-      val = util.ensureFunction(val);
+      var isFunc = util.isFunction(val);
       m_this.style('position', function (d, i) {
         if (d.__cluster) {
           return d;
-        } else {
+        } else if (isFunc) {
           return val(d, i);
+        } else {
+          return val;
         }
       });
       m_this.dataTime().modified();
@@ -194,7 +195,6 @@ var pointFeature = function (arg) {
     // create an array of positions in geo coordinates
     pts = m_this.data().map(function (d, i) {
       var pt = position(d);
-      pt.idx = i;
 
       // store the maximum point radius
       m_maxRadius = Math.max(
@@ -202,10 +202,10 @@ var pointFeature = function (arg) {
         radius(d, i) + (stroke(d, i) ? strokeWidth(d, i) : 0)
       );
 
-      return pt;
+      return [pt.x, pt.y];
     });
 
-    m_rangeTree = new wigglemaps.RangeTree(pts);
+    m_rangeTree = kdbush(pts);
     m_rangeTreeTime.modified();
   };
 
@@ -218,15 +218,11 @@ var pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (p) {
-    var min, max, data, idx = [], box, found = [], ifound = [], map, pt,
+    var min, max, data, idx = [], found = [], ifound = [], map, pt,
         corners,
         stroke = m_this.style.get('stroke'),
         strokeWidth = m_this.style.get('strokeWidth'),
         radius = m_this.style.get('radius');
-
-    if (!m_this.selectionAPI()) {
-      return [];
-    }
 
     data = m_this.data();
     if (!data || !data.length) {
@@ -235,6 +231,10 @@ var pointFeature = function (arg) {
         index: []
       };
     }
+
+    // We need to do this before we find corners, since the max radius is
+    // determined then
+    m_this._updateRangeTree();
 
     map = m_this.layer().map();
     pt = map.gcsToDisplay(p);
@@ -255,14 +255,7 @@ var pointFeature = function (arg) {
     };
 
     // Find points inside the bounding box
-    box = new wigglemaps.Box(
-      wigglemaps.vect(min.x, min.y),
-      wigglemaps.vect(max.x, max.y)
-    );
-    m_this._updateRangeTree();
-    m_rangeTree.search(box).forEach(function (q) {
-      idx.push(q.idx);
-    });
+    idx = m_rangeTree.range(min.x, min.y, max.x, max.y);
 
     // Filter by circular region
     idx.forEach(function (i) {
@@ -319,8 +312,10 @@ var pointFeature = function (arg) {
     if (data === undefined) {
       return s_data();
     }
-    if (m_clustering && !m_ignoreData) {
+    if (!m_ignoreData) {
       m_allData = data;
+    }
+    if (m_clustering && !m_ignoreData) {
       m_this._clusterData();
     } else {
       s_data(data);
@@ -331,53 +326,11 @@ var pointFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Returns the bounding box for a given datum in screen coordinates as an
-   * object: ::
-   *
-   *   {
-   *     min: {
-   *       x: value,
-   *       y: value
-   *     },
-   *     max: {
-   *       x: value,
-   *       y: value
-   *     }
-   *   }
-   *
-   * @returns {object}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._boundingBox = function (d) {
-    var pt, radius;
-
-    // get the position in geo coordinates
-    pt = m_this.position()(d);
-
-    // convert to screen coordinates
-    pt = m_this.layer().map().gcsToDisplay(pt);
-
-    // get the radius of the points (should we add stroke width?)
-    radius = m_this.style().radius(d);
-
-    return {
-      min: {
-        x: pt.x - radius,
-        y: pt.y - radius
-      },
-      max: {
-        x: pt.x + radius,
-        y: pt.y + radius
-      }
-    };
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
+    arg = arg || {};
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
@@ -403,6 +356,9 @@ var pointFeature = function (arg) {
     }
 
     m_this.style(defaultStyle);
+    if (defaultStyle.position) {
+      m_this.position(defaultStyle.position);
+    }
     m_this.dataTime().modified();
 
     // bind to the zoom handler for point clustering
@@ -429,9 +385,10 @@ var pointFeature = function (arg) {
  * @param {geo.pointFeature.spec} spec The object specification
  * @returns {geo.pointFeature|null}
  */
-pointFeature.create = function (layer, renderer, spec) {
+pointFeature.create = function (layer, spec) {
   'use strict';
 
+  spec = spec || {};
   spec.type = 'point';
   return feature.create(layer, spec);
 };

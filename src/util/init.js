@@ -362,57 +362,6 @@
     radiusEarth: 6378137,
 
     /**
-     * Linearly combine two "coordinate-like" objects in a uniform way.
-     * Coordinate like objects have ``x``, ``y``, and optionally a ``z``
-     * key.  The first object is mutated.
-     *
-     *   a <= ca * a + cb * b
-     *
-     * @param {number} ca
-     * @param {object} a
-     * @param {number} [a.x=0]
-     * @param {number} [a.y=0]
-     * @param {number} [a.z=0]
-     * @param {number} cb
-     * @param {object} b
-     * @param {number} [b.x=0]
-     * @param {number} [b.y=0]
-     * @param {number} [b.z=0]
-     * @returns {object} ca * a + cb * b
-     */
-    lincomb: function (ca, a, cb, b) {
-      a.x = ca * (a.x || 0) + cb * (b.x || 0);
-      a.y = ca * (a.y || 0) + cb * (b.y || 0);
-      a.z = ca * (a.x || 0) + cb * (b.x || 0);
-      return a;
-    },
-
-    /**
-     * Element-wise product of two coordinate-like object.  Mutates
-     * the first object.  Note the default values for ``b``, which
-     * are intended to used as a anisotropic scaling factors.
-     *
-     *   a <= a * b^pow
-     *
-     * @param {object} a
-     * @param {number} [a.x=0]
-     * @param {number} [a.y=0]
-     * @param {number} [a.z=0]
-     * @param {object} b
-     * @param {number} [b.x=1]
-     * @param {number} [b.y=1]
-     * @param {number} [b.z=1]
-     * @param {number} [pow=1]
-     * @returns {object} a * b^pow
-     */
-    scale: function (a, b, pow) {
-      a.x = (a.x || 0) * Math.pow(b.x || 1, pow);
-      a.y = (a.y || 0) * Math.pow(b.y || 1, pow);
-      a.z = (a.z || 0) * Math.pow(b.z || 1, pow);
-      return a;
-    },
-
-    /**
      * Compare two arrays and return if their contents are equal.
      * @param {array} a1 first array to compare
      * @param {array} a2 second array to compare
@@ -684,6 +633,163 @@
         } : undefined
       };
       return {map: mapParams, layer: layerParams};
+    },
+
+    /**
+     * Escape any character in a string that has a code point >= 127.
+     *
+     * @param {string} text: the string to escape.
+     * @returns {string}: the escaped string.
+     */
+    escapeUnicodeHTML: function (text) {
+      return text.replace(/./g, function (k) {
+        var code = k.charCodeAt();
+        if (code < 127) {
+          return k;
+        }
+        return '&#' + code.toString(10) + ';';
+      });
+    },
+
+    /**
+     * Check svg image and html img tags.  If the source is set, load images
+     * explicitly and convert them to local data:image references.
+     *
+     * @param {selector} elem: a jquery selector that may contain images.
+     * @returns {array}: a list of deferred objects that resolve when images
+     *      are dereferences.
+     */
+    dereferenceElements: function (elem) {
+      var deferList = [];
+
+      $('img,image', elem).each(function () {
+        var src = $(this);
+        var key = src.is('image') ? 'href' : 'src';
+        if (src.attr(key)) {
+          var img = new Image();
+          if (src.attr(key).substr(0, 4) === 'http' || src[0].crossOrigin) {
+            img.crossOrigin = src[0].crossOrigin || 'anonymous';
+          }
+          var defer = $.Deferred();
+          img.onload = function () {
+            var cvs = document.createElement('canvas');
+            cvs.width = img.naturalWidth;
+            cvs.height = img.naturalHeight;
+            cvs.getContext('2d').drawImage(img, 0, 0);
+            src.attr(key, cvs.toDataURL('image/png'));
+            if (src.attr(key).substr(0, 10) !== 'data:image') {
+              src.remove();
+            }
+            defer.resolve();
+          };
+          img.onerror = function () {
+            src.remove();
+            defer.resolve();
+          };
+          img.src = src.attr(key);
+          deferList.push(defer);
+        }
+      });
+      return deferList;
+    },
+
+    /**
+     * Convert an html element to an image.  This attempts to localize any
+     * images within the element.  If there are other external references, the
+     * image may not work due to security considerations.
+     *
+     * @param {object} elem: either a jquery selector or an html element.  This
+     *      may contain multiple elements.  The direct parent and grandparent
+     *      of the element are used for class information.
+     * @param {number} parents: number of layers up to travel to get class
+     *      information.
+     * @returns {deferred}: a jquery deferred object which receives an HTML
+     *      Image element when resolved.
+     */
+    htmlToImage: function (elem, parents) {
+      var defer = $.Deferred(), container;
+
+      var parent = $(elem);
+      elem = $(elem).clone();
+      while (parents && parents > 0) {
+        parent = parent.parent();
+        if (parent.is('div')) {
+          /* Create a containing div with the parent's class and id (so css
+           * will be used), but override size and background. */
+          container = $('<div>').attr({
+            'class': parent.attr('class'),
+            id: parent.attr('id')
+          }).css({
+            width: '100%',
+            height: '100%',
+            background: 'none',
+            margin: 0
+          });
+          container.append(elem);
+          elem = container;
+        }
+        parents -= 1;
+      }
+      // canvas elements won't render properly here.
+      $('canvas', elem).remove();
+      container = $('<div xmlns="http://www.w3.org/1999/xhtml">');
+      container.css({
+        width: parent.width() + 'px',
+        height: parent.height() + 'px'
+      });
+      container.append($('<head>'));
+      var body = $('<body>');
+      container.append(body);
+      /* We must specify the new body as having no background, or we'll clobber
+       * other layers. */
+      body.css({
+        width: parent.width() + 'px',
+        height: parent.height() + 'px',
+        background: 'none',
+        margin: 0
+      });
+      body.append(elem);
+      var deferList = geo.util.dereferenceElements(elem);
+      /* Get styles and links in order, as order matters in css */
+      $('style,link[rel="stylesheet"]').each(function () {
+        var styleElem;
+        if ($(this).is('style')) {
+          styleElem = $(this).clone();
+        } else {
+          var fetch = $.Deferred();
+          styleElem = $('<style type="text/css">');
+          $.get($(this).attr('href')).done(function (css) {
+            styleElem.text(css);
+            fetch.resolve();
+          });
+          deferList.push(fetch);
+        }
+        $('head', container).append(styleElem);
+      });
+
+      $.when.apply($, deferList).then(function () {
+        var svg = $('<svg xmlns="http://www.w3.org/2000/svg">' +
+                    '<foreignObject width="100%" height="100%">' +
+                    '</foreignObject></svg>');
+        svg.attr({
+          width: parent.width() + 'px',
+          height: parent.height() + 'px',
+          'text-rendering': 'optimizeLegibility'
+        });
+        $('foreignObject', svg).append(container);
+
+        var img = new Image();
+        img.onload = function () {
+          defer.resolve(img);
+        };
+        img.onerror = function () {
+          defer.reject();
+        };
+        img.src = 'data:image/svg+xml;base64,' +
+            btoa(geo.util.escapeUnicodeHTML(
+                new XMLSerializer().serializeToString(svg[0])));
+      });
+      return defer;
     },
 
     /**

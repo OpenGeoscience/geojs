@@ -5,7 +5,8 @@
  * @license BSD-3-Clause
  */
 var globals = {
-  d3: require('d3')
+  d3: require('d3'),
+  hammerjs: require('hammerjs')
 };
 
 module.exports = globals;

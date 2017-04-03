@@ -54,7 +54,6 @@ module.exports.prepareImageTest = function () {
 };
 
 module.exports.prepareIframeTest = function () {
-  window.contextPreserveDrawingBuffer = true;
   $('#map').remove();
   var map = $('<iframe id="map"/>').css({
     width: '800px', height: '600px', border: 0});
@@ -83,70 +82,19 @@ module.exports.prepareIframeTest = function () {
  *    selects at least one existing element.
  */
 module.exports.imageTest = function (name, elemSelector, threshold, doneFunc, idleFunc, delay, rafCount, readySelector) {
-  var deferred = $.Deferred();
-
-  var readyFunc = function () {
-    var result;
-    if (!elemSelector) {
-      result = $('<canvas>')[0];
-      result.width = $('canvas')[0].width;
-      result.height = $('canvas')[0].height;
-      var context = result.getContext('2d');
-      context.fillStyle = 'white';
-      context.fillRect(0, 0, result.width, result.height);
-      $('canvas').each(function () {
-        context.drawImage($(this)[0], 0, 0);
-      });
-    } else {
-      var innerScreenX = window.mozInnerScreenX !== undefined ?
-            window.mozInnerScreenX :
-            (window.outerWidth - window.innerWidth) / 2 + window.screenX,
-          innerScreenY = window.mozInnerScreenY !== undefined ?
-            window.mozInnerScreenY :
-            window.outerHeight - window.innerHeight -
-            (window.outerWidth - window.innerWidth) / 2 + window.screenY;
-      result = {
-        screenCoordinates: true,
-        left: $(elemSelector).offset().left + innerScreenX,
-        top: $(elemSelector).offset().top + innerScreenY,
-        width: $(elemSelector).outerWidth(true),
-        height: $(elemSelector).outerHeight(true)
-      };
-    }
-    compareImage(name, result, threshold, function () {
-      if (doneFunc) {
-        doneFunc();
-      }
-      deferred.resolve();
+  var defer;
+  if (idleFunc) {
+    var idleDefer = $.Deferred();
+    idleFunc(function () {
+      idleDefer.resolve();
     });
-  };
-
-  var rafCounter = rafCount === undefined ? 2 : rafCount;
-
-  if (rafCounter) {
-    var rafCallback = readyFunc;
-    var rafFunc = function () {
-      if (rafCounter <= 0) {
-        rafCallback();
-      } else {
-        window.requestAnimationFrame(function () {
-          rafCounter -= 1;
-          rafFunc();
-        });
-      }
-    };
-    readyFunc = rafFunc;
-  }
-
-  if (delay) {
-    var delayFunc = readyFunc;
-    readyFunc = function () {
-      window.setTimeout(delayFunc, delay);
-    };
+    defer = idleDefer;
+  } else {
+    defer = $.when();
   }
 
   if (readySelector) {
-    var selFunc = readyFunc;
+    var readyDefer = $.Deferred();
     var selWaitFunc;
     selWaitFunc = function () {
       var baseJquery = $,
@@ -156,17 +104,74 @@ module.exports.imageTest = function (name, elemSelector, threshold, doneFunc, id
       }
       if (!baseJquery || !baseJquery(readySelector).length) {
         window.setTimeout(selWaitFunc, 50);
-        return;
+        return readyDefer;
       }
-      selFunc();
+      readyDefer.resolve();
+      return readyDefer;
     };
-    readyFunc = selWaitFunc;
+    defer.done(selWaitFunc);
+    defer = readyDefer;
   }
 
-  if (idleFunc) {
-    idleFunc(readyFunc);
-  } else {
-    readyFunc();
+  if (delay) {
+    var delayDefer = $.Deferred();
+    defer.done(function () {
+      window.setTimeout(function () {
+        delayDefer.resolve();
+      }, delay);
+    });
+    defer = delayDefer;
   }
-  return deferred;
+
+  var rafCounter = rafCount === undefined ? 2 : rafCount;
+
+  if (rafCounter) {
+    var rafDefer = $.Deferred();
+    var rafFunc = function () {
+      if (rafCounter <= 0) {
+        rafDefer.resolve();
+      } else {
+        window.requestAnimationFrame(function () {
+          rafCounter -= 1;
+          rafFunc();
+        });
+      }
+      return rafDefer;
+    };
+    defer.done(rafFunc);
+    defer = rafDefer;
+  }
+  if (!elemSelector) {
+    defer = defer.then(function () {
+      return $('#map').data('data-geojs-map').screenshot(null, 'canvas');
+    });
+  } else {
+    defer = defer.then(function () {
+      var innerScreenX = window.mozInnerScreenX !== undefined ?
+            window.mozInnerScreenX :
+            (window.outerWidth - window.innerWidth) / 2 + window.screenX,
+          innerScreenY = window.mozInnerScreenY !== undefined ?
+            window.mozInnerScreenY :
+            window.outerHeight - window.innerHeight -
+            (window.outerWidth - window.innerWidth) / 2 + window.screenY;
+      return {
+        screenCoordinates: true,
+        left: $(elemSelector).offset().left + innerScreenX,
+        top: $(elemSelector).offset().top + innerScreenY,
+        width: $(elemSelector).outerWidth(true),
+        height: $(elemSelector).outerHeight(true)
+      };
+    });
+  }
+  var compareDefer = $.Deferred();
+  defer = defer.then(function (result) {
+    compareImage(name, result, threshold, function () {
+      if (doneFunc) {
+        doneFunc();
+      }
+      compareDefer.resolve();
+    });
+    return compareDefer;
+  });
+  return compareDefer;
 };
