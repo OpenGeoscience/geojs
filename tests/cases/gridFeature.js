@@ -1,4 +1,5 @@
 // Test geo.canvas.gridFeature
+
 describe('canvas grid feature', function () {
   var geo = require('../test-utils').geo;
   var $ = require('jquery');
@@ -30,14 +31,15 @@ describe('canvas grid feature', function () {
 
     it('Setup map', function () {
       mockAnimationFrame();
-      map = geo.map({node: '#map-canvas-grid-feature', center: [0, 0], zoom: 3});
+      map = geo.map({node: '#map-canvas-grid-feature', center: [-140, 45], zoom: 3});
       map.resize(0, 0, width, height);
     });
 
     it('Add grid to a layer', function () {
       var layerOptions = {
         features: ['grid'],
-        opacity: 0.75
+        opacity: 0.75,
+        renderer: 'canvas'
       };
       var gridOptions = {
         minIntensity: 0,
@@ -55,7 +57,7 @@ describe('canvas grid feature', function () {
           y: 45
         },
         cellSize: 1, // in degrees, approximately 5 miles
-        rowCount: 10,
+        rowCount: 3,
         updateDelay: 50
       };
       var grid_data = Array([
@@ -77,6 +79,11 @@ describe('canvas grid feature', function () {
       expect(grid1.upperLeft().y).toBe(45);
     });
 
+    it('Validate gcsPosition', function () {
+      expect(grid1.gcsPosition().x).toBe(-15584728.711058298);
+      expect(grid1.gcsPosition().y).toBe(5621521.486192066);
+    });
+
     it('Validate cellsize', function () {
       expect(grid1.cellSize()).toBe(1);
     });
@@ -87,6 +94,19 @@ describe('canvas grid feature', function () {
 
     it('Validate minimum intensity', function () {
       expect(grid1.minIntensity()).toBe(0.0);
+    });
+
+    it('Validate rowcount', function () {
+      expect(grid1.rowCount()).toBe(3);
+    });
+
+    it('Validate updateDelay', function () {
+      expect(grid1.updateDelay()).toBe(50);
+    });
+
+    it('Compute gradient', function () {
+      expect(layer1.node()[0].children[0].getContext('2d')
+        .getImageData(1, 0, 1, 1).data.length).toBe(4);
     });
 
     it('Remove a feature from a layer', function () {
