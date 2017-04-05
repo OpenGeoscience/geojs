@@ -20,7 +20,7 @@ describe('canvas grid feature', function () {
     var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
     var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
-    var map, layer1, grid1, width = 800, height = 600;
+    var map, layer, grid1, width = 800, height = 600;
     var clock;
     beforeEach(function () {
       clock = sinon.useFakeTimers();
@@ -31,52 +31,50 @@ describe('canvas grid feature', function () {
 
     it('Setup map', function () {
       mockAnimationFrame();
-      map = geo.map({node: '#map-canvas-grid-feature', center: [-140, 45], zoom: 3});
+      map = geo.map({node: '#map-canvas-grid-feature', center: [0, 0], zoom: 3});
+      layer = map.createLayer('feature', {'renderer': 'canvas'});
       map.resize(0, 0, width, height);
     });
 
-    it('Add grid to a layer', function () {
-      var layerOptions = {
-        features: ['grid'],
-        opacity: 0.75,
-        renderer: 'canvas'
-      };
-      var gridOptions = {
-        minIntensity: 0,
-        maxIntensity: 100,
-        style: {
-          color: {
-            0.00: {r: 0, g: 0, b: 0, a: 0.0},
-            0.25: {r: 0, g: 1, b: 0, a: 0.5},
-            0.50: {r: 1, g: 1, b: 0, a: 0.5},
-            1.00: {r: 1, g: 0, b: 0, a: 0.5}
-          }
-        },
-        upperLeft: {
-          x: -140,
-          y: 45
-        },
-        cellSize: 1, // in degrees, approximately 5 miles
-        rowCount: 3,
-        updateDelay: 50
-      };
-      var grid_data = Array([
-        [1, 2, 3],
-        [3, 4, 0],
-        [5, 6, 100]
-      ]);
-      layer1 = map.createLayer('feature', layerOptions);
-      grid1 = layer1.createFeature('grid', gridOptions);
-      grid1.data(grid_data);
-      grid1.draw();
+    it('Add feature to a layer', function () {
+      var grid_data = [10, 29, 39, 45, 23, 99, 40, 69, 99];
+
+      grid1 = layer.createFeature('grid')
+              .data(grid_data)
+              .intensity(function (d) {
+                return d[0];
+              })
+              .maxIntensity(100)
+              .minIntensity(0)
+              .upperLeft({x: 0, y: 0})
+              .cellSize(1)
+              .rowCount(3)
+              .updateDelay(0);
+
       map.draw();
       stepAnimationFrame(new Date().getTime());
-      expect(layer1.children().length).toBe(1);
+      expect(layer.children().length).toBe(1);
+    });
+
+    it('_animatePan', function () {
+      map.draw();
+      var buildTime = grid1.buildTime().getMTime();
+      map.pan({x: 1, y: 0});
+      expect(grid1.buildTime().getMTime()).toBe(buildTime);
+      clock.tick(50);
+      map.pan({x: 0, y: 0});
+      expect(grid1.buildTime().getMTime()).not.toBe(buildTime);
     });
 
     it('Validate coords', function () {
-      expect(grid1.upperLeft().x).toBe(-140);
-      expect(grid1.upperLeft().y).toBe(45);
+      expect(grid1.upperLeft().x).toBe(0);
+      expect(grid1.upperLeft().y).toBe(0);
+    });
+
+    it('Set coords', function () {
+      grid1.upperLeft({x: -140.0, y: 45.0});
+      expect(grid1.upperLeft().x).toBe(-140.0);
+      expect(grid1.upperLeft().y).toBe(45.0);
     });
 
     it('Validate gcsPosition', function () {
@@ -88,32 +86,77 @@ describe('canvas grid feature', function () {
       expect(grid1.cellSize()).toBe(1);
     });
 
+    it('Set cellsize', function () {
+      grid1.cellSize(2);
+      expect(grid1.cellSize()).toBe(2);
+    });
+
     it('Validate maximum intensity', function () {
       expect(grid1.maxIntensity()).toBe(100.0);
+    });
+
+    it('Set maximum intensity', function () {
+      grid1.maxIntensity(99.99);
+      expect(grid1.maxIntensity()).toBe(99.99);
     });
 
     it('Validate minimum intensity', function () {
       expect(grid1.minIntensity()).toBe(0.0);
     });
 
+    it('Validate maximum intensity', function () {
+      grid1.minIntensity(0.01);
+      expect(grid1.minIntensity()).toBe(0.01);
+    });
+
     it('Validate rowcount', function () {
       expect(grid1.rowCount()).toBe(3);
     });
 
+    it('Set rowcount', function () {
+      grid1.rowCount(5);
+      expect(grid1.rowCount()).toBe(5);
+    });
+
     it('Validate updateDelay', function () {
-      expect(grid1.updateDelay()).toBe(50);
+      expect(grid1.updateDelay()).toBe(0);
+    });
+
+    it('Set updateDelay', function () {
+      grid1.updateDelay(60);
+      expect(grid1.updateDelay()).toBe(60);
     });
 
     it('Compute gradient', function () {
-      expect(layer1.node()[0].children[0].getContext('2d')
+      expect(layer.node()[0].children[0].getContext('2d')
         .getImageData(1, 0, 1, 1).data.length).toBe(4);
     });
 
     it('Remove a feature from a layer', function () {
-      layer1.deleteFeature(grid1).draw();
-      expect(layer1.children().length).toBe(0);
+      layer.deleteFeature(grid1).draw();
+      expect(layer.children().length).toBe(0);
       // stop mocking animation frames
       unmockAnimationFrame();
     });
+
+    it('Check autogenerated min/max intensities', function () {
+      var grid_data = [10, 29, 39, 45, 23, 99, 40, 69, 99];
+
+      var layer2 = map.createLayer('feature');
+      var grid2 = layer2.createFeature('grid')
+        .data(grid_data)
+        .intensity(function (d) {
+          return d;
+        })
+        .upperLeft({x: 0, y: 0})
+        .cellSize(1)
+        .rowCount(3)
+        .updateDelay(0);
+
+      grid2._build();
+      expect(grid2.minIntensity()).toBe(10);
+      expect(grid2.maxIntensity()).toBe(99);
+    });
+
   });
 });
