@@ -96,6 +96,8 @@ describe('geo.tileLayer', function () {
       },
       updateAttribution: function () {
       },
+      bounds: function () {
+      },
       node: get_set('node'),
       children: function () {
         return [];
@@ -414,6 +416,29 @@ describe('geo.tileLayer', function () {
       expect(l.tilesAtZoom(1)).toEqual({x: 2, y: 2});
       expect(l.tilesAtZoom(2)).toEqual({x: 4, y: 3});
       expect(l.tilesAtZoom(3)).toEqual({x: 8, y: 6});
+    });
+    it('visible', function () {
+      var m = map(), layer, count = 0;
+      opts.map = m;
+      layer = geo.tileLayer(opts);
+      // check if we are updating by doing the least possible and tracking it
+      layer._getTiles = function () {
+        count += 1;
+      };
+      layer._updateSubLayers = undefined;
+
+      expect(layer.visible()).toBe(true);
+      layer._update();
+      expect(count).toBe(1);
+      expect(layer.visible(false)).toBe(layer);
+      expect(layer.visible()).toBe(false);
+      layer._update();
+      expect(count).toBe(1);
+      expect(layer.visible(true)).toBe(layer);
+      expect(layer.visible()).toBe(true);
+      expect(count).toBe(2);
+      layer._update();
+      expect(count).toBe(3);
     });
   });
   describe('Public utility methods', function () {
