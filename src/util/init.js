@@ -362,57 +362,6 @@
     radiusEarth: 6378137,
 
     /**
-     * Linearly combine two "coordinate-like" objects in a uniform way.
-     * Coordinate like objects have ``x``, ``y``, and optionally a ``z``
-     * key.  The first object is mutated.
-     *
-     *   a <= ca * a + cb * b
-     *
-     * @param {number} ca
-     * @param {object} a
-     * @param {number} [a.x=0]
-     * @param {number} [a.y=0]
-     * @param {number} [a.z=0]
-     * @param {number} cb
-     * @param {object} b
-     * @param {number} [b.x=0]
-     * @param {number} [b.y=0]
-     * @param {number} [b.z=0]
-     * @returns {object} ca * a + cb * b
-     */
-    lincomb: function (ca, a, cb, b) {
-      a.x = ca * (a.x || 0) + cb * (b.x || 0);
-      a.y = ca * (a.y || 0) + cb * (b.y || 0);
-      a.z = ca * (a.x || 0) + cb * (b.x || 0);
-      return a;
-    },
-
-    /**
-     * Element-wise product of two coordinate-like object.  Mutates
-     * the first object.  Note the default values for ``b``, which
-     * are intended to used as a anisotropic scaling factors.
-     *
-     *   a <= a * b^pow
-     *
-     * @param {object} a
-     * @param {number} [a.x=0]
-     * @param {number} [a.y=0]
-     * @param {number} [a.z=0]
-     * @param {object} b
-     * @param {number} [b.x=1]
-     * @param {number} [b.y=1]
-     * @param {number} [b.z=1]
-     * @param {number} [pow=1]
-     * @returns {object} a * b^pow
-     */
-    scale: function (a, b, pow) {
-      a.x = (a.x || 0) * Math.pow(b.x || 1, pow);
-      a.y = (a.y || 0) * Math.pow(b.y || 1, pow);
-      a.z = (a.z || 0) * Math.pow(b.z || 1, pow);
-      return a;
-    },
-
-    /**
      * Compare two arrays and return if their contents are equal.
      * @param {array} a1 first array to compare
      * @param {array} a2 second array to compare

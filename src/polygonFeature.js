@@ -271,7 +271,7 @@ var polygonFeature = function (arg) {
       m_lineFeature = m_this.layer().createFeature('line', {
         selectionAPI: false,
         gcs: m_this.gcs(),
-        visible: m_this.visible()
+        visible: m_this.visible(undefined, true)
       });
       m_this.dependentFeatures([m_lineFeature]);
     }

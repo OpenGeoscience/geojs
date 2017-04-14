@@ -257,7 +257,11 @@ var jsonReader = function (arg) {
             .style({
               strokeColor: m_this._style('strokeColor', '#ff7800', lines, convertColor),
               strokeWidth: m_this._style('strokeWidth', 4, lines),
-              strokeOpacity: m_this._style('strokeOpacity', 0.5, lines)
+              strokeOpacity: m_this._style('strokeOpacity', 0.5, lines),
+              strokeOffset: m_this._style('strokeOffset', 0, lines),
+              lineCap: m_this._style('lineCap', 'butt', lines),
+              lineJoin: m_this._style('lineCap', 'miter', lines),
+              closed: m_this._style('closed', false, lines)
             })
         );
       }
