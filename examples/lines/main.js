@@ -347,8 +347,10 @@ $(function () {
     .position(function (d) {
       return {x: d[0], y: d[1]};
     })
-    // add hover events
-    .geoOn(geo.event.feature.mouseover, function (evt) {
+    // add hover events -- use mouseon and mouseoff, since we only show one
+    // tootip.  If we showed one tooltip per item we were over, use mouseover
+    // and mouseout.
+    .geoOn(geo.event.feature.mouseon, function (evt) {
       var text = (evt.data.name ? evt.data.name : '') +
                  (evt.data.highway ? ' (' + evt.data.highway + ')' : '');
       if (text) {
@@ -357,7 +359,7 @@ $(function () {
       }
       tooltipElem.toggleClass('hidden', !text);
     })
-    .geoOn(geo.event.feature.mouseout, function (evt) {
+    .geoOn(geo.event.feature.mouseoff, function (evt) {
       tooltipElem.addClass('hidden');
     });
 

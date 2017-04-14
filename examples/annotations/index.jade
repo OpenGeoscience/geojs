@@ -6,13 +6,15 @@ block append mainContent
       .shortlabel Add
       button#rectangle.lastused(next='polygon') Rectangle
       button#polygon(next='point') Polygon
-      button#point(next='rectangle') Point
+      button#point(next='line') Point
+      button#line(next='rectangle') Line
     .form-group
       #instructions(annotation='none')
         .annotation.none
         .annotation.polygon Left-click points in the polygon.  Double click, right click, or click the starting point to close the polygon.
-        .annotation.rectangle Left click-and-drag to draw a rectangle.
+        .annotation.rectangle Left click-and-drag or left click opposite corners to draw a rectangle.
         .annotation.point Left click to create a point.
+        .annotation.line Left-click points in the line.  Double click, right click, or click the starting point to end the line.
     .form-group(title='If enabled, left-click to add another annotation, and right-click to switch annotation type.  Otherwise, you must click a button above.')
       label(for='clickadd') Click to add annotation
       input#clickadd(param-name='clickadd', type='checkbox', placeholder='true', checked='checked')
@@ -64,15 +66,33 @@ block append mainContent
             select#edit-stroke(option='stroke', format='boolean')
               option(value='true') Yes
               option(value='false') No
-          .form-group(annotation-types='point polygon rectangle')
+          .form-group(annotation-types='point polygon rectangle line')
             label(for='edit-strokeWidth') Stroke Width
             input#edit-strokeWidth(option='strokeWidth', format='positive')
-          .form-group(annotation-types='point polygon rectangle')
+          .form-group(annotation-types='point polygon rectangle line')
             label(for='edit-strokeColor') Stroke Color
             input#edit-strokeColor(option='strokeColor', format='color')
-          .form-group(annotation-types='point polygon rectangle')
+          .form-group(annotation-types='point polygon rectangle line')
             label(for='edit-strokeOpacity') Stroke Opacity
             input#edit-strokeOpacity(option='strokeOpacity', format='opacity')
+          .form-group(annotation-types='line')
+            label(for='edit-closed') Closed
+            select#edit-closed(option='closed', format='boolean')
+              option(value='true') Yes
+              option(value='false') No
+          .form-group(annotation-types='line')
+            label(for='edit-lineCap') Line End Caps
+            select#edit-lineCap(option='lineCap', format='text')
+              option(value='butt') Butt
+              option(value='round') Round
+              option(value='square') Square
+          .form-group(annotation-types='line')
+            label(for='edit-lineJoin') Line Joins
+            select#edit-lineJoin(option='lineJoin', format='text')
+              option(value='miter') Miter
+              option(value='bevel') Bevel
+              option(value='round') Round
+              option(value='miter-clip') Miter-Clip
           .form-group
             #edit-validation-error
         .modal-footer

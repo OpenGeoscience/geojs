@@ -652,10 +652,9 @@ var mapInteractor = function (args) {
     m_touchHandler.lastEventType = evt.which;
     m_touchHandler.lastEvent = evt;
     /* convert touch events to have page locations */
-    var offset = $node.offset();
     if (evt.pageX === undefined && evt.center !== undefined && evt.center.x !== undefined) {
-      evt.pageX = evt.center.x + offset.left;
-      evt.pageY = evt.center.y + offset.top;
+      evt.pageX = evt.center.x;
+      evt.pageY = evt.center.y;
     }
     /* start events should occur *before* the triggering delta.  By using the
      * mouse handlers, we get all of the action properties we expect (and

@@ -120,6 +120,24 @@ describe('geo.annotation', function () {
       expect(ann.options().coordinates).toBe(undefined);
       expect(ann._coordinates()).toBe(testval);
     });
+    it('style and editstyle', function () {
+      var ann = geo.annotation.annotation('test', {
+        layer: layer, style: {testopt: 30}, editstyle: {testopt: 50}});
+      expect(ann.options('style').testopt).toBe(30);
+      expect(ann.style().testopt).toBe(30);
+      expect(ann.style('testopt')).toBe(30);
+      expect(ann.style('testopt', 40)).toBe(ann);
+      expect(ann.style().testopt).toBe(40);
+      expect(ann.style({testopt: 30})).toBe(ann);
+      expect(ann.style().testopt).toBe(30);
+      expect(ann.options('editstyle').testopt).toBe(50);
+      expect(ann.editstyle().testopt).toBe(50);
+      expect(ann.editstyle('testopt')).toBe(50);
+      expect(ann.editstyle('testopt', 60)).toBe(ann);
+      expect(ann.editstyle().testopt).toBe(60);
+      expect(ann.editstyle({testopt: 50})).toBe(ann);
+      expect(ann.editstyle().testopt).toBe(50);
+    });
     it('coordinates', function () {
       var ann = geo.annotation.annotation('test', {layer: layer});
       var coord = [{x: 10, y: 30}, {x: 20, y: 25}];
@@ -195,7 +213,16 @@ describe('geo.annotation', function () {
       expect(features.length).toBe(1);
       expect(features[0].polygon.polygon).toEqual(corners);
       expect(features[0].polygon.style.fillOpacity).toBe(0.25);
+      expect(features[0].polygon.style.fillColor.g).toBe(1);
+      expect(features[0].polygon.style.polygon({polygon: 'a'})).toBe('a');
       ann.state(geo.annotation.state.create);
+      features = ann.features();
+      expect(features.length).toBe(1);
+      expect(features[0].polygon.polygon).toEqual(corners);
+      expect(features[0].polygon.style.fillOpacity).toBe(0.25);
+      expect(features[0].polygon.style.fillColor.g).toBe(0.3);
+      expect(features[0].polygon.style.polygon({polygon: 'a'})).toBe('a');
+      ann.options('corners', []);
       features = ann.features();
       expect(features.length).toBe(0);
     });
@@ -259,6 +286,57 @@ describe('geo.annotation', function () {
       expect(geojson.geometry.coordinates.length).toBe(1);
       expect(geojson.geometry.coordinates[0].length).toBe(5);
       expect(geojson.geometry.coordinates[0][2][1]).toBeCloseTo(1);
+    });
+    it('mouseMove', function () {
+      var ann = geo.annotation.rectangleAnnotation({corners: corners});
+      expect(ann.mouseMove({mapgcs: {x: 6, y: 4}})).toBe(undefined);
+      expect(ann.options('corners')).toEqual(corners);
+      ann.state(geo.annotation.state.create);
+      expect(ann.mouseMove({mapgcs: {x: 6, y: 4}})).toBe(true);
+      expect(ann.options('corners')).not.toEqual(corners);
+    });
+    it('mouseClick', function () {
+      var map = create_map();
+      var layer = map.createLayer('annotation', {
+        annotations: ['rectangle']
+      });
+      var ann = geo.annotation.rectangleAnnotation({layer: layer});
+      var time = new Date().getTime();
+      expect(ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 10, y: 20},
+        mapgcs: map.displayToGcs({x: 10, y: 20}, null)
+      })).toBe(undefined);
+      ann.state(geo.annotation.state.create);
+      expect(ann.mouseClick({
+        buttonsDown: {middle: true},
+        time: time,
+        map: corners[0],
+        mapgcs: map.displayToGcs(corners[0], null)
+      })).toBe(undefined);
+      expect(ann.mouseClick({
+        buttonsDown: {right: true},
+        time: time,
+        map: corners[0],
+        mapgcs: map.displayToGcs(corners[0], null)
+      })).toBe(undefined);
+      expect(ann.options('corners').length).toBe(0);
+      expect(ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: corners[0],
+        mapgcs: map.displayToGcs(corners[0], null)
+      })).toBe(true);
+      expect(ann.options('corners').length).toBe(4);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: corners[2],
+        mapgcs: map.displayToGcs(corners[2], null)
+      });
+      expect(ann.options('corners').length).toBe(4);
+      expect(ann.state()).toBe(geo.annotation.state.done);
     });
   });
 
@@ -489,6 +567,201 @@ describe('geo.annotation', function () {
     });
   });
 
+  describe('geo.annotation.lineAnnotation', function () {
+    var vertices = [{x: 30, y: 0}, {x: 50, y: 0}, {x: 40, y: 20}, {x: 30, y: 10}];
+    var vertices2 = [{x: 30, y: 10}, {x: 50, y: 10}, {x: 40, y: 30}];
+    it('create', function () {
+      var ann = geo.annotation.lineAnnotation();
+      expect(ann instanceof geo.annotation.lineAnnotation);
+      expect(ann.type()).toBe('line');
+    });
+    it('features', function () {
+      var ann = geo.annotation.lineAnnotation({vertices: vertices});
+      var features = ann.features();
+      expect(features.length).toBe(1);
+      expect(features[0].line.line).toEqual(vertices);
+      expect(features[0].line.style.strokeOpacity).toBe(1);
+      expect(features[0].line.style.strokeColor.b).toBe(0);
+      expect(features[0].line.style.line().length).toBe(vertices.length);
+      expect(features[0].line.style.position(0, 1)).toEqual(vertices[1]);
+      ann.state(geo.annotation.state.create);
+      features = ann.features();
+      expect(features.length).toBe(1);
+      expect(features[0].line.line).toEqual(vertices);
+      expect(features[0].line.style.strokeOpacity).toBe(1);
+      expect(features[0].line.style.strokeColor.b).toBe(1);
+      expect(features[0].line.style.line().length).toBe(vertices.length);
+      expect(features[0].line.style.position(0, 1)).toEqual(vertices[1]);
+      ann.options('vertices', [{x: 3, y: 0}, {x: 5, y: 0}]);
+      features = ann.features();
+      expect(features.length).toBe(1);
+      expect(features[0].line.line.length).toBe(2);
+    });
+    it('_coordinates', function () {
+      var ann = geo.annotation.lineAnnotation({vertices: vertices});
+      expect(ann._coordinates()).toEqual(vertices);
+      ann._coordinates(vertices2);
+      expect(ann._coordinates()).toEqual(vertices2);
+    });
+    it('_geojsonCoordinates', function () {
+      var ann = geo.annotation.lineAnnotation();
+      expect(ann._geojsonCoordinates()).toBe(undefined);
+      ann._coordinates(vertices2);
+      var coor = ann._geojsonCoordinates();
+      expect(coor.length).toBe(3);
+    });
+    it('_geojsonGeometryType', function () {
+      var ann = geo.annotation.lineAnnotation();
+      expect(ann._geojsonGeometryType()).toBe('LineString');
+    });
+    it('geojson', function () {
+      var ann = geo.annotation.lineAnnotation({vertices: vertices2});
+      var geojson = ann.geojson();
+      expect(geojson.type).toBe('Feature');
+      expect(geojson.geometry.type).toBe('LineString');
+      expect(geojson.geometry.coordinates.length).toBe(3);
+      expect(geojson.geometry.coordinates[2][1]).toBeCloseTo(30);
+    });
+    it('mouseMove', function () {
+      var ann = geo.annotation.lineAnnotation({vertices: vertices});
+      expect(ann.mouseMove({mapgcs: {x: 6, y: 4}})).toBe(undefined);
+      expect(ann.options('vertices')).toEqual(vertices);
+      ann.state(geo.annotation.state.create);
+      expect(ann.mouseMove({mapgcs: {x: 6, y: 4}})).toBe(true);
+      expect(ann.options('vertices')).not.toEqual(vertices);
+    });
+    it('mouseClick', function () {
+      var map = create_map();
+      var layer = map.createLayer('annotation', {
+        annotations: ['line']
+      });
+      var ann = geo.annotation.lineAnnotation({layer: layer});
+      var time = new Date().getTime();
+      expect(ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 10, y: 20},
+        mapgcs: map.displayToGcs({x: 10, y: 20}, null)
+      })).toBe(undefined);
+      ann.state(geo.annotation.state.create);
+      expect(ann.mouseClick({
+        buttonsDown: {middle: true},
+        time: time,
+        map: vertices[0],
+        mapgcs: map.displayToGcs(vertices[0], null)
+      })).toBe(undefined);
+      expect(ann.options('vertices').length).toBe(0);
+      expect(ann.mouseClick({
+        buttonsDown: {right: true},
+        time: time,
+        map: vertices[0],
+        mapgcs: map.displayToGcs(vertices[0], null)
+      })).toBe(undefined);
+      expect(ann.options('vertices').length).toBe(0);
+      expect(ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: vertices[0],
+        mapgcs: map.displayToGcs(vertices[0], null)
+      })).toBe(true);
+      expect(ann.options('vertices').length).toBe(2);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: vertices[1],
+        mapgcs: map.displayToGcs(vertices[1], null)
+      });
+      expect(ann.options('vertices').length).toBe(3);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: vertices[2],
+        mapgcs: map.displayToGcs(vertices[2], null)
+      });
+      expect(ann.options('vertices').length).toBe(4);
+      expect(ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: vertices[0].x + 1, y: vertices[0].y},
+        mapgcs: map.displayToGcs({x: vertices[0].x + 1, y: vertices[0].y}, null)
+      })).toBe('done');
+      expect(ann.options('vertices').length).toBe(3);
+      expect(ann.state()).toBe(geo.annotation.state.done);
+
+      // test double click
+      ann.state(geo.annotation.state.create);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: vertices[2],
+        mapgcs: map.displayToGcs(vertices[2], null)
+      });
+      expect(ann.options('vertices').length).toBe(4);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: vertices[2],
+        mapgcs: map.displayToGcs(vertices[2], null)
+      });
+      expect(ann.options('vertices').length).toBe(3);
+      expect(ann.state()).toBe(geo.annotation.state.done);
+
+      // test right-click with only one fixed vertex
+      ann.state(geo.annotation.state.create);
+      ann.options('vertices', [{x: 3, y: 0}, {x: 5, y: 0}]);
+      expect(ann.mouseClick({
+        buttonsDown: {right: true},
+        time: time,
+        map: vertices[0],
+        mapgcs: map.displayToGcs(vertices[0], null)
+      })).toBe('remove');
+    });
+    it('actions', function () {
+      var ann = geo.annotation.lineAnnotation({vertices: vertices});
+      var actions = ann.actions();
+      expect(actions.length).toBe(0);
+      actions = ann.actions(geo.annotation.state.create);
+      expect(actions.length).toBe(2);
+      expect(actions[0].name).toEqual('line create');
+      ann.state(geo.annotation.state.create);
+      actions = ann.actions();
+      expect(actions.length).toBe(2);
+      expect(actions[0].name).toEqual('line create');
+      actions = ann.actions(geo.annotation.state.done);
+      expect(actions.length).toBe(0);
+    });
+    it('processAction', function () {
+      var map = create_map();
+      var layer = map.createLayer('annotation', {
+        annotations: ['line']
+      });
+      var ann = geo.annotation.lineAnnotation({layer: layer, vertices: vertices});
+      expect(ann.processAction({state: null})).toBe(undefined);
+      ann.options('vertices', []);
+      ann.state(geo.annotation.state.create);
+      var evt = {
+        state: {action: geo.geo_action.annotation_line},
+        mouse: {
+          map: vertices[0],
+          mapgcs: map.displayToGcs(vertices[0], null)
+        }
+      };
+      expect(ann.processAction(evt)).toBe(true);
+      expect(ann.options('vertices').length).toBe(2);
+      evt = {
+        state: {action: geo.geo_action.annotation_line},
+        mouse: {
+          map: vertices[1],
+          mapgcs: map.displayToGcs(vertices[1], null)
+        }
+      };
+      expect(ann.processAction(evt)).toBe(true);
+      expect(ann.options('vertices').length).toBe(3);
+      expect(ann.processAction(evt)).not.toBe(true);
+      expect(ann.options('vertices').length).toBe(3);
+    });
+  });
+
   describe('annotation registry', function () {
     var newshapeCount = 0;
     it('listAnnotations', function () {
@@ -496,6 +769,7 @@ describe('geo.annotation', function () {
       expect($.inArray('rectangle', list) >= 0).toBe(true);
       expect($.inArray('polygon', list) >= 0).toBe(true);
       expect($.inArray('point', list) >= 0).toBe(true);
+      expect($.inArray('line', list) >= 0).toBe(true);
       expect($.inArray('unknown', list) >= 0).toBe(false);
     });
     it('registerAnnotation', function () {

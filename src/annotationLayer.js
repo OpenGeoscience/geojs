@@ -51,13 +51,17 @@ var annotationLayer = function (args) {
       m_features = [];
 
   var geojsonStyleProperties = {
+    'closed': {dataType: 'boolean', keys: ['closed', 'close']},
     'fill': {dataType: 'boolean', keys: ['fill']},
     'fillColor': {dataType: 'color', keys: ['fillColor', 'fill-color', 'marker-color', 'fill']},
     'fillOpacity': {dataType: 'opacity', keys: ['fillOpacity', 'fill-opacity']},
+    'lineCap': {dataType: 'text', keys: ['lineCap', 'line-cap']},
+    'lineJoin': {dataType: 'text', keys: ['lineJoin', 'line-join']},
     'radius': {dataType: 'positive', keys: ['radius']},
     'scaled': {dataType: 'booleanOrNumber', keys: ['scaled']},
     'stroke': {dataType: 'boolean', keys: ['stroke']},
     'strokeColor': {dataType: 'color', keys: ['strokeColor', 'stroke-color', 'stroke']},
+    'strokeOffset': {dataType: 'number', keys: ['strokeOffset', 'stroke-offset']},
     'strokeOpacity': {dataType: 'opacity', keys: ['strokeOpacity', 'stroke-opacity']},
     'strokeWidth': {dataType: 'positive', keys: ['strokeWidth', 'stroke-width']}
   };
@@ -65,16 +69,19 @@ var annotationLayer = function (args) {
   m_options = $.extend(true, {}, {
     dblClickTime: 300,
     adjacentPointProximity: 5,  // in pixels, 0 is exact
+    // in pixels; set to continuousPointProximity to false to disable
+    // continuous drawing modes.
+    continuousPointProximity: 5,
     finalPointProximity: 10  // in pixels, 0 is exact
   }, args);
 
   /**
-   * Process a selection event.  If we are in rectangle-creation mode, this
+   * Process an action event.  If we are in rectangle-creation mode, this
    * creates a rectangle.
    *
    * @param {geo.event} evt the selection event.
    */
-  this._processSelection = function (evt) {
+  this._processAction = function (evt) {
     var update;
     if (evt.state && evt.state.actionRecord &&
         evt.state.actionRecord.owner === geo_annotation.actionOwner &&
@@ -341,6 +348,9 @@ var annotationLayer = function (args) {
         this.currentAnnotation = null;
       }
       switch (m_mode) {
+        case 'line':
+          createAnnotation = geo_annotation.lineAnnotation;
+          break;
         case 'point':
           createAnnotation = geo_annotation.pointAnnotation;
           break;
@@ -464,7 +474,14 @@ var annotationLayer = function (args) {
         options.style = {};
       }
       delete options.annotationType;
+      // the geoJSON reader can only emit line, polygon, and point
       switch (feature.featureType) {
+        case 'line':
+          position = feature.line()(data, data_idx);
+          if (!position || position.length < 2) {
+            return;
+          }
+          break;
         case 'polygon':
           position = feature.polygon()(data, data_idx);
           if (!position || !position.outer || position.outer.length < 3) {
@@ -482,8 +499,6 @@ var annotationLayer = function (args) {
         case 'point':
           position = [feature.position()(data, data_idx)];
           break;
-        default:
-          return;
       }
       for (i = 0; i < position.length; i += 1) {
         position[i] = util.normalizeCoordinates(position[i]);
@@ -558,6 +573,8 @@ var annotationLayer = function (args) {
    *     'true', 'on', or 'yes', falsy values that aren't 0, and true are
    *     handled as booleans.  Otherwise, a floating point number that isn't
    *     NaN or an infinity.
+   *   number: a floating point number that isn't NaN or an infinity.
+   *   text: any text string.
    * @param {number|string|object|boolean} value: the value to validate.
    * @param {string} dataType: the data type for validation.
    * @returns {number|string|object|boolean|undefined} the sanitized value or
@@ -587,6 +604,12 @@ var annotationLayer = function (args) {
           return;
         }
         break;
+      case 'number':
+        value = +value;
+        if (isNaN(value) || !isFinite(value)) {
+          return;
+        }
+        break;
       case 'opacity':
         value = +value;
         if (isNaN(value) || value < 0 || value > 1) {
@@ -598,6 +621,9 @@ var annotationLayer = function (args) {
         if (isNaN(value) || !isFinite(value) || value <= 0) {
           return;
         }
+        break;
+      case 'text':
+        value = '' + value;
         break;
     }
     return value;
@@ -652,10 +678,12 @@ var annotationLayer = function (args) {
                * hasn't been tested.
                */
               var style = {};
-              $.each(['fill', 'fillColor', 'fillOpacity', 'line', 'polygon',
-                      'position', 'radius', 'stroke', 'strokeColor',
-                      'strokeOpacity', 'strokeWidth', 'uniformPolygon'
-                  ], function (keyidx, key) {
+              $.each([
+                'closed', 'fill', 'fillColor', 'fillOpacity', 'line',
+                'lineCap', 'lineJoin', 'polygon', 'position', 'radius',
+                'stroke', 'strokeColor', 'strokeOffset', 'strokeOpacity',
+                'strokeWidth', 'uniformPolygon'
+              ], function (keyidx, key) {
                 var origFunc;
                 if (feature.style()[key] !== undefined) {
                   origFunc = feature.style.get(key);
@@ -725,7 +753,8 @@ var annotationLayer = function (args) {
     if (!m_this.map().interactor()) {
       m_this.map().interactor(mapInteractor({actions: []}));
     }
-    m_this.geoOn(geo_event.actionselection, m_this._processSelection);
+    m_this.geoOn(geo_event.actionselection, m_this._processAction);
+    m_this.geoOn(geo_event.actionmove, m_this._processAction);
 
     m_this.geoOn(geo_event.mouseclick, m_this._handleMouseClick);
     m_this.geoOn(geo_event.mousemove, m_this._handleMouseMove);
