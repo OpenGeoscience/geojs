@@ -1,7 +1,5 @@
 // Test geo.core.osmLayer
-var geo = require('../test-utils').geo;
 var $ = require('jquery');
-var vgl = require('vgl');
 var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
 var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
 var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
@@ -13,8 +11,10 @@ describe('geo.core.osmLayer', function () {
   var waitForIt = require('../test-utils').waitForIt;
   var submitNote = require('../test-utils').submitNote;
   // var logCanvas2D = require('../test-utils').logCanvas2D;
-  var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
-  var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
+  var geo = require('../test-utils').geo;
+  var mockVGLRenderer = geo.util.mockVGLRenderer;
+  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+  var vgl = require('vgl');
   var closeToEqual = require('../test-utils').closeToEqual;
 
   function create_map(opts) {

@@ -6,8 +6,8 @@ describe('renderers', function () {
   var supported = true;
   var fallback = 'd3';
   var geo = require('../test-utils').geo;
-  var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
-  var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
+  var mockVGLRenderer = geo.util.mockVGLRenderer;
+  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 
   function create_simple_renderer() {
     var simpleRenderer = function (arg) {

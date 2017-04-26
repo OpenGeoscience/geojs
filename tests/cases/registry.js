@@ -2,8 +2,8 @@ describe('geo.registry', function () {
   'use strict';
 
   var geo = require('../test-utils').geo;
-  var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
-  var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
+  var mockVGLRenderer = geo.util.mockVGLRenderer;
+  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 
   describe('Check rendererForFeatures', function () {
     it('specific features', function () {
