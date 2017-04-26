@@ -1,17 +1,18 @@
 /* eslint-disable camelcase */
 /* eslint-disable underscore/prefer-constant */
 
+var $ = require('jquery');
 var vgl = require('vgl');
 var vglRenderer = require('../gl/vglRenderer');
 
-var _renderWindow = vgl.renderWindow;
-var _supported = vglRenderer.supported;
+var _renderWindow, _supported;
 
 module.exports = {};
 
 /**
  * Replace vgl.renderer with a mocked version for testing in a non-webGL state.
- * Use resotreVGLRenderer to unmock.
+ * Use restoreVGLRenderer to unmock.  Call vgl.mockCounts() to get the number
+ * of times different webGL functions have been called.
  *
  * @param {boolean} [supported=true] If false, then the vgl renderer will
  *      indicate that this is an unsupported browser environment.
@@ -46,7 +47,7 @@ module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
         };
       };
   /* The context largely does nothing. */
-  var m_context = {
+  var default_context = {
     activeTexture: noop('activeTexture'),
     attachShader: noop('attachShader'),
     bindAttribLocation: noop('bindAttribLocation'),
@@ -130,17 +131,40 @@ module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
     viewport: noop('viewport')
   };
 
-  /* Our mock has only a single renderWindow */
-  var m_renderWindow = vgl.renderWindow();
-  m_renderWindow._setup = function () {
-    return true;
+  _renderWindow = vgl.renderWindow;
+  var mockedRenderWindow = function () {
+    /* Temporarily put back the original definition of renderWindow so that the
+     * class instance will be instantiated correctly. */
+    vgl.renderWindow = _renderWindow;
+    var m_this = new vgl.renderWindow(),
+        m_context;
+    vgl.renderWindow = mockedRenderWindow;
+
+    m_this._setup = function () {
+      var i, renderers = m_this.renderers(),
+          wsize = m_this.windowSize(),
+          wpos = m_this.windowPosition();
+
+      m_context = $.extend({}, default_context);
+
+      for (i = 0; i < renderers.length; i += 1) {
+        if ((renderers[i].width() > wsize[0]) ||
+            renderers[i].width() === 0 ||
+            (renderers[i].height() > wsize[1]) ||
+            renderers[i].height() === 0) {
+          renderers[i].resize(wpos[0], wpos[1], wsize[0], wsize[1]);
+        }
+      }
+      return true;
+    };
+    m_this.context = function () {
+      return m_context;
+    };
+    return m_this;
   };
-  m_renderWindow.context = function () {
-    return m_context;
-  };
-  vgl.renderWindow = function () {
-    return m_renderWindow;
-  };
+  vgl.renderWindow = mockedRenderWindow;
+
+  _supported = vglRenderer.supported;
   vglRenderer.supported = function () {
     return !!supported;
   };
@@ -159,6 +183,7 @@ module.exports.restoreVGLRenderer = function () {
     vgl.renderWindow = _renderWindow;
     vglRenderer.supported = _supported;
     delete vgl._mocked;
+    // delete vgl._mockedRenderWindow;
     delete vgl.mockCounts;
   }
 };
