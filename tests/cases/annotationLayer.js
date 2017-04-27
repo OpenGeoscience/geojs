@@ -5,8 +5,8 @@ describe('geo.annotationLayer', function () {
 
   var $ = require('jquery');
   var geo = require('../test-utils').geo;
-  var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
-  var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
+  var mockVGLRenderer = geo.util.mockVGLRenderer;
+  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 
   beforeEach(function () {
     mockVGLRenderer();

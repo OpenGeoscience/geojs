@@ -1,9 +1,9 @@
 // Test geo.choroplethFeature and geo.gl.choroplethFeature
 
-var geo = require('../test-utils').geo;
 var $ = require('jquery');
-var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
-var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
+var geo = require('../test-utils').geo;
+var mockVGLRenderer = geo.util.mockVGLRenderer;
+var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 
 describe('geo.choroplethFeature', function () {
   'use strict';
@@ -130,9 +130,9 @@ describe('geo.choroplethFeature', function () {
         .scalarValue(scalarData[0])).toBe(10);
       expect(choropleth.choropleth.get('accessors')()
         .geoId(mpdata[0])).toBe(0);
-      expect(Object.keys(choropleth.choropleth.get())).toEqual(
-        ['colorRange', 'scale', 'accessors', 'scalar',
-         'scalarAggregator', 'name']);
+      expect(Object.keys(choropleth.choropleth.get())).toEqual([
+        'colorRange', 'scale', 'accessors', 'scalar',
+        'scalarAggregator', 'name']);
       restoreVGLRenderer();
     });
   });

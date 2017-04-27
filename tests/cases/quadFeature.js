@@ -2,11 +2,11 @@
 
 /* globals Image */
 
-var geo = require('../test-utils').geo;
 var $ = require('jquery');
+var geo = require('../test-utils').geo;
+var mockVGLRenderer = geo.util.mockVGLRenderer;
+var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 var vgl = require('vgl');
-var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
-var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
 var waitForIt = require('../test-utils').waitForIt;
 var closeToArray = require('../test-utils').closeToArray;
 var logCanvas2D = require('../test-utils').logCanvas2D;

@@ -1,14 +1,14 @@
 // Test geo.lineFeature, geo.d3.lineFeature, geo.canvas.lineFeature, and
 // geo.gl.lineFeature
 
-var geo = require('../test-utils').geo;
 var $ = require('jquery');
 var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
 var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
 var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
+var geo = require('../test-utils').geo;
+var mockVGLRenderer = geo.util.mockVGLRenderer;
+var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 var vgl = require('vgl');
-var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
-var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
 var waitForIt = require('../test-utils').waitForIt;
 var logCanvas2D = require('../test-utils').logCanvas2D;
 
