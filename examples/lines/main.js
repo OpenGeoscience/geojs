@@ -129,7 +129,7 @@ $(function () {
    *    the line.
    */
   function show_lines(rawdata) {
-    $('#map').removeClass('ready');
+    $('#map').removeClass('ready').attr('segments', '');
     if (!rawdata) {
       return;
     }
@@ -146,7 +146,7 @@ $(function () {
     var text = 'Shown: ' + segments;
     $('#lines-shown').text(text).attr('title', text);
     map.onIdle(function () {
-      $('#map').addClass('ready');
+      $('#map').addClass('ready').attr('segments', maxsegments);
     });
   }
 
@@ -291,9 +291,9 @@ $(function () {
   function select_preset(evt) {
     var update;
     var ctl = $(evt.target);
-    var keys = ['antialiasing', 'lineCap', 'lineJoin', 'lines', 'miterLimit',
-                'showmap', 'strokeColor', 'strokeOffset', 'strokeOpacity',
-                'strokeWidth'];
+    var keys = [
+      'antialiasing', 'lineCap', 'lineJoin', 'lines', 'miterLimit', 'showmap',
+      'strokeColor', 'strokeOffset', 'strokeOpacity', 'strokeWidth'];
     skipdraw = true;
     $.each(keys, function (idx, key) {
       var value = ctl.attr(key);
@@ -347,8 +347,10 @@ $(function () {
     .position(function (d) {
       return {x: d[0], y: d[1]};
     })
-    // add hover events
-    .geoOn(geo.event.feature.mouseover, function (evt) {
+    // add hover events -- use mouseon and mouseoff, since we only show one
+    // tootip.  If we showed one tooltip per item we were over, use mouseover
+    // and mouseout.
+    .geoOn(geo.event.feature.mouseon, function (evt) {
       var text = (evt.data.name ? evt.data.name : '') +
                  (evt.data.highway ? ' (' + evt.data.highway + ')' : '');
       if (text) {
@@ -357,7 +359,7 @@ $(function () {
       }
       tooltipElem.toggleClass('hidden', !text);
     })
-    .geoOn(geo.event.feature.mouseout, function (evt) {
+    .geoOn(geo.event.feature.mouseoff, function (evt) {
       tooltipElem.addClass('hidden');
     });
 

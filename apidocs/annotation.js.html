@@ -212,6 +212,60 @@ var annotation = function (type, args) {
   };
 
   /**
+   * Set or get style.
+   *
+   * @param {string|object} arg1 if undefined, return the options.style object.
+   *    If a string, either set or return the style of that name.  If an
+   *    object, update the style with the object's values.
+   * @param {object} arg2 if arg1 is a string and this is defined, set the
+   *    style to this value.
+   * @returns {object|this} if styles are set, return the layer, otherwise
+   *    return the requested style or the set of styles.
+   */
+  this.style = function (arg1, arg2) {
+    if (arg1 === undefined) {
+      return m_options.style;
+    }
+    if (typeof arg1 === 'string' &amp;&amp; arg2 === undefined) {
+      return m_options.style[arg1];
+    }
+    if (arg2 === undefined) {
+      m_options.style = $.extend(true, m_options.style, arg1);
+    } else {
+      m_options.style[arg1] = arg2;
+    }
+    this.modified();
+    return this;
+  };
+
+  /**
+   * Set or get edit style.
+   *
+   * @param {string|object} arg1 if undefined, return the options.editstyle
+   *    object.  If a string, either set or return the style of that name.  If
+   *    an object, update the style with the object's values.
+   * @param {object} arg2 if arg1 is a string and this is defined, set the
+   *    style to this value.
+   * @returns {object|this} if styles are set, return the layer, otherwise
+   *    return the requested style or the set of styles.
+   */
+  this.editstyle = function (arg1, arg2) {
+    if (arg1 === undefined) {
+      return m_options.editstyle;
+    }
+    if (typeof arg1 === 'string' &amp;&amp; arg2 === undefined) {
+      return m_options.editstyle[arg1];
+    }
+    if (arg2 === undefined) {
+      m_options.editstyle = $.extend(true, m_options.editstyle, arg1);
+    } else {
+      m_options.editstyle[arg1] = arg2;
+    }
+    this.modified();
+    return this;
+  };
+
+  /**
    * Get the type of this annotation.
    *
    * @returns {string} the annotation type.
@@ -315,8 +369,10 @@ var annotation = function (type, args) {
    * @return {array} a list of style names to store.
    */
   this._geojsonStyles = function () {
-    return ['fill', 'fillColor', 'fillOpacity', 'stroke', 'strokeColor',
-            'strokeOpacity', 'strokeWidth'];
+    return [
+      'closed', 'fill', 'fillColor', 'fillOpacity', 'lineCap', 'lineJoin',
+      'radius', 'stroke', 'strokeColor', 'strokeOffset', 'strokeOpacity',
+      'strokeWidth'];
   };
 
   /**
@@ -415,6 +471,7 @@ var rectangleAnnotation = function (args) {
   if (!(this instanceof rectangleAnnotation)) {
     return new rectangleAnnotation(args);
   }
+
   args = $.extend(true, {}, {
     style: {
       fill: true,
@@ -426,9 +483,20 @@ var rectangleAnnotation = function (args) {
       strokeOpacity: 1,
       strokeWidth: 3,
       uniformPolygon: true
+    },
+    editstyle: {
+      fill: true,
+      fillColor: {r: 0.3, g: 0.3, b: 0.3},
+      fillOpacity: 0.25,
+      polygon: function (d) { return d.polygon; },
+      stroke: true,
+      strokeColor: {r: 0, g: 0, b: 1},
+      strokeOpacity: 1,
+      strokeWidth: 3,
+      uniformPolygon: true
     }
   }, args || {});
-  args.corners = args.corners || args.coordinates;
+  args.corners = args.corners || args.coordinates || [];
   delete args.coordinates;
   annotation.call(this, 'rectangle', args);
 
@@ -496,6 +564,14 @@ var rectangleAnnotation = function (args) {
     switch (state) {
       case annotationState.create:
         features = [];
+        if (opt.corners &amp;&amp; opt.corners.length >= 4) {
+          features = [{
+            polygon: {
+              polygon: opt.corners,
+              style: opt.editstyle
+            }
+          }];
+        }
         break;
       default:
         features = [{
@@ -554,6 +630,77 @@ var rectangleAnnotation = function (args) {
   this._geojsonGeometryType = function () {
     return 'Polygon';
   };
+
+  /**
+   * Return a list of styles that should be preserved in a geojson
+   * representation of the annotation.
+   *
+   * @return {array} a list of style names to store.
+   */
+  this._geojsonStyles = function () {
+    return [
+      'fill', 'fillColor', 'fillOpacity', 'lineCap', 'lineJoin', 'stroke',
+      'strokeColor', 'strokeOffset', 'strokeOpacity', 'strokeWidth'];
+  };
+
+  /**
+   * Handle a mouse move on this annotation.
+   *
+   * @param {geo.event} evt the mouse move event.
+   * @returns {boolean|string} true to update the annotation, falsy to not
+   *    update anything.
+   */
+  this.mouseMove = function (evt) {
+    if (this.state() !== annotationState.create) {
+      return;
+    }
+    var corners = this.options('corners');
+    if (corners.length) {
+      corners[2] = $.extend({}, evt.mapgcs);
+      corners[1].x = evt.mapgcs.x;
+      corners[3].y = evt.mapgcs.y;
+      return true;
+    }
+  };
+
+  /**
+   * Handle a mouse click on this annotation.  If the event is processed,
+   * evt.handled should be set to true to prevent further processing.
+   *
+   * @param {geo.event} evt the mouse click event.
+   * @returns {boolean|string} true to update the annotation, 'done' if the
+   *    annotation was completed (changed from create to done state), 'remove'
+   *    if the annotation should be removed, falsy to not update anything.
+   */
+  this.mouseClick = function (evt) {
+    var layer = this.layer();
+    if (this.state() !== annotationState.create || !layer) {
+      return;
+    }
+    if (!evt.buttonsDown.left &amp;&amp; !evt.buttonsDown.right) {
+      return;
+    }
+    var corners = this.options('corners');
+    if (evt.buttonsDown.right &amp;&amp; !corners.length) {
+      return;
+    }
+    evt.handled = true;
+    if (corners.length) {
+      corners[2] = $.extend({}, evt.mapgcs);
+      corners[1].x = evt.mapgcs.x;
+      corners[3].y = evt.mapgcs.y;
+      this.state(annotationState.done);
+      return 'done';
+    }
+    if (evt.buttonsDown.left) {
+      corners.push($.extend({}, evt.mapgcs));
+      corners.push($.extend({}, evt.mapgcs));
+      corners.push($.extend({}, evt.mapgcs));
+      corners.push($.extend({}, evt.mapgcs));
+      return true;
+    }
+  };
+
 };
 inherit(rectangleAnnotation, annotation);
 
@@ -788,6 +935,18 @@ var polygonAnnotation = function (args) {
   this._geojsonGeometryType = function () {
     return 'Polygon';
   };
+
+  /**
+   * Return a list of styles that should be preserved in a geojson
+   * representation of the annotation.
+   *
+   * @return {array} a list of style names to store.
+   */
+  this._geojsonStyles = function () {
+    return [
+      'fill', 'fillColor', 'fillOpacity', 'lineCap', 'lineJoin', 'stroke',
+      'strokeColor', 'strokeOffset', 'strokeOpacity', 'strokeWidth'];
+  };
 };
 inherit(polygonAnnotation, annotation);
 
@@ -795,6 +954,301 @@ var polygonRequiredFeatures = {};
 polygonRequiredFeatures[polygonFeature.capabilities.feature] = true;
 polygonRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
 registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
+
+/////////////////////////////////////////////////////////////////////////////
+/**
+ * Line annotation class
+ *
+ * Must specify:
+ *   vertices: a list of vertices {x: x, y: y} in map gcs coordinates.
+ * May specify:
+ *   style.
+ *     strokeWidth, strokeColor, strokeOpacity, strokeOffset, closed, lineCap,
+ *     lineJoin
+ *   editstyle.
+ *     strokeWidth, strokeColor, strokeOpacity, strokeOffset, closed, lineCap,
+ *     lineJoin
+ */
+/////////////////////////////////////////////////////////////////////////////
+var lineAnnotation = function (args) {
+  'use strict';
+  if (!(this instanceof lineAnnotation)) {
+    return new lineAnnotation(args);
+  }
+
+  var m_this = this;
+
+  args = $.extend(true, {}, {
+    style: {
+      line: function (d) {
+        /* Return an array that has the same number of items as we have
+         * vertices. */
+        return Array.apply(null, Array(m_this.options('vertices').length)).map(
+            function () { return d; });
+      },
+      position: function (d, i) {
+        return m_this.options('vertices')[i];
+      },
+      strokeColor: {r: 0, g: 0, b: 0},
+      strokeOpacity: 1,
+      strokeWidth: 3,
+      closed: false,
+      lineCap: 'butt',
+      lineJoin: 'miter'
+    },
+    editstyle: {
+      line: function (d) {
+        /* Return an array that has the same number of items as we have
+         * vertices. */
+        return Array.apply(null, Array(m_this.options('vertices').length)).map(
+            function () { return d; });
+      },
+      position: function (d, i) {
+        return m_this.options('vertices')[i];
+      },
+      strokeColor: {r: 0, g: 0, b: 1},
+      strokeOpacity: 1,
+      strokeWidth: 3,
+      closed: false,
+      lineCap: 'butt',
+      lineJoin: 'miter'
+    }
+  }, args || {});
+  args.vertices = args.vertices || args.coordinates || [];
+  delete args.coordinates;
+  annotation.call(this, 'line', args);
+
+  /**
+   * Get a list of renderable features for this annotation.
+   *
+   * @returns {array} an array of features.
+   */
+  this.features = function () {
+    var opt = this.options(),
+        state = this.state(),
+        features;
+    switch (state) {
+      case annotationState.create:
+        features = [{
+          line: {
+            line: opt.vertices,
+            style: opt.editstyle
+          }
+        }];
+        break;
+      default:
+        features = [{
+          line: {
+            line: opt.vertices,
+            style: opt.style
+          }
+        }];
+        break;
+    }
+    return features;
+  };
+
+  /**
+   * Get coordinates associated with this annotation in the map gcs coordinate
+   * system.
+   *
+   * @param {array} coordinates: an optional array of coordinates to set.
+   * @returns {array} an array of coordinates.
+   */
+  this._coordinates = function (coordinates) {
+    if (coordinates) {
+      this.options('vertices', coordinates);
+    }
+    return this.options('vertices');
+  };
+
+  /**
+   * Handle a mouse move on this annotation.
+   *
+   * @param {geo.event} evt the mouse move event.
+   * @returns {boolean|string} true to update the annotation, falsy to not
+   *    update anything.
+   */
+  this.mouseMove = function (evt) {
+    if (this.state() !== annotationState.create) {
+      return;
+    }
+    var vertices = this.options('vertices');
+    if (vertices.length) {
+      vertices[vertices.length - 1] = evt.mapgcs;
+      return true;
+    }
+  };
+
+  /**
+   * Handle a mouse click on this annotation.  If the event is processed,
+   * evt.handled should be set to true to prevent further processing.
+   *
+   * @param {geo.event} evt the mouse click event.
+   * @returns {boolean|string} true to update the annotation, 'done' if the
+   *    annotation was completed (changed from create to done state), 'remove'
+   *    if the annotation should be removed, falsy to not update anything.
+   */
+  this.mouseClick = function (evt) {
+    var layer = this.layer();
+    if (this.state() !== annotationState.create || !layer) {
+      return;
+    }
+    var end = !!evt.buttonsDown.right, skip;
+    if (!evt.buttonsDown.left &amp;&amp; !evt.buttonsDown.right) {
+      return;
+    }
+    var vertices = this.options('vertices');
+    if (evt.buttonsDown.right &amp;&amp; !vertices.length) {
+      return;
+    }
+    evt.handled = true;
+    if (evt.buttonsDown.left) {
+      if (vertices.length) {
+        if (vertices.length >= 2 &amp;&amp; layer.displayDistance(
+            vertices[vertices.length - 2], null, evt.map, 'display') &lt;=
+            layer.options('adjacentPointProximity')) {
+          skip = true;
+          if (this.lastClick &amp;&amp;
+              evt.time - this.lastClick &lt; layer.options('dblClickTime')) {
+            end = true;
+          }
+        } else if (vertices.length >= 2 &amp;&amp; layer.displayDistance(
+            vertices[0], null, evt.map, 'display') &lt;=
+            layer.options('finalPointProximity')) {
+          end = 'close';
+        } else {
+          vertices[vertices.length - 1] = evt.mapgcs;
+        }
+      } else {
+        vertices.push(evt.mapgcs);
+      }
+      if (!end &amp;&amp; !skip) {
+        vertices.push(evt.mapgcs);
+      }
+      this.lastClick = evt.time;
+    }
+    if (end) {
+      if (vertices.length &lt; 3) {
+        return 'remove';
+      }
+      vertices.pop();
+      this.options('style').closed = end === 'close';
+      this.state(annotationState.done);
+      return 'done';
+    }
+    return (end || !skip);
+  };
+
+  /**
+   * Return actions needed for the specified state of this annotation.
+   *
+   * @param {string} state: the state to return actions for.  Defaults to
+   *    the current state.
+   * @returns {array}: a list of actions.
+   */
+  this.actions = function (state) {
+    if (!state) {
+      state = this.state();
+    }
+    switch (state) {
+      case annotationState.create:
+        return [{
+          action: geo_action.annotation_line,
+          name: 'line create',
+          owner: annotationActionOwner,
+          input: 'left',
+          modifiers: {shift: false, ctrl: false}
+        }, {
+          action: geo_action.annotation_line,
+          name: 'line create',
+          owner: annotationActionOwner,
+          input: 'pan'
+        }];
+      default:
+        return [];
+    }
+  };
+
+  /**
+   * Process any actions for this annotation.
+   *
+   * @param {object} evt: the action event.
+   * @returns {boolean|string} true to update the annotation, 'done' if the
+   *    annotation was completed (changed from create to done state), 'remove'
+   *    if the annotation should be removed, falsy to not update anything.
+   */
+  this.processAction = function (evt) {
+    var layer = this.layer();
+    if (this.state() !== annotationState.create || !layer ||
+        evt.state.action !== geo_action.annotation_line) {
+      return;
+    }
+    var cpp = layer.options('continuousPointProximity');
+    if (cpp || cpp === 0) {
+      var vertices = this.options('vertices');
+      if (!vertices.length) {
+        vertices.push(evt.mouse.mapgcs);
+        vertices.push(evt.mouse.mapgcs);
+        return true;
+      }
+      var dist = layer.displayDistance(
+            vertices[vertices.length - 2], null, evt.mouse.map, 'display');
+      if (dist &amp;&amp; dist > cpp) {
+        // we should combine nearly colinear points, but we don't
+        vertices[vertices.length - 1] = evt.mouse.mapgcs;
+        vertices.push(evt.mouse.mapgcs);
+        return true;
+      }
+    }
+  };
+
+  /**
+   * Return the coordinates to be stored in a geojson geometery object.
+   *
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @return {array} an array of flattened coordinates in the ingcs coordinate
+   *    system.  Undefined if this annotation is incompelte.
+   */
+  this._geojsonCoordinates = function (gcs) {
+    var src = this.coordinates(gcs);
+    if (!src || src.length &lt; 2 || this.state() === annotationState.create) {
+      return;
+    }
+    var coor = [];
+    for (var i = 0; i &lt; src.length; i += 1) {
+      coor.push([src[i].x, src[i].y]);
+    }
+    return coor;
+  };
+
+  /**
+   * Return the geometry type that is used to store this annotation in geojson.
+   *
+   * @return {string} a geojson geometry type.
+   */
+  this._geojsonGeometryType = function () {
+    return 'LineString';
+  };
+
+  /**
+   * Return a list of styles that should be preserved in a geojson
+   * representation of the annotation.
+   *
+   * @return {array} a list of style names to store.
+   */
+  this._geojsonStyles = function () {
+    return [
+      'closed', 'lineCap', 'lineJoin', 'strokeColor', 'strokeOffset',
+      'strokeOpacity', 'strokeWidth'];
+  };
+};
+inherit(lineAnnotation, annotation);
+
+var lineRequiredFeatures = {};
+lineRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
+registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
 
 /////////////////////////////////////////////////////////////////////////////
 /**
@@ -927,8 +1381,9 @@ var pointAnnotation = function (args) {
    * @return {array} a list of style names to store.
    */
   this._geojsonStyles = function () {
-    return ['fill', 'fillColor', 'fillOpacity', 'radius', 'scaled', 'stroke',
-            'strokeColor', 'strokeOpacity', 'strokeWidth'];
+    return [
+      'fill', 'fillColor', 'fillOpacity', 'radius', 'scaled', 'stroke',
+      'strokeColor', 'strokeOpacity', 'strokeWidth'];
   };
 
   /**
@@ -966,6 +1421,7 @@ module.exports = {
   state: annotationState,
   actionOwner: annotationActionOwner,
   annotation: annotation,
+  lineAnnotation: lineAnnotation,
   pointAnnotation: pointAnnotation,
   polygonAnnotation: polygonAnnotation,
   rectangleAnnotation: rectangleAnnotation
@@ -980,13 +1436,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="geo.module_util.html">geo.util</a></li></ul><h3>Classes</h3><ul><li><a href="geo.annotation.html">geo.annotation</a></li><li><a href="geo.annotationLayer.html">geo.annotationLayer</a></li><li><a href="geo.camera.html">geo.camera</a></li><li><a href="geo.canvas.heatmapFeature.html">geo.canvas.heatmapFeature</a></li><li><a href="geo.canvas.lineFeature.html">geo.canvas.lineFeature</a></li><li><a href="geo.canvas.object.html">geo.canvas.object</a></li><li><a href="geo.canvas.pixelmapFeature.html">geo.canvas.pixelmapFeature</a></li><li><a href="geo.canvas.quadFeature.html">geo.canvas.quadFeature</a></li><li><a href="geo.canvas.renderer.html">geo.canvas.renderer</a></li><li><a href="geo.choroplethFeature.html">geo.choroplethFeature</a></li><li><a href="geo.contourFeature.html">geo.contourFeature</a></li><li><a href="geo.d3.graphFeature.html">geo.d3.graphFeature</a></li><li><a href="geo.d3.lineFeature.html">geo.d3.lineFeature</a></li><li><a href="geo.d3.object.html">geo.d3.object</a></li><li><a href="geo.d3.pathFeature.html">geo.d3.pathFeature</a></li><li><a href="geo.d3.pointFeature.html">geo.d3.pointFeature</a></li><li><a href="geo.d3.quadFeature.html">geo.d3.quadFeature</a></li><li><a href="geo.d3.renderer.html">geo.d3.renderer</a></li><li><a href="geo.d3.vectorFeature.html">geo.d3.vectorFeature</a></li><li><a href="geo.domRenderer.html">geo.domRenderer</a></li><li><a href="geo.feature.html">geo.feature</a></li><li><a href="geo.featureLayer.html">geo.featureLayer</a></li><li><a href="geo.fetchQueue.html">geo.fetchQueue</a></li><li><a href="geo.fileReader.html">geo.fileReader</a></li><li><a href="geo.gl.choroplethFeature.html">geo.gl.choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">geo.gl.contourFeature</a></li><li><a href="geo.gl.lineFeature.html">geo.gl.lineFeature</a></li><li><a href="geo.gl.object.html">geo.gl.object</a></li><li><a href="geo.gl.pointFeature.html">geo.gl.pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">geo.gl.polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">geo.gl.quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">geo.gl.vglRenderer</a></li><li><a href="geo.graphFeature.html">geo.graphFeature</a></li><li><a href="geo.gui.legendWidget.html">geo.gui.legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">geo.gui.sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">geo.gui.svgWidget</a></li><li><a href="geo.gui.uiLayer.html">geo.gui.uiLayer</a></li><li><a href="geo.gui.widget.html">geo.gui.widget</a></li><li><a href="geo.heatmapFeature.html">geo.heatmapFeature</a></li><li><a href="geo.imageTile.html">geo.imageTile</a></li><li><a href="geo.jsonReader.html">geo.jsonReader</a></li><li><a href="geo.layer.html">geo.layer</a></li><li><a href="geo.lineFeature.html">geo.lineFeature</a></li><li><a href="geo.map.html">geo.map</a></li><li><a href="geo.mapInteractor.html">geo.mapInteractor</a></li><li><a href="geo.object.html">geo.object</a></li><li><a href="geo.osmLayer.html">geo.osmLayer</a></li><li><a href="geo.pathFeature.html">geo.pathFeature</a></li><li><a href="geo.pixelmapFeature.html">geo.pixelmapFeature</a></li><li><a href="geo.pointFeature.html">geo.pointFeature</a></li><li><a href="geo.polygonFeature.html">geo.polygonFeature</a></li><li><a href="geo.quadFeature.html">geo.quadFeature</a></li><li><a href="geo.renderer.html">geo.renderer</a></li><li><a href="geo.sceneObject.html">geo.sceneObject</a></li><li><a href="geo.tile.html">geo.tile</a></li><li><a href="geo.tileCache.html">geo.tileCache</a></li><li><a href="geo.tileLayer.html">geo.tileLayer</a></li><li><a href="geo.timestamp.html">geo.timestamp</a></li><li><a href="geo.transform.html">geo.transform</a></li><li><a href="geo.util.ClusterGroup.html">geo.util.ClusterGroup</a></li><li><a href="geo.vectorFeature.html">geo.vectorFeature</a></li></ul><h3>Namespaces</h3><ul><li><a href="-_anonymous_-geo.util.html"><anonymous>~geo.util</a></li><li><a href="geo.canvas.html">geo.canvas</a></li><li><a href="geo.d3.html">geo.d3</a></li><li><a href="geo.event.html">geo.event</a></li><li><a href="geo.event.annotation.html">geo.event.annotation</a></li><li><a href="geo.event.camera.html">geo.event.camera</a></li><li><a href="geo.event.feature.html">geo.event.feature</a></li><li><a href="geo.event.pixelmap.html">geo.event.pixelmap</a></li><li><a href="geo.event.screenshot.html">geo.event.screenshot</a></li><li><a href="geo.gl.html">geo.gl</a></li><li><a href="geo.gui.html">geo.gui</a></li></ul><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#__render">__render</a></li><li><a href="global.html#_addPolygonFeature">_addPolygonFeature</a></li><li><a href="global.html#_animatePan">_animatePan</a></li><li><a href="global.html#_appendChild">_appendChild</a></li><li><a href="global.html#_bindMouseHandlers">_bindMouseHandlers</a></li><li><a href="global.html#_boundingBox">_boundingBox</a></li><li><a href="global.html#_build">_build</a></li><li><a href="global.html#_checkForStroke">_checkForStroke</a></li><li><a href="global.html#_clusterData">_clusterData</a></li><li><a href="global.html#_colorize">_colorize</a></li><li><a href="global.html#_computeGradient">_computeGradient</a></li><li><a href="global.html#_computePixelmap">_computePixelmap</a></li><li><a href="global.html#_connectEvents">_connectEvents</a></li><li><a href="global.html#_coordinates">_coordinates</a></li><li><a href="global.html#_createCanvas">_createCanvas</a></li><li><a href="global.html#_createCircle">_createCircle</a></li><li><a href="global.html#_createFeature">_createFeature</a></li><li><a href="global.html#_definitions">_definitions</a></li><li><a href="global.html#_deleteFeature">_deleteFeature</a></li><li><a href="global.html#_disconnectEvents">_disconnectEvents</a></li><li><a href="global.html#_drawFeatures">_drawFeatures</a></li><li><a href="global.html#_exit">_exit</a></li><li><a href="global.html#_feature">_feature</a></li><li><a href="global.html#_featureArray">_featureArray</a></li><li><a href="global.html#_featureToPolygons">_featureToPolygons</a></li><li><a href="global.html#_forward">_forward</a></li><li><a href="global.html#_generateQuads">_generateQuads</a></li><li><a href="global.html#_generateScale">_generateScale</a></li><li><a href="global.html#_geojsonCoordinates">_geojsonCoordinates</a></li><li><a href="global.html#_geojsonFeatureToAnnotation">_geojsonFeatureToAnnotation</a></li><li><a href="global.html#_geojsonGeometryType">_geojsonGeometryType</a></li><li><a href="global.html#_geojsonStyles">_geojsonStyles</a></li><li><a href="global.html#_getArrayBuffer">_getArrayBuffer</a></li><li><a href="global.html#_getLoopData">_getLoopData</a></li><li><a href="global.html#_getMouseButton">_getMouseButton</a></li><li><a href="global.html#_getMouseModifiers">_getMouseModifiers</a></li><li><a href="global.html#_getMousePosition">_getMousePosition</a></li><li><a href="global.html#_getString">_getString</a></li><li><a href="global.html#_handleBrush">_handleBrush</a></li><li><a href="global.html#_handleBrushend">_handleBrushend</a></li><li><a href="global.html#_handleDoubleClick">_handleDoubleClick</a></li><li><a href="global.html#_handleKeys">_handleKeys</a></li><li><a href="global.html#_handleMouseclick">_handleMouseclick</a></li><li><a href="global.html#_handleMouseClick">_handleMouseClick</a></li><li><a href="global.html#_handleMouseDown">_handleMouseDown</a></li><li><a href="global.html#_handleMouseMove">_handleMouseMove</a></li><li><a href="global.html#_handleMousemove">_handleMousemove</a></li><li><a href="global.html#_handleMouseMoveDocument">_handleMouseMoveDocument</a></li><li><a href="global.html#_handleMouseUp">_handleMouseUp</a></li><li><a href="global.html#_handleMouseUpDocument">_handleMouseUpDocument</a></li><li><a href="global.html#_handleMouseWheel">_handleMouseWheel</a></li><li><a href="global.html#_handleZoom">_handleZoom</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_inverse">_inverse</a></li><li><a href="global.html#_objectListAdd">_objectListAdd</a></li><li><a href="global.html#_objectListEnd">_objectListEnd</a></li><li><a href="global.html#_objectListGet">_objectListGet</a></li><li><a href="global.html#_objectListStart">_objectListStart</a></li><li><a href="global.html#_position">_position</a></li><li><a href="global.html#_positionToQuad">_positionToQuad</a></li><li><a href="global.html#_preparePixelmap">_preparePixelmap</a></li><li><a href="global.html#_processSelection">_processSelection</a></li><li><a href="global.html#_removeFeature">_removeFeature</a></li><li><a href="global.html#_render">_render</a></li><li><a href="global.html#_renderBinnedData">_renderBinnedData</a></li><li><a href="global.html#_renderColorQuads">_renderColorQuads</a></li><li><a href="global.html#_renderFrame">_renderFrame</a></li><li><a href="global.html#_renderImageQuads">_renderImageQuads</a></li><li><a href="global.html#_renderOnCanvas">_renderOnCanvas</a></li><li><a href="global.html#_renderPoints">_renderPoints</a></li><li><a href="global.html#_resize">_resize</a></li><li><a href="global.html#_setClickMaybe">_setClickMaybe</a></li><li><a href="global.html#_setTransform">_setTransform</a></li><li><a href="global.html#_style">_style</a></li><li><a href="global.html#_unbindMouseHandlers">_unbindMouseHandlers</a></li><li><a href="global.html#_update">_update</a></li><li><a href="global.html#_updateFromEvent">_updateFromEvent</a></li><li><a href="global.html#_updatePointSearchInfo">_updatePointSearchInfo</a></li><li><a href="global.html#_updateRangeTree">_updateRangeTree</a></li><li><a href="global.html#_updateTextures">_updateTextures</a></li><li><a href="global.html#_wipePolygons">_wipePolygons</a></li><li><a href="global.html#actions">actions</a></li><li><a href="global.html#active">active</a></li><li><a href="global.html#actors">actors</a></li><li><a href="global.html#addAction">addAction</a></li><li><a href="global.html#addAnnotation">addAnnotation</a></li><li><a href="global.html#addChild">addChild</a></li><li><a href="global.html#addFeature">addFeature</a></li><li><a href="global.html#addPromise">addPromise</a></li><li><a href="global.html#allowRotation">allowRotation</a></li><li><a href="global.html#annotationById">annotationById</a></li><li><a href="global.html#annotations">annotations</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#attribution">attribution</a></li><li><a href="global.html#bin">bin</a></li><li><a href="global.html#binned">binned</a></li><li><a href="global.html#bounds">bounds</a></li><li><a href="global.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li><li><a href="global.html#boxSearch">boxSearch</a></li><li><a href="global.html#buildTime">buildTime</a></li><li><a href="global.html#camera">camera</a></li><li><a href="global.html#cancel">cancel</a></li><li><a href="global.html#canRead">canRead</a></li><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#center">center</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#choropleth">choropleth</a></li><li><a href="global.html#clampBoundsX">clampBoundsX</a></li><li><a href="global.html#clampBoundsY">clampBoundsY</a></li><li><a href="global.html#clampZoom">clampZoom</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clustering">clustering</a></li><li><a href="global.html#color">color</a></li><li><a href="global.html#contextRenderer">contextRenderer</a></li><li><a href="global.html#contour">contour</a></li><li><a href="global.html#coordinates">coordinates</a></li><li><a href="global.html#createChoropleth">createChoropleth</a></li><li><a href="global.html#createContours">createContours</a></li><li><a href="global.html#createFeature">createFeature</a></li><li><a href="global.html#createLayer">createLayer</a></li><li><a href="global.html#createWidget">createWidget</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#dataTime">dataTime</a></li><li><a href="global.html#deleteFeature">deleteFeature</a></li><li><a href="global.html#deleteLayer">deleteLayer</a></li><li><a href="global.html#deleteWidget">deleteWidget</a></li><li><a href="global.html#delta">delta</a></li><li><a href="global.html#dependentFeatures">dependentFeatures</a></li><li><a href="global.html#destroy">destroy</a></li><li><a href="global.html#discreteZoom">discreteZoom</a></li><li><a href="global.html#displayDistance">displayDistance</a></li><li><a href="global.html#displayToGcs">displayToGcs</a></li><li><a href="global.html#displayToWorld">displayToWorld</a></li><li><a href="global.html#draw">draw</a></li><li><a href="global.html#exit">exit</a></li><li><a href="global.html#featureGcsToDisplay">featureGcsToDisplay</a></li><li><a href="global.html#features">features</a></li><li><a href="global.html#featureVertices">featureVertices</a></li><li><a href="global.html#fileReader">fileReader</a></li><li><a href="global.html#forward">forward</a></li><li><a href="global.html#fromLocal">fromLocal</a></li><li><a href="global.html#gcs">gcs</a></li><li><a href="global.html#gcsPosition">gcsPosition</a></li><li><a href="global.html#gcsToDisplay">gcsToDisplay</a></li><li><a href="global.html#gcsToWorld">gcsToWorld</a></li><li><a href="global.html#geo_action">geo_action</a></li><li><a href="global.html#geojson">geojson</a></li><li><a href="global.html#geoOff">geoOff</a></li><li><a href="global.html#geoOn">geoOn</a></li><li><a href="global.html#geoTrigger">geoTrigger</a></li><li><a href="global.html#globals">globals</a></li><li><a href="global.html#hasAction">hasAction</a></li><li><a href="global.html#height">height</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#ingcs">ingcs</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#intensity">intensity</a></li><li><a href="global.html#interactor">interactor</a></li><li><a href="global.html#inverse">inverse</a></li><li><a href="global.html#isInViewport">isInViewport</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#layer">layer</a></li><li><a href="global.html#layers">layers</a></li><li><a href="global.html#line">line</a></li><li><a href="global.html#linkFeatures">linkFeatures</a></li><li><a href="global.html#links">links</a></li><li><a href="global.html#map">map</a></li><li><a href="global.html#maxIndex">maxIndex</a></li><li><a href="global.html#maxIntensity">maxIntensity</a></li><li><a href="global.html#minIntensity">minIntensity</a></li><li><a href="global.html#mode">mode</a></li><li><a href="global.html#modified">modified</a></li><li><a href="global.html#mouse">mouse</a></li><li><a href="global.html#mouseClick">mouseClick</a></li><li><a href="global.html#mouseMove">mouseMove</a></li><li><a href="global.html#moveDown">moveDown</a></li><li><a href="global.html#moveToBottom">moveToBottom</a></li><li><a href="global.html#moveToTop">moveToTop</a></li><li><a href="global.html#moveUp">moveUp</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#node">node</a></li><li><a href="global.html#nodeFeature">nodeFeature</a></li><li><a href="global.html#nodes">nodes</a></li><li><a href="global.html#onIdle">onIdle</a></li><li><a href="global.html#opacity">opacity</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#origin">origin</a></li><li><a href="global.html#pan">pan</a></li><li><a href="global.html#parent">parent</a></li><li><a href="global.html#parentCanvas">parentCanvas</a></li><li><a href="global.html#pause">pause</a></li><li><a href="global.html#pointAnnotation">pointAnnotation</a></li><li><a href="global.html#pointSearch">pointSearch</a></li><li><a href="global.html#polygonAnnotation">polygonAnnotation</a></li><li><a href="global.html#position">position</a></li><li><a href="global.html#processAction">processAction</a></li><li><a href="global.html#read">read</a></li><li><a href="global.html#rectangleAnnotation">rectangleAnnotation</a></li><li><a href="global.html#removeAction">removeAction</a></li><li><a href="global.html#removeAllAnnotations">removeAllAnnotations</a></li><li><a href="global.html#removeAnnotation">removeAnnotation</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#removeFeature">removeFeature</a></li><li><a href="global.html#renderer">renderer</a></li><li><a href="global.html#rendererName">rendererName</a></li><li><a href="global.html#reposition">reposition</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#resize">resize</a></li><li><a href="global.html#rotatedSize">rotatedSize</a></li><li><a href="global.html#rotation">rotation</a></li><li><a href="global.html#scalar">scalar</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#scaleFactor">scaleFactor</a></li><li><a href="global.html#scheduleAnimationFrame">scheduleAnimationFrame</a></li><li><a href="global.html#screenshot">screenshot</a></li><li><a href="global.html#select">select</a></li><li><a href="global.html#selectionAPI">selectionAPI</a></li><li><a href="global.html#simulateEvent">simulateEvent</a></li><li><a href="global.html#size">size</a></li><li><a href="global.html#source">source</a></li><li><a href="global.html#springBack">springBack</a></li><li><a href="global.html#state">state</a></li><li><a href="global.html#sticky">sticky</a></li><li><a href="global.html#style">style</a></li><li><a href="global.html#target">target</a></li><li><a href="global.html#toLocal">toLocal</a></li><li><a href="global.html#transition">transition</a></li><li><a href="global.html#transitionCancel">transitionCancel</a></li><li><a href="global.html#type">type</a></li><li><a href="global.html#unitsPerPixel">unitsPerPixel</a></li><li><a href="global.html#updateAttribution">updateAttribution</a></li><li><a href="global.html#updateDelay">updateDelay</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#url">url</a></li><li><a href="global.html#validateAttribute">validateAttribute</a></li><li><a href="global.html#verticesPerFeature">verticesPerFeature</a></li><li><a href="global.html#visible">visible</a></li><li><a href="global.html#width">width</a></li><li><a href="global.html#worldToDisplay">worldToDisplay</a></li><li><a href="global.html#worldToGcs">worldToGcs</a></li><li><a href="global.html#zIndex">zIndex</a></li><li><a href="global.html#zoom">zoom</a></li><li><a href="global.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li><li><a href="global.html#zoomRange">zoomRange</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="geo.module_util.html">geo.util</a></li></ul><h3>Classes</h3><ul><li><a href="geo.annotation.html">geo.annotation</a></li><li><a href="geo.annotationLayer.html">geo.annotationLayer</a></li><li><a href="geo.camera.html">geo.camera</a></li><li><a href="geo.canvas.heatmapFeature.html">geo.canvas.heatmapFeature</a></li><li><a href="geo.canvas.lineFeature.html">geo.canvas.lineFeature</a></li><li><a href="geo.canvas.object.html">geo.canvas.object</a></li><li><a href="geo.canvas.pixelmapFeature.html">geo.canvas.pixelmapFeature</a></li><li><a href="geo.canvas.quadFeature.html">geo.canvas.quadFeature</a></li><li><a href="geo.canvas.renderer.html">geo.canvas.renderer</a></li><li><a href="geo.choroplethFeature.html">geo.choroplethFeature</a></li><li><a href="geo.contourFeature.html">geo.contourFeature</a></li><li><a href="geo.d3.graphFeature.html">geo.d3.graphFeature</a></li><li><a href="geo.d3.lineFeature.html">geo.d3.lineFeature</a></li><li><a href="geo.d3.object.html">geo.d3.object</a></li><li><a href="geo.d3.pathFeature.html">geo.d3.pathFeature</a></li><li><a href="geo.d3.pointFeature.html">geo.d3.pointFeature</a></li><li><a href="geo.d3.quadFeature.html">geo.d3.quadFeature</a></li><li><a href="geo.d3.renderer.html">geo.d3.renderer</a></li><li><a href="geo.d3.vectorFeature.html">geo.d3.vectorFeature</a></li><li><a href="geo.domRenderer.html">geo.domRenderer</a></li><li><a href="geo.feature.html">geo.feature</a></li><li><a href="geo.featureLayer.html">geo.featureLayer</a></li><li><a href="geo.fetchQueue.html">geo.fetchQueue</a></li><li><a href="geo.fileReader.html">geo.fileReader</a></li><li><a href="geo.gl.choroplethFeature.html">geo.gl.choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">geo.gl.contourFeature</a></li><li><a href="geo.gl.lineFeature.html">geo.gl.lineFeature</a></li><li><a href="geo.gl.object.html">geo.gl.object</a></li><li><a href="geo.gl.pointFeature.html">geo.gl.pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">geo.gl.polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">geo.gl.quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">geo.gl.vglRenderer</a></li><li><a href="geo.graphFeature.html">geo.graphFeature</a></li><li><a href="geo.gui.legendWidget.html">geo.gui.legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">geo.gui.sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">geo.gui.svgWidget</a></li><li><a href="geo.gui.uiLayer.html">geo.gui.uiLayer</a></li><li><a href="geo.gui.widget.html">geo.gui.widget</a></li><li><a href="geo.heatmapFeature.html">geo.heatmapFeature</a></li><li><a href="geo.imageTile.html">geo.imageTile</a></li><li><a href="geo.jsonReader.html">geo.jsonReader</a></li><li><a href="geo.layer.html">geo.layer</a></li><li><a href="geo.lineFeature.html">geo.lineFeature</a></li><li><a href="geo.map.html">geo.map</a></li><li><a href="geo.mapInteractor.html">geo.mapInteractor</a></li><li><a href="geo.object.html">geo.object</a></li><li><a href="geo.osmLayer.html">geo.osmLayer</a></li><li><a href="geo.pathFeature.html">geo.pathFeature</a></li><li><a href="geo.pixelmapFeature.html">geo.pixelmapFeature</a></li><li><a href="geo.pointFeature.html">geo.pointFeature</a></li><li><a href="geo.polygonFeature.html">geo.polygonFeature</a></li><li><a href="geo.quadFeature.html">geo.quadFeature</a></li><li><a href="geo.renderer.html">geo.renderer</a></li><li><a href="geo.sceneObject.html">geo.sceneObject</a></li><li><a href="geo.tile.html">geo.tile</a></li><li><a href="geo.tileCache.html">geo.tileCache</a></li><li><a href="geo.tileLayer.html">geo.tileLayer</a></li><li><a href="geo.timestamp.html">geo.timestamp</a></li><li><a href="geo.transform.html">geo.transform</a></li><li><a href="geo.util.ClusterGroup.html">geo.util.ClusterGroup</a></li><li><a href="geo.vectorFeature.html">geo.vectorFeature</a></li></ul><h3>Namespaces</h3><ul><li><a href="-_anonymous_-geo.util.html"><anonymous>~geo.util</a></li><li><a href="geo.canvas.html">geo.canvas</a></li><li><a href="geo.d3.html">geo.d3</a></li><li><a href="geo.event.html">geo.event</a></li><li><a href="geo.event.annotation.html">geo.event.annotation</a></li><li><a href="geo.event.camera.html">geo.event.camera</a></li><li><a href="geo.event.feature.html">geo.event.feature</a></li><li><a href="geo.event.pixelmap.html">geo.event.pixelmap</a></li><li><a href="geo.event.screenshot.html">geo.event.screenshot</a></li><li><a href="geo.gl.html">geo.gl</a></li><li><a href="geo.gui.html">geo.gui</a></li></ul><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#__render">__render</a></li><li><a href="global.html#_addPolygonFeature">_addPolygonFeature</a></li><li><a href="global.html#_animatePan">_animatePan</a></li><li><a href="global.html#_appendChild">_appendChild</a></li><li><a href="global.html#_bindMouseHandlers">_bindMouseHandlers</a></li><li><a href="global.html#_build">_build</a></li><li><a href="global.html#_checkForStroke">_checkForStroke</a></li><li><a href="global.html#_clusterData">_clusterData</a></li><li><a href="global.html#_colorize">_colorize</a></li><li><a href="global.html#_computeGradient">_computeGradient</a></li><li><a href="global.html#_computePixelmap">_computePixelmap</a></li><li><a href="global.html#_connectEvents">_connectEvents</a></li><li><a href="global.html#_coordinates">_coordinates</a></li><li><a href="global.html#_createCanvas">_createCanvas</a></li><li><a href="global.html#_createCircle">_createCircle</a></li><li><a href="global.html#_createFeature">_createFeature</a></li><li><a href="global.html#_definitions">_definitions</a></li><li><a href="global.html#_deleteFeature">_deleteFeature</a></li><li><a href="global.html#_disconnectEvents">_disconnectEvents</a></li><li><a href="global.html#_drawFeatures">_drawFeatures</a></li><li><a href="global.html#_exit">_exit</a></li><li><a href="global.html#_feature">_feature</a></li><li><a href="global.html#_featureArray">_featureArray</a></li><li><a href="global.html#_featureToPolygons">_featureToPolygons</a></li><li><a href="global.html#_forward">_forward</a></li><li><a href="global.html#_generateQuads">_generateQuads</a></li><li><a href="global.html#_generateScale">_generateScale</a></li><li><a href="global.html#_geojsonCoordinates">_geojsonCoordinates</a></li><li><a href="global.html#_geojsonFeatureToAnnotation">_geojsonFeatureToAnnotation</a></li><li><a href="global.html#_geojsonGeometryType">_geojsonGeometryType</a></li><li><a href="global.html#_geojsonStyles">_geojsonStyles</a></li><li><a href="global.html#_getArrayBuffer">_getArrayBuffer</a></li><li><a href="global.html#_getLoopData">_getLoopData</a></li><li><a href="global.html#_getMouseButton">_getMouseButton</a></li><li><a href="global.html#_getMouseModifiers">_getMouseModifiers</a></li><li><a href="global.html#_getMousePosition">_getMousePosition</a></li><li><a href="global.html#_getString">_getString</a></li><li><a href="global.html#_handleBrush">_handleBrush</a></li><li><a href="global.html#_handleBrushend">_handleBrushend</a></li><li><a href="global.html#_handleDoubleClick">_handleDoubleClick</a></li><li><a href="global.html#_handleKeys">_handleKeys</a></li><li><a href="global.html#_handleMouseclick">_handleMouseclick</a></li><li><a href="global.html#_handleMouseClick">_handleMouseClick</a></li><li><a href="global.html#_handleMouseDown">_handleMouseDown</a></li><li><a href="global.html#_handleMousemove">_handleMousemove</a></li><li><a href="global.html#_handleMouseMove">_handleMouseMove</a></li><li><a href="global.html#_handleMouseMoveDocument">_handleMouseMoveDocument</a></li><li><a href="global.html#_handleMouseUp">_handleMouseUp</a></li><li><a href="global.html#_handleMouseUpDocument">_handleMouseUpDocument</a></li><li><a href="global.html#_handleMouseWheel">_handleMouseWheel</a></li><li><a href="global.html#_handleTouch">_handleTouch</a></li><li><a href="global.html#_handleZoom">_handleZoom</a></li><li><a href="global.html#_handleZoomrotate">_handleZoomrotate</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_inverse">_inverse</a></li><li><a href="global.html#_objectListAdd">_objectListAdd</a></li><li><a href="global.html#_objectListEnd">_objectListEnd</a></li><li><a href="global.html#_objectListGet">_objectListGet</a></li><li><a href="global.html#_objectListStart">_objectListStart</a></li><li><a href="global.html#_position">_position</a></li><li><a href="global.html#_positionToQuad">_positionToQuad</a></li><li><a href="global.html#_preparePixelmap">_preparePixelmap</a></li><li><a href="global.html#_processAction">_processAction</a></li><li><a href="global.html#_removeFeature">_removeFeature</a></li><li><a href="global.html#_render">_render</a></li><li><a href="global.html#_renderBinnedData">_renderBinnedData</a></li><li><a href="global.html#_renderColorQuads">_renderColorQuads</a></li><li><a href="global.html#_renderFrame">_renderFrame</a></li><li><a href="global.html#_renderImageQuads">_renderImageQuads</a></li><li><a href="global.html#_renderOnCanvas">_renderOnCanvas</a></li><li><a href="global.html#_renderPoints">_renderPoints</a></li><li><a href="global.html#_resize">_resize</a></li><li><a href="global.html#_setClickMaybe">_setClickMaybe</a></li><li><a href="global.html#_setTransform">_setTransform</a></li><li><a href="global.html#_style">_style</a></li><li><a href="global.html#_unbindMouseHandlers">_unbindMouseHandlers</a></li><li><a href="global.html#_update">_update</a></li><li><a href="global.html#_updateFromEvent">_updateFromEvent</a></li><li><a href="global.html#_updatePointSearchInfo">_updatePointSearchInfo</a></li><li><a href="global.html#_updateRangeTree">_updateRangeTree</a></li><li><a href="global.html#_updateTextures">_updateTextures</a></li><li><a href="global.html#_wipePolygons">_wipePolygons</a></li><li><a href="global.html#actions">actions</a></li><li><a href="global.html#active">active</a></li><li><a href="global.html#actors">actors</a></li><li><a href="global.html#addAction">addAction</a></li><li><a href="global.html#addAnnotation">addAnnotation</a></li><li><a href="global.html#addChild">addChild</a></li><li><a href="global.html#addFeature">addFeature</a></li><li><a href="global.html#addPromise">addPromise</a></li><li><a href="global.html#allowRotation">allowRotation</a></li><li><a href="global.html#annotationById">annotationById</a></li><li><a href="global.html#annotations">annotations</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#attribution">attribution</a></li><li><a href="global.html#bin">bin</a></li><li><a href="global.html#binned">binned</a></li><li><a href="global.html#bounds">bounds</a></li><li><a href="global.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li><li><a href="global.html#boxSearch">boxSearch</a></li><li><a href="global.html#buildTime">buildTime</a></li><li><a href="global.html#camera">camera</a></li><li><a href="global.html#cancel">cancel</a></li><li><a href="global.html#canRead">canRead</a></li><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#center">center</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#clampBoundsX">clampBoundsX</a></li><li><a href="global.html#clampBoundsY">clampBoundsY</a></li><li><a href="global.html#clampZoom">clampZoom</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clustering">clustering</a></li><li><a href="global.html#color">color</a></li><li><a href="global.html#contextRenderer">contextRenderer</a></li><li><a href="global.html#contour">contour</a></li><li><a href="global.html#coordinates">coordinates</a></li><li><a href="global.html#createChoropleth">createChoropleth</a></li><li><a href="global.html#createContours">createContours</a></li><li><a href="global.html#createFeature">createFeature</a></li><li><a href="global.html#createLayer">createLayer</a></li><li><a href="global.html#createWidget">createWidget</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#dataTime">dataTime</a></li><li><a href="global.html#deleteFeature">deleteFeature</a></li><li><a href="global.html#deleteLayer">deleteLayer</a></li><li><a href="global.html#deleteWidget">deleteWidget</a></li><li><a href="global.html#delta">delta</a></li><li><a href="global.html#dependentFeatures">dependentFeatures</a></li><li><a href="global.html#destroy">destroy</a></li><li><a href="global.html#discreteZoom">discreteZoom</a></li><li><a href="global.html#displayDistance">displayDistance</a></li><li><a href="global.html#displayToGcs">displayToGcs</a></li><li><a href="global.html#displayToWorld">displayToWorld</a></li><li><a href="global.html#draw">draw</a></li><li><a href="global.html#editstyle">editstyle</a></li><li><a href="global.html#exit">exit</a></li><li><a href="global.html#featureGcsToDisplay">featureGcsToDisplay</a></li><li><a href="global.html#features">features</a></li><li><a href="global.html#featureVertices">featureVertices</a></li><li><a href="global.html#fileReader">fileReader</a></li><li><a href="global.html#forward">forward</a></li><li><a href="global.html#fromLocal">fromLocal</a></li><li><a href="global.html#gcs">gcs</a></li><li><a href="global.html#gcsPosition">gcsPosition</a></li><li><a href="global.html#gcsToDisplay">gcsToDisplay</a></li><li><a href="global.html#gcsToWorld">gcsToWorld</a></li><li><a href="global.html#geo_action">geo_action</a></li><li><a href="global.html#geojson">geojson</a></li><li><a href="global.html#geoOff">geoOff</a></li><li><a href="global.html#geoOn">geoOn</a></li><li><a href="global.html#geoTrigger">geoTrigger</a></li><li><a href="global.html#globals">globals</a></li><li><a href="global.html#hasAction">hasAction</a></li><li><a href="global.html#hasTouchSupport">hasTouchSupport</a></li><li><a href="global.html#height">height</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#ingcs">ingcs</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#intensity">intensity</a></li><li><a href="global.html#interactor">interactor</a></li><li><a href="global.html#inverse">inverse</a></li><li><a href="global.html#isInViewport">isInViewport</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#layer">layer</a></li><li><a href="global.html#layers">layers</a></li><li><a href="global.html#line">line</a></li><li><a href="global.html#lineAnnotation">lineAnnotation</a></li><li><a href="global.html#linkFeatures">linkFeatures</a></li><li><a href="global.html#links">links</a></li><li><a href="global.html#map">map</a></li><li><a href="global.html#maxIndex">maxIndex</a></li><li><a href="global.html#maxIntensity">maxIntensity</a></li><li><a href="global.html#minIntensity">minIntensity</a></li><li><a href="global.html#mockVGLRenderer">mockVGLRenderer</a></li><li><a href="global.html#mode">mode</a></li><li><a href="global.html#modified">modified</a></li><li><a href="global.html#mouse">mouse</a></li><li><a href="global.html#mouseClick">mouseClick</a></li><li><a href="global.html#mouseMove">mouseMove</a></li><li><a href="global.html#moveDown">moveDown</a></li><li><a href="global.html#moveToBottom">moveToBottom</a></li><li><a href="global.html#moveToTop">moveToTop</a></li><li><a href="global.html#moveUp">moveUp</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#node">node</a></li><li><a href="global.html#nodeFeature">nodeFeature</a></li><li><a href="global.html#nodes">nodes</a></li><li><a href="global.html#onIdle">onIdle</a></li><li><a href="global.html#opacity">opacity</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#origin">origin</a></li><li><a href="global.html#pan">pan</a></li><li><a href="global.html#parent">parent</a></li><li><a href="global.html#parentCanvas">parentCanvas</a></li><li><a href="global.html#pause">pause</a></li><li><a href="global.html#pointAnnotation">pointAnnotation</a></li><li><a href="global.html#pointSearch">pointSearch</a></li><li><a href="global.html#polygonAnnotation">polygonAnnotation</a></li><li><a href="global.html#position">position</a></li><li><a href="global.html#processAction">processAction</a></li><li><a href="global.html#read">read</a></li><li><a href="global.html#rectangleAnnotation">rectangleAnnotation</a></li><li><a href="global.html#removeAction">removeAction</a></li><li><a href="global.html#removeAllAnnotations">removeAllAnnotations</a></li><li><a href="global.html#removeAnnotation">removeAnnotation</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#removeFeature">removeFeature</a></li><li><a href="global.html#renderer">renderer</a></li><li><a href="global.html#rendererName">rendererName</a></li><li><a href="global.html#reposition">reposition</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#resize">resize</a></li><li><a href="global.html#restoreVGLRenderer">restoreVGLRenderer</a></li><li><a href="global.html#rotatedSize">rotatedSize</a></li><li><a href="global.html#rotation">rotation</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#scaleFactor">scaleFactor</a></li><li><a href="global.html#scheduleAnimationFrame">scheduleAnimationFrame</a></li><li><a href="global.html#screenshot">screenshot</a></li><li><a href="global.html#select">select</a></li><li><a href="global.html#selectionAPI">selectionAPI</a></li><li><a href="global.html#simulateEvent">simulateEvent</a></li><li><a href="global.html#size">size</a></li><li><a href="global.html#source">source</a></li><li><a href="global.html#springBack">springBack</a></li><li><a href="global.html#state">state</a></li><li><a href="global.html#sticky">sticky</a></li><li><a href="global.html#style">style</a></li><li><a href="global.html#target">target</a></li><li><a href="global.html#toLocal">toLocal</a></li><li><a href="global.html#transition">transition</a></li><li><a href="global.html#transitionCancel">transitionCancel</a></li><li><a href="global.html#type">type</a></li><li><a href="global.html#unitsPerPixel">unitsPerPixel</a></li><li><a href="global.html#updateAttribution">updateAttribution</a></li><li><a href="global.html#updateDelay">updateDelay</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#url">url</a></li><li><a href="global.html#validateAttribute">validateAttribute</a></li><li><a href="global.html#verticesPerFeature">verticesPerFeature</a></li><li><a href="global.html#visible">visible</a></li><li><a href="global.html#width">width</a></li><li><a href="global.html#worldToDisplay">worldToDisplay</a></li><li><a href="global.html#worldToGcs">worldToGcs</a></li><li><a href="global.html#zIndex">zIndex</a></li><li><a href="global.html#zoom">zoom</a></li><li><a href="global.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li><li><a href="global.html#zoomRange">zoomRange</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Mar 01 2017 09:50:33 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Apr 27 2017 14:27:42 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

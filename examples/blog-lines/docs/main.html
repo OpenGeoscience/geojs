@@ -329,7 +329,9 @@
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">geojsLinesTest</span>(<span class="hljs-params">opts</span>) </span>{
 <span class="hljs-meta">  'use strict'</span>;
 
-  <span class="hljs-keyword">var</span> geo = libraryReference(opts);</pre></div></div>
+  <span class="hljs-keyword">var</span> geo = libraryReference(opts);
+
+  $(opts.node).removeClass(<span class="hljs-string">'ready'</span>);</pre></div></div>
             
         </li>
         
@@ -438,7 +440,13 @@
       }, baseStyle));
   }
 
-  map.draw();</pre></div></div>
+  map.draw();
+
+  map.onIdle(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    map.scheduleAnimationFrame(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      $(opts.node).addClass(<span class="hljs-string">'ready'</span>);
+    }, <span class="hljs-string">'readyFlag'</span>);
+  });</pre></div></div>
             
         </li>
         

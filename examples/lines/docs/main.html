@@ -273,7 +273,7 @@ rendering</p>
    *    the line.
    */</span>
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show_lines</span>(<span class="hljs-params">rawdata</span>) </span>{
-    $(<span class="hljs-string">'#map'</span>).removeClass(<span class="hljs-string">'ready'</span>);
+    $(<span class="hljs-string">'#map'</span>).removeClass(<span class="hljs-string">'ready'</span>).attr(<span class="hljs-string">'segments'</span>, <span class="hljs-string">''</span>);
     <span class="hljs-keyword">if</span> (!rawdata) {
       <span class="hljs-keyword">return</span>;
     }</pre></div></div>
@@ -303,7 +303,7 @@ any number of segments, we have to keep a tally.</p>
     <span class="hljs-keyword">var</span> text = <span class="hljs-string">'Shown: '</span> + segments;
     $(<span class="hljs-string">'#lines-shown'</span>).text(text).attr(<span class="hljs-string">'title'</span>, text);
     map.onIdle(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-      $(<span class="hljs-string">'#map'</span>).addClass(<span class="hljs-string">'ready'</span>);
+      $(<span class="hljs-string">'#map'</span>).addClass(<span class="hljs-string">'ready'</span>).attr(<span class="hljs-string">'segments'</span>, maxsegments);
     });
   }
 
@@ -461,9 +461,9 @@ any number of segments, we have to keep a tally.</p>
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">select_preset</span>(<span class="hljs-params">evt</span>) </span>{
     <span class="hljs-keyword">var</span> update;
     <span class="hljs-keyword">var</span> ctl = $(evt.target);
-    <span class="hljs-keyword">var</span> keys = [<span class="hljs-string">'antialiasing'</span>, <span class="hljs-string">'lineCap'</span>, <span class="hljs-string">'lineJoin'</span>, <span class="hljs-string">'lines'</span>, <span class="hljs-string">'miterLimit'</span>,
-                <span class="hljs-string">'showmap'</span>, <span class="hljs-string">'strokeColor'</span>, <span class="hljs-string">'strokeOffset'</span>, <span class="hljs-string">'strokeOpacity'</span>,
-                <span class="hljs-string">'strokeWidth'</span>];
+    <span class="hljs-keyword">var</span> keys = [
+      <span class="hljs-string">'antialiasing'</span>, <span class="hljs-string">'lineCap'</span>, <span class="hljs-string">'lineJoin'</span>, <span class="hljs-string">'lines'</span>, <span class="hljs-string">'miterLimit'</span>, <span class="hljs-string">'showmap'</span>,
+      <span class="hljs-string">'strokeColor'</span>, <span class="hljs-string">'strokeOffset'</span>, <span class="hljs-string">'strokeOpacity'</span>, <span class="hljs-string">'strokeWidth'</span>];
     skipdraw = <span class="hljs-literal">true</span>;
     $.each(keys, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">idx, key</span>) </span>{
       <span class="hljs-keyword">var</span> value = ctl.attr(key);
@@ -578,11 +578,13 @@ any number of segments, we have to keep a tally.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
-              <p>add hover events</p>
+              <p>add hover events – use mouseon and mouseoff, since we only show one
+tootip.  If we showed one tooltip per item we were over, use mouseover
+and mouseout.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    .geoOn(geo.event.feature.mouseover, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
+            <div class="content"><div class='highlight'><pre>    .geoOn(geo.event.feature.mouseon, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
       <span class="hljs-keyword">var</span> text = (evt.data.name ? evt.data.name : <span class="hljs-string">''</span>) +
                  (evt.data.highway ? <span class="hljs-string">' ('</span> + evt.data.highway + <span class="hljs-string">')'</span> : <span class="hljs-string">''</span>);
       <span class="hljs-keyword">if</span> (text) {
@@ -591,7 +593,7 @@ any number of segments, we have to keep a tally.</p>
       }
       tooltipElem.toggleClass(<span class="hljs-string">'hidden'</span>, !text);
     })
-    .geoOn(geo.event.feature.mouseout, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
+    .geoOn(geo.event.feature.mouseoff, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
       tooltipElem.addClass(<span class="hljs-string">'hidden'</span>);
     });</pre></div></div>
             

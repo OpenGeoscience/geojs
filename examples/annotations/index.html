@@ -37,7 +37,7 @@
             <h4 class="modal-title">Annotation Layer</h4>
           </div>
           <div class="modal-body">
-            <p class="text-left">This example shows how to add annotations, such as marked rectangles, to a map.  Left click to add a polygon, right click to add a rectangle.</p>
+            <p class="text-left">This example shows how to add annotations, such as marked rectangles, to a map.</p>
             <p class="text-right">© 2014, Kitware, Inc.</p>
           </div>
           <div class="modal-footer">
@@ -53,14 +53,16 @@
         <div class="shortlabel">Add</div>
         <button id="rectangle" next="polygon" class="lastused">Rectangle</button>
         <button id="polygon" next="point">Polygon</button>
-        <button id="point" next="rectangle">Point</button>
+        <button id="point" next="line">Point</button>
+        <button id="line" next="rectangle">Line</button>
       </div>
       <div class="form-group">
         <div id="instructions" annotation="none">
           <div class="annotation none"></div>
           <div class="annotation polygon">Left-click points in the polygon.  Double click, right click, or click the starting point to close the polygon.</div>
-          <div class="annotation rectangle">Left click-and-drag to draw a rectangle.</div>
+          <div class="annotation rectangle">Left click-and-drag or left click opposite corners to draw a rectangle.</div>
           <div class="annotation point">Left click to create a point.</div>
+          <div class="annotation line">Left-click points in the line.  Double click, right click, or click the starting point to end the line.</div>
         </div>
       </div>
       <div title="If enabled, left-click to add another annotation, and right-click to switch annotation type.  Otherwise, you must click a button above." class="form-group">
@@ -125,17 +127,41 @@
                 <option value="false">No</option>
               </select>
             </div>
-            <div annotation-types="point polygon rectangle" class="form-group">
+            <div annotation-types="point polygon rectangle line" class="form-group">
               <label for="edit-strokeWidth">Stroke Width</label>
               <input id="edit-strokeWidth" option="strokeWidth" format="positive">
             </div>
-            <div annotation-types="point polygon rectangle" class="form-group">
+            <div annotation-types="point polygon rectangle line" class="form-group">
               <label for="edit-strokeColor">Stroke Color</label>
               <input id="edit-strokeColor" option="strokeColor" format="color">
             </div>
-            <div annotation-types="point polygon rectangle" class="form-group">
+            <div annotation-types="point polygon rectangle line" class="form-group">
               <label for="edit-strokeOpacity">Stroke Opacity</label>
               <input id="edit-strokeOpacity" option="strokeOpacity" format="opacity">
+            </div>
+            <div annotation-types="line" class="form-group">
+              <label for="edit-closed">Closed</label>
+              <select id="edit-closed" option="closed" format="boolean">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+            <div annotation-types="line" class="form-group">
+              <label for="edit-lineCap">Line End Caps</label>
+              <select id="edit-lineCap" option="lineCap" format="text">
+                <option value="butt">Butt</option>
+                <option value="round">Round</option>
+                <option value="square">Square</option>
+              </select>
+            </div>
+            <div annotation-types="line" class="form-group">
+              <label for="edit-lineJoin">Line Joins</label>
+              <select id="edit-lineJoin" option="lineJoin" format="text">
+                <option value="miter">Miter</option>
+                <option value="bevel">Bevel</option>
+                <option value="round">Round</option>
+                <option value="miter-clip">Miter-Clip</option>
+              </select>
             </div>
             <div class="form-group">
               <div id="edit-validation-error"></div>

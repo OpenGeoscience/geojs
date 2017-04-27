@@ -54,6 +54,7 @@
 #instructions[annotation="polygon"] .annotation.polygon,
 #instructions[annotation="rectangle"] .annotation.rectangle,
 #instructions[annotation="point"] .annotation.point,
+#instructions[annotation="line"] .annotation.line,
 #instructions[annotation="none"] .annotation.none {
   display: block;
 }
