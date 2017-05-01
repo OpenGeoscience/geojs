@@ -364,11 +364,10 @@ var feature = function (arg) {
    * value per data item.  The values are not converted or validated.  Color
    * values should be objects with r, g, b values on a scale of [0, 1].  If
    * invalidate values are given the behavior is undefined.
-   *   For features where this._subcomponentStyles is an object and a style
-   * name is a key in that object, and the first entry of the styleArray is
-   * itself an array, then each entry of the array is expected to be an array,
-   * and values are used from these subarrays.  This allows a style to apply,
-   * for instance, per vertex of a data item rather than per data item.
+   *   For some feature styles, if the first entry of an array is itself an
+   * array, then each entry of the array is expected to be an array, and values
+   * are used from these subarrays.  This allows a style to apply, for
+   * instance, per vertex of a data item rather than per data item.
    *
    * @param {string|object} keyOrObject: either the name of a single style or
    *    an object where the keys are the names of styles and the values are
@@ -387,6 +386,8 @@ var feature = function (arg) {
         m_this.updateStyleFromArray(key, value);
       });
     } else {
+      /* colors area lways expected to be objects with r, g, b values, so for
+       * any color, make sure we don't have undefined entries. */
       var fallback;
       if (keyOrObject.toLowerCase().match(/color$/)) {
         fallback = {r: 0, g: 0, b: 0};
