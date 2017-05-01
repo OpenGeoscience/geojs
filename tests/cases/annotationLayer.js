@@ -385,6 +385,7 @@ describe('geo.annotationLayer', function () {
     it('_processAction', function () {
       layer.removeAllAnnotations();
       layer._processAction({
+        event: geo.event.actionselection,
         state: {action: geo.geo_action.annotation_rectangle},
         lowerLeft: {x: 10, y: 10},
         lowerRight: {x: 20, y: 10},
@@ -395,6 +396,7 @@ describe('geo.annotationLayer', function () {
       layer.mode('rectangle');
       expect(layer.annotations()[0].state()).toBe(geo.annotation.state.create);
       layer._processAction({
+        event: geo.event.actionselection,
         state: {
           action: geo.geo_action.annotation_rectangle,
           actionRecord: {owner: geo.annotation.actionOwner}

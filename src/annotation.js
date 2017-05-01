@@ -509,6 +509,7 @@ var rectangleAnnotation = function (args) {
   this.processAction = function (evt) {
     var layer = this.layer();
     if (this.state() !== annotationState.create || !layer ||
+        evt.event !== geo_event.actionselection ||
         evt.state.action !== geo_action.annotation_rectangle) {
       return;
     }

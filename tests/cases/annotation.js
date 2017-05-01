@@ -249,10 +249,14 @@ describe('geo.annotation', function () {
       expect(ann.processAction({state: null})).toBe(undefined);
       ann.state(geo.annotation.state.create);
       var evt = {
+        event: geo.event.actionmove,
         state: {action: geo.geo_action.annotation_rectangle},
         lowerLeft: {x: 10, y: 65},
         upperRight: {x: 90, y: 5}
       };
+      expect(ann.processAction(evt)).not.toBe('done');
+      expect(ann.state()).toBe(geo.annotation.state.create);
+      evt.event = geo.event.actionselection;
       expect(ann.processAction(evt)).toBe('done');
       expect(ann.state()).toBe(geo.annotation.state.done);
       var coor = ann.coordinates();
