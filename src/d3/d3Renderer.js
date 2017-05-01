@@ -635,7 +635,11 @@ registerRenderer('d3', d3Renderer);
    * @returns {boolean} true if available.
    */
   d3Renderer.supported = function () {
-    return !!__webpack_modules__[require.resolveWeak('d3')]; // eslint-disable-line
+    if (!__webpack_modules__[require.resolveWeak('d3')]) {  // eslint-disable-line
+      return false;
+    }
+    var d3 = require('d3');
+    return d3 !== undefined;
   };
 
   /**
