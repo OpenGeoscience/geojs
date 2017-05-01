@@ -15,6 +15,7 @@ var geo_action = {
   zoomselect: 'geo_action_zoomselect',
 
   // annotation actions
+  annotation_line: 'geo_annotation_line',
   annotation_polygon: 'geo_annotation_polygon',
   annotation_rectangle: 'geo_annotation_rectangle'
 };

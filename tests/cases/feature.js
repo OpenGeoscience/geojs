@@ -198,6 +198,20 @@ describe('geo.feature', function () {
       feat.dependentFeatures([]);
       expect(feat.visible(true)).toBe(feat);
       expect(depFeat.visible()).toBe(false);
+
+      // the layer can control the visibility
+      expect(feat.visible()).toBe(true);
+      expect(feat.visible(undefined, true)).toBe(true);
+      layer.visible(false);
+      expect(feat.visible()).toBe(false);
+      expect(feat.visible(undefined, true)).toBe(true);
+      expect(feat.visible(false, true)).toBe(feat);
+      expect(feat.visible()).toBe(false);
+      expect(feat.visible(undefined, true)).toBe(false);
+      layer.visible(true);
+      expect(feat.visible()).toBe(false);
+      expect(feat.visible(true, true)).toBe(feat);
+      expect(feat.visible()).toBe(true);
     });
     it('updateStyleFromArray', function () {
       var count = 0;
@@ -315,6 +329,21 @@ describe('geo.feature', function () {
       expect(feat.selectionAPI()).toBe(true);
       expect(feat.selectionAPI(0)).toBe(feat);
       expect(feat.selectionAPI()).toBe(false);
+
+      // the layer can control the visibility
+      feat.selectionAPI(true);
+      expect(feat.selectionAPI()).toBe(true);
+      expect(feat.selectionAPI(undefined, true)).toBe(true);
+      layer.selectionAPI(false);
+      expect(feat.selectionAPI()).toBe(false);
+      expect(feat.selectionAPI(undefined, true)).toBe(true);
+      expect(feat.selectionAPI(false, true)).toBe(feat);
+      expect(feat.selectionAPI()).toBe(false);
+      expect(feat.selectionAPI(undefined, true)).toBe(false);
+      layer.selectionAPI(true);
+      expect(feat.selectionAPI()).toBe(false);
+      expect(feat.selectionAPI(true, true)).toBe(feat);
+      expect(feat.selectionAPI()).toBe(true);
     });
   });
 });

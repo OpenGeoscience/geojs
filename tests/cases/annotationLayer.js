@@ -5,8 +5,8 @@ describe('geo.annotationLayer', function () {
 
   var $ = require('jquery');
   var geo = require('../test-utils').geo;
-  var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
-  var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
+  var mockVGLRenderer = geo.util.mockVGLRenderer;
+  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 
   beforeEach(function () {
     mockVGLRenderer();
@@ -78,6 +78,12 @@ describe('geo.annotationLayer', function () {
       expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).toBeNull();
       expect(layer.mode('rectangle')).toBe(layer);
       expect(layer.mode()).toBe('rectangle');
+      expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).not.toBeNull();
+      expect(layer.mode(null)).toBe(layer);
+      expect(layer.mode()).toBe(null);
+      expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).toBeNull();
+      expect(layer.mode('line')).toBe(layer);
+      expect(layer.mode()).toBe('line');
       expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).not.toBeNull();
       expect(layer.mode(null)).toBe(layer);
       expect(layer.mode()).toBe(null);
@@ -376,9 +382,9 @@ describe('geo.annotationLayer', function () {
       layer._handleZoom();
       expect(layer.features()[0].getMTime()).toBeGreaterThan(mod);
     });
-    it('_processSelection', function () {
+    it('_processAction', function () {
       layer.removeAllAnnotations();
-      layer._processSelection({
+      layer._processAction({
         state: {action: geo.geo_action.annotation_rectangle},
         lowerLeft: {x: 10, y: 10},
         lowerRight: {x: 20, y: 10},
@@ -388,7 +394,7 @@ describe('geo.annotationLayer', function () {
       expect(layer.annotations().length).toBe(0);
       layer.mode('rectangle');
       expect(layer.annotations()[0].state()).toBe(geo.annotation.state.create);
-      layer._processSelection({
+      layer._processAction({
         state: {
           action: geo.geo_action.annotation_rectangle,
           actionRecord: {owner: geo.annotation.actionOwner}
@@ -406,17 +412,35 @@ describe('geo.annotationLayer', function () {
       map.deleteLayer(layer);
       layer = map.createLayer('annotation');  /* use the vgl variant */
       /* This is tested through the layer.geojson function */
+      var unknownFeature = {
+        type: 'Feature',
+        properties: {annotationType: 'unknown'},
+        geometry: {
+          type: 'LineString',
+          coordinates: [[-73.75, 42.84], [-73.79, 42.84]]
+        }
+      };
+      expect(layer.geojson(unknownFeature)).toBe(0);
       var lineString = {
         type: 'Feature',
         properties: {},
         geometry: {
           type: 'LineString',
-          coordinates: [[-73.759202, 42.849643], [-73.756799, 42.849572]]
+          coordinates: [[-73.75, 42.84]]
         }
       };
       expect(layer.geojson(lineString)).toBe(0);
+      lineString = {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [[-73.75, 42.84], [-73.79, 42.84]]
+        }
+      };
+      expect(layer.geojson(lineString)).toBe(1);
       lineString.properties.annotationType = 'polygon';
-      expect(layer.geojson(lineString)).toBe(0);
+      expect(layer.geojson(lineString)).toBe(2);
       var sample = {
         type: 'FeatureCollection',
         features: [{
@@ -469,7 +493,7 @@ describe('geo.annotationLayer', function () {
           }
         }]
       };
-      expect(layer.geojson(sample)).toBe(3);
+      expect(layer.geojson(sample)).toBe(5);
       var badpoly = {
         type: 'Feature',
         geometry: {
@@ -522,6 +546,37 @@ describe('geo.annotationLayer', function () {
       expect(attr.fillOpacity).toBe(0.3);
       expect(attr.fillColor).toBe('#4b0082');
       expect(attr.scaled).toBe(4);
+
+      badattr = {
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: [[-118, 36], [-119, 36]]
+        },
+        properties: {
+          strokeOffset: 'not a number',
+          lineCap: 'any text is allowed'
+        }
+      };
+      layer.geojson(badattr, true);
+      attr = layer.geojson().features[0].properties;
+      expect(attr.strokeOffset).toBe(undefined);
+      expect(attr.lineCap).toBe('any text is allowed');
+      goodattr = {
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: [[-118, 36], [-119, 36]]
+        },
+        properties: {
+          strokeOffset: '0.5',
+          lineCap: 'round'
+        }
+      };
+      layer.geojson(goodattr, true);
+      attr = layer.geojson().features[0].properties;
+      expect(attr.strokeOffset).toBe(0.5);
+      expect(attr.lineCap).toBe('round');
     });
   });
   it('Test destroy layer.', function () {

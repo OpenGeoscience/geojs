@@ -1,12 +1,12 @@
-var geo = require('../test-utils').geo;
 var $ = require('jquery');
 
 describe('Contour Feature', function () {
   'use strict';
 
   var map, layer;
-  var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
-  var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
+  var geo = require('../test-utils').geo;
+  var mockVGLRenderer = geo.util.mockVGLRenderer;
+  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 
   beforeEach(function () {
     $('<div id="map-contour-wrap"/>')

@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("d3"));
+		module.exports = factory(require("hammerjs"), require("d3"));
 	else if(typeof define === 'function' && define.amd)
-		define(["d3"], factory);
+		define(["hammerjs", "d3"], factory);
 	else if(typeof exports === 'object')
-		exports["geo"] = factory(require("d3"));
+		exports["geo"] = factory(require("hammerjs"), require("d3"));
 	else
-		root["geo"] = factory(root["d3"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_219__) {
+		root["geo"] = factory(root["hammerjs"], root["d3"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_224__, __WEBPACK_EXTERNAL_MODULE_226__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -52,7 +52,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	// License headers that will be preserved in distributed bundles.
 	/**
@@ -81,6 +81,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * earcut
 	 * @copyright 2016, Mapbox
 	 * @license ISC
+	 *
+	 * kdbush
+	 * @copyright 2017, Vladimir Agafonkin
+	 * @license ISC
 	 */
 
 	var $ = __webpack_require__(1);
@@ -90,50 +94,50 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = $.extend({
 	  annotation: __webpack_require__(7),
-	  annotationLayer: __webpack_require__(213),
-	  camera: __webpack_require__(209),
-	  choroplethFeature: __webpack_require__(218),
-	  contourFeature: __webpack_require__(220),
-	  domRenderer: __webpack_require__(221),
+	  annotationLayer: __webpack_require__(219),
+	  camera: __webpack_require__(212),
+	  choroplethFeature: __webpack_require__(225),
+	  contourFeature: __webpack_require__(227),
+	  domRenderer: __webpack_require__(228),
 	  event: __webpack_require__(9),
-	  feature: __webpack_require__(204),
-	  featureLayer: __webpack_require__(214),
-	  fetchQueue: __webpack_require__(223),
-	  fileReader: __webpack_require__(224),
+	  feature: __webpack_require__(208),
+	  featureLayer: __webpack_require__(220),
+	  fetchQueue: __webpack_require__(229),
+	  fileReader: __webpack_require__(230),
 	  geo_action: __webpack_require__(10),
-	  graphFeature: __webpack_require__(225),
-	  heatmapFeature: __webpack_require__(226),
-	  imageTile: __webpack_require__(227),
-	  jsonReader: __webpack_require__(229),
-	  layer: __webpack_require__(208),
-	  lineFeature: __webpack_require__(203),
-	  map: __webpack_require__(230),
-	  mapInteractor: __webpack_require__(216),
-	  object: __webpack_require__(206),
-	  osmLayer: __webpack_require__(232),
-	  pathFeature: __webpack_require__(235),
-	  pointFeature: __webpack_require__(210),
-	  polygonFeature: __webpack_require__(212),
-	  quadFeature: __webpack_require__(217),
-	  pixelmapFeature: __webpack_require__(236),
-	  renderer: __webpack_require__(222),
-	  sceneObject: __webpack_require__(205),
-	  tile: __webpack_require__(228),
-	  tileCache: __webpack_require__(234),
-	  tileLayer: __webpack_require__(233),
-	  timestamp: __webpack_require__(207),
+	  graphFeature: __webpack_require__(231),
+	  heatmapFeature: __webpack_require__(232),
+	  imageTile: __webpack_require__(233),
+	  jsonReader: __webpack_require__(235),
+	  layer: __webpack_require__(211),
+	  lineFeature: __webpack_require__(207),
+	  map: __webpack_require__(236),
+	  mapInteractor: __webpack_require__(222),
+	  object: __webpack_require__(204),
+	  osmLayer: __webpack_require__(238),
+	  pathFeature: __webpack_require__(241),
+	  pointFeature: __webpack_require__(213),
+	  polygonFeature: __webpack_require__(218),
+	  quadFeature: __webpack_require__(223),
+	  pixelmapFeature: __webpack_require__(242),
+	  renderer: __webpack_require__(203),
+	  sceneObject: __webpack_require__(209),
+	  tile: __webpack_require__(234),
+	  tileCache: __webpack_require__(240),
+	  tileLayer: __webpack_require__(239),
+	  timestamp: __webpack_require__(210),
 	  transform: __webpack_require__(11),
-	  vectorFeature: __webpack_require__(237),
+	  vectorFeature: __webpack_require__(243),
 	  inherit: __webpack_require__(8),
-	  version: __webpack_require__(238),
-	  sha: __webpack_require__(239),
+	  version: __webpack_require__(244),
+	  sha: __webpack_require__(245),
 
 	  util: __webpack_require__(83),
 	  jQuery: $,
-	  d3: __webpack_require__(240),
-	  gl: __webpack_require__(252),
-	  canvas: __webpack_require__(263),
-	  gui: __webpack_require__(271)
+	  d3: __webpack_require__(246),
+	  gl: __webpack_require__(258),
+	  canvas: __webpack_require__(268),
+	  gui: __webpack_require__(276)
 	}, __webpack_require__(202));
 
 	if (window && !window.$) {
@@ -144,9 +148,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 	 * jQuery JavaScript Library v2.2.4
@@ -9964,9 +9968,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}));
 
 
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	// Add a polyfill for window.requestAnimationFrame.
 	if (!window.requestAnimationFrame) {
@@ -10006,9 +10010,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
@@ -10032,23 +10036,23 @@ return /******/ (function(modules) { // webpackBootstrap
 		module.hot.dispose(function() { update(); });
 	}
 
-/***/ },
+/***/ }),
 /* 4 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	exports = module.exports = __webpack_require__(5)();
 	// imports
 
 
 	// module
-	exports.push([module.id, ".geojs-map{position:relative}.geojs-map .geo-attribution{position:absolute;right:0;bottom:0;padding-right:5px;cursor:auto;font:11px/1.5 Helvetica Neue,Arial,Helvetica,sans-serif;z-index:1001;background:hsla(0,0%,100%,.7);clear:both;display:block;pointer-events:auto}.geojs-map .geo-attribution .geo-attribution-layer{padding-left:5px}.geojs-map .canvas-canvas{display:block;-webkit-transform-origin:0 0;transform-origin:0 0}.geojs-map .webgl-canvas{display:block}.geojs-map .geojs-layer{position:absolute;width:100%;height:100%;pointer-events:none}.geojs-map .geojs-layer.active{pointer-events:auto}.geojs-map .geo-tile-layer{-webkit-transform-origin:0 0;transform-origin:0 0;line-height:0;font-size:0}.geojs-map.annotation-input{cursor:crosshair}.geojs-map.highlight-focus:after{content:\"\";display:block;position:absolute;box-sizing:border-box;left:0;top:0;right:0;bottom:0;border:3px solid Highlight;opacity:1;-ms-filter:none;filter:none;-webkit-transition:opacity 0s;transition:opacity 0s;visibility:hidden}.geojs-map.highlight-focus:focus:after{visibility:visible;-webkit-transition:opacity 2.5s ease-in;transition:opacity 2.5s ease-in;opacity:0;-ms-filter:\"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)\";filter:alpha(opacity=0)}.geo-tile-container{position:absolute}.geo-tile-container.crop{overflow:hidden}", ""]);
+	exports.push([module.id, ".geojs-map{position:relative;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.geojs-map .geo-attribution{position:absolute;right:0;bottom:0;padding-right:5px;cursor:auto;font:11px/1.5 Helvetica Neue,Arial,Helvetica,sans-serif;z-index:1001;background:hsla(0,0%,100%,.7);clear:both;display:block;pointer-events:auto}.geojs-map .geo-attribution .geo-attribution-layer{padding-left:5px}.geojs-map .canvas-canvas{display:block;-webkit-transform-origin:0 0;transform-origin:0 0}.geojs-map .webgl-canvas{display:block}.geojs-map .geojs-layer{position:absolute;width:100%;height:100%;pointer-events:none}.geojs-map .geojs-layer.active{pointer-events:auto}.geojs-map .geo-tile-layer{-webkit-transform-origin:0 0;transform-origin:0 0;line-height:0;font-size:0}.geojs-map.annotation-input{cursor:crosshair}.geojs-map.highlight-focus:after{content:\"\";display:block;position:absolute;box-sizing:border-box;left:0;top:0;right:0;bottom:0;border:3px solid Highlight;opacity:1;-ms-filter:none;filter:none;transition:opacity 0s;visibility:hidden}.geojs-map.highlight-focus:focus:after{visibility:visible;transition:opacity 2.5s ease-in;opacity:0;-ms-filter:\"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)\";filter:alpha(opacity=0)}.geo-tile-container{position:absolute}.geo-tile-container.crop{overflow:hidden}", ""]);
 
 	// exports
 
 
-/***/ },
+/***/ }),
 /* 5 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/*
 		MIT License http://www.opensource.org/licenses/mit-license.php
@@ -10102,9 +10106,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 6 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	/*
 		MIT License http://www.opensource.org/licenses/mit-license.php
@@ -10354,9 +10358,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
+/***/ }),
 /* 7 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(8);
@@ -10365,9 +10369,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var transform = __webpack_require__(11);
 	var util = __webpack_require__(83);
 	var registerAnnotation = __webpack_require__(202).registerAnnotation;
-	var lineFeature = __webpack_require__(203);
-	var pointFeature = __webpack_require__(210);
-	var polygonFeature = __webpack_require__(212);
+	var lineFeature = __webpack_require__(207);
+	var pointFeature = __webpack_require__(213);
+	var polygonFeature = __webpack_require__(218);
 
 	var annotationId = 0;
 
@@ -10544,6 +10548,60 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
+	   * Set or get style.
+	   *
+	   * @param {string|object} arg1 if undefined, return the options.style object.
+	   *    If a string, either set or return the style of that name.  If an
+	   *    object, update the style with the object's values.
+	   * @param {object} arg2 if arg1 is a string and this is defined, set the
+	   *    style to this value.
+	   * @returns {object|this} if styles are set, return the layer, otherwise
+	   *    return the requested style or the set of styles.
+	   */
+	  this.style = function (arg1, arg2) {
+	    if (arg1 === undefined) {
+	      return m_options.style;
+	    }
+	    if (typeof arg1 === 'string' && arg2 === undefined) {
+	      return m_options.style[arg1];
+	    }
+	    if (arg2 === undefined) {
+	      m_options.style = $.extend(true, m_options.style, arg1);
+	    } else {
+	      m_options.style[arg1] = arg2;
+	    }
+	    this.modified();
+	    return this;
+	  };
+
+	  /**
+	   * Set or get edit style.
+	   *
+	   * @param {string|object} arg1 if undefined, return the options.editstyle
+	   *    object.  If a string, either set or return the style of that name.  If
+	   *    an object, update the style with the object's values.
+	   * @param {object} arg2 if arg1 is a string and this is defined, set the
+	   *    style to this value.
+	   * @returns {object|this} if styles are set, return the layer, otherwise
+	   *    return the requested style or the set of styles.
+	   */
+	  this.editstyle = function (arg1, arg2) {
+	    if (arg1 === undefined) {
+	      return m_options.editstyle;
+	    }
+	    if (typeof arg1 === 'string' && arg2 === undefined) {
+	      return m_options.editstyle[arg1];
+	    }
+	    if (arg2 === undefined) {
+	      m_options.editstyle = $.extend(true, m_options.editstyle, arg1);
+	    } else {
+	      m_options.editstyle[arg1] = arg2;
+	    }
+	    this.modified();
+	    return this;
+	  };
+
+	  /**
 	   * Get the type of this annotation.
 	   *
 	   * @returns {string} the annotation type.
@@ -10647,8 +10705,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {array} a list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
-	    return ['fill', 'fillColor', 'fillOpacity', 'stroke', 'strokeColor',
-	            'strokeOpacity', 'strokeWidth'];
+	    return [
+	      'closed', 'fill', 'fillColor', 'fillOpacity', 'lineCap', 'lineJoin',
+	      'radius', 'stroke', 'strokeColor', 'strokeOffset', 'strokeOpacity',
+	      'strokeWidth'];
 	  };
 
 	  /**
@@ -10747,6 +10807,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!(this instanceof rectangleAnnotation)) {
 	    return new rectangleAnnotation(args);
 	  }
+
 	  args = $.extend(true, {}, {
 	    style: {
 	      fill: true,
@@ -10758,9 +10819,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	      strokeOpacity: 1,
 	      strokeWidth: 3,
 	      uniformPolygon: true
+	    },
+	    editstyle: {
+	      fill: true,
+	      fillColor: {r: 0.3, g: 0.3, b: 0.3},
+	      fillOpacity: 0.25,
+	      polygon: function (d) { return d.polygon; },
+	      stroke: true,
+	      strokeColor: {r: 0, g: 0, b: 1},
+	      strokeOpacity: 1,
+	      strokeWidth: 3,
+	      uniformPolygon: true
 	    }
 	  }, args || {});
-	  args.corners = args.corners || args.coordinates;
+	  args.corners = args.corners || args.coordinates || [];
 	  delete args.coordinates;
 	  annotation.call(this, 'rectangle', args);
 
@@ -10828,6 +10900,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    switch (state) {
 	      case annotationState.create:
 	        features = [];
+	        if (opt.corners && opt.corners.length >= 4) {
+	          features = [{
+	            polygon: {
+	              polygon: opt.corners,
+	              style: opt.editstyle
+	            }
+	          }];
+	        }
 	        break;
 	      default:
 	        features = [{
@@ -10886,6 +10966,77 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._geojsonGeometryType = function () {
 	    return 'Polygon';
 	  };
+
+	  /**
+	   * Return a list of styles that should be preserved in a geojson
+	   * representation of the annotation.
+	   *
+	   * @return {array} a list of style names to store.
+	   */
+	  this._geojsonStyles = function () {
+	    return [
+	      'fill', 'fillColor', 'fillOpacity', 'lineCap', 'lineJoin', 'stroke',
+	      'strokeColor', 'strokeOffset', 'strokeOpacity', 'strokeWidth'];
+	  };
+
+	  /**
+	   * Handle a mouse move on this annotation.
+	   *
+	   * @param {geo.event} evt the mouse move event.
+	   * @returns {boolean|string} true to update the annotation, falsy to not
+	   *    update anything.
+	   */
+	  this.mouseMove = function (evt) {
+	    if (this.state() !== annotationState.create) {
+	      return;
+	    }
+	    var corners = this.options('corners');
+	    if (corners.length) {
+	      corners[2] = $.extend({}, evt.mapgcs);
+	      corners[1].x = evt.mapgcs.x;
+	      corners[3].y = evt.mapgcs.y;
+	      return true;
+	    }
+	  };
+
+	  /**
+	   * Handle a mouse click on this annotation.  If the event is processed,
+	   * evt.handled should be set to true to prevent further processing.
+	   *
+	   * @param {geo.event} evt the mouse click event.
+	   * @returns {boolean|string} true to update the annotation, 'done' if the
+	   *    annotation was completed (changed from create to done state), 'remove'
+	   *    if the annotation should be removed, falsy to not update anything.
+	   */
+	  this.mouseClick = function (evt) {
+	    var layer = this.layer();
+	    if (this.state() !== annotationState.create || !layer) {
+	      return;
+	    }
+	    if (!evt.buttonsDown.left && !evt.buttonsDown.right) {
+	      return;
+	    }
+	    var corners = this.options('corners');
+	    if (evt.buttonsDown.right && !corners.length) {
+	      return;
+	    }
+	    evt.handled = true;
+	    if (corners.length) {
+	      corners[2] = $.extend({}, evt.mapgcs);
+	      corners[1].x = evt.mapgcs.x;
+	      corners[3].y = evt.mapgcs.y;
+	      this.state(annotationState.done);
+	      return 'done';
+	    }
+	    if (evt.buttonsDown.left) {
+	      corners.push($.extend({}, evt.mapgcs));
+	      corners.push($.extend({}, evt.mapgcs));
+	      corners.push($.extend({}, evt.mapgcs));
+	      corners.push($.extend({}, evt.mapgcs));
+	      return true;
+	    }
+	  };
+
 	};
 	inherit(rectangleAnnotation, annotation);
 
@@ -11120,6 +11271,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._geojsonGeometryType = function () {
 	    return 'Polygon';
 	  };
+
+	  /**
+	   * Return a list of styles that should be preserved in a geojson
+	   * representation of the annotation.
+	   *
+	   * @return {array} a list of style names to store.
+	   */
+	  this._geojsonStyles = function () {
+	    return [
+	      'fill', 'fillColor', 'fillOpacity', 'lineCap', 'lineJoin', 'stroke',
+	      'strokeColor', 'strokeOffset', 'strokeOpacity', 'strokeWidth'];
+	  };
 	};
 	inherit(polygonAnnotation, annotation);
 
@@ -11127,6 +11290,301 @@ return /******/ (function(modules) { // webpackBootstrap
 	polygonRequiredFeatures[polygonFeature.capabilities.feature] = true;
 	polygonRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
 	registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
+
+	/////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Line annotation class
+	 *
+	 * Must specify:
+	 *   vertices: a list of vertices {x: x, y: y} in map gcs coordinates.
+	 * May specify:
+	 *   style.
+	 *     strokeWidth, strokeColor, strokeOpacity, strokeOffset, closed, lineCap,
+	 *     lineJoin
+	 *   editstyle.
+	 *     strokeWidth, strokeColor, strokeOpacity, strokeOffset, closed, lineCap,
+	 *     lineJoin
+	 */
+	/////////////////////////////////////////////////////////////////////////////
+	var lineAnnotation = function (args) {
+	  'use strict';
+	  if (!(this instanceof lineAnnotation)) {
+	    return new lineAnnotation(args);
+	  }
+
+	  var m_this = this;
+
+	  args = $.extend(true, {}, {
+	    style: {
+	      line: function (d) {
+	        /* Return an array that has the same number of items as we have
+	         * vertices. */
+	        return Array.apply(null, Array(m_this.options('vertices').length)).map(
+	            function () { return d; });
+	      },
+	      position: function (d, i) {
+	        return m_this.options('vertices')[i];
+	      },
+	      strokeColor: {r: 0, g: 0, b: 0},
+	      strokeOpacity: 1,
+	      strokeWidth: 3,
+	      closed: false,
+	      lineCap: 'butt',
+	      lineJoin: 'miter'
+	    },
+	    editstyle: {
+	      line: function (d) {
+	        /* Return an array that has the same number of items as we have
+	         * vertices. */
+	        return Array.apply(null, Array(m_this.options('vertices').length)).map(
+	            function () { return d; });
+	      },
+	      position: function (d, i) {
+	        return m_this.options('vertices')[i];
+	      },
+	      strokeColor: {r: 0, g: 0, b: 1},
+	      strokeOpacity: 1,
+	      strokeWidth: 3,
+	      closed: false,
+	      lineCap: 'butt',
+	      lineJoin: 'miter'
+	    }
+	  }, args || {});
+	  args.vertices = args.vertices || args.coordinates || [];
+	  delete args.coordinates;
+	  annotation.call(this, 'line', args);
+
+	  /**
+	   * Get a list of renderable features for this annotation.
+	   *
+	   * @returns {array} an array of features.
+	   */
+	  this.features = function () {
+	    var opt = this.options(),
+	        state = this.state(),
+	        features;
+	    switch (state) {
+	      case annotationState.create:
+	        features = [{
+	          line: {
+	            line: opt.vertices,
+	            style: opt.editstyle
+	          }
+	        }];
+	        break;
+	      default:
+	        features = [{
+	          line: {
+	            line: opt.vertices,
+	            style: opt.style
+	          }
+	        }];
+	        break;
+	    }
+	    return features;
+	  };
+
+	  /**
+	   * Get coordinates associated with this annotation in the map gcs coordinate
+	   * system.
+	   *
+	   * @param {array} coordinates: an optional array of coordinates to set.
+	   * @returns {array} an array of coordinates.
+	   */
+	  this._coordinates = function (coordinates) {
+	    if (coordinates) {
+	      this.options('vertices', coordinates);
+	    }
+	    return this.options('vertices');
+	  };
+
+	  /**
+	   * Handle a mouse move on this annotation.
+	   *
+	   * @param {geo.event} evt the mouse move event.
+	   * @returns {boolean|string} true to update the annotation, falsy to not
+	   *    update anything.
+	   */
+	  this.mouseMove = function (evt) {
+	    if (this.state() !== annotationState.create) {
+	      return;
+	    }
+	    var vertices = this.options('vertices');
+	    if (vertices.length) {
+	      vertices[vertices.length - 1] = evt.mapgcs;
+	      return true;
+	    }
+	  };
+
+	  /**
+	   * Handle a mouse click on this annotation.  If the event is processed,
+	   * evt.handled should be set to true to prevent further processing.
+	   *
+	   * @param {geo.event} evt the mouse click event.
+	   * @returns {boolean|string} true to update the annotation, 'done' if the
+	   *    annotation was completed (changed from create to done state), 'remove'
+	   *    if the annotation should be removed, falsy to not update anything.
+	   */
+	  this.mouseClick = function (evt) {
+	    var layer = this.layer();
+	    if (this.state() !== annotationState.create || !layer) {
+	      return;
+	    }
+	    var end = !!evt.buttonsDown.right, skip;
+	    if (!evt.buttonsDown.left && !evt.buttonsDown.right) {
+	      return;
+	    }
+	    var vertices = this.options('vertices');
+	    if (evt.buttonsDown.right && !vertices.length) {
+	      return;
+	    }
+	    evt.handled = true;
+	    if (evt.buttonsDown.left) {
+	      if (vertices.length) {
+	        if (vertices.length >= 2 && layer.displayDistance(
+	            vertices[vertices.length - 2], null, evt.map, 'display') <=
+	            layer.options('adjacentPointProximity')) {
+	          skip = true;
+	          if (this.lastClick &&
+	              evt.time - this.lastClick < layer.options('dblClickTime')) {
+	            end = true;
+	          }
+	        } else if (vertices.length >= 2 && layer.displayDistance(
+	            vertices[0], null, evt.map, 'display') <=
+	            layer.options('finalPointProximity')) {
+	          end = 'close';
+	        } else {
+	          vertices[vertices.length - 1] = evt.mapgcs;
+	        }
+	      } else {
+	        vertices.push(evt.mapgcs);
+	      }
+	      if (!end && !skip) {
+	        vertices.push(evt.mapgcs);
+	      }
+	      this.lastClick = evt.time;
+	    }
+	    if (end) {
+	      if (vertices.length < 3) {
+	        return 'remove';
+	      }
+	      vertices.pop();
+	      this.options('style').closed = end === 'close';
+	      this.state(annotationState.done);
+	      return 'done';
+	    }
+	    return (end || !skip);
+	  };
+
+	  /**
+	   * Return actions needed for the specified state of this annotation.
+	   *
+	   * @param {string} state: the state to return actions for.  Defaults to
+	   *    the current state.
+	   * @returns {array}: a list of actions.
+	   */
+	  this.actions = function (state) {
+	    if (!state) {
+	      state = this.state();
+	    }
+	    switch (state) {
+	      case annotationState.create:
+	        return [{
+	          action: geo_action.annotation_line,
+	          name: 'line create',
+	          owner: annotationActionOwner,
+	          input: 'left',
+	          modifiers: {shift: false, ctrl: false}
+	        }, {
+	          action: geo_action.annotation_line,
+	          name: 'line create',
+	          owner: annotationActionOwner,
+	          input: 'pan'
+	        }];
+	      default:
+	        return [];
+	    }
+	  };
+
+	  /**
+	   * Process any actions for this annotation.
+	   *
+	   * @param {object} evt: the action event.
+	   * @returns {boolean|string} true to update the annotation, 'done' if the
+	   *    annotation was completed (changed from create to done state), 'remove'
+	   *    if the annotation should be removed, falsy to not update anything.
+	   */
+	  this.processAction = function (evt) {
+	    var layer = this.layer();
+	    if (this.state() !== annotationState.create || !layer ||
+	        evt.state.action !== geo_action.annotation_line) {
+	      return;
+	    }
+	    var cpp = layer.options('continuousPointProximity');
+	    if (cpp || cpp === 0) {
+	      var vertices = this.options('vertices');
+	      if (!vertices.length) {
+	        vertices.push(evt.mouse.mapgcs);
+	        vertices.push(evt.mouse.mapgcs);
+	        return true;
+	      }
+	      var dist = layer.displayDistance(
+	            vertices[vertices.length - 2], null, evt.mouse.map, 'display');
+	      if (dist && dist > cpp) {
+	        // we should combine nearly colinear points, but we don't
+	        vertices[vertices.length - 1] = evt.mouse.mapgcs;
+	        vertices.push(evt.mouse.mapgcs);
+	        return true;
+	      }
+	    }
+	  };
+
+	  /**
+	   * Return the coordinates to be stored in a geojson geometery object.
+	   *
+	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+	   *    null to use the map gcs, or any other transform.
+	   * @return {array} an array of flattened coordinates in the ingcs coordinate
+	   *    system.  Undefined if this annotation is incompelte.
+	   */
+	  this._geojsonCoordinates = function (gcs) {
+	    var src = this.coordinates(gcs);
+	    if (!src || src.length < 2 || this.state() === annotationState.create) {
+	      return;
+	    }
+	    var coor = [];
+	    for (var i = 0; i < src.length; i += 1) {
+	      coor.push([src[i].x, src[i].y]);
+	    }
+	    return coor;
+	  };
+
+	  /**
+	   * Return the geometry type that is used to store this annotation in geojson.
+	   *
+	   * @return {string} a geojson geometry type.
+	   */
+	  this._geojsonGeometryType = function () {
+	    return 'LineString';
+	  };
+
+	  /**
+	   * Return a list of styles that should be preserved in a geojson
+	   * representation of the annotation.
+	   *
+	   * @return {array} a list of style names to store.
+	   */
+	  this._geojsonStyles = function () {
+	    return [
+	      'closed', 'lineCap', 'lineJoin', 'strokeColor', 'strokeOffset',
+	      'strokeOpacity', 'strokeWidth'];
+	  };
+	};
+	inherit(lineAnnotation, annotation);
+
+	var lineRequiredFeatures = {};
+	lineRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
+	registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
 
 	/////////////////////////////////////////////////////////////////////////////
 	/**
@@ -11259,8 +11717,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {array} a list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
-	    return ['fill', 'fillColor', 'fillOpacity', 'radius', 'scaled', 'stroke',
-	            'strokeColor', 'strokeOpacity', 'strokeWidth'];
+	    return [
+	      'fill', 'fillColor', 'fillOpacity', 'radius', 'scaled', 'stroke',
+	      'strokeColor', 'strokeOpacity', 'strokeWidth'];
 	  };
 
 	  /**
@@ -11298,15 +11757,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  state: annotationState,
 	  actionOwner: annotationActionOwner,
 	  annotation: annotation,
+	  lineAnnotation: lineAnnotation,
 	  pointAnnotation: pointAnnotation,
 	  polygonAnnotation: polygonAnnotation,
 	  rectangleAnnotation: rectangleAnnotation
 	};
 
 
-/***/ },
+/***/ }),
 /* 8 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	function newfunc() {
 	  return function () {};
@@ -11325,9 +11785,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 9 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -11861,9 +12321,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = geo_event;
 
 
-/***/ },
+/***/ }),
 /* 10 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -11878,9 +12338,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  select: 'geo_action_select',
 	  unzoomselect: 'geo_action_unzoomselect',
 	  zoom: 'geo_action_zoom',
+	  zoomrotate: 'geo_action_zoom_rotate',
 	  zoomselect: 'geo_action_zoomselect',
 
 	  // annotation actions
+	  annotation_line: 'geo_annotation_line',
 	  annotation_polygon: 'geo_annotation_polygon',
 	  annotation_rectangle: 'geo_annotation_rectangle'
 	};
@@ -11888,9 +12350,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = geo_action;
 
 
-/***/ },
+/***/ }),
 /* 11 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var proj4 = __webpack_require__(12);
 
@@ -12389,9 +12851,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = transform;
 
 
-/***/ },
+/***/ }),
 /* 12 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var proj4 = __webpack_require__(13);
 	proj4.defaultDatum = 'WGS84'; //default datum
@@ -12407,9 +12869,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = proj4;
 
 
-/***/ },
+/***/ }),
 /* 13 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var proj = __webpack_require__(14);
 	var transform = __webpack_require__(35);
@@ -12476,9 +12938,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	module.exports = proj4;
 
-/***/ },
+/***/ }),
 /* 14 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var parseCode = __webpack_require__(15);
 	var extend = __webpack_require__(22);
@@ -12551,9 +13013,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Projection;
 
 
-/***/ },
+/***/ }),
 /* 15 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var defs = __webpack_require__(16);
 	var wkt = __webpack_require__(21);
@@ -12594,9 +13056,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = parse;
 
 
-/***/ },
+/***/ }),
 /* 16 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var globals = __webpack_require__(17);
 	var parseProj = __webpack_require__(18);
@@ -12655,9 +13117,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = defs;
 
 
-/***/ },
+/***/ }),
 /* 17 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(defs) {
 	  defs('EPSG:4326', "+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees");
@@ -12672,9 +13134,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 18 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var D2R = 0.01745329251994329577;
 	var PrimeMeridian = __webpack_require__(19);
@@ -12810,9 +13272,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 19 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	exports.greenwich = 0.0; //"0dE",
 	exports.lisbon = -9.131906111111; //"9d07'54.862\"W",
@@ -12828,17 +13290,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.athens = 23.7163375; //"23d42'58.815\"E",
 	exports.oslo = 10.722916666667; //"10d43'22.5\"E"
 
-/***/ },
+/***/ }),
 /* 20 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	exports.ft = {to_meter: 0.3048};
 	exports['us-ft'] = {to_meter: 1200 / 3937};
 
 
-/***/ },
+/***/ }),
 /* 21 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var D2R = 0.01745329251994329577;
 	var extend = __webpack_require__(22);
@@ -13065,9 +13527,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 22 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(destination, source) {
 	  destination = destination || {};
@@ -13085,9 +13547,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 23 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var projs = [
 	  __webpack_require__(24),
@@ -13125,9 +13587,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 24 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var msfnz = __webpack_require__(25);
 	var HALF_PI = Math.PI/2;
@@ -13228,18 +13690,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Mercator", "Popular Visualisation Pseudo Mercator", "Mercator_1SP", "Mercator_Auxiliary_Sphere", "merc"];
 
 
-/***/ },
+/***/ }),
 /* 25 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(eccent, sinphi, cosphi) {
 	  var con = eccent * sinphi;
 	  return cosphi / (Math.sqrt(1 - con * con));
 	};
 
-/***/ },
+/***/ }),
 /* 26 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var TWO_PI = Math.PI * 2;
 	// SPI is slightly greater than Math.PI, so values that exceed the -180..180
@@ -13253,17 +13715,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return (Math.abs(x) <= SPI) ? x : (x - (sign(x) * TWO_PI));
 	};
 
-/***/ },
+/***/ }),
 /* 27 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(x) {
 	  return x<0 ? -1 : 1;
 	};
 
-/***/ },
+/***/ }),
 /* 28 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	var HALF_PI = Math.PI/2;
 
@@ -13274,9 +13736,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return (Math.tan(0.5 * (HALF_PI - phi)) / con);
 	};
 
-/***/ },
+/***/ }),
 /* 29 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	var HALF_PI = Math.PI/2;
 	module.exports = function(eccent, ts) {
@@ -13295,9 +13757,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return -9999;
 	};
 
-/***/ },
+/***/ }),
 /* 30 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	exports.init = function() {
 	  //no-op for longlat
@@ -13311,9 +13773,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["longlat", "identity"];
 
 
-/***/ },
+/***/ }),
 /* 31 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	// ellipoid pj_set_ell.c
 	var SIXTH = 0.1666666666666666667;
@@ -13370,9 +13832,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 32 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	exports.MERIT = {
 	  a: 6378137.0,
@@ -13590,9 +14052,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ellipseName: "Normal Sphere (r=6370997)"
 	};
 
-/***/ },
+/***/ }),
 /* 33 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	exports.wgs84 = {
 	  towgs84: "0,0,0",
@@ -13675,9 +14137,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  datumName: "Reseau National Belge 1972"
 	};
 
-/***/ },
+/***/ }),
 /* 34 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	var PJD_3PARAM = 1;
 	var PJD_7PARAM = 2;
@@ -13719,9 +14181,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = datum;
 
 
-/***/ },
+/***/ }),
 /* 35 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var D2R = 0.01745329251994329577;
 	var R2D = 57.29577951308232088;
@@ -13807,9 +14269,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 36 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var PJD_3PARAM = 1;
 	var PJD_7PARAM = 2;
@@ -13852,9 +14314,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 37 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 	var PJD_3PARAM = 1;
@@ -14105,9 +14567,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 38 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(crs, denorm, point) {
 	  var xin = point.x,
@@ -14163,9 +14625,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 39 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function (array){
 	  var out = {
@@ -14181,9 +14643,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return out;
 	};
 
-/***/ },
+/***/ }),
 /* 40 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var mgrs = __webpack_require__(41);
 
@@ -14221,9 +14683,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Point;
 
 
-/***/ },
+/***/ }),
 /* 41 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	
 
@@ -14969,16 +15431,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
+/***/ }),
 /* 42 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = '2.3.16';
 
 
-/***/ },
+/***/ }),
 /* 43 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var projs = [
 	  __webpack_require__(44),
@@ -15010,9 +15472,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	};
 
-/***/ },
+/***/ }),
 /* 44 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	// Heavily based on this tmerc projection implementation
 	// https://github.com/mbloch/mapshaper-proj/blob/master/src/projections/tmerc.js
@@ -15183,9 +15645,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Transverse_Mercator", "Transverse Mercator", "tmerc"];
 
 
-/***/ },
+/***/ }),
 /* 45 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	var C00 = 1;
 	var C02 = 0.25;
@@ -15212,9 +15674,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return en;
 	};
 
-/***/ },
+/***/ }),
 /* 46 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(phi, sphi, cphi, en) {
 	  cphi *= sphi;
@@ -15222,9 +15684,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return (en[0] * phi - cphi * (en[1] + sphi * (en[2] + sphi * (en[3] + sphi * en[4]))));
 	};
 
-/***/ },
+/***/ }),
 /* 47 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var pj_mlfn = __webpack_require__(46);
 	var EPSLN = 1.0e-10;
@@ -15247,9 +15709,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return phi;
 	};
 
-/***/ },
+/***/ }),
 /* 48 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var adjust_zone = __webpack_require__(49);
 	var tmerc = __webpack_require__(44);
@@ -15276,9 +15738,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Universal Transverse Mercator System", "utm"];
 
 
-/***/ },
+/***/ }),
 /* 49 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var adjust_lon = __webpack_require__(26);
 
@@ -15301,9 +15763,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 50 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var gauss = __webpack_require__(51);
 	var adjust_lon = __webpack_require__(26);
@@ -15364,9 +15826,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Stereographic_North_Pole", "Oblique_Stereographic", "Polar_Stereographic", "sterea","Oblique Stereographic Alternative"];
 
 
-/***/ },
+/***/ }),
 /* 51 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var FORTPI = Math.PI/4;
 	var srat = __webpack_require__(52);
@@ -15415,17 +15877,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["gauss"];
 
 
-/***/ },
+/***/ }),
 /* 52 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(esinp, exp) {
 	  return (Math.pow((1 - esinp) / (1 + esinp), exp));
 	};
 
-/***/ },
+/***/ }),
 /* 53 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var HALF_PI = Math.PI/2;
 	var EPSLN = 1.0e-10;
@@ -15595,9 +16057,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["stere", "Stereographic_South_Pole", "Polar Stereographic (variant B)"];
 
 
-/***/ },
+/***/ }),
 /* 54 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/*
 	  references:
@@ -15681,9 +16143,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["somerc"];
 
 
-/***/ },
+/***/ }),
 /* 55 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var tsfnz = __webpack_require__(28);
 	var adjust_lon = __webpack_require__(26);
@@ -15854,9 +16316,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.names = ["Hotine_Oblique_Mercator", "Hotine Oblique Mercator", "Hotine_Oblique_Mercator_Azimuth_Natural_Origin", "Hotine_Oblique_Mercator_Azimuth_Center", "omerc"];
 
-/***/ },
+/***/ }),
 /* 56 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var EPSLN = 1.0e-10;
 	var msfnz = __webpack_require__(25);
@@ -15995,9 +16457,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Lambert Tangential Conformal Conic Projection", "Lambert_Conformal_Conic", "Lambert_Conformal_Conic_2SP", "lcc"];
 
 
-/***/ },
+/***/ }),
 /* 57 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var adjust_lon = __webpack_require__(26);
 	exports.init = function() {
@@ -16099,9 +16561,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Krovak", "krovak"];
 
 
-/***/ },
+/***/ }),
 /* 58 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var mlfn = __webpack_require__(59);
 	var e0fn = __webpack_require__(60);
@@ -16207,58 +16669,58 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	exports.names = ["Cassini", "Cassini_Soldner", "cass"];
 
-/***/ },
+/***/ }),
 /* 59 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(e0, e1, e2, e3, phi) {
 	  return (e0 * phi - e1 * Math.sin(2 * phi) + e2 * Math.sin(4 * phi) - e3 * Math.sin(6 * phi));
 	};
 
-/***/ },
+/***/ }),
 /* 60 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(x) {
 	  return (1 - 0.25 * x * (1 + x / 16 * (3 + 1.25 * x)));
 	};
 
-/***/ },
+/***/ }),
 /* 61 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(x) {
 	  return (0.375 * x * (1 + 0.25 * x * (1 + 0.46875 * x)));
 	};
 
-/***/ },
+/***/ }),
 /* 62 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(x) {
 	  return (0.05859375 * x * x * (1 + 0.75 * x));
 	};
 
-/***/ },
+/***/ }),
 /* 63 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(x) {
 	  return (x * x * x * (35 / 3072));
 	};
 
-/***/ },
+/***/ }),
 /* 64 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(a, e, sinphi) {
 	  var temp = e * sinphi;
 	  return a / Math.sqrt(1 - temp * temp);
 	};
 
-/***/ },
+/***/ }),
 /* 65 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var HALF_PI = Math.PI/2;
 	var sign = __webpack_require__(27);
@@ -16267,9 +16729,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return (Math.abs(x) < HALF_PI) ? x : (x - (sign(x) * Math.PI));
 	};
 
-/***/ },
+/***/ }),
 /* 66 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(ml, e0, e1, e2, e3) {
 	  var phi;
@@ -16288,9 +16750,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return NaN;
 	};
 
-/***/ },
+/***/ }),
 /* 67 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var HALF_PI = Math.PI/2;
 	var FORTPI = Math.PI/4;
@@ -16582,9 +17044,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Lambert Azimuthal Equal Area", "Lambert_Azimuthal_Equal_Area", "laea"];
 
 
-/***/ },
+/***/ }),
 /* 68 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(eccent, sinphi) {
 	  var con;
@@ -16597,9 +17059,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
-/***/ },
+/***/ }),
 /* 69 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var EPSLN = 1.0e-10;
 	var msfnz = __webpack_require__(25);
@@ -16724,9 +17186,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Albers_Conic_Equal_Area", "Albers", "aea"];
 
 
-/***/ },
+/***/ }),
 /* 70 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = function(x) {
 	  if (Math.abs(x) > 1) {
@@ -16735,9 +17197,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return Math.asin(x);
 	};
 
-/***/ },
+/***/ }),
 /* 71 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var adjust_lon = __webpack_require__(26);
 	var EPSLN = 1.0e-10;
@@ -16840,9 +17302,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["gnom"];
 
 
-/***/ },
+/***/ }),
 /* 72 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var adjust_lon = __webpack_require__(26);
 	var qsfnz = __webpack_require__(68);
@@ -16909,9 +17371,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["cea"];
 
 
-/***/ },
+/***/ }),
 /* 73 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	var HALF_PI = Math.PI/2;
 
@@ -16946,9 +17408,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return NaN;
 	};
 
-/***/ },
+/***/ }),
 /* 74 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var adjust_lon = __webpack_require__(26);
 	var adjust_lat = __webpack_require__(65);
@@ -16993,9 +17455,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Equirectangular", "Equidistant_Cylindrical", "eqc"];
 
 
-/***/ },
+/***/ }),
 /* 75 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var e0fn = __webpack_require__(60);
 	var e1fn = __webpack_require__(61);
@@ -17126,9 +17588,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	exports.names = ["Polyconic", "poly"];
 
-/***/ },
+/***/ }),
 /* 76 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	var SEC_TO_RAD = 4.84813681109535993589914102357e-6;
 	/*
@@ -17350,9 +17812,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	exports.names = ["New_Zealand_Map_Grid", "nzmg"];
 
-/***/ },
+/***/ }),
 /* 77 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var adjust_lon = __webpack_require__(26);
 	/*
@@ -17401,9 +17863,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Miller_Cylindrical", "mill"];
 
 
-/***/ },
+/***/ }),
 /* 78 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var adjust_lon = __webpack_require__(26);
 	var adjust_lat = __webpack_require__(65);
@@ -17512,9 +17974,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	exports.names = ["Sinusoidal", "sinu"];
 
-/***/ },
+/***/ }),
 /* 79 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var adjust_lon = __webpack_require__(26);
 	var EPSLN = 1.0e-10;
@@ -17595,9 +18057,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Mollweide", "moll"];
 
 
-/***/ },
+/***/ }),
 /* 80 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var e0fn = __webpack_require__(60);
 	var e1fn = __webpack_require__(61);
@@ -17711,9 +18173,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Equidistant_Conic", "eqdc"];
 
 
-/***/ },
+/***/ }),
 /* 81 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var adjust_lon = __webpack_require__(26);
 	var HALF_PI = Math.PI/2;
@@ -17836,9 +18298,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	exports.names = ["Van_der_Grinten_I", "VanDerGrinten", "vandg"];
 
-/***/ },
+/***/ }),
 /* 82 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var adjust_lon = __webpack_require__(26);
 	var HALF_PI = Math.PI/2;
@@ -18039,9 +18501,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.names = ["Azimuthal_Equidistant", "aeqd"];
 
 
-/***/ },
+/***/ }),
 /* 83 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 
@@ -18050,15 +18512,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var util = __webpack_require__(84);
 	$.extend(util, __webpack_require__(85));
-	util.DistanceGrid = __webpack_require__(86);
-	util.ClusterGroup = __webpack_require__(87);
+	$.extend(util, __webpack_require__(86));
+	util.DistanceGrid = __webpack_require__(205);
+	util.ClusterGroup = __webpack_require__(206);
 
 	module.exports = util;
 
 
-/***/ },
+/***/ }),
 /* 84 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	
 	(function () {
@@ -18422,57 +18885,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * Radius of the earth in meters, from the equatorial radius of SRID 4326.
 	     */
 	    radiusEarth: 6378137,
-
-	    /**
-	     * Linearly combine two "coordinate-like" objects in a uniform way.
-	     * Coordinate like objects have ``x``, ``y``, and optionally a ``z``
-	     * key.  The first object is mutated.
-	     *
-	     *   a <= ca * a + cb * b
-	     *
-	     * @param {number} ca
-	     * @param {object} a
-	     * @param {number} [a.x=0]
-	     * @param {number} [a.y=0]
-	     * @param {number} [a.z=0]
-	     * @param {number} cb
-	     * @param {object} b
-	     * @param {number} [b.x=0]
-	     * @param {number} [b.y=0]
-	     * @param {number} [b.z=0]
-	     * @returns {object} ca * a + cb * b
-	     */
-	    lincomb: function (ca, a, cb, b) {
-	      a.x = ca * (a.x || 0) + cb * (b.x || 0);
-	      a.y = ca * (a.y || 0) + cb * (b.y || 0);
-	      a.z = ca * (a.x || 0) + cb * (b.x || 0);
-	      return a;
-	    },
-
-	    /**
-	     * Element-wise product of two coordinate-like object.  Mutates
-	     * the first object.  Note the default values for ``b``, which
-	     * are intended to used as a anisotropic scaling factors.
-	     *
-	     *   a <= a * b^pow
-	     *
-	     * @param {object} a
-	     * @param {number} [a.x=0]
-	     * @param {number} [a.y=0]
-	     * @param {number} [a.z=0]
-	     * @param {object} b
-	     * @param {number} [b.x=1]
-	     * @param {number} [b.y=1]
-	     * @param {number} [b.z=1]
-	     * @param {number} [pow=1]
-	     * @returns {object} a * b^pow
-	     */
-	    scale: function (a, b, pow) {
-	      a.x = (a.x || 0) * Math.pow(b.x || 1, pow);
-	      a.y = (a.y || 0) * Math.pow(b.y || 1, pow);
-	      a.z = (a.z || 0) * Math.pow(b.z || 1, pow);
-	      return a;
-	    },
 
 	    /**
 	     * Compare two arrays and return if their contents are equal.
@@ -19208,9 +19620,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}());
 
 
-/***/ },
+/***/ }),
 /* 85 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/**
 	 * @file
@@ -19424,506 +19836,217 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(this);
 
 
-/***/ },
+/***/ }),
 /* 86 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
-	/*
-	markercluster plugin:
+	/* eslint-disable camelcase */
+	/* eslint-disable underscore/prefer-constant */
 
-	Copyright 2012 David Leaver
+	var $ = __webpack_require__(1);
+	var vgl = __webpack_require__(87);
+	var vglRenderer = __webpack_require__(201);
 
-	Permission is hereby granted, free of charge, to any person obtaining
-	a copy of this software and associated documentation files (the
-	"Software"), to deal in the Software without restriction, including
-	without limitation the rights to use, copy, modify, merge, publish,
-	distribute, sublicense, and/or sell copies of the Software, and to
-	permit persons to whom the Software is furnished to do so, subject to
-	the following conditions:
+	var _renderWindow, _supported;
 
-	The above copyright notice and this permission notice shall be
-	included in all copies or substantial portions of the Software.
-
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-	EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-	NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-	LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-	OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	Leaflet utilities:
-
-	Copyright (c) 2010-2015, Vladimir Agafonkin
-	Copyright (c) 2010-2011, CloudMade
-	All rights reserved.
-
-	Redistribution and use in source and binary forms, with or without modification, are
-	permitted provided that the following conditions are met:
-
-	   1. Redistributions of source code must retain the above copyright notice, this list of
-	      conditions and the following disclaimer.
-
-	   2. Redistributions in binary form must reproduce the above copyright notice, this list
-	      of conditions and the following disclaimer in the documentation and/or other
-	      materials provided with the distribution.
-
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-	EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-	MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-	COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-	EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-	SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-	HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-	TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-	*/
+	module.exports = {};
 
 	/**
-	 * @file
-	 * Code taken from https://github.com/Leaflet/Leaflet.markercluster
-	 * to support faster hierarchical clustering of features.
-	 * @copyright 2012, David Leaver
+	 * Replace vgl.renderer with a mocked version for testing in a non-webGL state.
+	 * Use restoreVGLRenderer to unmock.  Call vgl.mockCounts() to get the number
+	 * of times different webGL functions have been called.
+	 *
+	 * @param {boolean} [supported=true] If false, then the vgl renderer will
+	 *      indicate that this is an unsupported browser environment.
 	 */
-
-	(function () {
-	    "use strict";
-
-	    var $ = __webpack_require__(1);
-	    var L = {};
-	    L.Util = {
-	        // return unique ID of an object
-	        stamp: function (obj) {
-	            obj._leaflet_id = obj._leaflet_id || ++L.Util.lastId;
-	            return obj._leaflet_id;
-	        },
-	        lastId: 0
-	    };
-
-	    var DistanceGrid = function (cellSize) {
-	        this._cellSize = cellSize;
-	        this._sqCellSize = cellSize * cellSize;
-	        this._grid = {};
-	        this._objectPoint = {};
-	    };
-
-	    DistanceGrid.prototype = {
-
-	        addObject: function (obj, point) {
-	            var x = this._getCoord(point.x),
-	                y = this._getCoord(point.y),
-	                grid = this._grid,
-	                row = grid[y] = grid[y] || {},
-	                cell = row[x] = row[x] || [],
-	                stamp = L.Util.stamp(obj);
-
-	            point.obj = obj;
-	            this._objectPoint[stamp] = point;
-
-	            cell.push(obj);
-	        },
-
-	        updateObject: function (obj, point) {
-	            this.removeObject(obj);
-	            this.addObject(obj, point);
-	        },
-
-	        //Returns true if the object was found
-	        removeObject: function (obj, point) {
-	            var x = this._getCoord(point.x),
-	                y = this._getCoord(point.y),
-	                grid = this._grid,
-	                row = grid[y] = grid[y] || {},
-	                cell = row[x] = row[x] || [],
-	                i, len;
-
-	            delete this._objectPoint[L.Util.stamp(obj)];
-
-	            for (i = 0, len = cell.length; i < len; i++) {
-	                if (cell[i] === obj) {
-
-	                    cell.splice(i, 1);
-
-	                    if (len === 1) {
-	                        delete row[x];
-	                    }
-
-	                    return true;
-	                }
-	            }
-
-	        },
-
-	        eachObject: function (fn, context) {
-	            var i, j, k, len, row, cell, removed,
-	                grid = this._grid;
-
-	            for (i in grid) {
-	                row = grid[i];
-
-	                for (j in row) {
-	                    cell = row[j];
-
-	                    for (k = 0, len = cell.length; k < len; k++) {
-	                        removed = fn.call(context, cell[k]);
-	                        if (removed) {
-	                            k--;
-	                            len--;
-	                        }
-	                    }
-	                }
-	            }
-	        },
-
-	        getNearObject: function (point) {
-	            var x = this._getCoord(point.x),
-	                y = this._getCoord(point.y),
-	                i, j, k, row, cell, len, obj, dist,
-	                objectPoint = this._objectPoint,
-	                closestDistSq = this._sqCellSize,
-	                closest = null;
-
-	            for (i = y - 1; i <= y + 1; i++) {
-	                row = this._grid[i];
-	                if (row) {
-
-	                    for (j = x - 1; j <= x + 1; j++) {
-	                        cell = row[j];
-	                        if (cell) {
-
-	                            for (k = 0, len = cell.length; k < len; k++) {
-	                                obj = cell[k];
-	                                dist = this._sqDist(
-	                                    objectPoint[L.Util.stamp(obj)],
-	                                    point
-	                                );
-	                                if (dist < closestDistSq) {
-	                                    closestDistSq = dist;
-	                                    closest = obj;
-	                                }
-	                            }
-	                        }
-	                    }
-	                }
-	            }
-	            return closest;
-	        },
-
-	        /* return the point coordinates contained in the structure */
-	        contents: function () {
-	            return $.map(this._objectPoint, function (val) { return val; });
-	        },
-
-	        _getCoord: function (x) {
-	            return Math.floor(x / this._cellSize);
-	        },
-
-	        _sqDist: function (p, p2) {
-	            var dx = p2.x - p.x,
-	                dy = p2.y - p.y;
-	            return dx * dx + dy * dy;
-	        }
-	    };
-
-	    module.exports = DistanceGrid;
-	})();
-
-
-/***/ },
-/* 87 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * @file
-	 * Using methods adapted from leaflet to cluster an array of positions
-	 * hierarchically given an array of length scales (zoom levels).
-	 */
-
-	(function () {
+	module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
 	  'use strict';
+	  var vgl = __webpack_require__(87);
 
-	  var $ = __webpack_require__(1);
-	  var vgl = __webpack_require__(88);
-
-	  /**
-	   * This class manages a group of nearby points that are clustered as a
-	   * single object for display purposes.  The class constructor is private
-	   * and only meant to be created by the ClusterGroup object.
-	   *
-	   * This is a tree-like data structure.  Each node in the tree is a
-	   * cluster containing child clusters and unclustered points.
-	   *
-	   * @class
-	   * @private
-	   *
-	   * @param {geo.util.ClusterGroup} group The source cluster group
-	   * @param {number} zoom The zoom level of the current node
-	   * @param {object[]} children An array of ClusterTrees or point objects
-	   */
-	  function ClusterTree(group, zoom, children) {
-	    this._group = group;
-	    this._zoom = zoom;
-	    this._points = [];     // Unclustered points
-	    this._clusters = [];   // Child clusters
-	    this._count = 0;       // Total number of points
-	    this._parent = null;
-	    this._coord = null;    // The cached coordinates
-	    var that = this;
-
-	    // add the children provided in the constructor call
-	    (children || []).forEach(function (c) {
-	      that._add(c);
-	    });
+	  if (supported === undefined) {
+	    supported = true;
 	  }
 
-	  /**
-	   * Add a point or cluster as a child to the current cluster.
-	   * @param {object} pt A ClusterTree or point object
-	   * @private
-	   */
-	  ClusterTree.prototype._add = function (pt) {
-	    var inc = 1;
+	  if (vgl._mocked) {
+	    throw new Error('VGL renderer already mocked');
+	  }
 
-	    if (pt instanceof ClusterTree) {
-	      // add a child cluster
-	      this._clusters.push(pt);
-	      inc = pt._count;
-	    } else {
-	      this._points.push(pt);
-	    }
-	    pt._parent = this;
-
-	    // increment the counter
-	    this._increment(inc);
+	  var mockCounts = {};
+	  var count = function (name) {
+	    mockCounts[name] = (mockCounts[name] || 0) + 1;
 	  };
-
-	  /**
-	   * Increment the child counter for this and the parent.
-	   * @param {number} inc The value to increment by
-	   * @private
-	   */
-	  ClusterTree.prototype._increment = function (inc) {
-	    this._coord = null;
-	    this._count += inc;
-	    if (this._parent) {
-	      this._parent._increment(inc);
-	    }
-	  };
-
-	  /**
-	   * Return the total number of child points contained in the cluster.
-	   * @returns {number} Total points contained
-	   */
-	  ClusterTree.prototype.count = function () {
-	    return this._count;
-	  };
-
-	  /**
-	   * Recursively call a function on all points contained in the cluster.
-	   * Calls the function with `this` as the current ClusterTree object, and
-	   * arguments to arguments the point object and the zoom level:
-	   *   func.call(this, point, zoom)
-	   */
-	  ClusterTree.prototype.each = function (func) {
-	    var i;
-	    for (i = 0; i < this._points.length; i += 1) {
-	      func.call(this, this._points[i], this._zoom);
-	    }
-	    for (i = 0; i < this._clusters.length; i += 1) {
-	      this._clusters[i].each.call(
-	        this._clusters[i],
-	        func
-	      );
-	    }
-	  };
-
-	  /**
-	   * Get the coordinates of the cluster (the mean position of all the points
-	   * contained).  This is lazily calculated and cached.
-	   */
-	  ClusterTree.prototype.coords = function () {
-	    var i, center = {x: 0, y: 0};
-	    if (this._coord) {
-	      return this._coord;
-	    }
-	    // first add up the points at the node
-	    for (i = 0; i < this._points.length; i += 1) {
-	      center.x += this._points[i].x;
-	      center.y += this._points[i].y;
-	    }
-
-	    // add up the contribution from the clusters
-	    for (i = 0; i < this._clusters.length; i += 1) {
-	      center.x += this._clusters[i].coords().x * this._clusters[i].count();
-	      center.y += this._clusters[i].coords().y * this._clusters[i].count();
-	    }
-
-	    return {
-	      x: center.x / this.count(),
-	      y: center.y / this.count()
+	  var noop = function (name) {
+	    return function () {
+	      count(name);
 	    };
 	  };
+	  var _id = 0,
+	      incID = function (name) {
+	        return function () {
+	          count(name);
+	          _id += 1;
+	          return _id;
+	        };
+	      };
+	  /* The context largely does nothing. */
+	  var default_context = {
+	    activeTexture: noop('activeTexture'),
+	    attachShader: noop('attachShader'),
+	    bindAttribLocation: noop('bindAttribLocation'),
+	    bindBuffer: noop('bindBuffer'),
+	    bindFramebuffer: noop('bindFramebuffer'),
+	    bindTexture: noop('bindTexture'),
+	    blendFuncSeparate: noop('blendFuncSeparate'),
+	    bufferData: noop('bufferData'),
+	    bufferSubData: noop('bufferSubData'),
+	    checkFramebufferStatus: function (key) {
+	      count('checkFramebufferStatus');
+	      if (key === vgl.GL.FRAMEBUFFER) {
+	        return vgl.GL.FRAMEBUFFER_COMPLETE;
+	      }
+	    },
+	    clear: noop('clear'),
+	    clearColor: noop('clearColor'),
+	    clearDepth: noop('clearDepth'),
+	    compileShader: noop('compileShader'),
+	    createBuffer: incID('createBuffer'),
+	    createFramebuffer: noop('createFramebuffer'),
+	    createProgram: incID('createProgram'),
+	    createShader: incID('createShader'),
+	    createTexture: incID('createTexture'),
+	    deleteBuffer: noop('deleteBuffer'),
+	    deleteProgram: noop('deleteProgram'),
+	    deleteShader: noop('deleteShader'),
+	    deleteTexture: noop('deleteTexture'),
+	    depthFunc: noop('depthFunc'),
+	    disable: noop('disable'),
+	    disableVertexAttribArray: noop('disableVertexAttribArray'),
+	    drawArrays: noop('drawArrays'),
+	    enable: noop('enable'),
+	    enableVertexAttribArray: noop('enableVertexAttribArray'),
+	    finish: noop('finish'),
+	    getExtension: incID('getExtension'),
+	    getParameter: function (key) {
+	      count('getParameter');
+	      if (key === vgl.GL.DEPTH_BITS) {
+	        return 16;
+	      }
+	    },
+	    getProgramParameter: function (id, key) {
+	      count('getProgramParameter');
+	      if (key === vgl.GL.LINK_STATUS) {
+	        return true;
+	      }
+	    },
+	    getShaderInfoLog: function () {
+	      count('getShaderInfoLog');
+	      return 'log';
+	    },
+	    getShaderParameter: function (id, key) {
+	      count('getShaderParameter');
+	      if (key === vgl.GL.COMPILE_STATUS) {
+	        return true;
+	      }
+	    },
+	    getUniformLocation: incID('getUniformLocation'),
+	    isEnabled: function (key) {
+	      count('isEnabled');
+	      if (key === vgl.GL.BLEND) {
+	        return true;
+	      }
+	    },
+	    linkProgram: noop('linkProgram'),
+	    pixelStorei: noop('pixelStorei'),
+	    shaderSource: noop('shaderSource'),
+	    texImage2D: noop('texImage2D'),
+	    texParameteri: noop('texParameteri'),
+	    uniform1iv: noop('uniform1iv'),
+	    uniform1fv: noop('uniform1fv'),
+	    uniform2fv: noop('uniform2fv'),
+	    uniform3fv: noop('uniform3fv'),
+	    uniform4fv: noop('uniform4fv'),
+	    uniformMatrix3fv: noop('uniformMatrix3fv'),
+	    uniformMatrix4fv: noop('uniformMatrix4fv'),
+	    useProgram: noop('useProgram'),
+	    vertexAttribPointer: noop('vertexAttribPointer'),
+	    vertexAttrib3fv: noop('vertexAttrib3fv'),
+	    viewport: noop('viewport')
+	  };
 
-	  /**
-	   * This class manages clustering of an array of positions hierarchically.
-	   * The algorithm and code was adapted from the Leaflet marker cluster
-	   * plugin by David Leaver: https://github.com/Leaflet/Leaflet.markercluster
-	   *
-	   * @class geo.util.ClusterGroup
-	   * @param {object} opts An options object
-	   * @param {number} width The width of the window; used for scaling.
-	   * @param {number} height The height of the window; used for scaling.
-	   * @param {number} maxZoom The maximimum zoom level to calculate
-	   * @param {number} radius Proportional to the clustering radius in pixels
-	   */
-	  function C(opts, width, height) {
+	  _renderWindow = vgl.renderWindow;
+	  var mockedRenderWindow = function () {
+	    /* Temporarily put back the original definition of renderWindow so that the
+	     * class instance will be instantiated correctly. */
+	    vgl.renderWindow = _renderWindow;
+	    var m_this = new vgl.renderWindow(),
+	        m_context;
+	    vgl.renderWindow = mockedRenderWindow;
 
-	    var DistanceGrid = __webpack_require__(86);
+	    m_this._setup = function () {
+	      var i, renderers = m_this.renderers(),
+	          wsize = m_this.windowSize(),
+	          wpos = m_this.windowPosition();
 
-	    // store the options
-	    this._opts = $.extend({
-	      maxZoom: 18,
-	      radius: 0.05
-	    }, opts);
-	    this._opts.width = this._opts.width || width || 256;
-	    this._opts.height = this._opts.height || height || 256;
+	      m_context = $.extend({}, default_context);
 
-	    // generate the initial datastructures
-	    this._clusters = {}; // clusters at each zoom level
-	    this._points = {};   // unclustered points at each zoom level
+	      for (i = 0; i < renderers.length; i += 1) {
+	        if ((renderers[i].width() > wsize[0]) ||
+	            renderers[i].width() === 0 ||
+	            (renderers[i].height() > wsize[1]) ||
+	            renderers[i].height() === 0) {
+	          renderers[i].resize(wpos[0], wpos[1], wsize[0], wsize[1]);
+	        }
+	      }
+	      return true;
+	    };
+	    m_this.context = function () {
+	      return m_context;
+	    };
+	    return m_this;
+	  };
+	  vgl.renderWindow = mockedRenderWindow;
 
-	    var zoom, scl;
-	    for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
-	      scl = this._scaleAtLevel(zoom, this._opts.width, this._opts.height);
-	      this._clusters[zoom] = new DistanceGrid(scl);
-	      this._points[zoom] = new DistanceGrid(scl);
-	    }
-	    this._topClusterLevel = new ClusterTree(this, -1);
+	  _supported = vglRenderer.supported;
+	  vglRenderer.supported = function () {
+	    return !!supported;
+	  };
+
+	  vgl._mocked = true;
+	  vgl.mockCounts = function () {
+	    return mockCounts;
+	  };
+	};
+
+	/**
+	 * Unmock the vgl renderer.
+	 */
+	module.exports.restoreVGLRenderer = function () {
+	  if (vgl._mocked) {
+	    vgl.renderWindow = _renderWindow;
+	    vglRenderer.supported = _supported;
+	    delete vgl._mocked;
+	    // delete vgl._mockedRenderWindow;
+	    delete vgl.mockCounts;
 	  }
-
-	  /**
-	   * Returns a characteristic distance scale at a particular zoom level.  This
-	   * scale is used to control the clustering radius.  When the renderer supports
-	   * it, this call should be replaced by a calculation involving the view port
-	   * size in point coordinates at a particular zoom level.
-	   * @private
-	   */
-	  C.prototype._scaleAtLevel = function (zoom, width, height) {
-	    return vgl.zoomToHeight(zoom, width, height) / 2 * this._opts.radius;
-	  };
-
-	  /**
-	   * Add a position to the cluster group.
-	   * @protected
-	   */
-	  C.prototype.addPoint = function (point) {
-	    var zoom, closest, parent, newCluster, lastParent, z;
-
-	    // start at the maximum zoom level and search for nearby
-	    //
-	    // 1.  existing clusters
-	    // 2.  unclustered points
-	    //
-	    // otherwise add the point as a new unclustered point
-
-	    for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
-
-	      // find near cluster
-	      closest = this._clusters[zoom].getNearObject(point);
-	      if (closest) {
-	        // add the point to the cluster and return
-	        closest._add(point);
-	        return;
-	      }
-
-	      // find near point
-	      closest = this._points[zoom].getNearObject(point);
-	      if (closest) {
-	        parent = closest._parent;
-	        if (parent) {
-	          // remove the point from the parent
-	          for (z = parent._points.length - 1; z >= 0; z -= 1) {
-	            if (parent._points[z] === closest) {
-	              parent._points.splice(z, 1);
-	              parent._increment(-1);
-	              break;
-	            }
-	          }
-	        }
-
-	        if (!parent) {
-	          $.noop();
-	        }
-	        // create a new cluster with these two points
-	        newCluster = new ClusterTree(this, zoom, [closest, point]);
-	        this._clusters[zoom].addObject(newCluster, newCluster.coords());
-
-	        // create intermediate parent clusters that don't exist
-	        lastParent = newCluster;
-	        for (z = zoom - 1; z > parent._zoom; z -= 1) {
-	          lastParent = new ClusterTree(this, z, [lastParent]);
-	          this._clusters[z].addObject(lastParent, lastParent.coords());
-	        }
-	        parent._add(lastParent);
-
-	        // remove closest from this zoom level and any above (replace with newCluster)
-	        for (z = zoom; z >= 0; z -= 1) {
-	          if (!this._points[z].removeObject(closest, closest)) {
-	            break;
-	          }
-	        }
-
-	        return;
-	      }
-
-	      // add an unclustered point
-	      this._points[zoom].addObject(point, point);
-	    }
-
-	    // otherwise add to the top
-	    this._topClusterLevel._add(point);
-	  };
-
-	  /**
-	   * Return the unclustered points contained at a given zoom level.
-	   * @param {number} zoom The zoom level
-	   * @return {object[]} The array of unclustered points
-	   */
-	  C.prototype.points = function (zoom) {
-	    zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
-	    return this._points[Math.floor(zoom)].contents();
-	  };
-
-	  /**
-	   * Return the clusters contained at a given zoom level.
-	   * @param {number} zoom The zoom level
-	   * @return {ClusterTree[]} The array of clusters
-	   */
-	  C.prototype.clusters = function (zoom) {
-	    zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
-	    return this._clusters[Math.floor(zoom)].contents();
-	  };
-
-	  module.exports = C;
-	})();
+	};
 
 
-/***/ },
-/* 88 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 87 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {module.exports = global["vgl"] = __webpack_require__(89);
+	/* WEBPACK VAR INJECTION */(function(global) {module.exports = global["vgl"] = __webpack_require__(88);
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ },
-/* 89 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 88 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*** IMPORTS FROM imports-loader ***/
-	var mat4 = __webpack_require__(90);
-	var vec4 = __webpack_require__(114);
-	var vec3 = __webpack_require__(140);
-	var vec2 = __webpack_require__(173);
+	var mat4 = __webpack_require__(89);
+	var vec4 = __webpack_require__(113);
+	var vec3 = __webpack_require__(139);
+	var vec2 = __webpack_require__(172);
 	var $ = __webpack_require__(1);
 
 	(function (root, factory) {
@@ -32992,39 +33115,39 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 
-/***/ },
-/* 90 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 89 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  create: __webpack_require__(91)
-	  , clone: __webpack_require__(92)
-	  , copy: __webpack_require__(93)
-	  , identity: __webpack_require__(94)
-	  , transpose: __webpack_require__(95)
-	  , invert: __webpack_require__(96)
-	  , adjoint: __webpack_require__(97)
-	  , determinant: __webpack_require__(98)
-	  , multiply: __webpack_require__(99)
-	  , translate: __webpack_require__(100)
-	  , scale: __webpack_require__(101)
-	  , rotate: __webpack_require__(102)
-	  , rotateX: __webpack_require__(103)
-	  , rotateY: __webpack_require__(104)
-	  , rotateZ: __webpack_require__(105)
-	  , fromRotationTranslation: __webpack_require__(106)
-	  , fromQuat: __webpack_require__(107)
-	  , frustum: __webpack_require__(108)
-	  , perspective: __webpack_require__(109)
-	  , perspectiveFromFieldOfView: __webpack_require__(110)
-	  , ortho: __webpack_require__(111)
-	  , lookAt: __webpack_require__(112)
-	  , str: __webpack_require__(113)
+	  create: __webpack_require__(90)
+	  , clone: __webpack_require__(91)
+	  , copy: __webpack_require__(92)
+	  , identity: __webpack_require__(93)
+	  , transpose: __webpack_require__(94)
+	  , invert: __webpack_require__(95)
+	  , adjoint: __webpack_require__(96)
+	  , determinant: __webpack_require__(97)
+	  , multiply: __webpack_require__(98)
+	  , translate: __webpack_require__(99)
+	  , scale: __webpack_require__(100)
+	  , rotate: __webpack_require__(101)
+	  , rotateX: __webpack_require__(102)
+	  , rotateY: __webpack_require__(103)
+	  , rotateZ: __webpack_require__(104)
+	  , fromRotationTranslation: __webpack_require__(105)
+	  , fromQuat: __webpack_require__(106)
+	  , frustum: __webpack_require__(107)
+	  , perspective: __webpack_require__(108)
+	  , perspectiveFromFieldOfView: __webpack_require__(109)
+	  , ortho: __webpack_require__(110)
+	  , lookAt: __webpack_require__(111)
+	  , str: __webpack_require__(112)
 	}
 
-/***/ },
-/* 91 */
-/***/ function(module, exports) {
+/***/ }),
+/* 90 */
+/***/ (function(module, exports) {
 
 	module.exports = create;
 
@@ -33054,9 +33177,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 92 */
-/***/ function(module, exports) {
+/***/ }),
+/* 91 */
+/***/ (function(module, exports) {
 
 	module.exports = clone;
 
@@ -33087,9 +33210,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 93 */
-/***/ function(module, exports) {
+/***/ }),
+/* 92 */
+/***/ (function(module, exports) {
 
 	module.exports = copy;
 
@@ -33120,9 +33243,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 94 */
-/***/ function(module, exports) {
+/***/ }),
+/* 93 */
+/***/ (function(module, exports) {
 
 	module.exports = identity;
 
@@ -33152,9 +33275,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 95 */
-/***/ function(module, exports) {
+/***/ }),
+/* 94 */
+/***/ (function(module, exports) {
 
 	module.exports = transpose;
 
@@ -33206,9 +33329,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 96 */
-/***/ function(module, exports) {
+/***/ }),
+/* 95 */
+/***/ (function(module, exports) {
 
 	module.exports = invert;
 
@@ -33266,9 +33389,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 97 */
-/***/ function(module, exports) {
+/***/ }),
+/* 96 */
+/***/ (function(module, exports) {
 
 	module.exports = adjoint;
 
@@ -33304,9 +33427,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 98 */
-/***/ function(module, exports) {
+/***/ }),
+/* 97 */
+/***/ (function(module, exports) {
 
 	module.exports = determinant;
 
@@ -33339,9 +33462,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 	};
 
-/***/ },
-/* 99 */
-/***/ function(module, exports) {
+/***/ }),
+/* 98 */
+/***/ (function(module, exports) {
 
 	module.exports = multiply;
 
@@ -33386,9 +33509,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 100 */
-/***/ function(module, exports) {
+/***/ }),
+/* 99 */
+/***/ (function(module, exports) {
 
 	module.exports = translate;
 
@@ -33429,9 +33552,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 101 */
-/***/ function(module, exports) {
+/***/ }),
+/* 100 */
+/***/ (function(module, exports) {
 
 	module.exports = scale;
 
@@ -33465,9 +33588,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 102 */
-/***/ function(module, exports) {
+/***/ }),
+/* 101 */
+/***/ (function(module, exports) {
 
 	module.exports = rotate;
 
@@ -33534,9 +33657,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 103 */
-/***/ function(module, exports) {
+/***/ }),
+/* 102 */
+/***/ (function(module, exports) {
 
 	module.exports = rotateX;
 
@@ -33583,9 +33706,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 104 */
-/***/ function(module, exports) {
+/***/ }),
+/* 103 */
+/***/ (function(module, exports) {
 
 	module.exports = rotateY;
 
@@ -33632,9 +33755,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 105 */
-/***/ function(module, exports) {
+/***/ }),
+/* 104 */
+/***/ (function(module, exports) {
 
 	module.exports = rotateZ;
 
@@ -33681,9 +33804,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 106 */
-/***/ function(module, exports) {
+/***/ }),
+/* 105 */
+/***/ (function(module, exports) {
 
 	module.exports = fromRotationTranslation;
 
@@ -33739,9 +33862,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 107 */
-/***/ function(module, exports) {
+/***/ }),
+/* 106 */
+/***/ (function(module, exports) {
 
 	module.exports = fromQuat;
 
@@ -33791,9 +33914,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 108 */
-/***/ function(module, exports) {
+/***/ }),
+/* 107 */
+/***/ (function(module, exports) {
 
 	module.exports = frustum;
 
@@ -33832,9 +33955,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 109 */
-/***/ function(module, exports) {
+/***/ }),
+/* 108 */
+/***/ (function(module, exports) {
 
 	module.exports = perspective;
 
@@ -33870,9 +33993,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 110 */
-/***/ function(module, exports) {
+/***/ }),
+/* 109 */
+/***/ (function(module, exports) {
 
 	module.exports = perspectiveFromFieldOfView;
 
@@ -33916,9 +34039,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 
-/***/ },
-/* 111 */
-/***/ function(module, exports) {
+/***/ }),
+/* 110 */
+/***/ (function(module, exports) {
 
 	module.exports = ortho;
 
@@ -33957,11 +34080,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 112 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 111 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	var identity = __webpack_require__(94);
+	var identity = __webpack_require__(93);
 
 	module.exports = lookAt;
 
@@ -34052,9 +34175,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	};
 
-/***/ },
-/* 113 */
-/***/ function(module, exports) {
+/***/ }),
+/* 112 */
+/***/ (function(module, exports) {
 
 	module.exports = str;
 
@@ -34071,42 +34194,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    a[12] + ', ' + a[13] + ', ' + a[14] + ', ' + a[15] + ')';
 	};
 
-/***/ },
-/* 114 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 113 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  create: __webpack_require__(115),
-	  clone: __webpack_require__(116),
-	  fromValues: __webpack_require__(117),
-	  copy: __webpack_require__(118),
-	  set: __webpack_require__(119),
-	  add: __webpack_require__(120),
-	  subtract: __webpack_require__(121),
-	  multiply: __webpack_require__(122),
-	  divide: __webpack_require__(123),
-	  min: __webpack_require__(124),
-	  max: __webpack_require__(125),
-	  scale: __webpack_require__(126),
-	  scaleAndAdd: __webpack_require__(127),
-	  distance: __webpack_require__(128),
-	  squaredDistance: __webpack_require__(129),
-	  length: __webpack_require__(130),
-	  squaredLength: __webpack_require__(131),
-	  negate: __webpack_require__(132),
-	  inverse: __webpack_require__(133),
-	  normalize: __webpack_require__(134),
-	  dot: __webpack_require__(135),
-	  lerp: __webpack_require__(136),
-	  random: __webpack_require__(137),
-	  transformMat4: __webpack_require__(138),
-	  transformQuat: __webpack_require__(139)
+	  create: __webpack_require__(114),
+	  clone: __webpack_require__(115),
+	  fromValues: __webpack_require__(116),
+	  copy: __webpack_require__(117),
+	  set: __webpack_require__(118),
+	  add: __webpack_require__(119),
+	  subtract: __webpack_require__(120),
+	  multiply: __webpack_require__(121),
+	  divide: __webpack_require__(122),
+	  min: __webpack_require__(123),
+	  max: __webpack_require__(124),
+	  scale: __webpack_require__(125),
+	  scaleAndAdd: __webpack_require__(126),
+	  distance: __webpack_require__(127),
+	  squaredDistance: __webpack_require__(128),
+	  length: __webpack_require__(129),
+	  squaredLength: __webpack_require__(130),
+	  negate: __webpack_require__(131),
+	  inverse: __webpack_require__(132),
+	  normalize: __webpack_require__(133),
+	  dot: __webpack_require__(134),
+	  lerp: __webpack_require__(135),
+	  random: __webpack_require__(136),
+	  transformMat4: __webpack_require__(137),
+	  transformQuat: __webpack_require__(138)
 	}
 
 
-/***/ },
-/* 115 */
-/***/ function(module, exports) {
+/***/ }),
+/* 114 */
+/***/ (function(module, exports) {
 
 	module.exports = create
 
@@ -34125,9 +34248,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 116 */
-/***/ function(module, exports) {
+/***/ }),
+/* 115 */
+/***/ (function(module, exports) {
 
 	module.exports = clone
 
@@ -34147,9 +34270,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 117 */
-/***/ function(module, exports) {
+/***/ }),
+/* 116 */
+/***/ (function(module, exports) {
 
 	module.exports = fromValues
 
@@ -34172,9 +34295,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 118 */
-/***/ function(module, exports) {
+/***/ }),
+/* 117 */
+/***/ (function(module, exports) {
 
 	module.exports = copy
 
@@ -34194,9 +34317,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 119 */
-/***/ function(module, exports) {
+/***/ }),
+/* 118 */
+/***/ (function(module, exports) {
 
 	module.exports = set
 
@@ -34219,9 +34342,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 120 */
-/***/ function(module, exports) {
+/***/ }),
+/* 119 */
+/***/ (function(module, exports) {
 
 	module.exports = add
 
@@ -34242,9 +34365,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 121 */
-/***/ function(module, exports) {
+/***/ }),
+/* 120 */
+/***/ (function(module, exports) {
 
 	module.exports = subtract
 
@@ -34265,9 +34388,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 122 */
-/***/ function(module, exports) {
+/***/ }),
+/* 121 */
+/***/ (function(module, exports) {
 
 	module.exports = multiply
 
@@ -34288,9 +34411,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 123 */
-/***/ function(module, exports) {
+/***/ }),
+/* 122 */
+/***/ (function(module, exports) {
 
 	module.exports = divide
 
@@ -34311,9 +34434,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 124 */
-/***/ function(module, exports) {
+/***/ }),
+/* 123 */
+/***/ (function(module, exports) {
 
 	module.exports = min
 
@@ -34334,9 +34457,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 125 */
-/***/ function(module, exports) {
+/***/ }),
+/* 124 */
+/***/ (function(module, exports) {
 
 	module.exports = max
 
@@ -34357,9 +34480,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 126 */
-/***/ function(module, exports) {
+/***/ }),
+/* 125 */
+/***/ (function(module, exports) {
 
 	module.exports = scale
 
@@ -34380,9 +34503,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 127 */
-/***/ function(module, exports) {
+/***/ }),
+/* 126 */
+/***/ (function(module, exports) {
 
 	module.exports = scaleAndAdd
 
@@ -34404,9 +34527,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 128 */
-/***/ function(module, exports) {
+/***/ }),
+/* 127 */
+/***/ (function(module, exports) {
 
 	module.exports = distance
 
@@ -34426,9 +34549,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 129 */
-/***/ function(module, exports) {
+/***/ }),
+/* 128 */
+/***/ (function(module, exports) {
 
 	module.exports = squaredDistance
 
@@ -34448,9 +34571,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 130 */
-/***/ function(module, exports) {
+/***/ }),
+/* 129 */
+/***/ (function(module, exports) {
 
 	module.exports = length
 
@@ -34469,9 +34592,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 131 */
-/***/ function(module, exports) {
+/***/ }),
+/* 130 */
+/***/ (function(module, exports) {
 
 	module.exports = squaredLength
 
@@ -34490,9 +34613,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 132 */
-/***/ function(module, exports) {
+/***/ }),
+/* 131 */
+/***/ (function(module, exports) {
 
 	module.exports = negate
 
@@ -34512,9 +34635,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 133 */
-/***/ function(module, exports) {
+/***/ }),
+/* 132 */
+/***/ (function(module, exports) {
 
 	module.exports = inverse
 
@@ -34534,9 +34657,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 134 */
-/***/ function(module, exports) {
+/***/ }),
+/* 133 */
+/***/ (function(module, exports) {
 
 	module.exports = normalize
 
@@ -34564,9 +34687,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 135 */
-/***/ function(module, exports) {
+/***/ }),
+/* 134 */
+/***/ (function(module, exports) {
 
 	module.exports = dot
 
@@ -34582,9 +34705,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 136 */
-/***/ function(module, exports) {
+/***/ }),
+/* 135 */
+/***/ (function(module, exports) {
 
 	module.exports = lerp
 
@@ -34610,12 +34733,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 137 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 136 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	var vecNormalize = __webpack_require__(134)
-	var vecScale = __webpack_require__(126)
+	var vecNormalize = __webpack_require__(133)
+	var vecScale = __webpack_require__(125)
 
 	module.exports = random
 
@@ -34640,9 +34763,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 138 */
-/***/ function(module, exports) {
+/***/ }),
+/* 137 */
+/***/ (function(module, exports) {
 
 	module.exports = transformMat4
 
@@ -34664,9 +34787,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 139 */
-/***/ function(module, exports) {
+/***/ }),
+/* 138 */
+/***/ (function(module, exports) {
 
 	module.exports = transformQuat
 
@@ -34697,48 +34820,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 140 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 139 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  create: __webpack_require__(141)
-	  , clone: __webpack_require__(142)
-	  , angle: __webpack_require__(143)
-	  , fromValues: __webpack_require__(144)
-	  , copy: __webpack_require__(147)
-	  , set: __webpack_require__(148)
-	  , add: __webpack_require__(149)
-	  , subtract: __webpack_require__(150)
-	  , multiply: __webpack_require__(151)
-	  , divide: __webpack_require__(152)
-	  , min: __webpack_require__(153)
-	  , max: __webpack_require__(154)
-	  , scale: __webpack_require__(155)
-	  , scaleAndAdd: __webpack_require__(156)
-	  , distance: __webpack_require__(157)
-	  , squaredDistance: __webpack_require__(158)
-	  , length: __webpack_require__(159)
-	  , squaredLength: __webpack_require__(160)
-	  , negate: __webpack_require__(161)
-	  , inverse: __webpack_require__(162)
-	  , normalize: __webpack_require__(145)
-	  , dot: __webpack_require__(146)
-	  , cross: __webpack_require__(163)
-	  , lerp: __webpack_require__(164)
-	  , random: __webpack_require__(165)
-	  , transformMat4: __webpack_require__(166)
-	  , transformMat3: __webpack_require__(167)
-	  , transformQuat: __webpack_require__(168)
-	  , rotateX: __webpack_require__(169)
-	  , rotateY: __webpack_require__(170)
-	  , rotateZ: __webpack_require__(171)
-	  , forEach: __webpack_require__(172)
+	  create: __webpack_require__(140)
+	  , clone: __webpack_require__(141)
+	  , angle: __webpack_require__(142)
+	  , fromValues: __webpack_require__(143)
+	  , copy: __webpack_require__(146)
+	  , set: __webpack_require__(147)
+	  , add: __webpack_require__(148)
+	  , subtract: __webpack_require__(149)
+	  , multiply: __webpack_require__(150)
+	  , divide: __webpack_require__(151)
+	  , min: __webpack_require__(152)
+	  , max: __webpack_require__(153)
+	  , scale: __webpack_require__(154)
+	  , scaleAndAdd: __webpack_require__(155)
+	  , distance: __webpack_require__(156)
+	  , squaredDistance: __webpack_require__(157)
+	  , length: __webpack_require__(158)
+	  , squaredLength: __webpack_require__(159)
+	  , negate: __webpack_require__(160)
+	  , inverse: __webpack_require__(161)
+	  , normalize: __webpack_require__(144)
+	  , dot: __webpack_require__(145)
+	  , cross: __webpack_require__(162)
+	  , lerp: __webpack_require__(163)
+	  , random: __webpack_require__(164)
+	  , transformMat4: __webpack_require__(165)
+	  , transformMat3: __webpack_require__(166)
+	  , transformQuat: __webpack_require__(167)
+	  , rotateX: __webpack_require__(168)
+	  , rotateY: __webpack_require__(169)
+	  , rotateZ: __webpack_require__(170)
+	  , forEach: __webpack_require__(171)
 	}
 
-/***/ },
-/* 141 */
-/***/ function(module, exports) {
+/***/ }),
+/* 140 */
+/***/ (function(module, exports) {
 
 	module.exports = create;
 
@@ -34755,9 +34878,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 142 */
-/***/ function(module, exports) {
+/***/ }),
+/* 141 */
+/***/ (function(module, exports) {
 
 	module.exports = clone;
 
@@ -34775,15 +34898,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 143 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 142 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = angle
 
-	var fromValues = __webpack_require__(144)
-	var normalize = __webpack_require__(145)
-	var dot = __webpack_require__(146)
+	var fromValues = __webpack_require__(143)
+	var normalize = __webpack_require__(144)
+	var dot = __webpack_require__(145)
 
 	/**
 	 * Get the angle between two 3D vectors
@@ -34808,9 +34931,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
-/* 144 */
-/***/ function(module, exports) {
+/***/ }),
+/* 143 */
+/***/ (function(module, exports) {
 
 	module.exports = fromValues;
 
@@ -34830,9 +34953,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 145 */
-/***/ function(module, exports) {
+/***/ }),
+/* 144 */
+/***/ (function(module, exports) {
 
 	module.exports = normalize;
 
@@ -34858,9 +34981,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 146 */
-/***/ function(module, exports) {
+/***/ }),
+/* 145 */
+/***/ (function(module, exports) {
 
 	module.exports = dot;
 
@@ -34875,9 +34998,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 	}
 
-/***/ },
-/* 147 */
-/***/ function(module, exports) {
+/***/ }),
+/* 146 */
+/***/ (function(module, exports) {
 
 	module.exports = copy;
 
@@ -34895,9 +35018,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 148 */
-/***/ function(module, exports) {
+/***/ }),
+/* 147 */
+/***/ (function(module, exports) {
 
 	module.exports = set;
 
@@ -34917,9 +35040,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 149 */
-/***/ function(module, exports) {
+/***/ }),
+/* 148 */
+/***/ (function(module, exports) {
 
 	module.exports = add;
 
@@ -34938,9 +35061,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 150 */
-/***/ function(module, exports) {
+/***/ }),
+/* 149 */
+/***/ (function(module, exports) {
 
 	module.exports = subtract;
 
@@ -34959,9 +35082,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 151 */
-/***/ function(module, exports) {
+/***/ }),
+/* 150 */
+/***/ (function(module, exports) {
 
 	module.exports = multiply;
 
@@ -34980,9 +35103,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 152 */
-/***/ function(module, exports) {
+/***/ }),
+/* 151 */
+/***/ (function(module, exports) {
 
 	module.exports = divide;
 
@@ -35001,9 +35124,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 153 */
-/***/ function(module, exports) {
+/***/ }),
+/* 152 */
+/***/ (function(module, exports) {
 
 	module.exports = min;
 
@@ -35022,9 +35145,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 154 */
-/***/ function(module, exports) {
+/***/ }),
+/* 153 */
+/***/ (function(module, exports) {
 
 	module.exports = max;
 
@@ -35043,9 +35166,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 155 */
-/***/ function(module, exports) {
+/***/ }),
+/* 154 */
+/***/ (function(module, exports) {
 
 	module.exports = scale;
 
@@ -35064,9 +35187,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 156 */
-/***/ function(module, exports) {
+/***/ }),
+/* 155 */
+/***/ (function(module, exports) {
 
 	module.exports = scaleAndAdd;
 
@@ -35086,9 +35209,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 157 */
-/***/ function(module, exports) {
+/***/ }),
+/* 156 */
+/***/ (function(module, exports) {
 
 	module.exports = distance;
 
@@ -35106,9 +35229,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return Math.sqrt(x*x + y*y + z*z)
 	}
 
-/***/ },
-/* 158 */
-/***/ function(module, exports) {
+/***/ }),
+/* 157 */
+/***/ (function(module, exports) {
 
 	module.exports = squaredDistance;
 
@@ -35126,9 +35249,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return x*x + y*y + z*z
 	}
 
-/***/ },
-/* 159 */
-/***/ function(module, exports) {
+/***/ }),
+/* 158 */
+/***/ (function(module, exports) {
 
 	module.exports = length;
 
@@ -35145,9 +35268,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return Math.sqrt(x*x + y*y + z*z)
 	}
 
-/***/ },
-/* 160 */
-/***/ function(module, exports) {
+/***/ }),
+/* 159 */
+/***/ (function(module, exports) {
 
 	module.exports = squaredLength;
 
@@ -35164,9 +35287,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return x*x + y*y + z*z
 	}
 
-/***/ },
-/* 161 */
-/***/ function(module, exports) {
+/***/ }),
+/* 160 */
+/***/ (function(module, exports) {
 
 	module.exports = negate;
 
@@ -35184,9 +35307,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 162 */
-/***/ function(module, exports) {
+/***/ }),
+/* 161 */
+/***/ (function(module, exports) {
 
 	module.exports = inverse;
 
@@ -35204,9 +35327,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return out
 	}
 
-/***/ },
-/* 163 */
-/***/ function(module, exports) {
+/***/ }),
+/* 162 */
+/***/ (function(module, exports) {
 
 	module.exports = cross;
 
@@ -35228,9 +35351,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 164 */
-/***/ function(module, exports) {
+/***/ }),
+/* 163 */
+/***/ (function(module, exports) {
 
 	module.exports = lerp;
 
@@ -35253,9 +35376,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 165 */
-/***/ function(module, exports) {
+/***/ }),
+/* 164 */
+/***/ (function(module, exports) {
 
 	module.exports = random;
 
@@ -35279,9 +35402,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 166 */
-/***/ function(module, exports) {
+/***/ }),
+/* 165 */
+/***/ (function(module, exports) {
 
 	module.exports = transformMat4;
 
@@ -35304,9 +35427,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 167 */
-/***/ function(module, exports) {
+/***/ }),
+/* 166 */
+/***/ (function(module, exports) {
 
 	module.exports = transformMat3;
 
@@ -35326,9 +35449,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 168 */
-/***/ function(module, exports) {
+/***/ }),
+/* 167 */
+/***/ (function(module, exports) {
 
 	module.exports = transformQuat;
 
@@ -35359,9 +35482,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 169 */
-/***/ function(module, exports) {
+/***/ }),
+/* 168 */
+/***/ (function(module, exports) {
 
 	module.exports = rotateX;
 
@@ -35393,9 +35516,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 170 */
-/***/ function(module, exports) {
+/***/ }),
+/* 169 */
+/***/ (function(module, exports) {
 
 	module.exports = rotateY;
 
@@ -35427,9 +35550,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 171 */
-/***/ function(module, exports) {
+/***/ }),
+/* 170 */
+/***/ (function(module, exports) {
 
 	module.exports = rotateZ;
 
@@ -35461,13 +35584,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 172 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 171 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = forEach;
 
-	var vec = __webpack_require__(141)()
+	var vec = __webpack_require__(140)()
 
 	/**
 	 * Perform some operation over an array of vec3s.
@@ -35510,44 +35633,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return a
 	}
 
-/***/ },
-/* 173 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 172 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  create: __webpack_require__(174)
-	  , clone: __webpack_require__(175)
-	  , fromValues: __webpack_require__(176)
-	  , copy: __webpack_require__(177)
-	  , set: __webpack_require__(178)
-	  , add: __webpack_require__(179)
-	  , subtract: __webpack_require__(180)
-	  , multiply: __webpack_require__(181)
-	  , divide: __webpack_require__(182)
-	  , min: __webpack_require__(183)
-	  , max: __webpack_require__(184)
-	  , scale: __webpack_require__(185)
-	  , scaleAndAdd: __webpack_require__(186)
-	  , distance: __webpack_require__(187)
-	  , squaredDistance: __webpack_require__(188)
-	  , length: __webpack_require__(189)
-	  , squaredLength: __webpack_require__(190)
-	  , negate: __webpack_require__(191)
-	  , normalize: __webpack_require__(192)
-	  , dot: __webpack_require__(193)
-	  , cross: __webpack_require__(194)
-	  , lerp: __webpack_require__(195)
-	  , random: __webpack_require__(196)
-	  , transformMat2: __webpack_require__(197)
-	  , transformMat2d: __webpack_require__(198)
-	  , transformMat3: __webpack_require__(199)
-	  , transformMat4: __webpack_require__(200)
-	  , forEach: __webpack_require__(201)
+	  create: __webpack_require__(173)
+	  , clone: __webpack_require__(174)
+	  , fromValues: __webpack_require__(175)
+	  , copy: __webpack_require__(176)
+	  , set: __webpack_require__(177)
+	  , add: __webpack_require__(178)
+	  , subtract: __webpack_require__(179)
+	  , multiply: __webpack_require__(180)
+	  , divide: __webpack_require__(181)
+	  , min: __webpack_require__(182)
+	  , max: __webpack_require__(183)
+	  , scale: __webpack_require__(184)
+	  , scaleAndAdd: __webpack_require__(185)
+	  , distance: __webpack_require__(186)
+	  , squaredDistance: __webpack_require__(187)
+	  , length: __webpack_require__(188)
+	  , squaredLength: __webpack_require__(189)
+	  , negate: __webpack_require__(190)
+	  , normalize: __webpack_require__(191)
+	  , dot: __webpack_require__(192)
+	  , cross: __webpack_require__(193)
+	  , lerp: __webpack_require__(194)
+	  , random: __webpack_require__(195)
+	  , transformMat2: __webpack_require__(196)
+	  , transformMat2d: __webpack_require__(197)
+	  , transformMat3: __webpack_require__(198)
+	  , transformMat4: __webpack_require__(199)
+	  , forEach: __webpack_require__(200)
 	}
 
-/***/ },
-/* 174 */
-/***/ function(module, exports) {
+/***/ }),
+/* 173 */
+/***/ (function(module, exports) {
 
 	module.exports = create
 
@@ -35563,9 +35686,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 175 */
-/***/ function(module, exports) {
+/***/ }),
+/* 174 */
+/***/ (function(module, exports) {
 
 	module.exports = clone
 
@@ -35582,9 +35705,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 176 */
-/***/ function(module, exports) {
+/***/ }),
+/* 175 */
+/***/ (function(module, exports) {
 
 	module.exports = fromValues
 
@@ -35602,9 +35725,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 177 */
-/***/ function(module, exports) {
+/***/ }),
+/* 176 */
+/***/ (function(module, exports) {
 
 	module.exports = copy
 
@@ -35621,9 +35744,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 178 */
-/***/ function(module, exports) {
+/***/ }),
+/* 177 */
+/***/ (function(module, exports) {
 
 	module.exports = set
 
@@ -35641,9 +35764,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 179 */
-/***/ function(module, exports) {
+/***/ }),
+/* 178 */
+/***/ (function(module, exports) {
 
 	module.exports = add
 
@@ -35661,9 +35784,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 180 */
-/***/ function(module, exports) {
+/***/ }),
+/* 179 */
+/***/ (function(module, exports) {
 
 	module.exports = subtract
 
@@ -35681,9 +35804,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 181 */
-/***/ function(module, exports) {
+/***/ }),
+/* 180 */
+/***/ (function(module, exports) {
 
 	module.exports = multiply
 
@@ -35701,9 +35824,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 182 */
-/***/ function(module, exports) {
+/***/ }),
+/* 181 */
+/***/ (function(module, exports) {
 
 	module.exports = divide
 
@@ -35721,9 +35844,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 183 */
-/***/ function(module, exports) {
+/***/ }),
+/* 182 */
+/***/ (function(module, exports) {
 
 	module.exports = min
 
@@ -35741,9 +35864,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 184 */
-/***/ function(module, exports) {
+/***/ }),
+/* 183 */
+/***/ (function(module, exports) {
 
 	module.exports = max
 
@@ -35761,9 +35884,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 185 */
-/***/ function(module, exports) {
+/***/ }),
+/* 184 */
+/***/ (function(module, exports) {
 
 	module.exports = scale
 
@@ -35781,9 +35904,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 186 */
-/***/ function(module, exports) {
+/***/ }),
+/* 185 */
+/***/ (function(module, exports) {
 
 	module.exports = scaleAndAdd
 
@@ -35802,9 +35925,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 187 */
-/***/ function(module, exports) {
+/***/ }),
+/* 186 */
+/***/ (function(module, exports) {
 
 	module.exports = distance
 
@@ -35821,9 +35944,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return Math.sqrt(x*x + y*y)
 	}
 
-/***/ },
-/* 188 */
-/***/ function(module, exports) {
+/***/ }),
+/* 187 */
+/***/ (function(module, exports) {
 
 	module.exports = squaredDistance
 
@@ -35840,9 +35963,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return x*x + y*y
 	}
 
-/***/ },
-/* 189 */
-/***/ function(module, exports) {
+/***/ }),
+/* 188 */
+/***/ (function(module, exports) {
 
 	module.exports = length
 
@@ -35858,9 +35981,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return Math.sqrt(x*x + y*y)
 	}
 
-/***/ },
-/* 190 */
-/***/ function(module, exports) {
+/***/ }),
+/* 189 */
+/***/ (function(module, exports) {
 
 	module.exports = squaredLength
 
@@ -35876,9 +35999,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return x*x + y*y
 	}
 
-/***/ },
-/* 191 */
-/***/ function(module, exports) {
+/***/ }),
+/* 190 */
+/***/ (function(module, exports) {
 
 	module.exports = negate
 
@@ -35895,9 +36018,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 192 */
-/***/ function(module, exports) {
+/***/ }),
+/* 191 */
+/***/ (function(module, exports) {
 
 	module.exports = normalize
 
@@ -35921,9 +36044,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 193 */
-/***/ function(module, exports) {
+/***/ }),
+/* 192 */
+/***/ (function(module, exports) {
 
 	module.exports = dot
 
@@ -35938,9 +36061,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return a[0] * b[0] + a[1] * b[1]
 	}
 
-/***/ },
-/* 194 */
-/***/ function(module, exports) {
+/***/ }),
+/* 193 */
+/***/ (function(module, exports) {
 
 	module.exports = cross
 
@@ -35960,9 +36083,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 195 */
-/***/ function(module, exports) {
+/***/ }),
+/* 194 */
+/***/ (function(module, exports) {
 
 	module.exports = lerp
 
@@ -35983,9 +36106,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 196 */
-/***/ function(module, exports) {
+/***/ }),
+/* 195 */
+/***/ (function(module, exports) {
 
 	module.exports = random
 
@@ -36004,9 +36127,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 197 */
-/***/ function(module, exports) {
+/***/ }),
+/* 196 */
+/***/ (function(module, exports) {
 
 	module.exports = transformMat2
 
@@ -36026,9 +36149,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 198 */
-/***/ function(module, exports) {
+/***/ }),
+/* 197 */
+/***/ (function(module, exports) {
 
 	module.exports = transformMat2d
 
@@ -36048,9 +36171,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 199 */
-/***/ function(module, exports) {
+/***/ }),
+/* 198 */
+/***/ (function(module, exports) {
 
 	module.exports = transformMat3
 
@@ -36071,9 +36194,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 200 */
-/***/ function(module, exports) {
+/***/ }),
+/* 199 */
+/***/ (function(module, exports) {
 
 	module.exports = transformMat4
 
@@ -36095,13 +36218,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out
 	}
 
-/***/ },
-/* 201 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 200 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = forEach
 
-	var vec = __webpack_require__(174)()
+	var vec = __webpack_require__(173)()
 
 	/**
 	 * Perform some operation over an array of vec2s.
@@ -36142,9 +36265,335 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return a
 	}
 
-/***/ },
+/***/ }),
+/* 201 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(8);
+	var registerRenderer = __webpack_require__(202).registerRenderer;
+	var renderer = __webpack_require__(203);
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class vglRenderer
+	 *
+	 * @class geo.gl.vglRenderer
+	 * @extends geo.renderer
+	 * @param canvas
+	 * @returns {geo.gl.vglRenderer}
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	var vglRenderer = function (arg) {
+	  'use strict';
+
+	  if (!(this instanceof vglRenderer)) {
+	    return new vglRenderer(arg);
+	  }
+	  arg = arg || {};
+	  renderer.call(this, arg);
+
+	  var $ = __webpack_require__(1);
+	  var vgl = __webpack_require__(87);
+	  var mat4 = __webpack_require__(89);
+	  var util = __webpack_require__(83);
+	  var geo_event = __webpack_require__(9);
+
+	  var m_this = this,
+	      m_contextRenderer = null,
+	      m_viewer = null,
+	      m_width = 0,
+	      m_height = 0,
+	      m_lastZoom,
+	      m_updateCamera = false,
+	      s_init = this._init,
+	      s_exit = this._exit;
+
+	  /// TODO: Move this API to the base class
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Return width of the renderer
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.width = function () {
+	    return m_width;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Return height of the renderer
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.height = function () {
+	    return m_height;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get context specific renderer
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.contextRenderer = function () {
+	    return m_contextRenderer;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get API used by the renderer
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.api = function () {
+	    return 'vgl';
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Initialize
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._init = function () {
+	    if (m_this.initialized()) {
+	      return m_this;
+	    }
+
+	    s_init.call(m_this);
+
+	    var canvas = $(document.createElement('canvas'));
+	    canvas.addClass('webgl-canvas');
+	    $(m_this.layer().node().get(0)).append(canvas);
+
+	    if (window.contextPreserveDrawingBuffer) {
+	      var elem = canvas.get(0);
+	      var getContext = elem.getContext;
+	      elem.getContext = function (contextType, contextAttributes) {
+	        contextAttributes = contextAttributes || {};
+	        contextAttributes.preserveDrawingBuffer = true;
+	        return getContext.call(elem, contextType, contextAttributes);
+	      };
+	    }
+
+	    m_viewer = vgl.viewer(canvas.get(0), arg.options);
+	    m_viewer.init();
+	    m_contextRenderer = m_viewer.renderWindow().activeRenderer();
+	    m_contextRenderer.setResetScene(false);
+
+	    if (m_viewer.renderWindow().renderers().length > 0) {
+	      m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
+	    }
+	    m_this.canvas(canvas);
+	    /* Initialize the size of the renderer */
+	    var map = m_this.layer().map(),
+	        mapSize = map.size();
+	    m_this._resize(0, 0, mapSize.width, mapSize.height);
+
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Handle resize event
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._resize = function (x, y, w, h) {
+	    var renderWindow = m_viewer.renderWindow();
+
+	    m_width = w;
+	    m_height = h;
+	    m_this.canvas().attr('width', w);
+	    m_this.canvas().attr('height', h);
+	    renderWindow.positionAndResize(x, y, w, h);
+
+	    m_updateCamera = true;
+	    m_this._render();
+
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Render.  This actually schedules rendering for the next animation frame.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._render = function () {
+	    /* If we are already scheduled to render, don't schedule again.  Rather,
+	     * mark that we should render after other animation frame requests occur.
+	     * It would be nice if we could just reschedule the call by removing and
+	     * readding the animation frame request, but this doesn't work for if the
+	     * reschedule occurs during another animation frame callback (it then waits
+	     * until a subsequent frame). */
+	    m_this.layer().map().scheduleAnimationFrame(this._renderFrame, true);
+	    return m_this;
+	  };
+
+	  /**
+	   * This clears the render timer and actually renders.
+	   */
+	  this._renderFrame = function () {
+	    if (m_updateCamera) {
+	      m_updateCamera = false;
+	      m_this._updateRendererCamera();
+	    }
+	    m_viewer.render();
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Exit
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._exit = function () {
+	    m_this.canvas().remove();
+	    m_viewer.exit();
+	    s_exit();
+	  };
+
+	  this._updateRendererCamera = function () {
+	    var renderWindow = m_viewer.renderWindow(),
+	        map = m_this.layer().map(),
+	        camera = map.camera(),
+	        rotation = map.rotation() || 0,
+	        view = camera.view,
+	        proj = camera.projectionMatrix;
+	    if (proj[15]) {
+	      /* we want positive z to be closer to the camera, but webGL does the
+	       * converse, so reverse the z coordinates. */
+	      proj = mat4.scale(util.mat4AsArray(), proj, [1, 1, -1]);
+	    }
+	    /* A similar kluge as in the base camera class worldToDisplay4.  With this,
+	     * we can show z values from 0 to 1. */
+	    proj = mat4.translate(util.mat4AsArray(), proj,
+	                          [0, 0, camera.constructor.bounds.far]);
+	    /* Check if the rotation is a multiple of 90 */
+	    var basis = Math.PI / 2,
+	        angle = rotation % basis,  // move to range (-pi/2, pi/2)
+	        ortho = (Math.min(Math.abs(angle), Math.abs(angle - basis)) < 0.00001);
+	    renderWindow.renderers().forEach(function (renderer) {
+	      var cam = renderer.camera();
+	      if (util.compareArrays(view, cam.viewMatrix()) &&
+	          util.compareArrays(proj, cam.projectionMatrix()) &&
+	          m_lastZoom === map.zoom()) {
+	        return;
+	      }
+	      m_lastZoom = map.zoom();
+	      cam.setViewMatrix(view, true);
+	      cam.setProjectionMatrix(proj);
+	      var viewport = camera.viewport;
+	      /* Test if we should align texels.  We won't if the projection matrix
+	       * is not simple, if there is a rotation that isn't a multiple of 90
+	       * degrees, if the viewport is not at an integer location, or if the zoom
+	       * level is not close to an integer.
+	       *   Note that the test for the viewport is strict (val % 1 is non-zero
+	       * if the value is not an integer), as, in general, the alignment is only
+	       * non-integral if a percent offset or calculation was used in css
+	       * somewhere.  The test for zoom level always has some allowance for
+	       * precision, as it is often the result of repeated computations. */
+	      if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
+	          proj[8] || proj[9] || proj[11] || proj[15] !== 1 || !ortho ||
+	          (viewport.left && viewport.left % 1) ||
+	          (viewport.top && viewport.top % 1) ||
+	          (parseFloat(m_lastZoom.toFixed(6)) !==
+	           parseFloat(m_lastZoom.toFixed(0)))) {
+	        /* Don't align texels */
+	        cam.viewAlignment = function () {
+	          return null;
+	        };
+	      } else {
+	        /* Set information for texel alignment.  The rounding factors should
+	         * probably be divided by window.devicePixelRatio. */
+	        cam.viewAlignment = function () {
+	          var align = {
+	            roundx: 2.0 / viewport.width,
+	            roundy: 2.0 / viewport.height
+	          };
+	          align.dx = (viewport.width % 2) ? align.roundx * 0.5 : 0;
+	          align.dy = (viewport.height % 2) ? align.roundy * 0.5 : 0;
+	          return align;
+	        };
+	      }
+	    });
+	  };
+
+	  // Connect to pan event.  This is sufficient, as all zooms and rotations also
+	  // produce a pan
+	  m_this.layer().geoOn(geo_event.pan, function (evt) {
+	    void (evt);
+	    m_updateCamera = true;
+	  });
+
+	  // Connect to parallelprojection event
+	  m_this.layer().geoOn(geo_event.parallelprojection, function (evt) {
+	    var vglRenderer = m_this.contextRenderer(),
+	        camera,
+	        layer = m_this.layer();
+
+	    if (evt.geo && evt.geo._triggeredBy !== layer) {
+	      if (!vglRenderer || !vglRenderer.camera()) {
+	        console.log('Parallel projection event triggered on unconnected VGL ' +
+	                    'renderer.');
+	        return;
+	      }
+	      camera = vglRenderer.camera();
+	      camera.setEnableParallelProjection(evt.parallelProjection);
+	      m_updateCamera = true;
+	    }
+	  });
+
+	  return this;
+	};
+
+	inherit(vglRenderer, renderer);
+
+	registerRenderer('vgl', vglRenderer);
+
+	(function () {
+	  'use strict';
+
+	  var checkedWebGL;
+
+	  /**
+	   * Report if the vgl renderer is supported.  This is just a check if webGL is
+	   * supported and available.
+	   *
+	   * @returns {boolean} true if available.
+	   */
+	  vglRenderer.supported = function () {
+	    if (checkedWebGL === undefined) {
+	      /* This is extracted from what Modernizr uses. */
+	      var canvas, ctx, exts; // eslint-disable-line no-unused-vars
+	      try {
+	        canvas = document.createElement('canvas');
+	        ctx = (canvas.getContext('webgl') ||
+	               canvas.getContext('experimental-webgl'));
+	        exts = ctx.getSupportedExtensions();
+	        checkedWebGL = true;
+	      } catch (e) {
+	        console.error('No webGL support');
+	        checkedWebGL = false;
+	      }
+	      canvas = undefined;
+	      ctx = undefined;
+	      exts = undefined;
+	    }
+	    return checkedWebGL;
+	  };
+
+	  /**
+	   * If the vgl renderer is not supported, supply the name of a renderer that
+	   * should be used instead.  This asks for the null renderer.
+	   *
+	   * @returns null for the null renderer.
+	   */
+	  vglRenderer.fallback = function () {
+	    return null;
+	  };
+
+	})();
+
+	module.exports = vglRenderer;
+
+
+/***/ }),
 /* 202 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 	var widgets = {
@@ -36591,13 +37040,813 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = util;
 
 
-/***/ },
+/***/ }),
 /* 203 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(204);
-	var timestamp = __webpack_require__(207);
+	var object = __webpack_require__(204);
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class renderer
+	 *
+	 * @class geo.renderer
+	 * @extends geo.object
+	 * @returns {geo.renderer}
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	var renderer = function (arg) {
+	  'use strict';
+
+	  if (!(this instanceof renderer)) {
+	    return new renderer(arg);
+	  }
+	  object.call(this);
+
+	  arg = arg || {};
+	  var m_this = this,
+	      m_layer = arg.layer === undefined ? null : arg.layer,
+	      m_canvas = arg.canvas === undefined ? null : arg.canvas,
+	      m_initialized = false;
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get layer of the renderer
+	   *
+	   * @returns {*}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.layer = function () {
+	    return m_layer;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get canvas for the renderer
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.canvas = function (val) {
+	    if (val === undefined) {
+	      return m_canvas;
+	    } else {
+	      m_canvas = val;
+	      m_this.modified();
+	    }
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get map that this renderer belongs to
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.map = function () {
+	    if (m_layer) {
+	      return m_layer.map();
+	    } else {
+	      return null;
+	    }
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set if renderer has been initialized
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.initialized = function (val) {
+	    if (val === undefined) {
+	      return m_initialized;
+	    } else {
+	      m_initialized = val;
+	      return m_this;
+	    }
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get render API used by the renderer
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.api = function () {
+	    throw new Error('Should be implemented by derived classes');
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Reset to default
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.reset = function () {
+	    return true;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Initialize
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._init = function () {
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Handle resize event
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._resize = function () {
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Render
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._render = function () {
+	  };
+
+	  return this;
+	};
+
+	inherit(renderer, object);
+	module.exports = renderer;
+
+
+/***/ }),
+/* 204 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var vgl = __webpack_require__(87);
+	var inherit = __webpack_require__(8);
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class object
+	 *
+	 * @class geo.object
+	 * @extends vgl.object
+	 * @returns {geo.object}
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	var object = function () {
+	  'use strict';
+	  if (!(this instanceof object)) {
+	    return new object();
+	  }
+
+	  var m_this = this,
+	      m_eventHandlers = {},
+	      m_idleHandlers = [],
+	      m_promiseCount = 0;
+
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Bind a handler that will be called once when all internal promises are
+	   *  resolved.
+	   *
+	   *  @param {function} handler A function taking no arguments
+	   *  @returns {geo.object[]|geo.object} this
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.onIdle = function (handler) {
+	    if (m_promiseCount) {
+	      m_idleHandlers.push(handler);
+	    } else {
+	      handler();
+	    }
+	    return m_this;
+	  };
+
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Add a new promise object preventing idle event handlers from being called
+	   *  until it is resolved.
+	   *
+	   *  @param {Promise} promise A promise object
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.addPromise = function (promise) {
+	    // called on any resolution of the promise
+	    function onDone() {
+	      m_promiseCount -= 1;
+	      if (!m_promiseCount) {
+	        m_idleHandlers.splice(0, m_idleHandlers.length)
+	          .forEach(function (handler) {
+	            handler();
+	          });
+	      }
+	    }
+	    m_promiseCount += 1;
+	    promise.then(onDone, onDone);
+	    return m_this;
+	  };
+
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Bind an event handler to this object
+	   *
+	   *  @param {String} event
+	   *    An event from {geo.events}
+	   *  @param {function} handler
+	   *    A function that will be called when ``event`` is triggered.  The
+	   *    function will be given an event object as a first parameter and
+	   *    optionally a second argument provided by the triggerer.
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.geoOn = function (event, handler) {
+	    if (Array.isArray(event)) {
+	      event.forEach(function (e) {
+	        m_this.geoOn(e, handler);
+	      });
+	      return m_this;
+	    }
+	    if (!m_eventHandlers.hasOwnProperty(event)) {
+	      m_eventHandlers[event] = [];
+	    }
+	    m_eventHandlers[event].push(handler);
+	    return m_this;
+	  };
+
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Trigger an event (or events) on this object and call all handlers
+	   *
+	   *  @param {String} event An event from {geo.event}
+	   *  @param {Object} args An optional argument to pass to handlers
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.geoTrigger = function (event, args) {
+
+	    // if we have an array of events, recall with single events
+	    if (Array.isArray(event)) {
+	      event.forEach(function (e) {
+	        m_this.geoTrigger(e, args);
+	      });
+	      return m_this;
+	    }
+
+	    // append the event type to the argument object
+	    args = args || {};
+	    args.event = event;
+
+	    if (m_eventHandlers.hasOwnProperty(event)) {
+	      m_eventHandlers[event].forEach(function (handler) {
+	        handler.call(m_this, args);
+	      });
+	    }
+
+	    return m_this;
+	  };
+
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   *  Remove handlers from an event (or an array of events).  If no event is
+	   *  provided all handlers will be removed.
+	   *
+	   *  @param {string?} event An event from {geo.events}
+	   *  @param {object?} arg A function or array of functions to remove from the events
+	   *                      or if falsey remove all handlers from the events
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this.geoOff = function (event, arg) {
+	    if (event === undefined) {
+	      m_eventHandlers = {};
+	      m_idleHandlers = [];
+	      m_promiseCount = 0;
+	    }
+	    if (Array.isArray(event)) {
+	      event.forEach(function (e) {
+	        m_this.geoOff(e, arg);
+	      });
+	      return m_this;
+	    }
+	    if (!arg) {
+	      m_eventHandlers[event] = [];
+	    } else if (Array.isArray(arg)) {
+	      arg.forEach(function (handler) {
+	        m_this.geoOff(event, handler);
+	      });
+	      return m_this;
+	    }
+	    // What do we do if the handler is not already bound?
+	    //   ignoring for now...
+	    if (m_eventHandlers.hasOwnProperty(event)) {
+	      m_eventHandlers[event] = m_eventHandlers[event].filter(function (f) {
+	        return f !== arg;
+	      }
+	      );
+	    }
+	    return m_this;
+	  };
+
+	  //////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Free all resources and destroy the object.
+	   */
+	  //////////////////////////////////////////////////////////////////////////////
+	  this._exit = function () {
+	    m_this.geoOff();
+	  };
+
+	  vgl.object.call(this);
+
+	  return this;
+	};
+
+	inherit(object, vgl.object);
+	module.exports = object;
+
+
+/***/ }),
+/* 205 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	/*
+	markercluster plugin:
+
+	Copyright 2012 David Leaver
+
+	Permission is hereby granted, free of charge, to any person obtaining
+	a copy of this software and associated documentation files (the
+	"Software"), to deal in the Software without restriction, including
+	without limitation the rights to use, copy, modify, merge, publish,
+	distribute, sublicense, and/or sell copies of the Software, and to
+	permit persons to whom the Software is furnished to do so, subject to
+	the following conditions:
+
+	The above copyright notice and this permission notice shall be
+	included in all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+	EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+	NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+	LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+	OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	Leaflet utilities:
+
+	Copyright (c) 2010-2015, Vladimir Agafonkin
+	Copyright (c) 2010-2011, CloudMade
+	All rights reserved.
+
+	Redistribution and use in source and binary forms, with or without modification, are
+	permitted provided that the following conditions are met:
+
+	   1. Redistributions of source code must retain the above copyright notice, this list of
+	      conditions and the following disclaimer.
+
+	   2. Redistributions in binary form must reproduce the above copyright notice, this list
+	      of conditions and the following disclaimer in the documentation and/or other
+	      materials provided with the distribution.
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+	EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+	MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+	COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+	EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+	SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+	HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+	TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+	*/
+
+	/**
+	 * @file
+	 * Code taken from https://github.com/Leaflet/Leaflet.markercluster
+	 * to support faster hierarchical clustering of features.
+	 * @copyright 2012, David Leaver
+	 */
+
+	(function () {
+	    "use strict";
+
+	    var $ = __webpack_require__(1);
+	    var L = {};
+	    L.Util = {
+	        // return unique ID of an object
+	        stamp: function (obj) {
+	            obj._leaflet_id = obj._leaflet_id || ++L.Util.lastId;
+	            return obj._leaflet_id;
+	        },
+	        lastId: 0
+	    };
+
+	    var DistanceGrid = function (cellSize) {
+	        this._cellSize = cellSize;
+	        this._sqCellSize = cellSize * cellSize;
+	        this._grid = {};
+	        this._objectPoint = {};
+	    };
+
+	    DistanceGrid.prototype = {
+
+	        addObject: function (obj, point) {
+	            var x = this._getCoord(point.x),
+	                y = this._getCoord(point.y),
+	                grid = this._grid,
+	                row = grid[y] = grid[y] || {},
+	                cell = row[x] = row[x] || [],
+	                stamp = L.Util.stamp(obj);
+
+	            point.obj = obj;
+	            this._objectPoint[stamp] = point;
+
+	            cell.push(obj);
+	        },
+
+	        updateObject: function (obj, point) {
+	            this.removeObject(obj);
+	            this.addObject(obj, point);
+	        },
+
+	        //Returns true if the object was found
+	        removeObject: function (obj, point) {
+	            var x = this._getCoord(point.x),
+	                y = this._getCoord(point.y),
+	                grid = this._grid,
+	                row = grid[y] = grid[y] || {},
+	                cell = row[x] = row[x] || [],
+	                i, len;
+
+	            delete this._objectPoint[L.Util.stamp(obj)];
+
+	            for (i = 0, len = cell.length; i < len; i++) {
+	                if (cell[i] === obj) {
+
+	                    cell.splice(i, 1);
+
+	                    if (len === 1) {
+	                        delete row[x];
+	                    }
+
+	                    return true;
+	                }
+	            }
+
+	        },
+
+	        eachObject: function (fn, context) {
+	            var i, j, k, len, row, cell, removed,
+	                grid = this._grid;
+
+	            for (i in grid) {
+	                row = grid[i];
+
+	                for (j in row) {
+	                    cell = row[j];
+
+	                    for (k = 0, len = cell.length; k < len; k++) {
+	                        removed = fn.call(context, cell[k]);
+	                        if (removed) {
+	                            k--;
+	                            len--;
+	                        }
+	                    }
+	                }
+	            }
+	        },
+
+	        getNearObject: function (point) {
+	            var x = this._getCoord(point.x),
+	                y = this._getCoord(point.y),
+	                i, j, k, row, cell, len, obj, dist,
+	                objectPoint = this._objectPoint,
+	                closestDistSq = this._sqCellSize,
+	                closest = null;
+
+	            for (i = y - 1; i <= y + 1; i++) {
+	                row = this._grid[i];
+	                if (row) {
+
+	                    for (j = x - 1; j <= x + 1; j++) {
+	                        cell = row[j];
+	                        if (cell) {
+
+	                            for (k = 0, len = cell.length; k < len; k++) {
+	                                obj = cell[k];
+	                                dist = this._sqDist(
+	                                    objectPoint[L.Util.stamp(obj)],
+	                                    point
+	                                );
+	                                if (dist < closestDistSq) {
+	                                    closestDistSq = dist;
+	                                    closest = obj;
+	                                }
+	                            }
+	                        }
+	                    }
+	                }
+	            }
+	            return closest;
+	        },
+
+	        /* return the point coordinates contained in the structure */
+	        contents: function () {
+	            return $.map(this._objectPoint, function (val) { return val; });
+	        },
+
+	        _getCoord: function (x) {
+	            return Math.floor(x / this._cellSize);
+	        },
+
+	        _sqDist: function (p, p2) {
+	            var dx = p2.x - p.x,
+	                dy = p2.y - p.y;
+	            return dx * dx + dy * dy;
+	        }
+	    };
+
+	    module.exports = DistanceGrid;
+	})();
+
+
+/***/ }),
+/* 206 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	/**
+	 * @file
+	 * Using methods adapted from leaflet to cluster an array of positions
+	 * hierarchically given an array of length scales (zoom levels).
+	 */
+
+	(function () {
+	  'use strict';
+
+	  var $ = __webpack_require__(1);
+	  var vgl = __webpack_require__(87);
+
+	  /**
+	   * This class manages a group of nearby points that are clustered as a
+	   * single object for display purposes.  The class constructor is private
+	   * and only meant to be created by the ClusterGroup object.
+	   *
+	   * This is a tree-like data structure.  Each node in the tree is a
+	   * cluster containing child clusters and unclustered points.
+	   *
+	   * @class
+	   * @private
+	   *
+	   * @param {geo.util.ClusterGroup} group The source cluster group
+	   * @param {number} zoom The zoom level of the current node
+	   * @param {object[]} children An array of ClusterTrees or point objects
+	   */
+	  function ClusterTree(group, zoom, children) {
+	    this._group = group;
+	    this._zoom = zoom;
+	    this._points = [];     // Unclustered points
+	    this._clusters = [];   // Child clusters
+	    this._count = 0;       // Total number of points
+	    this._parent = null;
+	    this._coord = null;    // The cached coordinates
+	    var that = this;
+
+	    // add the children provided in the constructor call
+	    (children || []).forEach(function (c) {
+	      that._add(c);
+	    });
+	  }
+
+	  /**
+	   * Add a point or cluster as a child to the current cluster.
+	   * @param {object} pt A ClusterTree or point object
+	   * @private
+	   */
+	  ClusterTree.prototype._add = function (pt) {
+	    var inc = 1;
+
+	    if (pt instanceof ClusterTree) {
+	      // add a child cluster
+	      this._clusters.push(pt);
+	      inc = pt._count;
+	    } else {
+	      this._points.push(pt);
+	    }
+	    pt._parent = this;
+
+	    // increment the counter
+	    this._increment(inc);
+	  };
+
+	  /**
+	   * Increment the child counter for this and the parent.
+	   * @param {number} inc The value to increment by
+	   * @private
+	   */
+	  ClusterTree.prototype._increment = function (inc) {
+	    this._coord = null;
+	    this._count += inc;
+	    if (this._parent) {
+	      this._parent._increment(inc);
+	    }
+	  };
+
+	  /**
+	   * Return the total number of child points contained in the cluster.
+	   * @returns {number} Total points contained
+	   */
+	  ClusterTree.prototype.count = function () {
+	    return this._count;
+	  };
+
+	  /**
+	   * Recursively call a function on all points contained in the cluster.
+	   * Calls the function with `this` as the current ClusterTree object, and
+	   * arguments to arguments the point object and the zoom level:
+	   *   func.call(this, point, zoom)
+	   */
+	  ClusterTree.prototype.each = function (func) {
+	    var i;
+	    for (i = 0; i < this._points.length; i += 1) {
+	      func.call(this, this._points[i], this._zoom);
+	    }
+	    for (i = 0; i < this._clusters.length; i += 1) {
+	      this._clusters[i].each.call(
+	        this._clusters[i],
+	        func
+	      );
+	    }
+	  };
+
+	  /**
+	   * Get the coordinates of the cluster (the mean position of all the points
+	   * contained).  This is lazily calculated and cached.
+	   */
+	  ClusterTree.prototype.coords = function () {
+	    var i, center = {x: 0, y: 0};
+	    if (this._coord) {
+	      return this._coord;
+	    }
+	    // first add up the points at the node
+	    for (i = 0; i < this._points.length; i += 1) {
+	      center.x += this._points[i].x;
+	      center.y += this._points[i].y;
+	    }
+
+	    // add up the contribution from the clusters
+	    for (i = 0; i < this._clusters.length; i += 1) {
+	      center.x += this._clusters[i].coords().x * this._clusters[i].count();
+	      center.y += this._clusters[i].coords().y * this._clusters[i].count();
+	    }
+
+	    return {
+	      x: center.x / this.count(),
+	      y: center.y / this.count()
+	    };
+	  };
+
+	  /**
+	   * This class manages clustering of an array of positions hierarchically.
+	   * The algorithm and code was adapted from the Leaflet marker cluster
+	   * plugin by David Leaver: https://github.com/Leaflet/Leaflet.markercluster
+	   *
+	   * @class geo.util.ClusterGroup
+	   * @param {object} opts An options object
+	   * @param {number} width The width of the window; used for scaling.
+	   * @param {number} height The height of the window; used for scaling.
+	   * @param {number} maxZoom The maximimum zoom level to calculate
+	   * @param {number} radius Proportional to the clustering radius in pixels
+	   */
+	  function C(opts, width, height) {
+
+	    var DistanceGrid = __webpack_require__(205);
+
+	    // store the options
+	    this._opts = $.extend({
+	      maxZoom: 18,
+	      radius: 0.05
+	    }, opts);
+	    this._opts.width = this._opts.width || width || 256;
+	    this._opts.height = this._opts.height || height || 256;
+
+	    // generate the initial datastructures
+	    this._clusters = {}; // clusters at each zoom level
+	    this._points = {};   // unclustered points at each zoom level
+
+	    var zoom, scl;
+	    for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
+	      scl = this._scaleAtLevel(zoom, this._opts.width, this._opts.height);
+	      this._clusters[zoom] = new DistanceGrid(scl);
+	      this._points[zoom] = new DistanceGrid(scl);
+	    }
+	    this._topClusterLevel = new ClusterTree(this, -1);
+	  }
+
+	  /**
+	   * Returns a characteristic distance scale at a particular zoom level.  This
+	   * scale is used to control the clustering radius.  When the renderer supports
+	   * it, this call should be replaced by a calculation involving the view port
+	   * size in point coordinates at a particular zoom level.
+	   * @private
+	   */
+	  C.prototype._scaleAtLevel = function (zoom, width, height) {
+	    return vgl.zoomToHeight(zoom, width, height) / 2 * this._opts.radius;
+	  };
+
+	  /**
+	   * Add a position to the cluster group.
+	   * @protected
+	   */
+	  C.prototype.addPoint = function (point) {
+	    var zoom, closest, parent, newCluster, lastParent, z;
+
+	    // start at the maximum zoom level and search for nearby
+	    //
+	    // 1.  existing clusters
+	    // 2.  unclustered points
+	    //
+	    // otherwise add the point as a new unclustered point
+
+	    for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
+
+	      // find near cluster
+	      closest = this._clusters[zoom].getNearObject(point);
+	      if (closest) {
+	        // add the point to the cluster and return
+	        closest._add(point);
+	        return;
+	      }
+
+	      // find near point
+	      closest = this._points[zoom].getNearObject(point);
+	      if (closest) {
+	        parent = closest._parent;
+	        if (parent) {
+	          // remove the point from the parent
+	          for (z = parent._points.length - 1; z >= 0; z -= 1) {
+	            if (parent._points[z] === closest) {
+	              parent._points.splice(z, 1);
+	              parent._increment(-1);
+	              break;
+	            }
+	          }
+	        }
+
+	        if (!parent) {
+	          $.noop();
+	        }
+	        // create a new cluster with these two points
+	        newCluster = new ClusterTree(this, zoom, [closest, point]);
+	        this._clusters[zoom].addObject(newCluster, newCluster.coords());
+
+	        // create intermediate parent clusters that don't exist
+	        lastParent = newCluster;
+	        for (z = zoom - 1; z > parent._zoom; z -= 1) {
+	          lastParent = new ClusterTree(this, z, [lastParent]);
+	          this._clusters[z].addObject(lastParent, lastParent.coords());
+	        }
+	        parent._add(lastParent);
+
+	        // remove closest from this zoom level and any above (replace with newCluster)
+	        for (z = zoom; z >= 0; z -= 1) {
+	          if (!this._points[z].removeObject(closest, closest)) {
+	            break;
+	          }
+	        }
+
+	        return;
+	      }
+
+	      // add an unclustered point
+	      this._points[zoom].addObject(point, point);
+	    }
+
+	    // otherwise add to the top
+	    this._topClusterLevel._add(point);
+	  };
+
+	  /**
+	   * Return the unclustered points contained at a given zoom level.
+	   * @param {number} zoom The zoom level
+	   * @return {object[]} The array of unclustered points
+	   */
+	  C.prototype.points = function (zoom) {
+	    zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
+	    return this._points[Math.floor(zoom)].contents();
+	  };
+
+	  /**
+	   * Return the clusters contained at a given zoom level.
+	   * @param {number} zoom The zoom level
+	   * @return {ClusterTree[]} The array of clusters
+	   */
+	  C.prototype.clusters = function (zoom) {
+	    zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
+	    return this._clusters[Math.floor(zoom)].contents();
+	  };
+
+	  module.exports = C;
+	})();
+
+
+/***/ }),
+/* 207 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(8);
+	var feature = __webpack_require__(208);
+	var timestamp = __webpack_require__(210);
 	var transform = __webpack_require__(11);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -36712,7 +37961,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._updatePointSearchInfo = function () {
-	    if (m_pointSearchTime.getMTime() >= m_this.dataTime().getMTime()) {
+	    if (m_pointSearchTime.getMTime() >= m_this.dataTime().getMTime() &&
+	        m_pointSearchTime.getMTime() >= m_this.getMTime()) {
 	      return;
 	    }
 	    m_pointSearchTime.modified();
@@ -36926,14 +38176,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = lineFeature;
 
 
-/***/ },
-/* 204 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 208 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(205);
-	var timestamp = __webpack_require__(207);
+	var sceneObject = __webpack_require__(209);
+	var timestamp = __webpack_require__(210);
 	var geo_event = __webpack_require__(9);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -36985,7 +38235,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // Don't bind handlers for improved performance on features that don't
 	    // require it.
-	    if (!m_selectionAPI) {
+	    if (!this.selectionAPI()) {
 	      return;
 	    }
 
@@ -37345,24 +38595,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set visibility of the feature
+	   *
+	   * @param {boolean|undefined} val: undefined to return the visibility, a
+	   *    boolean to change the visibility.
+	   * @param {boolean} direct: if true, when getting the visibility, disregard
+	   *    the visibility of the parent layer, and when setting, refresh the state
+	   *    regardless of whether it has changed or not.
+	   * @return {boolean|object} either the visibility (if getting) or the feature
+	   *    (if setting).
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
-	  this.visible = function (val) {
+	  this.visible = function (val, direct) {
 	    if (val === undefined) {
+	      if (!direct && m_layer && m_layer.visible && !m_layer.visible()) {
+	        return false;
+	      }
 	      return m_visible;
 	    }
-	    if (m_visible !== val) {
+	    if (m_visible !== val || direct) {
 	      m_visible = val;
 	      m_this.modified();
-
+	      if (m_layer && m_layer.visible && !m_layer.visible()) {
+	        val = false;
+	      }
 	      // bind or unbind mouse handlers on visibility change
-	      if (m_visible) {
+	      if (val) {
 	        m_this._bindMouseHandlers();
 	      } else {
 	        m_this._unbindMouseHandlers();
 	      }
 	      for (var i = 0; i < m_dependentFeatures.length; i += 1) {
-	        m_dependentFeatures[i].visible(val);
+	        m_dependentFeatures[i].visible(m_visible, direct);
 	      }
 	    }
 	    return m_this;
@@ -37464,16 +38727,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Query or set if the selection API is enabled for this feature.
-	   * @returns {bool}
+	   * Get/Set if the selection API is enabled for this feature.
+	   *
+	   * @param {boolean|undefined} val: undefined to return the selectionAPI
+	   *    state, or a boolean to change the state.
+	   * @param {boolean} direct: if true, when getting the selectionAPI state,
+	   *    disregard the state of the parent layer, and when setting, refresh the
+	   *    state regardless of whether it has changed or not.
+	   * @return {boolean|object} either the selectionAPI state (if getting) or the
+	   *    feature (if setting).
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
-	  this.selectionAPI = function (arg) {
+	  this.selectionAPI = function (arg, direct) {
 	    if (arg === undefined) {
+	      if (!direct && m_layer && m_layer.selectionAPI && !m_layer.selectionAPI()) {
+	        return false;
+	      }
 	      return m_selectionAPI;
 	    }
 	    arg = !!arg;
-	    if (arg !== m_selectionAPI) {
+	    if (arg !== m_selectionAPI || direct) {
 	      m_selectionAPI = arg;
 	      this._unbindMouseHandlers();
 	      this._bindMouseHandlers();
@@ -37568,7 +38841,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  // Check arguments
-	  if (!(layer instanceof __webpack_require__(208))) {
+	  if (!(layer instanceof __webpack_require__(211))) {
 	    console.warn('Invalid layer');
 	    return null;
 	  }
@@ -37591,12 +38864,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = feature;
 
 
-/***/ },
-/* 205 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 209 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var object = __webpack_require__(206);
+	var object = __webpack_require__(204);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -37779,196 +39052,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = sceneObject;
 
 
-/***/ },
-/* 206 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 210 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	var vgl = __webpack_require__(88);
-	var inherit = __webpack_require__(8);
-
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create a new instance of class object
-	 *
-	 * @class geo.object
-	 * @extends vgl.object
-	 * @returns {geo.object}
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var object = function () {
-	  'use strict';
-	  if (!(this instanceof object)) {
-	    return new object();
-	  }
-
-	  var m_this = this,
-	      m_eventHandlers = {},
-	      m_idleHandlers = [],
-	      m_promiseCount = 0;
-
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Bind a handler that will be called once when all internal promises are
-	   *  resolved.
-	   *
-	   *  @param {function} handler A function taking no arguments
-	   *  @returns {geo.object[]|geo.object} this
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.onIdle = function (handler) {
-	    if (m_promiseCount) {
-	      m_idleHandlers.push(handler);
-	    } else {
-	      handler();
-	    }
-	    return m_this;
-	  };
-
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Add a new promise object preventing idle event handlers from being called
-	   *  until it is resolved.
-	   *
-	   *  @param {Promise} promise A promise object
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.addPromise = function (promise) {
-	    // called on any resolution of the promise
-	    function onDone() {
-	      m_promiseCount -= 1;
-	      if (!m_promiseCount) {
-	        m_idleHandlers.splice(0, m_idleHandlers.length)
-	          .forEach(function (handler) {
-	            handler();
-	          });
-	      }
-	    }
-	    m_promiseCount += 1;
-	    promise.then(onDone, onDone);
-	    return m_this;
-	  };
-
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Bind an event handler to this object
-	   *
-	   *  @param {String} event
-	   *    An event from {geo.events}
-	   *  @param {function} handler
-	   *    A function that will be called when ``event`` is triggered.  The
-	   *    function will be given an event object as a first parameter and
-	   *    optionally a second argument provided by the triggerer.
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.geoOn = function (event, handler) {
-	    if (Array.isArray(event)) {
-	      event.forEach(function (e) {
-	        m_this.geoOn(e, handler);
-	      });
-	      return m_this;
-	    }
-	    if (!m_eventHandlers.hasOwnProperty(event)) {
-	      m_eventHandlers[event] = [];
-	    }
-	    m_eventHandlers[event].push(handler);
-	    return m_this;
-	  };
-
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Trigger an event (or events) on this object and call all handlers
-	   *
-	   *  @param {String} event An event from {geo.event}
-	   *  @param {Object} args An optional argument to pass to handlers
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.geoTrigger = function (event, args) {
-
-	    // if we have an array of events, recall with single events
-	    if (Array.isArray(event)) {
-	      event.forEach(function (e) {
-	        m_this.geoTrigger(e, args);
-	      });
-	      return m_this;
-	    }
-
-	    // append the event type to the argument object
-	    args = args || {};
-	    args.event = event;
-
-	    if (m_eventHandlers.hasOwnProperty(event)) {
-	      m_eventHandlers[event].forEach(function (handler) {
-	        handler.call(m_this, args);
-	      });
-	    }
-
-	    return m_this;
-	  };
-
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   *  Remove handlers from an event (or an array of events).  If no event is
-	   *  provided all handlers will be removed.
-	   *
-	   *  @param {string?} event An event from {geo.events}
-	   *  @param {object?} arg A function or array of functions to remove from the events
-	   *                      or if falsey remove all handlers from the events
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this.geoOff = function (event, arg) {
-	    if (event === undefined) {
-	      m_eventHandlers = {};
-	      m_idleHandlers = [];
-	      m_promiseCount = 0;
-	    }
-	    if (Array.isArray(event)) {
-	      event.forEach(function (e) {
-	        m_this.geoOff(e, arg);
-	      });
-	      return m_this;
-	    }
-	    if (!arg) {
-	      m_eventHandlers[event] = [];
-	    } else if (Array.isArray(arg)) {
-	      arg.forEach(function (handler) {
-	        m_this.geoOff(event, handler);
-	      });
-	      return m_this;
-	    }
-	    // What do we do if the handler is not already bound?
-	    //   ignoring for now...
-	    if (m_eventHandlers.hasOwnProperty(event)) {
-	      m_eventHandlers[event] = m_eventHandlers[event].filter(function (f) {
-	        return f !== arg;
-	      }
-	      );
-	    }
-	    return m_this;
-	  };
-
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Free all resources and destroy the object.
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this._exit = function () {
-	    m_this.geoOff();
-	  };
-
-	  vgl.object.call(this);
-
-	  return this;
-	};
-
-	inherit(object, vgl.object);
-	module.exports = object;
-
-
-/***/ },
-/* 207 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var vgl = __webpack_require__(88);
+	var vgl = __webpack_require__(87);
 	var inherit = __webpack_require__(8);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -37992,13 +39080,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = timestamp;
 
 
-/***/ },
-/* 208 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 211 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(205);
-	var feature = __webpack_require__(204);
+	var sceneObject = __webpack_require__(209);
+	var feature = __webpack_require__(208);
 	var checkRenderer = __webpack_require__(202).checkRenderer;
 	var rendererForFeatures = __webpack_require__(202).rendererForFeatures;
 	var rendererForAnnotations = __webpack_require__(202).rendererForAnnotations;
@@ -38024,11 +39112,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  sceneObject.call(this, arg);
 
 	  var $ = __webpack_require__(1);
-	  var timestamp = __webpack_require__(207);
+	  var timestamp = __webpack_require__(210);
 	  var createRenderer = __webpack_require__(202).createRenderer;
 	  var newLayerId = __webpack_require__(83).newLayerId;
 	  var geo_event = __webpack_require__(9);
-	  var camera = __webpack_require__(209);
+	  var camera = __webpack_require__(212);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -38053,6 +39141,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_active = arg.active === undefined ? true : arg.active,
 	      m_opacity = arg.opacity === undefined ? 1 : arg.opacity,
 	      m_attribution = arg.attribution || null,
+	      m_visible = arg.visible === undefined ? true : arg.visible,
+	      m_selectionAPI = arg.selectionAPI === undefined ? true : arg.selectionAPI,
 	      m_zIndex;
 
 	  m_rendererName = checkRenderer(m_rendererName);
@@ -38190,20 +39280,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get whether or not the layer is active.  An active layer will receive
+	   * Get/Set whether or not the layer is active.  An active layer will receive
 	   * native mouse when the layer is on top.  Non-active layers will never
 	   * receive native mouse events.
 	   *
-	   * @returns {Boolean}
+	   * @returns {Boolean|object}
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
-	  this.active = function () {
-	    return m_active;
+	  this.active = function (arg) {
+	    if (arg === undefined) {
+	      return m_active;
+	    }
+	    if (m_active !== arg) {
+	      m_active = arg;
+	      m_node.toggleClass('active', m_active);
+	    }
+	    return this;
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get/Set root node of the layer
+	   * Get root node of the layer
 	   *
 	   * @returns {div}
 	   */
@@ -38348,6 +39445,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return m_this;
 	    }
 	    return m_attribution;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set visibility of the layer
+	   *
+	   * @param {boolean|undefined} val: undefined to return the visibility, a
+	   *    boolean to change the visibility.
+	   * @return {boolean|object} either the visibility (if getting) or the layer
+	   *    (if setting).
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.visible = function (val) {
+	    if (val === undefined) {
+	      return m_visible;
+	    }
+	    if (m_visible !== val) {
+	      m_visible = val;
+	      m_node.css('display', m_visible ? '' : 'none');
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set selectionAPI of the layer
+	   *
+	   * @param {boolean|undefined} val: undefined to return the selectionAPI
+	   *    state, or a boolean to change it.
+	   * @return {boolean|object} either the selectionAPI state (if getting) or the
+	   *    layer (if setting).
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.selectionAPI = function (val) {
+	    if (val === undefined) {
+	      return m_selectionAPI;
+	    }
+	    if (m_selectionAPI !== val) {
+	      m_selectionAPI = val;
+	    }
+	    return m_this;
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -38562,18 +39701,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = layer;
 
 
-/***/ },
-/* 209 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 212 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	(function () {
 	  'use strict';
 
 	  var inherit = __webpack_require__(8);
-	  var object = __webpack_require__(206);
+	  var object = __webpack_require__(204);
 	  var util = __webpack_require__(83);
-	  var mat4 = __webpack_require__(90);
-	  var vec4 = __webpack_require__(114);
+	  var mat4 = __webpack_require__(89);
+	  var vec4 = __webpack_require__(113);
 
 	  //////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -39499,12 +40638,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	})();
 
 
-/***/ },
-/* 210 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 213 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(204);
+	var feature = __webpack_require__(208);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -39526,11 +40665,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  feature.call(this, arg);
 
 	  var $ = __webpack_require__(1);
-	  var timestamp = __webpack_require__(207);
-	  var ClusterGroup = __webpack_require__(87);
+	  var timestamp = __webpack_require__(210);
+	  var ClusterGroup = __webpack_require__(206);
 	  var geo_event = __webpack_require__(9);
 	  var util = __webpack_require__(83);
-	  var wigglemaps = __webpack_require__(211);
+	  var kdbush = __webpack_require__(214);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -39567,10 +40706,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_clusterTree = null;
 	      m_clustering = false;
 	      s_data(m_allData);
-	      m_allData = null;
-	    } else if (!m_clustering && val) {
+	    } else if (val && m_clustering !== val) {
 	      // Generate the cluster tree
-	      m_clustering = true;
+	      m_clustering = val;
 	      m_this._clusterData();
 	    }
 	    return m_this;
@@ -39663,12 +40801,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (val === undefined) {
 	      return m_this.style('position');
 	    } else {
-	      val = util.ensureFunction(val);
+	      var isFunc = util.isFunction(val);
 	      m_this.style('position', function (d, i) {
 	        if (d.__cluster) {
 	          return d;
-	        } else {
+	        } else if (isFunc) {
 	          return val(d, i);
+	        } else {
+	          return val;
 	        }
 	      });
 	      m_this.dataTime().modified();
@@ -39699,7 +40839,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // create an array of positions in geo coordinates
 	    pts = m_this.data().map(function (d, i) {
 	      var pt = position(d);
-	      pt.idx = i;
 
 	      // store the maximum point radius
 	      m_maxRadius = Math.max(
@@ -39707,10 +40846,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        radius(d, i) + (stroke(d, i) ? strokeWidth(d, i) : 0)
 	      );
 
-	      return pt;
+	      return [pt.x, pt.y];
 	    });
 
-	    m_rangeTree = new wigglemaps.RangeTree(pts);
+	    m_rangeTree = kdbush(pts);
 	    m_rangeTreeTime.modified();
 	  };
 
@@ -39723,15 +40862,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.pointSearch = function (p) {
-	    var min, max, data, idx = [], box, found = [], ifound = [], map, pt,
+	    var min, max, data, idx = [], found = [], ifound = [], map, pt,
 	        corners,
 	        stroke = m_this.style.get('stroke'),
 	        strokeWidth = m_this.style.get('strokeWidth'),
 	        radius = m_this.style.get('radius');
-
-	    if (!m_this.selectionAPI()) {
-	      return [];
-	    }
 
 	    data = m_this.data();
 	    if (!data || !data.length) {
@@ -39740,6 +40875,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        index: []
 	      };
 	    }
+
+	    // We need to do this before we find corners, since the max radius is
+	    // determined then
+	    m_this._updateRangeTree();
 
 	    map = m_this.layer().map();
 	    pt = map.gcsToDisplay(p);
@@ -39760,14 +40899,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 
 	    // Find points inside the bounding box
-	    box = new wigglemaps.Box(
-	      wigglemaps.vect(min.x, min.y),
-	      wigglemaps.vect(max.x, max.y)
-	    );
-	    m_this._updateRangeTree();
-	    m_rangeTree.search(box).forEach(function (q) {
-	      idx.push(q.idx);
-	    });
+	    idx = m_rangeTree.range(min.x, min.y, max.x, max.y);
 
 	    // Filter by circular region
 	    idx.forEach(function (i) {
@@ -39824,8 +40956,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (data === undefined) {
 	      return s_data();
 	    }
-	    if (m_clustering && !m_ignoreData) {
+	    if (!m_ignoreData) {
 	      m_allData = data;
+	    }
+	    if (m_clustering && !m_ignoreData) {
 	      m_this._clusterData();
 	    } else {
 	      s_data(data);
@@ -39836,53 +40970,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Returns the bounding box for a given datum in screen coordinates as an
-	   * object: ::
-	   *
-	   *   {
-	   *     min: {
-	   *       x: value,
-	   *       y: value
-	   *     },
-	   *     max: {
-	   *       x: value,
-	   *       y: value
-	   *     }
-	   *   }
-	   *
-	   * @returns {object}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._boundingBox = function (d) {
-	    var pt, radius;
-
-	    // get the position in geo coordinates
-	    pt = m_this.position()(d);
-
-	    // convert to screen coordinates
-	    pt = m_this.layer().map().gcsToDisplay(pt);
-
-	    // get the radius of the points (should we add stroke width?)
-	    radius = m_this.style().radius(d);
-
-	    return {
-	      min: {
-	        x: pt.x - radius,
-	        y: pt.y - radius
-	      },
-	      max: {
-	        x: pt.x + radius,
-	        y: pt.y + radius
-	      }
-	    };
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
 	   * Initialize
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
+	    arg = arg || {};
 	    s_init.call(m_this, arg);
 
 	    var defaultStyle = $.extend(
@@ -39908,6 +41000,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    m_this.style(defaultStyle);
+	    if (defaultStyle.position) {
+	      m_this.position(defaultStyle.position);
+	    }
 	    m_this.dataTime().modified();
 
 	    // bind to the zoom handler for point clustering
@@ -39934,9 +41029,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {geo.pointFeature.spec} spec The object specification
 	 * @returns {geo.pointFeature|null}
 	 */
-	pointFeature.create = function (layer, renderer, spec) {
+	pointFeature.create = function (layer, spec) {
 	  'use strict';
 
+	  spec = spec || {};
 	  spec.type = 'point';
 	  return feature.create(layer, spec);
 	};
@@ -39950,423 +41046,243 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = pointFeature;
 
 
-/***/ },
-/* 211 */
-/***/ function(module, exports) {
+/***/ }),
+/* 214 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * @license
-	 * Includes several support classes adapted from wigglemaps.
-	 *
-	 * https://github.com/dotskapes/wigglemaps
-	 *
-	 * Copyright 2013 Preston and Krejci (dotSkapes Virtual Lab)
-	 *
-	 * Licensed under the Apache License, Version 2.0 (the "License");
-	 * you may not use this file except in compliance with the License.
-	 * You may obtain a copy of the License at
-	 *
-	 *   http://www.apache.org/licenses/LICENSE-2.0
-	 *
-	 * Unless required by applicable law or agreed to in writing, software
-	 * distributed under the License is distributed on an "AS IS" BASIS,
-	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	 * See the License for the specific language governing permissions and
-	 * limitations under the License.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
+	'use strict';
 
-	(function () {
-	    'use strict';
+	var sort = __webpack_require__(215);
+	var range = __webpack_require__(216);
+	var within = __webpack_require__(217);
 
-	    var RangeNode = function (elem, start, end, current) {
-	        this.data = elem[current];
-	        this.left = null;
-	        this.right = null;
-	        if (start !== current)
-	            this.left = new RangeNode(elem, start, current - 1, parseInt((start + (current - 1)) / 2, 10));
-	        if (end !== current)
-	            this.right = new RangeNode(elem, current + 1, end, parseInt((end + (current + 1)) / 2, 10));
-	        this.elem = elem;
-	        this.start = start;
-	        this.end = end;
-	        this.subtree = null; /* This is populated as needed */
-	        this.search = rangeNodeSearch;
-	    };
+	module.exports = kdbush;
 
-	    var rangeNodeSearch = function (result, box) {
-	        var m_this = this;
+	function kdbush(points, getX, getY, nodeSize, ArrayType) {
+	    return new KDBush(points, getX, getY, nodeSize, ArrayType);
+	}
 
-	        var xrange = function (b) {
-	            return (b.x_in(m_this.elem[m_this.start]) &&
-	                    b.x_in(m_this.elem[m_this.end]));
-	        };
+	function KDBush(points, getX, getY, nodeSize, ArrayType) {
+	    getX = getX || defaultGetX;
+	    getY = getY || defaultGetY;
+	    ArrayType = ArrayType || Array;
 
-	        var yrange = function (b, start, end) {
-	            return (b.y_in(m_this.subtree[start]) &&
-	                    b.y_in(m_this.subtree[end]));
-	        };
+	    this.nodeSize = nodeSize || 64;
+	    this.points = points;
 
-	        var subquery = function (result, box, start, end, current) {
-	            if (yrange(box, start, end)) {
-	                for (var i = start; i <= end; i ++) {
-	                    result.push(m_this.subtree[i]);
-	                }
-	                return;
-	            }
-	            if (box.y_in(m_this.subtree[current]))
-	                result.push(m_this.subtree[current]);
-	            if (box.y_left(m_this.subtree[current])){
-	                if (current !== end)
-	                    subquery(result, box, current + 1, end, parseInt((end + (current + 1)) / 2, 10));
-	            } else if (box.x_right(m_this.subtree[current])) {
-	                if (current !== start)
-	                    subquery(result, box, start, current - 1, parseInt((start + (current - 1)) / 2, 10));
-	            } else {
-	                if (current !== end)
-	                    subquery(result, box, current + 1, end, parseInt((end + (current + 1)) / 2, 10));
-	                if (current !== start)
-	                    subquery(result, box, start, current - 1, parseInt((start + (current - 1)) / 2, 10));
-	            }
-	        };
+	    this.ids = new ArrayType(points.length);
+	    this.coords = new ArrayType(points.length * 2);
 
-	        if (xrange(box)) {
-	            if (!this.subtree) {
-	                this.subtree = this.elem.slice(this.start, this.end + 1);
-	                this.subtree.sort(function (a, b) {
-	                    return a.y - b.y;
-	                });
-	            }
-	            subquery(result, box, 0, this.subtree.length - 1, parseInt((this.subtree.length - 1) / 2, 10));
-	            return;
-	        } else {
-	            if (box.contains(this.data))
-	                result.push(this.data);
-	            if (box.x_left(this.data)) {
-	                if (this.right)
-	                    this.right.search(result, box);
-	            } else if (box.x_right(this.data)) {
-	                if (this.left)
-	                    this.left.search(result, box);
-	            } else {
-	                if (this.left)
-	                    this.left.search(result, box);
-	                if (this.right)
-	                    this.right.search(result, box);
-	            }
-	        }
-	    };
-
-	    var RangeTree = function (elem) {
-	        elem.sort(function (a, b) {
-	            return a.x - b.x;
-	        });
-	        if (elem.length > 0)
-	            this.root = new RangeNode(elem, 0, elem.length - 1, parseInt((elem.length - 1) / 2, 10));
-	        else
-	            this.root = null;
-
-	        this.search = function (_box) {
-	            if (!this.root)
-	                return [];
-	            //var box = new Box (min, max);
-	            var box = _box.clone ();
-	            var result = [];
-	            this.root.search (result, box);
-	            return result;
-	        };
-	    };
-
-	    var Box = function (v1, v2) {
-	        this.min = v1.clone ();
-	        this.max = v2.clone ();
-	        this.contains = function (p) {
-	            return (v1.x <= p.x) && (v2.x >= p.x) && (v1.y <= p.y) && (v2.y >= p.y);
-	        };
-
-	        this.x_in = function (p) {
-	            return (v1.x <= p.x) && (v2.x >= p.x);
-	        };
-
-	        this.x_left = function (p) {
-	            return (v1.x >= p.x);
-	        };
-
-	        this.x_right = function (p) {
-	            return (v2.x <= p.x);
-	        };
-
-	        this.y_in = function (p) {
-	            return (v1.y <= p.y) && (v2.y >= p.y);
-	        };
-
-	        this.y_left = function (p) {
-	            return (v1.y >= p.y);
-	        };
-
-	        this.y_right = function (p) {
-	            return (v2.y <= p.y);
-	        };
-
-	        this.area = function () {
-	            return (this.max.x - this.min.x) * (this.max.y - this.min.y);
-	        };
-
-	        this.height = function () {
-	            return this.max.y - this.min.y;
-	        };
-
-	        this.width = function () {
-	            return this.max.x - this.min.x;
-	        };
-
-	        this.vertex = function (index) {
-	            switch (index) {
-	            case 0:
-	                return this.min.clone ();
-	            case 1:
-	                return new vect (this.max.x, this.min.y);
-	            case 2:
-	                return this.max.clone ();
-	            case 3:
-	                return new vect (this.min.x, this.max.y);
-	            default:
-	                throw "Index out of bounds: " + index ;
-	            }
-	        };
-
-	        this.intersects = function (box) {
-	            for (var i = 0; i < 4; i ++) {
-	                for (var j = 0; j < 4; j ++) {
-	                    if (vect.intersects (this.vertex (i), this.vertex ((i + 1) % 4),
-	                                         box.vertex (j), box.vertex ((j + 1) % 4)))
-	                        return true;
-	                }
-	            }
-	            if (this.contains (box.min) &&
-	                this.contains (box.max) &&
-	                this.contains (new vect (box.min.x, box.max.y)) &&
-	                this.contains (new vect (box.max.x, box.min.y)))
-	                return true;
-	            if (box.contains (this.min) &&
-	                box.contains (this.max) &&
-	                box.contains (new vect (this.min.x, this.max.y)) &&
-	                box.contains (new vect (this.max.x, this.min.y)))
-	                return true;
-	            return false;
-	        };
-
-	        this.union = function (b) {
-	            this.min.x = Math.min (this.min.x, b.min.x);
-	            this.min.y = Math.min (this.min.y, b.min.y);
-
-	            this.max.x = Math.max (this.max.x, b.max.x);
-	            this.max.y = Math.max (this.max.y, b.max.y);
-	        };
-
-	        this.centroid = function () {
-	            return new vect ((this.max.x + this.min.x) / 2, (this.max.y + this.min.y) / 2);
-	        };
-
-	        this.clone = function () {
-	            return new Box (v1, v2);
-	        };
-	    };
-
-	    // A basic vector type. Supports standard 2D vector operations
-	    var Vector2D = function (x, y) {
-	        this.x = x;
-	        this.y = y;
-
-	        this.add = function (v) {
-	            this.x += v.x;
-	            this.y += v.y;
-	            return this;
-	        };
-	        this.sub = function (v) {
-	            this.x -= v.x;
-	            this.y -= v.y;
-	            return this;
-	        };
-	        this.scale = function (s) {
-	            this.x *= s;
-	            this.y *= s;
-	            return this;
-	        };
-	        this.length = function () {
-	            return Math.sqrt (this.x * this.x + this.y * this.y);
-	        };
-	        this.normalize = function () {
-	            var scale = this.length ();
-	            if (scale === 0)
-	                return this;
-	            this.x /= scale;
-	            this.y /= scale;
-	            return this;
-	        };
-	        this.div = function (v) {
-	            this.x /= v.x;
-	            this.y /= v.y;
-	            return this;
-	        };
-	        this.floor = function () {
-	            this.x = Math.floor (this.x);
-	            this.y = Math.floor (this.y);
-	            return this;
-	        };
-	        this.zero = function (tol) {
-	            tol = tol || 0;
-	            return (this.length() <= tol);
-	        };
-	        this.dot = function (v) {
-	            return (this.x * v.x) + (this.y * v.y);
-	        };
-	        this.cross = function (v) {
-	            return (this.x * v.y) - (this.y * v.x);
-	        };
-	        this.rotate = function (omega) {
-	            var cos = Math.cos (omega);
-	            var sin = Math.sin (omega);
-	            xp = cos * this.x - sin * this.y;
-	            yp = sin * this.x + cos * this.y;
-	            this.x = xp;
-	            this.y = yp;
-	            return this;
-	        };
-	        this.clone = function () {
-	            return new Vector2D (this.x, this.y);
-	        };
-
-	        this.array = function () {
-	            return [this.x, this.y];
-	        };
-	    };
-
-	    // A shortcut for the vector constructor
-	    function vect (x, y) {
-	        return new Vector2D (x, y);
+	    for (var i = 0; i < points.length; i++) {
+	        this.ids[i] = i;
+	        this.coords[2 * i] = getX(points[i]);
+	        this.coords[2 * i + 1] = getY(points[i]);
 	    }
 
-	    // Shorthand operations for vectors for operations that make new vectors
+	    sort(this.ids, this.coords, this.nodeSize, 0, this.ids.length - 1, 0);
+	}
 
-	    vect.scale = function (v, s) {
-	        return v.clone ().scale (s);
-	    };
+	KDBush.prototype = {
+	    range: function (minX, minY, maxX, maxY) {
+	        return range(this.ids, this.coords, minX, minY, maxX, maxY, this.nodeSize);
+	    },
 
-	    vect.add = function (v1, v2) {
-	        return v1.clone ().add (v2);
-	    };
+	    within: function (x, y, r) {
+	        return within(this.ids, this.coords, x, y, r, this.nodeSize);
+	    }
+	};
 
-	    vect.sub = function (v1, v2) {
-	        return v1.clone ().sub (v2);
-	    };
-
-	    vect.dist = function (v1, v2) {
-	        return v1.clone ().sub (v2).length ();
-	    };
-
-	    vect.dir = function (v1, v2) {
-	        return v1.clone ().sub (v2).normalize ();
-	    };
-
-	    vect.dot = function (v1, v2) {
-	        return (v1.x * v2.x) + (v1.y * v2.y);
-	    };
-
-	    vect.cross = function (v1, v2) {
-	        return (v1.x * v2.y) - (v1.y * v2.x);
-	    };
-
-	    vect.left = function (a, b, c, tol) {
-	        if (!tol)
-	            tol = 0;
-	        var v1 = vect.sub (b, a);
-	        var v2 = vect.sub (c, a);
-	        return (vect.cross (v1, v2) >= -tol);
-	    };
-
-	    vect.intersects = function (a, b, c, d, tol) {
-	        if (!tol)
-	            tol = 0;
-	        return (vect.left (a, b, c, tol) != vect.left (a, b, d, tol) &&
-	                vect.left (c, d, b, tol) != vect.left (c, d, a, tol));
-	    };
-
-	    vect.intersect2dt = function (a, b, c, d) {
-	        var denom = a.x * (d.y - c.y) +
-	            b.x * (c.y - d.y) +
-	            d.x * (b.y - a.y) +
-	            c.x * (a.y - b.y);
-
-	        if (denom === 0)
-	            return Infinity;
-
-	        var num_s = a.x * (d.y - c.y) +
-	            c.x * (a.y - d.y) +
-	            d.x * (c.y - a.y);
-	        var s = num_s / denom;
-
-	        var num_t = -(a.x * (c.y - b.y) +
-	                      b.x * (a.y - c.y) +
-	                      c.x * (b.y - a.y));
-	        var t = num_t / denom;
-
-	        return t;
-	    };
-
-	    vect.intersect2dpos = function (a, b, c, d) {
-	        var denom = a.x * (d.y - c.y) +
-	            b.x * (c.y - d.y) +
-	            d.x * (b.y - a.y) +
-	            c.x * (a.y - b.y);
-
-	        if (denom === 0)
-	            return Infinity;
-
-	        var num_s = a.x * (d.y - c.y) +
-	            c.x * (a.y - d.y) +
-	            d.x * (c.y - a.y);
-	        var s = num_s / denom;
-
-	        /*var num_t = -(a.x * (c.y - b.y) +
-	                      b.x * (a.y - c.y) +
-	                      c.x * (b.y - a.y));
-	        var t = num_t / denom;*/
-
-	        var dir = vect.sub (b, a);
-	        dir.scale (s);
-	        return vect.add (a, dir);
-	    };
-
-	    vect.rotate = function (v, omega) {
-	        var cos = Math.cos (omega);
-	        var sin = Math.sin (omega);
-	        xp = cos * v.x - sin * v.y;
-	        yp = sin * v.x + cos * v.y;
-	        var c = new vect (xp, yp);
-	        return c;
-	    };
-
-	    vect.normalize = function (v) {
-	        return v.clone ().normalize ();
-	    };
-
-	    module.exports = {
-	        Box: Box,
-	        vect: vect,
-	        RangeTree: RangeTree
-	    };
-	}());
+	function defaultGetX(p) { return p[0]; }
+	function defaultGetY(p) { return p[1]; }
 
 
-/***/ },
-/* 212 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 215 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	module.exports = sortKD;
+
+	function sortKD(ids, coords, nodeSize, left, right, depth) {
+	    if (right - left <= nodeSize) return;
+
+	    var m = Math.floor((left + right) / 2);
+
+	    select(ids, coords, m, left, right, depth % 2);
+
+	    sortKD(ids, coords, nodeSize, left, m - 1, depth + 1);
+	    sortKD(ids, coords, nodeSize, m + 1, right, depth + 1);
+	}
+
+	function select(ids, coords, k, left, right, inc) {
+
+	    while (right > left) {
+	        if (right - left > 600) {
+	            var n = right - left + 1;
+	            var m = k - left + 1;
+	            var z = Math.log(n);
+	            var s = 0.5 * Math.exp(2 * z / 3);
+	            var sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
+	            var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
+	            var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
+	            select(ids, coords, k, newLeft, newRight, inc);
+	        }
+
+	        var t = coords[2 * k + inc];
+	        var i = left;
+	        var j = right;
+
+	        swapItem(ids, coords, left, k);
+	        if (coords[2 * right + inc] > t) swapItem(ids, coords, left, right);
+
+	        while (i < j) {
+	            swapItem(ids, coords, i, j);
+	            i++;
+	            j--;
+	            while (coords[2 * i + inc] < t) i++;
+	            while (coords[2 * j + inc] > t) j--;
+	        }
+
+	        if (coords[2 * left + inc] === t) swapItem(ids, coords, left, j);
+	        else {
+	            j++;
+	            swapItem(ids, coords, j, right);
+	        }
+
+	        if (j <= k) left = j + 1;
+	        if (k <= j) right = j - 1;
+	    }
+	}
+
+	function swapItem(ids, coords, i, j) {
+	    swap(ids, i, j);
+	    swap(coords, 2 * i, 2 * j);
+	    swap(coords, 2 * i + 1, 2 * j + 1);
+	}
+
+	function swap(arr, i, j) {
+	    var tmp = arr[i];
+	    arr[i] = arr[j];
+	    arr[j] = tmp;
+	}
+
+
+/***/ }),
+/* 216 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	module.exports = range;
+
+	function range(ids, coords, minX, minY, maxX, maxY, nodeSize) {
+	    var stack = [0, ids.length - 1, 0];
+	    var result = [];
+	    var x, y;
+
+	    while (stack.length) {
+	        var axis = stack.pop();
+	        var right = stack.pop();
+	        var left = stack.pop();
+
+	        if (right - left <= nodeSize) {
+	            for (var i = left; i <= right; i++) {
+	                x = coords[2 * i];
+	                y = coords[2 * i + 1];
+	                if (x >= minX && x <= maxX && y >= minY && y <= maxY) result.push(ids[i]);
+	            }
+	            continue;
+	        }
+
+	        var m = Math.floor((left + right) / 2);
+
+	        x = coords[2 * m];
+	        y = coords[2 * m + 1];
+
+	        if (x >= minX && x <= maxX && y >= minY && y <= maxY) result.push(ids[m]);
+
+	        var nextAxis = (axis + 1) % 2;
+
+	        if (axis === 0 ? minX <= x : minY <= y) {
+	            stack.push(left);
+	            stack.push(m - 1);
+	            stack.push(nextAxis);
+	        }
+	        if (axis === 0 ? maxX >= x : maxY >= y) {
+	            stack.push(m + 1);
+	            stack.push(right);
+	            stack.push(nextAxis);
+	        }
+	    }
+
+	    return result;
+	}
+
+
+/***/ }),
+/* 217 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	module.exports = within;
+
+	function within(ids, coords, qx, qy, r, nodeSize) {
+	    var stack = [0, ids.length - 1, 0];
+	    var result = [];
+	    var r2 = r * r;
+
+	    while (stack.length) {
+	        var axis = stack.pop();
+	        var right = stack.pop();
+	        var left = stack.pop();
+
+	        if (right - left <= nodeSize) {
+	            for (var i = left; i <= right; i++) {
+	                if (sqDist(coords[2 * i], coords[2 * i + 1], qx, qy) <= r2) result.push(ids[i]);
+	            }
+	            continue;
+	        }
+
+	        var m = Math.floor((left + right) / 2);
+
+	        var x = coords[2 * m];
+	        var y = coords[2 * m + 1];
+
+	        if (sqDist(x, y, qx, qy) <= r2) result.push(ids[m]);
+
+	        var nextAxis = (axis + 1) % 2;
+
+	        if (axis === 0 ? qx - r <= x : qy - r <= y) {
+	            stack.push(left);
+	            stack.push(m - 1);
+	            stack.push(nextAxis);
+	        }
+	        if (axis === 0 ? qx + r >= x : qy + r >= y) {
+	            stack.push(m + 1);
+	            stack.push(right);
+	            stack.push(nextAxis);
+	        }
+	    }
+
+	    return result;
+	}
+
+	function sqDist(ax, ay, bx, by) {
+	    var dx = ax - bx;
+	    var dy = ay - by;
+	    return dx * dx + dy * dy;
+	}
+
+
+/***/ }),
+/* 218 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(204);
+	var feature = __webpack_require__(208);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -40637,7 +41553,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_lineFeature = m_this.layer().createFeature('line', {
 	        selectionAPI: false,
 	        gcs: m_this.gcs(),
-	        visible: m_this.visible()
+	        visible: m_this.visible(undefined, true)
 	      });
 	      m_this.dependentFeatures([m_lineFeature]);
 	    }
@@ -40789,18 +41705,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = polygonFeature;
 
 
-/***/ },
-/* 213 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 219 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var featureLayer = __webpack_require__(214);
+	var featureLayer = __webpack_require__(220);
 	var geo_annotation = __webpack_require__(7);
 	var geo_event = __webpack_require__(9);
 	var registry = __webpack_require__(202);
 	var transform = __webpack_require__(11);
 	var $ = __webpack_require__(1);
-	var Mousetrap = __webpack_require__(215);
+	var Mousetrap = __webpack_require__(221);
 
 	/////////////////////////////////////////////////////////////////////////////
 	/**
@@ -40831,8 +41747,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  featureLayer.call(this, args);
 
-	  var mapInteractor = __webpack_require__(216);
-	  var timestamp = __webpack_require__(207);
+	  var mapInteractor = __webpack_require__(222);
+	  var timestamp = __webpack_require__(210);
 	  var util = __webpack_require__(83);
 
 	  var m_this = this,
@@ -40846,13 +41762,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_features = [];
 
 	  var geojsonStyleProperties = {
+	    'closed': {dataType: 'boolean', keys: ['closed', 'close']},
 	    'fill': {dataType: 'boolean', keys: ['fill']},
 	    'fillColor': {dataType: 'color', keys: ['fillColor', 'fill-color', 'marker-color', 'fill']},
 	    'fillOpacity': {dataType: 'opacity', keys: ['fillOpacity', 'fill-opacity']},
+	    'lineCap': {dataType: 'text', keys: ['lineCap', 'line-cap']},
+	    'lineJoin': {dataType: 'text', keys: ['lineJoin', 'line-join']},
 	    'radius': {dataType: 'positive', keys: ['radius']},
 	    'scaled': {dataType: 'booleanOrNumber', keys: ['scaled']},
 	    'stroke': {dataType: 'boolean', keys: ['stroke']},
 	    'strokeColor': {dataType: 'color', keys: ['strokeColor', 'stroke-color', 'stroke']},
+	    'strokeOffset': {dataType: 'number', keys: ['strokeOffset', 'stroke-offset']},
 	    'strokeOpacity': {dataType: 'opacity', keys: ['strokeOpacity', 'stroke-opacity']},
 	    'strokeWidth': {dataType: 'positive', keys: ['strokeWidth', 'stroke-width']}
 	  };
@@ -40860,16 +41780,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  m_options = $.extend(true, {}, {
 	    dblClickTime: 300,
 	    adjacentPointProximity: 5,  // in pixels, 0 is exact
+	    // in pixels; set to continuousPointProximity to false to disable
+	    // continuous drawing modes.
+	    continuousPointProximity: 5,
 	    finalPointProximity: 10  // in pixels, 0 is exact
 	  }, args);
 
 	  /**
-	   * Process a selection event.  If we are in rectangle-creation mode, this
+	   * Process an action event.  If we are in rectangle-creation mode, this
 	   * creates a rectangle.
 	   *
 	   * @param {geo.event} evt the selection event.
 	   */
-	  this._processSelection = function (evt) {
+	  this._processAction = function (evt) {
 	    var update;
 	    if (evt.state && evt.state.actionRecord &&
 	        evt.state.actionRecord.owner === geo_annotation.actionOwner &&
@@ -41136,6 +42059,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.currentAnnotation = null;
 	      }
 	      switch (m_mode) {
+	        case 'line':
+	          createAnnotation = geo_annotation.lineAnnotation;
+	          break;
 	        case 'point':
 	          createAnnotation = geo_annotation.pointAnnotation;
 	          break;
@@ -41259,7 +42185,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        options.style = {};
 	      }
 	      delete options.annotationType;
+	      // the geoJSON reader can only emit line, polygon, and point
 	      switch (feature.featureType) {
+	        case 'line':
+	          position = feature.line()(data, data_idx);
+	          if (!position || position.length < 2) {
+	            return;
+	          }
+	          break;
 	        case 'polygon':
 	          position = feature.polygon()(data, data_idx);
 	          if (!position || !position.outer || position.outer.length < 3) {
@@ -41277,8 +42210,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        case 'point':
 	          position = [feature.position()(data, data_idx)];
 	          break;
-	        default:
-	          return;
 	      }
 	      for (i = 0; i < position.length; i += 1) {
 	        position[i] = util.normalizeCoordinates(position[i]);
@@ -41353,6 +42284,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *     'true', 'on', or 'yes', falsy values that aren't 0, and true are
 	   *     handled as booleans.  Otherwise, a floating point number that isn't
 	   *     NaN or an infinity.
+	   *   number: a floating point number that isn't NaN or an infinity.
+	   *   text: any text string.
 	   * @param {number|string|object|boolean} value: the value to validate.
 	   * @param {string} dataType: the data type for validation.
 	   * @returns {number|string|object|boolean|undefined} the sanitized value or
@@ -41382,6 +42315,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return;
 	        }
 	        break;
+	      case 'number':
+	        value = +value;
+	        if (isNaN(value) || !isFinite(value)) {
+	          return;
+	        }
+	        break;
 	      case 'opacity':
 	        value = +value;
 	        if (isNaN(value) || value < 0 || value > 1) {
@@ -41393,6 +42332,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (isNaN(value) || !isFinite(value) || value <= 0) {
 	          return;
 	        }
+	        break;
+	      case 'text':
+	        value = '' + value;
 	        break;
 	    }
 	    return value;
@@ -41447,10 +42389,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	               * hasn't been tested.
 	               */
 	              var style = {};
-	              $.each(['fill', 'fillColor', 'fillOpacity', 'line', 'polygon',
-	                      'position', 'radius', 'stroke', 'strokeColor',
-	                      'strokeOpacity', 'strokeWidth', 'uniformPolygon'
-	                  ], function (keyidx, key) {
+	              $.each([
+	                'closed', 'fill', 'fillColor', 'fillOpacity', 'line',
+	                'lineCap', 'lineJoin', 'polygon', 'position', 'radius',
+	                'stroke', 'strokeColor', 'strokeOffset', 'strokeOpacity',
+	                'strokeWidth', 'uniformPolygon'
+	              ], function (keyidx, key) {
 	                var origFunc;
 	                if (feature.style()[key] !== undefined) {
 	                  origFunc = feature.style.get(key);
@@ -41520,7 +42464,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!m_this.map().interactor()) {
 	      m_this.map().interactor(mapInteractor({actions: []}));
 	    }
-	    m_this.geoOn(geo_event.actionselection, m_this._processSelection);
+	    m_this.geoOn(geo_event.actionselection, m_this._processAction);
+	    m_this.geoOn(geo_event.actionmove, m_this._processAction);
 
 	    m_this.geoOn(geo_event.mouseclick, m_this._handleMouseClick);
 	    m_this.geoOn(geo_event.mousemove, m_this._handleMouseMove);
@@ -41551,12 +42496,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = annotationLayer;
 
 
-/***/ },
-/* 214 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 220 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var layer = __webpack_require__(208);
+	var layer = __webpack_require__(211);
 	var geo_event = __webpack_require__(9);
 	var registry = __webpack_require__(202);
 
@@ -41587,6 +42532,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      s_init = this._init,
 	      s_exit = this._exit,
 	      s_update = this._update,
+	      s_visible = this.visible,
+	      s_selectionAPI = this.selectionAPI,
 	      s_draw = this.draw;
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -41788,13 +42735,72 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.draw = function () {
-	    // Call sceneObject.draw, which calls draw on all child objects.
-	    s_draw();
+	    if (m_this.visible()) {
+	      // Call sceneObject.draw, which calls draw on all child objects.
+	      s_draw();
 
-	    // Now call render on the renderer. In certain cases it may not do
-	    // anything if the if the child objects are drawn on the screen already.
-	    if (m_this.renderer()) {
-	      m_this.renderer()._render();
+	      // Now call render on the renderer. In certain cases it may not do
+	      // anything if the child objects are drawn on the screen already.
+	      if (m_this.renderer()) {
+	        m_this.renderer()._render();
+	      }
+	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set visibility of the layer
+	   *
+	   * @param {boolean|undefined} val: undefined to return the visibility, a
+	   *    boolean to change the visibility.
+	   * @return {boolean|object} either the visibility (if getting) or the layer
+	   *    (if setting).
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.visible = function (val) {
+	    if (val === undefined) {
+	      return s_visible();
+	    }
+	    if (m_this.visible() !== val) {
+	      s_visible(val);
+
+	      // take a copy of the features; changing visible could mutate them.
+	      var features = m_features.slice(), i;
+
+	      for (i = 0; i < features.length; i += 1) {
+	        features[i].visible(features[i].visible(undefined, true), true);
+	      }
+	      if (val) {
+	        m_this.draw();
+	      }
+	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set selectionAPI of the layer
+	   *
+	   * @param {boolean|undefined} val: undefined to return the selectionAPI
+	   *    state, or a boolean to change it.
+	   * @return {boolean|object} either the selectionAPI state (if getting) or the
+	   *    layer (if setting).
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.selectionAPI = function (val) {
+	    if (val === undefined) {
+	      return s_selectionAPI();
+	    }
+	    if (m_this.selectionAPI() !== val) {
+	      s_selectionAPI(val);
+
+	      // take a copy of the features; changing selectionAPI could mutate them.
+	      var features = m_features.slice(), i;
+
+	      for (i = 0; i < features.length; i += 1) {
+	        features[i].selectionAPI(features[i].selectionAPI(undefined, true), true);
+	      }
 	    }
 	    return m_this;
 	  };
@@ -41819,13 +42825,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = featureLayer;
 
 
-/***/ },
-/* 215 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 221 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
 	/**
-	 * Copyright 2016 Craig Campbell
+	 * Copyright 2012-2017 Craig Campbell
 	 *
 	 * Licensed under the Apache License, Version 2.0 (the "License");
 	 * you may not use this file except in compliance with the License.
@@ -41842,7 +42848,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Mousetrap is a simple keyboard shortcut library for Javascript with
 	 * no external dependencies
 	 *
-	 * @version 1.6.0
+	 * @version 1.6.1
 	 * @url craig.is/killing/mice
 	 */
 	(function(window, document, undefined) {
@@ -41981,7 +42987,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * loop through to map numbers on the numeric keypad
 	     */
 	    for (i = 0; i <= 9; ++i) {
-	        _MAP[i + 96] = i;
+
+	        // This needs to use a string cause otherwise since 0 is falsey
+	        // mousetrap will never fire for numpad 0 pressed as part of a keydown
+	        // event.
+	        //
+	        // @see https://github.com/ccampbell/mousetrap/pull/258
+	        _MAP[i + 96] = i.toString();
 	    }
 
 	    /**
@@ -42863,14 +43875,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	}) (typeof window !== 'undefined' ? window : null, typeof  window !== 'undefined' ? document : null);
 
 
-/***/ },
-/* 216 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 222 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var object = __webpack_require__(206);
+	var object = __webpack_require__(204);
 	var util = __webpack_require__(83);
-	var Mousetrap = __webpack_require__(215);
+	var Mousetrap = __webpack_require__(221);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -42897,13 +43909,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var throttle = __webpack_require__(83).throttle;
 	  var debounce = __webpack_require__(83).debounce;
 	  var actionMatch = __webpack_require__(83).actionMatch;
-	  var quadFeature = __webpack_require__(217);
+	  var quadFeature = __webpack_require__(223);
 
 	  var m_options,
 	      m_this = this,
 	      m_mouse,
 	      m_keyHandler,
 	      m_boundKeys,
+	      m_touchHandler,
 	      m_state,
 	      m_queue,
 	      $node,
@@ -43009,6 +44022,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        selectionRectangle: geo_event.unzoomselect,
 	        owner: 'geo.mapInteractor',
 	        name: 'drag unzoom'
+	      }, {
+	        action: geo_action.pan,
+	        input: 'pan',
+	        owner: 'geo.mapInteractor',
+	        name: 'touch pan'
+	      }, {
+	        action: geo_action.zoomrotate,
+	        input: 'rotate',
+	        owner: 'geo.mapInteractor',
+	        name: 'touch zoom and rotate'
 	      }],
 
 	      click: {
@@ -43061,11 +44084,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * (which would propably require detecting keyup events). */
 	        focusHighlight: true
 	      },
-
+	      /* Set alwaysTouch to false to only add touch support on devices that
+	       * report touch support.  Set to true to add touch support on all
+	       * devices. */
+	      alwaysTouch: false,
 	      wheelScaleX: 1,
 	      wheelScaleY: 1,
 	      zoomScale: 1,
 	      rotateWheelScale: 6 * Math.PI / 180,
+	      /* The minimum angle of rotation (in radians) before the
+	       * geo_action.zoomrotate action will allow rotation.  Set to 0 to always
+	       * include rotation. */
+	      zoomrotateMinimumRotation: 5.0 * Math.PI / 180,
+	      /* The minimum angle of rotation (in radians) before the
+	       * geo_action.zoomrotate action will reverse the rotation direction.
+	       * This helps reduce chatter when zooms and pans are combined with
+	       * rotations. */
+	      zoomrotateReverseRotation: 4.0 * Math.PI / 180,
+	      /* The minimum zoom factor change (increasing or descreasing) before the
+	       * geo_action.zoomrotate action will allow zoom.  Set to 0 to always
+	       * include zoom. */
+	      zoomrotateMinimumZoom: 0.05,
+	      /* The minimum number of pixels before the geo_action.zoomrotate action
+	       * will allow panning.  Set to 0 to always include panning. */
+	      zoomrotateMinimumPan: 5,
+	      /* The touch pan delay prevents a touch pan event from immediately
+	       * following a rotate (including zoom) event.  No touch pan event is
+	       * processed within this number of milliseconds of a non-pan touch
+	       * event. */
+	      touchPanDelay: 50,
 	      momentum: {
 	        enabled: true,
 	        maxSpeed: 2.5,
@@ -43435,6 +44482,89 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
+	  /**
+	   * Check if this browser has touch support.
+	   * Copied from https://github.com/hammerjs/touchemulator under the MIT
+	   * license.
+	   *
+	   * @returns {boolean}: true if there is touch support.
+	   */
+	  this.hasTouchSupport = function () {
+	    return ('ontouchstart' in window) || // touch events
+	           (window.Modernizr && window.Modernizr.touch) || // modernizr
+	           (navigator.msMaxTouchPoints || navigator.maxTouchPoints) > 1; // pointer events
+	  };
+
+	  /**
+	   * Handle touch events.
+	   *
+	   * @param {object} evt: the touch event.
+	   */
+	  this._handleTouch = function (evt) {
+	    var endIfBound = false;
+	    if (evt.pointerType === 'mouse' && m_touchHandler.touchSupport) {
+	      endIfBound = true;
+	    }
+	    if (evt.type === 'hammer.input') {
+	      if (m_touchHandler.lastEventType === 'pan' && evt.pointers.length !== 1) {
+	        endIfBound = true;
+	        m_touchHandler.lastEventType = null;
+	      } else {
+	        return;
+	      }
+	    }
+	    var evtType = /^(.*)(start|end|move)$/.exec(evt.type);
+	    if (!evtType || evtType.length !== 3) {
+	      endIfBound = true;
+	    }
+	    if (endIfBound) {
+	      if (m_state.boundDocumentHandlers && m_touchHandler.lastEvent) {
+	        m_this._handleMouseUpDocument(m_touchHandler.lastEvent);
+	      }
+	      return;
+	    }
+	    evt.which = evtType[1];
+	    var time = (new Date()).valueOf();
+	    if (evt.which === 'pan' && m_touchHandler.lastEventType !== 'pan' &&
+	        time - m_touchHandler.lastTime < m_options.touchPanDelay) {
+	      return;
+	    }
+	    m_touchHandler.lastTime = time;
+	    m_touchHandler.lastEventType = evt.which;
+	    m_touchHandler.lastEvent = evt;
+	    /* convert touch events to have page locations */
+	    if (evt.pageX === undefined && evt.center !== undefined && evt.center.x !== undefined) {
+	      evt.pageX = evt.center.x;
+	      evt.pageY = evt.center.y;
+	    }
+	    /* start events should occur *before* the triggering delta.  By using the
+	     * mouse handlers, we get all of the action properties we expect (and
+	     * actions can be changed or defined as we see fit). */
+	    if (evtType[2] === 'start') {
+	      m_this._handleMouseDown(evt);
+	      m_this._setClickMaybe(false);
+	      if (m_state.boundDocumentHandlers) {
+	        $(document).on('mousemove.geojs', m_this._handleMouseUpDocument);
+	      }
+	    }
+	    /* start and move events both trigger a movement */
+	    if (evtType[2] === 'start' || evtType[2] === 'move') {
+	      if (m_state.boundDocumentHandlers) {
+	        m_this._handleMouseMoveDocument(evt);
+	      } else {
+	        m_this._handleMouseMove(evt);
+	      }
+	    }
+	    if (evtType[2] === 'end' || evtType[2] === 'cancel') {
+	      if (m_state.boundDocumentHandlers) {
+	        m_this._handleMouseUpDocument(evt);
+	      } else {
+	        m_this._handleMouseUp(evt);
+	      }
+	      m_touchHandler.lastEvent = null;
+	    }
+	  };
+
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Connects events to a map.  If the map is not set, then this does nothing.
@@ -43456,6 +44586,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this._handleMouseWheel = throttled_wheel();
 	    m_callZoom = debounced_zoom();
 
+	    // catalog what inputs we are using
+	    util.adjustActions(m_options.actions);
+	    var usedInputs = {};
+	    ['right', 'pan', 'rotate'].forEach(function (input) {
+	      usedInputs[input] = m_options.actions.some(function (action) {
+	        return action.input[input];
+	      });
+	    });
 	    // add event handlers
 	    $node.on('wheel.geojs', m_this._handleMouseWheel);
 	    $node.on('mousemove.geojs', m_this._handleMouseMove);
@@ -43463,13 +44601,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    $node.on('mouseup.geojs', m_this._handleMouseUp);
 	    // Disable dragging images and such
 	    $node.on('dragstart', function () { return false; });
-	    util.adjustActions(m_options.actions);
-	    if (m_options.actions.some(function (action) {
-	      return action.input.right;
-	    })) {
+	    if (usedInputs.right) {
 	      $node.on('contextmenu.geojs', function () { return false; });
 	    }
 
+	    // bind keyboard events
 	    if (m_options.keyboard && m_options.keyboard.actions) {
 	      m_keyHandler = Mousetrap($node[0]);
 	      var bound = [];
@@ -43491,12 +44627,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	    $node.toggleClass('highlight-focus',
 	      m_boundKeys && m_boundKeys.length && m_options.keyboard.focusHighlight);
 
+	    // bind touch events
+	    if ((m_this.hasTouchSupport() || m_options.alwaysTouch) &&
+	        (usedInputs.pan || usedInputs.rotate) &&
+	        __webpack_require__.m[/*require.resolve*/(224)]) { // eslint-disable-line
+	      var Hammer = __webpack_require__(224);
+	      var recog = [],
+	          touchEvents = ['hammer.input'];
+	      if (usedInputs.rotate) {
+	        recog.push([Hammer.Rotate, {enable: true}]);
+	        touchEvents = touchEvents.concat(['rotatestart', 'rotateend', 'rotatemove']);
+	      }
+	      if (usedInputs.pan) {
+	        recog.push([Hammer.Pan, {direction: Hammer.DIRECTION_ALL}]);
+	        touchEvents = touchEvents.concat(['panstart', 'panend', 'panmove']);
+	      }
+	      var hammerParams = {recognizers: recog, preventDefault: true};
+	      m_touchHandler = {
+	        manager: new Hammer.Manager($node[0], hammerParams),
+	        touchSupport: m_this.hasTouchSupport(),
+	        lastTime: 0
+	      };
+	      touchEvents.forEach(function (touchEvent) {
+	        m_touchHandler.manager.on(touchEvent, m_this._handleTouch);
+	      });
+	    }
+
 	    return m_this;
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Disonnects events to a map.  If the map is not set, then this does nothing.
+	   * Disiconnects events to a map.  If the map is not set, then this does
+	   * nothing.
 	   * @returns {geo.mapInteractor}
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
@@ -43507,6 +44670,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      m_boundKeys = null;
 	      m_keyHandler = null;
+	    }
+	    if (m_touchHandler) {
+	      m_touchHandler.manager.destroy();
+	      m_touchHandler = null;
 	    }
 	    if ($node) {
 	      $node.off('.geojs');
@@ -43595,12 +44762,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._getMouseButton = function (evt) {
-	    if (evt.which === 1) {
-	      m_mouse.buttons.left = evt.type !== 'mouseup';
-	    } else if (evt.which === 3) {
-	      m_mouse.buttons.right = evt.type !== 'mouseup';
-	    } else if (evt.which === 2) {
-	      m_mouse.buttons.middle = evt.type !== 'mouseup';
+	    for (var prop in m_mouse.buttons) {
+	      if (m_mouse.buttons.hasOwnProperty(prop)) {
+	        m_mouse.buttons[prop] = false;
+	      }
+	    }
+	    if (evt.type !== 'mouseup') {
+	      switch (evt.which) {
+	        case 1: m_mouse.buttons.left = true; break;
+	        case 2: m_mouse.buttons.middle = true; break;
+	        case 3: m_mouse.buttons.right = true; break;
+	        default:
+	          if (evt.which) {
+	            m_mouse.buttons[evt.which] = true;
+	          }
+	          break;
+	      }
 	    }
 	  };
 
@@ -43747,12 +44924,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	    actionRecord = actionMatch(m_mouse.buttons, m_mouse.modifiers,
-	                              m_options.actions);
+	                               m_options.actions);
 	    action = (actionRecord || {}).action;
 
+	    var map = m_this.map();
 	    // cancel transitions and momentum on click
-	    m_this.map().transitionCancel(
-	        '_handleMouseDown' + (action ? '.' + action : ''));
+	    map.transitionCancel('_handleMouseDown' + (action ? '.' + action : ''));
 	    m_this.cancel(geo_action.momentum);
 
 	    m_mouse.velocity = {
@@ -43771,6 +44948,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        action: action,
 	        actionRecord: actionRecord,
 	        origin: $.extend(true, {}, m_mouse),
+	        initialZoom: map.zoom(),
+	        initialRotation: map.rotation(),
+	        initialEventRotation: evt.rotation,
 	        delta: {x: 0, y: 0}
 	      };
 
@@ -43778,20 +44958,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // Make sure the old selection layer is gone.
 	        if (m_selectionLayer) {
 	          m_selectionLayer.clear();
-	          m_this.map().deleteLayer(m_selectionLayer);
+	          map.deleteLayer(m_selectionLayer);
 	          m_selectionLayer = null;
 	        }
-	        m_selectionLayer = m_this.map().createLayer(
+	        m_selectionLayer = map.createLayer(
 	          'feature', {features: [quadFeature.capabilities.color]});
 	        m_selectionQuad = m_selectionLayer.createFeature(
-	          'quad', {gcs: m_this.map().gcs()});
+	          'quad', {gcs: map.gcs()});
 	        m_selectionQuad.style({
 	          opacity: 0.25,
 	          color: {r: 0.3, g: 0.3, b: 0.3}
 	        });
-	        m_this.map().geoTrigger(geo_event.brushstart, m_this._getSelection());
+	        map.geoTrigger(geo_event.brushstart, m_this._getSelection());
 	      }
-	      m_this.map().geoTrigger(geo_event.actiondown, {
+	      map.geoTrigger(geo_event.actiondown, {
 	        state: m_this.state(), mouse: m_this.mouse(), event: evt});
 
 	      // bind temporary handlers to document
@@ -43818,7 +44998,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleMouseMove = function (evt) {
-
 	    if (m_paused) {
 	      return;
 	    }
@@ -43842,6 +45021,78 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    m_this.map().geoTrigger(geo_event.mousemove, m_this.mouse());
+	  };
+
+	  /**
+	   * Handle the zoomrotate action.
+	   *
+	   * @param {object} evt: the mouse event that triggered this.
+	   */
+	  this._handleZoomrotate = function (evt) {
+	    /* Only zoom if we have once exceeded the initial zoom threshold. */
+	    var deltaZoom = Math.log2(evt.scale);
+	    if (!m_state.zoomrotateAllowZoom && deltaZoom &&
+	        Math.abs(deltaZoom) >= Math.log2(1 + m_options.zoomrotateMinimumZoom)) {
+	      if (m_options.zoomrotateMinimumZoom) {
+	        m_state.initialZoom -= deltaZoom;
+	      }
+	      m_state.zoomrotateAllowZoom = true;
+	    }
+	    if (m_state.zoomrotateAllowZoom && deltaZoom) {
+	      var zoom = m_state.initialZoom + deltaZoom;
+	      m_this.map().zoom(zoom, m_state.origin);
+	    }
+	    /* Only rotate if we have once exceeded the initial rotation threshold.  The
+	     * first time this happens (if the threshold is greater than zero), set the
+	     * start of rotation to the current position, so that there is no sudden
+	     * jump. */
+	    var deltaTheta = (evt.rotation - m_state.initialEventRotation) * Math.PI / 180;
+	    if (!m_state.zoomrotateAllowRotation && deltaTheta &&
+	        Math.abs(deltaTheta) >= m_options.zoomrotateMinimumRotation) {
+	      if (m_options.zoomrotateMinimumRotation) {
+	        m_state.initialEventRotation = evt.rotation;
+	        deltaTheta = 0;
+	      }
+	      m_state.zoomrotateAllowRotation = true;
+	    }
+	    if (m_state.zoomrotateAllowRotation) {
+	      var theta = m_state.initialRotation + deltaTheta;
+	      /* Compute the delta in the range of [-PI, PI).  This is involed to work
+	       * around modulo returning a signed value. */
+	      deltaTheta = ((theta - m_this.map().rotation()) % (Math.PI * 2) +
+	                    Math.PI * 3) % (Math.PI * 2) - Math.PI;
+	      /* If we reverse direction, don't rotate until some threshold is
+	       * exceeded.  This helps prevent rotation bouncing while panning. */
+	      if (deltaTheta && (deltaTheta * (m_state.lastRotationDelta || 0) >= 0 ||
+	          Math.abs(deltaTheta) >= m_options.zoomrotateReverseRotation)) {
+	        m_this.map().rotation(theta, m_state.origin);
+	        m_state.lastRotationDelta = deltaTheta;
+	      }
+	    }
+	    /* Only pan if we have once exceed the initial pan threshold. */
+	    var panOrigin = m_state.origin.page;
+	    if (m_state.initialEventGeo) {
+	      var offset = $node.offset();
+	      panOrigin = m_this.map().gcsToDisplay(m_state.initialEventGeo);
+	      panOrigin.x += offset.left;
+	      panOrigin.y += offset.top;
+	    }
+	    var x = evt.pageX, deltaX = x - panOrigin.x,
+	        y = evt.pageY, deltaY = y - panOrigin.y,
+	        deltaPan2 = deltaX * deltaX + deltaY * deltaY;
+	    if (!m_state.zoomrotateAllowPan && deltaPan2 &&
+	        deltaPan2 >= m_options.zoomrotateMinimumPan * m_options.zoomrotateMinimumPan) {
+	      if (m_options.zoomrotateMinimumPan) {
+	        deltaX = deltaY = 0;
+	        m_state.initialEventGeo = m_this.mouse().geo;
+	      } else {
+	        m_state.initialEventGeo = m_state.origin.geo;
+	      }
+	      m_state.zoomrotateAllowPan = true;
+	    }
+	    if (m_state.zoomrotateAllowPan && (deltaX || deltaY)) {
+	      m_this.map().pan({x: deltaX, y: deltaY});
+	    }
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -43902,6 +45153,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      cx = m_mouse.map.x - m_this.map().size().width / 2;
 	      cy = m_mouse.map.y - m_this.map().size().height / 2;
 	      m_this.map().rotation(m_state.origin.rotation + Math.atan2(cy, cx));
+	    } else if (m_state.action === geo_action.zoomrotate) {
+	      m_this._handleZoomrotate(evt);
 	    } else if (m_state.actionRecord.selectionRectangle) {
 	      // Get the bounds of the current selection
 	      selectionObj = m_this._getSelection();
@@ -44001,7 +45254,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Based on the screen coodinates of a selection, zoom or unzoom and
+	   * Based on the screen coordinates of a selection, zoom or unzoom and
 	   * recenter.
 	   *
 	   * @private
@@ -44360,7 +45613,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      if (action) {
 	        // if we were moving because of momentum or a transition, cancel it and
-	        // recompute where the mouse action is occuring.
+	        // recompute where the mouse action is occurring.
 	        var recompute = m_this.map().transitionCancel('wheel.' + action);
 	        recompute |= m_this.cancel(geo_action.momentum, true);
 	        if (recompute) {
@@ -44653,7 +45906,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (type === 'keyboard' && m_keyHandler) {
 	      /* Mousetrap passes through the keys we send, but not an event object,
-	       * so we construct an artifical event object as the keys, and use that.
+	       * so we construct an artificial event object as the keys, and use that.
 	       */
 	      var keys = {
 	        shiftKey: options.shift || options.shiftKey || false,
@@ -44698,6 +45951,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        ctrlKey: options.modifiers.indexOf('ctrl') >= 0,
 	        metaKey: options.modifiers.indexOf('meta') >= 0,
 	        shiftKey: options.modifiers.indexOf('shift') >= 0,
+
+	        center: options.center,
+	        rotation: options.touch ? options.rotation || 0 : options.rotation,
+	        scale: options.touch ? options.scale || 1 : options.scale,
+	        pointers: options.pointers,
+	        pointerType: options.pointerType,
+
 	        originalEvent: {
 	          deltaX: options.wheelDelta.x,
 	          deltaY: options.wheelDelta.y,
@@ -44708,7 +45968,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	    );
-	    $node.trigger(evt);
+	    if (options.touch && m_touchHandler) {
+	      m_this._handleTouch(evt);
+	    } else {
+	      $node.trigger(evt);
+	    }
 	    if (type.indexOf('.geojs') >= 0) {
 	      $(document).trigger(evt);
 	    }
@@ -44721,13 +45985,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = mapInteractor;
 
 
-/***/ },
-/* 217 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 223 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(204);
+	var feature = __webpack_require__(208);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -45046,7 +46310,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        return;
 	      }
-	      var quad, reload, image, prev_onload,
+	      var quad, reload, image, prev_onload, prev_onerror,
 	          pos, img, opacity, previewColor, previewImage, quadinfo = {};
 
 	      pos = m_this._positionToQuad(posFunc, depthFunc, d, i);
@@ -45064,10 +46328,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        origin = pos.ll;
 	        origindiag2 = diag2;
 	      }
-	      pos = [pos.ll[0], pos.ll[1], pos.ll[2],
-	             pos.lr[0], pos.lr[1], pos.lr[2],
-	             pos.ul[0], pos.ul[1], pos.ul[2],
-	             pos.ur[0], pos.ur[1], pos.ur[2]];
+	      pos = [
+	        pos.ll[0], pos.ll[1], pos.ll[2],
+	        pos.lr[0], pos.lr[1], pos.lr[2],
+	        pos.ul[0], pos.ul[1], pos.ul[2],
+	        pos.ur[0], pos.ur[1], pos.ur[2]
+	      ];
 	      img = imgFunc.call(m_this, d, i);
 	      if (!img) {
 	        quad = {
@@ -45123,6 +46389,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	          reload = loadedFunc.call(m_this, d, i);
 	          if (reload) {
+	            // add a promise to the layer if this image might complete
+	            var defer = util.isReadyImage(image, true) ? null : $.Deferred();
 	            prev_onload = image.onload;
 	            image.onload = function () {
 	              if (previewColor !== undefined) {
@@ -45135,10 +46403,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	              m_this.modified();
 	              m_this._update();
 	              m_this.layer().draw();
+	              if (defer) {
+	                defer.resolve();
+	              }
 	              if (prev_onload) {
 	                return prev_onload.apply(this, arguments);
 	              }
 	            };
+	            prev_onerror = image.onerror;
+	            image.onerror = function () {
+	              if (defer) {
+	                defer.reject();
+	              }
+	              if (prev_onerror) {
+	                return prev_onerror.apply(this, arguments);
+	              }
+	            };
+	            if (defer) {
+	              m_this.layer().addPromise(defer.promise());
+	            }
 	          } else if (previewColor === undefined && !quad.image) {
 	            return;
 	          }
@@ -45242,21 +46525,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = quadFeature;
 
 
-/***/ },
-/* 218 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 224 */
+/***/ (function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_224__;
+
+/***/ }),
+/* 225 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(204);
+	var feature = __webpack_require__(208);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class choroplethFeature
 	 *
 	 * @class geo.choroplethFeature
+	 * @param {Object} arg Options object
 	 * @extends geo.feature
+	 * @param {Array} [colorRange] Color lookup table for
+	 *   choroplethFeature. Default is 9-step color table.
+	 * @param {Function} [scale] A scale converts a input domain into the
+	 *   the colorRange. Default is d3.scale.quantize.
+	 * @param {Object} [accessor] A accessor defines three functions; Retrieve
+	 *   geoId from geometry feature and scalarId and scalarValue from scalarData. By
+	 *   default geoId uses GEO_ID key in the geometry feature property,
+	 *   scalarId uses id key and scalarValue uses value from a object within
+	 *   the scalar array.
+	 * @param {Object|Function} [scalar] A scalar is a array of objects with keys id
+	 *   that maps scalar value to the geometry and value of the scalar.
+	 *   Multiple values mapped to the same id are aggregated by the aggregator.
+	 * @param {Object|Function} [choropleth] Defines accessor for choropleth. It
+	 *   provides an API to replace or add attributes to the choropleth.
+	 * @param {Object|Function} [choropleth.get] A uniform getter that
+	 *   always returns a function even for constant values.
+	 *   If undefined input, return all the choropleth values as an object.
 	 * @returns {geo.choroplethFeature}
-	 *
 	 */
 	//////////////////////////////////////////////////////////////////////////////
 	var choroplethFeature = function (arg) {
@@ -45275,12 +46581,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @private
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
-	  var d3 = __webpack_require__(219),
+	  var d3 = __webpack_require__(226),
 	      m_this = this,
 	      s_init = this._init,
 	      m_choropleth = $.extend({},
 	        {
-	              /* 9-step based on paraview bwr colortable */
 	          colorRange: [
 	                {r: 0.07514311, g: 0.468049805, b: 1},
 	                {r: 0.468487184, g: 0.588057293, b: 1},
@@ -45294,15 +46599,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	          ],
 	          scale: d3.scale.quantize(),
 	          accessors: {
-	                //accessor for ID on geodata feature
+	            //accessor for ID on geodata feature
 	            geoId: function (geoFeature) {
 	              return geoFeature.properties.GEO_ID;
 	            },
-	                //accessor for ID on scalar element
+	            //accessor for ID on scalar element
 	            scalarId: function (scalarElement) {
 	              return scalarElement.id;
 	            },
-	                //accessor for value on scalar element
+	            //accessor for value on scalar element
 	            scalarValue: function (scalarElement) {
 	              return scalarElement.value;
 	            }
@@ -45314,6 +46619,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get/Set choropleth scalar data
 	   *
+	   * @memberof geo.choroplethFeature
+	   * @param {Array} [data] Scalar data is an array of objects in which each
+	   *   object provides an id and a value for that id. The id uniquely identifies
+	   *   the geometry this scalar is associated with.
+	   * @param {Function} [aggregator] The aggregator aggregates the scalar in case
+	   *   there are multiple values are found with the same id. The default
+	   *   is d3.mean.
 	   * @returns {geo.feature.choropleth}
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
@@ -45353,6 +46665,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get/Set choropleth accessor
 	   *
+	   * @memberof geo.choroplethFeature
+	   * @param {Object|String} [arg1] The first argument is the key for a
+	   *   attributes of the choropleth. If the argument is a string and the second
+	   *   argument is undefined, the value of the key is returned. If the arg1 is
+	   *   an object and the second argument is undefined, choropleth attributes
+	   *   are extended by that object. If arg1 is an object and arg2 is defined,
+	   *   a new key-value pair is then added to the choropleth as an attribute.
+	   * @param {Object|String} [arg2] arg2 defines the value of the key (arg1).
 	   * @returns {geo.feature.choropleth}
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
@@ -45381,10 +46701,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
+	   * Get/Set choropleth getter
+	   *
+	   * @memberof geo.choroplethFeature
 	   * A uniform getter that always returns a function even for constant values.
 	   * If undefined input, return all the choropleth values as an object.
 	   *
-	   * @param {string|undefined} key
+	   * @param {string|undefined} key defines one of the attributes of a
+	   *  choropleth.
 	   * @return {function}
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
@@ -45483,7 +46807,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
-	  /**sr
+	  /**
 	   * Generate scale for choropleth.data(), make polygons from features.
 	   * @returns: [ [geo.feature.polygon, ...] , ... ]
 	   */
@@ -45503,7 +46827,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var valueArray = scalars._dictionary[id];
 	        var accumulatedScalarValue = choropleth().scalarAggregator(valueArray);
 	        // take average of this array of values
-	        // which allows for non-bijective correspondance
+	        // which allows for non-bijective correspondence
 	        // between geo data and scalar data
 	        var fillColor =
 	            m_this
@@ -45536,18 +46860,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = choroplethFeature;
 
 
-/***/ },
-/* 219 */
-/***/ function(module, exports) {
+/***/ }),
+/* 226 */
+/***/ (function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_219__;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_226__;
 
-/***/ },
-/* 220 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 227 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(204);
+	var feature = __webpack_require__(208);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -46002,12 +47326,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-/***/ },
-/* 221 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 228 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var renderer = __webpack_require__(222);
+	var renderer = __webpack_require__(203);
 	var registerRenderer = __webpack_require__(202).registerRenderer;
 
 	/**
@@ -46050,140 +47374,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = domRenderer;
 
 
-/***/ },
-/* 222 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var inherit = __webpack_require__(8);
-	var object = __webpack_require__(206);
-
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create a new instance of class renderer
-	 *
-	 * @class geo.renderer
-	 * @extends geo.object
-	 * @returns {geo.renderer}
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var renderer = function (arg) {
-	  'use strict';
-
-	  if (!(this instanceof renderer)) {
-	    return new renderer(arg);
-	  }
-	  object.call(this);
-
-	  arg = arg || {};
-	  var m_this = this,
-	      m_layer = arg.layer === undefined ? null : arg.layer,
-	      m_canvas = arg.canvas === undefined ? null : arg.canvas,
-	      m_initialized = false;
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get layer of the renderer
-	   *
-	   * @returns {*}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.layer = function () {
-	    return m_layer;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get canvas for the renderer
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.canvas = function (val) {
-	    if (val === undefined) {
-	      return m_canvas;
-	    } else {
-	      m_canvas = val;
-	      m_this.modified();
-	    }
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get map that this renderer belongs to
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.map = function () {
-	    if (m_layer) {
-	      return m_layer.map();
-	    } else {
-	      return null;
-	    }
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set if renderer has been initialized
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.initialized = function (val) {
-	    if (val === undefined) {
-	      return m_initialized;
-	    } else {
-	      m_initialized = val;
-	      return m_this;
-	    }
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get render API used by the renderer
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.api = function () {
-	    throw new Error('Should be implemented by derived classes');
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Reset to default
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.reset = function () {
-	    return true;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Initialize
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._init = function () {
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Handle resize event
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._resize = function () {
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Render
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._render = function () {
-	  };
-
-	  return this;
-	};
-
-	inherit(renderer, object);
-	module.exports = renderer;
-
-
-/***/ },
-/* 223 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 229 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
 	  'use strict';
@@ -46412,13 +47605,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	})();
 
 
-/***/ },
-/* 224 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 230 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var featureLayer = __webpack_require__(214);
-	var object = __webpack_require__(206);
+	var featureLayer = __webpack_require__(220);
+	var object = __webpack_require__(204);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -46528,12 +47721,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = fileReader;
 
 
-/***/ },
-/* 225 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 231 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(204);
+	var feature = __webpack_require__(208);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -46767,13 +47960,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = graphFeature;
 
 
-/***/ },
-/* 226 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 232 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(204);
+	var feature = __webpack_require__(208);
 	var transform = __webpack_require__(11);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -47058,12 +48251,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = heatmapFeature;
 
 
-/***/ },
-/* 227 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 233 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var tile = __webpack_require__(228);
+	var tile = __webpack_require__(234);
 
 	module.exports = (function () {
 	  'use strict';
@@ -47177,9 +48370,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	})();
 
 
-/***/ },
-/* 228 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 234 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
 	  'use strict';
@@ -47406,13 +48599,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	})();
 
 
-/***/ },
-/* 229 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 235 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFileReader = __webpack_require__(202).registerFileReader;
-	var fileReader = __webpack_require__(224);
+	var fileReader = __webpack_require__(230);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -47669,7 +48862,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            .style({
 	              strokeColor: m_this._style('strokeColor', '#ff7800', lines, convertColor),
 	              strokeWidth: m_this._style('strokeWidth', 4, lines),
-	              strokeOpacity: m_this._style('strokeOpacity', 0.5, lines)
+	              strokeOpacity: m_this._style('strokeOpacity', 0.5, lines),
+	              strokeOffset: m_this._style('strokeOffset', 0, lines),
+	              lineCap: m_this._style('lineCap', 'butt', lines),
+	              lineJoin: m_this._style('lineCap', 'miter', lines),
+	              closed: m_this._style('closed', false, lines)
 	            })
 	        );
 	      }
@@ -47712,14 +48909,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = jsonReader;
 
 
-/***/ },
-/* 230 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 236 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
-	var vgl = __webpack_require__(88);
+	var vgl = __webpack_require__(87);
 	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(205);
+	var sceneObject = __webpack_require__(209);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -47802,13 +48999,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  sceneObject.call(this, arg);
 
-	  var camera = __webpack_require__(209);
+	  var camera = __webpack_require__(212);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
 	  var registry = __webpack_require__(202);
 	  var geo_event = __webpack_require__(9);
-	  var mapInteractor = __webpack_require__(216);
-	  var uiLayer = __webpack_require__(231);
+	  var mapInteractor = __webpack_require__(222);
+	  var uiLayer = __webpack_require__(237);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -49407,10 +50604,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	      }
 	      layer.node().children('canvas').each(function () {
-	        if (layer.renderer().api() === 'vgl') {
-	          layer.renderer()._renderFrame();
-	        }
-	        drawLayerImageToContext(context, opacity, $(this), $(this)[0]);
+	        var canvasElem = $(this);
+	        defer = defer.then(function () {
+	          if (layer.renderer().api() === 'vgl') {
+	            layer.renderer()._renderFrame();
+	          }
+	          drawLayerImageToContext(context, opacity, canvasElem, canvasElem[0]);
+	        });
 	      });
 	      if (layer.node().children().not('canvas').length) {
 	        defer = defer.then(function () {
@@ -49882,7 +51082,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  var _map = map(spec),
-	      layer = __webpack_require__(208);
+	      layer = __webpack_require__(211);
 
 	  /* If the spec is bad, we still end up with an object, but it won't have a
 	   * zoom function */
@@ -49906,13 +51106,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = map;
 
 
-/***/ },
-/* 231 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 237 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerLayer = __webpack_require__(202).registerLayer;
-	var layer = __webpack_require__(208);
+	var layer = __webpack_require__(211);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -49991,18 +51191,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = uiLayer;
 
 
-/***/ },
-/* 232 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 238 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
 	  'use strict';
 
 	  var $ = __webpack_require__(1);
 	  var inherit = __webpack_require__(8);
-	  var tileLayer = __webpack_require__(233);
+	  var tileLayer = __webpack_require__(239);
 	  var registry = __webpack_require__(202);
-	  var quadFeature = __webpack_require__(217);
+	  var quadFeature = __webpack_require__(223);
 
 	  //////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -50018,7 +51218,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  //////////////////////////////////////////////////////////////////////////////
 	  var osmLayer = function (arg) {
 
-	    var imageTile = __webpack_require__(227);
+	    var imageTile = __webpack_require__(233);
 
 	    if (!(this instanceof osmLayer)) {
 	      return new osmLayer(arg);
@@ -50088,15 +51288,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	})();
 
 
-/***/ },
-/* 233 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 239 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
 	  'use strict';
 
 	  var inherit = __webpack_require__(8);
-	  var featureLayer = __webpack_require__(214);
+	  var featureLayer = __webpack_require__(220);
 
 	  /**
 	   * Standard modulo operator where the output is in [0, b) for all inputs.
@@ -50232,19 +51432,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  //////////////////////////////////////////////////////////////////////////////
 	  var tileLayer = function (options) {
-
-	    var $ = __webpack_require__(1);
-	    var geo_event = __webpack_require__(9);
-	    var transform = __webpack_require__(11);
-	    var tileCache = __webpack_require__(234);
-	    var fetchQueue = __webpack_require__(223);
-	    var adjustLayerForRenderer = __webpack_require__(202).adjustLayerForRenderer;
-	    var Tile = __webpack_require__(228);
-
+	    'use strict';
 	    if (!(this instanceof tileLayer)) {
 	      return new tileLayer(options);
 	    }
 	    featureLayer.call(this, options);
+
+	    var $ = __webpack_require__(1);
+	    var geo_event = __webpack_require__(9);
+	    var transform = __webpack_require__(11);
+	    var tileCache = __webpack_require__(240);
+	    var fetchQueue = __webpack_require__(229);
+	    var adjustLayerForRenderer = __webpack_require__(202).adjustLayerForRenderer;
+	    var Tile = __webpack_require__(234);
 
 	    options = $.extend(true, {}, this.constructor.defaults, options || {});
 	    if (!options.cacheSize) {
@@ -50271,6 +51471,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var s_init = this._init,
 	        s_exit = this._exit,
+	        s_visible = this.visible,
 	        m_lastTileSet = [],
 	        m_maxBounds = [],
 	        m_exited;
@@ -51157,6 +52358,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	          evt.event.event === geo_event.rotate)) {
 	        return;
 	      }
+	      if (!this.visible()) {
+	        return;
+	      }
 	      var map = this.map(),
 	          bounds = map.bounds(undefined, null),
 	          mapZoom = map.zoom(),
@@ -51524,6 +52728,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return m_tileOffsetValues[level];
 	    };
 
+	    ////////////////////////////////////////////////////////////////////////////
+	    /**
+	     * Get/Set visibility of the layer
+	     *
+	     * @param {boolean|undefined} val: undefined to return the visibility, a
+	     *    boolean to change the visibility.
+	     * @return {boolean|object} either the visibility (if getting) or the layer
+	     *    (if setting).
+	     */
+	    ////////////////////////////////////////////////////////////////////////////
+	    this.visible = function (val) {
+	      if (val === undefined) {
+	        return s_visible();
+	      }
+	      if (this.visible() !== val) {
+	        s_visible(val);
+
+	        if (val) {
+	          this._update();
+	        }
+	      }
+	      return this;
+	    };
+
 	    /**
 	     * Initialize after the layer is added to the map.
 	     */
@@ -51589,9 +52817,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	})();
 
 
-/***/ },
-/* 234 */
-/***/ function(module, exports) {
+/***/ }),
+/* 240 */
+/***/ (function(module, exports) {
 
 	module.exports = (function () {
 	  'use strict';
@@ -51743,13 +52971,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	})();
 
 
-/***/ },
-/* 235 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 241 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(204);
+	var feature = __webpack_require__(208);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -51827,13 +53055,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = pathFeature;
 
 
-/***/ },
-/* 236 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 242 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(204);
+	var feature = __webpack_require__(208);
 	var geo_event = __webpack_require__(9);
 	var util = __webpack_require__(83);
 
@@ -52172,13 +53400,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_quadFeature = m_this.layer().createFeature('quad', {
 	        selectionAPI: false,
 	        gcs: m_this.gcs(),
-	        visible: m_this.visible()
+	        visible: m_this.visible(undefined, true)
 	      });
 	      m_this.dependentFeatures([m_quadFeature]);
-	      m_quadFeature.style({image: m_info.canvas,
-	                           position: m_this.style.get('position')})
-	                   .data([{}])
-	                   .draw();
+	      m_quadFeature.style({
+	        image: m_info.canvas,
+	        position: m_this.style.get('position')})
+	      .data([{}])
+	      .draw();
 	    }
 	    /* If we prepared the pixelmap and rendered it, send a prepared event */
 	    if (prepared) {
@@ -52284,12 +53513,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = pixelmapFeature;
 
 
-/***/ },
-/* 237 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 243 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var feature = __webpack_require__(204);
+	var feature = __webpack_require__(208);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -52392,60 +53621,60 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = vectorFeature;
 
 
-/***/ },
-/* 238 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 244 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	module.exports = ("0.11.1");
-
-
-/***/ },
-/* 239 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = ("b8314e39b0cc017a96e8cdf6b2413f74ce31a958");
+	module.exports = ("0.12.0");
 
 
-/***/ },
-/* 240 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 245 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	module.exports = ("1103e98717cad3ddc16716b907185851a3d2138d");
+
+
+/***/ }),
+/* 246 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var geo_event = __webpack_require__(9);
 	geo_event.d3 = {
-	  rescale: __webpack_require__(241)
+	  rescale: __webpack_require__(247)
 	};
 
 	/**
 	 * @namespace geo.d3
 	 */
 	module.exports = {
-	  graphFeature: __webpack_require__(242),
-	  lineFeature: __webpack_require__(243),
-	  object: __webpack_require__(244),
-	  pathFeature: __webpack_require__(246),
-	  pointFeature: __webpack_require__(247),
-	  quadFeature: __webpack_require__(248),
-	  renderer: __webpack_require__(249),
-	  tileLayer: __webpack_require__(250),
-	  uniqueID: __webpack_require__(245),
-	  vectorFeature: __webpack_require__(251)
+	  graphFeature: __webpack_require__(248),
+	  lineFeature: __webpack_require__(249),
+	  object: __webpack_require__(250),
+	  pathFeature: __webpack_require__(252),
+	  pointFeature: __webpack_require__(253),
+	  quadFeature: __webpack_require__(254),
+	  renderer: __webpack_require__(255),
+	  tileLayer: __webpack_require__(256),
+	  uniqueID: __webpack_require__(251),
+	  vectorFeature: __webpack_require__(257)
 	};
 
 
-/***/ },
-/* 241 */
-/***/ function(module, exports) {
+/***/ }),
+/* 247 */
+/***/ (function(module, exports) {
 
 	module.exports = 'geo_d3_rescale';
 
 
-/***/ },
-/* 242 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 248 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var graphFeature = __webpack_require__(225);
+	var graphFeature = __webpack_require__(231);
 
 	/**
 	 * @class geo.d3.graphFeature
@@ -52488,13 +53717,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = d3_graphFeature;
 
 
-/***/ },
-/* 243 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 249 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var lineFeature = __webpack_require__(203);
+	var lineFeature = __webpack_require__(207);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -52512,9 +53741,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new d3_lineFeature(arg);
 	  }
 
-	  var d3 = __webpack_require__(219);
-	  var object = __webpack_require__(244);
-	  var timestamp = __webpack_require__(207);
+	  var d3 = __webpack_require__(226);
+	  var object = __webpack_require__(250);
+	  var timestamp = __webpack_require__(210);
 	  var util = __webpack_require__(83);
 
 	  arg = arg || {};
@@ -52643,12 +53872,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = d3_lineFeature;
 
 
-/***/ },
-/* 244 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 250 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(205);
+	var sceneObject = __webpack_require__(209);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -52662,8 +53891,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var d3_object = function (arg) {
 	  'use strict';
 
-	  var object = __webpack_require__(206);
-	  var uniqueID = __webpack_require__(245);
+	  var object = __webpack_require__(204);
+	  var uniqueID = __webpack_require__(251);
 
 	  // this is used to extend other geojs classes, so only generate
 	  // a new object when that is not the case... like if this === window
@@ -52718,9 +53947,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = d3_object;
 
 
-/***/ },
-/* 245 */
-/***/ function(module, exports) {
+/***/ }),
+/* 251 */
+/***/ (function(module, exports) {
 
 	var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
 	    strLength = 8;
@@ -52745,13 +53974,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = uniqueID;
 
 
-/***/ },
-/* 246 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 252 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var pathFeature = __webpack_require__(235);
+	var pathFeature = __webpack_require__(241);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -52770,9 +53999,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var $ = __webpack_require__(1);
-	  var d3 = __webpack_require__(219);
-	  var object = __webpack_require__(244);
-	  var timestamp = __webpack_require__(207);
+	  var d3 = __webpack_require__(226);
+	  var object = __webpack_require__(250);
+	  var timestamp = __webpack_require__(210);
 
 	  arg = arg || {};
 	  pathFeature.call(this, arg);
@@ -52882,13 +54111,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = d3_pathFeature;
 
 
-/***/ },
-/* 247 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 253 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var pointFeature = __webpack_require__(210);
+	var pointFeature = __webpack_require__(213);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -52907,8 +54136,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new d3_pointFeature(arg);
 	  }
 
-	  var d3_object = __webpack_require__(244);
-	  var timestamp = __webpack_require__(207);
+	  var d3_object = __webpack_require__(250);
+	  var timestamp = __webpack_require__(210);
 
 	  arg = arg || {};
 	  pointFeature.call(this, arg);
@@ -53009,13 +54238,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = d3_pointFeature;
 
 
-/***/ },
-/* 248 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 254 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var quadFeature = __webpack_require__(217);
+	var quadFeature = __webpack_require__(223);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -53034,8 +54263,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var $ = __webpack_require__(1);
-	  var d3 = __webpack_require__(219);
-	  var object = __webpack_require__(244);
+	  var d3 = __webpack_require__(226);
+	  var object = __webpack_require__(250);
 
 	  quadFeature.call(this, arg);
 	  object.call(this);
@@ -53256,13 +54485,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = d3_quadFeature;
 
 
-/***/ },
-/* 249 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 255 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerRenderer = __webpack_require__(202).registerRenderer;
-	var renderer = __webpack_require__(222);
+	var renderer = __webpack_require__(203);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -53276,11 +54505,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var d3Renderer = function (arg) {
 	  'use strict';
 
-	  var d3 = __webpack_require__(219);
-	  var object = __webpack_require__(244);
+	  var d3 = __webpack_require__(226);
+	  var object = __webpack_require__(250);
 	  var util = __webpack_require__(83);
 	  var geo_event = __webpack_require__(9);
-	  var d3Rescale = __webpack_require__(241);
+	  var d3Rescale = __webpack_require__(247);
 
 	  if (!(this instanceof d3Renderer)) {
 	    return new d3Renderer(arg);
@@ -53680,7 +54909,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_svg.attr('width', w);
 	    m_svg.attr('height', h);
 	    m_this._setTransform();
-	    m_this.layer().geoTrigger(geo_event.d3Rescale, { scale: m_scale }, true);
+	    m_this.layer().geoTrigger(d3Rescale, { scale: m_scale }, true);
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -53897,7 +55126,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @returns {boolean} true if available.
 	   */
 	  d3Renderer.supported = function () {
-	    return !!__webpack_require__.m[/*require.resolve*/(219)]; // eslint-disable-line
+	    return !!__webpack_require__.m[/*require.resolve*/(226)]; // eslint-disable-line
 	  };
 
 	  /**
@@ -53914,9 +55143,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = d3Renderer;
 
 
-/***/ },
-/* 250 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 256 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(202).registerLayerAdjustment;
 
@@ -54009,13 +55238,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = d3_tileLayer;
 
 
-/***/ },
-/* 251 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 257 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var vectorFeature = __webpack_require__(237);
+	var vectorFeature = __webpack_require__(243);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -54033,9 +55262,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new d3_vectorFeature(arg);
 	  }
 
-	  var object = __webpack_require__(244);
-	  var timestamp = __webpack_require__(207);
-	  var d3 = __webpack_require__(219);
+	  var object = __webpack_require__(250);
+	  var timestamp = __webpack_require__(210);
+	  var d3 = __webpack_require__(226);
 
 	  arg = arg || {};
 	  vectorFeature.call(this, arg);
@@ -54318,32 +55547,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = d3_vectorFeature;
 
 
-/***/ },
-/* 252 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 258 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.gl
 	 */
 	module.exports = {
-	  choroplethFeature: __webpack_require__(253),
-	  contourFeature: __webpack_require__(254),
-	  lineFeature: __webpack_require__(256),
-	  pointFeature: __webpack_require__(257),
-	  polygonFeature: __webpack_require__(258),
-	  quadFeature: __webpack_require__(260),
-	  tileLayer: __webpack_require__(261),
-	  vglRenderer: __webpack_require__(262)
+	  choroplethFeature: __webpack_require__(259),
+	  contourFeature: __webpack_require__(260),
+	  lineFeature: __webpack_require__(262),
+	  pointFeature: __webpack_require__(263),
+	  polygonFeature: __webpack_require__(264),
+	  quadFeature: __webpack_require__(266),
+	  tileLayer: __webpack_require__(267),
+	  vglRenderer: __webpack_require__(201)
 	};
 
 
-/***/ },
-/* 253 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 259 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var choroplethFeature = __webpack_require__(218);
+	var choroplethFeature = __webpack_require__(225);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -54467,13 +55696,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = gl_choroplethFeature;
 
 
-/***/ },
-/* 254 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 260 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var contourFeature = __webpack_require__(220);
+	var contourFeature = __webpack_require__(227);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -54493,10 +55722,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  contourFeature.call(this, arg);
 
-	  var vgl = __webpack_require__(88);
+	  var vgl = __webpack_require__(87);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
-	  var object = __webpack_require__(255);
+	  var object = __webpack_require__(261);
 
 	  object.call(this);
 
@@ -54767,9 +55996,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = gl_contourFeature;
 
 
-/***/ },
-/* 255 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 261 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -54782,7 +56011,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var gl_object = function (arg) {
 	  'use strict';
 
-	  var object = __webpack_require__(206);
+	  var object = __webpack_require__(204);
 
 	  // this is used to extend other geojs classes, so only generate
 	  // a new object when that is not the case... like if this === window
@@ -54812,13 +56041,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 
-/***/ },
-/* 256 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 262 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var lineFeature = __webpack_require__(203);
+	var lineFeature = __webpack_require__(207);
 
 	var MAX_MITER_LIMIT = 100;
 
@@ -54868,10 +56097,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  lineFeature.call(this, arg);
 
-	  var vgl = __webpack_require__(88);
+	  var vgl = __webpack_require__(87);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
-	  var object = __webpack_require__(255);
+	  var object = __webpack_require__(261);
 
 	  object.call(this);
 
@@ -55551,13 +56780,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = gl_lineFeature;
 
 
-/***/ },
-/* 257 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 263 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var pointFeature = __webpack_require__(210);
+	var pointFeature = __webpack_require__(213);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -55576,10 +56805,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  pointFeature.call(this, arg);
 
-	  var vgl = __webpack_require__(88);
+	  var vgl = __webpack_require__(87);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
-	  var object = __webpack_require__(255);
+	  var object = __webpack_require__(261);
 
 	  object.call(this);
 
@@ -55595,6 +56824,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_pixelWidthUniform = null,
 	      m_aspectUniform = null,
 	      m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
+	      /* If you are drawing very large points, you will often get better
+	       * performance using a different primitiveShape.  The 'sprite' shape uses
+	       * the least memory, but has hardware-specific limitations to its size.
+	       * 'triangle' seems to be fastest on low-powered hardware, but 'square'
+	       * visits fewer fragments. */
 	      m_primitiveShape = 'sprite', // arg can change this, below
 	      s_init = this._init,
 	      s_update = this._update,
@@ -56086,6 +57320,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.renderer().contextRenderer().removeActor(m_actor);
+	    m_actor = null;
 	    s_exit();
 	  };
 
@@ -56101,13 +57336,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = gl_pointFeature;
 
 
-/***/ },
-/* 258 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 264 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var polygonFeature = __webpack_require__(212);
+	var polygonFeature = __webpack_require__(218);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -56126,11 +57361,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  polygonFeature.call(this, arg);
 
-	  var vgl = __webpack_require__(88);
-	  var earcut = __webpack_require__(259);
+	  var vgl = __webpack_require__(87);
+	  var earcut = __webpack_require__(265);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
-	  var object = __webpack_require__(255);
+	  var object = __webpack_require__(261);
 
 	  object.call(this);
 
@@ -56488,9 +57723,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = gl_polygonFeature;
 
 
-/***/ },
-/* 259 */
-/***/ function(module, exports) {
+/***/ }),
+/* 265 */
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -57138,13 +58373,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
-/* 260 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 266 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var quadFeature = __webpack_require__(217);
+	var quadFeature = __webpack_require__(223);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -57164,8 +58399,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  quadFeature.call(this, arg);
 
 	  var $ = __webpack_require__(1);
-	  var vgl = __webpack_require__(88);
-	  var object = __webpack_require__(255);
+	  var vgl = __webpack_require__(87);
+	  var object = __webpack_require__(261);
 
 	  object.call(this);
 
@@ -57517,11 +58752,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_this._build();
 	    }
 	    if (m_actor_color) {
-	      m_actor_color.setVisible(m_this.visible());
+	      m_actor_color.setVisible(m_this.visible(undefined, true));
 	      m_actor_color.material().setBinNumber(m_this.bin());
 	    }
 	    if (m_actor_image) {
-	      m_actor_image.setVisible(m_this.visible());
+	      m_actor_image.setVisible(m_this.visible(undefined, true));
 	      m_actor_image.material().setBinNumber(m_this.bin());
 	    }
 	    m_this.updateTime().modified();
@@ -57572,9 +58807,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = gl_quadFeature;
 
 
-/***/ },
-/* 261 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 267 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(202).registerLayerAdjustment;
 
@@ -57676,356 +58911,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = gl_tileLayer;
 
 
-/***/ },
-/* 262 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var inherit = __webpack_require__(8);
-	var registerRenderer = __webpack_require__(202).registerRenderer;
-	var renderer = __webpack_require__(222);
-
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create a new instance of class vglRenderer
-	 *
-	 * @class geo.gl.vglRenderer
-	 * @extends geo.renderer
-	 * @param canvas
-	 * @returns {geo.gl.vglRenderer}
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var vglRenderer = function (arg) {
-	  'use strict';
-
-	  if (!(this instanceof vglRenderer)) {
-	    return new vglRenderer(arg);
-	  }
-	  arg = arg || {};
-	  renderer.call(this, arg);
-
-	  var $ = __webpack_require__(1);
-	  var vgl = __webpack_require__(88);
-	  var mat4 = __webpack_require__(90);
-	  var util = __webpack_require__(83);
-	  var geo_event = __webpack_require__(9);
-
-	  var m_this = this,
-	      m_contextRenderer = null,
-	      m_viewer = null,
-	      m_width = 0,
-	      m_height = 0,
-	      m_lastZoom,
-	      m_updateCamera = false,
-	      s_init = this._init,
-	      s_exit = this._exit;
-
-	  /// TODO: Move this API to the base class
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Return width of the renderer
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.width = function () {
-	    return m_width;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Return height of the renderer
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.height = function () {
-	    return m_height;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get context specific renderer
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.contextRenderer = function () {
-	    return m_contextRenderer;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get API used by the renderer
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.api = function () {
-	    return 'vgl';
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Initialize
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._init = function () {
-	    if (m_this.initialized()) {
-	      return m_this;
-	    }
-
-	    s_init.call(m_this);
-
-	    var canvas = $(document.createElement('canvas'));
-	    canvas.addClass('webgl-canvas');
-	    $(m_this.layer().node().get(0)).append(canvas);
-
-	    if (window.contextPreserveDrawingBuffer) {
-	      var elem = canvas.get(0);
-	      var getContext = elem.getContext;
-	      elem.getContext = function (contextType, contextAttributes) {
-	        contextAttributes = contextAttributes || {};
-	        contextAttributes.preserveDrawingBuffer = true;
-	        return getContext.call(elem, contextType, contextAttributes);
-	      };
-	    }
-
-	    m_viewer = vgl.viewer(canvas.get(0), arg.options);
-	    m_viewer.init();
-	    m_contextRenderer = m_viewer.renderWindow().activeRenderer();
-	    m_contextRenderer.setResetScene(false);
-
-	    if (m_viewer.renderWindow().renderers().length > 0) {
-	      m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
-	    }
-	    m_this.canvas(canvas);
-	    /* Initialize the size of the renderer */
-	    var map = m_this.layer().map(),
-	        mapSize = map.size();
-	    m_this._resize(0, 0, mapSize.width, mapSize.height);
-
-	    return m_this;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Handle resize event
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._resize = function (x, y, w, h) {
-	    var renderWindow = m_viewer.renderWindow();
-
-	    m_width = w;
-	    m_height = h;
-	    m_this.canvas().attr('width', w);
-	    m_this.canvas().attr('height', h);
-	    renderWindow.positionAndResize(x, y, w, h);
-
-	    m_updateCamera = true;
-	    m_this._render();
-
-	    return m_this;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Render.  This actually schedules rendering for the next animation frame.
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._render = function () {
-	    /* If we are already scheduled to render, don't schedule again.  Rather,
-	     * mark that we should render after other animation frame requests occur.
-	     * It would be nice if we could just reschedule the call by removing and
-	     * readding the animation frame request, but this doesn't work for if the
-	     * reschedule occurs during another animation frame callback (it then waits
-	     * until a subsequent frame). */
-	    m_this.layer().map().scheduleAnimationFrame(this._renderFrame, true);
-	    return m_this;
-	  };
-
-	  /**
-	   * This clears the render timer and actually renders.
-	   */
-	  this._renderFrame = function () {
-	    if (m_updateCamera) {
-	      m_updateCamera = false;
-	      m_this._updateRendererCamera();
-	    }
-	    m_viewer.render();
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Exit
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._exit = function () {
-	    m_this.canvas().remove();
-	    m_viewer.exit();
-	    s_exit();
-	  };
-
-	  this._updateRendererCamera = function () {
-	    var renderWindow = m_viewer.renderWindow(),
-	        map = m_this.layer().map(),
-	        camera = map.camera(),
-	        rotation = map.rotation() || 0,
-	        view = camera.view,
-	        proj = camera.projectionMatrix;
-	    if (proj[15]) {
-	      /* we want positive z to be closer to the camera, but webGL does the
-	       * converse, so reverse the z coordinates. */
-	      proj = mat4.scale(util.mat4AsArray(), proj, [1, 1, -1]);
-	    }
-	    /* A similar kluge as in the base camera class worldToDisplay4.  With this,
-	     * we can show z values from 0 to 1. */
-	    proj = mat4.translate(util.mat4AsArray(), proj,
-	                          [0, 0, camera.constructor.bounds.far]);
-	    /* Check if the rotation is a multiple of 90 */
-	    var basis = Math.PI / 2,
-	        angle = rotation % basis,  // move to range (-pi/2, pi/2)
-	        ortho = (Math.min(Math.abs(angle), Math.abs(angle - basis)) < 0.00001);
-	    renderWindow.renderers().forEach(function (renderer) {
-	      var cam = renderer.camera();
-	      if (util.compareArrays(view, cam.viewMatrix()) &&
-	          util.compareArrays(proj, cam.projectionMatrix()) &&
-	          m_lastZoom === map.zoom()) {
-	        return;
-	      }
-	      m_lastZoom = map.zoom();
-	      cam.setViewMatrix(view, true);
-	      cam.setProjectionMatrix(proj);
-	      var viewport = camera.viewport;
-	      /* Test if we should align texels.  We won't if the projection matrix
-	       * is not simple, if there is a rotation that isn't a multiple of 90
-	       * degrees, if the viewport is not at an integer location, or if the zoom
-	       * level is not close to an integer.
-	       *   Note that the test for the viewport is strict (val % 1 is non-zero
-	       * if the value is not an integer), as, in general, the alignment is only
-	       * non-integral if a percent offset or calculation was used in css
-	       * somewhere.  The test for zoom level always has some allowance for
-	       * precision, as it is often the result of repeated computations. */
-	      if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
-	          proj[8] || proj[9] || proj[11] || proj[15] !== 1 || !ortho ||
-	          (viewport.left && viewport.left % 1) ||
-	          (viewport.top && viewport.top % 1) ||
-	          (parseFloat(m_lastZoom.toFixed(6)) !==
-	           parseFloat(m_lastZoom.toFixed(0)))) {
-	        /* Don't align texels */
-	        cam.viewAlignment = function () {
-	          return null;
-	        };
-	      } else {
-	        /* Set information for texel alignment.  The rounding factors should
-	         * probably be divided by window.devicePixelRatio. */
-	        cam.viewAlignment = function () {
-	          var align = {
-	            roundx: 2.0 / viewport.width,
-	            roundy: 2.0 / viewport.height
-	          };
-	          align.dx = (viewport.width % 2) ? align.roundx * 0.5 : 0;
-	          align.dy = (viewport.height % 2) ? align.roundy * 0.5 : 0;
-	          return align;
-	        };
-	      }
-	    });
-	  };
-
-	  // Connect to pan event.  This is sufficient, as all zooms and rotations also
-	  // produce a pan
-	  m_this.layer().geoOn(geo_event.pan, function (evt) {
-	    void (evt);
-	    m_updateCamera = true;
-	  });
-
-	  // Connect to parallelprojection event
-	  m_this.layer().geoOn(geo_event.parallelprojection, function (evt) {
-	    var vglRenderer = m_this.contextRenderer(),
-	        camera,
-	        layer = m_this.layer();
-
-	    if (evt.geo && evt.geo._triggeredBy !== layer) {
-	      if (!vglRenderer || !vglRenderer.camera()) {
-	        console.log('Parallel projection event triggered on unconnected VGL ' +
-	                    'renderer.');
-	        return;
-	      }
-	      camera = vglRenderer.camera();
-	      camera.setEnableParallelProjection(evt.parallelProjection);
-	      m_updateCamera = true;
-	    }
-	  });
-
-	  return this;
-	};
-
-	inherit(vglRenderer, renderer);
-
-	registerRenderer('vgl', vglRenderer);
-
-	(function () {
-	  'use strict';
-
-	  var checkedWebGL;
-
-	  /**
-	   * Report if the vgl renderer is supported.  This is just a check if webGL is
-	   * supported and available.
-	   *
-	   * @returns {boolean} true if available.
-	   */
-	  vglRenderer.supported = function () {
-	    if (checkedWebGL === undefined) {
-	      /* This is extracted from what Modernizr uses. */
-	      var canvas, ctx, exts; // eslint-disable-line no-unused-vars
-	      try {
-	        canvas = document.createElement('canvas');
-	        ctx = (canvas.getContext('webgl') ||
-	               canvas.getContext('experimental-webgl'));
-	        exts = ctx.getSupportedExtensions();
-	        checkedWebGL = true;
-	      } catch (e) {
-	        console.error('No webGL support');
-	        checkedWebGL = false;
-	      }
-	      canvas = undefined;
-	      ctx = undefined;
-	      exts = undefined;
-	    }
-	    return checkedWebGL;
-	  };
-
-	  /**
-	   * If the vgl renderer is not supported, supply the name of a renderer that
-	   * should be used instead.  This asks for the null renderer.
-	   *
-	   * @returns null for the null renderer.
-	   */
-	  vglRenderer.fallback = function () {
-	    return null;
-	  };
-
-	})();
-
-	module.exports = vglRenderer;
-
-
-/***/ },
-/* 263 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 268 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.canvas
 	 */
 	module.exports = {
-	  canvasRenderer: __webpack_require__(264),
-	  heatmapFeature: __webpack_require__(265),
-	  lineFeature: __webpack_require__(267),
-	  pixelmapFeature: __webpack_require__(268),
-	  quadFeature: __webpack_require__(269),
-	  tileLayer: __webpack_require__(270)
+	  canvasRenderer: __webpack_require__(269),
+	  heatmapFeature: __webpack_require__(270),
+	  lineFeature: __webpack_require__(272),
+	  pixelmapFeature: __webpack_require__(273),
+	  quadFeature: __webpack_require__(274),
+	  tileLayer: __webpack_require__(275)
 	};
 
 
-/***/ },
-/* 264 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 269 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerRenderer = __webpack_require__(202).registerRenderer;
-	var renderer = __webpack_require__(222);
+	var renderer = __webpack_require__(203);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -58197,14 +59106,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = canvasRenderer;
 
 
-/***/ },
-/* 265 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 270 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var heatmapFeature = __webpack_require__(226);
-	var timestamp = __webpack_require__(207);
+	var heatmapFeature = __webpack_require__(232);
+	var timestamp = __webpack_require__(210);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -58225,7 +59134,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new canvas_heatmapFeature(arg);
 	  }
 	  heatmapFeature.call(this, arg);
-	  var object = __webpack_require__(266);
+	  var object = __webpack_require__(271);
 
 	  object.call(this);
 
@@ -58699,12 +59608,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = canvas_heatmapFeature;
 
 
-/***/ },
-/* 266 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 271 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(205);
+	var sceneObject = __webpack_require__(209);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -58717,7 +59626,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var canvas_object = function (arg) {
 	  'use strict';
 
-	  var object = __webpack_require__(206);
+	  var object = __webpack_require__(204);
 
 	  // this is used to extend other geojs classes, so only generate
 	  // a new object when that is not the case... like if this === window
@@ -58755,13 +59664,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 
-/***/ },
-/* 267 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 272 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var lineFeature = __webpack_require__(203);
+	var lineFeature = __webpack_require__(207);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -58779,7 +59688,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new canvas_lineFeature(arg);
 	  }
 
-	  var object = __webpack_require__(266);
+	  var object = __webpack_require__(271);
 
 	  arg = arg || {};
 	  lineFeature.call(this, arg);
@@ -58877,13 +59786,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = canvas_lineFeature;
 
 
-/***/ },
-/* 268 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 273 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var pixelmapFeature = __webpack_require__(236);
+	var pixelmapFeature = __webpack_require__(242);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -58903,7 +59812,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  pixelmapFeature.call(this, arg);
 
-	  var object = __webpack_require__(266);
+	  var object = __webpack_require__(271);
 	  object.call(this);
 
 	  this._init(arg);
@@ -58917,13 +59826,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = canvas_pixelmapFeature;
 
 
-/***/ },
-/* 269 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 274 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(202).registerFeature;
-	var quadFeature = __webpack_require__(217);
+	var quadFeature = __webpack_require__(223);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -58943,7 +59852,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  quadFeature.call(this, arg);
 
-	  var object = __webpack_require__(266);
+	  var object = __webpack_require__(271);
 	  object.call(this);
 
 	  var $ = __webpack_require__(1);
@@ -59083,9 +59992,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = canvas_quadFeature;
 
 
-/***/ },
-/* 270 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 275 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(202).registerLayerAdjustment;
 
@@ -59183,28 +60092,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = canvas_tileLayer;
 
 
-/***/ },
-/* 271 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 276 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.gui
 	 */
 	module.exports = {
-	  domWidget: __webpack_require__(272),
-	  legendWidget: __webpack_require__(274),
-	  sliderWidget: __webpack_require__(276),
-	  svgWidget: __webpack_require__(275),
-	  uiLayer: __webpack_require__(231),
-	  widget: __webpack_require__(273)
+	  domWidget: __webpack_require__(277),
+	  legendWidget: __webpack_require__(279),
+	  sliderWidget: __webpack_require__(281),
+	  svgWidget: __webpack_require__(280),
+	  uiLayer: __webpack_require__(237),
+	  widget: __webpack_require__(278)
 	};
 
 
-/***/ },
-/* 272 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 277 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	var widget = __webpack_require__(273);
+	var widget = __webpack_require__(278);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(202).registerWidget;
 
@@ -59260,12 +60169,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = domWidget;
 
 
-/***/ },
-/* 273 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 278 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(205);
+	var sceneObject = __webpack_require__(209);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -59480,11 +60389,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = widget;
 
 
-/***/ },
-/* 274 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 279 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	var svgWidget = __webpack_require__(275);
+	var svgWidget = __webpack_require__(280);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(202).registerWidget;
 
@@ -59504,7 +60413,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  svgWidget.call(this, arg);
 
-	  var d3 = __webpack_require__(219);
+	  var d3 = __webpack_require__(226);
 	  var geo_event = __webpack_require__(9);
 
 	  /** @private */
@@ -59772,11 +60681,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = legendWidget;
 
 
-/***/ },
-/* 275 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 280 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	var domWidget = __webpack_require__(272);
+	var domWidget = __webpack_require__(277);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(202).registerWidget;
 
@@ -59806,7 +60715,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  domWidget.call(this, arg);
 
-	  var d3Renderer = __webpack_require__(249);
+	  var d3Renderer = __webpack_require__(255);
 
 	  var m_this = this,
 	      m_renderer = null;
@@ -59863,11 +60772,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = svgWidget;
 
 
-/***/ },
-/* 276 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 281 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	var svgWidget = __webpack_require__(275);
+	var svgWidget = __webpack_require__(280);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(202).registerWidget;
 
@@ -59887,7 +60796,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  svgWidget.call(this, arg);
 
-	  var d3 = __webpack_require__(219);
+	  var d3 = __webpack_require__(226);
 	  var geo_event = __webpack_require__(9);
 
 	  var m_this = this,
@@ -60216,7 +61125,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = sliderWidget;
 
 
-/***/ }
+/***/ })
 /******/ ])
 });
 ;

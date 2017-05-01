@@ -138,6 +138,11 @@ module.exports = (function () {
    */
   //////////////////////////////////////////////////////////////////////////////
   var tileLayer = function (options) {
+    'use strict';
+    if (!(this instanceof tileLayer)) {
+      return new tileLayer(options);
+    }
+    featureLayer.call(this, options);
 
     var $ = require('jquery');
     var geo_event = require('./event');
@@ -146,11 +151,6 @@ module.exports = (function () {
     var fetchQueue = require('./fetchQueue');
     var adjustLayerForRenderer = require('./registry').adjustLayerForRenderer;
     var Tile = require('./tile');
-
-    if (!(this instanceof tileLayer)) {
-      return new tileLayer(options);
-    }
-    featureLayer.call(this, options);
 
     options = $.extend(true, {}, this.constructor.defaults, options || {});
     if (!options.cacheSize) {
@@ -177,6 +177,7 @@ module.exports = (function () {
 
     var s_init = this._init,
         s_exit = this._exit,
+        s_visible = this.visible,
         m_lastTileSet = [],
         m_maxBounds = [],
         m_exited;
@@ -1063,6 +1064,9 @@ module.exports = (function () {
           evt.event.event === geo_event.rotate)) {
         return;
       }
+      if (!this.visible()) {
+        return;
+      }
       var map = this.map(),
           bounds = map.bounds(undefined, null),
           mapZoom = map.zoom(),
@@ -1428,6 +1432,30 @@ module.exports = (function () {
         m_tileOffsetValues[level] = this._options.tileOffset(level);
       }
       return m_tileOffsetValues[level];
+    };
+
+    ////////////////////////////////////////////////////////////////////////////
+    /**
+     * Get/Set visibility of the layer
+     *
+     * @param {boolean|undefined} val: undefined to return the visibility, a
+     *    boolean to change the visibility.
+     * @return {boolean|object} either the visibility (if getting) or the layer
+     *    (if setting).
+     */
+    ////////////////////////////////////////////////////////////////////////////
+    this.visible = function (val) {
+      if (val === undefined) {
+        return s_visible();
+      }
+      if (this.visible() !== val) {
+        s_visible(val);
+
+        if (val) {
+          this._update();
+        }
+      }
+      return this;
     };
 
     /**
