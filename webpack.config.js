@@ -43,7 +43,7 @@ module.exports = {
   },
   externals: {
     d3: 'd3',
-    hammerjs: 'hammerjs'
+    hammerjs: 'Hammer'
   },
   plugins: [
     define_plugin,
