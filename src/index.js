@@ -1,7 +1,7 @@
 // License headers that will be preserved in distributed bundles.
 /**
  * GeoJS
- * @copyright 2013-2016, Kitware, Inc.
+ * @copyright 2013-2017, Kitware, Inc.
  * @license Apache-2.0
  *
  * Bundled with the following libraries:
