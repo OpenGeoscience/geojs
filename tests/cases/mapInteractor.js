@@ -1819,3 +1819,38 @@ describe('mapInteractor', function () {
     expect(map.info.zoom).toBe(2);
   });
 });
+describe('Optional Dependencies', function () {
+  var $ = require('jquery');
+  var geo = require('../test-utils').geo;
+
+  beforeEach(function () {
+    // create a new div
+    $('<div id="mapNode1" class="mapNode testNode"></div>')
+        .css({width: '800px', height: '600px'}).appendTo('body');
+  });
+
+  afterEach(function () {
+    // delete the div and clean up lingering event handlers
+    $('.testNode').remove();
+    $(document).off('.geojs');
+  });
+
+  it('test missing Hammer library', function () {
+    var old = __webpack_modules__[require.resolveWeak('hammerjs')];  // eslint-disable-line
+    __webpack_modules__[require.resolveWeak('hammerjs')] = null;  // eslint-disable-line
+    var map = geo.map({node: '#mapNode1'}),
+        interactor = map.interactor();
+
+    expect(interactor.hasTouchSupport()).toBe(true);
+    expect(map.center().x).toBeCloseTo(0);
+    // We shouldn't process pan touch events
+    interactor.simulateEvent(
+      'panstart', {touch: true, center: {x: 20, y: 20}});
+    interactor.simulateEvent(
+      'panmove', {touch: true, center: {x: 30, y: 20}});
+    interactor.simulateEvent(
+      'panend', {touch: true, center: {x: 40, y: 20}});
+    expect(map.center().x).toBeCloseTo(0);
+    __webpack_modules__[require.resolveWeak('hammerjs')] = old;  // eslint-disable-line
+  });
+});
