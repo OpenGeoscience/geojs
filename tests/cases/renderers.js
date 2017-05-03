@@ -71,6 +71,12 @@ describe('renderers', function () {
 
       expect(geo.checkRenderer('d3')).toBe('d3');
 
+      var oldd3 = __webpack_modules__[require.resolveWeak('d3')];  // eslint-disable-line
+      __webpack_modules__[require.resolveWeak('d3')] = null;  // eslint-disable-line
+      expect(geo.checkRenderer('d3')).toBe(null);
+      __webpack_modules__[require.resolveWeak('d3')] = oldd3;  // eslint-disable-line
+      expect(geo.checkRenderer('d3')).toBe('d3');
+
       mockVGLRenderer(false);
       expect(geo.checkRenderer('vgl')).toBe(null);
       restoreVGLRenderer();
