@@ -197,9 +197,9 @@ var contourFeature = function (arg) {
     result.maxColor = $.extend({a: contour.get('maxOpacity')() || 0},
         util.convertColor(contour.get('maxColor')()));
     contour.get('colorRange')().forEach(function (clr, idx) {
-      result.colorMap.push($.extend(
-          {a: opacityRange && opacityRange[idx] !== undefined ?
-          opacityRange[idx] : 1}, util.convertColor(clr)));
+      result.colorMap.push($.extend({
+        a: opacityRange && opacityRange[idx] !== undefined ? opacityRange[idx] : 1
+      }, util.convertColor(clr)));
     });
     /* Determine which values are usable */
     if (gridW * gridH > data.length) {
@@ -243,7 +243,7 @@ var contourFeature = function (arg) {
     numPts = gridW * gridH;
     for (i = 0; i < numPts; i += 1) {
       if (skipColumn === undefined) {
-        val = parseFloat(valueFunc(data[i]));
+        val = parseFloat(valueFunc(data[i], i));
       } else {
         j = Math.floor(i / gridW);
         origI = i - j * gridW;
@@ -252,7 +252,7 @@ var contourFeature = function (arg) {
           origI -= gridWorig;
         }
         origI += j * gridWorig;
-        val = parseFloat(valueFunc(data[origI]));
+        val = parseFloat(valueFunc(data[origI], origI));
       }
       values[i] = isNaN(val) ? null : val;
       if (values[i] !== null) {
@@ -338,7 +338,7 @@ var contourFeature = function (arg) {
           result.pos[i3 + 1] = y0 + dy * Math.floor(j / gridW);
           result.pos[i3 + 2] = 0;
         }
-        result.opacity[i] = opacityFunc(item);
+        result.opacity[i] = opacityFunc(item, j);
         if (rangeValues && val >= result.minValue && val <= result.maxValue) {
           for (k = 1; k < rangeValues.length; k += 1) {
             if (val <= rangeValues[k]) {

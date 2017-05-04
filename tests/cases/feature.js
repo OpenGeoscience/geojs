@@ -213,6 +213,40 @@ describe('geo.feature', function () {
       expect(feat.visible(true, true)).toBe(feat);
       expect(feat.visible()).toBe(true);
     });
+    it('updateStyleFromArray', function () {
+      var count = 0;
+      feat.draw = function () {
+        count += 1;
+      };
+      feat._subfeatureStyles.opacity = true;
+      feat.data([1, 2, 3, 4]);
+      feat.style({radius: 10, strokeColor: 'white', opacity: 0.5});
+      feat.style('radius', 10);
+      expect(feat.style.get('radius')(2, 1)).toBe(10);
+      expect(feat.style.get('strokeColor')(2, 1)).toEqual({r: 1, g: 1, b: 1});
+      expect(feat.style.get('opacity')(0, 0, 2, 1)).toBe(0.5);
+      expect(feat.updateStyleFromArray('radius', [11, 12, 13, 14])).toBe(feat);
+      expect(feat.style.get('radius')(2, 1)).toBe(12);
+      feat.updateStyleFromArray({radius: [21, 22, 23, 24]});
+      expect(feat.style.get('radius')(2, 1)).toBe(22);
+      feat.updateStyleFromArray('strokeColor', [{r: 1, g: 0, b: 0}]);
+      expect(feat.style.get('strokeColor')(1, 0)).toEqual({r: 1, g: 0, b: 0});
+      expect(feat.style.get('strokeColor')(2, 1)).toEqual({r: 0, g: 0, b: 0});
+      feat.updateStyleFromArray('opacity', [0.1, 0.2, 0.3, 0.4]);
+      expect(feat.style.get('opacity')(0, 0, 2, 1)).toBe(0.2);
+      expect(feat.style.get('opacity')(0, 1, 2, 1)).toBe(0.2);
+      feat.updateStyleFromArray('opacity', [[0.11, 0.12], [0.21, 0.22], [0.31, 0.32], [0.41, 0.42]]);
+      expect(feat.style.get('opacity')(0, 0, 2, 1)).toBe(0.21);
+      expect(feat.style.get('opacity')(0, 1, 2, 1)).toBe(0.22);
+      expect(feat.updateStyleFromArray('opacity', 0.5)).toBe(feat);
+      expect(feat.style.get('opacity')(0, 0, 2, 1)).toBe(0.21);
+      expect(count).toBe(0);
+      feat.updateStyleFromArray('opacity', [0.1, 0.2, 0.3, 0.4], true);
+      expect(count).toBe(1);
+      feat.visible(false);
+      feat.updateStyleFromArray('radius', [11, 12, 13, 14], true);
+      expect(count).toBe(1);
+    });
   });
   describe('Check class accessors', function () {
     var map, layer, feat;

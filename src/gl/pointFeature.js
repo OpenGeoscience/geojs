@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
@@ -46,6 +47,7 @@ var gl_pointFeature = function (arg) {
       m_primitiveShape = 'sprite', // arg can change this, below
       s_init = this._init,
       s_update = this._update,
+      s_updateStyleFromArray = this.updateStyleFromArray,
       vertexShaderSource = null,
       fragmentShaderSource = null;
 
@@ -60,7 +62,7 @@ var gl_pointFeature = function (arg) {
     '  precision highp float;',
     '#endif',
     'attribute vec3 pos;',
-    'attribute float rad;',
+    'attribute float radius;',
     'attribute vec3 fillColor;',
     'attribute vec3 strokeColor;',
     'attribute float fillOpacity;',
@@ -98,7 +100,7 @@ var gl_pointFeature = function (arg) {
     '  }',
     '  else',
     '    strokeVar = 1.0;',
-    '  if (fill < 1.0 || rad <= 0.0 || fillOpacity <= 0.0)',
+    '  if (fill < 1.0 || radius <= 0.0 || fillOpacity <= 0.0)',
     '    fillVar = 0.0;',
     '  else',
     '    fillVar = 1.0;',
@@ -109,13 +111,13 @@ var gl_pointFeature = function (arg) {
     '  }',
     '  fillColorVar = vec4 (fillColor, fillOpacity);',
     '  strokeColorVar = vec4 (strokeColor, strokeOpacity);',
-    '  radiusVar = rad;'
+    '  radiusVar = radius;'
   ]);
 
   if (m_primitiveShape === 'sprite') {
     vertexShaderSource.push.apply(vertexShaderSource, [
       '  gl_Position = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;',
-      '  gl_PointSize = 2.0 * (rad + strokeWidthVar); ',
+      '  gl_PointSize = 2.0 * (radius + strokeWidthVar); ',
       '}'
     ]);
   } else {
@@ -125,7 +127,7 @@ var gl_pointFeature = function (arg) {
       '  if (p.w != 0.0) {',
       '    p = p / p.w;',
       '  }',
-      '  p += (rad + strokeWidthVar) * ',
+      '  p += (radius + strokeWidthVar) * ',
       '       vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0);',
       '  gl_Position = vec4(p.xyz, 1.0);',
       '}'
@@ -273,7 +275,7 @@ var gl_pointFeature = function (arg) {
     /* It is more efficient to do a transform on a single array rather than on
      * an array of arrays or an array of objects. */
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
-      posVal = posFunc(data[i]);
+      posVal = posFunc(data[i], i);
       position[i3] = posVal.x;
       position[i3 + 1] = posVal.y;
       position[i3 + 2] = posVal.z || 0;
@@ -297,7 +299,7 @@ var gl_pointFeature = function (arg) {
       unitBuf = util.getGeomBuffer(geom, 'unit', vpf * numPts * 2);
     }
 
-    radius = util.getGeomBuffer(geom, 'rad', vpf * numPts);
+    radius = util.getGeomBuffer(geom, 'radius', vpf * numPts);
     stroke = util.getGeomBuffer(geom, 'stroke', vpf * numPts);
     strokeWidth = util.getGeomBuffer(geom, 'strokeWidth', vpf * numPts);
     strokeOpacity = util.getGeomBuffer(geom, 'strokeOpacity', vpf * numPts);
@@ -319,14 +321,14 @@ var gl_pointFeature = function (arg) {
         }
       }
       /* We can ignore the indicies (they will all be zero) */
-      radiusVal = radFunc(item);
-      strokeVal = strokeFunc(item) ? 1.0 : 0.0;
-      strokeWidthVal = strokeWidthFunc(item);
-      strokeOpacityVal = strokeOpacityFunc(item);
-      strokeColorVal = strokeColorFunc(item);
-      fillVal = fillFunc(item) ? 1.0 : 0.0;
-      fillOpacityVal = fillOpacityFunc(item);
-      fillColorVal = fillColorFunc(item);
+      radiusVal = radFunc(item, i);
+      strokeVal = strokeFunc(item, i) ? 1.0 : 0.0;
+      strokeWidthVal = strokeWidthFunc(item, i);
+      strokeOpacityVal = strokeOpacityFunc(item, i);
+      strokeColorVal = strokeColorFunc(item, i);
+      fillVal = fillFunc(item, i) ? 1.0 : 0.0;
+      fillOpacityVal = fillOpacityFunc(item, i);
+      fillColorVal = fillColorFunc(item, i);
       for (j = 0; j < vpf; j += 1, ivpf += 1, ivpf3 += 3) {
         posBuf[ivpf3] = position[i3];
         posBuf[ivpf3 + 1] = position[i3 + 1];
@@ -377,6 +379,81 @@ var gl_pointFeature = function (arg) {
     return unit.length / 2;
   };
 
+  this.updateStyleFromArray = function (keyOrObject, styleArray, refresh) {
+    var bufferedKeys = {
+      fill: 'bool',
+      fillColor: 3,
+      fillOpacity: 1,
+      radius: 1,
+      stroke: 'bool',
+      strokeColor: 3,
+      strokeOpacity: 1,
+      strokeWidth: 1
+    };
+    var needsRefresh, needsRender;
+    if (typeof keyOrObject === 'string') {
+      var obj = {};
+      obj[keyOrObject] = styleArray;
+      keyOrObject = obj;
+    }
+    $.each(keyOrObject, function (key, styleArray) {
+      if (m_this.visible() && m_actor && bufferedKeys[key] && !needsRefresh && !m_this.clustering()) {
+        var vpf, mapper, buffer, numPts, value, i, j, v, bpv;
+        bpv = bufferedKeys[key] === 'bool' ? 1 : bufferedKeys[key];
+        numPts = m_this.data().length;
+        mapper = m_actor.mapper();
+        buffer = mapper.getSourceBuffer(key);
+        vpf = m_this.verticesPerFeature();
+        if (!buffer || !numPts || numPts * vpf * bpv !== buffer.length) {
+          needsRefresh = true;
+        } else {
+          switch (bufferedKeys[key]) {
+            case 1:
+              for (i = 0, v = 0; i < numPts; i += 1) {
+                value = styleArray[i];
+                for (j = 0; j < vpf; j += 1, v += 1) {
+                  buffer[v] = value;
+                }
+              }
+              break;
+            case 3:
+              for (i = 0, v = 0; i < numPts; i += 1) {
+                value = styleArray[i];
+                for (j = 0; j < vpf; j += 1, v += 3) {
+                  buffer[v] = value.r;
+                  buffer[v + 1] = value.g;
+                  buffer[v + 2] = value.b;
+                }
+              }
+              break;
+            case 'bool':
+              for (i = 0, v = 0; i < numPts; i += 1) {
+                value = styleArray[i] ? 1.0 : 0.0;
+                for (j = 0; j < vpf; j += 1, v += 1) {
+                  buffer[v] = value;
+                }
+              }
+              break;
+          }
+          mapper.updateSourceBuffer(key);
+          /* This could probably be even faster than calling _render after
+           * updating the buffer, if the context's buffer was bound and
+           * updated.  This would requiring knowing the webgl context and
+           * probably the source to buffer mapping. */
+          needsRender = true;
+        }
+      } else {
+        needsRefresh = true;
+      }
+      s_updateStyleFromArray(key, styleArray, false);
+    });
+    if (m_this.visible() && needsRefresh) {
+      m_this.draw();
+    } else if (needsRender) {
+      m_this.renderer()._render();
+    }
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
@@ -388,7 +465,7 @@ var gl_pointFeature = function (arg) {
         fragmentShader = createFragmentShader(),
         posAttr = vgl.vertexAttribute('pos'),
         unitAttr = vgl.vertexAttribute('unit'),
-        radAttr = vgl.vertexAttribute('rad'),
+        radAttr = vgl.vertexAttribute('radius'),
         strokeWidthAttr = vgl.vertexAttribute('strokeWidth'),
         fillColorAttr = vgl.vertexAttribute('fillColor'),
         fillAttr = vgl.vertexAttribute('fill'),
@@ -405,7 +482,7 @@ var gl_pointFeature = function (arg) {
         sourceUnits = vgl.sourceDataAnyfv(
             2, vgl.vertexAttributeKeysIndexed.One, {'name': 'unit'}),
         sourceRadius = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Two, {'name': 'rad'}),
+            1, vgl.vertexAttributeKeysIndexed.Two, {'name': 'radius'}),
         sourceStrokeWidth = vgl.sourceDataAnyfv(
             1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'strokeWidth'}),
         sourceFillColor = vgl.sourceDataAnyfv(
