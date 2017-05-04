@@ -249,10 +249,14 @@ describe('geo.annotation', function () {
       expect(ann.processAction({state: null})).toBe(undefined);
       ann.state(geo.annotation.state.create);
       var evt = {
+        event: geo.event.actionmove,
         state: {action: geo.geo_action.annotation_rectangle},
         lowerLeft: {x: 10, y: 65},
         upperRight: {x: 90, y: 5}
       };
+      expect(ann.processAction(evt)).not.toBe('done');
+      expect(ann.state()).toBe(geo.annotation.state.create);
+      evt.event = geo.event.actionselection;
       expect(ann.processAction(evt)).toBe('done');
       expect(ann.state()).toBe(geo.annotation.state.done);
       var coor = ann.coordinates();
@@ -288,7 +292,11 @@ describe('geo.annotation', function () {
       expect(geojson.geometry.coordinates[0][2][1]).toBeCloseTo(1);
     });
     it('mouseMove', function () {
-      var ann = geo.annotation.rectangleAnnotation({corners: corners});
+      var map = create_map();
+      var layer = map.createLayer('annotation', {
+        annotations: ['rectangle']
+      });
+      var ann = geo.annotation.rectangleAnnotation({layer: layer, corners: corners});
       expect(ann.mouseMove({mapgcs: {x: 6, y: 4}})).toBe(undefined);
       expect(ann.options('corners')).toEqual(corners);
       ann.state(geo.annotation.state.create);

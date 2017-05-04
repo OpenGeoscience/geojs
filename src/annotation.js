@@ -509,6 +509,7 @@ var rectangleAnnotation = function (args) {
   this.processAction = function (evt) {
     var layer = this.layer();
     if (this.state() !== annotationState.create || !layer ||
+        evt.event !== geo_event.actionselection ||
         evt.state.action !== geo_action.annotation_rectangle) {
       return;
     }
@@ -616,6 +617,23 @@ var rectangleAnnotation = function (args) {
   };
 
   /**
+   * Set three corners based on an initial corner and a mouse event.
+   *
+   * @param {array} an array of four corners to update.
+   * @param {geo.event} evt the mouse move event.
+   */
+  this._setCornersFromMouse = function (corners, evt) {
+    var map = this.layer().map(),
+        c0 = map.gcsToDisplay({x: corners[0].x, y: corners[0].y}, null),
+        c2 = map.gcsToDisplay(evt.mapgcs, null),
+        c1 = {x: c2.x, y: c0.y},
+        c3 = {x: c0.x, y: c2.y};
+    corners[2] = $.extend({}, evt.mapgcs);
+    corners[1] = map.displayToGcs(c1, null);
+    corners[3] = map.displayToGcs(c3, null);
+  };
+
+  /**
    * Handle a mouse move on this annotation.
    *
    * @param {geo.event} evt the mouse move event.
@@ -628,9 +646,7 @@ var rectangleAnnotation = function (args) {
     }
     var corners = this.options('corners');
     if (corners.length) {
-      corners[2] = $.extend({}, evt.mapgcs);
-      corners[1].x = evt.mapgcs.x;
-      corners[3].y = evt.mapgcs.y;
+      this._setCornersFromMouse(corners, evt);
       return true;
     }
   };
@@ -658,9 +674,7 @@ var rectangleAnnotation = function (args) {
     }
     evt.handled = true;
     if (corners.length) {
-      corners[2] = $.extend({}, evt.mapgcs);
-      corners[1].x = evt.mapgcs.x;
-      corners[3].y = evt.mapgcs.y;
+      this._setCornersFromMouse(corners, evt);
       this.state(annotationState.done);
       return 'done';
     }
