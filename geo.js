@@ -82,6 +82,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @copyright 2016, Mapbox
 	 * @license ISC
 	 *
+	 * geojson-vt
+	 * @copyright 2015, Mapbox
+	 * @license ISC
+	 * 
 	 * kdbush
 	 * @copyright 2017, Vladimir Agafonkin
 	 * @license ISC
