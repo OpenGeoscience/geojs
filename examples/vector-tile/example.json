@@ -1,0 +1,10 @@
+{
+  "path": "vector-tile",
+  "title": "VectorTile",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "Deliver geographic data in small chunks to the browser."
+  },
+  "disabled": true
+}
