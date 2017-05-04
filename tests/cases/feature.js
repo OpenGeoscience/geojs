@@ -218,7 +218,7 @@ describe('geo.feature', function () {
       feat.draw = function () {
         count += 1;
       };
-      feat._subcomponentStyles.opacity = true;
+      feat._subfeatureStyles.opacity = true;
       feat.data([1, 2, 3, 4]);
       feat.style({radius: 10, strokeColor: 'white', opacity: 0.5});
       feat.style('radius', 10);

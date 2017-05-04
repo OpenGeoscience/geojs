@@ -72,7 +72,7 @@ var lineFeature = function (arg) {
       m_pointSearchInfo;
 
   this.featureType = 'line';
-  this._subcomponentStyles = {
+  this._subfeatureStyles = {
     lineCap: true,
     lineJoin: true,
     strokeColor: true,

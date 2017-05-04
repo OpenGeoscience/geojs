@@ -68,7 +68,7 @@ var polygonFeature = function (arg) {
       m_coordinates = [];
 
   this.featureType = 'polygon';
-  this._subcomponentStyles = {
+  this._subfeatureStyles = {
     fillColor: true,
     fillOpacity: true,
     lineCap: true,

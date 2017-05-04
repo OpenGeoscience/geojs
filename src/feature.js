@@ -46,7 +46,7 @@ var feature = function (arg) {
 
   // subclasses can add keys to this for styles that apply to subcomponents of
   // data items, such as individual vertices on lines or polygons.
-  this._subcomponentStyles = {};
+  this._subfeatureStyles = {};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -395,7 +395,7 @@ var feature = function (arg) {
       if (!Array.isArray(styleArray)) {
         return m_this;
       }
-      if (m_this._subcomponentStyles[keyOrObject]) {
+      if (m_this._subfeatureStyles[keyOrObject]) {
         if (styleArray.length && Array.isArray(styleArray[0])) {
           m_this.style(keyOrObject, function (v, j, d, i) {
             var val = (styleArray[i] || [])[j];
