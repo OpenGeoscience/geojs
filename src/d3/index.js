@@ -16,5 +16,6 @@ module.exports = {
   renderer: require('./d3Renderer'),
   tileLayer: require('./tileLayer'),
   uniqueID: require('./uniqueID'),
-  vectorFeature: require('./vectorFeature')
+  vectorFeature: require('./vectorFeature'),
+  vectorTile: require('./vectorTile')
 };

@@ -25,9 +25,16 @@ $(function () {
     var url = './data/countries.geojson';
     $.ajax(url, {
       success: function (resp) {
-        console.log(resp, resp.features)
-        layer.createFeature('vector')
-             .data(resp.features);
+	      try {
+	        var data = JSON.parse(resp);
+          console.log(layer.createFeature)
+          layer.createFeature('vectorTile', {renderer: 'vgl'})
+             .data(data);
+          // var tileIndex = geojsonvt(data)
+          console.log(tileIndex)
+	      } catch (e) {
+	        return false;
+	      }   
       }
     });
   }

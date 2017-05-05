@@ -52,7 +52,7 @@ module.exports = $.extend({
   graphFeature: require('./graphFeature'),
   heatmapFeature: require('./heatmapFeature'),
   imageTile: require('./imageTile'),
-  vectorTile: require('./vectorTile'),
+  vectorTile: require('./vectorTileFeature'),
   jsonReader: require('./jsonReader'),
   layer: require('./layer'),
   lineFeature: require('./lineFeature'),
