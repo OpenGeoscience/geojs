@@ -189,6 +189,7 @@ var vectorTile = function (arg) {
 
     // cache the georeferencing
     cache = data.map(function (d, i) {
+      console.log(d, i)
       var origin = m_this.featureGcsToDisplay(orig_func(d, i)),
           delta = size_func(d, i);
       max = Math.max(max, delta.x * delta.x + delta.y * delta.y);
