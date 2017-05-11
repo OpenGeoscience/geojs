@@ -751,25 +751,27 @@ var mapInteractor = function (args) {
         (usedInputs.pan || usedInputs.rotate) &&
         __webpack_modules__[require.resolveWeak('hammerjs')]) { // eslint-disable-line
       var Hammer = require('hammerjs');
-      var recog = [],
-          touchEvents = ['hammer.input'];
-      if (usedInputs.rotate) {
-        recog.push([Hammer.Rotate, {enable: true}]);
-        touchEvents = touchEvents.concat(['rotatestart', 'rotateend', 'rotatemove']);
+      if (Hammer !== undefined) {
+        var recog = [],
+            touchEvents = ['hammer.input'];
+        if (usedInputs.rotate) {
+          recog.push([Hammer.Rotate, {enable: true}]);
+          touchEvents = touchEvents.concat(['rotatestart', 'rotateend', 'rotatemove']);
+        }
+        if (usedInputs.pan) {
+          recog.push([Hammer.Pan, {direction: Hammer.DIRECTION_ALL}]);
+          touchEvents = touchEvents.concat(['panstart', 'panend', 'panmove']);
+        }
+        var hammerParams = {recognizers: recog, preventDefault: true};
+        m_touchHandler = {
+          manager: new Hammer.Manager($node[0], hammerParams),
+          touchSupport: m_this.hasTouchSupport(),
+          lastTime: 0
+        };
+        touchEvents.forEach(function (touchEvent) {
+          m_touchHandler.manager.on(touchEvent, m_this._handleTouch);
+        });
       }
-      if (usedInputs.pan) {
-        recog.push([Hammer.Pan, {direction: Hammer.DIRECTION_ALL}]);
-        touchEvents = touchEvents.concat(['panstart', 'panend', 'panmove']);
-      }
-      var hammerParams = {recognizers: recog, preventDefault: true};
-      m_touchHandler = {
-        manager: new Hammer.Manager($node[0], hammerParams),
-        touchSupport: m_this.hasTouchSupport(),
-        lastTime: 0
-      };
-      touchEvents.forEach(function (touchEvent) {
-        m_touchHandler.manager.on(touchEvent, m_this._handleTouch);
-      });
     }
 
     return m_this;
@@ -777,7 +779,7 @@ var mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Disiconnects events to a map.  If the map is not set, then this does
+   * Disconnects events to a map.  If the map is not set, then this does
    * nothing.
    * @returns {geo.mapInteractor}
    */
