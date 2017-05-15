@@ -1,7 +1,5 @@
 {
-  "templates": {
-    "default": {
-      "useLongnameInNav": true
-    }
+  "opts": {
+    "template": "node_modules/jaguarjs-jsdoc"
   }
 }

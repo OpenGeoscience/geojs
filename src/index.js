@@ -1,3 +1,4 @@
+/** @namespace geo */
 // License headers that will be preserved in distributed bundles.
 /**
  * GeoJS

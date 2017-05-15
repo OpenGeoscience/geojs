@@ -6,7 +6,8 @@ var object = require('./object');
  * Create a new instance of class sceneObject, which extends the object's
  * event handling with a tree-based event propagation.
  *
- * @class geo.sceneObject
+ * @class
+ * @alias geo.sceneObject
  * @extends geo.object
  * @returns {geo.sceneObject}
  */

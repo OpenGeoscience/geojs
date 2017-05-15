@@ -5,7 +5,8 @@ var inherit = require('./inherit');
 /**
  * Create a new instance of class object
  *
- * @class geo.object
+ * @class
+ * @alias geo.object
  * @extends vgl.object
  * @returns {geo.object}
  */
