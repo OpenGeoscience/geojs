@@ -16,6 +16,7 @@ module.exports = {};
  *
  * @param {boolean} [supported=true] If false, then the vgl renderer will
  *      indicate that this is an unsupported browser environment.
+ * @alias geo.util.mockVGLRenderer
  */
 module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
   'use strict';
@@ -177,6 +178,7 @@ module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
 
 /**
  * Unmock the vgl renderer.
+ * @alias geo.util.restoreVGLRenderer
  */
 module.exports.restoreVGLRenderer = function () {
   if (vgl._mocked) {
