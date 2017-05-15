@@ -419,6 +419,7 @@ var map = function (arg) {
    *    clampBoundsX options (up to a point, see fix_bounds) when determining
    *    the new view.
    * @returns {geo.map}
+   * @fires geo.event.event:pan
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pan = function (delta, ignoreDiscreteZoom, ignoreClampBounds) {

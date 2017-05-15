@@ -84,6 +84,8 @@ geo_event.rotate = 'geo_rotate';
  * Triggered when the map is panned either by user interaction or map
  * transition.
  *
+ * @event geo.event.pan
+ * @type {object}
  * @property {object} screenDelta The number of pixels to pan the map by
  * @property {object} center The new map center
  */
