@@ -41,7 +41,8 @@
    *   * viewFromCenterSizeRotation: set the camera view based on a center
    *        point, boundary size, and rotation angle.
    *
-   * @class geo.camera
+   * @class
+   * @alias geo.camera
    * @extends geo.object
    * @param {object?} spec Options argument
    * @param {string} spec.projection One of the supported geo.camera.projection

@@ -13,7 +13,8 @@ var sceneObject = require('./sceneObject');
  *            (center.x, center.y) + o            <-- center of viewport
  *   (-c, -c) + o                  (c, -c) + o
  *
- * @class geo.map
+ * @class
+ * @alias geo.map
  * @extends geo.sceneObject
  *
  * *** Always required ***
@@ -1504,7 +1505,8 @@ var map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the layers contained in the map.
-   * Alias of {@linkcode geo.sceneObject.children}.
+   * Alias of {@linkcode geo.sceneObject#children}.
+   * @method
    */
   ////////////////////////////////////////////////////////////////////////////
   this.layers = this.children;

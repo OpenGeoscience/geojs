@@ -8,7 +8,8 @@
  * <br>
  * The following properties are common to all event objects:
  *
- * @namespace geo.event
+ * @namespace
+ * @alias geo.event
  * @property {string} type The event type that was triggered
  * @property {object} geo A universal event object for controlling propagation
  *

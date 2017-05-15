@@ -22,14 +22,15 @@
  * In this visualization, | is a throttled-function call and X is the actual
  * callback execution:
  *
- * ::
- *   Throttled with `no_trailing` specified as false or unspecified:
- *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
- *   X    X    X    X    X    X        X    X    X    X    X    X
+ * ```
+ * Throttled with `no_trailing` specified as false or unspecified:
+ * ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+ * X    X    X    X    X    X        X    X    X    X    X    X
  *
- *   Throttled with `no_trailing` specified as true:
- *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
- *   X    X    X    X    X             X    X    X    X    X
+ * Throttled with `no_trailing` specified as true:
+ * ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+ * X    X    X    X    X             X    X    X    X    X
+ * ```
  *
  * @alias geo.util.throttle
  * @param {number} delay A zero-or-greater delay in milliseconds. For event
