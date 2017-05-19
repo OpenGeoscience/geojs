@@ -356,11 +356,21 @@ var mapInteractor = function (args) {
    */
 
   /**
-   * General represention of a point on the earth.
+   * General represention of a point on the earth.  The coordinates are most
+   * commonly in longitude and latitude, but the coordinate system is changed
+   * by the interface gcs.
    * @typedef geo.geoPosition
    * @type {object}
-   * @property {Number} x Horizontal coordinate in degrees longitude
-   * @property {Number} y Vertical coordinate in degrees latitude
+   * @property {Number} x Horizontal coordinate, often degrees longitude
+   * @property {Number} y Vertical coordinate, often degrees latitude
+   */
+
+  /**
+   * Represention of a size in pixels
+   * @typedef geo.screenSize
+   * @type {object}
+   * @property {number} width Width in pixels.
+   * @property {number} height Height in pixels.
    */
 
   /**

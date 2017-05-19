@@ -63,8 +63,11 @@ geo_event.layerRemove = 'geo_layerRemove';
  * triggered on the map itself.  Instead it is triggered individually on
  * layers, starting with the base layer.
  *
+ * @event geo.event.zoom
+ * @type {object}
  * @property {number} zoomLevel New zoom level
- * @property {object} screenPosition The screen position of mouse pointer
+ * @property {geo.screenPosition} screenPosition The screen position of mouse
+ *      pointer
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.zoom = 'geo_zoom';
@@ -87,7 +90,8 @@ geo_event.rotate = 'geo_rotate';
  * @event geo.event.pan
  * @type {object}
  * @property {object} screenDelta The number of pixels to pan the map by
- * @property {object} center The new map center
+ * @property {number} screenDelta.x
+ * @property {number} screenDelta.y
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.pan = 'geo_pan';
