@@ -6,7 +6,8 @@ var object = require('./object');
  * Create a new instance of class sceneObject, which extends the object's
  * event handling with a tree-based event propagation.
  *
- * @class geo.sceneObject
+ * @class
+ * @alias geo.sceneObject
  * @extends geo.object
  * @returns {geo.sceneObject}
  */
@@ -55,7 +56,7 @@ var sceneObject = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   /**
    *  Get/set parent of the object
-   *  @param {?geo.sceneObject} parent
+   *  @param {geo.sceneObject} [parent]
    */
   //////////////////////////////////////////////////////////////////////////////
   this.parent = function (arg) {

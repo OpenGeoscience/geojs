@@ -1,7 +1,17 @@
 {
+  "opts": {
+    "template": "node_modules/jaguarjs-jsdoc"
+  },
+  "plugins": [
+    "node_modules/jsdoc-autoprivate/autoprivate.js",
+    "plugins/markdown"
+  ],
   "templates": {
+    "applicationName": "GeoJS",
+    "linenums": true,
+    "cleverLinks": true,
     "default": {
-      "useLongnameInNav": true
+      "outputSourceFiles": true
     }
   }
 }
