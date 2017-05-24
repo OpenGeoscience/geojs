@@ -72,6 +72,7 @@ module.exports = $.extend({
   tileLayer: require('./tileLayer'),
   timestamp: require('./timestamp'),
   transform: require('./transform'),
+  typedef: require('./typedef'),
   vectorFeature: require('./vectorFeature'),
   inherit: require('./inherit'),
   version: require('./version'),
