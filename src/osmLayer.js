@@ -56,8 +56,9 @@ module.exports = (function () {
         queue: this._queue,
         overlap: this._options.tileOverlap,
         scale: this._options.tileScale,
-        url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
-                               this._options.subdomains)
+        url: this._options.url.call(
+            this, urlParams.x, urlParams.y, urlParams.level || 0,
+            this._options.subdomains)
       });
     }.bind(this);
   };

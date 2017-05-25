@@ -957,14 +957,18 @@ describe('geo.tileLayer', function () {
     });
 
     it('_getTile', function () {
+      var lastThis;
       var t, l = geo.tileLayer({
             map: map(),
             tileWidth: 110,
             tileHeight: 120,
-            url: function (x, y, z) { return {x: x, y: y, level: z}; }
+            url: function (x, y, z) {
+              lastThis = this;
+              return {x: x, y: y, level: z};
+            }
           });
-
       t = l._getTile({x: 1, y: 1, level: 0}, {x: 0, y: 0, level: 0});
+      expect(lastThis).toBe(l);
       expect(t._url).toEqual({x: 0, y: 0, level: 0});
       expect(t.size).toEqual({x: 110, y: 120});
       expect(t.index).toEqual({x: 1, y: 1, level: 0});

@@ -280,6 +280,7 @@ util.createLayer = function (name, map, arg) {
       $.extend(true, options, arg);
     }
     layer = layers[name](options);
+    layer.layerName = name;
     layer._init();
     return layer;
   } else {

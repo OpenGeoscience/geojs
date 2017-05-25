@@ -17,7 +17,7 @@ $(function () {
   wms.url(
     function (x, y, zoom) {
       // Compute the bounding box
-      var bb = wms.gcsTileBounds({x: x, y: y, level: zoom}, projection);
+      var bb = this.gcsTileBounds({x: x, y: y, level: zoom}, projection);
       var bbox_mercator = bb.left + ',' + bb.bottom + ',' + bb.right + ',' + bb.top;
 
       // Set the WMS server parameters
