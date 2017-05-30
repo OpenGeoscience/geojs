@@ -406,9 +406,10 @@ var map = function (arg) {
    * @param {boolean} [ignoreDiscreteZoom] if true, ignore the discreteZoom
    *    option when determining the new view.
    * @param {boolean|'limited'} [ignoreClampBounds] if true ignore the
-   *    clampBounds* options when determining the new view.  When 'limited',
-   *    the clampBounds* options are selectively enforced so that the map will
-   *    not end up more out of bounds than its current state.
+   *    clampBoundsX and clampBoundsY options when determining the new view.
+   *    When 'limited', the clampBoundsX and clampBoundsY options are
+   *    selectively enforced so that the map will not end up more out of bounds
+   *    than its current state.
    * @returns {this}
    * @fires geo.event.pan
    */
@@ -427,7 +428,7 @@ var map = function (arg) {
         y: (delta.x * sinr + (-delta.y) * cosr) * unit
       });
     }
-    /* If m_clampBounds* is true, clamp the pan */
+    /* If m_clampBoundsX or m_clampBoundsY is true, clamp the pan */
     var bounds = m_camera.bounds;
     bounds = fix_bounds(bounds, m_rotation, ignoreClampBounds === 'limited' ? {
       x: delta.x, y: delta.y, unit: unit} : undefined,
@@ -528,9 +529,10 @@ var map = function (arg) {
    * @param {boolean} [ignoreDiscreteZoom] if true, ignore the discreteZoom
    *    option when determining the new view.
    * @param {boolean|'limited'} [ignoreClampBounds] if true ignore the
-   *    clampBounds* options when determining the new view.  When 'limited',
-   *    the clampBounds* options are selectively enforced so that the map will
-   *    not end up more out of bounds than its current state.
+   *    clampBoundsX and clampBoundsY options when determining the new view.
+   *    When 'limited', the clampBoundsX and clampBoundsY options are
+   *    selectively enforced so that the map will not end up more out of bounds
+   *    than its current state.
    * @returns {geo.geoPosition|this}
    * @fires geo.event.pan
    */
@@ -597,7 +599,7 @@ var map = function (arg) {
   /**
    * Remove layer from the map
    *
-   * @param {geo.layer?} layer layer that should be removed from the map
+   * @param {geo.layer?} layer layer to remove from the map
    * @return {geo.layer}
    * @fires geo.event.layerRemove
    */
@@ -2007,10 +2009,10 @@ var map = function (arg) {
 
   /**
    * Return the nearest valid bounds maintaining the width and height.  Does
-   * nothing if m_clampBounds* is false.  If a delta is specified, will only
-   * clamp if the out-of-bounds condition would be worse.  If ignoreClampBounds
-   * is true, clamping is applied only to prevent more than half the image from
-   * being off screen.
+   * nothing if m_clampBoundsX and m_clampBoundsY are false.  If a delta is
+   * specified, will only clamp if the out-of-bounds condition would be worse.
+   * If ignoreClampBounds is true, clamping is applied only to prevent more
+   * than half the image from being off screen.
    *
    * @param {geo.geoBounds} bounds the new bounds to apply in map gcs
    *    coordinates.
