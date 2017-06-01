@@ -151,6 +151,32 @@ var polygonFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get the style for the stroke of the polygon.  Since polygons can have
+   * holes, the number of stroke lines may not be the same as the number of
+   * polygons.  If the style for a stroke is a function, this calls the
+   * appropriate value for the polygon.  Any style set for a stroke line should
+   * be wrapped in this function.
+   *
+   * @param {(object|function)?} styleValue The polygon's style value used for
+   *    the stroke.  This should be m_this.style(<name of style>) and not
+   *    m_this.style.get(<name of style>), as the result is more efficient if
+   *    the style is not a function.
+   * @returns {object|function} A style that can be used for the stroke.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function linePolyStyle(styleValue) {
+    if (util.isFunction(styleValue)) {
+      return function (d) {
+        return styleValue(d[0], d[1], d[2], d[3]);
+      };
+    } else {
+      return styleValue;
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get/set polygon accessor.
    *
    * @memberof geo.polygonFeature
@@ -287,15 +313,15 @@ var polygonFeature = function (arg) {
     }
     var polyStyle = m_this.style();
     m_lineFeature.style({
-      antialiasing: polyStyle.antialiasing,
+      antialiasing: linePolyStyle(polyStyle.antialiasing),
       closed: true,
-      lineCap: polyStyle.lineCap,
-      lineJoin: polyStyle.lineJoin,
-      miterLimit: polyStyle.miterLimit,
-      strokeWidth: polyStyle.strokeWidth,
-      strokeStyle: polyStyle.strokeStyle,
-      strokeColor: polyStyle.strokeColor,
-      strokeOffset: polyStyle.strokeOffset,
+      lineCap: linePolyStyle(polyStyle.lineCap),
+      lineJoin: linePolyStyle(polyStyle.lineJoin),
+      miterLimit: linePolyStyle(polyStyle.miterLimit),
+      strokeWidth: linePolyStyle(polyStyle.strokeWidth),
+      strokeStyle: linePolyStyle(polyStyle.strokeStyle),
+      strokeColor: linePolyStyle(polyStyle.strokeColor),
+      strokeOffset: linePolyStyle(polyStyle.strokeOffset),
       strokeOpacity: function (d) {
         return m_this.style.get('stroke')(d[2], d[3]) ? m_this.style.get('strokeOpacity')(d[0], d[1], d[2], d[3]) : 0;
       }
