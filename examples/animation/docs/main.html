@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Run after the DOM loads</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-meta">  'use strict'</span>;
+
+  <span class="hljs-keyword">var</span> layer, pointFeature, points, datapoints,
+      timeRecords = {<span class="hljs-attr">generate</span>: [], <span class="hljs-attr">update</span>: [], <span class="hljs-attr">frames</span>: []},
+      animationState = {};
+
+  <span class="hljs-keyword">var</span> map = geo.map({
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-98</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">39</span>
+    },
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">3</span>
+  });
+  <span class="hljs-keyword">var</span> layerOptions = {
+    <span class="hljs-attr">features</span>: [<span class="hljs-string">'point'</span>]
+  };
+
+  <span class="hljs-keyword">var</span> animationStyles = {
+    <span class="hljs-attr">fill</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">fillColor</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">fillOpacity</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">stroke</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">strokeColor</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">strokeOpacity</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">strokeWidth</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">radius</span>: <span class="hljs-literal">true</span>
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Parse query parameters into an object for ease of access</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> query = <span class="hljs-built_in">document</span>.location.search.replace(<span class="hljs-regexp">/(^\?)/</span>, <span class="hljs-string">''</span>).split(
+    <span class="hljs-string">'&amp;'</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">n</span>) </span>{
+      n = n.split(<span class="hljs-string">'='</span>);
+      <span class="hljs-keyword">if</span> (n[<span class="hljs-number">0</span>]) {
+        <span class="hljs-keyword">this</span>[<span class="hljs-built_in">decodeURIComponent</span>(n[<span class="hljs-number">0</span>])] = <span class="hljs-built_in">decodeURIComponent</span>(n[<span class="hljs-number">1</span>]);
+      }
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }.bind({}))[<span class="hljs-number">0</span>];
+  $.each(query, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">key, value</span>) </span>{
+    <span class="hljs-keyword">var</span> ctlvalue, ctlkey = key, ctl;
+    <span class="hljs-keyword">switch</span> (key) {
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'dataset'</span>:
+        ctlvalue = value ? value : <span class="hljs-string">'adderall'</span>;
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'points'</span>:
+        <span class="hljs-keyword">if</span> (value.length) {
+          points = ctlvalue = <span class="hljs-built_in">parseInt</span>(value, <span class="hljs-number">10</span>);
+        }
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">default</span>:
+        <span class="hljs-keyword">if</span> (animationStyles[key] !== <span class="hljs-literal">undefined</span>) {
+          animationStyles[key] = ctlvalue = value === <span class="hljs-string">'true'</span>;
+        }
+    }
+    <span class="hljs-keyword">if</span> (ctlvalue !== <span class="hljs-literal">undefined</span>) {
+      ctl = $(<span class="hljs-string">'#'</span> + ctlkey);
+      <span class="hljs-keyword">if</span> (ctl.is(<span class="hljs-string">'[type="checkbox"]'</span>)) {
+        ctl.prop(<span class="hljs-string">'checked'</span>, value === <span class="hljs-string">'true'</span> || value === <span class="hljs-literal">true</span>);
+      } <span class="hljs-keyword">else</span> {
+        ctl.val(ctlvalue);
+      }
+    }
+  });
+
+  <span class="hljs-comment">/* Based on the current controls, fetch a data set and show it as a heatmap.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetch_data</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> dataset = $(<span class="hljs-string">'#dataset'</span>).val(),
+        url = <span class="hljs-string">'../../data/'</span> + $(<span class="hljs-string">'#dataset option:selected'</span>).attr(<span class="hljs-string">'url'</span>);
+    $.ajax(url, {
+      <span class="hljs-attr">success</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) </span>{
+        <span class="hljs-keyword">var</span> wasPlaying = animationState.mode === <span class="hljs-string">'play'</span>;
+        animation_pause();
+        animationState = {};
+        <span class="hljs-keyword">var</span> rows;
+        <span class="hljs-keyword">switch</span> (dataset) {
+          <span class="hljs-keyword">case</span> <span class="hljs-string">'adderall'</span>:
+            rows = resp.split(<span class="hljs-regexp">/\r\n|\n|\r/</span>);
+            rows.splice(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+            rows = rows.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">r</span>) </span>{
+              <span class="hljs-keyword">var</span> fields = r.split(<span class="hljs-string">','</span>);
+              <span class="hljs-keyword">return</span> [fields[<span class="hljs-number">12</span>], fields[<span class="hljs-number">24</span>], fields[<span class="hljs-number">25</span>]].map(<span class="hljs-built_in">parseFloat</span>);
+            });
+            <span class="hljs-keyword">break</span>;
+          <span class="hljs-keyword">case</span> <span class="hljs-string">'cities'</span>:
+            rows = resp.split(<span class="hljs-regexp">/\r\n|\n|\r/</span>);
+            rows.splice(rows.length - <span class="hljs-number">1</span>, <span class="hljs-number">1</span>);
+            rows = rows.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">r</span>) </span>{
+              <span class="hljs-keyword">var</span> fields = r.split(<span class="hljs-string">'","'</span>);
+              <span class="hljs-keyword">return</span> [<span class="hljs-string">''</span> + fields[<span class="hljs-number">0</span>].replace(<span class="hljs-regexp">/(^\s+|\s+$|^"|"$)/g</span>, <span class="hljs-string">''</span>).length, fields[<span class="hljs-number">2</span>].replace(<span class="hljs-regexp">/(^\s+|\s+$|^"|"$)/g</span>, <span class="hljs-string">''</span>), fields[<span class="hljs-number">3</span>].replace(<span class="hljs-regexp">/(^\s+|\s+$|^"|"$)/g</span>, <span class="hljs-string">''</span>)].map(<span class="hljs-built_in">parseFloat</span>);
+            });
+            <span class="hljs-keyword">break</span>;
+          <span class="hljs-keyword">case</span> <span class="hljs-string">'earthquakes'</span>:
+            animationState.orderedData = <span class="hljs-literal">true</span>;
+            rows = resp;
+            <span class="hljs-keyword">break</span>;
+        }
+        datapoints = rows;
+        <span class="hljs-keyword">var</span> text = <span class="hljs-string">'Loaded: '</span> + datapoints.length;
+        $(<span class="hljs-string">'#points-loaded'</span>).text(text).attr(<span class="hljs-string">'title'</span>, text);
+        show_points(datapoints);
+        reset_styles();
+        <span class="hljs-keyword">if</span> (wasPlaying) {
+          animation_play();
+        }
+      }
+    });
+  }
+
+  <span class="hljs-comment">/* Given a set of datapoints, optionally truncate or expand it, then show it
+   * as a heatmap.
+   *
+   * @param {array} datapoints: an array of points to show.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show_points</span>(<span class="hljs-params">datapoints</span>) </span>{
+    <span class="hljs-keyword">var</span> rows = datapoints;
+    <span class="hljs-keyword">var</span> maxrows = <span class="hljs-built_in">parseInt</span>(points, <span class="hljs-number">10</span>) || rows.length;
+    <span class="hljs-keyword">if</span> (rows.length &gt; maxrows) {
+      rows = rows.slice(<span class="hljs-number">0</span>, maxrows);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (rows.length &lt; maxrows) {
+      rows = rows.slice();
+      <span class="hljs-keyword">while</span> (rows.length &lt; maxrows) {
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = rows.length - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span> &amp;&amp; rows.length &lt; maxrows; i -= <span class="hljs-number">1</span>) {
+          rows.push([
+            rows[i][<span class="hljs-number">0</span>] + <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>,
+            rows[i][<span class="hljs-number">1</span>] + <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>,
+            rows[i][<span class="hljs-number">2</span>] + <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>]);
+        }
+      }
+    }
+    pointFeature.data(rows);
+    pointFeature.draw();
+    <span class="hljs-keyword">var</span> text = <span class="hljs-string">'Shown: '</span> + rows.length;
+    $(<span class="hljs-string">'#points-shown'</span>).text(text).attr(<span class="hljs-string">'title'</span>, text);
+  }
+
+  <span class="hljs-comment">/**
+   * Handle changes to our controls.
+   *
+   * @param {object} evt jquery evt that triggered this call.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">change_controls</span>(<span class="hljs-params">evt</span>) </span>{
+    <span class="hljs-keyword">var</span> ctl = $(evt.target),
+        param = ctl.attr(<span class="hljs-string">'id'</span>),
+        value = ctl.val();
+    <span class="hljs-keyword">if</span> (ctl.is(<span class="hljs-string">'[type="checkbox"]'</span>)) {
+      value = ctl.is(<span class="hljs-string">':checked'</span>) ? <span class="hljs-string">'true'</span> : <span class="hljs-string">'false'</span>;
+    }
+    <span class="hljs-keyword">if</span> (value === <span class="hljs-string">''</span> &amp;&amp; ctl.attr(<span class="hljs-string">'placeholder'</span>)) {
+      value = ctl.attr(<span class="hljs-string">'placeholder'</span>);
+    }
+    <span class="hljs-keyword">if</span> (!param || value === query[param]) {
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">var</span> processedValue = (ctl.is(<span class="hljs-string">'[type="checkbox"]'</span>) ?
+                          (value === <span class="hljs-string">'true'</span>) : value);
+    <span class="hljs-keyword">if</span> (ctl.closest(<span class="hljs-string">'table.gradient'</span>).length) {
+      param = <span class="hljs-string">'gradient'</span>;
+    }
+    <span class="hljs-keyword">switch</span> (param) {
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'dataset'</span>:
+        fetch_data();
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'points'</span>:
+        points = <span class="hljs-built_in">parseInt</span>(value);
+        <span class="hljs-keyword">var</span> wasPlaying = animationState.mode === <span class="hljs-string">'play'</span>;
+        animation_pause();
+        show_points(datapoints);
+        reset_styles();
+        <span class="hljs-keyword">if</span> (wasPlaying) {
+          animation_play();
+        }
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">default</span>:
+        <span class="hljs-keyword">if</span> (animationStyles[param] !== <span class="hljs-literal">undefined</span>) {
+          animationStyles[param] = processedValue;
+          reset_styles();
+        }
+        <span class="hljs-keyword">break</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>update the url to reflect the changes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    query[param] = value;
+    <span class="hljs-keyword">if</span> (value === <span class="hljs-string">''</span> || (ctl.attr(<span class="hljs-string">'placeholder'</span>) &amp;&amp;
+        value === ctl.attr(<span class="hljs-string">'placeholder'</span>))) {
+      <span class="hljs-keyword">delete</span> query[param];
+    }
+    <span class="hljs-keyword">var</span> newurl = <span class="hljs-built_in">window</span>.location.protocol + <span class="hljs-string">'//'</span> + <span class="hljs-built_in">window</span>.location.host +
+        <span class="hljs-built_in">window</span>.location.pathname + <span class="hljs-string">'?'</span> + $.param(query);
+    <span class="hljs-built_in">window</span>.history.replaceState(query, <span class="hljs-string">''</span>, newurl);
+  }
+
+  <span class="hljs-comment">/**
+   * Render a frame of the animation and then request another frame as soon as
+   * possible.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">animation_frame</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> datalen = animationState.order.length,
+        styles = animationState.styleArrays,
+        curTime = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime(), genTime, updateTime,
+        position, i, idx, p;
+    timeRecords.frames.push(curTime);
+    animationState.raf = <span class="hljs-literal">null</span>;
+    position = ((curTime - animationState.startTime) / animationState.duration) % <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">if</span> (position &lt; <span class="hljs-number">0</span>) {
+      position += <span class="hljs-number">1</span>;
+    }
+    animationState.position = position;
+
+    <span class="hljs-keyword">for</span> (idx = <span class="hljs-number">0</span>; idx &lt; datalen; idx += <span class="hljs-number">1</span>) {
+      i = animationState.order[idx];
+      p = idx / datalen + position;
+      <span class="hljs-keyword">if</span> (p &gt; <span class="hljs-number">1</span>) {
+        p -= <span class="hljs-number">1</span>;
+      }
+      styles.p[i] = p;
+    }
+    <span class="hljs-keyword">if</span> (animationStyles.fill) {
+      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; datalen; i += <span class="hljs-number">1</span>) {
+        styles.fill[i] = styles.p[i] &gt;= <span class="hljs-number">0.1</span> ? <span class="hljs-literal">false</span> : <span class="hljs-literal">true</span>;
+      }
+    }
+    <span class="hljs-keyword">if</span> (animationStyles.fillColor) {
+      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; datalen; i += <span class="hljs-number">1</span>) {
+        p = styles.p[i];
+        <span class="hljs-keyword">if</span> (p &gt;= <span class="hljs-number">0.1</span>) {
+          styles.fillColor[i].r = <span class="hljs-number">0</span>;
+          styles.fillColor[i].g = <span class="hljs-number">0</span>;
+          styles.fillColor[i].b = <span class="hljs-number">0</span>;
+        } <span class="hljs-keyword">else</span> {
+          styles.fillColor[i].r = p * <span class="hljs-number">10</span>;
+          styles.fillColor[i].g = p * <span class="hljs-number">8.39</span>;
+          styles.fillColor[i].b = p * <span class="hljs-number">4.39</span>;
+        }
+      }
+    }
+    <span class="hljs-keyword">if</span> (animationStyles.fillOpacity) {
+      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; datalen; i += <span class="hljs-number">1</span>) {
+        p = styles.p[i];
+        styles.fillOpacity[i] = p &gt;= <span class="hljs-number">0.1</span> ? <span class="hljs-number">0</span> : <span class="hljs-number">1.0</span> - p * <span class="hljs-number">10</span>;  <span class="hljs-comment">// 1 - 0</span>
+      }
+    }
+    <span class="hljs-keyword">if</span> (animationStyles.radius) {
+      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; datalen; i += <span class="hljs-number">1</span>) {
+        p = styles.p[i];
+        styles.radius[i] = p &gt;= <span class="hljs-number">0.1</span> ? <span class="hljs-number">0</span> : <span class="hljs-number">2</span> + <span class="hljs-number">100</span> * p;  <span class="hljs-comment">// 2 - 12</span>
+      }
+    }
+    <span class="hljs-keyword">if</span> (animationStyles.stroke) {
+      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; datalen; i += <span class="hljs-number">1</span>) {
+        styles.stroke[i] = styles.p[i] &gt;= <span class="hljs-number">0.1</span> ? <span class="hljs-literal">false</span> : <span class="hljs-literal">true</span>;
+      }
+    }
+    <span class="hljs-keyword">if</span> (animationStyles.strokeColor) {
+      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; datalen; i += <span class="hljs-number">1</span>) {
+        p = styles.p[i];
+        <span class="hljs-keyword">if</span> (p &gt;= <span class="hljs-number">0.1</span>) {
+          styles.strokeColor[i].r = <span class="hljs-number">0</span>;
+          styles.strokeColor[i].g = <span class="hljs-number">0</span>;
+          styles.strokeColor[i].b = <span class="hljs-number">0</span>;
+        } <span class="hljs-keyword">else</span> {
+          styles.strokeColor[i].r = p * <span class="hljs-number">8.51</span>;
+          styles.strokeColor[i].g = p * <span class="hljs-number">6.04</span>;
+          styles.strokeColor[i].b = <span class="hljs-number">0</span>;
+        }
+      }
+    }
+    <span class="hljs-keyword">if</span> (animationStyles.strokeOpacity) {
+      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; datalen; i += <span class="hljs-number">1</span>) {
+        p = styles.p[i];
+        styles.strokeOpacity[i] = p &gt;= <span class="hljs-number">0.1</span> ? <span class="hljs-number">0</span> : <span class="hljs-number">1.0</span> - p * p * <span class="hljs-number">100</span>;  <span class="hljs-comment">// (1 - 0) ^ 2</span>
+      }
+    }
+    <span class="hljs-keyword">if</span> (animationStyles.strokeWidth) {
+      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; datalen; i += <span class="hljs-number">1</span>) {
+        p = styles.p[i];
+        styles.strokeWidth[i] = p &gt;= <span class="hljs-number">0.1</span> ? <span class="hljs-number">0</span> : <span class="hljs-number">3</span> - <span class="hljs-number">30</span> * p;  <span class="hljs-comment">// 3 - 0</span>
+      }
+    }
+    <span class="hljs-keyword">var</span> updateStyles = {};
+    $.each(animationStyles, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">key, use</span>) </span>{
+      <span class="hljs-keyword">if</span> (use) {
+        updateStyles[key] = styles[key];
+      }
+    });
+    genTime = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime();
+    pointFeature.updateStyleFromArray(updateStyles, <span class="hljs-literal">null</span>, <span class="hljs-literal">true</span>);
+    updateTime = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime();
+    timeRecords.generate.push(genTime - curTime);
+    timeRecords.update.push(updateTime - genTime);
+    show_framerate();
+    <span class="hljs-keyword">if</span> (animationState.mode === <span class="hljs-string">'play'</span>) {
+      animationState.raf = <span class="hljs-built_in">window</span>.requestAnimationFrame(animation_frame);
+    }
+  }
+
+  <span class="hljs-comment">/**
+   * Stop any animation timeout, but don't do anything else.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">animation_pause</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">if</span> (animationState.mode &amp;&amp; animationState.mode !== <span class="hljs-string">'pause'</span> &amp;&amp; animationState.mode !== <span class="hljs-string">'stop'</span>) {
+      <span class="hljs-keyword">if</span> (animationState.raf) {
+        <span class="hljs-built_in">window</span>.cancelAnimationFrame(animationState.raf);
+        animationState.raf = <span class="hljs-literal">null</span>;
+      }
+      animationState.mode = <span class="hljs-string">'pause'</span>;
+    }
+  }
+
+  <span class="hljs-comment">/**
+   * Start playing an animation.  If we haven't played it yet, create some
+   * arrays used for the animation.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">animation_play</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">if</span> (animationState.mode === <span class="hljs-string">'play'</span> || !pointFeature.data()) {
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">var</span> data = pointFeature.data(),
+        datalen = data.length;
+    <span class="hljs-keyword">if</span> (!datalen) {
+      <span class="hljs-keyword">return</span>;
+    }
+    animationState.duration = <span class="hljs-number">15000</span>;  <span class="hljs-comment">// in milliseconds</span>
+    <span class="hljs-keyword">if</span> (animationState.position === <span class="hljs-literal">undefined</span> || animationState.position === <span class="hljs-literal">null</span>) {
+      animationState.position = <span class="hljs-number">0</span>;
+    }
+    animationState.startTime = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime() - animationState.duration * animationState.position;
+    <span class="hljs-keyword">if</span> (!animationState.styleArrays || datalen !== animationState.order.length) {
+      animationState.order = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(datalen);
+      <span class="hljs-keyword">if</span> (!animationState.orderedData) {
+        <span class="hljs-keyword">var</span> posFunc = pointFeature.position(), posVal, i;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>sort our data by x so we get a visual ripple across it</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; datalen; i += <span class="hljs-number">1</span>) {
+          posVal = posFunc(data[i], i);
+          animationState.order[i] = {<span class="hljs-attr">i</span>: i, <span class="hljs-attr">x</span>: posVal.x, <span class="hljs-attr">y</span>: posVal.y};
+        }
+        animationState.order = animationState.order.sort(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">a, b</span>) </span>{
+          <span class="hljs-keyword">if</span> (a.x !== b.x) { <span class="hljs-keyword">return</span> b.x - a.x; }
+          <span class="hljs-keyword">if</span> (a.y !== b.y) { <span class="hljs-keyword">return</span> b.y - a.y; }
+          <span class="hljs-keyword">return</span> b.i - a.i;
+        }).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">val</span>) </span>{
+          <span class="hljs-keyword">return</span> val.i;
+        });
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; datalen; i += <span class="hljs-number">1</span>) {
+          animationState.order[i] = i;
+        }
+      }
+      animationState.styleArrays = {
+        <span class="hljs-attr">p</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(datalen),
+        <span class="hljs-attr">radius</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(datalen),
+        <span class="hljs-attr">fill</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(datalen),
+        <span class="hljs-attr">fillColor</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(datalen),
+        <span class="hljs-attr">fillOpacity</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(datalen),
+        <span class="hljs-attr">stroke</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(datalen),
+        <span class="hljs-attr">strokeColor</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(datalen),
+        <span class="hljs-attr">strokeOpacity</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(datalen),
+        <span class="hljs-attr">strokeWidth</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(datalen)
+      };
+      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; datalen; i += <span class="hljs-number">1</span>) {
+        animationState.styleArrays.fillColor[i] = {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>};
+        animationState.styleArrays.strokeColor[i] = {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>};
+      }
+    }
+    animationState.mode = <span class="hljs-string">'play'</span>;
+    animation_frame();
+  }
+
+  <span class="hljs-comment">/**
+   * Clear any animation timeout and reset the styles to the original values.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">animation_stop</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">if</span> (animationState.mode &amp;&amp; animationState.mode !== <span class="hljs-string">'stop'</span>) {
+      <span class="hljs-keyword">if</span> (animationState.raf) {
+        <span class="hljs-built_in">window</span>.cancelAnimationFrame(animationState.raf);
+        animationState.raf = <span class="hljs-literal">null</span>;
+      }
+      reset_styles();
+      animationState.position = <span class="hljs-literal">null</span>;
+      animationState.mode = <span class="hljs-string">'stop'</span>;
+    }
+  }
+
+  <span class="hljs-comment">/**
+   * Reset all of the styles to the defaults and redraw the feature.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset_styles</span>(<span class="hljs-params"></span>) </span>{
+    pointFeature.style({
+      <span class="hljs-attr">fill</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">fillColor</span>: { <span class="hljs-attr">r</span>: <span class="hljs-number">1.0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0.839</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0.439</span> },
+      <span class="hljs-attr">fillOpacity</span>: <span class="hljs-number">0.8</span>,
+      <span class="hljs-attr">radius</span>: <span class="hljs-number">5.0</span>,
+      <span class="hljs-attr">stroke</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">strokeColor</span>: { <span class="hljs-attr">r</span>: <span class="hljs-number">0.851</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0.604</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0.0</span> },
+      <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">1.25</span>,
+      <span class="hljs-attr">strokeOpacity</span>: <span class="hljs-number">1.0</span>
+    });
+    pointFeature.draw();
+  }
+
+  <span class="hljs-comment">/**
+   * Show the framerate averaged over the last five seconds.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show_framerate</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">if</span> (timeRecords.frames.length &lt; <span class="hljs-number">2</span>) {
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">var</span> timeSpan = <span class="hljs-number">5000</span>,
+        endPos = timeRecords.frames.length - <span class="hljs-number">1</span>,
+        endTime = timeRecords.frames[endPos],
+        startPos, startTime, fps, generate = <span class="hljs-number">0</span>, update = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">for</span> (startPos = endPos; startPos &gt; <span class="hljs-number">0</span>; startPos -= <span class="hljs-number">1</span>) {
+      <span class="hljs-keyword">if</span> (endTime - timeRecords.frames[startPos] &gt; timeSpan) {
+        <span class="hljs-keyword">break</span>;
+      }
+      generate += timeRecords.generate[startPos];
+      update += timeRecords.update[startPos];
+    }
+    startTime = timeRecords.frames[startPos];
+    timeSpan = endTime - startTime;
+    fps = (endPos - startPos) * <span class="hljs-number">1000</span> / timeSpan;
+    generate /= (endPos - startPos);
+    update /= (endPos - startPos);
+    $(<span class="hljs-string">'#timing-framerate'</span>).text(fps.toFixed(<span class="hljs-number">1</span>));
+    $(<span class="hljs-string">'#timing-generate'</span>).text(generate.toFixed(<span class="hljs-number">1</span>));
+    $(<span class="hljs-string">'#timing-update'</span>).text(update.toFixed(<span class="hljs-number">1</span>));
+    <span class="hljs-keyword">if</span> (startPos &gt; <span class="hljs-number">1000</span>) {
+      timeRecords.frames.splice(<span class="hljs-number">0</span>, startPos);
+      timeRecords.generate.splice(<span class="hljs-number">0</span>, startPos);
+      timeRecords.update.splice(<span class="hljs-number">0</span>, startPos);
+    }
+  }
+
+  map.createLayer(<span class="hljs-string">'osm'</span>);
+  layer = map.createLayer(<span class="hljs-string">'feature'</span>, layerOptions);
+  pointFeature = layer.createFeature(<span class="hljs-string">'point'</span>, {
+    <span class="hljs-attr">primitiveShape</span>: query.primitive ? query.primitive : <span class="hljs-string">'sprite'</span>
+  })
+  .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+    <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: d[<span class="hljs-number">2</span>], <span class="hljs-attr">y</span>: d[<span class="hljs-number">1</span>]};
+  });
+
+  fetch_data();
+  $(<span class="hljs-string">'#controls'</span>).on(<span class="hljs-string">'change'</span>, change_controls);
+  $(<span class="hljs-string">'button#play'</span>).on(<span class="hljs-string">'click'</span>, animation_play);
+  $(<span class="hljs-string">'button#pause'</span>).on(<span class="hljs-string">'click'</span>, animation_pause);
+  $(<span class="hljs-string">'button#stop'</span>).on(<span class="hljs-string">'click'</span>, animation_stop);
+});</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

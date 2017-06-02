@@ -1,32 +1,2855 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: event.js</title>
-
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
+    <title>Source: event.js</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <script src="scripts/jquery.min.js"></script>
     <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
-</head>
-
-<body>
-
-<div id="main">
-
-    <h1 class="page-title">Source: event.js</h1>
-
+    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/jaguar.css">
+    
+    
+    <script>
+    var config = {"monospaceLinks":false,"cleverLinks":true,"applicationName":"GeoJS","linenums":true,"default":{"outputSourceFiles":true}};
+    </script>
     
 
+    
+</head>
+<body>
+<div id="wrap" class="clearfix">
+    
+<div class="navigation">
+    <h3 class="applicationName"><a href="index.html">GeoJS</a></h3>
+
+    <div class="search">
+        <input id="search" type="text" class="form-control input-sm" placeholder="Search Documentations">
+    </div>
+    <ul class="list">
+    
+        <li class="item" data-name="geo">
+            <span class="title">
+                <a href="geo.html">geo</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="geo.brushSelection"><a href="geo.html#.brushSelection">brushSelection</a></li>
+            
+                <li data-name="geo.geoBounds"><a href="geo.html#.geoBounds">geoBounds</a></li>
+            
+                <li data-name="geo.geoPosition"><a href="geo.html#.geoPosition">geoPosition</a></li>
+            
+                <li data-name="geo.modifierKeys"><a href="geo.html#.modifierKeys">modifierKeys</a></li>
+            
+                <li data-name="geo.mouseButtons"><a href="geo.html#.mouseButtons">mouseButtons</a></li>
+            
+                <li data-name="geo.mouseState"><a href="geo.html#.mouseState">mouseState</a></li>
+            
+                <li data-name="geo.screenBounds"><a href="geo.html#.screenBounds">screenBounds</a></li>
+            
+                <li data-name="geo.screenPosition"><a href="geo.html#.screenPosition">screenPosition</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.canvas">
+            <span class="title">
+                <a href="geo.canvas.html">geo.canvas</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.d3">
+            <span class="title">
+                <a href="geo.d3.html">geo.d3</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.d3.uniqueID"><a href="geo.d3.html#.uniqueID">uniqueID</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.event">
+            <span class="title">
+                <a href="geo.event.html">geo.event</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="geo.event.actiondown"><a href="geo.event.html#.actiondown">actiondown</a></li>
+            
+                <li data-name="geo.event.actionmove"><a href="geo.event.html#.actionmove">actionmove</a></li>
+            
+                <li data-name="geo.event.actionselection"><a href="geo.event.html#.actionselection">actionselection</a></li>
+            
+                <li data-name="geo.event.actionup"><a href="geo.event.html#.actionup">actionup</a></li>
+            
+                <li data-name="geo.event.actionwheel"><a href="geo.event.html#.actionwheel">actionwheel</a></li>
+            
+                <li data-name="geo.event.annotation.add"><a href="geo.event.html#.annotation.add">annotation.add</a></li>
+            
+                <li data-name="geo.event.annotation.add_before"><a href="geo.event.html#.annotation.add_before">annotation.add_before</a></li>
+            
+                <li data-name="geo.event.annotation.mode"><a href="geo.event.html#.annotation.mode">annotation.mode</a></li>
+            
+                <li data-name="geo.event.annotation.remove"><a href="geo.event.html#.annotation.remove">annotation.remove</a></li>
+            
+                <li data-name="geo.event.annotation.state"><a href="geo.event.html#.annotation.state">annotation.state</a></li>
+            
+                <li data-name="geo.event.annotation.update"><a href="geo.event.html#.annotation.update">annotation.update</a></li>
+            
+                <li data-name="geo.event.brush"><a href="geo.event.html#.brush">brush</a></li>
+            
+                <li data-name="geo.event.brushend"><a href="geo.event.html#.brushend">brushend</a></li>
+            
+                <li data-name="geo.event.brushstart"><a href="geo.event.html#.brushstart">brushstart</a></li>
+            
+                <li data-name="geo.event.camera.pan"><a href="geo.event.html#.camera.pan">camera.pan</a></li>
+            
+                <li data-name="geo.event.camera.projection"><a href="geo.event.html#.camera.projection">camera.projection</a></li>
+            
+                <li data-name="geo.event.camera.view"><a href="geo.event.html#.camera.view">camera.view</a></li>
+            
+                <li data-name="geo.event.camera.viewport"><a href="geo.event.html#.camera.viewport">camera.viewport</a></li>
+            
+                <li data-name="geo.event.camera.zoom"><a href="geo.event.html#.camera.zoom">camera.zoom</a></li>
+            
+                <li data-name="geo.event.draw"><a href="geo.event.html#.draw">draw</a></li>
+            
+                <li data-name="geo.event.drawEnd"><a href="geo.event.html#.drawEnd">drawEnd</a></li>
+            
+                <li data-name="geo.event.keyaction"><a href="geo.event.html#.keyaction">keyaction</a></li>
+            
+                <li data-name="geo.event.layerAdd"><a href="geo.event.html#.layerAdd">layerAdd</a></li>
+            
+                <li data-name="geo.event.layerRemove"><a href="geo.event.html#.layerRemove">layerRemove</a></li>
+            
+                <li data-name="geo.event.mouseclick"><a href="geo.event.html#.mouseclick">mouseclick</a></li>
+            
+                <li data-name="geo.event.mousemove"><a href="geo.event.html#.mousemove">mousemove</a></li>
+            
+                <li data-name="geo.event.parallelprojection"><a href="geo.event.html#.parallelprojection">parallelprojection</a></li>
+            
+                <li data-name="geo.event.resize"><a href="geo.event.html#.resize">resize</a></li>
+            
+                <li data-name="geo.event.rotate"><a href="geo.event.html#.rotate">rotate</a></li>
+            
+                <li data-name="geo.event.select"><a href="geo.event.html#.select">select</a></li>
+            
+                <li data-name="geo.event.transitioncancel"><a href="geo.event.html#.transitioncancel">transitioncancel</a></li>
+            
+                <li data-name="geo.event.transitionend"><a href="geo.event.html#.transitionend">transitionend</a></li>
+            
+                <li data-name="geo.event.transitionstart"><a href="geo.event.html#.transitionstart">transitionstart</a></li>
+            
+                <li data-name="geo.event.unzoomselect"><a href="geo.event.html#.unzoomselect">unzoomselect</a></li>
+            
+                <li data-name="geo.event.worldChanged"><a href="geo.event.html#.worldChanged">worldChanged</a></li>
+            
+                <li data-name="geo.event.zoom"><a href="geo.event.html#.zoom">zoom</a></li>
+            
+                <li data-name="geo.event.zoomselect"><a href="geo.event.html#.zoomselect">zoomselect</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="geo.event.event:pan"><a href="geo.event.html#.event:pan">pan</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.event.annotation">
+            <span class="title">
+                <a href="geo.event.annotation.html">geo.event.annotation</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.event.camera">
+            <span class="title">
+                <a href="geo.event.camera.html">geo.event.camera</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.event.feature">
+            <span class="title">
+                <a href="geo.event.feature.html">geo.event.feature</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.event.pixelmap">
+            <span class="title">
+                <a href="geo.event.pixelmap.html">geo.event.pixelmap</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.event.pixelmap">
+            <span class="title">
+                <a href="geo.event.pixelmap.html">geo.event.pixelmap</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.event.screenshot">
+            <span class="title">
+                <a href="geo.event.screenshot.html">geo.event.screenshot</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gl">
+            <span class="title">
+                <a href="geo.gl.html">geo.gl</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gui">
+            <span class="title">
+                <a href="geo.gui.html">geo.gui</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.util">
+            <span class="title">
+                <a href="geo.util.html">geo.util</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="geo.util.cssColors"><a href="geo.util.html#.cssColors">cssColors</a></li>
+            
+                <li data-name="geo.util.radiusEarth"><a href="geo.util.html#.radiusEarth">radiusEarth</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.util.actionMatch"><a href="geo.util.html#.actionMatch">actionMatch</a></li>
+            
+                <li data-name="geo.util.addAction"><a href="geo.util.html#.addAction">addAction</a></li>
+            
+                <li data-name="geo.util.adjustActions"><a href="geo.util.html#.adjustActions">adjustActions</a></li>
+            
+                <li data-name="geo.util.compareArrays"><a href="geo.util.html#.compareArrays">compareArrays</a></li>
+            
+                <li data-name="geo.util.convertColor"><a href="geo.util.html#.convertColor">convertColor</a></li>
+            
+                <li data-name="geo.util.convertColorToHex"><a href="geo.util.html#.convertColorToHex">convertColorToHex</a></li>
+            
+                <li data-name="geo.util.dereferenceElements"><a href="geo.util.html#.dereferenceElements">dereferenceElements</a></li>
+            
+                <li data-name="geo.util.escapeUnicodeHTML"><a href="geo.util.html#.escapeUnicodeHTML">escapeUnicodeHTML</a></li>
+            
+                <li data-name="geo.util.getGeomBuffer"><a href="geo.util.html#.getGeomBuffer">getGeomBuffer</a></li>
+            
+                <li data-name="geo.util.hasAction"><a href="geo.util.html#.hasAction">hasAction</a></li>
+            
+                <li data-name="geo.util.htmlToImage"><a href="geo.util.html#.htmlToImage">htmlToImage</a></li>
+            
+                <li data-name="geo.util.isReadyImage"><a href="geo.util.html#.isReadyImage">isReadyImage</a></li>
+            
+                <li data-name="geo.util.mat4AsArray"><a href="geo.util.html#.mat4AsArray">mat4AsArray</a></li>
+            
+                <li data-name="geo.util.mockVGLRenderer"><a href="geo.util.html#.mockVGLRenderer">mockVGLRenderer</a></li>
+            
+                <li data-name="geo.util.normalizeCoordinates"><a href="geo.util.html#.normalizeCoordinates">normalizeCoordinates</a></li>
+            
+                <li data-name="geo.util.pixelCoordinateParams"><a href="geo.util.html#.pixelCoordinateParams">pixelCoordinateParams</a></li>
+            
+                <li data-name="geo.util.pointInPolygon"><a href="geo.util.html#.pointInPolygon">pointInPolygon</a></li>
+            
+                <li data-name="geo.util.pointTo2DTriangleBasis"><a href="geo.util.html#.pointTo2DTriangleBasis">pointTo2DTriangleBasis</a></li>
+            
+                <li data-name="geo.util.removeAction"><a href="geo.util.html#.removeAction">removeAction</a></li>
+            
+                <li data-name="geo.util.restoreVGLRenderer"><a href="geo.util.html#.restoreVGLRenderer">restoreVGLRenderer</a></li>
+            
+                <li data-name="geo.util.throttle"><a href="geo.util.html#.throttle">throttle</a></li>
+            
+                <li data-name="geo.util.timeFunctionStart"><a href="geo.util.html#.timeFunctionStart">timeFunctionStart</a></li>
+            
+                <li data-name="geo.util.timeFunctionStop"><a href="geo.util.html#.timeFunctionStop">timeFunctionStop</a></li>
+            
+                <li data-name="geo.util.timeReport"><a href="geo.util.html#.timeReport">timeReport</a></li>
+            
+                <li data-name="geo.util.timeRequestAnimationFrame"><a href="geo.util.html#.timeRequestAnimationFrame">timeRequestAnimationFrame</a></li>
+            
+                <li data-name="geo.util.vec3AsArray"><a href="geo.util.html#.vec3AsArray">vec3AsArray</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.annotation">
+            <span class="title">
+                <a href="geo.annotation.html">geo.annotation</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.annotationLayer">
+            <span class="title">
+                <a href="geo.annotationLayer.html">geo.annotationLayer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.annotationLayer#addChild"><a href="geo.annotationLayer.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.annotationLayer#addPromise"><a href="geo.annotationLayer.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.annotationLayer#children"><a href="geo.annotationLayer.html#children">children</a></li>
+            
+                <li data-name="geo.annotationLayer#draw"><a href="geo.annotationLayer.html#draw">draw</a></li>
+            
+                <li data-name="geo.annotationLayer#geoOff"><a href="geo.annotationLayer.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.annotationLayer#geoOn"><a href="geo.annotationLayer.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.annotationLayer#geoTrigger"><a href="geo.annotationLayer.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.annotationLayer#onIdle"><a href="geo.annotationLayer.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.annotationLayer#parent"><a href="geo.annotationLayer.html#parent">parent</a></li>
+            
+                <li data-name="geo.annotationLayer#removeChild"><a href="geo.annotationLayer.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.camera">
+            <span class="title">
+                <a href="geo.camera.html">geo.camera</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="geo.camera.bounds"><a href="geo.camera.html#.bounds">bounds</a></li>
+            
+                <li data-name="geo.camera.projection"><a href="geo.camera.html#.projection">projection</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.camera.affine"><a href="geo.camera.html#.affine">affine</a></li>
+            
+                <li data-name="geo.camera.applyTransform"><a href="geo.camera.html#.applyTransform">applyTransform</a></li>
+            
+                <li data-name="geo.camera.combine"><a href="geo.camera.html#.combine">combine</a></li>
+            
+                <li data-name="geo.camera.css"><a href="geo.camera.html#.css">css</a></li>
+            
+                <li data-name="geo.camera#addPromise"><a href="geo.camera.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.camera#applyProjection"><a href="geo.camera.html#applyProjection">applyProjection</a></li>
+            
+                <li data-name="geo.camera#css"><a href="geo.camera.html#css">css</a></li>
+            
+                <li data-name="geo.camera#debug"><a href="geo.camera.html#debug">debug</a></li>
+            
+                <li data-name="geo.camera#displayToWorld"><a href="geo.camera.html#displayToWorld">displayToWorld</a></li>
+            
+                <li data-name="geo.camera#displayToWorld4"><a href="geo.camera.html#displayToWorld4">displayToWorld4</a></li>
+            
+                <li data-name="geo.camera#geoOff"><a href="geo.camera.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.camera#geoOn"><a href="geo.camera.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.camera#geoTrigger"><a href="geo.camera.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.camera#onIdle"><a href="geo.camera.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.camera#pan"><a href="geo.camera.html#pan">pan</a></li>
+            
+                <li data-name="geo.camera#ppMatrix"><a href="geo.camera.html#ppMatrix">ppMatrix</a></li>
+            
+                <li data-name="geo.camera#toString"><a href="geo.camera.html#toString">toString</a></li>
+            
+                <li data-name="geo.camera#unapplyProjection"><a href="geo.camera.html#unapplyProjection">unapplyProjection</a></li>
+            
+                <li data-name="geo.camera#valueOf"><a href="geo.camera.html#valueOf">valueOf</a></li>
+            
+                <li data-name="geo.camera#viewFromCenterSizeRotation"><a href="geo.camera.html#viewFromCenterSizeRotation">viewFromCenterSizeRotation</a></li>
+            
+                <li data-name="geo.camera#worldToDisplay"><a href="geo.camera.html#worldToDisplay">worldToDisplay</a></li>
+            
+                <li data-name="geo.camera#worldToDisplay4"><a href="geo.camera.html#worldToDisplay4">worldToDisplay4</a></li>
+            
+                <li data-name="geo.camera#zoom"><a href="geo.camera.html#zoom">zoom</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.canvas.heatmapFeature">
+            <span class="title">
+                <a href="geo.canvas.heatmapFeature.html">geo.canvas.heatmapFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.canvas.heatmapFeature#addChild"><a href="geo.canvas.heatmapFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.canvas.heatmapFeature#addPromise"><a href="geo.canvas.heatmapFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.canvas.heatmapFeature#children"><a href="geo.canvas.heatmapFeature.html#children">children</a></li>
+            
+                <li data-name="geo.canvas.heatmapFeature#draw"><a href="geo.canvas.heatmapFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.canvas.heatmapFeature#geoOff"><a href="geo.canvas.heatmapFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.canvas.heatmapFeature#geoOn"><a href="geo.canvas.heatmapFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.canvas.heatmapFeature#geoTrigger"><a href="geo.canvas.heatmapFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.canvas.heatmapFeature#onIdle"><a href="geo.canvas.heatmapFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.canvas.heatmapFeature#parent"><a href="geo.canvas.heatmapFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.canvas.heatmapFeature#removeChild"><a href="geo.canvas.heatmapFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.canvas.lineFeature">
+            <span class="title">
+                <a href="geo.canvas.lineFeature.html">geo.canvas.lineFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.canvas.lineFeature#addChild"><a href="geo.canvas.lineFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.canvas.lineFeature#addPromise"><a href="geo.canvas.lineFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.canvas.lineFeature#children"><a href="geo.canvas.lineFeature.html#children">children</a></li>
+            
+                <li data-name="geo.canvas.lineFeature#draw"><a href="geo.canvas.lineFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.canvas.lineFeature#geoOff"><a href="geo.canvas.lineFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.canvas.lineFeature#geoOn"><a href="geo.canvas.lineFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.canvas.lineFeature#geoTrigger"><a href="geo.canvas.lineFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.canvas.lineFeature#onIdle"><a href="geo.canvas.lineFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.canvas.lineFeature#parent"><a href="geo.canvas.lineFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.canvas.lineFeature#removeChild"><a href="geo.canvas.lineFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.canvas.object">
+            <span class="title">
+                <a href="geo.canvas.object.html">geo.canvas.object</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.canvas.object#addChild"><a href="geo.canvas.object.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.canvas.object#addPromise"><a href="geo.canvas.object.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.canvas.object#children"><a href="geo.canvas.object.html#children">children</a></li>
+            
+                <li data-name="geo.canvas.object#draw"><a href="geo.canvas.object.html#draw">draw</a></li>
+            
+                <li data-name="geo.canvas.object#geoOff"><a href="geo.canvas.object.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.canvas.object#geoOn"><a href="geo.canvas.object.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.canvas.object#geoTrigger"><a href="geo.canvas.object.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.canvas.object#onIdle"><a href="geo.canvas.object.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.canvas.object#parent"><a href="geo.canvas.object.html#parent">parent</a></li>
+            
+                <li data-name="geo.canvas.object#removeChild"><a href="geo.canvas.object.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.canvas.pixelmapFeature">
+            <span class="title">
+                <a href="geo.canvas.pixelmapFeature.html">geo.canvas.pixelmapFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.canvas.pixelmapFeature#addChild"><a href="geo.canvas.pixelmapFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.canvas.pixelmapFeature#addPromise"><a href="geo.canvas.pixelmapFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.canvas.pixelmapFeature#children"><a href="geo.canvas.pixelmapFeature.html#children">children</a></li>
+            
+                <li data-name="geo.canvas.pixelmapFeature#draw"><a href="geo.canvas.pixelmapFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.canvas.pixelmapFeature#geoOff"><a href="geo.canvas.pixelmapFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.canvas.pixelmapFeature#geoOn"><a href="geo.canvas.pixelmapFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.canvas.pixelmapFeature#geoTrigger"><a href="geo.canvas.pixelmapFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.canvas.pixelmapFeature#onIdle"><a href="geo.canvas.pixelmapFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.canvas.pixelmapFeature#parent"><a href="geo.canvas.pixelmapFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.canvas.pixelmapFeature#removeChild"><a href="geo.canvas.pixelmapFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.canvas.quadFeature">
+            <span class="title">
+                <a href="geo.canvas.quadFeature.html">geo.canvas.quadFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.canvas.quadFeature#addChild"><a href="geo.canvas.quadFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.canvas.quadFeature#addPromise"><a href="geo.canvas.quadFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.canvas.quadFeature#children"><a href="geo.canvas.quadFeature.html#children">children</a></li>
+            
+                <li data-name="geo.canvas.quadFeature#draw"><a href="geo.canvas.quadFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.canvas.quadFeature#geoOff"><a href="geo.canvas.quadFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.canvas.quadFeature#geoOn"><a href="geo.canvas.quadFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.canvas.quadFeature#geoTrigger"><a href="geo.canvas.quadFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.canvas.quadFeature#onIdle"><a href="geo.canvas.quadFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.canvas.quadFeature#parent"><a href="geo.canvas.quadFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.canvas.quadFeature#removeChild"><a href="geo.canvas.quadFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.canvas.renderer">
+            <span class="title">
+                <a href="geo.canvas.renderer.html">geo.canvas.renderer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.canvas.renderer#addPromise"><a href="geo.canvas.renderer.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.canvas.renderer#geoOff"><a href="geo.canvas.renderer.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.canvas.renderer#geoOn"><a href="geo.canvas.renderer.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.canvas.renderer#geoTrigger"><a href="geo.canvas.renderer.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.canvas.renderer#onIdle"><a href="geo.canvas.renderer.html#onIdle">onIdle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.choroplethFeature">
+            <span class="title">
+                <a href="geo.choroplethFeature.html">geo.choroplethFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.choroplethFeature.this.choropleth"><a href="geo.choroplethFeature.html#.this.choropleth">this.choropleth</a></li>
+            
+                <li data-name="geo.choroplethFeature.this.scalar"><a href="geo.choroplethFeature.html#.this.scalar">this.scalar</a></li>
+            
+                <li data-name="geo.choroplethFeature#addChild"><a href="geo.choroplethFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.choroplethFeature#addPromise"><a href="geo.choroplethFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.choroplethFeature#children"><a href="geo.choroplethFeature.html#children">children</a></li>
+            
+                <li data-name="geo.choroplethFeature#draw"><a href="geo.choroplethFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.choroplethFeature#geoOff"><a href="geo.choroplethFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.choroplethFeature#geoOn"><a href="geo.choroplethFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.choroplethFeature#geoTrigger"><a href="geo.choroplethFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.choroplethFeature#onIdle"><a href="geo.choroplethFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.choroplethFeature#parent"><a href="geo.choroplethFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.choroplethFeature#removeChild"><a href="geo.choroplethFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.contourFeature">
+            <span class="title">
+                <a href="geo.contourFeature.html">geo.contourFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.contourFeature#addChild"><a href="geo.contourFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.contourFeature#addPromise"><a href="geo.contourFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.contourFeature#children"><a href="geo.contourFeature.html#children">children</a></li>
+            
+                <li data-name="geo.contourFeature#draw"><a href="geo.contourFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.contourFeature#geoOff"><a href="geo.contourFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.contourFeature#geoOn"><a href="geo.contourFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.contourFeature#geoTrigger"><a href="geo.contourFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.contourFeature#onIdle"><a href="geo.contourFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.contourFeature#parent"><a href="geo.contourFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.contourFeature#removeChild"><a href="geo.contourFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.d3.graphFeature">
+            <span class="title">
+                <a href="geo.d3.graphFeature.html">geo.d3.graphFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.d3.graphFeature#addChild"><a href="geo.d3.graphFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.d3.graphFeature#addPromise"><a href="geo.d3.graphFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.d3.graphFeature#children"><a href="geo.d3.graphFeature.html#children">children</a></li>
+            
+                <li data-name="geo.d3.graphFeature#draw"><a href="geo.d3.graphFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.d3.graphFeature#geoOff"><a href="geo.d3.graphFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.d3.graphFeature#geoOn"><a href="geo.d3.graphFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.d3.graphFeature#geoTrigger"><a href="geo.d3.graphFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.d3.graphFeature#onIdle"><a href="geo.d3.graphFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.d3.graphFeature#parent"><a href="geo.d3.graphFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.d3.graphFeature#removeChild"><a href="geo.d3.graphFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.d3.lineFeature">
+            <span class="title">
+                <a href="geo.d3.lineFeature.html">geo.d3.lineFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.d3.lineFeature#addChild"><a href="geo.d3.lineFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.d3.lineFeature#addPromise"><a href="geo.d3.lineFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.d3.lineFeature#children"><a href="geo.d3.lineFeature.html#children">children</a></li>
+            
+                <li data-name="geo.d3.lineFeature#draw"><a href="geo.d3.lineFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.d3.lineFeature#geoOff"><a href="geo.d3.lineFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.d3.lineFeature#geoOn"><a href="geo.d3.lineFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.d3.lineFeature#geoTrigger"><a href="geo.d3.lineFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.d3.lineFeature#onIdle"><a href="geo.d3.lineFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.d3.lineFeature#parent"><a href="geo.d3.lineFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.d3.lineFeature#removeChild"><a href="geo.d3.lineFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.d3.object">
+            <span class="title">
+                <a href="geo.d3.object.html">geo.d3.object</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.d3.object#addChild"><a href="geo.d3.object.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.d3.object#addPromise"><a href="geo.d3.object.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.d3.object#children"><a href="geo.d3.object.html#children">children</a></li>
+            
+                <li data-name="geo.d3.object#draw"><a href="geo.d3.object.html#draw">draw</a></li>
+            
+                <li data-name="geo.d3.object#geoOff"><a href="geo.d3.object.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.d3.object#geoOn"><a href="geo.d3.object.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.d3.object#geoTrigger"><a href="geo.d3.object.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.d3.object#onIdle"><a href="geo.d3.object.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.d3.object#parent"><a href="geo.d3.object.html#parent">parent</a></li>
+            
+                <li data-name="geo.d3.object#removeChild"><a href="geo.d3.object.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.d3.pathFeature">
+            <span class="title">
+                <a href="geo.d3.pathFeature.html">geo.d3.pathFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.d3.pathFeature#addChild"><a href="geo.d3.pathFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.d3.pathFeature#addPromise"><a href="geo.d3.pathFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.d3.pathFeature#children"><a href="geo.d3.pathFeature.html#children">children</a></li>
+            
+                <li data-name="geo.d3.pathFeature#draw"><a href="geo.d3.pathFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.d3.pathFeature#geoOff"><a href="geo.d3.pathFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.d3.pathFeature#geoOn"><a href="geo.d3.pathFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.d3.pathFeature#geoTrigger"><a href="geo.d3.pathFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.d3.pathFeature#onIdle"><a href="geo.d3.pathFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.d3.pathFeature#parent"><a href="geo.d3.pathFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.d3.pathFeature#removeChild"><a href="geo.d3.pathFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.d3.pointFeature">
+            <span class="title">
+                <a href="geo.d3.pointFeature.html">geo.d3.pointFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.d3.pointFeature#addChild"><a href="geo.d3.pointFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.d3.pointFeature#addPromise"><a href="geo.d3.pointFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.d3.pointFeature#children"><a href="geo.d3.pointFeature.html#children">children</a></li>
+            
+                <li data-name="geo.d3.pointFeature#draw"><a href="geo.d3.pointFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.d3.pointFeature#geoOff"><a href="geo.d3.pointFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.d3.pointFeature#geoOn"><a href="geo.d3.pointFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.d3.pointFeature#geoTrigger"><a href="geo.d3.pointFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.d3.pointFeature#onIdle"><a href="geo.d3.pointFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.d3.pointFeature#parent"><a href="geo.d3.pointFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.d3.pointFeature#removeChild"><a href="geo.d3.pointFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.d3.quadFeature">
+            <span class="title">
+                <a href="geo.d3.quadFeature.html">geo.d3.quadFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.d3.quadFeature#addChild"><a href="geo.d3.quadFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.d3.quadFeature#addPromise"><a href="geo.d3.quadFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.d3.quadFeature#children"><a href="geo.d3.quadFeature.html#children">children</a></li>
+            
+                <li data-name="geo.d3.quadFeature#draw"><a href="geo.d3.quadFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.d3.quadFeature#geoOff"><a href="geo.d3.quadFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.d3.quadFeature#geoOn"><a href="geo.d3.quadFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.d3.quadFeature#geoTrigger"><a href="geo.d3.quadFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.d3.quadFeature#onIdle"><a href="geo.d3.quadFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.d3.quadFeature#parent"><a href="geo.d3.quadFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.d3.quadFeature#removeChild"><a href="geo.d3.quadFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.d3.renderer">
+            <span class="title">
+                <a href="geo.d3.renderer.html">geo.d3.renderer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.d3.renderer#addPromise"><a href="geo.d3.renderer.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.d3.renderer#geoOff"><a href="geo.d3.renderer.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.d3.renderer#geoOn"><a href="geo.d3.renderer.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.d3.renderer#geoTrigger"><a href="geo.d3.renderer.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.d3.renderer#onIdle"><a href="geo.d3.renderer.html#onIdle">onIdle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.d3.vectorFeature">
+            <span class="title">
+                <a href="geo.d3.vectorFeature.html">geo.d3.vectorFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.d3.vectorFeature#addChild"><a href="geo.d3.vectorFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.d3.vectorFeature#addPromise"><a href="geo.d3.vectorFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.d3.vectorFeature#children"><a href="geo.d3.vectorFeature.html#children">children</a></li>
+            
+                <li data-name="geo.d3.vectorFeature#draw"><a href="geo.d3.vectorFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.d3.vectorFeature#geoOff"><a href="geo.d3.vectorFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.d3.vectorFeature#geoOn"><a href="geo.d3.vectorFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.d3.vectorFeature#geoTrigger"><a href="geo.d3.vectorFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.d3.vectorFeature#onIdle"><a href="geo.d3.vectorFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.d3.vectorFeature#parent"><a href="geo.d3.vectorFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.d3.vectorFeature#removeChild"><a href="geo.d3.vectorFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.domRenderer">
+            <span class="title">
+                <a href="geo.domRenderer.html">geo.domRenderer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.domRenderer#addPromise"><a href="geo.domRenderer.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.domRenderer#geoOff"><a href="geo.domRenderer.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.domRenderer#geoOn"><a href="geo.domRenderer.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.domRenderer#geoTrigger"><a href="geo.domRenderer.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.domRenderer#onIdle"><a href="geo.domRenderer.html#onIdle">onIdle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.feature">
+            <span class="title">
+                <a href="geo.feature.html">geo.feature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="geo.feature.spec"><a href="geo.feature.html#.spec">spec</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.feature#addChild"><a href="geo.feature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.feature#addPromise"><a href="geo.feature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.feature#children"><a href="geo.feature.html#children">children</a></li>
+            
+                <li data-name="geo.feature#draw"><a href="geo.feature.html#draw">draw</a></li>
+            
+                <li data-name="geo.feature#geoOff"><a href="geo.feature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.feature#geoOn"><a href="geo.feature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.feature#geoTrigger"><a href="geo.feature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.feature#onIdle"><a href="geo.feature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.feature#parent"><a href="geo.feature.html#parent">parent</a></li>
+            
+                <li data-name="geo.feature#removeChild"><a href="geo.feature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.featureLayer">
+            <span class="title">
+                <a href="geo.featureLayer.html">geo.featureLayer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.featureLayer#addChild"><a href="geo.featureLayer.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.featureLayer#addPromise"><a href="geo.featureLayer.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.featureLayer#children"><a href="geo.featureLayer.html#children">children</a></li>
+            
+                <li data-name="geo.featureLayer#draw"><a href="geo.featureLayer.html#draw">draw</a></li>
+            
+                <li data-name="geo.featureLayer#geoOff"><a href="geo.featureLayer.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.featureLayer#geoOn"><a href="geo.featureLayer.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.featureLayer#geoTrigger"><a href="geo.featureLayer.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.featureLayer#onIdle"><a href="geo.featureLayer.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.featureLayer#parent"><a href="geo.featureLayer.html#parent">parent</a></li>
+            
+                <li data-name="geo.featureLayer#removeChild"><a href="geo.featureLayer.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.fetchQueue">
+            <span class="title">
+                <a href="geo.fetchQueue.html">geo.fetchQueue</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.fileReader">
+            <span class="title">
+                <a href="geo.fileReader.html">geo.fileReader</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.fileReader#addPromise"><a href="geo.fileReader.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.fileReader#geoOff"><a href="geo.fileReader.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.fileReader#geoOn"><a href="geo.fileReader.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.fileReader#geoTrigger"><a href="geo.fileReader.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.fileReader#onIdle"><a href="geo.fileReader.html#onIdle">onIdle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gl.choroplethFeature">
+            <span class="title">
+                <a href="geo.gl.choroplethFeature.html">geo.gl.choroplethFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.gl.choroplethFeature#addChild"><a href="geo.gl.choroplethFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.gl.choroplethFeature#addPromise"><a href="geo.gl.choroplethFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.gl.choroplethFeature#children"><a href="geo.gl.choroplethFeature.html#children">children</a></li>
+            
+                <li data-name="geo.gl.choroplethFeature#draw"><a href="geo.gl.choroplethFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.gl.choroplethFeature#geoOff"><a href="geo.gl.choroplethFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.gl.choroplethFeature#geoOn"><a href="geo.gl.choroplethFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.gl.choroplethFeature#geoTrigger"><a href="geo.gl.choroplethFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.gl.choroplethFeature#onIdle"><a href="geo.gl.choroplethFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.gl.choroplethFeature#parent"><a href="geo.gl.choroplethFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.gl.choroplethFeature#removeChild"><a href="geo.gl.choroplethFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gl.contourFeature">
+            <span class="title">
+                <a href="geo.gl.contourFeature.html">geo.gl.contourFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.gl.contourFeature#addChild"><a href="geo.gl.contourFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.gl.contourFeature#addPromise"><a href="geo.gl.contourFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.gl.contourFeature#children"><a href="geo.gl.contourFeature.html#children">children</a></li>
+            
+                <li data-name="geo.gl.contourFeature#draw"><a href="geo.gl.contourFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.gl.contourFeature#geoOff"><a href="geo.gl.contourFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.gl.contourFeature#geoOn"><a href="geo.gl.contourFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.gl.contourFeature#geoTrigger"><a href="geo.gl.contourFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.gl.contourFeature#onIdle"><a href="geo.gl.contourFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.gl.contourFeature#parent"><a href="geo.gl.contourFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.gl.contourFeature#removeChild"><a href="geo.gl.contourFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gl.lineFeature">
+            <span class="title">
+                <a href="geo.gl.lineFeature.html">geo.gl.lineFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.gl.lineFeature#addChild"><a href="geo.gl.lineFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.gl.lineFeature#addPromise"><a href="geo.gl.lineFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.gl.lineFeature#children"><a href="geo.gl.lineFeature.html#children">children</a></li>
+            
+                <li data-name="geo.gl.lineFeature#draw"><a href="geo.gl.lineFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.gl.lineFeature#geoOff"><a href="geo.gl.lineFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.gl.lineFeature#geoOn"><a href="geo.gl.lineFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.gl.lineFeature#geoTrigger"><a href="geo.gl.lineFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.gl.lineFeature#onIdle"><a href="geo.gl.lineFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.gl.lineFeature#parent"><a href="geo.gl.lineFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.gl.lineFeature#removeChild"><a href="geo.gl.lineFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gl.object">
+            <span class="title">
+                <a href="geo.gl.object.html">geo.gl.object</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.gl.object#addChild"><a href="geo.gl.object.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.gl.object#addPromise"><a href="geo.gl.object.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.gl.object#children"><a href="geo.gl.object.html#children">children</a></li>
+            
+                <li data-name="geo.gl.object#draw"><a href="geo.gl.object.html#draw">draw</a></li>
+            
+                <li data-name="geo.gl.object#geoOff"><a href="geo.gl.object.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.gl.object#geoOn"><a href="geo.gl.object.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.gl.object#geoTrigger"><a href="geo.gl.object.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.gl.object#onIdle"><a href="geo.gl.object.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.gl.object#parent"><a href="geo.gl.object.html#parent">parent</a></li>
+            
+                <li data-name="geo.gl.object#removeChild"><a href="geo.gl.object.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gl.pointFeature">
+            <span class="title">
+                <a href="geo.gl.pointFeature.html">geo.gl.pointFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.gl.pointFeature#addChild"><a href="geo.gl.pointFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.gl.pointFeature#addPromise"><a href="geo.gl.pointFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.gl.pointFeature#children"><a href="geo.gl.pointFeature.html#children">children</a></li>
+            
+                <li data-name="geo.gl.pointFeature#draw"><a href="geo.gl.pointFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.gl.pointFeature#geoOff"><a href="geo.gl.pointFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.gl.pointFeature#geoOn"><a href="geo.gl.pointFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.gl.pointFeature#geoTrigger"><a href="geo.gl.pointFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.gl.pointFeature#onIdle"><a href="geo.gl.pointFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.gl.pointFeature#parent"><a href="geo.gl.pointFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.gl.pointFeature#removeChild"><a href="geo.gl.pointFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gl.polygonFeature">
+            <span class="title">
+                <a href="geo.gl.polygonFeature.html">geo.gl.polygonFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.gl.polygonFeature.createGLPolygons"><a href="geo.gl.polygonFeature.html#.createGLPolygons">createGLPolygons</a></li>
+            
+                <li data-name="geo.gl.polygonFeature.this._build"><a href="geo.gl.polygonFeature.html#.this._build">this._build</a></li>
+            
+                <li data-name="geo.gl.polygonFeature.this._exit"><a href="geo.gl.polygonFeature.html#.this._exit">this._exit</a></li>
+            
+                <li data-name="geo.gl.polygonFeature.this._init"><a href="geo.gl.polygonFeature.html#.this._init">this._init</a></li>
+            
+                <li data-name="geo.gl.polygonFeature.this._update"><a href="geo.gl.polygonFeature.html#.this._update">this._update</a></li>
+            
+                <li data-name="geo.gl.polygonFeature#addChild"><a href="geo.gl.polygonFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.gl.polygonFeature#addPromise"><a href="geo.gl.polygonFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.gl.polygonFeature#children"><a href="geo.gl.polygonFeature.html#children">children</a></li>
+            
+                <li data-name="geo.gl.polygonFeature#draw"><a href="geo.gl.polygonFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.gl.polygonFeature#geoOff"><a href="geo.gl.polygonFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.gl.polygonFeature#geoOn"><a href="geo.gl.polygonFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.gl.polygonFeature#geoTrigger"><a href="geo.gl.polygonFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.gl.polygonFeature#onIdle"><a href="geo.gl.polygonFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.gl.polygonFeature#parent"><a href="geo.gl.polygonFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.gl.polygonFeature#removeChild"><a href="geo.gl.polygonFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gl.quadFeature">
+            <span class="title">
+                <a href="geo.gl.quadFeature.html">geo.gl.quadFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.gl.quadFeature#addChild"><a href="geo.gl.quadFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.gl.quadFeature#addPromise"><a href="geo.gl.quadFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.gl.quadFeature#children"><a href="geo.gl.quadFeature.html#children">children</a></li>
+            
+                <li data-name="geo.gl.quadFeature#draw"><a href="geo.gl.quadFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.gl.quadFeature#geoOff"><a href="geo.gl.quadFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.gl.quadFeature#geoOn"><a href="geo.gl.quadFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.gl.quadFeature#geoTrigger"><a href="geo.gl.quadFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.gl.quadFeature#onIdle"><a href="geo.gl.quadFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.gl.quadFeature#parent"><a href="geo.gl.quadFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.gl.quadFeature#removeChild"><a href="geo.gl.quadFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gl.vglRenderer">
+            <span class="title">
+                <a href="geo.gl.vglRenderer.html">geo.gl.vglRenderer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.gl.vglRenderer#addPromise"><a href="geo.gl.vglRenderer.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.gl.vglRenderer#geoOff"><a href="geo.gl.vglRenderer.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.gl.vglRenderer#geoOn"><a href="geo.gl.vglRenderer.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.gl.vglRenderer#geoTrigger"><a href="geo.gl.vglRenderer.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.gl.vglRenderer#onIdle"><a href="geo.gl.vglRenderer.html#onIdle">onIdle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.graphFeature">
+            <span class="title">
+                <a href="geo.graphFeature.html">geo.graphFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.graphFeature#addChild"><a href="geo.graphFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.graphFeature#addPromise"><a href="geo.graphFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.graphFeature#children"><a href="geo.graphFeature.html#children">children</a></li>
+            
+                <li data-name="geo.graphFeature#draw"><a href="geo.graphFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.graphFeature#geoOff"><a href="geo.graphFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.graphFeature#geoOn"><a href="geo.graphFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.graphFeature#geoTrigger"><a href="geo.graphFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.graphFeature#onIdle"><a href="geo.graphFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.graphFeature#parent"><a href="geo.graphFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.graphFeature#removeChild"><a href="geo.graphFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gui.legendWidget">
+            <span class="title">
+                <a href="geo.gui.legendWidget.html">geo.gui.legendWidget</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gui.sliderWidget">
+            <span class="title">
+                <a href="geo.gui.sliderWidget.html">geo.gui.sliderWidget</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gui.svgWidget">
+            <span class="title">
+                <a href="geo.gui.svgWidget.html">geo.gui.svgWidget</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gui.uiLayer">
+            <span class="title">
+                <a href="geo.gui.uiLayer.html">geo.gui.uiLayer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.gui.uiLayer#addChild"><a href="geo.gui.uiLayer.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.gui.uiLayer#addPromise"><a href="geo.gui.uiLayer.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.gui.uiLayer#children"><a href="geo.gui.uiLayer.html#children">children</a></li>
+            
+                <li data-name="geo.gui.uiLayer#draw"><a href="geo.gui.uiLayer.html#draw">draw</a></li>
+            
+                <li data-name="geo.gui.uiLayer#geoOff"><a href="geo.gui.uiLayer.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.gui.uiLayer#geoOn"><a href="geo.gui.uiLayer.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.gui.uiLayer#geoTrigger"><a href="geo.gui.uiLayer.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.gui.uiLayer#onIdle"><a href="geo.gui.uiLayer.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.gui.uiLayer#parent"><a href="geo.gui.uiLayer.html#parent">parent</a></li>
+            
+                <li data-name="geo.gui.uiLayer#removeChild"><a href="geo.gui.uiLayer.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.gui.widget">
+            <span class="title">
+                <a href="geo.gui.widget.html">geo.gui.widget</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.gui.widget#addChild"><a href="geo.gui.widget.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.gui.widget#addPromise"><a href="geo.gui.widget.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.gui.widget#children"><a href="geo.gui.widget.html#children">children</a></li>
+            
+                <li data-name="geo.gui.widget#draw"><a href="geo.gui.widget.html#draw">draw</a></li>
+            
+                <li data-name="geo.gui.widget#geoOff"><a href="geo.gui.widget.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.gui.widget#geoOn"><a href="geo.gui.widget.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.gui.widget#geoTrigger"><a href="geo.gui.widget.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.gui.widget#onIdle"><a href="geo.gui.widget.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.gui.widget#parent"><a href="geo.gui.widget.html#parent">parent</a></li>
+            
+                <li data-name="geo.gui.widget#removeChild"><a href="geo.gui.widget.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.heatmapFeature">
+            <span class="title">
+                <a href="geo.heatmapFeature.html">geo.heatmapFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.heatmapFeature#addChild"><a href="geo.heatmapFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.heatmapFeature#addPromise"><a href="geo.heatmapFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.heatmapFeature#children"><a href="geo.heatmapFeature.html#children">children</a></li>
+            
+                <li data-name="geo.heatmapFeature#draw"><a href="geo.heatmapFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.heatmapFeature#geoOff"><a href="geo.heatmapFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.heatmapFeature#geoOn"><a href="geo.heatmapFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.heatmapFeature#geoTrigger"><a href="geo.heatmapFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.heatmapFeature#onIdle"><a href="geo.heatmapFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.heatmapFeature#parent"><a href="geo.heatmapFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.heatmapFeature#removeChild"><a href="geo.heatmapFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.imageTile">
+            <span class="title">
+                <a href="geo.imageTile.html">geo.imageTile</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.jsonReader">
+            <span class="title">
+                <a href="geo.jsonReader.html">geo.jsonReader</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.jsonReader#addPromise"><a href="geo.jsonReader.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.jsonReader#geoOff"><a href="geo.jsonReader.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.jsonReader#geoOn"><a href="geo.jsonReader.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.jsonReader#geoTrigger"><a href="geo.jsonReader.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.jsonReader#onIdle"><a href="geo.jsonReader.html#onIdle">onIdle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.layer">
+            <span class="title">
+                <a href="geo.layer.html">geo.layer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="geo.layer.spec"><a href="geo.layer.html#.spec">spec</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.layer#addChild"><a href="geo.layer.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.layer#addPromise"><a href="geo.layer.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.layer#children"><a href="geo.layer.html#children">children</a></li>
+            
+                <li data-name="geo.layer#draw"><a href="geo.layer.html#draw">draw</a></li>
+            
+                <li data-name="geo.layer#geoOff"><a href="geo.layer.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.layer#geoOn"><a href="geo.layer.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.layer#geoTrigger"><a href="geo.layer.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.layer#onIdle"><a href="geo.layer.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.layer#parent"><a href="geo.layer.html#parent">parent</a></li>
+            
+                <li data-name="geo.layer#removeChild"><a href="geo.layer.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.lineFeature">
+            <span class="title">
+                <a href="geo.lineFeature.html">geo.lineFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.lineFeature#addChild"><a href="geo.lineFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.lineFeature#addPromise"><a href="geo.lineFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.lineFeature#children"><a href="geo.lineFeature.html#children">children</a></li>
+            
+                <li data-name="geo.lineFeature#draw"><a href="geo.lineFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.lineFeature#geoOff"><a href="geo.lineFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.lineFeature#geoOn"><a href="geo.lineFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.lineFeature#geoTrigger"><a href="geo.lineFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.lineFeature#onIdle"><a href="geo.lineFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.lineFeature#parent"><a href="geo.lineFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.lineFeature#removeChild"><a href="geo.lineFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.map">
+            <span class="title">
+                <a href="geo.map.html">geo.map</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="geo.map.spec"><a href="geo.map.html#.spec">spec</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.map.create"><a href="geo.map.html#.create">create</a></li>
+            
+                <li data-name="geo.map#addChild"><a href="geo.map.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.map#addPromise"><a href="geo.map.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.map#allowRotation"><a href="geo.map.html#allowRotation">allowRotation</a></li>
+            
+                <li data-name="geo.map#bounds"><a href="geo.map.html#bounds">bounds</a></li>
+            
+                <li data-name="geo.map#boundsFromZoomAndCenter"><a href="geo.map.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li>
+            
+                <li data-name="geo.map#camera"><a href="geo.map.html#camera">camera</a></li>
+            
+                <li data-name="geo.map#center"><a href="geo.map.html#center">center</a></li>
+            
+                <li data-name="geo.map#children"><a href="geo.map.html#children">children</a></li>
+            
+                <li data-name="geo.map#clampBoundsX"><a href="geo.map.html#clampBoundsX">clampBoundsX</a></li>
+            
+                <li data-name="geo.map#clampBoundsY"><a href="geo.map.html#clampBoundsY">clampBoundsY</a></li>
+            
+                <li data-name="geo.map#clampZoom"><a href="geo.map.html#clampZoom">clampZoom</a></li>
+            
+                <li data-name="geo.map#createLayer"><a href="geo.map.html#createLayer">createLayer</a></li>
+            
+                <li data-name="geo.map#deleteLayer"><a href="geo.map.html#deleteLayer">deleteLayer</a></li>
+            
+                <li data-name="geo.map#discreteZoom"><a href="geo.map.html#discreteZoom">discreteZoom</a></li>
+            
+                <li data-name="geo.map#displayToGcs"><a href="geo.map.html#displayToGcs">displayToGcs</a></li>
+            
+                <li data-name="geo.map#displayToWorld"><a href="geo.map.html#displayToWorld">displayToWorld</a></li>
+            
+                <li data-name="geo.map#draw"><a href="geo.map.html#draw">draw</a></li>
+            
+                <li data-name="geo.map#exit"><a href="geo.map.html#exit">exit</a></li>
+            
+                <li data-name="geo.map#fileReader"><a href="geo.map.html#fileReader">fileReader</a></li>
+            
+                <li data-name="geo.map#gcs"><a href="geo.map.html#gcs">gcs</a></li>
+            
+                <li data-name="geo.map#gcsToDisplay"><a href="geo.map.html#gcsToDisplay">gcsToDisplay</a></li>
+            
+                <li data-name="geo.map#gcsToWorld"><a href="geo.map.html#gcsToWorld">gcsToWorld</a></li>
+            
+                <li data-name="geo.map#geoOff"><a href="geo.map.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.map#geoOn"><a href="geo.map.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.map#geoTrigger"><a href="geo.map.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.map#ingcs"><a href="geo.map.html#ingcs">ingcs</a></li>
+            
+                <li data-name="geo.map#interactor"><a href="geo.map.html#interactor">interactor</a></li>
+            
+                <li data-name="geo.map#layers"><a href="geo.map.html#layers">layers</a></li>
+            
+                <li data-name="geo.map#node"><a href="geo.map.html#node">node</a></li>
+            
+                <li data-name="geo.map#onIdle"><a href="geo.map.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.map#origin"><a href="geo.map.html#origin">origin</a></li>
+            
+                <li data-name="geo.map#pan"><a href="geo.map.html#pan">pan</a></li>
+            
+                <li data-name="geo.map#parent"><a href="geo.map.html#parent">parent</a></li>
+            
+                <li data-name="geo.map#removeChild"><a href="geo.map.html#removeChild">removeChild</a></li>
+            
+                <li data-name="geo.map#resize"><a href="geo.map.html#resize">resize</a></li>
+            
+                <li data-name="geo.map#rotatedSize"><a href="geo.map.html#rotatedSize">rotatedSize</a></li>
+            
+                <li data-name="geo.map#rotation"><a href="geo.map.html#rotation">rotation</a></li>
+            
+                <li data-name="geo.map#scale"><a href="geo.map.html#scale">scale</a></li>
+            
+                <li data-name="geo.map#scheduleAnimationFrame"><a href="geo.map.html#scheduleAnimationFrame">scheduleAnimationFrame</a></li>
+            
+                <li data-name="geo.map#screenshot"><a href="geo.map.html#screenshot">screenshot</a></li>
+            
+                <li data-name="geo.map#size"><a href="geo.map.html#size">size</a></li>
+            
+                <li data-name="geo.map#transition"><a href="geo.map.html#transition">transition</a></li>
+            
+                <li data-name="geo.map#transitionCancel"><a href="geo.map.html#transitionCancel">transitionCancel</a></li>
+            
+                <li data-name="geo.map#unitsPerPixel"><a href="geo.map.html#unitsPerPixel">unitsPerPixel</a></li>
+            
+                <li data-name="geo.map#updateAttribution"><a href="geo.map.html#updateAttribution">updateAttribution</a></li>
+            
+                <li data-name="geo.map#worldToDisplay"><a href="geo.map.html#worldToDisplay">worldToDisplay</a></li>
+            
+                <li data-name="geo.map#worldToGcs"><a href="geo.map.html#worldToGcs">worldToGcs</a></li>
+            
+                <li data-name="geo.map#zoom"><a href="geo.map.html#zoom">zoom</a></li>
+            
+                <li data-name="geo.map#zoomAndCenterFromBounds"><a href="geo.map.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li>
+            
+                <li data-name="geo.map#zoomRange"><a href="geo.map.html#zoomRange">zoomRange</a></li>
+            
+                <li data-name="geo.map~drawLayerImageToContext"><a href="geo.map.html#~drawLayerImageToContext">drawLayerImageToContext</a></li>
+            
+                <li data-name="geo.map~processAnimationFrame"><a href="geo.map.html#~processAnimationFrame">processAnimationFrame</a></li>
+            
+                <li data-name="geo.map~rotate_bounds"><a href="geo.map.html#~rotate_bounds">rotate_bounds</a></li>
+            
+                <li data-name="geo.map~rotate_bounds_center"><a href="geo.map.html#~rotate_bounds_center">rotate_bounds_center</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.mapInteractor">
+            <span class="title">
+                <a href="geo.mapInteractor.html">geo.mapInteractor</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.mapInteractor#addPromise"><a href="geo.mapInteractor.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.mapInteractor#geoOff"><a href="geo.mapInteractor.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.mapInteractor#geoOn"><a href="geo.mapInteractor.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.mapInteractor#geoTrigger"><a href="geo.mapInteractor.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.mapInteractor#onIdle"><a href="geo.mapInteractor.html#onIdle">onIdle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.object">
+            <span class="title">
+                <a href="geo.object.html">geo.object</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.object#addPromise"><a href="geo.object.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.object#geoOff"><a href="geo.object.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.object#geoOn"><a href="geo.object.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.object#geoTrigger"><a href="geo.object.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.object#onIdle"><a href="geo.object.html#onIdle">onIdle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.osmLayer">
+            <span class="title">
+                <a href="geo.osmLayer.html">geo.osmLayer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.osmLayer#addChild"><a href="geo.osmLayer.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.osmLayer#addPromise"><a href="geo.osmLayer.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.osmLayer#children"><a href="geo.osmLayer.html#children">children</a></li>
+            
+                <li data-name="geo.osmLayer#draw"><a href="geo.osmLayer.html#draw">draw</a></li>
+            
+                <li data-name="geo.osmLayer#geoOff"><a href="geo.osmLayer.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.osmLayer#geoOn"><a href="geo.osmLayer.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.osmLayer#geoTrigger"><a href="geo.osmLayer.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.osmLayer#onIdle"><a href="geo.osmLayer.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.osmLayer#parent"><a href="geo.osmLayer.html#parent">parent</a></li>
+            
+                <li data-name="geo.osmLayer#removeChild"><a href="geo.osmLayer.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.pathFeature">
+            <span class="title">
+                <a href="geo.pathFeature.html">geo.pathFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.pathFeature#addChild"><a href="geo.pathFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.pathFeature#addPromise"><a href="geo.pathFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.pathFeature#children"><a href="geo.pathFeature.html#children">children</a></li>
+            
+                <li data-name="geo.pathFeature#draw"><a href="geo.pathFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.pathFeature#geoOff"><a href="geo.pathFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.pathFeature#geoOn"><a href="geo.pathFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.pathFeature#geoTrigger"><a href="geo.pathFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.pathFeature#onIdle"><a href="geo.pathFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.pathFeature#parent"><a href="geo.pathFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.pathFeature#removeChild"><a href="geo.pathFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.pixelmapFeature">
+            <span class="title">
+                <a href="geo.pixelmapFeature.html">geo.pixelmapFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.pixelmapFeature.this._exit"><a href="geo.pixelmapFeature.html#.this._exit">this._exit</a></li>
+            
+                <li data-name="geo.pixelmapFeature#addChild"><a href="geo.pixelmapFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.pixelmapFeature#addPromise"><a href="geo.pixelmapFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.pixelmapFeature#children"><a href="geo.pixelmapFeature.html#children">children</a></li>
+            
+                <li data-name="geo.pixelmapFeature#draw"><a href="geo.pixelmapFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.pixelmapFeature#geoOff"><a href="geo.pixelmapFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.pixelmapFeature#geoOn"><a href="geo.pixelmapFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.pixelmapFeature#geoTrigger"><a href="geo.pixelmapFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.pixelmapFeature#onIdle"><a href="geo.pixelmapFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.pixelmapFeature#parent"><a href="geo.pixelmapFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.pixelmapFeature#removeChild"><a href="geo.pixelmapFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.pointFeature">
+            <span class="title">
+                <a href="geo.pointFeature.html">geo.pointFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="geo.pointFeature.spec"><a href="geo.pointFeature.html#.spec">spec</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.pointFeature#addChild"><a href="geo.pointFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.pointFeature#addPromise"><a href="geo.pointFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.pointFeature#children"><a href="geo.pointFeature.html#children">children</a></li>
+            
+                <li data-name="geo.pointFeature#draw"><a href="geo.pointFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.pointFeature#geoOff"><a href="geo.pointFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.pointFeature#geoOn"><a href="geo.pointFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.pointFeature#geoTrigger"><a href="geo.pointFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.pointFeature#onIdle"><a href="geo.pointFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.pointFeature#parent"><a href="geo.pointFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.pointFeature#removeChild"><a href="geo.pointFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.polygonFeature">
+            <span class="title">
+                <a href="geo.polygonFeature.html">geo.polygonFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.polygonFeature.this._exit"><a href="geo.polygonFeature.html#.this._exit">this._exit</a></li>
+            
+                <li data-name="geo.polygonFeature.this._init"><a href="geo.polygonFeature.html#.this._init">this._init</a></li>
+            
+                <li data-name="geo.polygonFeature.this.data"><a href="geo.polygonFeature.html#.this.data">this.data</a></li>
+            
+                <li data-name="geo.polygonFeature.this.pointSearch"><a href="geo.polygonFeature.html#.this.pointSearch">this.pointSearch</a></li>
+            
+                <li data-name="geo.polygonFeature.this.polygon"><a href="geo.polygonFeature.html#.this.polygon">this.polygon</a></li>
+            
+                <li data-name="geo.polygonFeature.this.position"><a href="geo.polygonFeature.html#.this.position">this.position</a></li>
+            
+                <li data-name="geo.polygonFeature#addChild"><a href="geo.polygonFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.polygonFeature#addPromise"><a href="geo.polygonFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.polygonFeature#children"><a href="geo.polygonFeature.html#children">children</a></li>
+            
+                <li data-name="geo.polygonFeature#draw"><a href="geo.polygonFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.polygonFeature#geoOff"><a href="geo.polygonFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.polygonFeature#geoOn"><a href="geo.polygonFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.polygonFeature#geoTrigger"><a href="geo.polygonFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.polygonFeature#onIdle"><a href="geo.polygonFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.polygonFeature#parent"><a href="geo.polygonFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.polygonFeature#removeChild"><a href="geo.polygonFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.quadFeature">
+            <span class="title">
+                <a href="geo.quadFeature.html">geo.quadFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="geo.quadFeature.spec"><a href="geo.quadFeature.html#.spec">spec</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.quadFeature.this.pointSearch"><a href="geo.quadFeature.html#.this.pointSearch">this.pointSearch</a></li>
+            
+                <li data-name="geo.quadFeature.this.position"><a href="geo.quadFeature.html#.this.position">this.position</a></li>
+            
+                <li data-name="geo.quadFeature#addChild"><a href="geo.quadFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.quadFeature#addPromise"><a href="geo.quadFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.quadFeature#children"><a href="geo.quadFeature.html#children">children</a></li>
+            
+                <li data-name="geo.quadFeature#draw"><a href="geo.quadFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.quadFeature#geoOff"><a href="geo.quadFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.quadFeature#geoOn"><a href="geo.quadFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.quadFeature#geoTrigger"><a href="geo.quadFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.quadFeature#onIdle"><a href="geo.quadFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.quadFeature#parent"><a href="geo.quadFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.quadFeature#removeChild"><a href="geo.quadFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.renderer">
+            <span class="title">
+                <a href="geo.renderer.html">geo.renderer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.renderer#addPromise"><a href="geo.renderer.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.renderer#geoOff"><a href="geo.renderer.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.renderer#geoOn"><a href="geo.renderer.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.renderer#geoTrigger"><a href="geo.renderer.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.renderer#onIdle"><a href="geo.renderer.html#onIdle">onIdle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.sceneObject">
+            <span class="title">
+                <a href="geo.sceneObject.html">geo.sceneObject</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.sceneObject#addChild"><a href="geo.sceneObject.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.sceneObject#addPromise"><a href="geo.sceneObject.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.sceneObject#children"><a href="geo.sceneObject.html#children">children</a></li>
+            
+                <li data-name="geo.sceneObject#draw"><a href="geo.sceneObject.html#draw">draw</a></li>
+            
+                <li data-name="geo.sceneObject#geoOff"><a href="geo.sceneObject.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.sceneObject#geoOn"><a href="geo.sceneObject.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.sceneObject#geoTrigger"><a href="geo.sceneObject.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.sceneObject#onIdle"><a href="geo.sceneObject.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.sceneObject#parent"><a href="geo.sceneObject.html#parent">parent</a></li>
+            
+                <li data-name="geo.sceneObject#removeChild"><a href="geo.sceneObject.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.tile">
+            <span class="title">
+                <a href="geo.tile.html">geo.tile</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.tileCache">
+            <span class="title">
+                <a href="geo.tileCache.html">geo.tileCache</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.tileLayer">
+            <span class="title">
+                <a href="geo.tileLayer.html">geo.tileLayer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.tileLayer#addChild"><a href="geo.tileLayer.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.tileLayer#addPromise"><a href="geo.tileLayer.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.tileLayer#children"><a href="geo.tileLayer.html#children">children</a></li>
+            
+                <li data-name="geo.tileLayer#draw"><a href="geo.tileLayer.html#draw">draw</a></li>
+            
+                <li data-name="geo.tileLayer#geoOff"><a href="geo.tileLayer.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.tileLayer#geoOn"><a href="geo.tileLayer.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.tileLayer#geoTrigger"><a href="geo.tileLayer.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.tileLayer#onIdle"><a href="geo.tileLayer.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.tileLayer#parent"><a href="geo.tileLayer.html#parent">parent</a></li>
+            
+                <li data-name="geo.tileLayer#removeChild"><a href="geo.tileLayer.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.timestamp">
+            <span class="title">
+                <a href="geo.timestamp.html">geo.timestamp</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.transform">
+            <span class="title">
+                <a href="geo.transform.html">geo.transform</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.util.ClusterGroup">
+            <span class="title">
+                <a href="geo.util.ClusterGroup.html">geo.util.ClusterGroup</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.util.ClusterGroup#addPoint"><a href="geo.util.ClusterGroup.html#addPoint">addPoint</a></li>
+            
+                <li data-name="geo.util.ClusterGroup#clusters"><a href="geo.util.ClusterGroup.html#clusters">clusters</a></li>
+            
+                <li data-name="geo.util.ClusterGroup#points"><a href="geo.util.ClusterGroup.html#points">points</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.util.DistanceGrid">
+            <span class="title">
+                <a href="geo.util.DistanceGrid.html">geo.util.DistanceGrid</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="geo.vectorFeature">
+            <span class="title">
+                <a href="geo.vectorFeature.html">geo.vectorFeature</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="geo.vectorFeature#addChild"><a href="geo.vectorFeature.html#addChild">addChild</a></li>
+            
+                <li data-name="geo.vectorFeature#addPromise"><a href="geo.vectorFeature.html#addPromise">addPromise</a></li>
+            
+                <li data-name="geo.vectorFeature#children"><a href="geo.vectorFeature.html#children">children</a></li>
+            
+                <li data-name="geo.vectorFeature#draw"><a href="geo.vectorFeature.html#draw">draw</a></li>
+            
+                <li data-name="geo.vectorFeature#geoOff"><a href="geo.vectorFeature.html#geoOff">geoOff</a></li>
+            
+                <li data-name="geo.vectorFeature#geoOn"><a href="geo.vectorFeature.html#geoOn">geoOn</a></li>
+            
+                <li data-name="geo.vectorFeature#geoTrigger"><a href="geo.vectorFeature.html#geoTrigger">geoTrigger</a></li>
+            
+                <li data-name="geo.vectorFeature#onIdle"><a href="geo.vectorFeature.html#onIdle">onIdle</a></li>
+            
+                <li data-name="geo.vectorFeature#parent"><a href="geo.vectorFeature.html#parent">parent</a></li>
+            
+                <li data-name="geo.vectorFeature#removeChild"><a href="geo.vectorFeature.html#removeChild">removeChild</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+    </ul>
+</div>
+    <div class="main">
+        <h1 class="page-title" data-filename="event.js.html">Source: event.js</h1>
+        
 
 
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+            <pre id="source-code" class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
 /**
  * Common object containing all event types that are provided by the GeoJS
  * API.  Each property contained here is a valid target for event handling
@@ -36,7 +2859,8 @@
  * &lt;br>
  * The following properties are common to all event objects:
  *
- * @namespace geo.event
+ * @namespace
+ * @alias geo.event
  * @property {string} type The event type that was triggered
  * @property {object} geo A universal event object for controlling propagation
  *
@@ -111,6 +2935,8 @@ geo_event.rotate = 'geo_rotate';
  * Triggered when the map is panned either by user interaction or map
  * transition.
  *
+ * @event geo.event.pan
+ * @type {object}
  * @property {object} screenDelta The number of pixels to pan the map by
  * @property {object} center The new map center
  */
@@ -563,19 +3389,16 @@ module.exports = geo_event;
 
 
 
+
+
+        
+
+        <footer>
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 02 2017 09:30:07 GMT-0400 (EDT)
+        </footer>
+    </div>
 </div>
-
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="geo.module_util.html">geo.util</a></li></ul><h3>Classes</h3><ul><li><a href="geo.annotation.html">geo.annotation</a></li><li><a href="geo.annotationLayer.html">geo.annotationLayer</a></li><li><a href="geo.camera.html">geo.camera</a></li><li><a href="geo.canvas.heatmapFeature.html">geo.canvas.heatmapFeature</a></li><li><a href="geo.canvas.lineFeature.html">geo.canvas.lineFeature</a></li><li><a href="geo.canvas.object.html">geo.canvas.object</a></li><li><a href="geo.canvas.pixelmapFeature.html">geo.canvas.pixelmapFeature</a></li><li><a href="geo.canvas.quadFeature.html">geo.canvas.quadFeature</a></li><li><a href="geo.canvas.renderer.html">geo.canvas.renderer</a></li><li><a href="geo.choroplethFeature.html">geo.choroplethFeature</a></li><li><a href="geo.contourFeature.html">geo.contourFeature</a></li><li><a href="geo.d3.graphFeature.html">geo.d3.graphFeature</a></li><li><a href="geo.d3.lineFeature.html">geo.d3.lineFeature</a></li><li><a href="geo.d3.object.html">geo.d3.object</a></li><li><a href="geo.d3.pathFeature.html">geo.d3.pathFeature</a></li><li><a href="geo.d3.pointFeature.html">geo.d3.pointFeature</a></li><li><a href="geo.d3.quadFeature.html">geo.d3.quadFeature</a></li><li><a href="geo.d3.renderer.html">geo.d3.renderer</a></li><li><a href="geo.d3.vectorFeature.html">geo.d3.vectorFeature</a></li><li><a href="geo.domRenderer.html">geo.domRenderer</a></li><li><a href="geo.feature.html">geo.feature</a></li><li><a href="geo.featureLayer.html">geo.featureLayer</a></li><li><a href="geo.fetchQueue.html">geo.fetchQueue</a></li><li><a href="geo.fileReader.html">geo.fileReader</a></li><li><a href="geo.gl.choroplethFeature.html">geo.gl.choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">geo.gl.contourFeature</a></li><li><a href="geo.gl.lineFeature.html">geo.gl.lineFeature</a></li><li><a href="geo.gl.object.html">geo.gl.object</a></li><li><a href="geo.gl.pointFeature.html">geo.gl.pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">geo.gl.polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">geo.gl.quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">geo.gl.vglRenderer</a></li><li><a href="geo.graphFeature.html">geo.graphFeature</a></li><li><a href="geo.gui.legendWidget.html">geo.gui.legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">geo.gui.sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">geo.gui.svgWidget</a></li><li><a href="geo.gui.uiLayer.html">geo.gui.uiLayer</a></li><li><a href="geo.gui.widget.html">geo.gui.widget</a></li><li><a href="geo.heatmapFeature.html">geo.heatmapFeature</a></li><li><a href="geo.imageTile.html">geo.imageTile</a></li><li><a href="geo.jsonReader.html">geo.jsonReader</a></li><li><a href="geo.layer.html">geo.layer</a></li><li><a href="geo.lineFeature.html">geo.lineFeature</a></li><li><a href="geo.map.html">geo.map</a></li><li><a href="geo.mapInteractor.html">geo.mapInteractor</a></li><li><a href="geo.object.html">geo.object</a></li><li><a href="geo.osmLayer.html">geo.osmLayer</a></li><li><a href="geo.pathFeature.html">geo.pathFeature</a></li><li><a href="geo.pixelmapFeature.html">geo.pixelmapFeature</a></li><li><a href="geo.pointFeature.html">geo.pointFeature</a></li><li><a href="geo.polygonFeature.html">geo.polygonFeature</a></li><li><a href="geo.quadFeature.html">geo.quadFeature</a></li><li><a href="geo.renderer.html">geo.renderer</a></li><li><a href="geo.sceneObject.html">geo.sceneObject</a></li><li><a href="geo.tile.html">geo.tile</a></li><li><a href="geo.tileCache.html">geo.tileCache</a></li><li><a href="geo.tileLayer.html">geo.tileLayer</a></li><li><a href="geo.timestamp.html">geo.timestamp</a></li><li><a href="geo.transform.html">geo.transform</a></li><li><a href="geo.util.ClusterGroup.html">geo.util.ClusterGroup</a></li><li><a href="geo.vectorFeature.html">geo.vectorFeature</a></li></ul><h3>Namespaces</h3><ul><li><a href="-_anonymous_-geo.util.html"><anonymous>~geo.util</a></li><li><a href="geo.canvas.html">geo.canvas</a></li><li><a href="geo.d3.html">geo.d3</a></li><li><a href="geo.event.html">geo.event</a></li><li><a href="geo.event.annotation.html">geo.event.annotation</a></li><li><a href="geo.event.camera.html">geo.event.camera</a></li><li><a href="geo.event.feature.html">geo.event.feature</a></li><li><a href="geo.event.pixelmap.html">geo.event.pixelmap</a></li><li><a href="geo.event.screenshot.html">geo.event.screenshot</a></li><li><a href="geo.gl.html">geo.gl</a></li><li><a href="geo.gui.html">geo.gui</a></li></ul><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#__render">__render</a></li><li><a href="global.html#_addPolygonFeature">_addPolygonFeature</a></li><li><a href="global.html#_animatePan">_animatePan</a></li><li><a href="global.html#_appendChild">_appendChild</a></li><li><a href="global.html#_bindMouseHandlers">_bindMouseHandlers</a></li><li><a href="global.html#_build">_build</a></li><li><a href="global.html#_checkForStroke">_checkForStroke</a></li><li><a href="global.html#_clusterData">_clusterData</a></li><li><a href="global.html#_colorize">_colorize</a></li><li><a href="global.html#_computeGradient">_computeGradient</a></li><li><a href="global.html#_computePixelmap">_computePixelmap</a></li><li><a href="global.html#_connectEvents">_connectEvents</a></li><li><a href="global.html#_coordinates">_coordinates</a></li><li><a href="global.html#_createCanvas">_createCanvas</a></li><li><a href="global.html#_createCircle">_createCircle</a></li><li><a href="global.html#_createFeature">_createFeature</a></li><li><a href="global.html#_definitions">_definitions</a></li><li><a href="global.html#_deleteFeature">_deleteFeature</a></li><li><a href="global.html#_disconnectEvents">_disconnectEvents</a></li><li><a href="global.html#_drawFeatures">_drawFeatures</a></li><li><a href="global.html#_exit">_exit</a></li><li><a href="global.html#_feature">_feature</a></li><li><a href="global.html#_featureArray">_featureArray</a></li><li><a href="global.html#_featureToPolygons">_featureToPolygons</a></li><li><a href="global.html#_forward">_forward</a></li><li><a href="global.html#_generateQuads">_generateQuads</a></li><li><a href="global.html#_generateScale">_generateScale</a></li><li><a href="global.html#_geojsonCoordinates">_geojsonCoordinates</a></li><li><a href="global.html#_geojsonFeatureToAnnotation">_geojsonFeatureToAnnotation</a></li><li><a href="global.html#_geojsonGeometryType">_geojsonGeometryType</a></li><li><a href="global.html#_geojsonStyles">_geojsonStyles</a></li><li><a href="global.html#_getArrayBuffer">_getArrayBuffer</a></li><li><a href="global.html#_getLoopData">_getLoopData</a></li><li><a href="global.html#_getMouseButton">_getMouseButton</a></li><li><a href="global.html#_getMouseModifiers">_getMouseModifiers</a></li><li><a href="global.html#_getMousePosition">_getMousePosition</a></li><li><a href="global.html#_getString">_getString</a></li><li><a href="global.html#_handleBrush">_handleBrush</a></li><li><a href="global.html#_handleBrushend">_handleBrushend</a></li><li><a href="global.html#_handleDoubleClick">_handleDoubleClick</a></li><li><a href="global.html#_handleKeys">_handleKeys</a></li><li><a href="global.html#_handleMouseclick">_handleMouseclick</a></li><li><a href="global.html#_handleMouseClick">_handleMouseClick</a></li><li><a href="global.html#_handleMouseDown">_handleMouseDown</a></li><li><a href="global.html#_handleMousemove">_handleMousemove</a></li><li><a href="global.html#_handleMouseMove">_handleMouseMove</a></li><li><a href="global.html#_handleMouseMoveDocument">_handleMouseMoveDocument</a></li><li><a href="global.html#_handleMouseUp">_handleMouseUp</a></li><li><a href="global.html#_handleMouseUpDocument">_handleMouseUpDocument</a></li><li><a href="global.html#_handleMouseWheel">_handleMouseWheel</a></li><li><a href="global.html#_handleTouch">_handleTouch</a></li><li><a href="global.html#_handleZoom">_handleZoom</a></li><li><a href="global.html#_handleZoomrotate">_handleZoomrotate</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_inverse">_inverse</a></li><li><a href="global.html#_objectListAdd">_objectListAdd</a></li><li><a href="global.html#_objectListEnd">_objectListEnd</a></li><li><a href="global.html#_objectListGet">_objectListGet</a></li><li><a href="global.html#_objectListStart">_objectListStart</a></li><li><a href="global.html#_position">_position</a></li><li><a href="global.html#_positionToQuad">_positionToQuad</a></li><li><a href="global.html#_preparePixelmap">_preparePixelmap</a></li><li><a href="global.html#_processAction">_processAction</a></li><li><a href="global.html#_removeFeature">_removeFeature</a></li><li><a href="global.html#_render">_render</a></li><li><a href="global.html#_renderBinnedData">_renderBinnedData</a></li><li><a href="global.html#_renderColorQuads">_renderColorQuads</a></li><li><a href="global.html#_renderFrame">_renderFrame</a></li><li><a href="global.html#_renderImageQuads">_renderImageQuads</a></li><li><a href="global.html#_renderOnCanvas">_renderOnCanvas</a></li><li><a href="global.html#_renderPoints">_renderPoints</a></li><li><a href="global.html#_resize">_resize</a></li><li><a href="global.html#_setClickMaybe">_setClickMaybe</a></li><li><a href="global.html#_setTransform">_setTransform</a></li><li><a href="global.html#_style">_style</a></li><li><a href="global.html#_unbindMouseHandlers">_unbindMouseHandlers</a></li><li><a href="global.html#_update">_update</a></li><li><a href="global.html#_updateFromEvent">_updateFromEvent</a></li><li><a href="global.html#_updatePointSearchInfo">_updatePointSearchInfo</a></li><li><a href="global.html#_updateRangeTree">_updateRangeTree</a></li><li><a href="global.html#_updateTextures">_updateTextures</a></li><li><a href="global.html#_wipePolygons">_wipePolygons</a></li><li><a href="global.html#actions">actions</a></li><li><a href="global.html#active">active</a></li><li><a href="global.html#actors">actors</a></li><li><a href="global.html#addAction">addAction</a></li><li><a href="global.html#addAnnotation">addAnnotation</a></li><li><a href="global.html#addChild">addChild</a></li><li><a href="global.html#addFeature">addFeature</a></li><li><a href="global.html#addPromise">addPromise</a></li><li><a href="global.html#allowRotation">allowRotation</a></li><li><a href="global.html#annotationById">annotationById</a></li><li><a href="global.html#annotations">annotations</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#attribution">attribution</a></li><li><a href="global.html#bin">bin</a></li><li><a href="global.html#binned">binned</a></li><li><a href="global.html#bounds">bounds</a></li><li><a href="global.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li><li><a href="global.html#boxSearch">boxSearch</a></li><li><a href="global.html#buildTime">buildTime</a></li><li><a href="global.html#camera">camera</a></li><li><a href="global.html#cancel">cancel</a></li><li><a href="global.html#canRead">canRead</a></li><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#center">center</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#clampBoundsX">clampBoundsX</a></li><li><a href="global.html#clampBoundsY">clampBoundsY</a></li><li><a href="global.html#clampZoom">clampZoom</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clustering">clustering</a></li><li><a href="global.html#color">color</a></li><li><a href="global.html#contextRenderer">contextRenderer</a></li><li><a href="global.html#contour">contour</a></li><li><a href="global.html#coordinates">coordinates</a></li><li><a href="global.html#createChoropleth">createChoropleth</a></li><li><a href="global.html#createContours">createContours</a></li><li><a href="global.html#createFeature">createFeature</a></li><li><a href="global.html#createLayer">createLayer</a></li><li><a href="global.html#createWidget">createWidget</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#dataTime">dataTime</a></li><li><a href="global.html#deleteFeature">deleteFeature</a></li><li><a href="global.html#deleteLayer">deleteLayer</a></li><li><a href="global.html#deleteWidget">deleteWidget</a></li><li><a href="global.html#delta">delta</a></li><li><a href="global.html#dependentFeatures">dependentFeatures</a></li><li><a href="global.html#destroy">destroy</a></li><li><a href="global.html#discreteZoom">discreteZoom</a></li><li><a href="global.html#displayDistance">displayDistance</a></li><li><a href="global.html#displayToGcs">displayToGcs</a></li><li><a href="global.html#displayToWorld">displayToWorld</a></li><li><a href="global.html#draw">draw</a></li><li><a href="global.html#editstyle">editstyle</a></li><li><a href="global.html#exit">exit</a></li><li><a href="global.html#featureGcsToDisplay">featureGcsToDisplay</a></li><li><a href="global.html#features">features</a></li><li><a href="global.html#featureVertices">featureVertices</a></li><li><a href="global.html#fileReader">fileReader</a></li><li><a href="global.html#forward">forward</a></li><li><a href="global.html#fromLocal">fromLocal</a></li><li><a href="global.html#gcs">gcs</a></li><li><a href="global.html#gcsPosition">gcsPosition</a></li><li><a href="global.html#gcsToDisplay">gcsToDisplay</a></li><li><a href="global.html#gcsToWorld">gcsToWorld</a></li><li><a href="global.html#geo_action">geo_action</a></li><li><a href="global.html#geojson">geojson</a></li><li><a href="global.html#geoOff">geoOff</a></li><li><a href="global.html#geoOn">geoOn</a></li><li><a href="global.html#geoTrigger">geoTrigger</a></li><li><a href="global.html#globals">globals</a></li><li><a href="global.html#hasAction">hasAction</a></li><li><a href="global.html#hasTouchSupport">hasTouchSupport</a></li><li><a href="global.html#height">height</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#ingcs">ingcs</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#intensity">intensity</a></li><li><a href="global.html#interactor">interactor</a></li><li><a href="global.html#inverse">inverse</a></li><li><a href="global.html#isInViewport">isInViewport</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#layer">layer</a></li><li><a href="global.html#layers">layers</a></li><li><a href="global.html#line">line</a></li><li><a href="global.html#lineAnnotation">lineAnnotation</a></li><li><a href="global.html#linkFeatures">linkFeatures</a></li><li><a href="global.html#links">links</a></li><li><a href="global.html#map">map</a></li><li><a href="global.html#maxIndex">maxIndex</a></li><li><a href="global.html#maxIntensity">maxIntensity</a></li><li><a href="global.html#minIntensity">minIntensity</a></li><li><a href="global.html#mockVGLRenderer">mockVGLRenderer</a></li><li><a href="global.html#mode">mode</a></li><li><a href="global.html#modified">modified</a></li><li><a href="global.html#mouse">mouse</a></li><li><a href="global.html#mouseClick">mouseClick</a></li><li><a href="global.html#mouseMove">mouseMove</a></li><li><a href="global.html#moveDown">moveDown</a></li><li><a href="global.html#moveToBottom">moveToBottom</a></li><li><a href="global.html#moveToTop">moveToTop</a></li><li><a href="global.html#moveUp">moveUp</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#node">node</a></li><li><a href="global.html#nodeFeature">nodeFeature</a></li><li><a href="global.html#nodes">nodes</a></li><li><a href="global.html#onIdle">onIdle</a></li><li><a href="global.html#opacity">opacity</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#origin">origin</a></li><li><a href="global.html#pan">pan</a></li><li><a href="global.html#parent">parent</a></li><li><a href="global.html#parentCanvas">parentCanvas</a></li><li><a href="global.html#pause">pause</a></li><li><a href="global.html#pointAnnotation">pointAnnotation</a></li><li><a href="global.html#pointSearch">pointSearch</a></li><li><a href="global.html#polygonAnnotation">polygonAnnotation</a></li><li><a href="global.html#position">position</a></li><li><a href="global.html#processAction">processAction</a></li><li><a href="global.html#read">read</a></li><li><a href="global.html#rectangleAnnotation">rectangleAnnotation</a></li><li><a href="global.html#removeAction">removeAction</a></li><li><a href="global.html#removeAllAnnotations">removeAllAnnotations</a></li><li><a href="global.html#removeAnnotation">removeAnnotation</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#removeFeature">removeFeature</a></li><li><a href="global.html#renderer">renderer</a></li><li><a href="global.html#rendererName">rendererName</a></li><li><a href="global.html#reposition">reposition</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#resize">resize</a></li><li><a href="global.html#restoreVGLRenderer">restoreVGLRenderer</a></li><li><a href="global.html#rotatedSize">rotatedSize</a></li><li><a href="global.html#rotation">rotation</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#scaleFactor">scaleFactor</a></li><li><a href="global.html#scheduleAnimationFrame">scheduleAnimationFrame</a></li><li><a href="global.html#screenshot">screenshot</a></li><li><a href="global.html#select">select</a></li><li><a href="global.html#selectionAPI">selectionAPI</a></li><li><a href="global.html#simulateEvent">simulateEvent</a></li><li><a href="global.html#size">size</a></li><li><a href="global.html#source">source</a></li><li><a href="global.html#springBack">springBack</a></li><li><a href="global.html#state">state</a></li><li><a href="global.html#sticky">sticky</a></li><li><a href="global.html#style">style</a></li><li><a href="global.html#target">target</a></li><li><a href="global.html#toLocal">toLocal</a></li><li><a href="global.html#transition">transition</a></li><li><a href="global.html#transitionCancel">transitionCancel</a></li><li><a href="global.html#type">type</a></li><li><a href="global.html#unitsPerPixel">unitsPerPixel</a></li><li><a href="global.html#updateAttribution">updateAttribution</a></li><li><a href="global.html#updateDelay">updateDelay</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#url">url</a></li><li><a href="global.html#validateAttribute">validateAttribute</a></li><li><a href="global.html#verticesPerFeature">verticesPerFeature</a></li><li><a href="global.html#visible">visible</a></li><li><a href="global.html#width">width</a></li><li><a href="global.html#worldToDisplay">worldToDisplay</a></li><li><a href="global.html#worldToGcs">worldToGcs</a></li><li><a href="global.html#zIndex">zIndex</a></li><li><a href="global.html#zoom">zoom</a></li><li><a href="global.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li><li><a href="global.html#zoomRange">zoomRange</a></li></ul>
-</nav>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Apr 27 2017 14:27:42 GMT-0400 (EDT)
-</footer>
-
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
+<script>prettyPrint();</script>
+<script src="scripts/jaguar.js"></script>
 </body>
 </html>
