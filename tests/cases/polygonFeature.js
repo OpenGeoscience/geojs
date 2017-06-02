@@ -26,7 +26,8 @@ describe('geo.polygonFeature', function () {
       inner: [
         [{x: 55, y: 10}, {x: 60, y: 15}, {x: 65, y: 10}, {x: 60, y: 5}]
       ],
-      fillColor: '#FF8000'
+      fillColor: '#FF8000',
+      strokeColor: '#008'
     }, {
       outer:
         [{x: 50, y: 8}, {x: 70, y: 8}, {x: 70, y: 12}, {x: 50, y: 12}],
@@ -36,15 +37,23 @@ describe('geo.polygonFeature', function () {
       uniformPolygon: true
     }
   ];
+  var stylesVisited = [];
   var testStyle = {
     fillOpacity: function (d, idx, poly, polyidx) {
+      stylesVisited.push({style: 'fillOpacity', params: [d, idx, poly, polyidx]});
       return poly.fillOpacity !== undefined ? poly.fillOpacity : 1;
     },
     fillColor: function (d, idx, poly, polyidx) {
+      stylesVisited.push({style: 'fillColor', params: [d, idx, poly, polyidx]});
       return poly.fillColor !== undefined ? poly.fillColor : 'blue';
     },
     stroke: true,
+    strokeColor: function (d, idx, poly, polyidx) {
+      stylesVisited.push({style: 'strokeColor', params: [d, idx, poly, polyidx]});
+      return poly.strokeColor !== undefined ? poly.strokeColor : 'red';
+    },
     uniformPolygon: function (d) {
+      stylesVisited.push({style: 'uniformPolygon', params: [d]});
       return d.uniformPolygon !== undefined ? d.uniformPolygon : false;
     }
   };
@@ -197,7 +206,7 @@ describe('geo.polygonFeature', function () {
   describe('geo.gl.polygonFeature', function () {
     var map, layer, polygons, glCounts, buildTime;
     it('basic usage', function () {
-
+      stylesVisited.splice(0, stylesVisited.length);
       mockVGLRenderer();
       map = create_map();
       layer = map.createLayer('feature');
@@ -211,6 +220,14 @@ describe('geo.polygonFeature', function () {
     });
     waitForIt('next render gl A', function () {
       return vgl.mockCounts().createProgram >= (glCounts.createProgram || 0) + 2;
+    });
+    it('check that styles were used', function () {
+      $.each(stylesVisited, function (idx, val) {
+        if (val.style === 'strokeColor') {
+          expect(typeof val.params[3]).toBe('number');
+          expect(val.params[3]).toBeLessThan(4);
+        }
+      });
     });
     it('update the style', function () {
       polygons.style('fillColor', function (d) {
