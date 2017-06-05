@@ -355,7 +355,7 @@ var map = function (arg) {
    *    center.
    * @param {geo.screenPosition} origin.map The display coordinates of the zoom
    *    center.
-   * @param {boolean} [ignoreDiscreteZoom] if `true`, ignore the discreteZoom
+   * @param {boolean} [ignoreDiscreteZoom] If `true`, ignore the discreteZoom
    *    option when determining the new view.
    * @returns {number|this}
    * @fires geo.event.zoom
@@ -984,7 +984,7 @@ var map = function (arg) {
    * @param {object} [arg] The zoom range.
    * @param {number} [arg.min] The minimum zoom level.
    * @param {number} [arg.max] The maximum zoom level.
-   * @param {boolean} [noRefresh] if `true`, don't update the map if the zoom
+   * @param {boolean} [noRefresh] If `true`, don't update the map if the zoom
    *    level has changed.
    * @returns {object|this} The current zoom range or the map object.  The
    *    `min` value is the minimum value that the map can go to based on the
@@ -1750,7 +1750,7 @@ var map = function (arg) {
    * callbacks will be called in a single time slice, providing better
    * synchronization.
    *
-   * @param {function} Xallback function to call during the animation frame.
+   * @param {function} Callback function to call during the animation frame.
    *    It is called with an animation epoch, exactly as
    *    `requestAnimationFrame`.
    * @param {boolean|'remove'} [action=false] Falsy to only add the callback if
