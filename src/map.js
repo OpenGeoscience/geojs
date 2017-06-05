@@ -1750,7 +1750,7 @@ var map = function (arg) {
    * callbacks will be called in a single time slice, providing better
    * synchronization.
    *
-   * @param {function} Callback function to call during the animation frame.
+   * @param {function} callback Function to call during the animation frame.
    *    It is called with an animation epoch, exactly as
    *    `requestAnimationFrame`.
    * @param {boolean|'remove'} [action=false] Falsy to only add the callback if
