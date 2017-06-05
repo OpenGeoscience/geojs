@@ -109,8 +109,6 @@ geo_event.pan = 'geo_pan';
  * @event geo.event.resize
  * @type {object}
  * @property {object} target The map that was resized.
- * @property {number} x The new horizontal offset in pixels.
- * @property {number} y The new vertical offset in pixels.
  * @property {number} width The new width in pixels.
  * @property {number} height The new height in pixels.
  */

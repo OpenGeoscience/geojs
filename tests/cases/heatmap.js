@@ -35,7 +35,7 @@ describe('canvas heatmap', function () {
       mockAnimationFrame();
       map = geo.map({node: '#map-canvas-heatmap-feature', center: [0, 0], zoom: 3});
       layer = map.createLayer('feature', {'renderer': 'canvas'});
-      map.resize(0, 0, width, height);
+      map.size({width: width, height: height});
     });
 
     it('Add feature to a layer', function () {
