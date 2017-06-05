@@ -139,10 +139,6 @@ describe('geo.core.map', function () {
       expect(m.unitsPerPixel()).toBeCloseTo(200000 * 16);
       expect(m.unitsPerPixel(4)).toBeCloseTo(200000);
     });
-    it('scale', function () {
-      var m = create_map();
-      expect(m.scale()).toEqual({x: 1, y: 1, z: 1});
-    });
     it('gcs and ingcs', function () {
       var m = create_map(), units = m.unitsPerPixel(), bounds;
       var error = console.error;
@@ -222,8 +218,9 @@ describe('geo.core.map', function () {
       m.zoom(3.5);
       expect(m.zoom()).toBe(3.5);
       expect(closeToEqual(m.center(), {x: 0, y: 0, z: 0})).toBe(true);
-      m.zoom(3, {geo: m.displayToGcs({x: 122, y: 186}),
-                 map: {x: 122, y: 186}});
+      m.zoom(3, {
+        geo: m.displayToGcs({x: 122, y: 186}),
+        map: {x: 122, y: 186}});
       expect(m.zoom()).toBe(3);
       expect(closeToEqual(m.center(), {x: 6.59, y: -3.293, z: 0})).toBe(true);
       m.discreteZoom(true);
@@ -255,8 +252,9 @@ describe('geo.core.map', function () {
       m.rotation(1);
       expect(m.rotation()).toBe(1);
       expect(closeToEqual(m.center(), {x: 0, y: 0, z: 0})).toBe(true);
-      m.rotation(0, {geo: m.displayToGcs({x: 122, y: 186}),
-                     map: {x: 122, y: 186}});
+      m.rotation(0, {
+        geo: m.displayToGcs({x: 122, y: 186}),
+        map: {x: 122, y: 186}});
       expect(m.rotation()).toBe(0);
       expect(m.center().x).toBeGreaterThan(0.4);
       expect(m.center().y).toBeLessThan(-11);

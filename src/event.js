@@ -41,6 +41,8 @@ var geo_event = {};
 /**
  * Triggered when a layer is added to the map.
  *
+ * @event geo.event.layerAdd
+ * @type {object}
  * @property {geo.map} target The current map
  * @property {geo.layer} layer The new layer
  */
@@ -51,6 +53,8 @@ geo_event.layerAdd = 'geo_layerAdd';
 /**
  * Triggered when a layer is removed from the map.
  *
+ * @event geo.event.layerRemove
+ * @type {object}
  * @property {geo.map} target The current map
  * @property {geo.layer} layer The old layer
  */
@@ -63,8 +67,11 @@ geo_event.layerRemove = 'geo_layerRemove';
  * triggered on the map itself.  Instead it is triggered individually on
  * layers, starting with the base layer.
  *
+ * @event geo.event.zoom
+ * @type {object}
  * @property {number} zoomLevel New zoom level
- * @property {object} screenPosition The screen position of mouse pointer
+ * @property {geo.screenPosition} screenPosition The screen position of mouse
+ *      pointer
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.zoom = 'geo_zoom';
@@ -74,6 +81,8 @@ geo_event.zoom = 'geo_zoom';
  * Triggered when the map is rotated around the current map center (pointing
  * downward so that positive angles are clockwise rotations).
  *
+ * @event geo.event.rotate
+ * @type {object}
  * @property {number} angle The angle of the rotation in radians
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -87,7 +96,8 @@ geo_event.rotate = 'geo_rotate';
  * @event geo.event.pan
  * @type {object}
  * @property {object} screenDelta The number of pixels to pan the map by
- * @property {object} center The new map center
+ * @property {number} screenDelta.x
+ * @property {number} screenDelta.y
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.pan = 'geo_pan';
@@ -96,8 +106,13 @@ geo_event.pan = 'geo_pan';
 /**
  * Triggered when the map's canvas is resized.
  *
- * @property {number} width The new width in pixels
- * @property {number} height The new height in pixels
+ * @event geo.event.resize
+ * @type {object}
+ * @property {object} target The map that was resized.
+ * @property {number} x The new horizontal offset in pixels.
+ * @property {number} y The new vertical offset in pixels.
+ * @property {number} width The new width in pixels.
+ * @property {number} height The new height in pixels.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.resize = 'geo_resize';
@@ -141,6 +156,8 @@ geo_event.worldChanged = 'geo_worldChanged';
 /**
  * Triggered on every call to {@link geo.map#draw} before the map is rendered.
  *
+ * @event geo.event.draw
+ * @type {object}
  * @property {geo.map} target The current map
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -150,6 +167,8 @@ geo_event.draw = 'geo_draw';
 /**
  * Triggered on every call to {@link geo.map#draw} after the map is rendered.
  *
+ * @event geo.event.drawEnd
+ * @type {object}
  * @property {geo.map} target The current map
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -309,6 +328,8 @@ geo_event.keyaction = 'geo_keyaction';
  * to cancel the navigation completely.  The transition options can
  * be modified in place.
  *
+ * @event geo.event.transitionstart
+ * @type {object}
  * @property {geo.geoPosition} center The target center
  * @property {number} zoom The target zoom level
  * @property {number} duration The duration of the transition in milliseconds
@@ -321,6 +342,8 @@ geo_event.transitionstart = 'geo_transitionstart';
 /**
  * Triggered after a map navigation animation ends.
  *
+ * @event geo.event.transitionend
+ * @type {object}
  * @property {geo.geoPosition} center The target center
  * @property {number} zoom The target zoom level
  * @property {number} duration The duration of the transition in milliseconds
@@ -333,6 +356,8 @@ geo_event.transitionend = 'geo_transitionend';
 /**
  * Triggered if a map navigation animation is cancelled.
  *
+ * @event geo.event.transitioncancel
+ * @type {object}
  * @property {geo.geoPosition} center The target center
  * @property {number} zoom The target zoom level
  * @property {number} duration The duration of the transition in milliseconds
