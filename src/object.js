@@ -27,8 +27,8 @@ var object = function () {
    *  Bind a handler that will be called once when all internal promises are
    *  resolved.
    *
-   *  @param {function} handler A function taking no arguments
-   *  @returns {geo.object[]|geo.object} this
+   *  @param {function} handler A function taking no arguments.
+   *  @returns {this}
    */
   //////////////////////////////////////////////////////////////////////////////
   this.onIdle = function (handler) {
@@ -45,7 +45,8 @@ var object = function () {
    *  Add a new promise object preventing idle event handlers from being called
    *  until it is resolved.
    *
-   *  @param {Promise} promise A promise object
+   *  @param {Promise} promise A promise object.
+   *  @returns {this}
    */
   //////////////////////////////////////////////////////////////////////////////
   this.addPromise = function (promise) {
@@ -66,14 +67,13 @@ var object = function () {
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   *  Bind an event handler to this object
+   *  Bind an event handler to this object.
    *
-   *  @param {String} event
-   *    An event from {geo.events}
-   *  @param {function} handler
-   *    A function that will be called when ``event`` is triggered.  The
-   *    function will be given an event object as a first parameter and
-   *    optionally a second argument provided by the triggerer.
+   *  @param {string} event An event from {@link geo.event} or a user-defined
+   *    value.
+   *  @param {function} handler A function that is called when `event` is
+   *    triggered.  The function is passed a {@link geo.event} object.
+   *  @returns {this}
    */
   //////////////////////////////////////////////////////////////////////////////
   this.geoOn = function (event, handler) {
@@ -92,10 +92,13 @@ var object = function () {
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   *  Trigger an event (or events) on this object and call all handlers
+   *  Trigger an event (or events) on this object and call all handlers.
    *
-   *  @param {String} event An event from {geo.event}
-   *  @param {Object} args An optional argument to pass to handlers
+   *  @param {string|string[]} event An event or list of events from
+   *        {@link geo.event} or defined by the user.
+   *  @param {object} [args] Additional information to add to the
+   *    {@link geo.event} object passed to the handlers.
+   *  @returns {this}
    */
   //////////////////////////////////////////////////////////////////////////////
   this.geoTrigger = function (event, args) {
@@ -123,12 +126,15 @@ var object = function () {
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   *  Remove handlers from an event (or an array of events).  If no event is
+   *  Remove handlers from one event or an array of events.  If no event is
    *  provided all handlers will be removed.
    *
-   *  @param {string?} event An event from {geo.events}
-   *  @param {object?} arg A function or array of functions to remove from the events
-   *                      or if falsey remove all handlers from the events
+   *  @param {string|string[]} [event] An event or a list of events from
+   *        {@link geo.event} or defined by the user, or `undefined` to remove
+   *        all events (in which case `arg` is ignored).
+   *  @param {(function|function[])?} [arg] A function or array of functions to
+   *        remove from the events or a falsey value to remove all handlers
+   *        from the events.
    */
   //////////////////////////////////////////////////////////////////////////////
   this.geoOff = function (event, arg) {
@@ -151,8 +157,6 @@ var object = function () {
       });
       return m_this;
     }
-    // What do we do if the handler is not already bound?
-    //   ignoring for now...
     if (m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event] = m_eventHandlers[event].filter(function (f) {
         return f !== arg;

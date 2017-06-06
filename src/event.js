@@ -3,15 +3,16 @@
  * Common object containing all event types that are provided by the GeoJS
  * API.  Each property contained here is a valid target for event handling
  * via {@link geo.object#geoOn}.  The event object provided to handlers is
- * different for each event type.  Each handler will generally be called
- * with a the <code>this</code> context being the class that caused the event.<br>
+ * different for each event type.  Each handler is generally be called
+ * with the <code>this</code> context being the class that caused the event.<br>
  * <br>
  * The following properties are common to all event objects:
  *
  * @namespace
  * @alias geo.event
- * @property {string} type The event type that was triggered
- * @property {object} geo A universal event object for controlling propagation
+ * @type {object}
+ * @property {string} event The event type that was triggered.
+ * @property {object} geo A universal event object for controlling propagation.
  *
  * @example
  * map.geoOn(geo.event.layerAdd, function (event) {
@@ -28,23 +29,14 @@ var geo_event = {};
  */
 //////////////////////////////////////////////////////////////////////////////
 
-// The following were not triggered nor used anywhere.  Removing until their
-// purpose is defined more clearly.
-//
-// geo.event.update = 'geo_update';
-// geo.event.opacityUpdate = 'geo_opacityUpdate';
-// geo.event.layerSelect = 'geo_layerSelect';
-// geo.event.layerUnselect = 'geo_layerUnselect';
-// geo.event.query = 'geo_query';
-
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when a layer is added to the map.
  *
  * @event geo.event.layerAdd
  * @type {object}
- * @property {geo.map} target The current map
- * @property {geo.layer} layer The new layer
+ * @property {geo.map} target The current map.
+ * @property {geo.layer} layer The new layer that was added.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.layerAdd = 'geo_layerAdd';
@@ -55,23 +47,21 @@ geo_event.layerAdd = 'geo_layerAdd';
  *
  * @event geo.event.layerRemove
  * @type {object}
- * @property {geo.map} target The current map
- * @property {geo.layer} layer The old layer
+ * @property {geo.map} target The current map.
+ * @property {geo.layer} layer The old layer that was removed.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.layerRemove = 'geo_layerRemove';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered when the map's zoom level is changed.  Note that zoom is never
- * triggered on the map itself.  Instead it is triggered individually on
- * layers, starting with the base layer.
+ * Triggered when the map's zoom level is changed.
  *
  * @event geo.event.zoom
  * @type {object}
- * @property {number} zoomLevel New zoom level
- * @property {geo.screenPosition} screenPosition The screen position of mouse
- *      pointer
+ * @property {number} zoomLevel New zoom level.
+ * @property {geo.screenPosition} screenPosition The screen position of the
+ *      mouse pointer.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.zoom = 'geo_zoom';
@@ -83,7 +73,10 @@ geo_event.zoom = 'geo_zoom';
  *
  * @event geo.event.rotate
  * @type {object}
- * @property {number} angle The angle of the rotation in radians
+ * @property {number} rotation The angle of the rotation in radians.  This is
+ *      the map's complete rotation, not a delta.
+ * @property {geo.screenPosition} screenPosition The screen position of the
+ *      mouse pointer.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.rotate = 'geo_rotate';
@@ -95,9 +88,9 @@ geo_event.rotate = 'geo_rotate';
  *
  * @event geo.event.pan
  * @type {object}
- * @property {object} screenDelta The number of pixels to pan the map by
- * @property {number} screenDelta.x
- * @property {number} screenDelta.y
+ * @property {object} screenDelta The number of pixels of the pan.
+ * @property {number} screenDelta.x Horizontal pan distance in pixels.
+ * @property {number} screenDelta.y Vertical pan distance in pixels.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.pan = 'geo_pan';
@@ -108,7 +101,7 @@ geo_event.pan = 'geo_pan';
  *
  * @event geo.event.resize
  * @type {object}
- * @property {object} target The map that was resized.
+ * @property {geo.map} target The map that was resized.
  * @property {number} x The new horizontal offset in pixels.
  * @property {number} y The new vertical offset in pixels.
  * @property {number} width The new width in pixels.
@@ -119,46 +112,11 @@ geo_event.resize = 'geo_resize';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered when the world coordinate system changes.  Data in GCS
- * coordinates can be transformed by the following formulas:
- *
- *   x <- (x - origin.x) * scale.x
- *   y <- (y - origin.y) * scale.y
- *   z <- (z - origin.z) * scale.z
- *
- * Data in world coordinates can be updated using the following formulas:
- *
- *   x <- (x * scaleChange.x - origin.x * (scale.x + scaleChange.x)
- *          - scale.x * originChange.x) * scale.x / scaleChange.x
- *   y <- (y * scaleChange.y - origin.y * (scale.y + scaleChange.y)
- *          - scale.y * originChange.y) * scale.y / scaleChange.y
- *   z <- (z * scaleChange.z - origin.z * (scale.z + scaleChange.z)
- *          - scale.z * originChange.z) * scale.z / scaleChange.z
- *
- * @property {geo.map} map The map whose coordinates changed
- * @property {object} origin The new origin in GCS coordinates
- * @property {number} origin.x
- * @property {number} origin.y
- * @property {number} origin.z
- * @property {object} scale The new scale factor
- * @property {number} scale.x
- * @property {number} scale.y
- * @property {number} scale.z
- * @property {object} originChange Relative change from the old origin defined
- *   as `origin - oldorigin`.
- * @property {object} scaleChange Relative change from the old scale defined
- *   as `scale / oldscale`.
- */
-//////////////////////////////////////////////////////////////////////////////
-geo_event.worldChanged = 'geo_worldChanged';
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Triggered on every call to {@link geo.map#draw} before the map is rendered.
  *
  * @event geo.event.draw
  * @type {object}
- * @property {geo.map} target The current map
+ * @property {geo.map} target The current map.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.draw = 'geo_draw';
@@ -169,25 +127,29 @@ geo_event.draw = 'geo_draw';
  *
  * @event geo.event.drawEnd
  * @type {object}
- * @property {geo.map} target The current map
+ * @property {geo.map} target The current map.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.drawEnd = 'geo_drawEnd';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered on every 'mousemove' over the map's DOM element.  The event
- * object extends {@link geo.mouseState}.
- * @mixes geo.mouseState
+ * Triggered on every `mousemove` over the map's DOM element unless a click
+ * might occur.  The event object extends {@link geo.mouseState}.
+ *
+ * @event geo.event.mousemove
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.mousemove = 'geo_mousemove';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered on every 'mousedown' over the map's DOM element.  The event
- * object extends {@link geo.mouseState}.
- * @mixes geo.mouseState
+ * Triggered on `mouseup` events that happen soon enough and close enough to a
+ * mousedown event.  The event object extends {@link geo.mouseState}.
+ *
+ * @event geo.event.mouseclick
+ * @property {geo.mouseButtons} buttonsDown The buttons that were down at the
+ *      start of the click action.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.mouseclick = 'geo_mouseclick';
@@ -196,7 +158,8 @@ geo_event.mouseclick = 'geo_mouseclick';
 /**
  * Triggered on every 'mousemove' during a brushing selection.
  * The event object extends {@link geo.brushSelection}.
- * @mixes geo.brushSelection
+ *
+ * @event geo.event.brush
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.brush = 'geo_brush';
@@ -205,7 +168,8 @@ geo_event.brush = 'geo_brush';
 /**
  * Triggered after a brush selection ends.
  * The event object extends {@link geo.brushSelection}.
- * @mixes geo.brushSelection
+ *
+ * @event geo.event.brushend
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.brushend = 'geo_brushend';
@@ -214,45 +178,52 @@ geo_event.brushend = 'geo_brushend';
 /**
  * Triggered when a brush selection starts.
  * The event object extends {@link geo.brushSelection}.
- * @mixes geo.brushSelection
+ *
+ * @event geo.event.brushstart
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.brushstart = 'geo_brushstart';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered after a selection ends.
+ * Triggered when brushing results in a selection.
  * The event object extends {@link geo.brushSelection}.
- * @mixes geo.brushSelection
+ *
+ * @event geo.event.select
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.select = 'geo_select';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered after a zoom selection ends.
+ * Triggered when brushing results in a zoom selection.
  * The event object extends {@link geo.brushSelection}.
- * @mixes geo.brushSelection
+ *
+ * @event geo.event.zoomselect
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.zoomselect = 'geo_zoomselect';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered after an unzoom selection ends.
+ * Triggered when brushing results in a zoom-out selection.
  * The event object extends {@link geo.brushSelection}.
- * @mixes geo.brushSelection
+ *
+ * @event geo.event.unzoomselect
  */
+
 //////////////////////////////////////////////////////////////////////////////
 geo_event.unzoomselect = 'geo_unzoomselect';
 
+//DWM::
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered when an action is initiated with mouse down
+ * Triggered when an action is initiated with mouse down.
  *
- * @property {object} state The action state
- * @property {geo.mouseState} mouse The mouse state
- * @property {object} event The triggering event
+ * @event geo.event.actiondown
+ * @property {geo.actionState} state The action state.
+ * @property {geo.mouseState} mouse The mouse state.
+ * @property {jQuery.Event} event The triggering jQuery event.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.actiondown = 'geo_actiondown';
@@ -261,9 +232,10 @@ geo_event.actiondown = 'geo_actiondown';
 /**
  * Triggered when an action is being processed during mouse movement.
  *
- * @property {object} state The action state
- * @property {geo.mouseState} mouse The mouse state
- * @property {object} event The triggering event
+ * @event geo.event.actionmove
+ * @property {geo.actionState} state The action state.
+ * @property {geo.mouseState} mouse The mouse state.
+ * @property {jQuery.Event} event The triggering event.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.actionmove = 'geo_actionmove';
@@ -272,9 +244,10 @@ geo_event.actionmove = 'geo_actionmove';
 /**
  * Triggered when an action is ended with a mouse up.
  *
- * @property {object} state The action state
- * @property {geo.mouseState} mouse The mouse state
- * @property {object} event The triggering event
+ * @event geo.event.actionup
+ * @property {geo.actionState} state The action state.
+ * @property {geo.mouseState} mouse The mouse state.
+ * @property {jQuery.Event} event The triggering event.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.actionup = 'geo_actionup';
@@ -283,11 +256,14 @@ geo_event.actionup = 'geo_actionup';
 /**
  * Triggered when an action results in a selection.
  *
- * @property {object} state The action state
- * @property {geo.mouseState} mouse The mouse state
- * @property {object} event The triggering event
- * @property {object} lowerLeft Lower left of selection in screen coordinates
- * @property {object} upperRight Upper right of selection in screen coordinates
+ * @event geo.event.actionselection
+ * @property {geo.actionState} state The action state.
+ * @property {geo.mouseState} mouse The mouse state.
+ * @property {jQuery.Event} event The triggering event.
+ * @property {geo.screenPosition} lowerLeft Lower left of selection in screen
+ *      coordinates.
+ * @property {geo.screenPosition} upperRight Upper right of selection in screen
+ *      coordinates.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.actionselection = 'geo_actionselection';
@@ -296,9 +272,10 @@ geo_event.actionselection = 'geo_actionselection';
 /**
  * Triggered when an action is triggered with a mouse wheel event.
  *
- * @property {object} state The action state
- * @property {geo.mouseState} mouse The mouse state
- * @property {object} event The triggering event
+ * @event geo.event.actionwheel
+ * @property {geo.actionState} state The action state.
+ * @property {geo.mouseState} mouse The mouse state.
+ * @property {jQuery.Event} event The triggering event.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.actionwheel = 'geo_actionwheel';
@@ -307,14 +284,21 @@ geo_event.actionwheel = 'geo_actionwheel';
 /**
  * Triggered when an action is triggered via the keyboard.
  *
+ * @event geo.event.keyaction
  * @property {object} move The movement that would happen if the action is
- *      passed through, possibly containing zoomDelta, zoom (absolute),
- *      rotationDelta (in radians), rotation (absolute in radians), panX (in
- *      display pixels), panY (in display pixels).  Set move.cancel to cancel
- *      the entire movement.
+ *      passed through.
+ * @property {number} [move.zoomDelta] A change in the zoom level.
+ * @property {number} [move.zoom] A new zoom level.
+ * @property {number} [move.rotationDelta] A change in the rotation in radians.
+ * @property {number} [move.rotation] A new absolute rotation in radians.
+ * @property {number} [move.panX] A horizontal shift in display pixels.
+ * @property {number} [move.panY] A vertical shift in display pixels.
+ * @property {boolean} [move.cancel] Set to `true` to cancel the entire
+ *      movement.
  * @property {string} action Action based on key
- * @property {number} factor Factor based on metakeys [0-2].
- * @property {object} event The triggering event
+ * @property {number} factor Factor based on metakeys [0-2].  0 means a small
+ *      movement is preferred, 1 a medium movement, and 2 a large movement.
+ * @property {jQuery.Event} event The triggering event
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.keyaction = 'geo_keyaction';
@@ -322,18 +306,17 @@ geo_event.keyaction = 'geo_keyaction';
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered before a map navigation animation begins.  Set
- * <code>event.geo.cancelAnimation</code> to cancel the animation
- * of the navigation.  This will cause the map to navigate to the
- * target location immediately.  Set <code>event.geo.cancelNavigation</code>
- * to cancel the navigation completely.  The transition options can
- * be modified in place.
+ * `event.geo.cancelAnimation` to cancel the animation of the navigation.  This
+ * will cause the map to navigate to the target location immediately.  Set
+ * `event.geo.cancelNavigation` to cancel the navigation completely.  The
+ * transition options can be modified in place.
  *
  * @event geo.event.transitionstart
  * @type {object}
- * @property {geo.geoPosition} center The target center
- * @property {number} zoom The target zoom level
- * @property {number} duration The duration of the transition in milliseconds
- * @property {function} ease The easing function
+ * @property {geo.geoPosition} center The target center.
+ * @property {number} zoom The target zoom level.
+ * @property {number} duration The duration of the transition in milliseconds.
+ * @property {function} ease The easing function.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.transitionstart = 'geo_transitionstart';
@@ -344,34 +327,37 @@ geo_event.transitionstart = 'geo_transitionstart';
  *
  * @event geo.event.transitionend
  * @type {object}
- * @property {geo.geoPosition} center The target center
- * @property {number} zoom The target zoom level
- * @property {number} duration The duration of the transition in milliseconds
- * @property {function} ease The easing function
+ * @property {geo.geoPosition} center The target center.
+ * @property {number} zoom The target zoom level.
+ * @property {number} duration The duration of the transition in milliseconds.
+ * @property {function} ease The easing function.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.transitionend = 'geo_transitionend';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered if a map navigation animation is cancelled.
+ * Triggered if a map navigation animation is canceled.
  *
  * @event geo.event.transitioncancel
  * @type {object}
- * @property {geo.geoPosition} center The target center
- * @property {number} zoom The target zoom level
- * @property {number} duration The duration of the transition in milliseconds
- * @property {function} ease The easing function
+ * @property {geo.geoPosition} center The target center.
+ * @property {number} zoom The target zoom level.
+ * @property {number} duration The duration of the transition in milliseconds.
+ * @property {function} ease The easing function.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.transitioncancel = 'geo_transitioncancel';
 
+//DWM::
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when the parallel projection mode is changes.
  *
- * @property paralellProjection {boolean} True if parallel projection is turned
- *                                        on.
+ * @event geo.event.parallelprojection
+ * @type {object}
+ * @property {boolean} paralellProjection `true` if parallel projection is
+ *      turned on.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.parallelprojection = 'geo_parallelprojection';
@@ -389,13 +375,45 @@ geo_event.parallelprojection = 'geo_parallelprojection';
  */
 ////////////////////////////////////////////////////////////////////////////
 geo_event.feature = {
+  /**
+   * The event is the feature version of {@link geo.event.mousemove}.
+   * @event geo.event.feature.mousemove
+   */
   mousemove:  'geo_feature_mousemove',
+  /**
+   * The event is the feature version of {@link geo.event.mouseover}.
+   * @event geo.event.feature.mouseover
+   */
   mouseover:  'geo_feature_mouseover',
+  /**
+   * The event is the feature version of {@link geo.event.mouseout}.
+   * @event geo.event.feature.mouseout
+   */
   mouseout:   'geo_feature_mouseout',
+  /**
+   * The event is the feature version of {@link geo.event.mouseon}.
+   * @event geo.event.feature.mouseon
+   */
   mouseon:    'geo_feature_mouseon',
+  /**
+   * The event is the feature version of {@link geo.event.mouseoff}.
+   * @event geo.event.feature.mouseoff
+   */
   mouseoff:   'geo_feature_mouseoff',
+  /**
+   * The event is the feature version of {@link geo.event.mouseclick}.
+   * @event geo.event.feature.mouseclick
+   */
   mouseclick: 'geo_feature_mouseclick',
+  /**
+   * The event is the feature version of {@link geo.event.brushend}.
+   * @event geo.event.feature.brushend
+   */
   brushend:   'geo_feature_brushend',
+  /**
+   * The event is the feature version of {@link geo.event.brush}.
+   * @event geo.event.feature.brush
+   */
   brush:      'geo_feature_brush'
 };
 
@@ -406,31 +424,40 @@ geo_event.feature = {
  */
 ////////////////////////////////////////////////////////////////////////////
 geo_event.pixelmap = {
-  /* The image associated with the pixel map url has been prepared and rendered
-   * once. */
+  /**
+   * Report that an image associated with a pixel map has been prepared and
+   * rendered once.
+   *
+   * @event geo.event.pixelmap.prepared
+   * @type {object}
+   * @property {geo.pixelmapFeature} pixelmap The pixelamp object that was
+   *    prepared.
+   */
   prepared: 'geo_pixelmap_prepared'
 };
 
 ////////////////////////////////////////////////////////////////////////////
 /**
  * These events are triggered by the map screenshot feature.
- * @namespace geo.event.pixelmap
+ * @namespace geo.event.screenshot
  */
 ////////////////////////////////////////////////////////////////////////////
 geo_event.screenshot = {
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Triggered when a scrrenshot has been completed.
+   * Triggered when a screenshot has been completed.
    *
-   * @namespace geo.event.screenshot
-   * @property {object} canvas The canvas used to take the screenshot
-   * @property {string|object} screenshot the screenshot as a dataURL string or
-   *      the canvas, depending on the screenshot request.
+   * @event geo.event.screenshot.ready
+   * @property {HTMLCanvasElement} canvas The canvas used to take the
+   *    screenshot.
+   * @property {string|HTMLCanvasElement} screenshot The screenshot as a
+   *    dataURL string or the canvas, depending on the screenshot request.
    */
   ////////////////////////////////////////////////////////////////////////////
   ready: 'geo_screenshot_ready'
 };
 
+//DWM::
 ////////////////////////////////////////////////////////////////////////////
 /**
  * These events are triggered by the camera when it's internal state is
@@ -445,37 +472,21 @@ geo_event.camera = {};
  * Triggered after a general view matrix change (any change in the visible
  * bounds).  This is equivalent to the union of pan and zoom.
  *
- * @property {geo.camera} camera The camera instance
+ * @event geo.event.camera.view
+ * @type {object}
+ * @property {geo.camera} camera The camera instance.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.camera.view = 'geo_camera_view';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered after a pan in the x/y plane (no zoom level change).
- *
- * @property {geo.camera} camera The camera instance
- * @property {object} delta The translation delta in world coordinates.
- */
-//////////////////////////////////////////////////////////////////////////////
-geo_event.camera.pan = 'geo_camera_pan';
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Triggered after a view matrix change that is not a simple pan.  This
- * includes, but is not limited to, pure zooms.
- *
- * @property {geo.camera} camera The camera instance
- */
-//////////////////////////////////////////////////////////////////////////////
-geo_event.camera.zoom = 'geo_camera_zoom';
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Triggered after a projection change.
  *
- * @property {geo.camera} camera The camera instance
- * @property {string} type The projection type ('perspective'|'parallel')
+ * @event geo.event.camera.projection
+ * @property {geo.camera} camera The camera instance.
+ * @property {string} type The projection type, either `'perspective'` or
+ *      `'parallel'`.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.camera.projection = 'geo_camera_projection';
@@ -484,10 +495,9 @@ geo_event.camera.projection = 'geo_camera_projection';
 /**
  * Triggered after a viewport change.
  *
- * @property {geo.camera} camera The camera instance
- * @property {object} viewport The new viewport
- * @property {number} viewport.width The new width
- * @property {number} viewport.height The new height
+ * @event geo.event.camera.viewport
+ * @property {geo.camera} camera The camera instance.
+ * @property {geo.screenSize} viewport The new viewport size.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.camera.viewport = 'geo_camera_viewport';
@@ -504,6 +514,8 @@ geo_event.annotation = {};
 /**
  * Triggered when an annotation has been added.
  *
+ * @event geo.event.annotation.add
+ * @type {object}
  * @property {geo.annotation} annotation The annotation that was added.
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -513,6 +525,8 @@ geo_event.annotation.add = 'geo_annotation_add';
 /**
  * Triggered when an annotation is about to be added.
  *
+ * @event geo.event.annotation.add_before
+ * @type {object}
  * @property {geo.annotation} annotation The annotation that will be added.
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -523,6 +537,8 @@ geo_event.annotation.add_before = 'geo_annotation_add_before';
  * Triggered when an annotation has been altered.  This is currently only
  * triggered when updating existing annotations via the geojson function.
  *
+ * @event geo.event.annotation.update
+ * @type {object}
  * @property {geo.annotation} annotation The annotation that was altered.
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -532,6 +548,8 @@ geo_event.annotation.update = 'geo_annotation_update';
 /**
  * Triggered when an annotation has been removed.
  *
+ * @event geo.event.annotation.remove
+ * @type {object}
  * @property {geo.annotation} annotation The annotation that was removed.
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -541,7 +559,9 @@ geo_event.annotation.remove = 'geo_annotation_remove';
 /**
  * Triggered when an annotation's state changes.
  *
- * @property {geo.annotation} annotation The annotation that changed/
+ * @event geo.event.annotation.state
+ * @type {object}
+ * @property {geo.annotation} annotation The annotation that changed.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.annotation.state = 'geo_annotation_state';
@@ -550,7 +570,12 @@ geo_event.annotation.state = 'geo_annotation_state';
 /**
  * Triggered when the annotation mode is changed.
  *
- * @property {string|null} mode the new annotation mode.
+ * @event geo.event.annotation.mode
+ * @type {object}
+ * @property {string?} mode The new annotation mode.  This is one of the values
+ *      from `geo.annotation.annotationState`.
+ * @property {string?} oldMode The annotation mode before this change.  This is
+ *      one of the values from `geo.annotation.annotationState`.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo_event.annotation.mode = 'geo_annotation_mode';

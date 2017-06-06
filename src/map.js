@@ -386,7 +386,6 @@ var map = function (arg) {
 
     camera_bounds(bounds, m_rotation);
     evt = {
-      geo: {},
       zoomLevel: m_zoom,
       screenPosition: origin ? origin.map : undefined
     };
@@ -504,7 +503,6 @@ var map = function (arg) {
     camera_bounds(bounds, m_rotation);
 
     var evt = {
-      geo: {},
       rotation: m_rotation,
       screenPosition: origin ? origin.map : undefined
     };
@@ -563,8 +561,7 @@ var map = function (arg) {
     m_this.modified();
     // trigger a pan event
     m_this.geoTrigger(geo_event.pan, {
-      geo: coordinates,
-      screenDelta: null
+      screenDelta: {x: 0, y: 0}
     });
     return m_this;
   };
@@ -595,7 +592,6 @@ var map = function (arg) {
       m_this.modified();
 
       m_this.geoTrigger(geo_event.layerAdd, {
-        type: geo_event.layerAdd,
         target: m_this,
         layer: newLayer
       });
@@ -622,7 +618,6 @@ var map = function (arg) {
       m_this.modified();
 
       m_this.geoTrigger(geo_event.layerRemove, {
-        type: geo_event.layerRemove,
         target: m_this,
         layer: layer
       });
@@ -842,7 +837,6 @@ var map = function (arg) {
     var i, layers = m_this.children();
 
     m_this.geoTrigger(geo_event.draw, {
-      type: geo_event.draw,
       target: m_this
     });
 
@@ -853,7 +847,6 @@ var map = function (arg) {
     }
 
     m_this.geoTrigger(geo_event.drawEnd, {
-      type: geo_event.drawEnd,
       target: m_this
     });
 

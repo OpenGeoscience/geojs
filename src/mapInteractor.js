@@ -764,6 +764,8 @@ var mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Stores the current mouse position from an event
+   *
+   * @param {jQuery.Event} evt JQuery event with the mouse position.
    */
   ////////////////////////////////////////////////////////////////////////////
   this._getMousePosition = function (evt) {
@@ -790,8 +792,6 @@ var mapInteractor = function (args) {
       m_mouse.mapgcs = m_this.map().displayToGcs(m_mouse.map, null);
     } catch (e) {
       // catch georeferencing problems and move on
-      // needed for handling the map before the base layer
-      // is attached
       m_mouse.geo = m_mouse.mapgcs = null;
     }
   };
@@ -836,8 +836,9 @@ var mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Compute a selection information object.
+   *
    * @private
-   * @returns {object}
+   * @returns {geo.brushSelection}
    */
   ////////////////////////////////////////////////////////////////////////////
   this._getSelection = function () {
@@ -1833,6 +1834,8 @@ var mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the current interactor state
+   *
+   * @returns {geo.interactorState}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.state = function () {
