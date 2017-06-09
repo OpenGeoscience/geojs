@@ -239,7 +239,7 @@ describe('geo.core.map', function () {
       m.discreteZoom(true);
       m.zoom(0);
       expect(m.zoom()).toBe(1);
-      m.resize(0, 0, 600, 600);
+      m.size({width: 600, height: 600});
       expect(m.zoom()).toBe(2);
       m.zoom(3);
       expect(m.zoom()).toBe(3);
