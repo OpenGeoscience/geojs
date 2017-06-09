@@ -99,8 +99,6 @@ var map = function (arg) {
       s_exit = this._exit,
       // See https://en.wikipedia.org/wiki/Web_Mercator
       // phiMax = 180 / Math.PI * (2 * Math.atan(Math.exp(Math.PI)) - Math.PI / 2),
-      m_x = 0,
-      m_y = 0,
       m_node = $(arg.node),
       m_width = arg.width || m_node.width() || 512,
       m_height = arg.height || m_node.height() || 512,
@@ -649,7 +647,30 @@ var map = function (arg) {
         height: m_height
       };
     }
-    m_this.resize(0, 0, arg.width, arg.height);
+    // store the original center and restore it after the resize
+    var oldCenter = m_this.center();
+    m_width = arg.width || m_width;
+    m_height = arg.height || m_height;
+
+    reset_minimum_zoom();
+    var newZoom = fix_zoom(m_zoom);
+    if (newZoom !== m_zoom) {
+      m_this.zoom(newZoom);
+    }
+    m_this.camera().viewport = {
+      width: m_width, height: m_height,
+      left: m_node.offset().left, top: m_node.offset().top
+    };
+    m_this.center(oldCenter);
+
+    m_this.geoTrigger(geo_event.resize, {
+      type: geo_event.resize,
+      target: m_this,
+      width: m_width,
+      height: m_height
+    });
+
+    m_this.modified();
     return m_this;
   };
 
@@ -674,50 +695,6 @@ var map = function (arg) {
       width: Math.abs(bds.right - bds.left),
       height: Math.abs(bds.top - bds.bottom)
     };
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Resize map in pixels.
-   *
-   * @param {number} x Horizontal offset in display space
-   * @param {number} y Vertical offset in display space
-   * @param {number} w Width in display space
-   * @param {number} h Height in display space
-   * @fires geo.event.resize
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.resize = function (x, y, w, h) {
-
-    // store the original center and restore it after the resize
-    var oldCenter = m_this.center();
-    m_x = x;
-    m_y = y;
-    m_width = w || m_width;
-    m_height = h || m_height;
-
-    reset_minimum_zoom();
-    var newZoom = fix_zoom(m_zoom);
-    if (newZoom !== m_zoom) {
-      m_this.zoom(newZoom);
-    }
-    m_this.camera().viewport = {
-      width: m_width, height: m_height,
-      left: m_node.offset().left, top: m_node.offset().top
-    };
-    m_this.center(oldCenter);
-
-    m_this.geoTrigger(geo_event.resize, {
-      type: geo_event.resize,
-      target: m_this,
-      x: m_x,
-      y: m_y,
-      width: m_width,
-      height: m_height
-    });
-
-    m_this.modified();
-    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -2191,7 +2168,7 @@ var map = function (arg) {
    * @private
    */
   function resizeSelf() {
-    m_this.resize(0, 0, m_node.width(), m_node.height());
+    m_this.size({width: m_node.width(), height: m_node.height()});
   }
 
   ////////////////////////////////////////////////////////////////////////////
