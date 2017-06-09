@@ -292,9 +292,12 @@ var map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get map gcs.  This is the coordinate system used in drawing the map.
+   * Get or set the map gcs.  This is the coordinate system used in drawing the
+   * map.
    *
-   * @returns {string} A string used by {@linkcode geo.transform}.
+   * @param {string} [arg] If `undefined`, return the current gcs.  Otherwise,
+   *    a new value for the gcs.
+   * @returns {string|this} A string used by {@linkcode geo.transform}.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.gcs = function (arg) {
@@ -316,10 +319,12 @@ var map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get map interface gcs.  This is the coordinate system used when getting or
-   * setting map bounds, center, and other values.
+   * Get or set the map interface gcs.  This is the coordinate system used when
+   * getting or setting map bounds, center, and other values.
    *
-   * @returns {string} A string used by {@linkcode geo.transform}.
+   * @param {string} [arg] If `undefined`, returtn the current interface gcs.
+   *    Otherwise, a new value for the interface gcs.
+   * @returns {string|this} A string used by {@linkcode geo.transform}.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.ingcs = function (arg) {
