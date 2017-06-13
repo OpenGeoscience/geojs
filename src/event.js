@@ -3,8 +3,8 @@
  * Common object containing all event types that are provided by the GeoJS
  * API.  Each property contained here is a valid target for event handling
  * via {@link geo.object#geoOn}.  The event object provided to handlers is
- * different for each event type.  Each handler is generally be called
- * with the <code>this</code> context being the class that caused the event.<br>
+ * different for each event type.  Each handler is generally called with the
+ * `this` context being the class that caused the event.<br>
  * <br>
  * The following properties are common to all event objects:
  *
@@ -143,7 +143,7 @@ geo_event.mousemove = 'geo_mousemove';
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered on `mouseup` events that happen soon enough and close enough to a
- * mousedown event.  The event object extends {@link geo.mouseState}.
+ * `mousedown` event.  The event object extends {@link geo.mouseState}.
  *
  * @event geo.event.mouseclick
  * @property {geo.mouseButtons} buttonsDown The buttons that were down at the
@@ -428,7 +428,7 @@ geo_event.pixelmap = {
    *
    * @event geo.event.pixelmap.prepared
    * @type {object}
-   * @property {geo.pixelmapFeature} pixelmap The pixelamp object that was
+   * @property {geo.pixelmapFeature} pixelmap The pixelmap object that was
    *    prepared.
    */
   prepared: 'geo_pixelmap_prepared'

@@ -149,7 +149,7 @@
  *
  * @typedef geo.actionRecord
  * @type {object}
- * @property {string} action The name of the action, from geo.action.
+ * @property {string} action The name of the action, from (@link geo.action}.
  * @property {string} [owner] A name of an owning process that can be used to
  *      locate or filter actions.
  * @property {string} [name] A human-readable name that can be used to locate
@@ -161,7 +161,7 @@
  *      buttons), `wheel` (the mouse wheel), `pan` (touch pan), `rotate` (touch
  *      rotate).
  * @property {string|object} [modifiers] The name of a modifier key or an
- *      object withe modifiers as the keys and boolean values.  The listed
+ *      object with modifiers as the keys and boolean values.  The listed
  *      modifiers must be set or unset depending on the boolean value.
  *      Modifiers include `shift`, `ctrl`, `alt`, and `meta`.
  * @property {boolean|string} [selectionRectangle] If truthy, a selection
