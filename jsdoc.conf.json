@@ -3,6 +3,7 @@
     "template": "node_modules/jaguarjs-jsdoc"
   },
   "plugins": [
+    "jsdoc/plugins/events",
     "node_modules/jsdoc-autoprivate/autoprivate.js",
     "plugins/markdown"
   ],
