@@ -1,19 +1,19 @@
 {
     "extends": "semistandard",
     "rules": {
-        "indent": [2, 2, {"VariableDeclarator": 2, "SwitchCase": 1}],
-        "padded-blocks": 0,
-        "space-before-function-paren": [2, {"anonymous": "always", "named": "never"}],
-        "one-var": 0,
-        "no-throw-literal": 0,
-        "new-cap": 0,
-        "spaced-comment": 0,
-        "operator-linebreak": 0,
-        "key-spacing": 0,
-        "no-unneeded-ternary": 0,
-        "yoda": 0,
-        "no-useless-call": 0,
-        "camelcase": 0
+        "indent": ["error", 2, {"VariableDeclarator": 2, "SwitchCase": 1}],
+        "padded-blocks": "off",
+        "space-before-function-paren": ["error", {"anonymous": "always", "named": "never"}],
+        "one-var": "off",
+        "no-throw-literal": "off",
+        "new-cap": "off",
+        "spaced-comment": "off",
+        "operator-linebreak": "off",
+        "key-spacing": "off",
+        "no-unneeded-ternary": "off",
+        "yoda": "off",
+        "no-useless-call": "off",
+        "camelcase": "off"
     },
     "env": {
         "browser": true

@@ -1,0 +1,27 @@
+{
+    "rules": {
+        "valid-jsdoc": ["warn", {
+            "preferType": {
+                "Object": "object",
+                "Number": "number",
+                "String": "string",
+                "Boolean": "boolean",
+                "bool": "boolean"
+            },
+            "prefer": {
+                "return": "returns"
+            },
+            "requireReturn": false,
+            "requireReturnDescription": false,
+            "requireParamDescription": false,
+            "matchDescription": "^[^a-z][\\s\\S]*\\.$"
+        }],
+        "require-jsdoc": ["error", {
+            "require": {
+                "FunctionDeclaration": false,
+                "MethodDefinition": true,
+                "ClassDeclaration": true
+            }
+        }]
+    }
+}
