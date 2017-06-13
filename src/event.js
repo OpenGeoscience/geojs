@@ -154,7 +154,7 @@ geo_event.mouseclick = 'geo_mouseclick';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered on every 'mousemove' during a brushing selection.
+ * Triggered on every `mousemove` during a brushing selection.
  * The event object extends {@link geo.brushSelection}.
  *
  * @event geo.event.brush
