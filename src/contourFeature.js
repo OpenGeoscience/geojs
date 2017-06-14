@@ -41,25 +41,25 @@ var feature = require('./feature');
  *      `gridWidth` not `gridHeight` are specified,  the square root of the
  *      number of data elements is used.  If both are specified, some data
  *      could be unused.
- * @property {function|number} [x0] the x coordinate of the 0th point in the
+ * @property {function|number} [x0] The x coordinate of the 0th point in the
  *      `value` array.  If `null` or `undefined`, the coordinate is taken from
  *      the `position` style.
- * @property {function|number} [y0] the y coordinate of the 0th point in the
+ * @property {function|number} [y0] The y coordinate of the 0th point in the
  *      `value` array.  If `null` or `undefined`, the coordinate is taken from
  *      the `position` style.
- * @property {function|number} [dx] the distance in the x direction between the
+ * @property {function|number} [dx] The distance in the x direction between the
  *      0th and 1st point in the `value` array.  This may be positive or
  *      negative.  If 0, `null`, or `undefined`, the coordinate is taken from
  *      the `position` style.
- * @property {function|number} [dy] the distance in the y direction between the
+ * @property {function|number} [dy] The distance in the y direction between the
  *      0th and `gridWidth`th point in the `value` array.  This may be positive
  *      or negative.  If 0, `null`, or `undefined`, the coordinate is taken
  *      from the `position` style.
- * @property {function|boolean} [wrapLongitude].  If truthy and `position` is
- *      not used (`x0`, `y0`, `dx`, and `dy` are all set appropriately),
- *      assume the x coordinates is longitude and should be adjusted to be
- *      within -180 to 180.  If the data spans 180 degrees, the points or
- *      squares that straddle the meridian will be duplicated to ensure that
+ * @property {function|boolean} [wrapLongitude] If truthy and `position` is not
+ *      used (`x0`, `y0`, `dx`, and `dy` are all set appropriately), assume the
+ *      x coordinates is longitude and should be adjusted to be within -180 to
+ *      180.  If the data spans 180 degrees, the points or squares that
+ *      straddle the meridian will be duplicated to ensure that
  *      the map is covered from -180 to 180 as appropriate.  Set this to
  *      `false` if using a non-longitude x coordinate.  This is ignored if
  *      `position` is used.
