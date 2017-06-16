@@ -1,7 +1,6 @@
 var vgl = require('vgl');
 var inherit = require('./inherit');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class object
  *
@@ -10,7 +9,6 @@ var inherit = require('./inherit');
  * @extends vgl.object
  * @returns {geo.object}
  */
-//////////////////////////////////////////////////////////////////////////////
 var object = function () {
   'use strict';
   if (!(this instanceof object)) {
@@ -22,7 +20,6 @@ var object = function () {
       m_idleHandlers = [],
       m_promiseCount = 0;
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Bind a handler that will be called once when all internal promises are
    *  resolved.
@@ -30,7 +27,6 @@ var object = function () {
    *  @param {function} handler A function taking no arguments.
    *  @returns {this}
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.onIdle = function (handler) {
     if (m_promiseCount) {
       m_idleHandlers.push(handler);
@@ -40,7 +36,6 @@ var object = function () {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Add a new promise object preventing idle event handlers from being called
    *  until it is resolved.
@@ -48,7 +43,6 @@ var object = function () {
    *  @param {Promise} promise A promise object.
    *  @returns {this}
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.addPromise = function (promise) {
     // called on any resolution of the promise
     function onDone() {
@@ -65,7 +59,6 @@ var object = function () {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Bind an event handler to this object.
    *
@@ -75,7 +68,6 @@ var object = function () {
    *    triggered.  The function is passed a {@link geo.event} object.
    *  @returns {this}
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.geoOn = function (event, handler) {
     if (Array.isArray(event)) {
       event.forEach(function (e) {
@@ -90,7 +82,6 @@ var object = function () {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Trigger an event (or events) on this object and call all handlers.
    *
@@ -100,7 +91,6 @@ var object = function () {
    *    {@link geo.event} object passed to the handlers.
    *  @returns {this}
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.geoTrigger = function (event, args) {
 
     // if we have an array of events, recall with single events
@@ -124,7 +114,6 @@ var object = function () {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Remove handlers from one event or an array of events.  If no event is
    *  provided all handlers will be removed.
@@ -136,7 +125,6 @@ var object = function () {
    *        remove from the events or a falsey value to remove all handlers
    *        from the events.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.geoOff = function (event, arg) {
     if (event === undefined) {
       m_eventHandlers = {};
@@ -166,11 +154,9 @@ var object = function () {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Free all resources and destroy the object.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.geoOff();
   };

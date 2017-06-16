@@ -3,7 +3,6 @@ var registerFeature = require('../registry').registerFeature;
 var heatmapFeature = require('../heatmapFeature');
 var timestamp = require('../timestamp');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class heatmapFeature
  * Inspired from
@@ -14,7 +13,6 @@ var timestamp = require('../timestamp');
  * @extends geo.heatmapFeature
  * @returns {canvas_heatmapFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var canvas_heatmapFeature = function (arg) {
   'use strict';
 
@@ -26,11 +24,9 @@ var canvas_heatmapFeature = function (arg) {
 
   object.call(this);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var geo_event = require('../event');
 
   var m_this = this,
@@ -44,12 +40,10 @@ var canvas_heatmapFeature = function (arg) {
       s_update = this._update,
       m_renderTime = timestamp();
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Meta functions for converting from geojs styles to canvas.
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._convertColor = function (c) {
     var color;
     if (c.hasOwnProperty('r') &&
@@ -62,12 +56,10 @@ var canvas_heatmapFeature = function (arg) {
     return color;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Compute gradient (color lookup table)
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._computeGradient = function () {
     var canvas, stop, context2d, gradient, colors;
 
@@ -93,12 +85,10 @@ var canvas_heatmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create circle for each data point
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._createCircle = function () {
     var circle, ctx, r, r2, blur, gaussian;
     r = m_this.style('radius');
@@ -157,12 +147,10 @@ var canvas_heatmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Compute color for each pixel on the screen
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._colorize = function (pixels, gradient) {
     var grad = new Uint32Array(gradient.buffer),
         pixlen = pixels.length,
@@ -183,7 +171,6 @@ var canvas_heatmapFeature = function (arg) {
     pixels.set(m_typedClampedBuffer);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Render individual data points on the canvas.
    * @protected
@@ -192,7 +179,6 @@ var canvas_heatmapFeature = function (arg) {
    * @param {Array} data the main data array.
    * @param {number} radius the sum of radius and blurRadius.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._renderPoints = function (context2d, map, data, radius) {
     var position = m_this.gcsPosition(),
         intensityFunc = m_this.intensity(),
@@ -213,7 +199,6 @@ var canvas_heatmapFeature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Render data points on the canvas by binning.
    * @protected
@@ -223,7 +208,6 @@ var canvas_heatmapFeature = function (arg) {
    * @param {number} radius the sum of radius and blurRadius.
    * @param {number} binSize size of the bins in pixels.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._renderBinnedData = function (context2d, map, data, radius, binSize) {
     var position = m_this.gcsPosition(),
         intensityFunc = m_this.intensity(),
@@ -313,14 +297,12 @@ var canvas_heatmapFeature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Render the data on the canvas, then colorize the resulting opacity map.
    * @protected
    * @param {object} context2d the canvas context to draw in.
    * @param {object} map the parent map object.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._renderOnCanvas = function (context2d, map) {
 
     if (m_renderTime.getMTime() < m_this.buildTime().getMTime()) {
@@ -381,12 +363,10 @@ var canvas_heatmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_init.call(m_this, arg);
 
@@ -395,12 +375,10 @@ var canvas_heatmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
     s_update.call(m_this);
     if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
@@ -411,22 +389,18 @@ var canvas_heatmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update the css transform for the layer as part of an animation frame.
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._setTransform = function () {
     m_this.layer().canvas()[0].style.transform = m_heatMapTransform;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Animate pan (and zoom)
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._animatePan = function (e) {
 
     var map = m_this.layer().map(),
@@ -475,12 +449,10 @@ var canvas_heatmapFeature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     s_exit.call(m_this);
   };

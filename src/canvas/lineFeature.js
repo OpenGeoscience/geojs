@@ -2,7 +2,6 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var lineFeature = require('../lineFeature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class lineFeature
  *
@@ -11,7 +10,6 @@ var lineFeature = require('../lineFeature');
  * @extends geo.canvas.object
  * @returns {geo.canvas.lineFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var canvas_lineFeature = function (arg) {
   'use strict';
   if (!(this instanceof canvas_lineFeature)) {
@@ -24,21 +22,17 @@ var canvas_lineFeature = function (arg) {
   lineFeature.call(this, arg);
   object.call(this);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Render the data on the canvas.
    * @protected
    * @param {object} context2d the canvas context to draw in.
    * @param {object} map the parent map object.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._renderOnCanvas = function (context2d, map) {
     var data = m_this.data(),
         posFunc = m_this.position(),

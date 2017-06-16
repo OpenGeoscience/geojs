@@ -7,7 +7,6 @@ module.exports = (function () {
   var registry = require('./registry');
   var quadFeature = require('./quadFeature');
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Create a new instance of osmLayer
    *
@@ -18,7 +17,6 @@ module.exports = (function () {
    *        imageFormat (such as png or jpeg), and displayLast
    *        (to decide whether or not render tiles from last zoom level).
    */
-  //////////////////////////////////////////////////////////////////////////////
   var osmLayer = function (arg) {
 
     var imageTile = require('./imageTile');

@@ -13,13 +13,11 @@ var domWidget = function (arg) {
   var m_this = this,
       m_default_canvas = 'div';
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initializes DOM Widget.
    * Sets the canvas for the widget, does parent/child relationship management,
    * appends it to it's parent and handles any positioning logic.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     if (arg.hasOwnProperty('parent')) {
       arg.parent.addChild(m_this);
@@ -35,12 +33,10 @@ var domWidget = function (arg) {
     m_this.reposition();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Creates the widget canvas.
    * This is just a simple DOM element (based on args.el, or defaults to a div)
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._createCanvas = function () {
     m_this.canvas(document.createElement(arg.el || m_default_canvas));
   };

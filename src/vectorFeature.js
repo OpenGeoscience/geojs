@@ -1,7 +1,6 @@
 var inherit = require('./inherit');
 var feature = require('./feature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class vectorFeature
  *
@@ -9,7 +8,6 @@ var feature = require('./feature');
  * @extends geo.feature
  * @returns {geo.vectorFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var vectorFeature = function (arg) {
   'use strict';
   if (!(this instanceof vectorFeature)) {
@@ -21,22 +19,18 @@ var vectorFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_init = this._init,
       s_style = this.style;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the accessor for the origin of the vector.  This is the point
    * that the vector base resides at.  Defaults to (0, 0, 0).
    * @param {geo.accessor|geo.geoPosition} [accessor] The origin accessor
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.origin = function (val) {
     if (val === undefined) {
       return s_style('origin');
@@ -48,12 +42,10 @@ var vectorFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the accessor for the displacement (coordinates) of the vector.
    * @param {geo.accessor|geo.geoPosition} [accessor] The accessor
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.delta = function (val) {
     if (val === undefined) {
       return s_style('delta');
@@ -65,12 +57,10 @@ var vectorFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
 

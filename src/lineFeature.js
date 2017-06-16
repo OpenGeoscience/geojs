@@ -3,7 +3,6 @@ var feature = require('./feature');
 var timestamp = require('./timestamp');
 var transform = require('./transform');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class lineFeature
  *
@@ -49,7 +48,6 @@ var transform = require('./transform');
  *   mode.  This is a single value that applies to all lines.
  * @returns {geo.lineFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var lineFeature = function (arg) {
   'use strict';
   if (!(this instanceof lineFeature)) {
@@ -61,11 +59,9 @@ var lineFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_init = this._init,
       m_pointSearchTime = timestamp(),
@@ -81,13 +77,11 @@ var lineFeature = function (arg) {
     strokeWidth: true
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set line accessor
    *
    * @returns {geo.pointFeature}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.line = function (val) {
     if (val === undefined) {
       return m_this.style('line');
@@ -99,13 +93,11 @@ var lineFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set position accessor
    *
    * @returns {geo.pointFeature}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
       return m_this.style('position');
@@ -117,11 +109,9 @@ var lineFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Cache information needed for point searches.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._updatePointSearchInfo = function () {
     if (m_pointSearchTime.getMTime() >= m_this.dataTime().getMTime() &&
         m_pointSearchTime.getMTime() >= m_this.getMTime()) {
@@ -165,7 +155,6 @@ var lineFeature = function (arg) {
     return m_pointSearchInfo;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Returns an array of datum indices that contain the given point.
    * This is a slow implementation with runtime order of the number of
@@ -176,7 +165,6 @@ var lineFeature = function (arg) {
    * that variable width lines will have a greater selection region than their
    * visual size at the narrow end.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (p) {
     var data = m_this.data(), indices = [], found = [];
     if (!data || !data.length || !m_this.layer()) {
@@ -231,11 +219,9 @@ var lineFeature = function (arg) {
     };
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Returns an array of line indices that are contained in the given box.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.boxSearch = function (lowerLeft, upperRight, opts) {
     var pos = m_this.position(),
         idx = [],
@@ -267,11 +253,9 @@ var lineFeature = function (arg) {
     return idx;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     arg = arg || {};
     s_init.call(m_this, arg);

@@ -2,7 +2,6 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var quadFeature = require('../quadFeature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class quadFeature
  *
@@ -11,7 +10,6 @@ var quadFeature = require('../quadFeature');
  * @extends geo.quadFeature
  * @returns {geo.canvas.quadFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var canvas_quadFeature = function (arg) {
   'use strict';
 
@@ -31,11 +29,9 @@ var canvas_quadFeature = function (arg) {
       s_update = this._update,
       m_quads;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build this feature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     if (!m_this.position()) {
       return;
@@ -107,11 +103,9 @@ var canvas_quadFeature = function (arg) {
     this._renderColorQuads(context, map);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
     s_update.call(m_this);
     if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
@@ -122,20 +116,16 @@ var canvas_quadFeature = function (arg) {
     m_this.updateTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_init.call(m_this, arg);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
 
     s_exit.call(m_this);

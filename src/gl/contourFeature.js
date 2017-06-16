@@ -2,7 +2,6 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var contourFeature = require('../contourFeature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of contourFeature
  *
@@ -10,7 +9,6 @@ var contourFeature = require('../contourFeature');
  * @extends geo.contourFeature
  * @returns {geo.gl.contourFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var gl_contourFeature = function (arg) {
   'use strict';
 
@@ -27,11 +25,9 @@ var gl_contourFeature = function (arg) {
 
   object.call(this);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
       m_textureUnit = 7,
@@ -164,11 +160,9 @@ var gl_contourFeature = function (arg) {
     m_mapper.boundsDirtyTimestamp().modified();
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     var blend = vgl.blend(),
         prog = vgl.shaderProgram(),
@@ -234,13 +228,11 @@ var gl_contourFeature = function (arg) {
     m_mapper.setGeometryData(geom);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
    *
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     if (m_actor) {
       m_this.renderer().contextRenderer().removeActor(m_actor);
@@ -252,13 +244,11 @@ var gl_contourFeature = function (arg) {
     m_this.buildTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    *
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
     s_update.call(m_this);
 
@@ -272,11 +262,9 @@ var gl_contourFeature = function (arg) {
     m_this.updateTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
     s_exit();

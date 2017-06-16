@@ -1,7 +1,6 @@
 var inherit = require('./inherit');
 var feature = require('./feature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class contourFeature
  *
@@ -10,7 +9,6 @@ var feature = require('./feature');
  * @returns {geo.contourFeature}
  *
  */
-//////////////////////////////////////////////////////////////////////////////
 var contourFeature = function (arg) {
   'use strict';
   if (!(this instanceof contourFeature)) {
@@ -23,11 +21,9 @@ var contourFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_contour = {},
       s_init = this._init,
@@ -41,24 +37,20 @@ var contourFeature = function (arg) {
     m_contour = arg.contour;
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Override the parent data method to keep track of changes to the
    * internal coordinates.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.data = function (arg) {
     var ret = s_data(arg);
     return ret;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set contour accessor
    *
    * @returns {geo.pointFeature}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.contour = function (arg1, arg2) {
     if (arg1 === undefined) {
       return m_contour;
@@ -110,7 +102,6 @@ var contourFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * A uniform getter that always returns a function even for constant values.
    * If undefined input, return all the contour values as an object.
@@ -118,7 +109,6 @@ var contourFeature = function (arg) {
    * @param {string|undefined} key
    * @return {function}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.contour.get = function (key) {
     if (key === undefined) {
       var all = {}, k;
@@ -132,13 +122,11 @@ var contourFeature = function (arg) {
     return util.ensureFunction(m_contour[key]);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set position accessor
    *
    * @returns {geo.pointFeature}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
       return m_this.style('position');
@@ -150,7 +138,6 @@ var contourFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create a set of vertices, values at the vertices, and opacities at the
    * vertices.  Create a set of triangles of indices into the vertex array.
@@ -161,7 +148,6 @@ var contourFeature = function (arg) {
    *           contour data that can be used, only elements is guaranteed to
    *           exist, and it will be a zero-length array.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.createContours = function () {
     var i, i3, j, idx, k, val, numPts, usedPts = 0, usePos, item,
         idxMap = {},
@@ -357,11 +343,9 @@ var contourFeature = function (arg) {
     return result;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
 

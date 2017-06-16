@@ -3,7 +3,6 @@ var layer = require('./layer');
 var geo_event = require('./event');
 var registry = require('./registry');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Layer to draw points, lines, and polygons on the map The polydata layer
  * provide mechanisms to create and draw geometrical shapes such as points,
@@ -12,7 +11,6 @@ var registry = require('./registry');
  * @extends geo.layer
  * @returns {geo.featureLayer}
  */
-//////////////////////////////////////////////////////////////////////////////
 var featureLayer = function (arg) {
   'use strict';
   if (!(this instanceof featureLayer)) {
@@ -20,11 +18,9 @@ var featureLayer = function (arg) {
   }
   layer.call(this, arg);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_features = [],
       s_init = this._init,
@@ -34,7 +30,6 @@ var featureLayer = function (arg) {
       s_selectionAPI = this.selectionAPI,
       s_draw = this.draw;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create feature give a name
    *
@@ -42,7 +37,6 @@ var featureLayer = function (arg) {
    * @param {object} arg properties for the new feature
    * @returns {geo.Feature} Will return a new feature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.createFeature = function (featureName, arg) {
 
     var newFeature = registry.createFeature(
@@ -53,13 +47,11 @@ var featureLayer = function (arg) {
     return newFeature;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Add a feature to the layer if it is not already present.
    *
    * @param {object} feature the feature to add.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.addFeature = function (feature) {
     /* try to remove the feature first so that we don't have two copies */
     this.removeFeature(feature);
@@ -70,13 +62,11 @@ var featureLayer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Remove feature without destroying it
    *
    * @param {object} feature the feature to remove.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.removeFeature = function (feature) {
     var pos;
 
@@ -91,13 +81,11 @@ var featureLayer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Delete feature
    *
    * @param {object} feature the feature to delete.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.deleteFeature = function (feature) {
 
     // call _exit first, as destroying the feature affect other features
@@ -111,13 +99,11 @@ var featureLayer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set drawables
    *
    * @returns {Array}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.features = function (val) {
     if (val === undefined) {
       return m_features.slice();
@@ -139,20 +125,18 @@ var featureLayer = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     if (m_this.initialized()) {
       return m_this;
     }
 
-    /// Call super class init
+    // Call super class init
     s_init.call(m_this, true);
 
-    /// Bind events to handlers
+    // Bind events to handlers
     m_this.geoOn(geo_event.resize, function (event) {
       if (m_this.renderer()) {
         m_this.renderer()._resize(event.x, event.y, event.width, event.height);
@@ -187,11 +171,9 @@ var featureLayer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update layer
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function (request) {
     var i;
 
@@ -199,7 +181,7 @@ var featureLayer = function (arg) {
       return m_this;
     }
 
-    /// Call base class update
+    // Call base class update
     s_update.call(m_this, request);
 
     if (m_this.dataTime().getMTime() > m_this.updateTime().getMTime()) {
@@ -217,21 +199,17 @@ var featureLayer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Free all resources
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.clear();
     s_exit();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Draw
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
     if (m_this.visible()) {
       // Call sceneObject.draw, which calls draw on all child objects.
@@ -246,7 +224,6 @@ var featureLayer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set visibility of the layer
    *
@@ -255,7 +232,6 @@ var featureLayer = function (arg) {
    * @return {boolean|object} either the visibility (if getting) or the layer
    *    (if setting).
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.visible = function (val) {
     if (val === undefined) {
       return s_visible();
@@ -276,7 +252,6 @@ var featureLayer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set selectionAPI of the layer
    *
@@ -285,7 +260,6 @@ var featureLayer = function (arg) {
    * @return {boolean|object} either the selectionAPI state (if getting) or the
    *    layer (if setting).
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.selectionAPI = function (val) {
     if (val === undefined) {
       return s_selectionAPI();
@@ -303,11 +277,9 @@ var featureLayer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Clear all features in layer
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.clear = function () {
     while (m_features.length) {
       m_this.deleteFeature(m_features[0]);

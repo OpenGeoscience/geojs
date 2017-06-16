@@ -2,7 +2,6 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var polygonFeature = require('../polygonFeature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of polygonFeature
  *
@@ -10,7 +9,6 @@ var polygonFeature = require('../polygonFeature');
  * @extends geo.polygonFeature
  * @returns {geo.gl.polygonFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var gl_polygonFeature = function (arg) {
   'use strict';
   if (!(this instanceof gl_polygonFeature)) {
@@ -27,11 +25,9 @@ var gl_polygonFeature = function (arg) {
 
   object.call(this);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
       m_actor = vgl.actor(),
@@ -263,12 +259,10 @@ var gl_polygonFeature = function (arg) {
     }
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    * @memberof geo.gl.polygonFeature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     var prog = vgl.shaderProgram(),
         posAttr = vgl.vertexAttribute('pos'),
@@ -312,14 +306,12 @@ var gl_polygonFeature = function (arg) {
     s_init.call(m_this, arg);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
    *
    * @memberof geo.gl.polygonFeature
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
 
     createGLPolygons(m_this.dataTime().getMTime() < m_this.buildTime().getMTime() && m_geometry);
@@ -330,14 +322,12 @@ var gl_polygonFeature = function (arg) {
     m_this.buildTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    *
    * @memberof geo.gl.polygonFeature
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function (opts) {
     if (opts && opts.mayDelay) {
       m_updateAnimFrameRef = m_this.layer().map().scheduleAnimationFrame(m_this._update);
@@ -359,12 +349,10 @@ var gl_polygonFeature = function (arg) {
     m_this.updateTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
    * @memberof geo.gl.polygonFeature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
     s_exit();

@@ -2,7 +2,6 @@ var svgWidget = require('./svgWidget');
 var inherit = require('../inherit');
 var registerWidget = require('../registry').registerWidget;
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class sliderWidget
  *
@@ -10,7 +9,6 @@ var registerWidget = require('../registry').registerWidget;
  * @extends {geo.gui.svgWidget}
  * @returns {geo.gui.sliderWidget}
  */
-//////////////////////////////////////////////////////////////////////////////
 var sliderWidget = function (arg) {
   'use strict';
   if (!(this instanceof sliderWidget)) {
@@ -50,7 +48,6 @@ var sliderWidget = function (arg) {
     black: '#505050'
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Add an icon from a path string.  Returns a d3 group element.
    *
@@ -63,7 +60,6 @@ var sliderWidget = function (arg) {
    * @returns {object}
    * @private
    */
-  //////////////////////////////////////////////////////////////////////////////
   function put_icon(icon, base, cx, cy, size) {
     var g = base.append('g');
 
@@ -87,7 +83,6 @@ var sliderWidget = function (arg) {
     return {width: m_width, height: m_height};
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize the slider widget in the map.
    *
@@ -95,7 +90,6 @@ var sliderWidget = function (arg) {
    * @returns {geo.gui.sliderWidget}
    * @private
    */
-  //////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_createCanvas();
     s_appendChild();
@@ -300,7 +294,6 @@ var sliderWidget = function (arg) {
     m_this._update();
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Removes the slider element from the map and unbinds all handlers.
    *
@@ -308,14 +301,12 @@ var sliderWidget = function (arg) {
    * @returns {geo.gui.sliderWidget}
    * @private
    */
-  //////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_group.remove();
     m_this.layer().geoOff(geo_event.zoom);
     s_exit();
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Update the slider widget state in reponse to map changes.  I.e. zoom
    * range changes.
@@ -324,7 +315,6 @@ var sliderWidget = function (arg) {
    * @returns {geo.gui.sliderWidget}
    * @private
    */
-  //////////////////////////////////////////////////////////////////////////////
   this._update = function (obj) {
     var map = m_this.layer().map(),
         zoomRange = map.zoomRange(),

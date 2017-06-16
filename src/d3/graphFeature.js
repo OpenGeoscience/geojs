@@ -16,11 +16,9 @@ var d3_graphFeature = function (arg) {
   }
   graphFeature.call(this, arg);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
   *  Returns a d3 selection for the graph elements
   */
-  ////////////////////////////////////////////////////////////////////////////
   this.select = function () {
     var renderer = m_this.renderer(),
         selection = {},

@@ -2,7 +2,6 @@ var $ = require('jquery');
 var inherit = require('./inherit');
 var feature = require('./feature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class quadFeature
  *
@@ -42,7 +41,6 @@ var feature = require('./feature');
  *   attribute of the data item.
  * @returns {geo.quadFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var quadFeature = function (arg) {
   'use strict';
 
@@ -55,11 +53,9 @@ var quadFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_init = this._init,
       m_cacheQuads,
@@ -125,7 +121,6 @@ var quadFeature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Point search method for selection api.  Returns markers containing the
    * given point.
@@ -136,7 +131,6 @@ var quadFeature = function (arg) {
    * @returns {Object} an object with 'index': a list of quad indices, and
    *    'found': a list of quads that contain the specified coordinate.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (coordinate) {
     var found = [], indices = [], extra = {},
         poly1 = [{}, {}, {}, {}], poly2 = [{}, {}, {}, {}],
@@ -196,7 +190,6 @@ var quadFeature = function (arg) {
     };
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set position
    *
@@ -205,7 +198,6 @@ var quadFeature = function (arg) {
    *    position of each quad.
    * @returns {geo.quadFeature}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
       return m_this.style('position');
@@ -455,11 +447,9 @@ var quadFeature = function (arg) {
     return m_quads;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     arg = arg || {};
     s_init.call(m_this, arg);

@@ -40,7 +40,6 @@ module.exports = (function () {
     };
   }
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * This method defines a tileLayer, which is an abstract class defining a
    * layer divided into tiles of arbitrary data.  Notably, this class provides
@@ -136,7 +135,6 @@ module.exports = (function () {
    *   local coordinates.
    * @returns {geo.tileLayer}
    */
-  //////////////////////////////////////////////////////////////////////////////
   var tileLayer = function (options) {
     'use strict';
     if (!(this instanceof tileLayer)) {
@@ -764,7 +762,6 @@ module.exports = (function () {
     this._drawTile = function (tile) {
       // Make sure this method is not called when there is
       // a renderer attached.
-      //
       if (this.renderer() !== null) {
         throw new Error('This draw method is not valid on renderer managed layers.');
       }
@@ -1435,7 +1432,6 @@ module.exports = (function () {
       return m_tileOffsetValues[level];
     };
 
-    ////////////////////////////////////////////////////////////////////////////
     /**
      * Get/Set visibility of the layer
      *
@@ -1444,7 +1440,6 @@ module.exports = (function () {
      * @return {boolean|object} either the visibility (if getting) or the layer
      *    (if setting).
      */
-    ////////////////////////////////////////////////////////////////////////////
     this.visible = function (val) {
       if (val === undefined) {
         return s_visible();

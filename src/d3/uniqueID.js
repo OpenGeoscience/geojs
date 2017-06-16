@@ -1,13 +1,11 @@
 var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
     strLength = 8;
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Get a random string to use as a div ID
  * @function geo.d3.uniqueID
  * @returns {string}
  */
-//////////////////////////////////////////////////////////////////////////////
 var uniqueID = function () {
   var strArray = [],
       i;

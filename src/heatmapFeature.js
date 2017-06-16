@@ -3,7 +3,6 @@ var inherit = require('./inherit');
 var feature = require('./feature');
 var transform = require('./transform');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class heatmapFeature
  *
@@ -44,9 +43,7 @@ var transform = require('./transform');
  *   gaussian distribution.
  * @returns {geo.heatmapFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
 var heatmapFeature = function (arg) {
   'use strict';
   if (!(this instanceof heatmapFeature)) {
@@ -55,11 +52,9 @@ var heatmapFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_position,
       m_intensity,
@@ -77,13 +72,11 @@ var heatmapFeature = function (arg) {
   m_binned = arg.binned !== undefined ? arg.binned : 'auto';
   m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set maxIntensity
    *
    * @returns {geo.heatmap}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.maxIntensity = function (val) {
     if (val === undefined) {
       return m_maxIntensity;
@@ -95,13 +88,11 @@ var heatmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set maxIntensity
    *
    * @returns {geo.heatmap}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.minIntensity = function (val) {
     if (val === undefined) {
       return m_minIntensity;
@@ -113,13 +104,11 @@ var heatmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set updateDelay
    *
    * @returns {geo.heatmap}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.updateDelay = function (val) {
     if (val === undefined) {
       return m_updateDelay;
@@ -129,13 +118,11 @@ var heatmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set binned
    *
    * @returns {geo.heatmap}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.binned = function (val) {
     if (val === undefined) {
       return m_binned;
@@ -157,13 +144,11 @@ var heatmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set position accessor
    *
    * @returns {geo.heatmap}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
       return m_position;
@@ -175,25 +160,21 @@ var heatmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get pre-computed gcs position accessor
    *
    * @returns {geo.heatmap}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.gcsPosition = function () {
     this._update();
     return m_gcsPosition;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set intensity
    *
    * @returns {geo.heatmap}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.intensity = function (val) {
     if (val === undefined) {
       return m_intensity;
@@ -205,11 +186,9 @@ var heatmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
 
@@ -235,12 +214,10 @@ var heatmapFeature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     var data = m_this.data(),
         intensity = null,

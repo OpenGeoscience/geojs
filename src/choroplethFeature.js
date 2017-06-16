@@ -1,7 +1,6 @@
 var inherit = require('./inherit');
 var feature = require('./feature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class choroplethFeature
  *
@@ -27,7 +26,6 @@ var feature = require('./feature');
  *   If undefined input, return all the choropleth values as an object.
  * @returns {geo.choroplethFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var choroplethFeature = function (arg) {
   'use strict';
   if (!(this instanceof choroplethFeature)) {
@@ -39,11 +37,9 @@ var choroplethFeature = function (arg) {
   var $ = require('jquery');
   var ensureFunction = require('./util').ensureFunction;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var d3 = require('d3'),
       m_this = this,
       s_init = this._init,
@@ -78,7 +74,6 @@ var choroplethFeature = function (arg) {
         },
         arg.choropleth);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set choropleth scalar data
    *
@@ -91,7 +86,6 @@ var choroplethFeature = function (arg) {
    *   is d3.mean.
    * @returns {geo.feature.choropleth}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.scalar = function (data, aggregator) {
     var scalarId, scalarValue;
 
@@ -124,7 +118,6 @@ var choroplethFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set choropleth accessor
    *
@@ -138,7 +131,6 @@ var choroplethFeature = function (arg) {
    * @param {Object|String} [arg2] arg2 defines the value of the key (arg1).
    * @returns {geo.feature.choropleth}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.choropleth = function (arg1, arg2) {
     var choropleth;
 
@@ -162,7 +154,6 @@ var choroplethFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set choropleth getter
    *
@@ -174,7 +165,6 @@ var choroplethFeature = function (arg) {
    *  choropleth.
    * @return {function}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.choropleth.get = function (key) {
     var all = {}, k;
     if (key === undefined) {
@@ -188,7 +178,6 @@ var choroplethFeature = function (arg) {
     return ensureFunction(m_choropleth[key]);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * A method that adds a polygon feature to the current layer.
    *
@@ -196,7 +185,6 @@ var choroplethFeature = function (arg) {
    * @param {geo.color} fillColor
    * @return {geo.feature}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._addPolygonFeature = function (feature, fillColor) {
     var newFeature = m_this.layer()
         .createFeature('polygon', {});
@@ -235,7 +223,6 @@ var choroplethFeature = function (arg) {
     return newFeature;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * A method that adds polygons from a given feature to the current layer.
    *
@@ -243,20 +230,17 @@ var choroplethFeature = function (arg) {
    * @param geo.color
    * @return [{geo.feature}]
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._featureToPolygons = function (feature, fillValue) {
     return m_this
       ._addPolygonFeature(feature, fillValue);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * A method that sets a choropleth scale's domain and range.
    *
    * @param {undefined | function({})} valueAccessor
    * @return {geo.feature.choropleth}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._generateScale = function (valueAccessor) {
     var extent =
         d3.extent(m_this.scalar(), valueAccessor || undefined);
@@ -269,12 +253,10 @@ var choroplethFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Generate scale for choropleth.data(), make polygons from features.
    * @returns: [ [geo.feature.polygon, ...] , ... ]
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.createChoropleth = function () {
     var choropleth = m_this.choropleth,
         data = m_this.data(),
@@ -302,11 +284,9 @@ var choroplethFeature = function (arg) {
       });
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
 

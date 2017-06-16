@@ -4,7 +4,6 @@ var sceneObject = require('./sceneObject');
 var timestamp = require('./timestamp');
 var geo_event = require('./event');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class feature
  *
@@ -12,7 +11,6 @@ var geo_event = require('./event');
  * @extends geo.sceneObject
  * @returns {geo.feature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var feature = function (arg) {
   'use strict';
   if (!(this instanceof feature)) {
@@ -22,11 +20,9 @@ var feature = function (arg) {
 
   var util = require('./util');
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   arg = arg || {};
 
   var m_this = this,
@@ -48,11 +44,9 @@ var feature = function (arg) {
   // data items, such as individual vertices on lines or polygons.
   this._subfeatureStyles = {};
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private method to bind mouse handlers on the map element.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._bindMouseHandlers = function () {
 
     // Don't bind handlers for improved performance on features that don't
@@ -70,11 +64,9 @@ var feature = function (arg) {
     m_this.geoOn(geo_event.brush, m_this._handleBrush);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private method to unbind mouse handlers on the map element.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._unbindMouseHandlers = function () {
     m_this.geoOff(geo_event.mousemove, m_this._handleMousemove);
     m_this.geoOff(geo_event.mouseclick, m_this._handleMouseclick);
@@ -82,7 +74,6 @@ var feature = function (arg) {
     m_this.geoOff(geo_event.brush, m_this._handleBrush);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * For binding mouse events, use functions with
    * the following call signatures:
@@ -99,9 +90,7 @@ var feature = function (arg) {
    *   // do something with the feature marker.
    * });
    */
-  ////////////////////////////////////////////////////////////////////////////
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Search for features containing the given point.
    *
@@ -115,7 +104,6 @@ var feature = function (arg) {
    * @argument {Object} coordinate
    * @returns {Object}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function () {
     // base class method does nothing
     return {
@@ -124,21 +112,17 @@ var feature = function (arg) {
     };
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Returns an array of line indices that are contained in the given box.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.boxSearch = function (lowerLeft, upperRight, opts) {
     // base class method does nothing
     return [];
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private mousemove handler
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._handleMousemove = function () {
     var mouse = m_this.layer().map().interactor().mouse(),
         data = m_this.data(),
@@ -230,11 +214,9 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private mouseclick handler
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._handleMouseclick = function (evt) {
     var mouse = m_this.layer().map().interactor().mouse(),
         data = m_this.data(),
@@ -255,11 +237,9 @@ var feature = function (arg) {
     });
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private brush handler.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._handleBrush = function (brush) {
     var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
         data = m_this.data();
@@ -277,11 +257,9 @@ var feature = function (arg) {
     });
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private brushend handler.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._handleBrushend = function (brush) {
     var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
         data = m_this.data();
@@ -299,11 +277,9 @@ var feature = function (arg) {
     });
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set style used by the feature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.style = function (arg1, arg2) {
     if (arg1 === undefined) {
       return m_style;
@@ -320,7 +296,6 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * A uniform getter that always returns a function even for constant styles.
    * Maybe extend later to support accessor-like objects.  If undefined input,
@@ -329,7 +304,6 @@ var feature = function (arg) {
    * @param {string|undefined} key
    * @return {function}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.style.get = function (key) {
     var out;
     if (key === undefined) {
@@ -358,7 +332,6 @@ var feature = function (arg) {
     return out;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set style(s) from array(s).  For each style, the array should have one
    * value per data item.  The values are not converted or validated.  Color
@@ -379,7 +352,6 @@ var feature = function (arg) {
    *    once.
    * @returns {object} the feature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.updateStyleFromArray = function (keyOrObject, styleArray, refresh) {
     if (typeof keyOrObject !== 'string') {
       $.each(keyOrObject, function (key, value) {
@@ -420,29 +392,23 @@ var feature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get layer referenced by the feature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.layer = function () {
     return m_layer;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get renderer used by the feature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.renderer = function () {
     return m_renderer;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set projection of the feature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.gcs = function (val) {
     if (val === undefined) {
       if (m_gcs === undefined && m_renderer) {
@@ -456,7 +422,6 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from the renderer's input gcs coordinates to display coordinates.
    *
@@ -476,7 +441,6 @@ var feature = function (arg) {
     return c;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set visibility of the feature
    *
@@ -488,7 +452,6 @@ var feature = function (arg) {
    * @return {boolean|object} either the visibility (if getting) or the feature
    *    (if setting).
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.visible = function (val, direct) {
     if (val === undefined) {
       if (!direct && m_layer && m_layer.visible && !m_layer.visible()) {
@@ -515,12 +478,10 @@ var feature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set a list of dependent features.  Dependent features have their
    * visibility changed at the same time as the feature.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.dependentFeatures = function (arg) {
     if (arg === undefined) {
       return m_dependentFeatures.slice();
@@ -529,13 +490,11 @@ var feature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set bin of the feature
    *
    * Bin number is typically used for sorting the order of rendering
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.bin = function (val) {
     if (val === undefined) {
       return m_bin;
@@ -546,11 +505,9 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set timestamp of data change
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.dataTime = function (val) {
     if (val === undefined) {
       return m_dataTime;
@@ -561,11 +518,9 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set timestamp of last time build happened
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.buildTime = function (val) {
     if (val === undefined) {
       return m_buildTime;
@@ -576,11 +531,9 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set timestamp of last time update happened
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.updateTime = function (val) {
     if (val === undefined) {
       return m_updateTime;
@@ -591,13 +544,11 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set the data array for the feature.
    *
    * @returns {Array|this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.data = function (data) {
     if (data === undefined) {
       return m_this.style('data') || [];
@@ -609,7 +560,6 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set if the selection API is enabled for this feature.
    *
@@ -621,7 +571,6 @@ var feature = function (arg) {
    * @return {boolean|object} either the selectionAPI state (if getting) or the
    *    feature (if setting).
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.selectionAPI = function (arg, direct) {
     if (arg === undefined) {
       if (!direct && m_layer && m_layer.selectionAPI && !m_layer.selectionAPI()) {
@@ -638,13 +587,11 @@ var feature = function (arg) {
     return this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    *
    * Derived class should implement this
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     if (!m_layer) {
       throw new Error('Feature requires a valid layer');
@@ -655,33 +602,27 @@ var feature = function (arg) {
     m_this._bindMouseHandlers();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
    *
    * Derived class should implement this
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    *
    * Derived class should implement this
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
    *
    * Derived class should implement this
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this._unbindMouseHandlers();
     m_selectedFeatures = [];
