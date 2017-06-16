@@ -1,7 +1,6 @@
 var inherit = require('./inherit');
 var feature = require('./feature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class pointFeature
  *
@@ -11,7 +10,6 @@ var feature = require('./feature');
  * @extends geo.feature
  * @returns {geo.pointFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var pointFeature = function (arg) {
   'use strict';
   if (!(this instanceof pointFeature)) {
@@ -27,11 +25,9 @@ var pointFeature = function (arg) {
   var util = require('./util');
   var kdbush = require('kdbush');
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_init = this._init,
       m_rangeTree = null,
@@ -46,13 +42,11 @@ var pointFeature = function (arg) {
 
   this.featureType = 'point';
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set clustering option
    *
    * @returns {geo.pointFeature|boolean}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.clustering = function (val) {
     if (val === undefined) {
       return m_clustering;
@@ -70,12 +64,10 @@ var pointFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Generate the clustering tree from positions.  This might be async in the
    * future.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._clusterData = function () {
     if (!m_clustering) {
       // clustering is not enabled, so this is a no-op
@@ -104,13 +96,11 @@ var pointFeature = function (arg) {
     m_this._handleZoom(m_this.layer().map().zoom());
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Handle zoom events for clustering.  This keeps track of the last
    * clustering level, and only regenerates the displayed points when the
    * zoom level changes.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._handleZoom = function (zoom) {
     // get the current zoom level rounded down
     var z = Math.floor(zoom);
@@ -146,13 +136,11 @@ var pointFeature = function (arg) {
     m_this.data(data);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set position
    *
    * @returns {geo.pointFeature}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
       return m_this.style('position');
@@ -173,12 +161,10 @@ var pointFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update the current range tree object.  Should be called whenever the
    * data changes.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._updateRangeTree = function () {
     if (m_rangeTreeTime.getMTime() >= m_this.dataTime().getMTime()) {
       return;
@@ -209,14 +195,12 @@ var pointFeature = function (arg) {
     m_rangeTreeTime.modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Returns an array of datum indices that contain the given point.
    * Largely adapted from wigglemaps pointQuerier:
    *
    * https://github.com/dotskapes/wigglemaps/blob/cf5bed3fbfe2c3e48d31799462a80c564be1fb60/src/query/PointQuerier.js
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (p) {
     var min, max, data, idx = [], found = [], ifound = [], map, pt,
         corners,
@@ -281,11 +265,9 @@ var pointFeature = function (arg) {
     };
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Returns an array of datum indices that are contained in the given box.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.boxSearch = function (lowerLeft, upperRight) {
     var pos = m_this.position(),
         idx = [];
@@ -303,11 +285,9 @@ var pointFeature = function (arg) {
     return idx;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Overloaded data method that updates the internal range tree on write.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.data = function (data) {
     if (data === undefined) {
       return s_data();
@@ -324,11 +304,9 @@ var pointFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     arg = arg || {};
     s_init.call(m_this, arg);

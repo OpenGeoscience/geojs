@@ -4,7 +4,6 @@ var tile = require('./tile');
 module.exports = (function () {
   'use strict';
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * This class defines a tile that is part of a standard "image pyramid", such
    * as an open street map tile set.  Every tile is uniquely indexed by a row,
@@ -34,7 +33,6 @@ module.exports = (function () {
    * @param {number} [spec.overlap.x=0]
    * @param {number} [spec.overlap.y=0]
    */
-  //////////////////////////////////////////////////////////////////////////////
   var imageTile = function (spec) {
     if (!(this instanceof imageTile)) {
       return new imageTile(spec);

@@ -180,14 +180,14 @@ C.prototype._scaleAtLevel = function (zoom, width, height) {
  */
 C.prototype.addPoint = function (point) {
   var zoom, closest, parent, newCluster, lastParent, z;
-
-  // start at the maximum zoom level and search for nearby
-  //
-  // 1.  existing clusters
-  // 2.  unclustered points
-  //
-  // otherwise add the point as a new unclustered point
-
+  /*
+   * start at the maximum zoom level and search for nearby
+   *
+   * 1.  existing clusters
+   * 2.  unclustered points
+   *
+   * otherwise add the point as a new unclustered point
+   */
   for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
 
     // find near cluster

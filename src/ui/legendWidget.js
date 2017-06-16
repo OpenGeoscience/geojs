@@ -2,7 +2,6 @@ var svgWidget = require('./svgWidget');
 var inherit = require('../inherit');
 var registerWidget = require('../registry').registerWidget;
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class legendWidget
  *
@@ -10,7 +9,6 @@ var registerWidget = require('../registry').registerWidget;
  * @extends geo.gui.svgWidget
  * @returns {geo.gui.legendWidget}
  */
-//////////////////////////////////////////////////////////////////////////////
 var legendWidget = function (arg) {
   'use strict';
   if (!(this instanceof legendWidget)) {
@@ -32,7 +30,6 @@ var legendWidget = function (arg) {
       s_createCanvas = this._createCanvas,
       s_appendChild = this._appendChild;
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the category array associated with
    * the legend.  Each element of this array is
@@ -58,7 +55,6 @@ var legendWidget = function (arg) {
    *
    * @param {object[]?} categories The categories to display
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.categories = function (arg) {
     if (arg === undefined) {
       return m_categories.slice();
@@ -74,12 +70,10 @@ var legendWidget = function (arg) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get the widget's size
    * @return {{width: number, height: number}} The size in pixels
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.size = function () {
     var width = 1, height;
     var test = d3.select(m_this.canvas()).append('text')
@@ -98,11 +92,9 @@ var legendWidget = function (arg) {
     };
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Redraw the legend
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
 
     m_this._init();
@@ -196,12 +188,10 @@ var legendWidget = function (arg) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get scales for the x and y axis for the current size.
    * @private
    */
-  //////////////////////////////////////////////////////////////////////////////
   this._scale = function () {
     return {
       x: d3.scale.linear()
@@ -213,13 +203,11 @@ var legendWidget = function (arg) {
     };
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Private initialization.  Creates the widget's DOM container and internal
    * variables.
    * @private
    */
-  //////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     // adding categories redraws the entire thing by calling _init, see
     // the m_top.remove() line below

@@ -2,7 +2,6 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  *
  * Create a new instance of pointFeature
@@ -12,7 +11,6 @@ var pointFeature = require('../pointFeature');
  * @extends geo.d3.object
  * @returns {geo.d3.pointFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var d3_pointFeature = function (arg) {
   'use strict';
   if (!(this instanceof d3_pointFeature)) {
@@ -26,34 +24,28 @@ var d3_pointFeature = function (arg) {
   pointFeature.call(this, arg);
   d3_object.call(this);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_init = this._init,
       s_update = this._update,
       m_buildTime = timestamp(),
       m_style = {};
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
    *
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     var data = m_this.data(),
         s_style = m_this.style.get(),
@@ -92,13 +84,11 @@ var d3_pointFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    *
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
     s_update.call(m_this);
 

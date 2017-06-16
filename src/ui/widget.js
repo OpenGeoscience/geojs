@@ -1,7 +1,6 @@
 var inherit = require('../inherit');
 var sceneObject = require('../sceneObject');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class widget
  *
@@ -9,7 +8,6 @@ var sceneObject = require('../sceneObject');
  * @extends {geo.sceneObject}
  * @returns {geo.gui.widget}
  */
-//////////////////////////////////////////////////////////////////////////////
 var widget = function (arg) {
   'use strict';
   if (!(this instanceof widget)) {
@@ -45,13 +43,11 @@ var widget = function (arg) {
     s_exit();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create feature give a name
    *
    * @returns {geo.Feature} Will return a new feature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._createFeature = function (featureName, arg) {
 
     var newFeature = createFeature(
@@ -62,40 +58,32 @@ var widget = function (arg) {
     return newFeature;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Delete feature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._deleteFeature = function (feature) {
     m_this.removeChild(feature);
     feature._exit();
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the layer associated with this widget.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.layer = function () {
     return m_layer;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create the canvas this widget will operate on.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._createCanvas = function () {
     throw new Error('Must be defined in derived classes');
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set the canvas for the widget
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.canvas = function (val) {
     if (val === undefined) {
       return m_canvas;
@@ -104,22 +92,18 @@ var widget = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Appends a child to the widget
    * The widget determines how to append itself to a parent, the parent can either
    * be another widget, or the UI Layer.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._appendChild = function () {
     m_this.parentCanvas().appendChild(m_this.canvas());
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the parent canvas (top level widgets define their layer as their parent canvas)
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.parentCanvas = function () {
     if (m_this.parent === undefined) {
       return m_this.layer().canvas();
@@ -128,12 +112,10 @@ var widget = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Gets the CSS positioning that a widget should be placed at.
    * { top: 0, left: 0 } by default.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.position = function (pos) {
     if (pos !== undefined) {
       arg.position = pos;
@@ -160,14 +142,12 @@ var widget = function (arg) {
     return arg.position;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Repositions a widget based on the argument passed, or calling position on
    * the widget itself.
    * @param {object} position A position with the form:
    * { top: m, left: n }
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.reposition = function (position) {
     position = position || m_this.position();
     m_this.canvas().style.position = 'absolute';
@@ -190,11 +170,9 @@ var widget = function (arg) {
     return m_this.reposition();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Determines whether or not the widget is completely within the viewport.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.isInViewport = function () {
     var position = m_this.position();
     var layer = m_this.layer();

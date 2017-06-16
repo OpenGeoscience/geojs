@@ -2,7 +2,6 @@ var inherit = require('../inherit');
 var registerRenderer = require('../registry').registerRenderer;
 var renderer = require('../renderer');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class d3Renderer
  *
@@ -10,7 +9,6 @@ var renderer = require('../renderer');
  * @extends geo.renderer
  * @returns {geo.d3.d3Renderer}
  */
-//////////////////////////////////////////////////////////////////////////////
 var d3Renderer = function (arg) {
   'use strict';
 
@@ -45,12 +43,10 @@ var d3Renderer = function (arg) {
       m_svg = null,
       m_defs = null;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set attributes to a d3 selection.
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   function setAttrs(select, attrs) {
     var key;
     for (key in attrs) {
@@ -60,12 +56,10 @@ var d3Renderer = function (arg) {
     }
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Meta functions for converting from geojs styles to d3.
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._convertColor = function (f, g) {
     f = util.ensureFunction(f);
     g = g || function () { return true; };
@@ -90,12 +84,10 @@ var d3Renderer = function (arg) {
     };
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set styles to a d3 selection. Ignores unkown style keys.
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   function setStyles(select, styles) {
     var key, k, f;
     function fillFunc() {
@@ -155,14 +147,12 @@ var d3Renderer = function (arg) {
     }
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the svg group element associated with this renderer instance, or of a
    * group within the render instance.
    *
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   function getGroup(parentId) {
     if (parentId) {
       return m_svg.select('.group-' + parentId);
@@ -170,12 +160,10 @@ var d3Renderer = function (arg) {
     return m_svg.select('.group-' + m_this._d3id());
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set the initial lat-lon coordinates of the map view.
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   function initCorners() {
     var layer = m_this.layer(),
         map = layer.map(),
@@ -195,13 +183,11 @@ var d3Renderer = function (arg) {
     };
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set the translation, scale, and zoom for the current view.
    * @note rotation not yet supported
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._setTransform = function () {
     if (!m_corners) {
       initCorners();
@@ -251,13 +237,11 @@ var d3Renderer = function (arg) {
     m_transform.rotation = rotation;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from screen pixel coordinates to the local coordinate system
    * in the SVG group element taking into account the transform.
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.baseToLocal = function (pt) {
     pt = {
       x: (pt.x - m_transform.dx) / m_scale,
@@ -275,13 +259,11 @@ var d3Renderer = function (arg) {
     return pt;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from the local coordinate system in the SVG group element
    * to screen pixel coordinates.
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.localToBase = function (pt) {
     if (m_transform.rotation) {
       var sinr = Math.sin(m_transform.rotation),
@@ -299,11 +281,9 @@ var d3Renderer = function (arg) {
     return pt;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     if (!m_this.canvas()) {
       var canvas;
@@ -381,16 +361,13 @@ var d3Renderer = function (arg) {
     m_this._setTransform();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get API used by the renderer
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.api = function () {
     return 'd3';
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the current scaling factor to build features that shouldn't
    * change size during zooms.  For example:
@@ -401,16 +378,13 @@ var d3Renderer = function (arg) {
    * This will create a circle element with radius r0 independent of the
    * current zoom level.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.scaleFactor = function () {
     return m_scale;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Handle resize event
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._resize = function (x, y, w, h) {
     if (!m_corners) {
       initCorners();
@@ -421,19 +395,15 @@ var d3Renderer = function (arg) {
     m_this.layer().geoTrigger(d3Rescale, { scale: m_scale }, true);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update noop for geo.d3.object api.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Exit
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_features = {};
     m_this.canvas().remove();
@@ -446,17 +416,14 @@ var d3Renderer = function (arg) {
     s_exit();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the definitions dom element for the layer
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._definitions = function () {
     return m_defs;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create a new feature element from an object that describes the feature
    * attributes.  To be called from feature classes only.
@@ -481,7 +448,6 @@ var d3Renderer = function (arg) {
    *    parentId:   If set, the group ID of the parent element.
    *  }
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._drawFeatures = function (arg) {
     m_features[arg.id] = {
       data: arg.data,
@@ -498,12 +464,10 @@ var d3Renderer = function (arg) {
     return m_this.__render(arg.id, arg.parentId);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
   *  Updates a feature by performing a d3 data join.  If no input id is
   *  provided then this method will update all features.
   */
-  ////////////////////////////////////////////////////////////////////////////
   this.__render = function (id, parentId) {
     var key;
     if (id === undefined) {
@@ -568,20 +532,16 @@ var d3Renderer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
   *  Returns a d3 selection for the given feature id.
   */
-  ////////////////////////////////////////////////////////////////////////////
   this.select = function (id, parentId) {
     return getGroup(parentId).selectAll('.' + id);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
   *  Removes a feature from the layer.
   */
-  ////////////////////////////////////////////////////////////////////////////
   this._removeFeature = function (id) {
     m_removeIds[id] = true;
     m_this.layer().map().scheduleAnimationFrame(m_this._renderFrame);
@@ -592,11 +552,9 @@ var d3Renderer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
   *  Override draw method to do nothing.
   */
-  ////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
   };
 

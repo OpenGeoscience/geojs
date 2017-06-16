@@ -7,7 +7,6 @@
   var mat4 = require('gl-mat4');
   var vec4 = require('gl-vec4');
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * This class defines the raw interface for a camera.  At a low level, the
    * camera provides a methods for converting between a map's coordinate system
@@ -51,7 +50,6 @@
    * @param {object} spec.viewport.height
    * @returns {geo.camera}
    */
-  //////////////////////////////////////////////////////////////////////////////
   var camera = function (spec) {
     if (!(this instanceof camera)) {
       return new camera(spec);

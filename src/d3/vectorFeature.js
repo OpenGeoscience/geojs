@@ -2,7 +2,6 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var vectorFeature = require('../vectorFeature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of vectorFeature
  *
@@ -11,7 +10,6 @@ var vectorFeature = require('../vectorFeature');
  * @extends geo.d3.object
  * @returns {geo.d3.vectorFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var d3_vectorFeature = function (arg) {
   'use strict';
   if (!(this instanceof d3_vectorFeature)) {
@@ -26,11 +24,9 @@ var d3_vectorFeature = function (arg) {
   vectorFeature.call(this, arg);
   object.call(this);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_init = this._init,
       s_exit = this._exit,
@@ -38,7 +34,6 @@ var d3_vectorFeature = function (arg) {
       m_buildTime = timestamp(),
       m_style = {};
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Generate a unique ID for a marker definition
    * @private
@@ -46,12 +41,10 @@ var d3_vectorFeature = function (arg) {
    * @param {number} i The marker index
    * @param {string} position The marker's vector position (head or tail)
    */
-  ////////////////////////////////////////////////////////////////////////////
   function markerID(d, i, position) {
     return m_this._d3id() + '_marker_' + i + '_' + position;
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Add marker styles for vector arrows.
    * @private
@@ -61,7 +54,6 @@ var d3_vectorFeature = function (arg) {
    * @param {function} originStyle The marker style for the vector head
    * @param {function} endStyle The marker style for the vector tail
    */
-  ////////////////////////////////////////////////////////////////////////////
   function updateMarkers(data, stroke, opacity, originStyle, endStyle) {
 
     var markerConfigs = {
@@ -154,23 +146,19 @@ var d3_vectorFeature = function (arg) {
     sel.exit().remove();
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     var data = m_this.data(),
         s_style = m_this.style.get(),
@@ -256,12 +244,10 @@ var d3_vectorFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
     s_update.call(m_this);
 
@@ -280,12 +266,10 @@ var d3_vectorFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Exit
    * @protected
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     s_exit.call(m_this);
     m_style = {};

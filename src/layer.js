@@ -5,7 +5,6 @@ var checkRenderer = require('./registry').checkRenderer;
 var rendererForFeatures = require('./registry').rendererForFeatures;
 var rendererForAnnotations = require('./registry').rendererForAnnotations;
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * @class geo.layer
  * @extends geo.sceneObject
@@ -15,7 +14,6 @@ var rendererForAnnotations = require('./registry').rendererForAnnotations;
  *   to the index of the layer inside the map)
  * @returns {geo.layer}
  */
-//////////////////////////////////////////////////////////////////////////////
 var layer = function (arg) {
   'use strict';
 
@@ -32,11 +30,9 @@ var layer = function (arg) {
   var geo_event = require('./event');
   var camera = require('./camera');
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
       m_id = arg.id === undefined ? layer.newLayerId() : arg.id,
@@ -65,18 +61,15 @@ var layer = function (arg) {
     throw new Error('Layers must be initialized on a map.');
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the name of the renderer.
    *
    * @returns {string}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.rendererName = function () {
     return m_rendererName;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the z-index of the layer.  The z-index controls the display
    * order of the layers in much the same way as the CSS z-index property.
@@ -84,7 +77,6 @@ var layer = function (arg) {
    * @param {number} [zIndex] The new z-index
    * @returns {number|this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.zIndex = function (zIndex) {
     if (zIndex === undefined) {
       return m_zIndex;
@@ -94,7 +86,6 @@ var layer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Bring the layer above the given number of layers.  This will rotate the
    * current z-indices for this and the next `n` layers.
@@ -102,7 +93,6 @@ var layer = function (arg) {
    * @param {number} [n=1] The number of positions to move
    * @returns {this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.moveUp = function (n) {
     var order, i, me = null, tmp, sign;
 
@@ -143,7 +133,6 @@ var layer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Bring the layer below the given number of layers.  This will rotate the
    * current z-indices for this and the previous `n` layers.
@@ -151,7 +140,6 @@ var layer = function (arg) {
    * @param {number} [n=1] The number of positions to move
    * @returns {this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.moveDown = function (n) {
     if (n === undefined) {
       n = 1;
@@ -159,40 +147,33 @@ var layer = function (arg) {
     return m_this.moveUp(-n);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Bring the layer to the top of the map layers.
    *
    * @returns {this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.moveToTop = function () {
     return m_this.moveUp(m_this.map().children().length - 1);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Bring the layer to the bottom of the map layers.
    *
    * @returns {this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.moveToBottom = function () {
     return m_this.moveDown(m_this.map().children().length - 1);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get whether or not the layer is sticky (navigates with the map).
    *
    * @returns {Boolean}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.sticky = function () {
     return m_sticky;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set whether or not the layer is active.  An active layer will receive
    * native mouse when the layer is on top.  Non-active layers will never
@@ -200,7 +181,6 @@ var layer = function (arg) {
    *
    * @returns {Boolean|object}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.active = function (arg) {
     if (arg === undefined) {
       return m_active;
@@ -212,24 +192,20 @@ var layer = function (arg) {
     return this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get root node of the layer
    *
    * @returns {div}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.node = function () {
     return m_node;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set id of the layer
    *
    * @returns {String}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.id = function (val) {
     if (val === undefined) {
       return m_id;
@@ -239,13 +215,11 @@ var layer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set name of the layer
    *
    * @returns {String}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.name = function (val) {
     if (val === undefined) {
       return m_name;
@@ -255,57 +229,45 @@ var layer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set map of the layer
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.map = function () {
     return m_map;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get renderer for the layer if any
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.renderer = function () {
     return m_renderer;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get canvas of the layer
    *
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.canvas = function () {
     return m_canvas;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return last time data got changed
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.dataTime = function () {
     return m_dataTime;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the modified time for the last update that did something
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.updateTime = function () {
     return m_updateTime;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set if the layer has been initialized
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.initialized = function (val) {
     if (val !== undefined) {
       m_initialized = val;
@@ -314,7 +276,6 @@ var layer = function (arg) {
     return m_initialized;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Transform coordinates from world coordinates into a local coordinate
    * system specific to the underlying renderer.  This method is exposed
@@ -322,7 +283,6 @@ var layer = function (arg) {
    * not be called directly.  The default implementation is the identity
    * operator.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function (input) {
     if (m_this._toLocalMatrix) {
       camera.applyTransform(m_this._toLocalMatrix, input);
@@ -330,11 +290,9 @@ var layer = function (arg) {
     return input;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Transform coordinates from a local coordinate system to world coordinates.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.fromLocal = function (input) {
     if (m_this._fromLocalMatrix) {
       camera.applyTransform(m_this._fromLocalMatrix, input);
@@ -342,7 +300,6 @@ var layer = function (arg) {
     return input;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the attribution html content that will displayed with the
    * layer.  By default, nothing will be displayed.  Note, this content
@@ -351,7 +308,6 @@ var layer = function (arg) {
    * @param {string?} arg An html fragment
    * @returns {string|this} Chainable as a setter
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.attribution = function (arg) {
     if (arg !== undefined) {
       m_attribution = arg;
@@ -361,7 +317,6 @@ var layer = function (arg) {
     return m_attribution;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set visibility of the layer
    *
@@ -370,7 +325,6 @@ var layer = function (arg) {
    * @return {boolean|object} either the visibility (if getting) or the layer
    *    (if setting).
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.visible = function (val) {
     if (val === undefined) {
       return m_visible;
@@ -383,7 +337,6 @@ var layer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set selectionAPI of the layer
    *
@@ -392,7 +345,6 @@ var layer = function (arg) {
    * @return {boolean|object} either the selectionAPI state (if getting) or the
    *    layer (if setting).
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.selectionAPI = function (val) {
     if (val === undefined) {
       return m_selectionAPI;
@@ -403,7 +355,6 @@ var layer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Init layer
    *
@@ -411,7 +362,6 @@ var layer = function (arg) {
    *    resize, pan, and zoom events itself, set this flag to true to avoid
    *    binding them here.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (noEvents) {
     if (m_initialized) {
       return m_this;
@@ -442,7 +392,7 @@ var layer = function (arg) {
     m_initialized = true;
 
     if (!noEvents) {
-      /// Bind events to handlers
+      // Bind events to handlers
       m_this.geoOn(geo_event.resize, function (event) {
         m_this._update({event: event});
       });
@@ -463,11 +413,9 @@ var layer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Clean up resouces
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.geoOff();
     if (m_renderer) {
@@ -481,39 +429,31 @@ var layer = function (arg) {
     s_exit();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update layer
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the width of the layer in pixels.
    * **DEPRECIATED: use map.size instead.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.width = function () {
     return m_this.map().size().width;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the height of the layer in pixels
    * **DEPRECIATED: use map.size instead.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.height = function () {
     return m_this.map().size().height;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the current layer opacity.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.opacity = function (opac) {
     if (opac !== undefined) {
       m_opacity = opac;

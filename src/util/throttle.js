@@ -120,15 +120,17 @@ var throttle = function (delay, no_trailing,
       exec();
 
     } else if (no_trailing !== true) {
-      // In trailing throttle mode, since `delay` time has not been
-      // exceeded, schedule `callback` to execute `delay` ms after most
-      // recent execution.
-      //
-      // If `debounce_mode` is true (at_begin), schedule `clear` to execute
-      // after `delay` ms.
-      //
-      // If `debounce_mode` is false (at end), schedule `callback` to
-      // execute after `delay` ms.
+      /*
+       * In trailing throttle mode, since `delay` time has not been
+       * exceeded, schedule `callback` to execute `delay` ms after most
+       * recent execution.
+       *
+       * If `debounce_mode` is true (at_begin), schedule `clear` to execute
+       * after `delay` ms.
+       *
+       * If `debounce_mode` is false (at end), schedule `callback` to
+       * execute after `delay` ms.
+       */
       timeout_id = setTimeout(
         debounce_mode ?
           clear :

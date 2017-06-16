@@ -2,7 +2,6 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var pathFeature = require('../pathFeature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class pathFeature
  *
@@ -11,7 +10,6 @@ var pathFeature = require('../pathFeature');
  * @extends geo.d3.object
  * @returns {geo.d3.pathFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var d3_pathFeature = function (arg) {
   'use strict';
   if (!(this instanceof d3_pathFeature)) {
@@ -27,11 +25,9 @@ var d3_pathFeature = function (arg) {
   pathFeature.call(this, arg);
   object.call(this);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_init = this._init,
       m_buildTime = timestamp(),
@@ -40,23 +36,19 @@ var d3_pathFeature = function (arg) {
 
   m_style.style = {};
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
    *
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     var data = m_this.data() || [],
         s_style = m_this.style(),
@@ -103,13 +95,11 @@ var d3_pathFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    *
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
     s_update.call(m_this);
 

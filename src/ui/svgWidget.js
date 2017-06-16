@@ -2,7 +2,6 @@ var domWidget = require('./domWidget');
 var inherit = require('../inherit');
 var registerWidget = require('../registry').registerWidget;
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class geo.gui.svgWidget
  *
@@ -19,7 +18,6 @@ var registerWidget = require('../registry').registerWidget;
  * @returns {geo.gui.svgWidget}
  *
  */
-//////////////////////////////////////////////////////////////////////////////
 var svgWidget = function (arg) {
   'use strict';
   if (!(this instanceof svgWidget)) {
@@ -51,13 +49,11 @@ var svgWidget = function (arg) {
     m_this.reposition();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Creates the canvas for the svg widget.
    * This directly uses the {@link geo.d3.d3Renderer} as a helper to do all of the heavy
    * lifting.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._createCanvas = function (d3Parent) {
     var rendererOpts = {
       layer: m_this.layer(),

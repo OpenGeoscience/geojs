@@ -2,7 +2,6 @@ var inherit = require('./inherit');
 var registerFileReader = require('./registry').registerFileReader;
 var fileReader = require('./fileReader');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
 * Create a new instance of class jsonReader
 *
@@ -10,7 +9,6 @@ var fileReader = require('./fileReader');
 * @extends geo.fileReader
 * @returns {geo.jsonReader}
 */
-//////////////////////////////////////////////////////////////////////////////
 var jsonReader = function (arg) {
   'use strict';
   if (!(this instanceof jsonReader)) {

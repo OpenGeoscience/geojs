@@ -1,4 +1,3 @@
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Stores the current time for a map, triggers time keeping events, and
  * handles the animation state and interaction.
@@ -7,7 +6,6 @@
  * @extends geo.object
  * @returns {geo.clock}
  */
-//////////////////////////////////////////////////////////////////////////////
 geo.clock = function (opts) {
   'use strict';
 
@@ -17,11 +15,9 @@ geo.clock = function (opts) {
   geo.object.call(this, opts);
   opts = opts || {};
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  //////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_now = new Date(0),
       m_start = null,
@@ -34,11 +30,9 @@ geo.clock = function (opts) {
       m_currentAnimation = null,
       m_object = null;
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the geo.object to trigger events on.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.object = function (arg) {
     if (arg === undefined) {
       return m_object;
@@ -47,21 +41,17 @@ geo.clock = function (opts) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Returns true if attached to a valid geo.object.
    * @private
    */
-  //////////////////////////////////////////////////////////////////////////////
   this._attached = function () {
     return (m_object instanceof geo.object);
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the current time.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.now = function (arg) {
     var previous = m_now;
     if (arg === undefined) {
@@ -80,11 +70,9 @@ geo.clock = function (opts) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the animation start time.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.start = function (arg) {
     if (arg === undefined) {
       return m_start;
@@ -93,11 +81,9 @@ geo.clock = function (opts) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the animation end time.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.end = function (arg) {
     if (arg === undefined) {
       return m_end;
@@ -106,11 +92,9 @@ geo.clock = function (opts) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the animation time step.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.step = function (arg) {
     if (arg === undefined) {
       return m_step;
@@ -119,13 +103,11 @@ geo.clock = function (opts) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set looping control of the clock.  This controls how many times the
    * animation will repeat before stopping.  Default
    * ``Number.POSITIVE_INFINITY``, the animation repeats forever.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.loop = function (arg) {
     if (arg === undefined) {
       return m_loop;
@@ -134,7 +116,6 @@ geo.clock = function (opts) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the animation state.  Valid values are:
    *
@@ -145,7 +126,6 @@ geo.clock = function (opts) {
    * This will also trigger relevant events, but they may be fired
    * asynchronously.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.state = function (arg, step) {
 
     if (arg === undefined) {
@@ -172,13 +152,11 @@ geo.clock = function (opts) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the animation frame rate.  This is approximately the number
    * of frames displayed per second.  A null value will use the browser's
    * native requestAnimationFrame to draw new frames.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.framerate = function (arg) {
     if (arg === undefined) {
       return m_rate;
@@ -187,37 +165,31 @@ geo.clock = function (opts) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Step to the next frame in the animation.  Pauses the animation if it is
    * playing.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.stepForward = function () {
     m_this.state('pause');
     m_this._setNextFrame(1);
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Step to the previous frame in the animation.  Pauses the animation if it is
    * playing.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.stepBackward = function () {
     m_this.state('pause');
     m_this._setNextFrame(-1);
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Step to the next frame in the animation.  Will set the state to stop
    * if the animation has reached the end and there are no more loops.
    * @private
    */
-  //////////////////////////////////////////////////////////////////////////////
   this._setNextFrame = function (step) {
     var next = new Date(m_this.now().valueOf() + step * m_this.step());
 
@@ -237,14 +209,12 @@ geo.clock = function (opts) {
     m_this.now(next);
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Start an animation.
    * @param {integer} step The animation frame step (+1 for forward -1 for
    *                       reverse, etc).
    * @private
    */
-  //////////////////////////////////////////////////////////////////////////////
   this._animate = function (step) {
     var myAnimation = {};
     m_currentAnimation = myAnimation;

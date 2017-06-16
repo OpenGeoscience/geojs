@@ -3,7 +3,6 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of pointFeature
  *
@@ -11,7 +10,6 @@ var pointFeature = require('../pointFeature');
  * @extends geo.pointFeature
  * @returns {geo.gl.pointFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var gl_pointFeature = function (arg) {
   'use strict';
   if (!(this instanceof gl_pointFeature)) {
@@ -27,11 +25,9 @@ var gl_pointFeature = function (arg) {
 
   object.call(this);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
       m_actor = null,
@@ -353,13 +349,11 @@ var gl_pointFeature = function (arg) {
     m_mapper.boundsDirtyTimestamp().modified();
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return list of actors
    *
    * @returns {vgl.actor[]}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.actors = function () {
     if (!m_actor) {
       return [];
@@ -367,13 +361,11 @@ var gl_pointFeature = function (arg) {
     return [m_actor];
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the number of vertices used for each point.
    *
    * @returns {Number}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.verticesPerFeature = function () {
     var unit = pointPolygon(0, 0, 1, 1);
     return unit.length / 2;
@@ -454,11 +446,9 @@ var gl_pointFeature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     var prog = vgl.shaderProgram(),
         vertexShader = createVertexShader(),
@@ -555,13 +545,11 @@ var gl_pointFeature = function (arg) {
     m_mapper.setGeometryData(geom);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
    *
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
 
     if (m_actor) {
@@ -575,13 +563,11 @@ var gl_pointFeature = function (arg) {
     m_this.buildTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    *
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
 
     s_update.call(m_this);
@@ -604,11 +590,9 @@ var gl_pointFeature = function (arg) {
     m_this.updateTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
     m_actor = null;

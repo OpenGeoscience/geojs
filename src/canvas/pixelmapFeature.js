@@ -2,7 +2,6 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var pixelmapFeature = require('../pixelmapFeature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class pixelmapFeature
  *
@@ -11,7 +10,6 @@ var pixelmapFeature = require('../pixelmapFeature');
  * @extends geo.pixelmapFeature
  * @returns {canvas_pixelmapFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var canvas_pixelmapFeature = function (arg) {
   'use strict';
 

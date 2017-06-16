@@ -1,10 +1,8 @@
-//////////////////////////////////////////////////////////////////////////////
 /**
  * VGL specific subclass of object which rerenders when the object is drawn.
  * @class geo.gl.object
  * @extends geo.sceneObject
  */
-//////////////////////////////////////////////////////////////////////////////
 
 var gl_object = function (arg) {
   'use strict';
@@ -20,11 +18,9 @@ var gl_object = function (arg) {
   var m_this = this,
       s_draw = this.draw;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
   *  Redraw the object.
   */
-  ////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
     m_this._update({mayDelay: true});
     m_this.renderer()._render();

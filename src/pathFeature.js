@@ -2,7 +2,6 @@ var $ = require('jquery');
 var inherit = require('./inherit');
 var feature = require('./feature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class pathFeature
  *
@@ -10,7 +9,6 @@ var feature = require('./feature');
  * @extends geo.feature
  * @returns {geo.pathFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var pathFeature = function (arg) {
   'use strict';
   if (!(this instanceof pathFeature)) {
@@ -19,22 +17,18 @@ var pathFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_position = arg.position === undefined ? [] : arg.position,
       s_init = this._init;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set positions
    *
    * @returns {geo.pathFeature}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
       return m_position;
@@ -46,11 +40,9 @@ var pathFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
 

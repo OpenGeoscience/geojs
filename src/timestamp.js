@@ -1,7 +1,6 @@
 var vgl = require('vgl');
 var inherit = require('./inherit');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class timestamp
  *
@@ -9,7 +8,6 @@ var inherit = require('./inherit');
  * @extends vgl.timestamp
  * @returns {geo.timestamp}
  */
-//////////////////////////////////////////////////////////////////////////////
 var timestamp = function () {
   'use strict';
   if (!(this instanceof timestamp)) {

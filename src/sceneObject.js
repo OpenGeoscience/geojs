@@ -1,7 +1,6 @@
 var inherit = require('./inherit');
 var object = require('./object');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class sceneObject, which extends the object's
  * event handling with a tree-based event propagation.
@@ -11,7 +10,6 @@ var object = require('./object');
  * @extends geo.object
  * @returns {geo.sceneObject}
  */
-//////////////////////////////////////////////////////////////////////////////
 var sceneObject = function (arg) {
   'use strict';
   if (!(this instanceof sceneObject)) {
@@ -27,11 +25,9 @@ var sceneObject = function (arg) {
       s_addPromise = this.addPromise,
       s_onIdle = this.onIdle;
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Override object.addPromise to propagate up the scene tree.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.addPromise = function (promise) {
     if (m_parent) {
       m_parent.addPromise(promise);
@@ -40,11 +36,9 @@ var sceneObject = function (arg) {
     }
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Override object.onIdle to propagate up the scene tree.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.onIdle = function (handler) {
     if (m_parent) {
       m_parent.onIdle(handler);
@@ -53,12 +47,10 @@ var sceneObject = function (arg) {
     }
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Get/set parent of the object
    *  @param {geo.sceneObject} [parent]
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.parent = function (arg) {
     if (arg === undefined) {
       return m_parent;
@@ -67,11 +59,9 @@ var sceneObject = function (arg) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Add a child (or an array of children) to the object
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.addChild = function (child) {
     if (Array.isArray(child)) {
       child.forEach(m_this.addChild);
@@ -82,11 +72,9 @@ var sceneObject = function (arg) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Remove a child (or array of children) from the object
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.removeChild = function (child) {
     if (Array.isArray(child)) {
       child.forEach(m_this.removeChild);
@@ -96,21 +84,17 @@ var sceneObject = function (arg) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Get an array of child objects
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.children = function () {
     return m_children.slice();
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Force redraw of a scene object, to be implemented by subclasses.
    *  Base class just calls draw of child objects.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.draw = function (arg) {
     m_this.children().forEach(function (child) {
       child.draw(arg);
@@ -118,14 +102,12 @@ var sceneObject = function (arg) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    *  Trigger an event (or events) on this object and call all handlers.
    *  @param {String} event the event to trigger
    *  @param {Object} args arbitrary argument to pass to the handler
    *  @param {Boolean} childrenOnly if true, only propagate down the tree
    */
-  //////////////////////////////////////////////////////////////////////////////
   this.geoTrigger = function (event, args, childrenOnly) {
 
     var geoArgs;
@@ -165,11 +147,9 @@ var sceneObject = function (arg) {
     return m_this;
   };
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Free all resources and destroy the object.
    */
-  //////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.children = [];
     delete m_this.parent;

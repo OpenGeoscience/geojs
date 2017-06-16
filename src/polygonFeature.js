@@ -2,7 +2,6 @@ var $ = require('jquery');
 var inherit = require('./inherit');
 var feature = require('./feature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class polygonFeature
  *
@@ -41,7 +40,6 @@ var feature = require('./feature');
  *   color, and stroke opacity).   Defaults to false.  Can vary by polygon.
  * @returns {geo.polygonFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var polygonFeature = function (arg) {
   'use strict';
   if (!(this instanceof polygonFeature)) {
@@ -52,11 +50,9 @@ var polygonFeature = function (arg) {
 
   var util = require('./util');
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_lineFeature,
       s_init = this._init,
@@ -79,7 +75,6 @@ var polygonFeature = function (arg) {
     strokeWidth: true
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set data.
    *
@@ -88,7 +83,6 @@ var polygonFeature = function (arg) {
    *    feature.  If not specified, return the current data.
    * @returns {geo.polygonFeature|Object}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.data = function (arg) {
     var ret = s_data(arg);
     if (arg !== undefined) {
@@ -98,7 +92,6 @@ var polygonFeature = function (arg) {
     return ret;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the internal coordinates whenever the data changes.  For now, we do
    * the computation in world coordinates, but we will need to work in GCS
@@ -107,7 +100,6 @@ var polygonFeature = function (arg) {
    * @memberof geo.polygonFeature
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   function getCoordinates() {
     var posFunc = m_this.style.get('position'),
         polyFunc = m_this.style.get('polygon');
@@ -149,7 +141,6 @@ var polygonFeature = function (arg) {
     });
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the style for the stroke of the polygon.  Since polygons can have
    * holes, the number of stroke lines may not be the same as the number of
@@ -164,7 +155,6 @@ var polygonFeature = function (arg) {
    * @returns {object|function} A style that can be used for the stroke.
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   function linePolyStyle(styleValue) {
     if (util.isFunction(styleValue)) {
       return function (d) {
@@ -175,7 +165,6 @@ var polygonFeature = function (arg) {
     }
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set polygon accessor.
    *
@@ -184,7 +173,6 @@ var polygonFeature = function (arg) {
    *    and return the feature.  If not specified, return the current polygon.
    * @returns {geo.polygonFeature|Object}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.polygon = function (val) {
     if (val === undefined) {
       return m_this.style('polygon');
@@ -197,7 +185,6 @@ var polygonFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set position accessor.
    *
@@ -207,7 +194,6 @@ var polygonFeature = function (arg) {
    *    position.
    * @returns {geo.polygonFeature|Object}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
       return m_this.style('position');
@@ -220,7 +206,6 @@ var polygonFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Point search method for selection api.  Returns markers containing the
    * given point.
@@ -229,7 +214,6 @@ var polygonFeature = function (arg) {
    * @argument {object} coordinate
    * @returns {object}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (coordinate) {
     var found = [], indices = [], data = m_this.data();
     m_coordinates.forEach(function (coord, i) {
@@ -250,12 +234,10 @@ var polygonFeature = function (arg) {
     };
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set style used by the feature.  This calls the super function, then
    * checks if strokes are required.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.style = function (arg1, arg2) {
     var result = s_style.apply(this, arguments);
     if (arg1 !== undefined && (typeof arg1 !== 'string' || arg2 !== undefined)) {
@@ -285,12 +267,10 @@ var polygonFeature = function (arg) {
     return line;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Check if we need to add a line feature to the layer, and update it as
    * necessary.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._checkForStroke = function () {
     if (s_style('stroke') === false) {
       if (m_lineFeature && m_this.layer()) {
@@ -354,11 +334,9 @@ var polygonFeature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
   * Redraw the object.
   */
-  ////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
     var result = s_draw();
     if (m_lineFeature) {
@@ -367,12 +345,10 @@ var polygonFeature = function (arg) {
     return result;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
   * When the feature is marked as modified, mark our sub-feature as modified,
   * too.
   */
-  ////////////////////////////////////////////////////////////////////////////
   this.modified = function () {
     var result = s_modified();
     if (m_lineFeature) {
@@ -381,12 +357,10 @@ var polygonFeature = function (arg) {
     return result;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
    * @memberof geo.polygonFeature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     if (m_lineFeature && m_this.layer()) {
       m_this.layer().deleteFeature(m_lineFeature);
@@ -396,12 +370,10 @@ var polygonFeature = function (arg) {
     s_exit();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    * @memberof geo.polygonFeature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     arg = arg || {};
     s_init.call(m_this, arg);
