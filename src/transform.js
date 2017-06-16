@@ -1,6 +1,5 @@
 var proj4 = require('proj4');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * This purpose of this class is to provide a generic interface for computing
  * coordinate transformationss.  The interface is taken from the proj4js,
@@ -22,7 +21,6 @@ var proj4 = require('proj4');
  * @param {string} options.target A proj4 string for the target projection
  * @returns {geo.transform}
  */
-//////////////////////////////////////////////////////////////////////////////
 
 var transformCache = {};
 /* Up to maxTransformCacheSize squared might be cached.  When the maximum cache
@@ -281,12 +279,12 @@ transform.transformCoordinates = function (
 transform.transformCoordinatesArray = function (trans, coordinates, numberOfComponents) {
   var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint;
 
-  /// Default Z accessor
+  // Default Z accessor
   zAcc = function () {
     return 0.0;
   };
 
-  /// Helper methods
+  // Helper methods
   function handleArrayCoordinates() {
     if (coordinates[0] instanceof Array) {
       if (coordinates[0].length === 2) {
@@ -380,7 +378,7 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
     }
   }
 
-  /// Helper methods
+  // Helper methods
   function handleObjectCoordinates() {
     if (coordinates[0] &&
         'x' in coordinates[0] &&

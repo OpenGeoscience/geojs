@@ -42,12 +42,10 @@ function setNumeric() {
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Contains utility classes and methods used by geojs.
  * @namespace geo.util
  */
-//////////////////////////////////////////////////////////////////////////////
 var util = module.exports = {
   DistanceGrid: DistanceGrid,
   ClusterGroup: ClusterGroup,

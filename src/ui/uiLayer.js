@@ -2,7 +2,6 @@ var inherit = require('../inherit');
 var registerLayer = require('../registry').registerLayer;
 var layer = require('../layer');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class uiLayer
  *
@@ -10,7 +9,6 @@ var layer = require('../layer');
  * @extends {geo.layer}
  * @returns {geo.gui.uiLayer}
  */
-//////////////////////////////////////////////////////////////////////////////
 var uiLayer = function (arg) {
   'use strict';
 
@@ -28,13 +26,11 @@ var uiLayer = function (arg) {
   var m_this = this,
       s_exit = this._exit;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create a new ui control
    *
    * @returns {geo.gui.Widget} Will return a new control widget
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.createWidget = function (widgetName, arg) {
     var newWidget = createWidget(widgetName, m_this, arg);
 
@@ -48,11 +44,9 @@ var uiLayer = function (arg) {
     return newWidget;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Delete a ui control
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.deleteWidget = function (widget) {
     widget._exit();
     m_this.removeChild(widget);
@@ -60,11 +54,9 @@ var uiLayer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Free memory and destroy the layer.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.children().forEach(function (child) {
       m_this.deleteWidget(child);

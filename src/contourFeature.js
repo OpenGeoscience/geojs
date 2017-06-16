@@ -119,7 +119,6 @@ var feature = require('./feature');
  *    `opacityRange` converted into objects that include opacity.
  */
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class contourFeature
  *
@@ -130,7 +129,6 @@ var feature = require('./feature');
  * @param {geo.contourFeature.spec} arg
  * @returns {geo.contourFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var contourFeature = function (arg) {
   'use strict';
   if (!(this instanceof contourFeature)) {
@@ -143,11 +141,9 @@ var contourFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_contour = {},
       s_init = this._init;
@@ -160,7 +156,6 @@ var contourFeature = function (arg) {
     m_contour = arg.contour;
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set contour accessor
    *
@@ -176,7 +171,6 @@ var contourFeature = function (arg) {
    *    specification, the value of a named contour property, or this contour
    *    feature.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.contour = function (specOrProperty, value) {
     if (specOrProperty === undefined) {
       return m_contour;
@@ -228,7 +222,6 @@ var contourFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * A uniform getter that always returns a function even for constant values.
    * If undefined input, return all the contour values as an object.
@@ -238,7 +231,6 @@ var contourFeature = function (arg) {
    * @returns {function|object} A function related to the key, or an object
    *    with all contour keys, each of which is a function.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.contour.get = function (key) {
     if (key === undefined) {
       var all = {}, k;
@@ -252,7 +244,6 @@ var contourFeature = function (arg) {
     return util.ensureFunction(m_contour[key]);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set position accessor.  This is identical to getting or setting the
    * `position` style
@@ -261,7 +252,6 @@ var contourFeature = function (arg) {
    *    `undefined`, return the current value.
    * @returns {function|array|this} Either the position style or this.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
       return m_this.style('position');
@@ -273,7 +263,6 @@ var contourFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create a set of vertices, values at the vertices, and opacities at the
    * vertices.  Create a set of triangles of indices into the vertex array.
@@ -282,7 +271,6 @@ var contourFeature = function (arg) {
    * @returns {geo.contourFeature.contourInfo} An object with the contour
    *    information.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.createContours = function () {
     var i, i3, j, idx, k, val, numPts, usedPts = 0, usePos, item,
         idxMap = {},
@@ -478,13 +466,11 @@ var contourFeature = function (arg) {
     return result;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    *
    * @param {geo.contourFeature.spec} arg The contour feature specification.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
 

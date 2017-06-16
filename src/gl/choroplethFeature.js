@@ -2,7 +2,6 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var choroplethFeature = require('../choroplethFeature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of choroplethFeature
  *
@@ -10,7 +9,6 @@ var choroplethFeature = require('../choroplethFeature');
  * @extends geo.choroplethFeature
  * @returns {geo.gl.choroplethFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var gl_choroplethFeature = function (arg) {
   'use strict';
 
@@ -20,11 +18,9 @@ var gl_choroplethFeature = function (arg) {
   arg = arg || {};
   choroplethFeature.call(this, arg);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_gl_polygons = null,
       s_exit = this._exit,
@@ -50,34 +46,28 @@ var gl_choroplethFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
    *
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     m_this.buildTime().modified();
     return (m_gl_polygons = createGLChoropleth());
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    *
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
     s_update.call(m_this);
     if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
@@ -88,11 +78,9 @@ var gl_choroplethFeature = function (arg) {
     m_this.updateTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy Polygon Sub-Features
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._wipePolygons = function () {
     if (m_gl_polygons) {
       m_gl_polygons.map(function (polygon) {
@@ -102,11 +90,9 @@ var gl_choroplethFeature = function (arg) {
     m_gl_polygons = null;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this._wipePolygons();
     s_exit();

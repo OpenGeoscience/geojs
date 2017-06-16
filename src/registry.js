@@ -12,20 +12,16 @@ var rendererLayerAdjustments = {};
 var annotations = {};
 var util = {};
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Register a new file reader type
  */
-//////////////////////////////////////////////////////////////////////////////
 util.registerFileReader = function (name, func) {
   fileReaders[name] = func;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new file reader
  */
-//////////////////////////////////////////////////////////////////////////////
 util.createFileReader = function (name, opts) {
   if (fileReaders.hasOwnProperty(name)) {
     return fileReaders[name](opts);
@@ -33,20 +29,16 @@ util.createFileReader = function (name, opts) {
   return null;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Register a new renderer type
  */
-//////////////////////////////////////////////////////////////////////////////
 util.registerRenderer = function (name, func) {
   renderers[name] = func;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create new instance of the renderer
  */
-//////////////////////////////////////////////////////////////////////////////
 util.createRenderer = function (name, layer, canvas, options) {
   if (renderers.hasOwnProperty(name)) {
     var ren = renderers[name](
@@ -58,7 +50,6 @@ util.createRenderer = function (name, layer, canvas, options) {
   return null;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Check if the named renderer is supported.  If not, display a warning and get
  * the name of a fallback renderer.  Ideally, we would pass a list of desired
@@ -70,7 +61,6 @@ util.createRenderer = function (name, layer, canvas, options) {
  * @return {string|null|false} the name of the renderer that should be used
  *      or false if no valid renderer can be determined.
  */
-//////////////////////////////////////////////////////////////////////////////
 util.checkRenderer = function (name, noFallback) {
   if (name === null) {
     return name;
@@ -93,7 +83,6 @@ util.checkRenderer = function (name, noFallback) {
   return false;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Check if there is a renderer that is supported and supports a list of
  * features.  If not, display a warning.  This picks the first renderer that
@@ -111,7 +100,6 @@ util.checkRenderer = function (name, noFallback) {
  * @return {string|null|false} the name of the renderer that should be used
  *      or false if no valid renderer can be determined.
  */
-//////////////////////////////////////////////////////////////////////////////
 util.rendererForFeatures = function (featureList) {
   var preferredRenderers = ['vgl', 'canvas', 'd3', null];
 
@@ -154,7 +142,6 @@ util.rendererForFeatures = function (featureList) {
   return false;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Register a new feature type
  *
@@ -172,7 +159,6 @@ util.rendererForFeatures = function (featureList) {
  * @returns {object} if this feature replaces an existing one, this was the
  *      feature that was replaced.  In this case, a warning is issued.
  */
-//////////////////////////////////////////////////////////////////////////////
 util.registerFeature = function (category, name, func, capabilities) {
   if (!(category in features)) {
     features[category] = {};
@@ -188,11 +174,9 @@ util.registerFeature = function (category, name, func, capabilities) {
   return old;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create new instance of a feature
  */
-//////////////////////////////////////////////////////////////////////////////
 util.createFeature = function (name, layer, renderer, arg) {
   var category = renderer.api(),
       options = {'layer': layer, 'renderer': renderer};
@@ -211,14 +195,12 @@ util.createFeature = function (name, layer, renderer, arg) {
   return null;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Register a layer adjustment.
  *
  * @returns {object} if this layer adjustment replaces an existing one, this
  *      was the value that was replaced.  In this case, a warning is issued.
  */
-//////////////////////////////////////////////////////////////////////////////
 util.registerLayerAdjustment = function (category, name, func) {
   if (!(category in rendererLayerAdjustments)) {
     rendererLayerAdjustments[category] = {};
@@ -232,7 +214,6 @@ util.registerLayerAdjustment = function (category, name, func) {
   return old;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * If a layer needs to be adjusted based on the renderer, call the function
  * that adjusts it.
@@ -240,7 +221,6 @@ util.registerLayerAdjustment = function (category, name, func) {
  * @param {string} name Name of the layer.
  * @param {object} layer Instantiated layer object.
  */
-//////////////////////////////////////////////////////////////////////////////
 util.adjustLayerForRenderer = function (name, layer) {
   var rendererName = layer.rendererName();
   if (rendererName) {
@@ -252,23 +232,19 @@ util.adjustLayerForRenderer = function (name, layer) {
   }
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Register a new layer type
  */
-//////////////////////////////////////////////////////////////////////////////
 util.registerLayer = function (name, func, defaultFeatures) {
   layers[name] = func;
   layerDefaultFeatures[name] = defaultFeatures;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create new instance of the layer
  */
-//////////////////////////////////////////////////////////////////////////////
 util.createLayer = function (name, map, arg) {
-  /// Default renderer is vgl
+  // Default renderer is vgl
   var options = {map: map},
       layer = null;
 
@@ -280,6 +256,7 @@ util.createLayer = function (name, map, arg) {
       $.extend(true, options, arg);
     }
     layer = layers[name](options);
+    layer.layerName = name;
     layer._init();
     return layer;
   } else {
@@ -287,14 +264,12 @@ util.createLayer = function (name, map, arg) {
   }
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Register a new widget type
  *
  * @returns {object} if this widget replaces an existing one, this was the
  *      value that was replaced.  In this case, a warning is issued.
  */
-//////////////////////////////////////////////////////////////////////////////
 util.registerWidget = function (category, name, func) {
   if (!(category in widgets)) {
     widgets[category] = {};
@@ -308,11 +283,9 @@ util.registerWidget = function (category, name, func) {
   return old;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create new instance of the widget
  */
-//////////////////////////////////////////////////////////////////////////////
 util.createWidget = function (name, layer, arg) {
   var options = {
     layer: layer
@@ -329,7 +302,6 @@ util.createWidget = function (name, layer, arg) {
   throw new Error('Cannot create unknown widget ' + name);
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Register a new annotation type
  *
@@ -343,7 +315,6 @@ util.createWidget = function (name, layer, arg) {
  * @returns {object} if this annotation replaces an existing one, this was the
  *      value that was replaced.  In this case, a warning is issued.
  */
-//////////////////////////////////////////////////////////////////////////////
 util.registerAnnotation = function (name, func, features) {
   var old = annotations[name];
   if (old) {
@@ -353,7 +324,6 @@ util.registerAnnotation = function (name, func, features) {
   return old;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create an annotation based on a registered type.
  *
@@ -361,7 +331,6 @@ util.registerAnnotation = function (name, func, features) {
  * @param {object} options The options for the annotation.
  * @returns {object} the new annotation.
  */
-//////////////////////////////////////////////////////////////////////////////
 util.createAnnotation = function (name, options) {
   if (!annotations[name]) {
     console.warn('The ' + name + ' annotation is not registered');
@@ -371,18 +340,15 @@ util.createAnnotation = function (name, options) {
   return annotation;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Get a list of registered annotation types.
  *
  * @return {array} a list of registered annotations.
  */
-//////////////////////////////////////////////////////////////////////////////
 util.listAnnotations = function () {
   return Object.keys(annotations);
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Get a list of required features for a set of annotations.
  *
@@ -396,7 +362,6 @@ util.listAnnotations = function () {
  * @return {array} a list of features needed for the specified annotations.
  *   There may be duplicates in the list.
  */
-//////////////////////////////////////////////////////////////////////////////
 util.featuresForAnnotations = function (annotationList) {
   var features = [];
 
@@ -421,7 +386,6 @@ util.featuresForAnnotations = function (annotationList) {
   return features;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Check if there is a renderer that is supported and supports a list of
  * annotations.  If not, display a warning.  This generates a list of required
@@ -435,7 +399,6 @@ util.featuresForAnnotations = function (annotationList) {
  * @return {string|null|false} the name of the renderer that should be used or
  *   false if no valid renderer can be determined.
  */
-//////////////////////////////////////////////////////////////////////////////
 util.rendererForAnnotations = function (annotationList) {
   return util.rendererForFeatures(util.featuresForAnnotations(annotationList));
 };

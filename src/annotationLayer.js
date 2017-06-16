@@ -7,7 +7,6 @@ var transform = require('./transform');
 var $ = require('jquery');
 var Mousetrap = require('mousetrap');
 
-/////////////////////////////////////////////////////////////////////////////
 /**
  * Layer to handle direct interactions with different features.  Annotations
  * (features) can be created by calling mode(<name of feature>) or cancelled
@@ -28,7 +27,6 @@ var Mousetrap = require('mousetrap');
  *    start point.
  * @returns {geo.annotationLayer}
  */
-/////////////////////////////////////////////////////////////////////////////
 var annotationLayer = function (args) {
   'use strict';
   if (!(this instanceof annotationLayer)) {
@@ -629,11 +627,9 @@ var annotationLayer = function (args) {
     return value;
   };
 
-  ///////////////////////////////////////////////////////////////////////////
   /**
    * Update layer
    */
-  ///////////////////////////////////////////////////////////////////////////
   this._update = function (request) {
     if (m_this.getMTime() > m_buildTime.getMTime()) {
       /* Interally, we have a set of feature levels (to provide z-index
@@ -741,13 +737,11 @@ var annotationLayer = function (args) {
     }
   };
 
-  ///////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ///////////////////////////////////////////////////////////////////////////
   this._init = function () {
-    /// Call super class init
+    // Call super class init
     s_init.call(m_this);
 
     if (!m_this.map().interactor()) {
@@ -764,13 +758,11 @@ var annotationLayer = function (args) {
     return m_this;
   };
 
-  ///////////////////////////////////////////////////////////////////////////
   /**
    * Free all resources
    */
-  ///////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    /// Call super class exit
+    // Call super class exit
     s_exit.call(m_this);
     m_annotations = [];
     m_features = [];

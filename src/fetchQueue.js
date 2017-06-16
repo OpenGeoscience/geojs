@@ -3,7 +3,6 @@ module.exports = (function () {
 
   var $ = require('jquery');
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * This class implements a queue for Deferred objects.  Whenever one of the
    * objects in the queue completes (resolved or rejected), another item in the
@@ -29,7 +28,6 @@ module.exports = (function () {
    *    Deferred object and must return a truthy value if the object is still
    *    needed.
    */
-  //////////////////////////////////////////////////////////////////////////////
   var fetchQueue = function (options) {
     if (!(this instanceof fetchQueue)) {
       return new fetchQueue(options);

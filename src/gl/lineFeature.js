@@ -33,7 +33,6 @@ var flagsDebug = {  // uses 1 bit
   debug: 1
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of lineFeature
  *
@@ -41,7 +40,6 @@ var flagsDebug = {  // uses 1 bit
  * @extends geo.lineFeature
  * @returns {geo.gl.lineFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var gl_lineFeature = function (arg) {
   'use strict';
   if (!(this instanceof gl_lineFeature)) {
@@ -57,11 +55,9 @@ var gl_lineFeature = function (arg) {
 
   object.call(this);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
       m_actor,
@@ -536,35 +532,29 @@ var gl_lineFeature = function (arg) {
     m_mapper.boundsDirtyTimestamp().modified();
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the arrangement of vertices used for each line segment.
    *
    * @returns {Number}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.featureVertices = function () {
     // return [[0, -1], [0, 1], [1, -1], [1, 1], [1, -1], [0, 1]];
     return [[0, 'corner', -1], [0, 'near', 1], [1, 'far', -1],
             [1, 'corner', 1], [1, 'near', -1], [0, 'far', 1]];
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the number of vertices used for each line segment.
    *
    * @returns {Number}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.verticesPerFeature = function () {
     return m_this.featureVertices().length;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     var prog = vgl.shaderProgram(),
         vs = createVertexShader(),
@@ -652,13 +642,11 @@ var gl_lineFeature = function (arg) {
     m_mapper.setGeometryData(geom);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return list of actors
    *
    * @returns {vgl.actor[]}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.actors = function () {
     if (!m_actor) {
       return [];
@@ -666,13 +654,11 @@ var gl_lineFeature = function (arg) {
     return [m_actor];
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
    *
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     createGLLines();
 
@@ -682,13 +668,11 @@ var gl_lineFeature = function (arg) {
     m_this.buildTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    *
    * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
     s_update.call(m_this);
 
@@ -705,11 +689,9 @@ var gl_lineFeature = function (arg) {
     m_this.updateTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
     m_actor = null;

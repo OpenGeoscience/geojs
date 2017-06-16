@@ -2,7 +2,6 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var quadFeature = require('../quadFeature');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class quadFeature
  *
@@ -11,7 +10,6 @@ var quadFeature = require('../quadFeature');
  * @extends geo.quadFeature
  * @returns {geo.gl.quadFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var gl_quadFeature = function (arg) {
   'use strict';
   if (!(this instanceof gl_quadFeature)) {
@@ -141,11 +139,9 @@ var gl_quadFeature = function (arg) {
     m_glColorCompileTimestamp.modified();
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build this feature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     var mapper, mat, prog, srctex, unicrop, geom;
 
@@ -361,11 +357,9 @@ var gl_quadFeature = function (arg) {
     mapper.undoBindVertexData(renderState);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
     s_update.call(m_this);
     if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
@@ -383,20 +377,16 @@ var gl_quadFeature = function (arg) {
     m_this.updateTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_init.call(m_this, arg);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     if (m_actor_image) {
       m_this.renderer().contextRenderer().removeActor(m_actor_image);

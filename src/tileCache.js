@@ -1,7 +1,6 @@
 module.exports = (function () {
   'use strict';
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * This class implements a simple cache for tile objects.  Each tile is
    * stored in cache object keyed by a configurable hashing function.  Another
@@ -13,7 +12,6 @@ module.exports = (function () {
    * @param {object?} [options] A configuratoin object for the cache
    * @param {number} [options.size=64] The maximum number of tiles to store
    */
-  //////////////////////////////////////////////////////////////////////////////
   var tileCache = function (options) {
     if (!(this instanceof tileCache)) {
       return new tileCache(options);

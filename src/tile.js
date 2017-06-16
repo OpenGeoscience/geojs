@@ -3,7 +3,6 @@ module.exports = (function () {
 
   var $ = require('jquery');
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * This class defines the raw interface for a "tile" on a map.  A tile is
    * defined as a rectangular section of a map.  The base implementation
@@ -30,7 +29,6 @@ module.exports = (function () {
    * @param {Number} [spec.overlap.x=0]
    * @param {Number} [spec.overlap.y=0]
    */
-  //////////////////////////////////////////////////////////////////////////////
   var tile = function (spec) {
     if (!(this instanceof tile)) {
       return new tile(spec);

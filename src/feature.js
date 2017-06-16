@@ -79,7 +79,6 @@ var geo_event = require('./event');
  *      element.  The information is passed to events without change.
  */
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class feature
  *
@@ -88,7 +87,6 @@ var geo_event = require('./event');
  * @extends geo.sceneObject
  * @returns {geo.feature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var feature = function (arg) {
   'use strict';
   if (!(this instanceof feature)) {
@@ -98,11 +96,9 @@ var feature = function (arg) {
 
   var util = require('./util');
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   arg = arg || {};
 
   var m_this = this,
@@ -124,13 +120,11 @@ var feature = function (arg) {
   // data items, such as individual vertices on lines or polygons.
   this._subfeatureStyles = {};
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private method to bind mouse handlers on the map element.  This does
    * nothing if the selectionAPI is turned off.  Otherwise, it first unbinds
    * any existing handlers and then binds handlers.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._bindMouseHandlers = function () {
 
     // Don't bind handlers for improved performance on features that don't
@@ -148,11 +142,9 @@ var feature = function (arg) {
     m_this.geoOn(geo_event.brush, m_this._handleBrush);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private method to unbind mouse handlers on the map element.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._unbindMouseHandlers = function () {
     m_this.geoOff(geo_event.mousemove, m_this._handleMousemove);
     m_this.geoOff(geo_event.mouseclick, m_this._handleMouseclick);
@@ -160,7 +152,6 @@ var feature = function (arg) {
     m_this.geoOff(geo_event.brush, m_this._handleBrush);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Search for features containing the given point.  This should be defined in
    * relevant subclasses.
@@ -169,7 +160,6 @@ var feature = function (arg) {
    * @returns {geo.feature.searchResult} An object with a list of features and
    *    feature indices that are located at the specified point.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (geo) {
     // base class method does nothing
     return {
@@ -178,7 +168,6 @@ var feature = function (arg) {
     };
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Search for features contained within a rectangilar region.  This should be
    * defined in relevant subclasses.
@@ -191,13 +180,11 @@ var feature = function (arg) {
    *    within the region.
    * @returns {number[]} A list of features indices that are in the box region.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.boxSearch = function (lowerLeft, upperRight, opts) {
     // base class method does nothing
     return [];
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private mousemove handler.  This uses `pointSearch` to determine which
    * features the mouse is over, then fires appropriate events.
@@ -208,7 +195,6 @@ var feature = function (arg) {
    * @fires geo.event.feature.mouseoff
    * @fires geo.event.feature.mouseon
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._handleMousemove = function () {
     var mouse = m_this.layer().map().interactor().mouse(),
         data = m_this.data(),
@@ -300,7 +286,6 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private mouseclick handler.  This uses `pointSearch` to determine which
    * features the mouse is over, then fires a click event for each such
@@ -308,7 +293,6 @@ var feature = function (arg) {
    *
    * @fires geo.event.feature.mouseclick
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._handleMouseclick = function (evt) {
     var mouse = m_this.layer().map().interactor().mouse(),
         data = m_this.data(),
@@ -329,14 +313,12 @@ var feature = function (arg) {
     });
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private brush handler.  This uses `boxSearch` to determine which features
    * the brush includes, then fires appropriate events.
    *
    * @fires geo.event.feature.brush
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._handleBrush = function (brush) {
     var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
         data = m_this.data();
@@ -354,14 +336,12 @@ var feature = function (arg) {
     });
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private brushend handler.  This uses `boxSearch` to determine which
    * features the brush includes, then fires appropriate events.
    *
    * @fires geo.event.feature.brushend
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._handleBrushend = function (brush) {
     var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
         data = m_this.data();
@@ -379,7 +359,6 @@ var feature = function (arg) {
     });
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set style used by the feature.
    *
@@ -392,7 +371,6 @@ var feature = function (arg) {
    * @returns {object|this} Either the entire style object, the value of a
    *    specific style, or the current class instance.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.style = function (arg1, arg2) {
     if (arg1 === undefined) {
       return m_style;
@@ -409,7 +387,6 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * A uniform getter that always returns a function even for constant styles.
    * This can also return all defined styles as functions in a single object.
@@ -419,7 +396,6 @@ var feature = function (arg) {
    * @returns {function|object} Either a function for the named style or an
    *    object with functions for all defined styles.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.style.get = function (key) {
     var out;
     if (key === undefined) {
@@ -448,7 +424,6 @@ var feature = function (arg) {
     return out;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set style(s) from array(s).  For each style, the array should have one
    * value per data item.  The values are not converted or validated.  Color
@@ -469,7 +444,6 @@ var feature = function (arg) {
    *    done once.
    * @returns {this} The feature instance.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.updateStyleFromArray = function (keyOrObject, styleArray, refresh) {
     if (typeof keyOrObject !== 'string') {
       $.each(keyOrObject, function (key, value) {
@@ -510,29 +484,24 @@ var feature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the layer referenced by the feature.
    *
    * @returns {geo.layer} The layer associated with the feature.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.layer = function () {
     return m_layer;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the renderer used by the feature.
    *
    * @returns {geo.renderer} The renderer used to render the feature.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.renderer = function () {
     return m_renderer;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set the projection of the feature.
    *
@@ -543,7 +512,6 @@ var feature = function (arg) {
    *    map interface gcs is in use, that value will be returned.  If the gcs
    *    is set, return the current class instance.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.gcs = function (val) {
     if (val === undefined) {
       if ((m_gcs === undefined || m_gcs === null) && m_renderer) {
@@ -557,7 +525,6 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from the feature's gcs coordinates to display coordinates.
    *
@@ -575,7 +542,6 @@ var feature = function (arg) {
     return c;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set the visibility of the feature.
    *
@@ -589,7 +555,6 @@ var feature = function (arg) {
    * @returns {boolean|this} Either the visibility (if getting) or the feature
    *    (if setting).
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.visible = function (val, direct) {
     if (val === undefined) {
       if (!direct && m_layer && m_layer.visible && !m_layer.visible()) {
@@ -616,7 +581,6 @@ var feature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set a list of dependent features.  Dependent features have their
    * visibility changed at the same time as the feature.
@@ -626,7 +590,6 @@ var feature = function (arg) {
    * @returns {geo.feature[]|this} The current list of dependent features or
    *    a reference to `this`.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.dependentFeatures = function (arg) {
     if (arg === undefined) {
       return m_dependentFeatures.slice();
@@ -635,7 +598,6 @@ var feature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set bin of the feature.  The bin number is used to determine the order
    * of multiple features on the same layer.  It has no effect except on the
@@ -649,7 +611,6 @@ var feature = function (arg) {
    *    current bin number.
    * @param {number|this} The current bin number or a reference to `this`.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.bin = function (val) {
     if (val === undefined) {
       return m_bin;
@@ -660,7 +621,6 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set timestamp of data change.
    *
@@ -668,7 +628,6 @@ var feature = function (arg) {
    *    to get the current data timestamp object.
    * @returns {geo.timestamp|this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.dataTime = function (val) {
     if (val === undefined) {
       return m_dataTime;
@@ -679,7 +638,6 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set timestamp of last time a build happened.
    *
@@ -687,7 +645,6 @@ var feature = function (arg) {
    *    to get the current build timestamp object.
    * @returns {geo.timestamp|this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.buildTime = function (val) {
     if (val === undefined) {
       return m_buildTime;
@@ -698,7 +655,6 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set timestamp of last time an update happened.
    *
@@ -706,7 +662,6 @@ var feature = function (arg) {
    *    `undefined` to get the current update timestamp object.
    * @returns {geo.timestamp|this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.updateTime = function (val) {
     if (val === undefined) {
       return m_updateTime;
@@ -717,7 +672,6 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set the data array for the feature.  This is equivalent to getting or
    * setting the `data` style, except that setting the data array via this
@@ -728,7 +682,6 @@ var feature = function (arg) {
    *    existing array.
    * @returns {array|this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.data = function (data) {
     if (data === undefined) {
       return m_this.style('data') || [];
@@ -740,7 +693,6 @@ var feature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set if the selection API is enabled for this feature.
    *
@@ -752,7 +704,6 @@ var feature = function (arg) {
    * @returns {boolean|this} Either the selectionAPI state (if getting) or the
    *    feature (if setting).
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.selectionAPI = function (arg, direct) {
     if (arg === undefined) {
       if (!direct && m_layer && m_layer.selectionAPI && !m_layer.selectionAPI()) {
@@ -769,13 +720,11 @@ var feature = function (arg) {
     return this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize the class instance.  Derived classes should implement this.
    *
    * @param {geo.feature.spec} arg The feature specification.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     if (!m_layer) {
       throw new Error('Feature requires a valid layer');
@@ -786,34 +735,28 @@ var feature = function (arg) {
     m_this._bindMouseHandlers();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build.
    *
    * Derived classes should implement this.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update.
    *
    * Derived classes should implement this.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy.  Unbind mouse handlers, clear internal variables, and call the
    * parent destroy method.
    *
    * Derived classes should implement this.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this._unbindMouseHandlers();
     m_selectedFeatures = [];

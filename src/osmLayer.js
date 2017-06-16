@@ -7,7 +7,6 @@ module.exports = (function () {
   var registry = require('./registry');
   var quadFeature = require('./quadFeature');
 
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Create a new instance of osmLayer
    *
@@ -18,7 +17,6 @@ module.exports = (function () {
    *        imageFormat (such as png or jpeg), and displayLast
    *        (to decide whether or not render tiles from last zoom level).
    */
-  //////////////////////////////////////////////////////////////////////////////
   var osmLayer = function (arg) {
 
     var imageTile = require('./imageTile');
@@ -56,8 +54,9 @@ module.exports = (function () {
         queue: this._queue,
         overlap: this._options.tileOverlap,
         scale: this._options.tileScale,
-        url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
-                               this._options.subdomains)
+        url: this._options.url.call(
+            this, urlParams.x, urlParams.y, urlParams.level || 0,
+            this._options.subdomains)
       });
     }.bind(this);
   };

@@ -3,7 +3,6 @@ var vgl = require('vgl');
 var inherit = require('./inherit');
 var sceneObject = require('./sceneObject');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Creates a new map object
  *
@@ -66,7 +65,6 @@ var sceneObject = require('./sceneObject');
  *
  * @returns {geo.map}
  */
-//////////////////////////////////////////////////////////////////////////////
 var map = function (arg) {
   'use strict';
   if (!(this instanceof map)) {
@@ -89,12 +87,10 @@ var map = function (arg) {
   var mapInteractor = require('./mapInteractor');
   var uiLayer = require('./ui/uiLayer');
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Private member variables
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
       // See https://en.wikipedia.org/wiki/Web_Mercator
@@ -123,6 +119,7 @@ var map = function (arg) {
       m_clampBoundsY,
       m_clampZoom,
       m_animationQueue = arg.animationQueue || [],
+      m_autoResize = arg.autoResize === undefined ? true : arg.autoResize,
       m_origin;
 
   /* Compute the maximum bounds on our map projection.  By default, x ranges
@@ -147,16 +144,16 @@ var map = function (arg) {
     m_maxBounds.right - m_maxBounds.left) / 256);
 
   m_camera.viewport = {
-    width: m_width, height: m_height,
-    left: m_node.offset().left, top: m_node.offset().top
+    width: m_width,
+    height: m_height,
+    left: m_node.offset().left,
+    top: m_node.offset().top
   };
   arg.center = util.normalizeCoordinates(arg.center);
-  arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
   m_clampBoundsX = arg.clampBoundsX === undefined ? false : arg.clampBoundsX;
   m_clampBoundsY = arg.clampBoundsY === undefined ? true : arg.clampBoundsY;
   m_clampZoom = arg.clampZoom === undefined ? true : arg.clampZoom;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set the number of world space units per display pixel at the given
    * zoom level.
@@ -166,7 +163,6 @@ var map = function (arg) {
    *   specified zoom level.  Otherwise return the current value.
    * @returns {number|this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.unitsPerPixel = function (zoom, unit) {
     zoom = zoom || 0;
     if (unit) {
@@ -180,7 +176,58 @@ var map = function (arg) {
     return Math.pow(2, -zoom) * m_unitsPerPixel;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/set the animation queue.  Two maps can share a single animation queue
+   * to ensure synchronized animations.  When setting, the animation queue will
+   * merge values from the existing queue into the new queue.
+   *
+   * @param {array} [queue] The animation queue to use.
+   * @returns {array|this} The current animation queue or the current map.
+   */
+  this.animationQueue = function (queue) {
+    if (queue === undefined) {
+      return m_animationQueue;
+    }
+    if (queue !== m_animationQueue) {
+      if (m_animationQueue.length) {
+        /* If the specified queue already has data in, don't copy the 0th
+         * element of the existing queue, since the 0th element is always the
+         * actual requestAnimationFrame reference.  In this case, cancel the
+         * existing requestAnimationFrame.  By using a property of window,
+         * tests can override this if needed. */
+        if (queue.length && queue[0] !== m_animationQueue[0]) {
+          window['cancelAnimationFrame'](m_animationQueue[0]);
+        }
+        for (var i = queue.length ? 1 : 0; i < m_animationQueue.length; i += 1) {
+          queue.push(m_animationQueue[i]);
+        }
+      }
+      m_animationQueue = queue;
+    }
+    return this;
+  };
+
+  /**
+   * Get/set the autoResize flag.
+   *
+   * @param {boolean} [autoResize] Truthy to automaticaly resize the map when
+   *    the size of the browser window changes.
+   * @returns {boolean|this} The current state of autoResize or the current map.
+   */
+  this.autoResize = function (autoResize) {
+    if (autoResize === undefined) {
+      return m_autoResize;
+    }
+    if (autoResize !== m_autoResize) {
+      $(window).off('resize', resizeSelf);
+      m_autoResize = autoResize;
+      if (m_autoResize) {
+        $(window).on('resize', resizeSelf);
+      }
+    }
+    return this;
+  };
+
   /**
    * Get/set the `clampBoundsX` setting.  If changed, adjust the bounds of the
    * map as needed.
@@ -188,7 +235,6 @@ var map = function (arg) {
    * @param {boolean} [clamp] The new clamp value.
    * @returns {boolean|this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.clampBoundsX = function (clamp) {
     if (clamp === undefined) {
       return m_clampBoundsX;
@@ -200,7 +246,6 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set the `clampBoundsY` setting.  If changed, adjust the bounds of the
    * map as needed.
@@ -208,7 +253,6 @@ var map = function (arg) {
    * @param {boolean} [clamp] The new clamp value.
    * @returns {boolean|this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.clampBoundsY = function (clamp) {
     if (clamp === undefined) {
       return m_clampBoundsY;
@@ -220,7 +264,6 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set the `clampZoom` setting.  If changed, adjust the bounds of the map
    * as needed.
@@ -228,7 +271,6 @@ var map = function (arg) {
    * @param {boolean} [clamp] The new clamp value.
    * @returns {boolean|this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.clampZoom = function (clamp) {
     if (clamp === undefined) {
       return m_clampZoom;
@@ -241,7 +283,6 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set the `allowRotation` setting.  If changed, adjust the map as
    * needed.
@@ -253,7 +294,6 @@ var map = function (arg) {
    *    or to specific values).
    * @returns {boolean|function|this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.allowRotation = function (allowRotation) {
     if (allowRotation === undefined) {
       return m_allowRotation;
@@ -268,29 +308,24 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the map's world coordinate origin in gcs coordinates.
    *
    * @returns {geo.geoPosition}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.origin = function () {
     return $.extend({}, m_origin);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the camera
    *
    * @returns {geo.camera}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.camera = function () {
     return m_camera;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the map gcs.  This is the coordinate system used in drawing the
    * map.
@@ -299,7 +334,6 @@ var map = function (arg) {
    *    a new value for the gcs.
    * @returns {string|this} A string used by {@linkcode geo.transform}.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.gcs = function (arg) {
     if (arg === undefined) {
       return m_gcs;
@@ -317,7 +351,6 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the map interface gcs.  This is the coordinate system used when
    * getting or setting map bounds, center, and other values.
@@ -326,7 +359,6 @@ var map = function (arg) {
    *    Otherwise, a new value for the interface gcs.
    * @returns {string|this} A string used by {@linkcode geo.transform}.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.ingcs = function (arg) {
     if (arg === undefined) {
       return m_ingcs;
@@ -335,18 +367,15 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get root DOM node of the map.
    *
    * @returns {object}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.node = function () {
     return m_node;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set zoom level of the map.
    *
@@ -364,7 +393,6 @@ var map = function (arg) {
    * @fires geo.event.zoom
    * @fires geo.event.pan
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, origin, ignoreDiscreteZoom) {
     if (val === undefined) {
       return m_zoom;
@@ -405,7 +433,6 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Pan the map by a number of display pixels.
    *
@@ -422,7 +449,6 @@ var map = function (arg) {
    * @returns {this}
    * @fires geo.event.pan
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.pan = function (delta, ignoreDiscreteZoom, ignoreClampBounds) {
     var evt = {
       screenDelta: delta
@@ -467,7 +493,6 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set the map rotation.  The rotation is performed around the current
    * view center.  Rotation mostly ignores `clampBoundsX`, as the behavior
@@ -486,7 +511,6 @@ var map = function (arg) {
    * @fires geo.event.rotate
    * @fires geo.event.pan
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.rotation = function (rotation, origin, ignoreRotationFunc) {
     if (rotation === undefined) {
       return m_rotation;
@@ -525,7 +549,6 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set center of the map to the given geographic coordinates, or get the
    * current center.  Uses bare objects {x: 0, y: 0}.
@@ -546,7 +569,6 @@ var map = function (arg) {
    * @returns {geo.geoPosition|this}
    * @fires geo.event.pan
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.center = function (coordinates, gcs, ignoreDiscreteZoom,
                           ignoreClampBounds) {
     var center;
@@ -569,7 +591,6 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Add a layer to the map.
    *
@@ -578,7 +599,6 @@ var map = function (arg) {
    * @return {geo.layer}
    * @fires geo.event.layerAdd
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.createLayer = function (layerName, arg) {
     arg = arg || {};
     var newLayer = registry.createLayer(
@@ -603,7 +623,6 @@ var map = function (arg) {
     return newLayer;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Remove a layer from the map.
    *
@@ -611,7 +630,6 @@ var map = function (arg) {
    * @return {geo.layer}
    * @fires geo.event.layerRemove
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.deleteLayer = function (layer) {
 
     if (layer !== null && layer !== undefined) {
@@ -632,14 +650,12 @@ var map = function (arg) {
     return layer;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the size of the map.
    *
    * @param {geo.screenSize} [arg] Size in pixels.
    * @returns {geo.screenSize|this} The size in pixels or the map object.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.size = function (arg) {
     if (arg === undefined) {
       return {
@@ -658,8 +674,10 @@ var map = function (arg) {
       m_this.zoom(newZoom);
     }
     m_this.camera().viewport = {
-      width: m_width, height: m_height,
-      left: m_node.offset().left, top: m_node.offset().top
+      width: m_width,
+      height: m_height,
+      left: m_node.offset().left,
+      top: m_node.offset().top
     };
     m_this.center(oldCenter);
 
@@ -674,14 +692,12 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the rotated size of the map.  This is the width and height of the
    * non-rotated area necessary to enclose the rotated area in pixels.
    *
    * @returns {geo.screenSize} The size that fits the rotated map.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.rotatedSize = function () {
     if (!this.rotation()) {
       return {
@@ -697,7 +713,6 @@ var map = function (arg) {
     };
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from gcs coordinates to map world coordinates.
    *
@@ -706,7 +721,6 @@ var map = function (arg) {
    *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @return {geo.worldPosition} World space coordinates.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.gcsToWorld = function (c, gcs) {
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (gcs !== m_gcs) {
@@ -723,7 +737,6 @@ var map = function (arg) {
     return c;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from map world coordinates to gcs coordinates.
    *
@@ -732,7 +745,6 @@ var map = function (arg) {
    *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @return {geo.geoPosition} GCS space coordinates.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.worldToGcs = function (c, gcs) {
     if (m_origin.x || m_origin.y || m_origin.z) {
       c = transform.affineInverse(
@@ -749,7 +761,6 @@ var map = function (arg) {
     return c;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from gcs coordinates to display coordinates.  This is identical to
    * calling `gcsToWorld` and then `worldToDisplay`.
@@ -759,13 +770,11 @@ var map = function (arg) {
    *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @return {geo.screenPosition} Display space coordinates.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.gcsToDisplay = function (c, gcs) {
     c = m_this.gcsToWorld(c, gcs);
     return m_this.worldToDisplay(c);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from world coordinates to display coordinates using the attached
    * camera.
@@ -773,12 +782,10 @@ var map = function (arg) {
    * @param {geo.worldPosition} c The input coordinate to convert.
    * @return {geo.screenPosition} Display space coordinates.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.worldToDisplay = function (c) {
     return m_camera.worldToDisplay(c);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from display to gcs coordinates.  This is identical to calling
    * `displayToWorld` and then `worldToGcs`.
@@ -788,13 +795,11 @@ var map = function (arg) {
    *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @return {geo.geoPosition} GCS space coordinates.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.displayToGcs = function (c, gcs) {
     c = m_this.displayToWorld(c); // done via camera
     return m_this.worldToGcs(c, gcs);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from display coordinates to world coordinates using the attached
    * camera.
@@ -802,19 +807,16 @@ var map = function (arg) {
    * @param {geo.screenPosition} c The input coordinate to convert.
    * @return {geo.worldPosition} World space coordinates.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.displayToWorld = function (c) {
     return m_camera.displayToWorld(c);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Redraw the map and all its layers.
    *
    * @fires geo.event.draw
    * @fires geo.event.drawEnd
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
     var i, layers = m_this.children();
 
@@ -835,7 +837,6 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get, set, or create and set a file reader to a layer in the map to be used
    * as a drop target.
@@ -848,7 +849,6 @@ var map = function (arg) {
    *    layer, otherwise create a layer using these options.
    * @returns {geo.fileReader|this}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.fileReader = function (readerOrName, opts) {
     if (readerOrName === undefined) {
       return m_fileReader;
@@ -866,11 +866,9 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize the map.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
 
     if (m_node === undefined || m_node === null) {
@@ -885,11 +883,9 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update map.  This updates all layers of the map.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function (request) {
     var i, layers = m_this.children();
     for (i = 0; i < layers.length; i += 1) {
@@ -898,12 +894,10 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Exit this map.  This removes all layers, destroys current interactor, and
    * empties the associated DOM node.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.exit = function () {
     var i, layers = m_this.children();
     for (i = layers.length - 1; i >= 0; i -= 1) {
@@ -922,7 +916,6 @@ var map = function (arg) {
     s_exit();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the map interactor.
    *
@@ -930,7 +923,6 @@ var map = function (arg) {
    * @returns {geo.mapInteractor|this} The current map interactor or the map
    *    object.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.interactor = function (arg) {
     if (arg === undefined) {
       return m_interactor;
@@ -952,7 +944,6 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the min/max zoom range.
    *
@@ -966,7 +957,6 @@ var map = function (arg) {
    *    current dimensions and settings, the `origMin` value is the value that
    *    was specified via this function or when the map was created.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.zoomRange = function (arg, noRefresh) {
     if (arg === undefined) {
       return $.extend({}, m_validZoomRange);
@@ -984,7 +974,6 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the current transition or start an animated zoom/pan/rotate.  If a
    * second transition is requested while a transition is already in progress,
@@ -1028,7 +1017,6 @@ var map = function (arg) {
    * @fires geo.event.transitionend
    * @fires geo.event.transitioncancel
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.transition = function (opts, gcs, animTime) {
 
     if (opts === undefined) {
@@ -1058,7 +1046,7 @@ var map = function (arg) {
      *
      * @param {array} p0 An array of numbers to interpolate from.
      * @param {array} p1 An array of numbers to interpolate to.
-     * @return {function} A function that, given `t`, returns an array of
+     * @returns {function} A function that, given `t`, returns an array of
      *      interpolated values.
      * @private
      */
@@ -1237,7 +1225,6 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Cancel any existing transition.  The transition will send a cancel event
    * at the next animation frame, but no further activity occurs.
@@ -1249,7 +1236,6 @@ var map = function (arg) {
    * @returns {boolean} `true` if a transition was in progress.
    * @fires geo.event.transitioncancel
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.transitionCancel = function (source) {
     if (m_transition && (m_transition.cancel !== true || m_queuedTransition)) {
       m_transition.cancel = true;
@@ -1260,7 +1246,6 @@ var map = function (arg) {
     return false;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set the locations of the current map edges.  When set, the left-top
    * and right-bottom corners are transformed to the map's gcs and then used
@@ -1273,7 +1258,6 @@ var map = function (arg) {
    *    returned bounds are converted from the map projection to this gcs.
    * @return {geo.geoBounds} The actual new map bounds.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.bounds = function (bds, gcs) {
     var nav;
 
@@ -1302,7 +1286,6 @@ var map = function (arg) {
                                           true);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set the maximum view area of the map.  If the map wraps, this is the
    * unwrapped area.
@@ -1314,7 +1297,6 @@ var map = function (arg) {
    *    returned bounds are converted from the map projection to this gcs.
    * @return {geo.geoBounds|this} The map maximum bounds or the map object.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.maxBounds = function (bounds, gcs) {
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (bounds === undefined) {
@@ -1353,7 +1335,6 @@ var map = function (arg) {
     return this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the center zoom level necessary to display the given bounds.
    *
@@ -1365,7 +1346,6 @@ var map = function (arg) {
    *    gcs, `null` to use the map gcs, or any other transform.
    * @return {geo.zoomAndCenter}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.zoomAndCenterFromBounds = function (bounds, rotation, gcs) {
     var center, zoom;
 
@@ -1406,7 +1386,6 @@ var map = function (arg) {
     };
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the bounds that will be displayed with the given zoom and center.
    *
@@ -1426,7 +1405,6 @@ var map = function (arg) {
    *    the center of the bounds (rather than being forced to be at the edge).
    * @return {geo.geoBounds}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.boundsFromZoomAndCenter = function (zoom, center, rotation, gcs,
         ignoreDiscreteZoom, ignoreClampBounds) {
     var width, height, halfw, halfh, bounds, units;
@@ -1480,7 +1458,6 @@ var map = function (arg) {
     return bounds;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set the discrete zoom flag.  If `true`, the map will snap to integer
    * zoom levels.
@@ -1488,7 +1465,6 @@ var map = function (arg) {
    * @param {boolean} [discreteZoom] If specified, the new discrete zoom flag.
    * @return {boolean|this} The current discrete zoom flag or the map object.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.discreteZoom = function (discreteZoom) {
     if (discreteZoom === undefined) {
       return m_discreteZoom;
@@ -1504,16 +1480,13 @@ var map = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the layers contained in the map.
    * Alias of {@linkcode geo.sceneObject#children}.
    * @method
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.layers = this.children;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update the attribution notice displayed on the bottom right corner of
    * the map.  The content of this notice is managed by individual layers.
@@ -1529,7 +1502,6 @@ var map = function (arg) {
    *
    * @returns {this} Chainable.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.updateAttribution = function () {
     // clear any existing attribution content
     m_this.node().find('.geo-attribution').remove();
@@ -1793,23 +1765,21 @@ var map = function (arg) {
     }
   }
 
-  ////////////////////////////////////////////////////////////////////////////
-  //
-  // The following are some private methods for interacting with the camera.
-  // In order to hide the complexity of dealing with map aspect ratios,
-  // clamping behavior, resetting zoom levels on resize, etc. from the
-  // layers, the map handles camera movements directly.  This requires
-  // passing all camera movement events through the map initially.  The
-  // map uses these methods to fix up the events according to the constraints
-  // of the display and passes the event to the layers.
-  //
-  ////////////////////////////////////////////////////////////////////////////
+  /*
+   * The following are some private methods for interacting with the camera.
+   * In order to hide the complexity of dealing with map aspect ratios,
+   * clamping behavior, resetting zoom levels on resize, etc. from the
+   * layers, the map handles camera movements directly.  This requires
+   * passing all camera movement events through the map initially.  The
+   * map uses these methods to fix up the events according to the constraints
+   * of the display and passes the event to the layers.
+   */
   /**
    * Calculate the scaling factor to fit the given map bounds into the viewport
    * with the correct aspect ratio.
    *
    * @param {geo.geoBounds} bounds A desired bounds.
-   * @return {object} Multiplicative aspect ratio correction with x and y
+   * @returns {object} Multiplicative aspect ratio correction with x and y
    *    values.
    * @private
    */
@@ -1982,7 +1952,7 @@ var map = function (arg) {
    * @param {boolean} noRangeLimit If falsy, ensure that the rotation is in the
    *    range [0, 2*PI).  If it is very close to zero, it is snapped to zero.
    *    If true, the rotation can have any value.
-   * @return {number} the validated rotation
+   * @returns {number} the validated rotation
    * @private
    */
   function fix_rotation(rotation, ignoreRotationFunc, noRangeLimit) {
@@ -2025,6 +1995,8 @@ var map = function (arg) {
    *    Specifically, the map's `maxBounds` can be shifted so that they lie no
    *    further than the center of the bounds (rather than being forced to be
    *    at the edge).
+   * @returns {geo.geoBounds} The adjusted bounds.  This may be the same object
+   *    passed in `bounds`.
    * @private
    */
   function fix_bounds(bounds, rotation, delta, ignoreClampBounds) {
@@ -2169,12 +2141,10 @@ var map = function (arg) {
     m_this.size({width: m_node.width(), height: m_node.height()});
   }
 
-  ////////////////////////////////////////////////////////////////////////////
-  //
-  // All the methods are now defined.  From here, we are initializing all
-  // internal variables and event handlers.
-  //
-  ////////////////////////////////////////////////////////////////////////////
+  /*
+   * All the methods are now defined.  From here, we are initializing all
+   * internal variables and event handlers.
+   */
 
   this._init(arg);
 
@@ -2230,8 +2200,8 @@ var map = function (arg) {
     this.interactor(arg.interactor || mapInteractor({discreteZoom: m_discreteZoom}));
   }
 
-  if (arg.autoResize) {
-    $(window).resize(resizeSelf);
+  if (m_autoResize) {
+    $(window).on('resize', resizeSelf);
   }
 
   // attach attribution updates to layer events

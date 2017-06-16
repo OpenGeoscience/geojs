@@ -4,7 +4,6 @@ var feature = require('./feature');
 var geo_event = require('./event');
 var util = require('./util');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class imagemapFeature
  *
@@ -32,9 +31,7 @@ var util = require('./util');
  *   transformations for those two triangles.
  * @returns {geo.pixelmapFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
 var pixelmapFeature = function (arg) {
   'use strict';
   if (!(this instanceof pixelmapFeature)) {
@@ -43,11 +40,9 @@ var pixelmapFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_quadFeature,
       m_srcImage,
@@ -56,13 +51,11 @@ var pixelmapFeature = function (arg) {
       s_init = this._init,
       s_exit = this._exit;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set position accessor
    *
    * @returns {geo.pixelmap}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
       return m_this.style('position');
@@ -74,13 +67,11 @@ var pixelmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set url accessor
    *
    * @returns {geo.pixelmap}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.url = function (val) {
     if (val === undefined) {
       return m_this.style('url');
@@ -93,14 +84,12 @@ var pixelmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the maximum index value from the pixelmap.  This is a value present in
    * the pixelmap.
    *
    * @returns {geo.pixelmap}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.maxIndex = function () {
     if (m_info) {
       /* This isn't just m_info.mappedColors.length - 1, since there
@@ -117,13 +106,11 @@ var pixelmapFeature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set color accessor
    *
    * @returns {geo.pixelmap}
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.color = function (val) {
     if (val === undefined) {
       return m_this.style('color');
@@ -161,11 +148,9 @@ var pixelmapFeature = function (arg) {
     return {index: [], found: []};
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     /* Set the build time at the start of the call.  A build can result in
      * drawing a quad, which can trigger a full layer update, which in tern
@@ -356,11 +341,9 @@ var pixelmapFeature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
     s_update.call(m_this);
     if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
@@ -372,12 +355,10 @@ var pixelmapFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
    * @memberof geo.pixelmapFeature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function (abc) {
     if (m_quadFeature && m_this.layer()) {
       m_this.layer().deleteFeature(m_quadFeature);
@@ -387,11 +368,9 @@ var pixelmapFeature = function (arg) {
     s_exit();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     arg = arg || {};
     s_init.call(m_this, arg);

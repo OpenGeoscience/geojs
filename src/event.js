@@ -1,4 +1,3 @@
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Common object containing all event types that are provided by the GeoJS
  * API.  Each property contained here is a valid target for event handling
@@ -20,16 +19,12 @@
  * });
  *
  */
-//////////////////////////////////////////////////////////////////////////////
 var geo_event = {};
 
-//////////////////////////////////////////////////////////////////////////////
 /*
  * Event types
  */
-//////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when a layer is added to the map.
  *
@@ -38,10 +33,8 @@ var geo_event = {};
  * @property {geo.map} target The current map.
  * @property {geo.layer} layer The new layer that was added.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.layerAdd = 'geo_layerAdd';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when a layer is removed from the map.
  *
@@ -50,10 +43,8 @@ geo_event.layerAdd = 'geo_layerAdd';
  * @property {geo.map} target The current map.
  * @property {geo.layer} layer The old layer that was removed.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.layerRemove = 'geo_layerRemove';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when the map's zoom level is changed.
  *
@@ -63,10 +54,8 @@ geo_event.layerRemove = 'geo_layerRemove';
  * @property {geo.screenPosition} screenPosition The screen position of the
  *      mouse pointer.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.zoom = 'geo_zoom';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when the map is rotated around the current map center (pointing
  * downward so that positive angles are clockwise rotations).
@@ -78,10 +67,8 @@ geo_event.zoom = 'geo_zoom';
  * @property {geo.screenPosition} screenPosition The screen position of the
  *      mouse pointer.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.rotate = 'geo_rotate';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when the map is panned either by user interaction or map
  * transition.
@@ -92,10 +79,8 @@ geo_event.rotate = 'geo_rotate';
  * @property {number} screenDelta.x Horizontal pan distance in pixels.
  * @property {number} screenDelta.y Vertical pan distance in pixels.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.pan = 'geo_pan';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when the map's canvas is resized.
  *
@@ -105,10 +90,8 @@ geo_event.pan = 'geo_pan';
  * @property {number} width The new width in pixels.
  * @property {number} height The new height in pixels.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.resize = 'geo_resize';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered on every call to {@link geo.map#draw} before the map is rendered.
  *
@@ -116,10 +99,8 @@ geo_event.resize = 'geo_resize';
  * @type {object}
  * @property {geo.map} target The current map.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.draw = 'geo_draw';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered on every call to {@link geo.map#draw} after the map is rendered.
  *
@@ -127,20 +108,16 @@ geo_event.draw = 'geo_draw';
  * @type {object}
  * @property {geo.map} target The current map.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.drawEnd = 'geo_drawEnd';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered on every `mousemove` over the map's DOM element unless a click
  * might occur.  The event object extends {@link geo.mouseState}.
  *
  * @event geo.event.mousemove
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.mousemove = 'geo_mousemove';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered on `mouseup` events that happen soon enough and close enough to a
  * `mousedown` event.  The event object extends {@link geo.mouseState}.
@@ -149,60 +126,48 @@ geo_event.mousemove = 'geo_mousemove';
  * @property {geo.mouseButtons} buttonsDown The buttons that were down at the
  *      start of the click action.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.mouseclick = 'geo_mouseclick';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered on every `mousemove` during a brushing selection.
  * The event object extends {@link geo.brushSelection}.
  *
  * @event geo.event.brush
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.brush = 'geo_brush';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered after a brush selection ends.
  * The event object extends {@link geo.brushSelection}.
  *
  * @event geo.event.brushend
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.brushend = 'geo_brushend';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when a brush selection starts.
  * The event object extends {@link geo.brushSelection}.
  *
  * @event geo.event.brushstart
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.brushstart = 'geo_brushstart';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when brushing results in a selection.
  * The event object extends {@link geo.brushSelection}.
  *
  * @event geo.event.select
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.select = 'geo_select';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when brushing results in a zoom selection.
  * The event object extends {@link geo.brushSelection}.
  *
  * @event geo.event.zoomselect
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.zoomselect = 'geo_zoomselect';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when brushing results in a zoom-out selection.
  * The event object extends {@link geo.brushSelection}.
@@ -210,11 +175,9 @@ geo_event.zoomselect = 'geo_zoomselect';
  * @event geo.event.unzoomselect
  */
 
-//////////////////////////////////////////////////////////////////////////////
 geo_event.unzoomselect = 'geo_unzoomselect';
 
 //DWM::
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when an action is initiated with mouse down.
  *
@@ -223,10 +186,8 @@ geo_event.unzoomselect = 'geo_unzoomselect';
  * @property {geo.mouseState} mouse The mouse state.
  * @property {jQuery.Event} event The triggering jQuery event.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.actiondown = 'geo_actiondown';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when an action is being processed during mouse movement.
  *
@@ -235,10 +196,8 @@ geo_event.actiondown = 'geo_actiondown';
  * @property {geo.mouseState} mouse The mouse state.
  * @property {jQuery.Event} event The triggering event.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.actionmove = 'geo_actionmove';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when an action is ended with a mouse up.
  *
@@ -247,10 +206,8 @@ geo_event.actionmove = 'geo_actionmove';
  * @property {geo.mouseState} mouse The mouse state.
  * @property {jQuery.Event} event The triggering event.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.actionup = 'geo_actionup';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when an action results in a selection.
  *
@@ -263,10 +220,8 @@ geo_event.actionup = 'geo_actionup';
  * @property {geo.screenPosition} upperRight Upper right of selection in screen
  *      coordinates.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.actionselection = 'geo_actionselection';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when an action is triggered with a mouse wheel event.
  *
@@ -275,10 +230,8 @@ geo_event.actionselection = 'geo_actionselection';
  * @property {geo.mouseState} mouse The mouse state.
  * @property {jQuery.Event} event The triggering event.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.actionwheel = 'geo_actionwheel';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when an action is triggered via the keyboard.
  *
@@ -298,10 +251,8 @@ geo_event.actionwheel = 'geo_actionwheel';
  *      movement is preferred, 1 a medium movement, and 2 a large movement.
  * @property {jQuery.Event} event The triggering event
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.keyaction = 'geo_keyaction';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered before a map navigation animation begins.  Set
  * `event.geo.cancelAnimation` to cancel the animation of the navigation.  This
@@ -316,10 +267,8 @@ geo_event.keyaction = 'geo_keyaction';
  * @property {number} duration The duration of the transition in milliseconds.
  * @property {function} ease The easing function.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.transitionstart = 'geo_transitionstart';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered after a map navigation animation ends.
  *
@@ -330,10 +279,8 @@ geo_event.transitionstart = 'geo_transitionstart';
  * @property {number} duration The duration of the transition in milliseconds.
  * @property {function} ease The easing function.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.transitionend = 'geo_transitionend';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered if a map navigation animation is canceled.
  *
@@ -344,11 +291,9 @@ geo_event.transitionend = 'geo_transitionend';
  * @property {number} duration The duration of the transition in milliseconds.
  * @property {function} ease The easing function.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.transitioncancel = 'geo_transitioncancel';
 
 //DWM::
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when the parallel projection mode is changes.
  *
@@ -357,10 +302,8 @@ geo_event.transitioncancel = 'geo_transitioncancel';
  * @property {boolean} paralellProjection `true` if parallel projection is
  *      turned on.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.parallelprojection = 'geo_parallelprojection';
 
-////////////////////////////////////////////////////////////////////////////
 /**
  * This event object provides mouse/keyboard events that can be handled
  * by the features.  This provides a similar interface as core events,
@@ -371,7 +314,6 @@ geo_event.parallelprojection = 'geo_parallelprojection';
  * with the option 'selectionAPI'.
  * @namespace geo.event.feature
  */
-////////////////////////////////////////////////////////////////////////////
 geo_event.feature = {
   /**
    * The event is the feature version of {@link geo.event.mousemove}.
@@ -415,12 +357,10 @@ geo_event.feature = {
   brush:      'geo_feature_brush'
 };
 
-////////////////////////////////////////////////////////////////////////////
 /**
  * These events are triggered by the pixelmap feature.
  * @namespace geo.event.pixelmap
  */
-////////////////////////////////////////////////////////////////////////////
 geo_event.pixelmap = {
   /**
    * Report that an image associated with a pixel map has been prepared and
@@ -434,14 +374,11 @@ geo_event.pixelmap = {
   prepared: 'geo_pixelmap_prepared'
 };
 
-////////////////////////////////////////////////////////////////////////////
 /**
  * These events are triggered by the map screenshot feature.
  * @namespace geo.event.screenshot
  */
-////////////////////////////////////////////////////////////////////////////
 geo_event.screenshot = {
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Triggered when a screenshot has been completed.
    *
@@ -451,21 +388,17 @@ geo_event.screenshot = {
    * @property {string|HTMLCanvasElement} screenshot The screenshot as a
    *    dataURL string or the canvas, depending on the screenshot request.
    */
-  ////////////////////////////////////////////////////////////////////////////
   ready: 'geo_screenshot_ready'
 };
 
 //DWM::
-////////////////////////////////////////////////////////////////////////////
 /**
  * These events are triggered by the camera when it's internal state is
  * mutated.
  * @namespace geo.event.camera
  */
-////////////////////////////////////////////////////////////////////////////
 geo_event.camera = {};
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered after a general view matrix change (any change in the visible
  * bounds).  This is equivalent to the union of pan and zoom.
@@ -474,10 +407,8 @@ geo_event.camera = {};
  * @type {object}
  * @property {geo.camera} camera The camera instance.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.camera.view = 'geo_camera_view';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered after a projection change.
  *
@@ -486,10 +417,8 @@ geo_event.camera.view = 'geo_camera_view';
  * @property {string} type The projection type, either `'perspective'` or
  *      `'parallel'`.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.camera.projection = 'geo_camera_projection';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered after a viewport change.
  *
@@ -497,18 +426,14 @@ geo_event.camera.projection = 'geo_camera_projection';
  * @property {geo.camera} camera The camera instance.
  * @property {geo.screenSize} viewport The new viewport size.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.camera.viewport = 'geo_camera_viewport';
 
-////////////////////////////////////////////////////////////////////////////
 /**
  * These events are triggered by the annotation layer.
  * @namespace geo.event.annotation
  */
-////////////////////////////////////////////////////////////////////////////
 geo_event.annotation = {};
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when an annotation has been added.
  *
@@ -516,10 +441,8 @@ geo_event.annotation = {};
  * @type {object}
  * @property {geo.annotation} annotation The annotation that was added.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.annotation.add = 'geo_annotation_add';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when an annotation is about to be added.
  *
@@ -527,10 +450,8 @@ geo_event.annotation.add = 'geo_annotation_add';
  * @type {object}
  * @property {geo.annotation} annotation The annotation that will be added.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.annotation.add_before = 'geo_annotation_add_before';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when an annotation has been altered.  This is currently only
  * triggered when updating existing annotations via the geojson function.
@@ -539,10 +460,8 @@ geo_event.annotation.add_before = 'geo_annotation_add_before';
  * @type {object}
  * @property {geo.annotation} annotation The annotation that was altered.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.annotation.update = 'geo_annotation_update';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when an annotation has been removed.
  *
@@ -550,10 +469,8 @@ geo_event.annotation.update = 'geo_annotation_update';
  * @type {object}
  * @property {geo.annotation} annotation The annotation that was removed.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.annotation.remove = 'geo_annotation_remove';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when an annotation's state changes.
  *
@@ -561,10 +478,8 @@ geo_event.annotation.remove = 'geo_annotation_remove';
  * @type {object}
  * @property {geo.annotation} annotation The annotation that changed.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.annotation.state = 'geo_annotation_state';
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when the annotation mode is changed.
  *
@@ -575,7 +490,6 @@ geo_event.annotation.state = 'geo_annotation_state';
  * @property {string?} oldMode The annotation mode before this change.  This is
  *      one of the values from `geo.annotation.annotationState`.
  */
-//////////////////////////////////////////////////////////////////////////////
 geo_event.annotation.mode = 'geo_annotation_mode';
 
 module.exports = geo_event;

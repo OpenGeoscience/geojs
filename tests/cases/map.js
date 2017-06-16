@@ -139,6 +139,32 @@ describe('geo.core.map', function () {
       expect(m.unitsPerPixel()).toBeCloseTo(200000 * 16);
       expect(m.unitsPerPixel(4)).toBeCloseTo(200000);
     });
+    it('animationQueue', function () {
+      mockAnimationFrame();
+      var m = create_map(), queue = [], queue2 = [],
+          queue3 = [window.requestAnimationFrame(function () { })];
+      expect(m.animationQueue()).toEqual([]);
+      expect(m.animationQueue()).not.toBe(queue);
+      expect(m.animationQueue(queue)).toBe(m);
+      expect(m.animationQueue()).toBe(queue);
+      m.scheduleAnimationFrame(function () { });
+      expect(queue.length).toBe(2);
+      expect(m.animationQueue(queue2)).toBe(m);
+      expect(queue2.length).toBe(2);
+      expect(queue2).toEqual(queue);
+      expect(m.animationQueue(queue3)).toBe(m);
+      expect(queue3.length).toBe(2);
+      expect(queue3).not.toEqual(queue2);
+      unmockAnimationFrame();
+    });
+    it('autoResize', function () {
+      var m = create_map();
+      expect(m.autoResize()).toBe(true);
+      expect(m.autoResize(false)).toBe(m);
+      expect(m.autoResize()).toBe(false);
+      expect(m.autoResize(true)).toBe(m);
+      expect(m.autoResize()).toBe(true);
+    });
     it('gcs and ingcs', function () {
       var m = create_map(), units = m.unitsPerPixel(), bounds;
       var error = console.error;

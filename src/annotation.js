@@ -19,7 +19,6 @@ var annotationState = {
 
 var annotationActionOwner = 'annotationAction';
 
-/////////////////////////////////////////////////////////////////////////////
 /**
  * Base annotation class
  *
@@ -35,7 +34,6 @@ var annotationActionOwner = 'annotationAction';
  *    annotation.state values.
  * @returns {geo.annotation}
  */
-/////////////////////////////////////////////////////////////////////////////
 var annotation = function (type, args) {
   'use strict';
   if (!(this instanceof annotation)) {
@@ -422,7 +420,6 @@ var annotation = function (type, args) {
   };
 };
 
-/////////////////////////////////////////////////////////////////////////////
 /**
  * Rectangle annotation class
  *
@@ -437,7 +434,6 @@ var annotation = function (type, args) {
  *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
  *     strokeOpacity
  */
-/////////////////////////////////////////////////////////////////////////////
 var rectangleAnnotation = function (args) {
   'use strict';
   if (!(this instanceof rectangleAnnotation)) {
@@ -694,7 +690,6 @@ var rectangleRequiredFeatures = {};
 rectangleRequiredFeatures[polygonFeature.capabilities.feature] = true;
 registerAnnotation('rectangle', rectangleAnnotation, rectangleRequiredFeatures);
 
-/////////////////////////////////////////////////////////////////////////////
 /**
  * Polygon annotation class
  *
@@ -711,7 +706,6 @@ registerAnnotation('rectangle', rectangleAnnotation, rectangleRequiredFeatures);
  *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
  *     strokeOpacity
  */
-/////////////////////////////////////////////////////////////////////////////
 var polygonAnnotation = function (args) {
   'use strict';
   if (!(this instanceof polygonAnnotation)) {
@@ -941,7 +935,6 @@ polygonRequiredFeatures[polygonFeature.capabilities.feature] = true;
 polygonRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
 registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
 
-/////////////////////////////////////////////////////////////////////////////
 /**
  * Line annotation class
  *
@@ -955,7 +948,6 @@ registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
  *     strokeWidth, strokeColor, strokeOpacity, strokeOffset, closed, lineCap,
  *     lineJoin
  */
-/////////////////////////////////////////////////////////////////////////////
 var lineAnnotation = function (args) {
   'use strict';
   if (!(this instanceof lineAnnotation)) {
@@ -1236,7 +1228,6 @@ var lineRequiredFeatures = {};
 lineRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
 registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
 
-/////////////////////////////////////////////////////////////////////////////
 /**
  * Point annotation class
  *
@@ -1251,7 +1242,6 @@ registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
  * the radius is based on the zoom level at first instantiation.  Otherwise, if
  * it is a number, the radius is used at that zoom level.
  */
-/////////////////////////////////////////////////////////////////////////////
 var pointAnnotation = function (args) {
   'use strict';
   if (!(this instanceof pointAnnotation)) {

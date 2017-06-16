@@ -1,13 +1,11 @@
 var inherit = require('../inherit');
 var sceneObject = require('../sceneObject');
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Canvas specific subclass of object which rerenders when the object is drawn.
  * @class geo.canvas.object
  * @extends geo.sceneObject
  */
-//////////////////////////////////////////////////////////////////////////////
 
 var canvas_object = function (arg) {
   'use strict';
@@ -30,11 +28,9 @@ var canvas_object = function (arg) {
   this._renderOnCanvas = function () {
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
   *  Redraw the object.
   */
-  ////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
     m_this._update();
     m_this.renderer()._render();
