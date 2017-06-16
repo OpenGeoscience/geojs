@@ -123,6 +123,7 @@ var map = function (arg) {
       m_clampBoundsY,
       m_clampZoom,
       m_animationQueue = arg.animationQueue || [],
+      m_autoResize = arg.autoResize === undefined ? true : arg.autoResize,
       m_origin;
 
   /* Compute the maximum bounds on our map projection.  By default, x ranges
@@ -147,11 +148,12 @@ var map = function (arg) {
     m_maxBounds.right - m_maxBounds.left) / 256);
 
   m_camera.viewport = {
-    width: m_width, height: m_height,
-    left: m_node.offset().left, top: m_node.offset().top
+    width: m_width,
+    height: m_height,
+    left: m_node.offset().left,
+    top: m_node.offset().top
   };
   arg.center = util.normalizeCoordinates(arg.center);
-  arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
   m_clampBoundsX = arg.clampBoundsX === undefined ? false : arg.clampBoundsX;
   m_clampBoundsY = arg.clampBoundsY === undefined ? true : arg.clampBoundsY;
   m_clampZoom = arg.clampZoom === undefined ? true : arg.clampZoom;
@@ -178,6 +180,62 @@ var map = function (arg) {
       return m_this;
     }
     return Math.pow(2, -zoom) * m_unitsPerPixel;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/set the animation queue.  Two maps can share a single animation queue
+   * to ensure synchronized animations.  When setting, the animation queue will
+   * merge values from the existing queue into the new queue.
+   *
+   * @param {array} [queue] The animation queue to use.
+   * @returns {array|this} The current animation queue or the current map.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.animationQueue = function (queue) {
+    if (queue === undefined) {
+      return m_animationQueue;
+    }
+    if (queue !== m_animationQueue) {
+      if (m_animationQueue.length) {
+        /* If the specified queue already has data in, don't copy the 0th
+         * element of the existing queue, since the 0th element is always the
+         * actual requestAnimationFrame reference.  In this case, cancel the
+         * existing requestAnimationFrame.  By using a property of window,
+         * tests can override this if needed. */
+        if (queue.length && queue[0] !== m_animationQueue[0]) {
+          window['cancelAnimationFrame'](m_animationQueue[0]);
+        }
+        for (var i = queue.length ? 1 : 0; i < m_animationQueue.length; i += 1) {
+          queue.push(m_animationQueue[i]);
+        }
+      }
+      m_animationQueue = queue;
+    }
+    return this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/set the autoResize flag.
+   *
+   * @param {boolean} [autoResize] Truthy to automaticaly resize the map when
+   *    the size of the browser window changes.
+   * @returns {boolean|this} The current state of autoResize or the current map.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.autoResize = function (autoResize) {
+    if (autoResize === undefined) {
+      return m_autoResize;
+    }
+    if (autoResize !== m_autoResize) {
+      $(window).off('resize', resizeSelf);
+      m_autoResize = autoResize;
+      if (m_autoResize) {
+        $(window).on('resize', resizeSelf);
+      }
+    }
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -653,8 +711,10 @@ var map = function (arg) {
       m_this.zoom(newZoom);
     }
     m_this.camera().viewport = {
-      width: m_width, height: m_height,
-      left: m_node.offset().left, top: m_node.offset().top
+      width: m_width,
+      height: m_height,
+      left: m_node.offset().left,
+      top: m_node.offset().top
     };
     m_this.center(oldCenter);
 
@@ -1053,7 +1113,7 @@ var map = function (arg) {
      *
      * @param {array} p0 An array of numbers to interpolate from.
      * @param {array} p1 An array of numbers to interpolate to.
-     * @return {function} A function that, given `t`, returns an array of
+     * @returns {function} A function that, given `t`, returns an array of
      *      interpolated values.
      * @private
      */
@@ -1804,7 +1864,7 @@ var map = function (arg) {
    * with the correct aspect ratio.
    *
    * @param {geo.geoBounds} bounds A desired bounds.
-   * @return {object} Multiplicative aspect ratio correction with x and y
+   * @returns {object} Multiplicative aspect ratio correction with x and y
    *    values.
    * @private
    */
@@ -1977,7 +2037,7 @@ var map = function (arg) {
    * @param {boolean} noRangeLimit If falsy, ensure that the rotation is in the
    *    range [0, 2*PI).  If it is very close to zero, it is snapped to zero.
    *    If true, the rotation can have any value.
-   * @return {number} the validated rotation
+   * @returns {number} the validated rotation
    * @private
    */
   function fix_rotation(rotation, ignoreRotationFunc, noRangeLimit) {
@@ -2020,6 +2080,8 @@ var map = function (arg) {
    *    Specifically, the map's `maxBounds` can be shifted so that they lie no
    *    further than the center of the bounds (rather than being forced to be
    *    at the edge).
+   * @returns {geo.geoBounds} The adjusted bounds.  This may be the same object
+   *    passed in `bounds`.
    * @private
    */
   function fix_bounds(bounds, rotation, delta, ignoreClampBounds) {
@@ -2225,8 +2287,8 @@ var map = function (arg) {
     this.interactor(arg.interactor || mapInteractor({discreteZoom: m_discreteZoom}));
   }
 
-  if (arg.autoResize) {
-    $(window).resize(resizeSelf);
+  if (m_autoResize) {
+    $(window).on('resize', resizeSelf);
   }
 
   // attach attribution updates to layer events

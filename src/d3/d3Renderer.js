@@ -189,9 +189,9 @@ var d3Renderer = function (arg) {
     }
     m_diagonal = Math.pow(width * width + height * height, 0.5);
     m_corners = {
-      upperLeft: map.displayToGcs({'x': 0, 'y': 0}, null),
-      lowerRight: map.displayToGcs({'x': width, 'y': height}, null),
-      center: map.displayToGcs({'x': width / 2, 'y': height / 2}, null)
+      upperLeft: map.displayToGcs({x: 0, y: 0}, null),
+      lowerRight: map.displayToGcs({x: width, y: height}, null),
+      center: map.displayToGcs({x: width / 2, y: height / 2}, null)
     };
   }
 

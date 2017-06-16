@@ -123,7 +123,7 @@ describe('geo.core.osmLayer', function () {
   describe('default osmLayer', function () {
 
     describe('html', function () {
-      var layer;
+      var layer, lastThis;
       it('creation', function () {
         map = create_map();
         layer = map.createLayer('osm', {renderer: null, url: '/testdata/white.jpg'});
@@ -142,6 +142,19 @@ describe('geo.core.osmLayer', function () {
       });
       waitForIt('.geo-tile-container', function () {
         return map.node().find('.geo-tile-container').length > 0;
+      });
+      it('tile function', function () {
+        map.deleteLayer(layer);
+        layer = map.createLayer('osm', {renderer: null, mapOpacity: 0.5, url: function (x, y, z) {
+          lastThis = this;
+          return '/testdata/white.jpg';
+        }});
+      });
+      waitForIt('.geo-tile-container', function () {
+        return map.node().find('.geo-tile-container').length > 0;
+      });
+      it('tile function test', function () {
+        expect(lastThis).toBe(layer);
       });
       /* The follow is a test of tileLayer as attached to a map.  We don't
        * currently expose the tileLayer class directly to the createLayer
