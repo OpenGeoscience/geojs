@@ -141,6 +141,9 @@ class definition inside GeoJS.
 Class overview
 ---------------
 
+The latest version of the full API documentation is at
+`http://opengeoscience.github.io/geojs/apidocs/geo.html <http://opengeoscience.github.io/geojs/apidocs/geo.html>`_.
+
 GeoJS is made up of the following core classes.  Click on the link to go to the
 documentation for each of the classes.
 
@@ -214,9 +217,6 @@ documentation for each of the classes.
     the only implemented reader is
     `geo.jsonReader <http://opengeoscience.github.io/geojs/apidocs/geo.jsonReader.html>`_,
     which is an extendable geojson reader.
-
-The API documentation is in the process of being updated.  You can always find the latest version
-at `http://opengeoscience.github.io/geojs/apidocs/geo.html <http://opengeoscience.github.io/geojs/apidocs/geo.html>`_.
 
 Coordinate systems
 ------------------
