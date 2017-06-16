@@ -4,7 +4,7 @@ var inherit = require('./inherit');
 var sceneObject = require('./sceneObject');
 
 /**
- * Creates a new map object
+ * Creates a new map object.
  *
  * @class
  * @alias geo.map
@@ -318,7 +318,7 @@ var map = function (arg) {
   };
 
   /**
-   * Get the camera
+   * Get the camera.
    *
    * @returns {geo.camera}
    */
@@ -596,7 +596,7 @@ var map = function (arg) {
    *
    * @param {string} layerName The type of layer to add to the map.
    * @param {object} arg Parameters for the new layer.
-   * @return {geo.layer}
+   * @returns {geo.layer}
    * @fires geo.event.layerAdd
    */
   this.createLayer = function (layerName, arg) {
@@ -627,7 +627,7 @@ var map = function (arg) {
    * Remove a layer from the map.
    *
    * @param {geo.layer?} layer Layer to remove from the map.
-   * @return {geo.layer}
+   * @returns {geo.layer}
    * @fires geo.event.layerRemove
    */
   this.deleteLayer = function (layer) {
@@ -719,7 +719,7 @@ var map = function (arg) {
    * @param {geo.geoPosition} c The input coordinate to convert.
    * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
    *    the interface gcs, `null` to use the map gcs, or any other transform.
-   * @return {geo.worldPosition} World space coordinates.
+   * @returns {geo.worldPosition} World space coordinates.
    */
   this.gcsToWorld = function (c, gcs) {
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
@@ -743,7 +743,7 @@ var map = function (arg) {
    * @param {geo.worldPosition} c The input coordinate to convert.
    * @param {string|geo.transform|null} [gcs] output gcs.  `undefined` to use
    *    the interface gcs, `null` to use the map gcs, or any other transform.
-   * @return {geo.geoPosition} GCS space coordinates.
+   * @returns {geo.geoPosition} GCS space coordinates.
    */
   this.worldToGcs = function (c, gcs) {
     if (m_origin.x || m_origin.y || m_origin.z) {
@@ -768,7 +768,7 @@ var map = function (arg) {
    * @param {geo.geoPosition} c The input coordinate to convert.
    * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
    *    the interface gcs, `null` to use the map gcs, or any other transform.
-   * @return {geo.screenPosition} Display space coordinates.
+   * @returns {geo.screenPosition} Display space coordinates.
    */
   this.gcsToDisplay = function (c, gcs) {
     c = m_this.gcsToWorld(c, gcs);
@@ -780,7 +780,7 @@ var map = function (arg) {
    * camera.
    *
    * @param {geo.worldPosition} c The input coordinate to convert.
-   * @return {geo.screenPosition} Display space coordinates.
+   * @returns {geo.screenPosition} Display space coordinates.
    */
   this.worldToDisplay = function (c) {
     return m_camera.worldToDisplay(c);
@@ -793,7 +793,7 @@ var map = function (arg) {
    * @param {geo.screenPosition} c The input display coordinate to convert.
    * @param {string|geo.transform|null} [gcs] Output gcs.  `undefined` to use
    *    the interface gcs, `null` to use the map gcs, or any other transform.
-   * @return {geo.geoPosition} GCS space coordinates.
+   * @returns {geo.geoPosition} GCS space coordinates.
    */
   this.displayToGcs = function (c, gcs) {
     c = m_this.displayToWorld(c); // done via camera
@@ -805,7 +805,7 @@ var map = function (arg) {
    * camera.
    *
    * @param {geo.screenPosition} c The input coordinate to convert.
-   * @return {geo.worldPosition} World space coordinates.
+   * @returns {geo.worldPosition} World space coordinates.
    */
   this.displayToWorld = function (c) {
     return m_camera.displayToWorld(c);
@@ -814,6 +814,7 @@ var map = function (arg) {
   /**
    * Redraw the map and all its layers.
    *
+   * @returns {this} The map object.
    * @fires geo.event.draw
    * @fires geo.event.drawEnd
    */
@@ -868,6 +869,8 @@ var map = function (arg) {
 
   /**
    * Initialize the map.
+   *
+   * @returns {this} The map object.
    */
   this._init = function () {
 
@@ -885,6 +888,11 @@ var map = function (arg) {
 
   /**
    * Update map.  This updates all layers of the map.
+   *
+   * @param {object} [request] Optional information about the source of this
+   *    update request.  This could be an event, for instance.  It is passed
+   *    to individual layer's `_update` function.
+   * @returns {this} The map object.
    */
   this._update = function (request) {
     var i, layers = m_this.children();
@@ -1256,7 +1264,7 @@ var map = function (arg) {
    *    gcs, `null` to use the map gcs, or any other transform.  If setting the
    *    bounds, they are converted from this gcs to the map projection.  The
    *    returned bounds are converted from the map projection to this gcs.
-   * @return {geo.geoBounds} The actual new map bounds.
+   * @returns {geo.geoBounds} The actual new map bounds.
    */
   this.bounds = function (bds, gcs) {
     var nav;
@@ -1290,12 +1298,12 @@ var map = function (arg) {
    * Get/set the maximum view area of the map.  If the map wraps, this is the
    * unwrapped area.
    *
-   * @param {geo.geoBounds} [bds] The map bounds.
+   * @param {geo.geoBounds} [bounds] The map bounds.
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.  If setting the
    *    bounds, they are converted from this gcs to the map projection.  The
    *    returned bounds are converted from the map projection to this gcs.
-   * @return {geo.geoBounds|this} The map maximum bounds or the map object.
+   * @returns {geo.geoBounds|this} The map maximum bounds or the map object.
    */
   this.maxBounds = function (bounds, gcs) {
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
@@ -1344,7 +1352,7 @@ var map = function (arg) {
    * @param {number} rotation Rotation in clockwise radians.
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
-   * @return {geo.zoomAndCenter}
+   * @returns {geo.zoomAndCenter}
    */
   this.zoomAndCenterFromBounds = function (bounds, rotation, gcs) {
     var center, zoom;
@@ -1403,7 +1411,7 @@ var map = function (arg) {
    *    `clampBoundsY` is set, allow the bounds to be less clamped.
    *    The map's `maxBounds` can be shifted so that they lie no further than
    *    the center of the bounds (rather than being forced to be at the edge).
-   * @return {geo.geoBounds}
+   * @returns {geo.geoBounds}
    */
   this.boundsFromZoomAndCenter = function (zoom, center, rotation, gcs,
         ignoreDiscreteZoom, ignoreClampBounds) {
@@ -1463,7 +1471,7 @@ var map = function (arg) {
    * zoom levels.
    *
    * @param {boolean} [discreteZoom] If specified, the new discrete zoom flag.
-   * @return {boolean|this} The current discrete zoom flag or the map object.
+   * @returns {boolean|this} The current discrete zoom flag or the map object.
    */
   this.discreteZoom = function (discreteZoom) {
     if (discreteZoom === undefined) {

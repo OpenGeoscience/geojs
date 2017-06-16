@@ -177,7 +177,6 @@ geo_event.zoomselect = 'geo_zoomselect';
 
 geo_event.unzoomselect = 'geo_unzoomselect';
 
-//DWM::
 /**
  * Triggered when an action is initiated with mouse down.
  *

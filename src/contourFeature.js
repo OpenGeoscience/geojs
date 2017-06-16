@@ -120,7 +120,7 @@ var feature = require('./feature');
  */
 
 /**
- * Create a new instance of class contourFeature
+ * Create a new instance of class contourFeature.
  *
  * @class
  * @alias geo.contourFeature
@@ -157,7 +157,7 @@ var contourFeature = function (arg) {
   }
 
   /**
-   * Get/Set contour accessor
+   * Get/Set contour accessor.
    *
    * @param {string|geo.contourFeature.contourSpec} [specOrProperty] If
    *    `undefined`, return the current contour specification.  If a string is
@@ -246,9 +246,9 @@ var contourFeature = function (arg) {
 
   /**
    * Get/Set position accessor.  This is identical to getting or setting the
-   * `position` style
+   * `position` style.
    *
-   * @param {function|array) [val] If specified, set the position style.  If
+   * @param {function|array} [val] If specified, set the position style.  If
    *    `undefined`, return the current value.
    * @returns {function|array|this} Either the position style or this.
    */
@@ -467,7 +467,7 @@ var contourFeature = function (arg) {
   };
 
   /**
-   * Initialize
+   * Initialize.
    *
    * @param {geo.contourFeature.spec} arg The contour feature specification.
    */

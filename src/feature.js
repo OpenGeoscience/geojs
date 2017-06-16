@@ -80,11 +80,12 @@ var geo_event = require('./event');
  */
 
 /**
- * Create a new instance of class feature
+ * Create a new instance of class feature.
  *
  * @class
  * @alias geo.feature
  * @extends geo.sceneObject
+ * @param {geo.feature.spec} [arg] A feature specification.
  * @returns {geo.feature}
  */
 var feature = function (arg) {
@@ -173,7 +174,7 @@ var feature = function (arg) {
    * defined in relevant subclasses.
    *
    * @param {geo.geoPosition} lowerLeft Lower-left corner in gcs coordinates.
-   * @param {geo.geoPosition} upperright Upper-right corner in gcs coordinates.
+   * @param {geo.geoPosition} upperRight Upper-right corner in gcs coordinates.
    * @param {object} [opts] Additional search options.
    * @param {boolean} [opts.partial=false] If truthy, include features that are
    *    partially in the box, otherwise only include features that are fully
@@ -291,6 +292,7 @@ var feature = function (arg) {
    * features the mouse is over, then fires a click event for each such
    * feature.
    *
+   * @param {geo.event} evt The event that triggered this handler.
    * @fires geo.event.feature.mouseclick
    */
   this._handleMouseclick = function (evt) {
@@ -317,6 +319,7 @@ var feature = function (arg) {
    * Private brush handler.  This uses `boxSearch` to determine which features
    * the brush includes, then fires appropriate events.
    *
+   * @param {geo.brushSelection} brush The current brush selection.
    * @fires geo.event.feature.brush
    */
   this._handleBrush = function (brush) {
@@ -340,6 +343,7 @@ var feature = function (arg) {
    * Private brushend handler.  This uses `boxSearch` to determine which
    * features the brush includes, then fires appropriate events.
    *
+   * @param {geo.brushSelection} brush The current brush selection.
    * @fires geo.event.feature.brushend
    */
   this._handleBrushend = function (brush) {
@@ -505,7 +509,7 @@ var feature = function (arg) {
   /**
    * Get/Set the projection of the feature.
    *
-   * @param {string?} [arg] If `undefined`, return the current gcs.  If
+   * @param {string?} [val] If `undefined`, return the current gcs.  If
    *    `null`, use the map's interface gcs.  Otherwise, set a new value for
    *    the gcs.
    * @returns {string|this} A string used by {@linkcode geo.transform}.  If the
@@ -609,7 +613,7 @@ var feature = function (arg) {
    *
    * @param {number} [val] The new bin number.  If `undefined`, return the
    *    current bin number.
-   * @param {number|this} The current bin number or a reference to `this`.
+   * @returns {number|this} The current bin number or a reference to `this`.
    */
   this.bin = function (val) {
     if (val === undefined) {
@@ -696,9 +700,9 @@ var feature = function (arg) {
   /**
    * Get/Set if the selection API is enabled for this feature.
    *
-   * @param {boolean} [val] `undefined` to return the selectionAPI state, or a
+   * @param {boolean} [arg] `undefined` to return the selectionAPI state, or a
    *    boolean to change the state.
-   * @param {boolean} `direct` If `true`, when getting the selectionAPI state,
+   * @param {boolean} [direct] If `true`, when getting the selectionAPI state,
    *    disregard the state of the parent layer, and when setting, refresh the
    *    state regardless of whether it has changed or not.
    * @returns {boolean|this} Either the selectionAPI state (if getting) or the
