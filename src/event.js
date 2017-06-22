@@ -292,7 +292,6 @@ geo_event.transitionend = 'geo_transitionend';
  */
 geo_event.transitioncancel = 'geo_transitioncancel';
 
-//DWM::
 /**
  * Triggered when the parallel projection mode is changes.
  *
@@ -390,7 +389,6 @@ geo_event.screenshot = {
   ready: 'geo_screenshot_ready'
 };
 
-//DWM::
 /**
  * These events are triggered by the camera when it's internal state is
  * mutated.
