@@ -648,8 +648,10 @@ describe('geo.tileLayer', function () {
       l._getTiles = function (level, bounds) {
         expect(level).toBe(1);
         expect(bounds).toEqual({
-          left: 0, right: 1,
-          bottom: 0, top: 1
+          left: 0,
+          right: 1,
+          bottom: 0,
+          top: 1
         });
         return [
           {fetch: function () {
@@ -1325,21 +1327,35 @@ describe('geo.tileLayer', function () {
         });
       });
       it('url templating', function () {
+        /* eslint-disable no-template-curly-in-string */
+        var urls = {
+          's={s}&x={x}&y={y}&z={z}': ['a', 'b', 'c'],
+          's=${S}&x=${X}&y=${Y}&z=${Z}': ['a', 'b', 'c'],
+          's={s:abc}&x={x}&y={y}&z={z}': ['a', 'b', 'c'],
+          's={a,b,c}&x={x}&y={y}&z={z}': ['a', 'b', 'c'],
+          's={a-c}&x={x}&y={y}&z={z}': ['a', 'b', 'c'],
+          's=${s:1234}&x={x}&y={y}&z={z}': ['1', '2', '3', '4'],
+          's=${1,2,3,4}&x={x}&y={y}&z={z}': ['1', '2', '3', '4'],
+          's=${1-4}&x={x}&y={y}&z={z}': ['1', '2', '3', '4'],
+          's={ab,bc,12}&x={x}&y={y}&z={z}': ['ab', 'bc', '12']
+        };
+        /* eslint-enable no-template-curly-in-string */
         var tiles, l = geo.tileLayer({
               map: map({unitsPerPixel: 1}),
               wrapX: false,
               wrapY: false,
-              topDown: true,
-              url: '/testdata/white.jpg?s={s}&x={x}&y={y}&z={z}'
+              topDown: true
             });
-
-        tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50});
-        expect(tiles.length).toBe(5);
-        tiles.forEach(function (tile) {
-          expect($.inArray(tile._url.split('?s=')[1].split('&')[0],
-                           ['a', 'b', 'c'])).toBeGreaterThan(-1);
-          expect(tile._url.split('&x')[1]).toBe('=' + tile.index.x + '&y=' +
-              tile.index.y + '&z=' + tile.index.level);
+        $.each(urls, function (url, subdomains) {
+          l.url('/testdata/white.jpg?' + url);
+          tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50});
+          expect(tiles.length).toBe(5);
+          tiles.forEach(function (tile) {
+            expect($.inArray(tile._url.split('?s=')[1].split('&')[0],
+                             subdomains)).toBeGreaterThan(-1);
+            expect(tile._url.split('&x')[1]).toBe('=' + tile.index.x + '&y=' +
+                tile.index.y + '&z=' + tile.index.level);
+          });
         });
       });
       it('baseUrl', function () {

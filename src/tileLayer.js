@@ -15,28 +15,53 @@ module.exports = (function () {
   /**
    * Pick a subdomain from a list of subdomains based on a the tile location.
    *
-   * @param {number} x: the x tile coordinate.
-   * @param {number} y: the y tile coordinate.
-   * @param {list} subdomains: the list of known subdomains.
+   * @param {number} x The x tile coordinate.
+   * @param {number} y The y tile coordinate.
+   * @param {number} z The tile layer.
+   * @param {string[]} subdomains The list of known subdomains.
+   * @returns {string} A subdomain based on the location.
    */
-  function m_getTileSubdomain(x, y, subdomains) {
-    return subdomains[modulo(x + y, subdomains.length)];
+  function m_getTileSubdomain(x, y, z, subdomains) {
+    return subdomains[modulo(x + y + z, subdomains.length)];
   }
 
   /**
    * Returns an OSM tile server formatting function from a standard format
-   * string. Replaces {s}, {z}, {x}, and {y}.
+   * string. Replaces `{s}`, `{z}`, `{x}`, and `{y}`.  These may be any case
+   * and may be prefixed with `$` (e.g., `${X}` is the same as `{x}`).  The
+   * subdomain can be specifed by a string of characters, listed as a range,
+   * or as a comma separated list (e.g., `{s:abc}`, `{a-c}`, `{a,b,c}` are
+   * all equivalent.
    *
    * @param {string} base The tile format string
-   * @returns: a conversion function.
+   * @returns {function} A conversion function.
    * @private.
    */
   function m_tileUrlFromTemplate(base) {
+    var xPattern = new RegExp(/\$?\{[xX]\}/),
+        yPattern = new RegExp(/\$?\{[yY]\}/),
+        zPattern = new RegExp(/\$?\{[zZ]\}/),
+        sPattern = new RegExp(/\$?\{(s|S|[sS]:.+|[^-{}]-[^-{}]|([^,{}]+,)+[^,{}]+)\}/);
     return function (x, y, z, subdomains) {
-      return base.replace('{s}', m_getTileSubdomain(x, y, subdomains))
-        .replace('{z}', z)
-        .replace('{x}', x)
-        .replace('{y}', y);
+      var url = base
+        .replace(xPattern, x)
+        .replace(yPattern, y)
+        .replace(zPattern, z);
+      var sMatch = url.match(sPattern);
+      if (sMatch) {
+        if (sMatch[2]) {
+          subdomains = sMatch[1].split(',');
+        } else if (sMatch[1][1] === ':') {
+          subdomains = sMatch[1].substr(2).split('');
+        } else if (sMatch[1][1] === '-') {
+          subdomains = [];
+          for (var i = sMatch[1].charCodeAt(0); i <= sMatch[1].charCodeAt(2); i += 1) {
+            subdomains.push(String.fromCharCode(i));
+          }
+        }
+        url = url.replace(sPattern, m_getTileSubdomain(x, y, z, subdomains));
+      }
+      return url;
     };
   }
 
