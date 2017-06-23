@@ -15,28 +15,62 @@ module.exports = (function () {
   /**
    * Pick a subdomain from a list of subdomains based on a the tile location.
    *
-   * @param {number} x: the x tile coordinate.
-   * @param {number} y: the y tile coordinate.
-   * @param {list} subdomains: the list of known subdomains.
+   * @param {number} x The x tile coordinate.
+   * @param {number} y The y tile coordinate.
+   * @param {number} z The tile layer.
+   * @param {string[]} subdomains The list of known subdomains.
+   * @returns {string} A subdomain based on the location.
    */
-  function m_getTileSubdomain(x, y, subdomains) {
-    return subdomains[modulo(x + y, subdomains.length)];
+  function m_getTileSubdomain(x, y, z, subdomains) {
+    return subdomains[modulo(x + y + z, subdomains.length)];
   }
 
   /**
    * Returns an OSM tile server formatting function from a standard format
-   * string. Replaces {s}, {z}, {x}, and {y}.
+   * string. Replaces `{s}`, `{z}`, `{x}`, and `{y}`.  These may be any case
+   * and may be prefixed with `$` (e.g., `${X}` is the same as `{x}`).  The
+   * subdomain can be specifed by a string of characters, listed as a range,
+   * or as a comma-separated list (e.g., `{s:abc}`, `{a-c}`, `{a,b,c}` are
+   * all equivalent.  The comma-separated list can have subdimains that are of
+   * any length; the string and range both use one-character subdomains.
    *
    * @param {string} base The tile format string
-   * @returns: a conversion function.
+   * @returns {function} A conversion function.
    * @private.
    */
   function m_tileUrlFromTemplate(base) {
+    var xPattern = new RegExp(/\$?\{[xX]\}/),
+        yPattern = new RegExp(/\$?\{[yY]\}/),
+        zPattern = new RegExp(/\$?\{[zZ]\}/),
+        sPattern = new RegExp(/\$?\{(s|S|[sS]:[^{}]+|[^-{}]-[^-{}]|([^,{}]+,)+[^,{}]+)\}/);
+    var url = base
+        .replace(sPattern, '{s}')
+        .replace(xPattern, '{x}')
+        .replace(yPattern, '{y}')
+        .replace(zPattern, '{z}');
+    var urlSubdomains;
+    var sMatch = base.match(sPattern);
+    if (sMatch) {
+      if (sMatch[2]) {
+        urlSubdomains = sMatch[1].split(',');
+      } else if (sMatch[1][1] === ':') {
+        urlSubdomains = sMatch[1].substr(2).split('');
+      } else if (sMatch[1][1] === '-') {
+        urlSubdomains = [];
+        var start = sMatch[1].charCodeAt(0),
+            end = sMatch[1].charCodeAt(2);
+        for (var i = Math.min(start, end); i <= Math.max(start, end); i += 1) {
+          urlSubdomains.push(String.fromCharCode(i));
+        }
+      }
+    }
+
     return function (x, y, z, subdomains) {
-      return base.replace('{s}', m_getTileSubdomain(x, y, subdomains))
-        .replace('{z}', z)
+      return url
+        .replace('{s}', m_getTileSubdomain(x, y, z, urlSubdomains || subdomains))
         .replace('{x}', x)
-        .replace('{y}', y);
+        .replace('{y}', y)
+        .replace('{z}', z);
     };
   }
 
