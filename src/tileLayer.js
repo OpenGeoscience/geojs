@@ -30,8 +30,9 @@ module.exports = (function () {
    * string. Replaces `{s}`, `{z}`, `{x}`, and `{y}`.  These may be any case
    * and may be prefixed with `$` (e.g., `${X}` is the same as `{x}`).  The
    * subdomain can be specifed by a string of characters, listed as a range,
-   * or as a comma separated list (e.g., `{s:abc}`, `{a-c}`, `{a,b,c}` are
-   * all equivalent.
+   * or as a comma-separated list (e.g., `{s:abc}`, `{a-c}`, `{a,b,c}` are
+   * all equivalent.  The comma-separated list can have subdimains that are of
+   * any length; the string and range both use one-character subdomains.
    *
    * @param {string} base The tile format string
    * @returns {function} A conversion function.
@@ -41,27 +42,35 @@ module.exports = (function () {
     var xPattern = new RegExp(/\$?\{[xX]\}/),
         yPattern = new RegExp(/\$?\{[yY]\}/),
         zPattern = new RegExp(/\$?\{[zZ]\}/),
-        sPattern = new RegExp(/\$?\{(s|S|[sS]:.+|[^-{}]-[^-{}]|([^,{}]+,)+[^,{}]+)\}/);
-    return function (x, y, z, subdomains) {
-      var url = base
-        .replace(xPattern, x)
-        .replace(yPattern, y)
-        .replace(zPattern, z);
-      var sMatch = url.match(sPattern);
-      if (sMatch) {
-        if (sMatch[2]) {
-          subdomains = sMatch[1].split(',');
-        } else if (sMatch[1][1] === ':') {
-          subdomains = sMatch[1].substr(2).split('');
-        } else if (sMatch[1][1] === '-') {
-          subdomains = [];
-          for (var i = sMatch[1].charCodeAt(0); i <= sMatch[1].charCodeAt(2); i += 1) {
-            subdomains.push(String.fromCharCode(i));
-          }
+        sPattern = new RegExp(/\$?\{(s|S|[sS]:[^{}]+|[^-{}]-[^-{}]|([^,{}]+,)+[^,{}]+)\}/);
+    var url = base
+        .replace(sPattern, '{s}')
+        .replace(xPattern, '{x}')
+        .replace(yPattern, '{y}')
+        .replace(zPattern, '{z}');
+    var urlSubdomains;
+    var sMatch = base.match(sPattern);
+    if (sMatch) {
+      if (sMatch[2]) {
+        urlSubdomains = sMatch[1].split(',');
+      } else if (sMatch[1][1] === ':') {
+        urlSubdomains = sMatch[1].substr(2).split('');
+      } else if (sMatch[1][1] === '-') {
+        urlSubdomains = [];
+        var start = sMatch[1].charCodeAt(0),
+            end = sMatch[1].charCodeAt(2);
+        for (var i = Math.min(start, end); i <= Math.max(start, end); i += 1) {
+          urlSubdomains.push(String.fromCharCode(i));
         }
-        url = url.replace(sPattern, m_getTileSubdomain(x, y, z, subdomains));
       }
-      return url;
+    }
+
+    return function (x, y, z, subdomains) {
+      return url
+        .replace('{s}', m_getTileSubdomain(x, y, z, urlSubdomains || subdomains))
+        .replace('{x}', x)
+        .replace('{y}', y)
+        .replace('{z}', z);
     };
   }
 
