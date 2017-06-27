@@ -86,7 +86,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> bb = wms.gcsTileBounds({<span class="hljs-attr">x</span>: x, <span class="hljs-attr">y</span>: y, <span class="hljs-attr">level</span>: zoom}, projection);
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> bb = <span class="hljs-keyword">this</span>.gcsTileBounds({<span class="hljs-attr">x</span>: x, <span class="hljs-attr">y</span>: y, <span class="hljs-attr">level</span>: zoom}, projection);
       <span class="hljs-keyword">var</span> bbox_mercator = bb.left + <span class="hljs-string">','</span> + bb.bottom + <span class="hljs-string">','</span> + bb.right + <span class="hljs-string">','</span> + bb.top;</pre></div></div>
             
         </li>
