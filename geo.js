@@ -128,17 +128,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  tileLayer: __webpack_require__(238),
 	  timestamp: __webpack_require__(209),
 	  transform: __webpack_require__(11),
-	  vectorFeature: __webpack_require__(242),
+	  typedef: __webpack_require__(242),
+	  vectorFeature: __webpack_require__(243),
 	  inherit: __webpack_require__(8),
-	  version: __webpack_require__(243),
-	  sha: __webpack_require__(244),
+	  version: __webpack_require__(244),
+	  sha: __webpack_require__(245),
 
 	  util: __webpack_require__(83),
 	  jQuery: $,
-	  d3: __webpack_require__(245),
-	  gl: __webpack_require__(257),
-	  canvas: __webpack_require__(267),
-	  gui: __webpack_require__(275)
+	  d3: __webpack_require__(246),
+	  gl: __webpack_require__(258),
+	  canvas: __webpack_require__(268),
+	  gui: __webpack_require__(276)
 	}, __webpack_require__(201));
 
 	if (window && !window.$) {
@@ -10384,7 +10385,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var annotationActionOwner = 'annotationAction';
 
-	/////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Base annotation class
 	 *
@@ -10400,7 +10400,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *    annotation.state values.
 	 * @returns {geo.annotation}
 	 */
-	/////////////////////////////////////////////////////////////////////////////
 	var annotation = function (type, args) {
 	  'use strict';
 	  if (!(this instanceof annotation)) {
@@ -10787,7 +10786,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	};
 
-	/////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Rectangle annotation class
 	 *
@@ -10802,7 +10800,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
 	 *     strokeOpacity
 	 */
-	/////////////////////////////////////////////////////////////////////////////
 	var rectangleAnnotation = function (args) {
 	  'use strict';
 	  if (!(this instanceof rectangleAnnotation)) {
@@ -11059,7 +11056,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	rectangleRequiredFeatures[polygonFeature.capabilities.feature] = true;
 	registerAnnotation('rectangle', rectangleAnnotation, rectangleRequiredFeatures);
 
-	/////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Polygon annotation class
 	 *
@@ -11076,7 +11072,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
 	 *     strokeOpacity
 	 */
-	/////////////////////////////////////////////////////////////////////////////
 	var polygonAnnotation = function (args) {
 	  'use strict';
 	  if (!(this instanceof polygonAnnotation)) {
@@ -11306,7 +11301,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	polygonRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
 	registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
 
-	/////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Line annotation class
 	 *
@@ -11320,7 +11314,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *     strokeWidth, strokeColor, strokeOpacity, strokeOffset, closed, lineCap,
 	 *     lineJoin
 	 */
-	/////////////////////////////////////////////////////////////////////////////
 	var lineAnnotation = function (args) {
 	  'use strict';
 	  if (!(this instanceof lineAnnotation)) {
@@ -11601,7 +11594,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	lineRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
 	registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
 
-	/////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Point annotation class
 	 *
@@ -11616,7 +11608,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * the radius is based on the zoom level at first instantiation.  Otherwise, if
 	 * it is a number, the radius is used at that zoom level.
 	 */
-	/////////////////////////////////////////////////////////////////////////////
 	var pointAnnotation = function (args) {
 	  'use strict';
 	  if (!(this instanceof pointAnnotation)) {
@@ -11787,11 +11778,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return function () {};
 	}
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Convenient function to define JS inheritance
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	module.exports = function (C, P) {
 	  var F = newfunc();
 	  F.prototype = P.prototype;
@@ -11804,20 +11793,20 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 9 */
 /***/ (function(module, exports) {
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Common object containing all event types that are provided by the GeoJS
 	 * API.  Each property contained here is a valid target for event handling
 	 * via {@link geo.object#geoOn}.  The event object provided to handlers is
-	 * different for each event type.  Each handler will generally be called
-	 * with a the <code>this</code> context being the class that caused the event.<br>
+	 * different for each event type.  Each handler is generally called with the
+	 * `this` context being the class that caused the event.<br>
 	 * <br>
 	 * The following properties are common to all event objects:
 	 *
 	 * @namespace
 	 * @alias geo.event
-	 * @property {string} type The event type that was triggered
-	 * @property {object} geo A universal event object for controlling propagation
+	 * @type {object}
+	 * @property {string} event The event type that was triggered.
+	 * @property {object} geo A universal event object for controlling propagation.
 	 *
 	 * @example
 	 * map.geoOn(geo.event.layerAdd, function (event) {
@@ -11825,339 +11814,291 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * });
 	 *
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var geo_event = {};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/*
 	 * Event types
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 
-	// The following were not triggered nor used anywhere.  Removing until their
-	// purpose is defined more clearly.
-	//
-	// geo.event.update = 'geo_update';
-	// geo.event.opacityUpdate = 'geo_opacityUpdate';
-	// geo.event.layerSelect = 'geo_layerSelect';
-	// geo.event.layerUnselect = 'geo_layerUnselect';
-	// geo.event.query = 'geo_query';
-
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when a layer is added to the map.
 	 *
-	 * @property {geo.map} target The current map
-	 * @property {geo.layer} layer The new layer
+	 * @event geo.event.layerAdd
+	 * @type {object}
+	 * @property {geo.map} target The current map.
+	 * @property {geo.layer} layer The new layer that was added.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.layerAdd = 'geo_layerAdd';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when a layer is removed from the map.
 	 *
-	 * @property {geo.map} target The current map
-	 * @property {geo.layer} layer The old layer
+	 * @event geo.event.layerRemove
+	 * @type {object}
+	 * @property {geo.map} target The current map.
+	 * @property {geo.layer} layer The old layer that was removed.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.layerRemove = 'geo_layerRemove';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Triggered when the map's zoom level is changed.  Note that zoom is never
-	 * triggered on the map itself.  Instead it is triggered individually on
-	 * layers, starting with the base layer.
+	 * Triggered when the map's zoom level is changed.
 	 *
-	 * @property {number} zoomLevel New zoom level
-	 * @property {object} screenPosition The screen position of mouse pointer
+	 * @event geo.event.zoom
+	 * @type {object}
+	 * @property {number} zoomLevel New zoom level.
+	 * @property {geo.screenPosition} screenPosition The screen position of the
+	 *      mouse pointer.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.zoom = 'geo_zoom';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when the map is rotated around the current map center (pointing
 	 * downward so that positive angles are clockwise rotations).
 	 *
-	 * @property {number} angle The angle of the rotation in radians
+	 * @event geo.event.rotate
+	 * @type {object}
+	 * @property {number} rotation The angle of the rotation in radians.  This is
+	 *      the map's complete rotation, not a delta.
+	 * @property {geo.screenPosition} screenPosition The screen position of the
+	 *      mouse pointer.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.rotate = 'geo_rotate';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when the map is panned either by user interaction or map
 	 * transition.
 	 *
 	 * @event geo.event.pan
 	 * @type {object}
-	 * @property {object} screenDelta The number of pixels to pan the map by
-	 * @property {object} center The new map center
+	 * @property {object} screenDelta The number of pixels of the pan.
+	 * @property {number} screenDelta.x Horizontal pan distance in pixels.
+	 * @property {number} screenDelta.y Vertical pan distance in pixels.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.pan = 'geo_pan';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when the map's canvas is resized.
 	 *
-	 * @property {number} width The new width in pixels
-	 * @property {number} height The new height in pixels
+	 * @event geo.event.resize
+	 * @type {object}
+	 * @property {geo.map} target The map that was resized.
+	 * @property {number} width The new width in pixels.
+	 * @property {number} height The new height in pixels.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.resize = 'geo_resize';
 
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Triggered when the world coordinate system changes.  Data in GCS
-	 * coordinates can be transformed by the following formulas:
-	 *
-	 *   x <- (x - origin.x) * scale.x
-	 *   y <- (y - origin.y) * scale.y
-	 *   z <- (z - origin.z) * scale.z
-	 *
-	 * Data in world coordinates can be updated using the following formulas:
-	 *
-	 *   x <- (x * scaleChange.x - origin.x * (scale.x + scaleChange.x)
-	 *          - scale.x * originChange.x) * scale.x / scaleChange.x
-	 *   y <- (y * scaleChange.y - origin.y * (scale.y + scaleChange.y)
-	 *          - scale.y * originChange.y) * scale.y / scaleChange.y
-	 *   z <- (z * scaleChange.z - origin.z * (scale.z + scaleChange.z)
-	 *          - scale.z * originChange.z) * scale.z / scaleChange.z
-	 *
-	 * @property {geo.map} map The map whose coordinates changed
-	 * @property {object} origin The new origin in GCS coordinates
-	 * @property {number} origin.x
-	 * @property {number} origin.y
-	 * @property {number} origin.z
-	 * @property {object} scale The new scale factor
-	 * @property {number} scale.x
-	 * @property {number} scale.y
-	 * @property {number} scale.z
-	 * @property {object} originChange Relative change from the old origin defined
-	 *   as `origin - oldorigin`.
-	 * @property {object} scaleChange Relative change from the old scale defined
-	 *   as `scale / oldscale`.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	geo_event.worldChanged = 'geo_worldChanged';
-
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered on every call to {@link geo.map#draw} before the map is rendered.
 	 *
-	 * @property {geo.map} target The current map
+	 * @event geo.event.draw
+	 * @type {object}
+	 * @property {geo.map} target The current map.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.draw = 'geo_draw';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered on every call to {@link geo.map#draw} after the map is rendered.
 	 *
-	 * @property {geo.map} target The current map
+	 * @event geo.event.drawEnd
+	 * @type {object}
+	 * @property {geo.map} target The current map.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.drawEnd = 'geo_drawEnd';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Triggered on every 'mousemove' over the map's DOM element.  The event
-	 * object extends {@link geo.mouseState}.
-	 * @mixes geo.mouseState
+	 * Triggered on every `mousemove` over the map's DOM element unless a click
+	 * might occur.  The event object extends {@link geo.mouseState}.
+	 *
+	 * @event geo.event.mousemove
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.mousemove = 'geo_mousemove';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Triggered on every 'mousedown' over the map's DOM element.  The event
-	 * object extends {@link geo.mouseState}.
-	 * @mixes geo.mouseState
+	 * Triggered on `mouseup` events that happen soon enough and close enough to a
+	 * `mousedown` event.  The event object extends {@link geo.mouseState}.
+	 *
+	 * @event geo.event.mouseclick
+	 * @property {geo.mouseButtons} buttonsDown The buttons that were down at the
+	 *      start of the click action.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.mouseclick = 'geo_mouseclick';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Triggered on every 'mousemove' during a brushing selection.
+	 * Triggered on every `mousemove` during a brushing selection.
 	 * The event object extends {@link geo.brushSelection}.
-	 * @mixes geo.brushSelection
+	 *
+	 * @event geo.event.brush
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.brush = 'geo_brush';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered after a brush selection ends.
 	 * The event object extends {@link geo.brushSelection}.
-	 * @mixes geo.brushSelection
+	 *
+	 * @event geo.event.brushend
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.brushend = 'geo_brushend';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when a brush selection starts.
 	 * The event object extends {@link geo.brushSelection}.
-	 * @mixes geo.brushSelection
+	 *
+	 * @event geo.event.brushstart
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.brushstart = 'geo_brushstart';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Triggered after a selection ends.
+	 * Triggered when brushing results in a selection.
 	 * The event object extends {@link geo.brushSelection}.
-	 * @mixes geo.brushSelection
+	 *
+	 * @event geo.event.select
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.select = 'geo_select';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Triggered after a zoom selection ends.
+	 * Triggered when brushing results in a zoom selection.
 	 * The event object extends {@link geo.brushSelection}.
-	 * @mixes geo.brushSelection
+	 *
+	 * @event geo.event.zoomselect
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.zoomselect = 'geo_zoomselect';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Triggered after an unzoom selection ends.
+	 * Triggered when brushing results in a zoom-out selection.
 	 * The event object extends {@link geo.brushSelection}.
-	 * @mixes geo.brushSelection
+	 *
+	 * @event geo.event.unzoomselect
 	 */
-	//////////////////////////////////////////////////////////////////////////////
+
 	geo_event.unzoomselect = 'geo_unzoomselect';
 
-	//////////////////////////////////////////////////////////////////////////////
+	//DWM::
 	/**
-	 * Triggered when an action is initiated with mouse down
+	 * Triggered when an action is initiated with mouse down.
 	 *
-	 * @property {object} state The action state
-	 * @property {geo.mouseState} mouse The mouse state
-	 * @property {object} event The triggering event
+	 * @event geo.event.actiondown
+	 * @property {geo.actionState} state The action state.
+	 * @property {geo.mouseState} mouse The mouse state.
+	 * @property {jQuery.Event} event The triggering jQuery event.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.actiondown = 'geo_actiondown';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when an action is being processed during mouse movement.
 	 *
-	 * @property {object} state The action state
-	 * @property {geo.mouseState} mouse The mouse state
-	 * @property {object} event The triggering event
+	 * @event geo.event.actionmove
+	 * @property {geo.actionState} state The action state.
+	 * @property {geo.mouseState} mouse The mouse state.
+	 * @property {jQuery.Event} event The triggering event.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.actionmove = 'geo_actionmove';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when an action is ended with a mouse up.
 	 *
-	 * @property {object} state The action state
-	 * @property {geo.mouseState} mouse The mouse state
-	 * @property {object} event The triggering event
+	 * @event geo.event.actionup
+	 * @property {geo.actionState} state The action state.
+	 * @property {geo.mouseState} mouse The mouse state.
+	 * @property {jQuery.Event} event The triggering event.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.actionup = 'geo_actionup';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when an action results in a selection.
 	 *
-	 * @property {object} state The action state
-	 * @property {geo.mouseState} mouse The mouse state
-	 * @property {object} event The triggering event
-	 * @property {object} lowerLeft Lower left of selection in screen coordinates
-	 * @property {object} upperRight Upper right of selection in screen coordinates
+	 * @event geo.event.actionselection
+	 * @property {geo.actionState} state The action state.
+	 * @property {geo.mouseState} mouse The mouse state.
+	 * @property {jQuery.Event} event The triggering event.
+	 * @property {geo.screenPosition} lowerLeft Lower left of selection in screen
+	 *      coordinates.
+	 * @property {geo.screenPosition} upperRight Upper right of selection in screen
+	 *      coordinates.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.actionselection = 'geo_actionselection';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when an action is triggered with a mouse wheel event.
 	 *
-	 * @property {object} state The action state
-	 * @property {geo.mouseState} mouse The mouse state
-	 * @property {object} event The triggering event
+	 * @event geo.event.actionwheel
+	 * @property {geo.actionState} state The action state.
+	 * @property {geo.mouseState} mouse The mouse state.
+	 * @property {jQuery.Event} event The triggering event.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.actionwheel = 'geo_actionwheel';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when an action is triggered via the keyboard.
 	 *
+	 * @event geo.event.keyaction
 	 * @property {object} move The movement that would happen if the action is
-	 *      passed through, possibly containing zoomDelta, zoom (absolute),
-	 *      rotationDelta (in radians), rotation (absolute in radians), panX (in
-	 *      display pixels), panY (in display pixels).  Set move.cancel to cancel
-	 *      the entire movement.
+	 *      passed through.
+	 * @property {number} [move.zoomDelta] A change in the zoom level.
+	 * @property {number} [move.zoom] A new zoom level.
+	 * @property {number} [move.rotationDelta] A change in the rotation in radians.
+	 * @property {number} [move.rotation] A new absolute rotation in radians.
+	 * @property {number} [move.panX] A horizontal shift in display pixels.
+	 * @property {number} [move.panY] A vertical shift in display pixels.
+	 * @property {boolean} [move.cancel] Set to `true` to cancel the entire
+	 *      movement.
 	 * @property {string} action Action based on key
-	 * @property {number} factor Factor based on metakeys [0-2].
-	 * @property {object} event The triggering event
+	 * @property {number} factor Factor based on metakeys [0-2].  0 means a small
+	 *      movement is preferred, 1 a medium movement, and 2 a large movement.
+	 * @property {jQuery.Event} event The triggering event
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.keyaction = 'geo_keyaction';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered before a map navigation animation begins.  Set
-	 * <code>event.geo.cancelAnimation</code> to cancel the animation
-	 * of the navigation.  This will cause the map to navigate to the
-	 * target location immediately.  Set <code>event.geo.cancelNavigation</code>
-	 * to cancel the navigation completely.  The transition options can
-	 * be modified in place.
+	 * `event.geo.cancelAnimation` to cancel the animation of the navigation.  This
+	 * will cause the map to navigate to the target location immediately.  Set
+	 * `event.geo.cancelNavigation` to cancel the navigation completely.  The
+	 * transition options can be modified in place.
 	 *
-	 * @property {geo.geoPosition} center The target center
-	 * @property {number} zoom The target zoom level
-	 * @property {number} duration The duration of the transition in milliseconds
-	 * @property {function} ease The easing function
+	 * @event geo.event.transitionstart
+	 * @type {object}
+	 * @property {geo.geoPosition} center The target center.
+	 * @property {number} zoom The target zoom level.
+	 * @property {number} duration The duration of the transition in milliseconds.
+	 * @property {function} ease The easing function.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.transitionstart = 'geo_transitionstart';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered after a map navigation animation ends.
 	 *
-	 * @property {geo.geoPosition} center The target center
-	 * @property {number} zoom The target zoom level
-	 * @property {number} duration The duration of the transition in milliseconds
-	 * @property {function} ease The easing function
+	 * @event geo.event.transitionend
+	 * @type {object}
+	 * @property {geo.geoPosition} center The target center.
+	 * @property {number} zoom The target zoom level.
+	 * @property {number} duration The duration of the transition in milliseconds.
+	 * @property {function} ease The easing function.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.transitionend = 'geo_transitionend';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Triggered if a map navigation animation is cancelled.
+	 * Triggered if a map navigation animation is canceled.
 	 *
-	 * @property {geo.geoPosition} center The target center
-	 * @property {number} zoom The target zoom level
-	 * @property {number} duration The duration of the transition in milliseconds
-	 * @property {function} ease The easing function
+	 * @event geo.event.transitioncancel
+	 * @type {object}
+	 * @property {geo.geoPosition} center The target center.
+	 * @property {number} zoom The target zoom level.
+	 * @property {number} duration The duration of the transition in milliseconds.
+	 * @property {function} ease The easing function.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.transitioncancel = 'geo_transitioncancel';
 
-	//////////////////////////////////////////////////////////////////////////////
+	//DWM::
 	/**
 	 * Triggered when the parallel projection mode is changes.
 	 *
-	 * @property paralellProjection {boolean} True if parallel projection is turned
-	 *                                        on.
+	 * @event geo.event.parallelprojection
+	 * @type {object}
+	 * @property {boolean} paralellProjection `true` if parallel projection is
+	 *      turned on.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.parallelprojection = 'geo_parallelprojection';
 
-	////////////////////////////////////////////////////////////////////////////
 	/**
 	 * This event object provides mouse/keyboard events that can be handled
 	 * by the features.  This provides a similar interface as core events,
@@ -12168,172 +12109,182 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * with the option 'selectionAPI'.
 	 * @namespace geo.event.feature
 	 */
-	////////////////////////////////////////////////////////////////////////////
 	geo_event.feature = {
+	  /**
+	   * The event is the feature version of {@link geo.event.mousemove}.
+	   * @event geo.event.feature.mousemove
+	   */
 	  mousemove:  'geo_feature_mousemove',
+	  /**
+	   * The event is the feature version of {@link geo.event.mouseover}.
+	   * @event geo.event.feature.mouseover
+	   */
 	  mouseover:  'geo_feature_mouseover',
+	  /**
+	   * The event is the feature version of {@link geo.event.mouseout}.
+	   * @event geo.event.feature.mouseout
+	   */
 	  mouseout:   'geo_feature_mouseout',
+	  /**
+	   * The event is the feature version of {@link geo.event.mouseon}.
+	   * @event geo.event.feature.mouseon
+	   */
 	  mouseon:    'geo_feature_mouseon',
+	  /**
+	   * The event is the feature version of {@link geo.event.mouseoff}.
+	   * @event geo.event.feature.mouseoff
+	   */
 	  mouseoff:   'geo_feature_mouseoff',
+	  /**
+	   * The event is the feature version of {@link geo.event.mouseclick}.
+	   * @event geo.event.feature.mouseclick
+	   */
 	  mouseclick: 'geo_feature_mouseclick',
+	  /**
+	   * The event is the feature version of {@link geo.event.brushend}.
+	   * @event geo.event.feature.brushend
+	   */
 	  brushend:   'geo_feature_brushend',
+	  /**
+	   * The event is the feature version of {@link geo.event.brush}.
+	   * @event geo.event.feature.brush
+	   */
 	  brush:      'geo_feature_brush'
 	};
 
-	////////////////////////////////////////////////////////////////////////////
 	/**
 	 * These events are triggered by the pixelmap feature.
 	 * @namespace geo.event.pixelmap
 	 */
-	////////////////////////////////////////////////////////////////////////////
 	geo_event.pixelmap = {
-	  /* The image associated with the pixel map url has been prepared and rendered
-	   * once. */
+	  /**
+	   * Report that an image associated with a pixel map has been prepared and
+	   * rendered once.
+	   *
+	   * @event geo.event.pixelmap.prepared
+	   * @type {object}
+	   * @property {geo.pixelmapFeature} pixelmap The pixelmap object that was
+	   *    prepared.
+	   */
 	  prepared: 'geo_pixelmap_prepared'
 	};
 
-	////////////////////////////////////////////////////////////////////////////
 	/**
 	 * These events are triggered by the map screenshot feature.
-	 * @namespace geo.event.pixelmap
+	 * @namespace geo.event.screenshot
 	 */
-	////////////////////////////////////////////////////////////////////////////
 	geo_event.screenshot = {
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Triggered when a scrrenshot has been completed.
+	   * Triggered when a screenshot has been completed.
 	   *
-	   * @namespace geo.event.screenshot
-	   * @property {object} canvas The canvas used to take the screenshot
-	   * @property {string|object} screenshot the screenshot as a dataURL string or
-	   *      the canvas, depending on the screenshot request.
+	   * @event geo.event.screenshot.ready
+	   * @property {HTMLCanvasElement} canvas The canvas used to take the
+	   *    screenshot.
+	   * @property {string|HTMLCanvasElement} screenshot The screenshot as a
+	   *    dataURL string or the canvas, depending on the screenshot request.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  ready: 'geo_screenshot_ready'
 	};
 
-	////////////////////////////////////////////////////////////////////////////
+	//DWM::
 	/**
 	 * These events are triggered by the camera when it's internal state is
 	 * mutated.
 	 * @namespace geo.event.camera
 	 */
-	////////////////////////////////////////////////////////////////////////////
 	geo_event.camera = {};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered after a general view matrix change (any change in the visible
 	 * bounds).  This is equivalent to the union of pan and zoom.
 	 *
-	 * @property {geo.camera} camera The camera instance
+	 * @event geo.event.camera.view
+	 * @type {object}
+	 * @property {geo.camera} camera The camera instance.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.camera.view = 'geo_camera_view';
 
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Triggered after a pan in the x/y plane (no zoom level change).
-	 *
-	 * @property {geo.camera} camera The camera instance
-	 * @property {object} delta The translation delta in world coordinates.
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	geo_event.camera.pan = 'geo_camera_pan';
-
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Triggered after a view matrix change that is not a simple pan.  This
-	 * includes, but is not limited to, pure zooms.
-	 *
-	 * @property {geo.camera} camera The camera instance
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	geo_event.camera.zoom = 'geo_camera_zoom';
-
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered after a projection change.
 	 *
-	 * @property {geo.camera} camera The camera instance
-	 * @property {string} type The projection type ('perspective'|'parallel')
+	 * @event geo.event.camera.projection
+	 * @property {geo.camera} camera The camera instance.
+	 * @property {string} type The projection type, either `'perspective'` or
+	 *      `'parallel'`.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.camera.projection = 'geo_camera_projection';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered after a viewport change.
 	 *
-	 * @property {geo.camera} camera The camera instance
-	 * @property {object} viewport The new viewport
-	 * @property {number} viewport.width The new width
-	 * @property {number} viewport.height The new height
+	 * @event geo.event.camera.viewport
+	 * @property {geo.camera} camera The camera instance.
+	 * @property {geo.screenSize} viewport The new viewport size.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.camera.viewport = 'geo_camera_viewport';
 
-	////////////////////////////////////////////////////////////////////////////
 	/**
 	 * These events are triggered by the annotation layer.
 	 * @namespace geo.event.annotation
 	 */
-	////////////////////////////////////////////////////////////////////////////
 	geo_event.annotation = {};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when an annotation has been added.
 	 *
+	 * @event geo.event.annotation.add
+	 * @type {object}
 	 * @property {geo.annotation} annotation The annotation that was added.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.annotation.add = 'geo_annotation_add';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when an annotation is about to be added.
 	 *
+	 * @event geo.event.annotation.add_before
+	 * @type {object}
 	 * @property {geo.annotation} annotation The annotation that will be added.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.annotation.add_before = 'geo_annotation_add_before';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when an annotation has been altered.  This is currently only
 	 * triggered when updating existing annotations via the geojson function.
 	 *
+	 * @event geo.event.annotation.update
+	 * @type {object}
 	 * @property {geo.annotation} annotation The annotation that was altered.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.annotation.update = 'geo_annotation_update';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when an annotation has been removed.
 	 *
+	 * @event geo.event.annotation.remove
+	 * @type {object}
 	 * @property {geo.annotation} annotation The annotation that was removed.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.annotation.remove = 'geo_annotation_remove';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when an annotation's state changes.
 	 *
-	 * @property {geo.annotation} annotation The annotation that changed/
+	 * @event geo.event.annotation.state
+	 * @type {object}
+	 * @property {geo.annotation} annotation The annotation that changed.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.annotation.state = 'geo_annotation_state';
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Triggered when the annotation mode is changed.
 	 *
-	 * @property {string|null} mode the new annotation mode.
+	 * @event geo.event.annotation.mode
+	 * @type {object}
+	 * @property {string?} mode The new annotation mode.  This is one of the values
+	 *      from `geo.annotation.annotationState`.
+	 * @property {string?} oldMode The annotation mode before this change.  This is
+	 *      one of the values from `geo.annotation.annotationState`.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	geo_event.annotation.mode = 'geo_annotation_mode';
 
 	module.exports = geo_event;
@@ -12343,12 +12294,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 10 */
 /***/ (function(module, exports) {
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Common object containing all action types that are provided by the GeoJS
 	 * API.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var geo_action = {
 	  momentum: 'geo_action_momentum',
 	  pan: 'geo_action_pan',
@@ -12374,7 +12323,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var proj4 = __webpack_require__(12);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * This purpose of this class is to provide a generic interface for computing
 	 * coordinate transformationss.  The interface is taken from the proj4js,
@@ -12396,7 +12344,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string} options.target A proj4 string for the target projection
 	 * @returns {geo.transform}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 
 	var transformCache = {};
 	/* Up to maxTransformCacheSize squared might be cached.  When the maximum cache
@@ -12655,12 +12602,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	transform.transformCoordinatesArray = function (trans, coordinates, numberOfComponents) {
 	  var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint;
 
-	  /// Default Z accessor
+	  // Default Z accessor
 	  zAcc = function () {
 	    return 0.0;
 	  };
 
-	  /// Helper methods
+	  // Helper methods
 	  function handleArrayCoordinates() {
 	    if (coordinates[0] instanceof Array) {
 	      if (coordinates[0].length === 2) {
@@ -12754,7 +12701,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
-	  /// Helper methods
+	  // Helper methods
 	  function handleObjectCoordinates() {
 	    if (coordinates[0] &&
 	        'x' in coordinates[0] &&
@@ -18551,12 +18498,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Contains utility classes and methods used by geojs.
 	 * @namespace geo.util
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var util = module.exports = {
 	  DistanceGrid: DistanceGrid,
 	  ClusterGroup: ClusterGroup,
@@ -19777,15 +19722,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      exec();
 
 	    } else if (no_trailing !== true) {
-	      // In trailing throttle mode, since `delay` time has not been
-	      // exceeded, schedule `callback` to execute `delay` ms after most
-	      // recent execution.
-	      //
-	      // If `debounce_mode` is true (at_begin), schedule `clear` to execute
-	      // after `delay` ms.
-	      //
-	      // If `debounce_mode` is false (at end), schedule `callback` to
-	      // execute after `delay` ms.
+	      /*
+	       * In trailing throttle mode, since `delay` time has not been
+	       * exceeded, schedule `callback` to execute `delay` ms after most
+	       * recent execution.
+	       *
+	       * If `debounce_mode` is true (at_begin), schedule `clear` to execute
+	       * after `delay` ms.
+	       *
+	       * If `debounce_mode` is false (at end), schedule `callback` to
+	       * execute after `delay` ms.
+	       */
 	      timeout_id = setTimeout(
 	        debounce_mode ?
 	          clear :
@@ -36302,7 +36249,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var registerRenderer = __webpack_require__(201).registerRenderer;
 	var renderer = __webpack_require__(202);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class vglRenderer
 	 *
@@ -36311,7 +36257,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param canvas
 	 * @returns {geo.gl.vglRenderer}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var vglRenderer = function (arg) {
 	  'use strict';
 
@@ -36337,48 +36282,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	      s_init = this._init,
 	      s_exit = this._exit;
 
-	  /// TODO: Move this API to the base class
-	  ////////////////////////////////////////////////////////////////////////////
+	  // TODO: Move this API to the base class
 	  /**
 	   * Return width of the renderer
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.width = function () {
 	    return m_width;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return height of the renderer
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.height = function () {
 	    return m_height;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get context specific renderer
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.contextRenderer = function () {
 	    return m_contextRenderer;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get API used by the renderer
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.api = function () {
 	    return 'vgl';
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	    if (m_this.initialized()) {
 	      return m_this;
@@ -36417,11 +36352,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle resize event
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._resize = function (x, y, w, h) {
 	    var renderWindow = m_viewer.renderWindow();
 
@@ -36437,11 +36370,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Render.  This actually schedules rendering for the next animation frame.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._render = function () {
 	    /* If we are already scheduled to render, don't schedule again.  Rather,
 	     * mark that we should render after other animation frame requests occur.
@@ -36464,11 +36395,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_viewer.render();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Exit
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.canvas().remove();
 	    m_viewer.exit();
@@ -36638,20 +36567,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	var annotations = {};
 	var util = {};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Register a new file reader type
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.registerFileReader = function (name, func) {
 	  fileReaders[name] = func;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new file reader
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.createFileReader = function (name, opts) {
 	  if (fileReaders.hasOwnProperty(name)) {
 	    return fileReaders[name](opts);
@@ -36659,20 +36584,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return null;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Register a new renderer type
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.registerRenderer = function (name, func) {
 	  renderers[name] = func;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create new instance of the renderer
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.createRenderer = function (name, layer, canvas, options) {
 	  if (renderers.hasOwnProperty(name)) {
 	    var ren = renderers[name](
@@ -36684,7 +36605,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return null;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Check if the named renderer is supported.  If not, display a warning and get
 	 * the name of a fallback renderer.  Ideally, we would pass a list of desired
@@ -36696,7 +36616,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {string|null|false} the name of the renderer that should be used
 	 *      or false if no valid renderer can be determined.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.checkRenderer = function (name, noFallback) {
 	  if (name === null) {
 	    return name;
@@ -36719,7 +36638,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return false;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Check if there is a renderer that is supported and supports a list of
 	 * features.  If not, display a warning.  This picks the first renderer that
@@ -36737,7 +36655,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {string|null|false} the name of the renderer that should be used
 	 *      or false if no valid renderer can be determined.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.rendererForFeatures = function (featureList) {
 	  var preferredRenderers = ['vgl', 'canvas', 'd3', null];
 
@@ -36780,7 +36697,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return false;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Register a new feature type
 	 *
@@ -36798,7 +36714,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @returns {object} if this feature replaces an existing one, this was the
 	 *      feature that was replaced.  In this case, a warning is issued.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.registerFeature = function (category, name, func, capabilities) {
 	  if (!(category in features)) {
 	    features[category] = {};
@@ -36814,11 +36729,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return old;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create new instance of a feature
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.createFeature = function (name, layer, renderer, arg) {
 	  var category = renderer.api(),
 	      options = {'layer': layer, 'renderer': renderer};
@@ -36837,14 +36750,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return null;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Register a layer adjustment.
 	 *
 	 * @returns {object} if this layer adjustment replaces an existing one, this
 	 *      was the value that was replaced.  In this case, a warning is issued.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.registerLayerAdjustment = function (category, name, func) {
 	  if (!(category in rendererLayerAdjustments)) {
 	    rendererLayerAdjustments[category] = {};
@@ -36858,7 +36769,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return old;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * If a layer needs to be adjusted based on the renderer, call the function
 	 * that adjusts it.
@@ -36866,7 +36776,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string} name Name of the layer.
 	 * @param {object} layer Instantiated layer object.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.adjustLayerForRenderer = function (name, layer) {
 	  var rendererName = layer.rendererName();
 	  if (rendererName) {
@@ -36878,23 +36787,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Register a new layer type
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.registerLayer = function (name, func, defaultFeatures) {
 	  layers[name] = func;
 	  layerDefaultFeatures[name] = defaultFeatures;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create new instance of the layer
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.createLayer = function (name, map, arg) {
-	  /// Default renderer is vgl
+	  // Default renderer is vgl
 	  var options = {map: map},
 	      layer = null;
 
@@ -36906,6 +36811,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      $.extend(true, options, arg);
 	    }
 	    layer = layers[name](options);
+	    layer.layerName = name;
 	    layer._init();
 	    return layer;
 	  } else {
@@ -36913,14 +36819,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Register a new widget type
 	 *
 	 * @returns {object} if this widget replaces an existing one, this was the
 	 *      value that was replaced.  In this case, a warning is issued.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.registerWidget = function (category, name, func) {
 	  if (!(category in widgets)) {
 	    widgets[category] = {};
@@ -36934,11 +36838,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return old;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create new instance of the widget
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.createWidget = function (name, layer, arg) {
 	  var options = {
 	    layer: layer
@@ -36955,7 +36857,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  throw new Error('Cannot create unknown widget ' + name);
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Register a new annotation type
 	 *
@@ -36969,7 +36870,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @returns {object} if this annotation replaces an existing one, this was the
 	 *      value that was replaced.  In this case, a warning is issued.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.registerAnnotation = function (name, func, features) {
 	  var old = annotations[name];
 	  if (old) {
@@ -36979,7 +36879,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return old;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create an annotation based on a registered type.
 	 *
@@ -36987,7 +36886,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {object} options The options for the annotation.
 	 * @returns {object} the new annotation.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.createAnnotation = function (name, options) {
 	  if (!annotations[name]) {
 	    console.warn('The ' + name + ' annotation is not registered');
@@ -36997,18 +36895,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return annotation;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Get a list of registered annotation types.
 	 *
 	 * @return {array} a list of registered annotations.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.listAnnotations = function () {
 	  return Object.keys(annotations);
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Get a list of required features for a set of annotations.
 	 *
@@ -37022,7 +36917,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {array} a list of features needed for the specified annotations.
 	 *   There may be duplicates in the list.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.featuresForAnnotations = function (annotationList) {
 	  var features = [];
 
@@ -37047,7 +36941,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return features;
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Check if there is a renderer that is supported and supports a list of
 	 * annotations.  If not, display a warning.  This generates a list of required
@@ -37061,7 +36954,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {string|null|false} the name of the renderer that should be used or
 	 *   false if no valid renderer can be determined.
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	util.rendererForAnnotations = function (annotationList) {
 	  return util.rendererForFeatures(util.featuresForAnnotations(annotationList));
 	};
@@ -37076,7 +36968,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var inherit = __webpack_require__(8);
 	var object = __webpack_require__(203);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class renderer
 	 *
@@ -37084,7 +36975,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.object
 	 * @returns {geo.renderer}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var renderer = function (arg) {
 	  'use strict';
 
@@ -37099,22 +36989,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_canvas = arg.canvas === undefined ? null : arg.canvas,
 	      m_initialized = false;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get layer of the renderer
 	   *
 	   * @returns {*}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.layer = function () {
 	    return m_layer;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get canvas for the renderer
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.canvas = function (val) {
 	    if (val === undefined) {
 	      return m_canvas;
@@ -37124,11 +37010,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get map that this renderer belongs to
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.map = function () {
 	    if (m_layer) {
 	      return m_layer.map();
@@ -37137,11 +37021,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set if renderer has been initialized
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.initialized = function (val) {
 	    if (val === undefined) {
 	      return m_initialized;
@@ -37151,45 +37033,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get render API used by the renderer
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.api = function () {
 	    throw new Error('Should be implemented by derived classes');
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Reset to default
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.reset = function () {
 	    return true;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle resize event
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._resize = function () {
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Render
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._render = function () {
 	  };
 
@@ -37207,7 +37079,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var vgl = __webpack_require__(86);
 	var inherit = __webpack_require__(8);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class object
 	 *
@@ -37216,7 +37087,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends vgl.object
 	 * @returns {geo.object}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var object = function () {
 	  'use strict';
 	  if (!(this instanceof object)) {
@@ -37228,15 +37098,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_idleHandlers = [],
 	      m_promiseCount = 0;
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   *  Bind a handler that will be called once when all internal promises are
 	   *  resolved.
 	   *
-	   *  @param {function} handler A function taking no arguments
-	   *  @returns {geo.object[]|geo.object} this
+	   *  @param {function} handler A function taking no arguments.
+	   *  @returns {this}
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.onIdle = function (handler) {
 	    if (m_promiseCount) {
 	      m_idleHandlers.push(handler);
@@ -37246,14 +37114,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   *  Add a new promise object preventing idle event handlers from being called
 	   *  until it is resolved.
 	   *
-	   *  @param {Promise} promise A promise object
+	   *  @param {Promise} promise A promise object.
+	   *  @returns {this}
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.addPromise = function (promise) {
 	    // called on any resolution of the promise
 	    function onDone() {
@@ -37270,18 +37137,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
-	   *  Bind an event handler to this object
+	   *  Bind an event handler to this object.
 	   *
-	   *  @param {String} event
-	   *    An event from {geo.events}
-	   *  @param {function} handler
-	   *    A function that will be called when ``event`` is triggered.  The
-	   *    function will be given an event object as a first parameter and
-	   *    optionally a second argument provided by the triggerer.
+	   *  @param {string} event An event from {@link geo.event} or a user-defined
+	   *    value.
+	   *  @param {function} handler A function that is called when `event` is
+	   *    triggered.  The function is passed a {@link geo.event} object.
+	   *  @returns {this}
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.geoOn = function (event, handler) {
 	    if (Array.isArray(event)) {
 	      event.forEach(function (e) {
@@ -37296,14 +37160,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
-	   *  Trigger an event (or events) on this object and call all handlers
+	   *  Trigger an event (or events) on this object and call all handlers.
 	   *
-	   *  @param {String} event An event from {geo.event}
-	   *  @param {Object} args An optional argument to pass to handlers
+	   *  @param {string|string[]} event An event or list of events from
+	   *        {@link geo.event} or defined by the user.
+	   *  @param {object} [args] Additional information to add to the
+	   *    {@link geo.event} object passed to the handlers.
+	   *  @returns {this}
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.geoTrigger = function (event, args) {
 
 	    // if we have an array of events, recall with single events
@@ -37327,16 +37192,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
-	   *  Remove handlers from an event (or an array of events).  If no event is
+	   *  Remove handlers from one event or an array of events.  If no event is
 	   *  provided all handlers will be removed.
 	   *
-	   *  @param {string?} event An event from {geo.events}
-	   *  @param {object?} arg A function or array of functions to remove from the events
-	   *                      or if falsey remove all handlers from the events
+	   *  @param {string|string[]} [event] An event or a list of events from
+	   *        {@link geo.event} or defined by the user, or `undefined` to remove
+	   *        all events (in which case `arg` is ignored).
+	   *  @param {(function|function[])?} [arg] A function or array of functions to
+	   *        remove from the events or a falsey value to remove all handlers
+	   *        from the events.
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.geoOff = function (event, arg) {
 	    if (event === undefined) {
 	      m_eventHandlers = {};
@@ -37357,8 +37223,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 	      return m_this;
 	    }
-	    // What do we do if the handler is not already bound?
-	    //   ignoring for now...
 	    if (m_eventHandlers.hasOwnProperty(event)) {
 	      m_eventHandlers[event] = m_eventHandlers[event].filter(function (f) {
 	        return f !== arg;
@@ -37368,11 +37232,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Free all resources and destroy the object.
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.geoOff();
 	  };
@@ -37776,14 +37638,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	C.prototype.addPoint = function (point) {
 	  var zoom, closest, parent, newCluster, lastParent, z;
-
-	  // start at the maximum zoom level and search for nearby
-	  //
-	  // 1.  existing clusters
-	  // 2.  unclustered points
-	  //
-	  // otherwise add the point as a new unclustered point
-
+	  /*
+	   * start at the maximum zoom level and search for nearby
+	   *
+	   * 1.  existing clusters
+	   * 2.  unclustered points
+	   *
+	   * otherwise add the point as a new unclustered point
+	   */
 	  for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
 
 	    // find near cluster
@@ -37874,7 +37736,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var timestamp = __webpack_require__(209);
 	var transform = __webpack_require__(11);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class lineFeature
 	 *
@@ -37920,7 +37781,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *   mode.  This is a single value that applies to all lines.
 	 * @returns {geo.lineFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var lineFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof lineFeature)) {
@@ -37932,11 +37792,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  feature.call(this, arg);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_init = this._init,
 	      m_pointSearchTime = timestamp(),
@@ -37952,13 +37810,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    strokeWidth: true
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set line accessor
 	   *
 	   * @returns {geo.pointFeature}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.line = function (val) {
 	    if (val === undefined) {
 	      return m_this.style('line');
@@ -37970,13 +37826,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set position accessor
 	   *
 	   * @returns {geo.pointFeature}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.position = function (val) {
 	    if (val === undefined) {
 	      return m_this.style('position');
@@ -37988,11 +37842,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Cache information needed for point searches.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._updatePointSearchInfo = function () {
 	    if (m_pointSearchTime.getMTime() >= m_this.dataTime().getMTime() &&
 	        m_pointSearchTime.getMTime() >= m_this.getMTime()) {
@@ -38036,7 +37888,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_pointSearchInfo;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Returns an array of datum indices that contain the given point.
 	   * This is a slow implementation with runtime order of the number of
@@ -38047,7 +37898,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * that variable width lines will have a greater selection region than their
 	   * visual size at the narrow end.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.pointSearch = function (p) {
 	    var data = m_this.data(), indices = [], found = [];
 	    if (!data || !data.length || !m_this.layer()) {
@@ -38102,11 +37952,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Returns an array of line indices that are contained in the given box.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.boxSearch = function (lowerLeft, upperRight, opts) {
 	    var pos = m_this.position(),
 	        idx = [],
@@ -38138,11 +37986,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return idx;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    arg = arg || {};
 	    s_init.call(m_this, arg);
@@ -38219,7 +38065,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var timestamp = __webpack_require__(209);
 	var geo_event = __webpack_require__(9);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class feature
 	 *
@@ -38227,7 +38072,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.sceneObject
 	 * @returns {geo.feature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var feature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof feature)) {
@@ -38237,11 +38081,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var util = __webpack_require__(83);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  arg = arg || {};
 
 	  var m_this = this,
@@ -38263,11 +38105,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // data items, such as individual vertices on lines or polygons.
 	  this._subfeatureStyles = {};
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Private method to bind mouse handlers on the map element.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._bindMouseHandlers = function () {
 
 	    // Don't bind handlers for improved performance on features that don't
@@ -38285,11 +38125,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.geoOn(geo_event.brush, m_this._handleBrush);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Private method to unbind mouse handlers on the map element.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._unbindMouseHandlers = function () {
 	    m_this.geoOff(geo_event.mousemove, m_this._handleMousemove);
 	    m_this.geoOff(geo_event.mouseclick, m_this._handleMouseclick);
@@ -38297,7 +38135,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.geoOff(geo_event.brush, m_this._handleBrush);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * For binding mouse events, use functions with
 	   * the following call signatures:
@@ -38314,9 +38151,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *   // do something with the feature marker.
 	   * });
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Search for features containing the given point.
 	   *
@@ -38330,7 +38165,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @argument {Object} coordinate
 	   * @returns {Object}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.pointSearch = function () {
 	    // base class method does nothing
 	    return {
@@ -38339,21 +38173,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Returns an array of line indices that are contained in the given box.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.boxSearch = function (lowerLeft, upperRight, opts) {
 	    // base class method does nothing
 	    return [];
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Private mousemove handler
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleMousemove = function () {
 	    var mouse = m_this.layer().map().interactor().mouse(),
 	        data = m_this.data(),
@@ -38445,11 +38275,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Private mouseclick handler
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleMouseclick = function (evt) {
 	    var mouse = m_this.layer().map().interactor().mouse(),
 	        data = m_this.data(),
@@ -38470,11 +38298,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Private brush handler.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleBrush = function (brush) {
 	    var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
 	        data = m_this.data();
@@ -38492,11 +38318,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Private brushend handler.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleBrushend = function (brush) {
 	    var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
 	        data = m_this.data();
@@ -38514,11 +38338,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set style used by the feature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.style = function (arg1, arg2) {
 	    if (arg1 === undefined) {
 	      return m_style;
@@ -38535,7 +38357,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * A uniform getter that always returns a function even for constant styles.
 	   * Maybe extend later to support accessor-like objects.  If undefined input,
@@ -38544,7 +38365,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {string|undefined} key
 	   * @return {function}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.style.get = function (key) {
 	    var out;
 	    if (key === undefined) {
@@ -38573,7 +38393,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Set style(s) from array(s).  For each style, the array should have one
 	   * value per data item.  The values are not converted or validated.  Color
@@ -38594,7 +38413,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *    once.
 	   * @returns {object} the feature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.updateStyleFromArray = function (keyOrObject, styleArray, refresh) {
 	    if (typeof keyOrObject !== 'string') {
 	      $.each(keyOrObject, function (key, value) {
@@ -38635,29 +38453,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get layer referenced by the feature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.layer = function () {
 	    return m_layer;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get renderer used by the feature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.renderer = function () {
 	    return m_renderer;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set projection of the feature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.gcs = function (val) {
 	    if (val === undefined) {
 	      if (m_gcs === undefined && m_renderer) {
@@ -38671,7 +38483,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Convert from the renderer's input gcs coordinates to display coordinates.
 	   *
@@ -38691,7 +38502,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return c;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set visibility of the feature
 	   *
@@ -38703,7 +38513,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {boolean|object} either the visibility (if getting) or the feature
 	   *    (if setting).
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.visible = function (val, direct) {
 	    if (val === undefined) {
 	      if (!direct && m_layer && m_layer.visible && !m_layer.visible()) {
@@ -38730,12 +38539,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set a list of dependent features.  Dependent features have their
 	   * visibility changed at the same time as the feature.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.dependentFeatures = function (arg) {
 	    if (arg === undefined) {
 	      return m_dependentFeatures.slice();
@@ -38744,13 +38551,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set bin of the feature
 	   *
 	   * Bin number is typically used for sorting the order of rendering
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.bin = function (val) {
 	    if (val === undefined) {
 	      return m_bin;
@@ -38761,11 +38566,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set timestamp of data change
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.dataTime = function (val) {
 	    if (val === undefined) {
 	      return m_dataTime;
@@ -38776,11 +38579,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set timestamp of last time build happened
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.buildTime = function (val) {
 	    if (val === undefined) {
 	      return m_buildTime;
@@ -38791,11 +38592,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set timestamp of last time update happened
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.updateTime = function (val) {
 	    if (val === undefined) {
 	      return m_updateTime;
@@ -38806,13 +38605,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set the data array for the feature.
 	   *
 	   * @returns {Array|this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.data = function (data) {
 	    if (data === undefined) {
 	      return m_this.style('data') || [];
@@ -38824,7 +38621,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set if the selection API is enabled for this feature.
 	   *
@@ -38836,7 +38632,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {boolean|object} either the selectionAPI state (if getting) or the
 	   *    feature (if setting).
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.selectionAPI = function (arg, direct) {
 	    if (arg === undefined) {
 	      if (!direct && m_layer && m_layer.selectionAPI && !m_layer.selectionAPI()) {
@@ -38853,13 +38648,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   *
 	   * Derived class should implement this
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    if (!m_layer) {
 	      throw new Error('Feature requires a valid layer');
@@ -38870,33 +38663,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this._bindMouseHandlers();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   *
 	   * Derived class should implement this
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   *
 	   * Derived class should implement this
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
 	   *
 	   * Derived class should implement this
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this._unbindMouseHandlers();
 	    m_selectedFeatures = [];
@@ -38970,7 +38757,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var inherit = __webpack_require__(8);
 	var object = __webpack_require__(203);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class sceneObject, which extends the object's
 	 * event handling with a tree-based event propagation.
@@ -38980,7 +38766,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.object
 	 * @returns {geo.sceneObject}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var sceneObject = function (arg) {
 	  'use strict';
 	  if (!(this instanceof sceneObject)) {
@@ -38996,11 +38781,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      s_addPromise = this.addPromise,
 	      s_onIdle = this.onIdle;
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   *  Override object.addPromise to propagate up the scene tree.
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.addPromise = function (promise) {
 	    if (m_parent) {
 	      m_parent.addPromise(promise);
@@ -39009,11 +38792,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   *  Override object.onIdle to propagate up the scene tree.
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.onIdle = function (handler) {
 	    if (m_parent) {
 	      m_parent.onIdle(handler);
@@ -39022,12 +38803,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   *  Get/set parent of the object
 	   *  @param {geo.sceneObject} [parent]
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.parent = function (arg) {
 	    if (arg === undefined) {
 	      return m_parent;
@@ -39036,11 +38815,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   *  Add a child (or an array of children) to the object
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.addChild = function (child) {
 	    if (Array.isArray(child)) {
 	      child.forEach(m_this.addChild);
@@ -39051,11 +38828,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   *  Remove a child (or array of children) from the object
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.removeChild = function (child) {
 	    if (Array.isArray(child)) {
 	      child.forEach(m_this.removeChild);
@@ -39065,21 +38840,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   *  Get an array of child objects
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.children = function () {
 	    return m_children.slice();
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   *  Force redraw of a scene object, to be implemented by subclasses.
 	   *  Base class just calls draw of child objects.
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.draw = function (arg) {
 	    m_this.children().forEach(function (child) {
 	      child.draw(arg);
@@ -39087,14 +38858,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   *  Trigger an event (or events) on this object and call all handlers.
 	   *  @param {String} event the event to trigger
 	   *  @param {Object} args arbitrary argument to pass to the handler
 	   *  @param {Boolean} childrenOnly if true, only propagate down the tree
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.geoTrigger = function (event, args, childrenOnly) {
 
 	    var geoArgs;
@@ -39134,11 +38903,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Free all resources and destroy the object.
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.children = [];
 	    delete m_this.parent;
@@ -39159,7 +38926,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var vgl = __webpack_require__(86);
 	var inherit = __webpack_require__(8);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class timestamp
 	 *
@@ -39167,7 +38933,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends vgl.timestamp
 	 * @returns {geo.timestamp}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var timestamp = function () {
 	  'use strict';
 	  if (!(this instanceof timestamp)) {
@@ -39191,7 +38956,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var rendererForFeatures = __webpack_require__(201).rendererForFeatures;
 	var rendererForAnnotations = __webpack_require__(201).rendererForAnnotations;
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * @class geo.layer
 	 * @extends geo.sceneObject
@@ -39201,7 +38965,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *   to the index of the layer inside the map)
 	 * @returns {geo.layer}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var layer = function (arg) {
 	  'use strict';
 
@@ -39218,11 +38981,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var geo_event = __webpack_require__(9);
 	  var camera = __webpack_require__(211);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_exit = this._exit,
 	      m_id = arg.id === undefined ? layer.newLayerId() : arg.id,
@@ -39251,18 +39012,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    throw new Error('Layers must be initialized on a map.');
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the name of the renderer.
 	   *
 	   * @returns {string}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.rendererName = function () {
 	    return m_rendererName;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get or set the z-index of the layer.  The z-index controls the display
 	   * order of the layers in much the same way as the CSS z-index property.
@@ -39270,7 +39028,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {number} [zIndex] The new z-index
 	   * @returns {number|this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.zIndex = function (zIndex) {
 	    if (zIndex === undefined) {
 	      return m_zIndex;
@@ -39280,7 +39037,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Bring the layer above the given number of layers.  This will rotate the
 	   * current z-indices for this and the next `n` layers.
@@ -39288,7 +39044,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {number} [n=1] The number of positions to move
 	   * @returns {this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.moveUp = function (n) {
 	    var order, i, me = null, tmp, sign;
 
@@ -39329,7 +39084,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Bring the layer below the given number of layers.  This will rotate the
 	   * current z-indices for this and the previous `n` layers.
@@ -39337,7 +39091,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {number} [n=1] The number of positions to move
 	   * @returns {this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.moveDown = function (n) {
 	    if (n === undefined) {
 	      n = 1;
@@ -39345,40 +39098,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this.moveUp(-n);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Bring the layer to the top of the map layers.
 	   *
 	   * @returns {this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.moveToTop = function () {
 	    return m_this.moveUp(m_this.map().children().length - 1);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Bring the layer to the bottom of the map layers.
 	   *
 	   * @returns {this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.moveToBottom = function () {
 	    return m_this.moveDown(m_this.map().children().length - 1);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get whether or not the layer is sticky (navigates with the map).
 	   *
 	   * @returns {Boolean}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.sticky = function () {
 	    return m_sticky;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set whether or not the layer is active.  An active layer will receive
 	   * native mouse when the layer is on top.  Non-active layers will never
@@ -39386,7 +39132,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *
 	   * @returns {Boolean|object}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.active = function (arg) {
 	    if (arg === undefined) {
 	      return m_active;
@@ -39398,24 +39143,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get root node of the layer
 	   *
 	   * @returns {div}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.node = function () {
 	    return m_node;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set id of the layer
 	   *
 	   * @returns {String}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.id = function (val) {
 	    if (val === undefined) {
 	      return m_id;
@@ -39425,13 +39166,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set name of the layer
 	   *
 	   * @returns {String}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.name = function (val) {
 	    if (val === undefined) {
 	      return m_name;
@@ -39441,57 +39180,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set map of the layer
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.map = function () {
 	    return m_map;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get renderer for the layer if any
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.renderer = function () {
 	    return m_renderer;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get canvas of the layer
 	   *
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.canvas = function () {
 	    return m_canvas;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return last time data got changed
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.dataTime = function () {
 	    return m_dataTime;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return the modified time for the last update that did something
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.updateTime = function () {
 	    return m_updateTime;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set if the layer has been initialized
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.initialized = function (val) {
 	    if (val !== undefined) {
 	      m_initialized = val;
@@ -39500,7 +39227,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_initialized;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Transform coordinates from world coordinates into a local coordinate
 	   * system specific to the underlying renderer.  This method is exposed
@@ -39508,7 +39234,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * not be called directly.  The default implementation is the identity
 	   * operator.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.toLocal = function (input) {
 	    if (m_this._toLocalMatrix) {
 	      camera.applyTransform(m_this._toLocalMatrix, input);
@@ -39516,11 +39241,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return input;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Transform coordinates from a local coordinate system to world coordinates.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.fromLocal = function (input) {
 	    if (m_this._fromLocalMatrix) {
 	      camera.applyTransform(m_this._fromLocalMatrix, input);
@@ -39528,7 +39251,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return input;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get or set the attribution html content that will displayed with the
 	   * layer.  By default, nothing will be displayed.  Note, this content
@@ -39537,7 +39259,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {string?} arg An html fragment
 	   * @returns {string|this} Chainable as a setter
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.attribution = function (arg) {
 	    if (arg !== undefined) {
 	      m_attribution = arg;
@@ -39547,7 +39268,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_attribution;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set visibility of the layer
 	   *
@@ -39556,7 +39276,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {boolean|object} either the visibility (if getting) or the layer
 	   *    (if setting).
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.visible = function (val) {
 	    if (val === undefined) {
 	      return m_visible;
@@ -39569,7 +39288,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set selectionAPI of the layer
 	   *
@@ -39578,7 +39296,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {boolean|object} either the selectionAPI state (if getting) or the
 	   *    layer (if setting).
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.selectionAPI = function (val) {
 	    if (val === undefined) {
 	      return m_selectionAPI;
@@ -39589,7 +39306,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Init layer
 	   *
@@ -39597,7 +39313,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *    resize, pan, and zoom events itself, set this flag to true to avoid
 	   *    binding them here.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (noEvents) {
 	    if (m_initialized) {
 	      return m_this;
@@ -39628,7 +39343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_initialized = true;
 
 	    if (!noEvents) {
-	      /// Bind events to handlers
+	      // Bind events to handlers
 	      m_this.geoOn(geo_event.resize, function (event) {
 	        m_this._update({event: event});
 	      });
@@ -39649,11 +39364,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Clean up resouces
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.geoOff();
 	    if (m_renderer) {
@@ -39667,39 +39380,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_exit();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update layer
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return the width of the layer in pixels.
 	   * **DEPRECIATED: use map.size instead.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.width = function () {
 	    return m_this.map().size().width;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return the height of the layer in pixels
 	   * **DEPRECIATED: use map.size instead.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.height = function () {
 	    return m_this.map().size().height;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get or set the current layer opacity.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.opacity = function (opac) {
 	    if (opac !== undefined) {
 	      m_opacity = opac;
@@ -39814,7 +39519,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var mat4 = __webpack_require__(88);
 	  var vec4 = __webpack_require__(112);
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * This class defines the raw interface for a camera.  At a low level, the
 	   * camera provides a methods for converting between a map's coordinate system
@@ -39858,7 +39562,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {object} spec.viewport.height
 	   * @returns {geo.camera}
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  var camera = function (spec) {
 	    if (!(this instanceof camera)) {
 	      return new camera(spec);
@@ -40746,7 +40449,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var inherit = __webpack_require__(8);
 	var feature = __webpack_require__(207);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class pointFeature
 	 *
@@ -40756,7 +40458,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.feature
 	 * @returns {geo.pointFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var pointFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof pointFeature)) {
@@ -40772,11 +40473,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var util = __webpack_require__(83);
 	  var kdbush = __webpack_require__(213);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_init = this._init,
 	      m_rangeTree = null,
@@ -40791,13 +40490,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  this.featureType = 'point';
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set clustering option
 	   *
 	   * @returns {geo.pointFeature|boolean}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.clustering = function (val) {
 	    if (val === undefined) {
 	      return m_clustering;
@@ -40815,12 +40512,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Generate the clustering tree from positions.  This might be async in the
 	   * future.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._clusterData = function () {
 	    if (!m_clustering) {
 	      // clustering is not enabled, so this is a no-op
@@ -40849,13 +40544,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this._handleZoom(m_this.layer().map().zoom());
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle zoom events for clustering.  This keeps track of the last
 	   * clustering level, and only regenerates the displayed points when the
 	   * zoom level changes.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleZoom = function (zoom) {
 	    // get the current zoom level rounded down
 	    var z = Math.floor(zoom);
@@ -40891,13 +40584,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.data(data);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set position
 	   *
 	   * @returns {geo.pointFeature}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.position = function (val) {
 	    if (val === undefined) {
 	      return m_this.style('position');
@@ -40918,12 +40609,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update the current range tree object.  Should be called whenever the
 	   * data changes.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._updateRangeTree = function () {
 	    if (m_rangeTreeTime.getMTime() >= m_this.dataTime().getMTime()) {
 	      return;
@@ -40954,14 +40643,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_rangeTreeTime.modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Returns an array of datum indices that contain the given point.
 	   * Largely adapted from wigglemaps pointQuerier:
 	   *
 	   * https://github.com/dotskapes/wigglemaps/blob/cf5bed3fbfe2c3e48d31799462a80c564be1fb60/src/query/PointQuerier.js
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.pointSearch = function (p) {
 	    var min, max, data, idx = [], found = [], ifound = [], map, pt,
 	        corners,
@@ -41026,11 +40713,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Returns an array of datum indices that are contained in the given box.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.boxSearch = function (lowerLeft, upperRight) {
 	    var pos = m_this.position(),
 	        idx = [];
@@ -41048,11 +40733,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return idx;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Overloaded data method that updates the internal range tree on write.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.data = function (data) {
 	    if (data === undefined) {
 	      return s_data();
@@ -41069,11 +40752,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    arg = arg || {};
 	    s_init.call(m_this, arg);
@@ -41385,7 +41066,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var inherit = __webpack_require__(8);
 	var feature = __webpack_require__(207);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class polygonFeature
 	 *
@@ -41424,7 +41104,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *   color, and stroke opacity).   Defaults to false.  Can vary by polygon.
 	 * @returns {geo.polygonFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var polygonFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof polygonFeature)) {
@@ -41435,11 +41114,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var util = __webpack_require__(83);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      m_lineFeature,
 	      s_init = this._init,
@@ -41462,7 +41139,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    strokeWidth: true
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/set data.
 	   *
@@ -41471,7 +41147,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *    feature.  If not specified, return the current data.
 	   * @returns {geo.polygonFeature|Object}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.data = function (arg) {
 	    var ret = s_data(arg);
 	    if (arg !== undefined) {
@@ -41481,7 +41156,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return ret;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the internal coordinates whenever the data changes.  For now, we do
 	   * the computation in world coordinates, but we will need to work in GCS
@@ -41490,7 +41164,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @memberof geo.polygonFeature
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  function getCoordinates() {
 	    var posFunc = m_this.style.get('position'),
 	        polyFunc = m_this.style.get('polygon');
@@ -41532,7 +41205,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the style for the stroke of the polygon.  Since polygons can have
 	   * holes, the number of stroke lines may not be the same as the number of
@@ -41547,7 +41219,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @returns {object|function} A style that can be used for the stroke.
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  function linePolyStyle(styleValue) {
 	    if (util.isFunction(styleValue)) {
 	      return function (d) {
@@ -41558,7 +41229,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/set polygon accessor.
 	   *
@@ -41567,7 +41237,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *    and return the feature.  If not specified, return the current polygon.
 	   * @returns {geo.polygonFeature|Object}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.polygon = function (val) {
 	    if (val === undefined) {
 	      return m_this.style('polygon');
@@ -41580,7 +41249,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set position accessor.
 	   *
@@ -41590,7 +41258,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *    position.
 	   * @returns {geo.polygonFeature|Object}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.position = function (val) {
 	    if (val === undefined) {
 	      return m_this.style('position');
@@ -41603,7 +41270,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Point search method for selection api.  Returns markers containing the
 	   * given point.
@@ -41612,7 +41278,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @argument {object} coordinate
 	   * @returns {object}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.pointSearch = function (coordinate) {
 	    var found = [], indices = [], data = m_this.data();
 	    m_coordinates.forEach(function (coord, i) {
@@ -41633,12 +41298,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set style used by the feature.  This calls the super function, then
 	   * checks if strokes are required.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.style = function (arg1, arg2) {
 	    var result = s_style.apply(this, arguments);
 	    if (arg1 !== undefined && (typeof arg1 !== 'string' || arg2 !== undefined)) {
@@ -41668,12 +41331,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return line;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Check if we need to add a line feature to the layer, and update it as
 	   * necessary.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._checkForStroke = function () {
 	    if (s_style('stroke') === false) {
 	      if (m_lineFeature && m_this.layer()) {
@@ -41737,11 +41398,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	  * Redraw the object.
 	  */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.draw = function () {
 	    var result = s_draw();
 	    if (m_lineFeature) {
@@ -41750,12 +41409,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return result;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	  * When the feature is marked as modified, mark our sub-feature as modified,
 	  * too.
 	  */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.modified = function () {
 	    var result = s_modified();
 	    if (m_lineFeature) {
@@ -41764,12 +41421,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return result;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
 	   * @memberof geo.polygonFeature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    if (m_lineFeature && m_this.layer()) {
 	      m_this.layer().deleteFeature(m_lineFeature);
@@ -41779,12 +41434,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_exit();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   * @memberof geo.polygonFeature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    arg = arg || {};
 	    s_init.call(m_this, arg);
@@ -41860,7 +41513,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var $ = __webpack_require__(1);
 	var Mousetrap = __webpack_require__(220);
 
-	/////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Layer to handle direct interactions with different features.  Annotations
 	 * (features) can be created by calling mode(<name of feature>) or cancelled
@@ -41881,7 +41533,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *    start point.
 	 * @returns {geo.annotationLayer}
 	 */
-	/////////////////////////////////////////////////////////////////////////////
 	var annotationLayer = function (args) {
 	  'use strict';
 	  if (!(this instanceof annotationLayer)) {
@@ -42482,11 +42133,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return value;
 	  };
 
-	  ///////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update layer
 	   */
-	  ///////////////////////////////////////////////////////////////////////////
 	  this._update = function (request) {
 	    if (m_this.getMTime() > m_buildTime.getMTime()) {
 	      /* Interally, we have a set of feature levels (to provide z-index
@@ -42594,13 +42243,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ///////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ///////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
-	    /// Call super class init
+	    // Call super class init
 	    s_init.call(m_this);
 
 	    if (!m_this.map().interactor()) {
@@ -42617,13 +42264,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ///////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Free all resources
 	   */
-	  ///////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
-	    /// Call super class exit
+	    // Call super class exit
 	    s_exit.call(m_this);
 	    m_annotations = [];
 	    m_features = [];
@@ -42647,7 +42292,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var geo_event = __webpack_require__(9);
 	var registry = __webpack_require__(201);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Layer to draw points, lines, and polygons on the map The polydata layer
 	 * provide mechanisms to create and draw geometrical shapes such as points,
@@ -42656,7 +42300,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.layer
 	 * @returns {geo.featureLayer}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var featureLayer = function (arg) {
 	  'use strict';
 	  if (!(this instanceof featureLayer)) {
@@ -42664,11 +42307,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  layer.call(this, arg);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      m_features = [],
 	      s_init = this._init,
@@ -42678,7 +42319,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      s_selectionAPI = this.selectionAPI,
 	      s_draw = this.draw;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Create feature give a name
 	   *
@@ -42686,7 +42326,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {object} arg properties for the new feature
 	   * @returns {geo.Feature} Will return a new feature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.createFeature = function (featureName, arg) {
 
 	    var newFeature = registry.createFeature(
@@ -42697,13 +42336,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return newFeature;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Add a feature to the layer if it is not already present.
 	   *
 	   * @param {object} feature the feature to add.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.addFeature = function (feature) {
 	    /* try to remove the feature first so that we don't have two copies */
 	    this.removeFeature(feature);
@@ -42714,13 +42351,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Remove feature without destroying it
 	   *
 	   * @param {object} feature the feature to remove.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.removeFeature = function (feature) {
 	    var pos;
 
@@ -42735,13 +42370,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Delete feature
 	   *
 	   * @param {object} feature the feature to delete.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.deleteFeature = function (feature) {
 
 	    // call _exit first, as destroying the feature affect other features
@@ -42755,13 +42388,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set drawables
 	   *
 	   * @returns {Array}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.features = function (val) {
 	    if (val === undefined) {
 	      return m_features.slice();
@@ -42783,20 +42414,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	    if (m_this.initialized()) {
 	      return m_this;
 	    }
 
-	    /// Call super class init
+	    // Call super class init
 	    s_init.call(m_this, true);
 
-	    /// Bind events to handlers
+	    // Bind events to handlers
 	    m_this.geoOn(geo_event.resize, function (event) {
 	      if (m_this.renderer()) {
 	        m_this.renderer()._resize(event.x, event.y, event.width, event.height);
@@ -42831,11 +42460,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update layer
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function (request) {
 	    var i;
 
@@ -42843,7 +42470,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return m_this;
 	    }
 
-	    /// Call base class update
+	    // Call base class update
 	    s_update.call(m_this, request);
 
 	    if (m_this.dataTime().getMTime() > m_this.updateTime().getMTime()) {
@@ -42861,21 +42488,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Free all resources
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.clear();
 	    s_exit();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Draw
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.draw = function () {
 	    if (m_this.visible()) {
 	      // Call sceneObject.draw, which calls draw on all child objects.
@@ -42890,7 +42513,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set visibility of the layer
 	   *
@@ -42899,7 +42521,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {boolean|object} either the visibility (if getting) or the layer
 	   *    (if setting).
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.visible = function (val) {
 	    if (val === undefined) {
 	      return s_visible();
@@ -42920,7 +42541,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set selectionAPI of the layer
 	   *
@@ -42929,7 +42549,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {boolean|object} either the selectionAPI state (if getting) or the
 	   *    layer (if setting).
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.selectionAPI = function (val) {
 	    if (val === undefined) {
 	      return s_selectionAPI();
@@ -42947,11 +42566,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Clear all features in layer
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.clear = function () {
 	    while (m_features.length) {
 	      m_this.deleteFeature(m_features[0]);
@@ -44026,7 +43643,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var util = __webpack_require__(83);
 	var Mousetrap = __webpack_require__(220);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * The mapInteractor class is responsible for handling raw events from the
 	 * browser and interpreting them as map navigation interactions.  This class
@@ -44037,7 +43653,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.object
 	 * @returns {geo.mapInteractor}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var mapInteractor = function (args) {
 	  'use strict';
 	  if (!(this instanceof mapInteractor)) {
@@ -44287,147 +43902,68 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_options.keyboard.actions = $.extend(true, {}, args.keyboard.actions);
 	  }
 
-	  // options supported:
-	  // {
-	  //   // throttle mouse events to at most this many milliseconds each (default 30)
-	  //   throttle: number
-	  //
-	  //   // Clamp zoom events to discrete (integer) zoom levels.  If a number is
-	  //   // provided then zoom events will be debounced (and accumulated)
-	  //   // with the given delay.  The default debounce interval is 400 ms.
-	  //   discreteZoom: boolean | number > 0
-	  //
-	  //   // A list of available actions.  See above
-	  //   actions: []
-	  //
-	  //   // wheel scale factor to change the magnitude of wheel interactions
-	  //   wheelScaleX: 1
-	  //   wheelScaleY: 1
-	  //
-	  //   // zoom scale factor to change the magnitude of zoom move interactions
-	  //   zoomScale: 1
-	  //
-	  //   // scale factor to change the magnitude of wheel rotation interactions
-	  //   rotateWheelScale: 1
-	  //
-	  //   // enable momentum when panning
-	  //   momentum: {
-	  //     enabled: true | false,
-	  //     maxSpeed: number, // don't allow animation to pan faster than this
-	  //     minSpeed: number, // stop animations if the speed is less than this
-	  //     stopTime: number, // if the mouse hasn't moved for this many
-	  //                       // milliseconds, don't apply momentum
-	  //     drag: number, // drag coefficient
-	  //     actions: [geo_action.pan, geo_action.zoom]
-	  //                                      // actions on which to apply momentum
-	  //   }
-	  //
-	  //   // enable spring clamping to screen edges to enforce clamping
-	  //   spring: {
-	  //     enabled: true | false,
-	  //     springConstant: number,
-	  //   }
-	  //
-	  //   // enable animation for both discrete and continuous zoom
-	  //   zoomAnimation: {
-	  //     enabled: true | false,
-	  //     duration: number,  // milliseconds
-	  //     ease: function     // easing function
-	  //   }
-	  //
-	  //   // enable the "click" event
-	  //   // A click will be registered when a mouse down is followed
-	  //   // by a mouse up in less than the given number of milliseconds
-	  //   // and the standard handler will *not* be called
-	  //   // If the duration is <= 0, then clicks will only be canceled by
-	  //   // a mousemove.
-	  //   click: {
-	  //     enabled: true | false,
-	  //     buttons: {left: true, right: true, middle: true}
-	  //     duration: 0,
-	  //     cancelOnMove: true // cancels click if the mouse is moved before release
-	  //   }
-	  // }
-
-	  // A bunch of type definitions for api documentation:
-	  /**
-	   * General representation of rectangular bounds in world coordinates
-	   * @typedef geo.geoBounds
-	   * @type {object}
-	   * @property {geo.geoPosition} upperLeft Upper left corner
-	   * @property {geo.geoPosition} upperRight Upper right corner
-	   * @property {geo.geoPosition} lowerLeft Lower left corner
-	   * @property {geo.geoPosition} lowerRight Lower right corner
-	   */
-
-	  /**
-	   * General representation of rectangular bounds in pixel coordinates
-	   * @typedef geo.screenBounds
-	   * @type {object}
-	   * @property {geo.screenPosition} upperLeft Upper left corner
-	   * @property {geo.screenPosition} upperRight Upper right corner
-	   * @property {geo.screenPosition} lowerLeft Lower left corner
-	   * @property {geo.screenPosition} lowerRight Lower right corner
-	   */
-
-	  /**
-	   * General representation of a point on the screen.
-	   * @typedef geo.screenPosition
-	   * @type {object}
-	   * @property {Number} x Horizontal coordinate in pixels
-	   * @property {Number} y Vertical coordinate in pixels
-	   */
-
-	  /**
-	   * General represention of a point on the earth.
-	   * @typedef geo.geoPosition
-	   * @type {object}
-	   * @property {Number} x Horizontal coordinate in degrees longitude
-	   * @property {Number} y Vertical coordinate in degrees latitude
-	   */
-
-	  /**
-	   * The status of all mouse buttons.
-	   * @typedef geo.mouseButtons
-	   * @type {object}
-	   * @property {true|false} left The left mouse button
-	   * @property {true|false} right The right mouse button
-	   * @property {true|false} middle The middle mouse button
-	   */
-
-	  /**
-	   * The status of all modifier keys these are copied from the
-	   * standard DOM events.
-	   * @typedef geo.modifierKeys
-	   * @type {object}
-	   * @property {true|false} alt <code>Event.alt</code>
-	   * @property {true|false} ctrl <code>Event.ctrl</code>
-	   * @property {true|false} shift <code>Event.shift</code>
-	   * @property {true|false} meta <code>Event.meta</code>
-	   */
-
-	  /**
-	   * Provides information about the state of the mouse
-	   * @typedef geo.mouseState
-	   * @type {object}
-	   * @property {geo.screenPosition} page Mouse location in pixel space
-	   * @property {geo.geoPosition} map Mouse location in world space
-	   * @property {geo.mouseButtons} buttons The current state of the mouse buttons
-	   * @property {geo.modifierKeys} modifiers The current state of all modifier keys
-	   * @property {Date} time The timestamp the event took place
-	   * @property {Number} deltaTime The time in milliseconds since the last mouse event
-	   * @property {geo.screenPosition} velocity The velocity of the mouse pointer
-	   * in pixels per second
-	   */
-
-	  /**
-	   * @typedef geo.brushSelection
-	   * @type {object}
-	   * @property {geo.screenBounds} display The selection bounds in pixel space
-	   * @property {geo.geoBounds} gcs The selection bounds in world space
-	   * @property {geo.mouseState} mouse The current mouse state
-	   * @property {geo.mouseState} origin The mouse state at the start of the
-	   * brush action
+	  /*
+	   * options supported:
+	   * {
+	   *    * throttle mouse events to at most this many milliseconds each (default 30)
+	   *   throttle: number
+	   *
+	   *    * Clamp zoom events to discrete (integer) zoom levels.  If a number is
+	   *    * provided then zoom events will be debounced (and accumulated)
+	   *    * with the given delay.  The default debounce interval is 400 ms.
+	   *   discreteZoom: boolean | number > 0
+	   *
+	   *    * A list of available actions.  See above
+	   *   actions: []
+	   *
+	   *    * wheel scale factor to change the magnitude of wheel interactions
+	   *   wheelScaleX: 1
+	   *   wheelScaleY: 1
+	   *
+	   *    * zoom scale factor to change the magnitude of zoom move interactions
+	   *   zoomScale: 1
+	   *
+	   *    * scale factor to change the magnitude of wheel rotation interactions
+	   *   rotateWheelScale: 1
+	   *
+	   *    * enable momentum when panning
+	   *   momentum: {
+	   *     enabled: true | false,
+	   *     maxSpeed: number, // don't allow animation to pan faster than this
+	   *     minSpeed: number, // stop animations if the speed is less than this
+	   *     stopTime: number, // if the mouse hasn't moved for this many
+	   *                        * milliseconds, don't apply momentum
+	   *     drag: number, // drag coefficient
+	   *     actions: [geo_action.pan, geo_action.zoom]
+	   *                                       * actions on which to apply momentum
+	   *   }
+	   *
+	   *    * enable spring clamping to screen edges to enforce clamping
+	   *   spring: {
+	   *     enabled: true | false,
+	   *     springConstant: number,
+	   *   }
+	   *
+	   *    * enable animation for both discrete and continuous zoom
+	   *   zoomAnimation: {
+	   *     enabled: true | false,
+	   *     duration: number,   * milliseconds
+	   *     ease: function      * easing function
+	   *   }
+	   *
+	   *    * enable the "click" event
+	   *    * A click will be registered when a mouse down is followed
+	   *    * by a mouse up in less than the given number of milliseconds
+	   *    * and the standard handler will *not* be called
+	   *    * If the duration is <= 0, then clicks will only be canceled by
+	   *    * a mousemove.
+	   *   click: {
+	   *     enabled: true | false,
+	   *     buttons: {left: true, right: true, middle: true}
+	   *     duration: 0,
+	   *     cancelOnMove: true // cancels click if the mouse is moved before release
+	   *   }
+	   * }
 	   */
 
 	  // default mouse object
@@ -44464,41 +44000,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  // The interactor state determines what actions are taken in response to
-	  // core browser events.
-	  //
-	  // i.e.
-	  //  {
-	  //    'action': geo_action.pan,   // an ongoing pan event
-	  //    'origin': {...},      // mouse object at the start of the action
-	  //    'delta': {x: *, y: *} // mouse movement since action start
-	  //                          // not including the current event
-	  //  }
-	  //
-	  //  {
-	  //    'action': geo_action.zoom,  // an ongoing zoom event
-	  //    ...
-	  //  }
-	  //
-	  //  {
-	  //    'action': geo_action.rotate,  // an ongoing rotate event
-	  //    'origin': {...},      // mouse object at the start of the action
-	  //    'delta': {x: *, y: *} // mouse movement since action start
-	  //                          // not including the current event
-	  //  }
-	  //
-	  //  {
-	  //    'acton': geo_action.select,
-	  //    'origin': {...},
-	  //    'delta': {x: *, y: *}
-	  //  }
-	  //
-	  //  {
-	  //    'action': geo_action.momentum,
-	  //    'origin': {...},
-	  //    'handler': function () { }, // called in animation loop
-	  //    'timer': animate loop timer
-	  //  }
+	  /*
+	   * The interactor state determines what actions are taken in response to
+	   * core browser events.
+	   *
+	   * i.e.
+	   *  {
+	   *    'action': geo_action.pan,    * an ongoing pan event
+	   *    'origin': {...},       * mouse object at the start of the action
+	   *    'delta': {x: *, y: *} // mouse movement since action start
+	   *                           * not including the current event
+	   *  }
+	   *
+	   *  {
+	   *    'action': geo_action.zoom,   * an ongoing zoom event
+	   *    ...
+	   *  }
+	   *
+	   *  {
+	   *    'action': geo_action.rotate,   * an ongoing rotate event
+	   *    'origin': {...},       * mouse object at the start of the action
+	   *    'delta': {x: *, y: *} // mouse movement since action start
+	   *                           * not including the current event
+	   *  }
+	   *
+	   *  {
+	   *    'acton': geo_action.select,
+	   *    'origin': {...},
+	   *    'delta': {x: *, y: *}
+	   *  }
+	   *
+	   *  {
+	   *    'action': geo_action.momentum,
+	   *    'origin': {...},
+	   *    'handler': function () { }, // called in animation loop
+	   *    'timer': animate loop timer
+	   *  }
+	   */
 	  m_state = {};
 
 	  /**
@@ -44707,12 +44245,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Connects events to a map.  If the map is not set, then this does nothing.
 	   * @returns {geo.mapInteractor}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._connectEvents = function () {
 	    if (!m_options.map) {
 	      return m_this;
@@ -44800,13 +44336,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Disconnects events to a map.  If the map is not set, then this does
 	   * nothing.
 	   * @returns {geo.mapInteractor}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._disconnectEvents = function () {
 	    if (m_boundKeys) {
 	      if (m_keyHandler) {
@@ -44829,14 +44363,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Sets or gets map for this interactor, adds draw region layer if needed
 	   *
 	   * @param {geo.map} newMap optional
 	   * @returns {geo.interactorStyle|geo.map}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.map = function (val) {
 	    if (val !== undefined) {
 	      m_options.map = val;
@@ -44846,14 +44378,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_options.map;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Gets/sets the options object for the interactor.
 	   *
 	   * @param {object} opts optional
 	   * @returns {geo.interactorStyle|object}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.options = function (opts) {
 	    if (opts === undefined) {
 	      return $.extend({}, m_options);
@@ -44865,11 +44395,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Stores the current mouse position from an event
+	   *
+	   * @param {jQuery.Event} evt JQuery event with the mouse position.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._getMousePosition = function (evt) {
 	    var offset = $node.offset(), dt, t;
 
@@ -44894,17 +44424,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_mouse.mapgcs = m_this.map().displayToGcs(m_mouse.map, null);
 	    } catch (e) {
 	      // catch georeferencing problems and move on
-	      // needed for handling the map before the base layer
-	      // is attached
 	      m_mouse.geo = m_mouse.mapgcs = null;
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Stores the current mouse button
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._getMouseButton = function (evt) {
 	    for (var prop in m_mouse.buttons) {
 	      if (m_mouse.buttons.hasOwnProperty(prop)) {
@@ -44925,11 +44451,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Stores the current keyboard modifiers
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._getMouseModifiers = function (evt) {
 	    m_mouse.modifiers.alt = evt.altKey;
 	    m_mouse.modifiers.ctrl = evt.ctrlKey;
@@ -44937,13 +44461,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_mouse.modifiers.shift = evt.shiftKey;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Compute a selection information object.
+	   *
 	   * @private
-	   * @returns {object}
+	   * @returns {geo.brushSelection}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._getSelection = function () {
 	    var origin = m_state.origin,
 	        mouse = m_this.mouse(),
@@ -44994,7 +44517,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Immediately cancel an ongoing action.
 	   *
@@ -45003,7 +44525,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *                         canceled.
 	   * @returns {bool} If an action was canceled
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.cancel = function (action, keepQueue) {
 	    var out;
 	    if (!action) {
@@ -45021,12 +44542,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return out;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Set the value of whether a click is possible.  Cancel any outstanding
 	   * timer for this process.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._setClickMaybe = function (value) {
 	    m_clickMaybe = value;
 	    if (m_clickMaybeTimeout) {
@@ -45035,11 +44554,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle event when a mouse button is pressed
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleMouseDown = function (evt) {
 	    var action, actionRecord;
 
@@ -45136,11 +44653,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle mouse move event
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleMouseMove = function (evt) {
 	    if (m_paused) {
 	      return;
@@ -45239,11 +44754,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle mouse move event on the document (temporary bindings)
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleMouseMoveDocument = function (evt) {
 	    var dx, dy, selectionObj;
 
@@ -45396,7 +44909,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Based on the screen coordinates of a selection, zoom or unzoom and
 	   * recenter.
@@ -45409,7 +44921,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {object} upperRight the x and y coordinates of the upper right
 	   *    corner of the zoom rectangle.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._zoomFromSelection = function (action, lowerLeft, upperRight) {
 	    if (action !== geo_action.zoomselect && action !== geo_action.unzoomselect) {
 	      return;
@@ -45462,12 +44973,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle event when a mouse button is unpressed on the document.
 	   * Removes temporary bindings.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleMouseUpDocument = function (evt) {
 	    var selectionObj, oldAction;
 
@@ -45534,11 +45043,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle event when a mouse button is unpressed
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleMouseUp = function (evt) {
 	    if (m_paused) {
 	      return;
@@ -45551,14 +45058,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle event when a mouse click is detected.  A mouse click is a simulated
 	   * event that occurs when the time between a mouse down and mouse up
 	   * is less than the configured duration and (optionally) if no mousemove
 	   * events were triggered in the interim.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleMouseClick = function (evt) {
 
 	    /* Cancel a selection if it is occurring */
@@ -45588,13 +45093,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.map().geoTrigger(geo_event.mouseclick, details);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Private wrapper around the map zoom method that is debounced to support
 	   * discrete zoom interactions.
 	   * @param {number} deltaZ The zoom increment
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  function debounced_zoom() {
 	    var deltaZ = 0, delay = 400, origin, startZoom, targetZoom;
 
@@ -45689,13 +45192,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Attaches wrapped methods for accumulating fast mouse wheel events and
 	   * throttling map interactions.
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  function throttled_wheel() {
 	    var my_queue = {};
 
@@ -45800,14 +45301,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle mouse wheel event.  (Defined inside _connectEvents).
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleMouseWheel = function () {};
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Start up a spring back action when the map bounds are out of range.
 	   * Not to be user callable.
@@ -45815,7 +45313,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @protected
 	   *
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.springBack = function (initialVelocity, origAction) {
 	    if (m_state.action === geo_action.momentum) {
 	      return;
@@ -45892,19 +45389,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle double click event
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._handleDoubleClick = function () {
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Public method that unbinds all events
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.destroy = function () {
 	    m_this._disconnectEvents();
 	    if (m_this.map()) {
@@ -45913,20 +45406,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.map(null);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get current mouse information
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.mouse = function () {
 	    return $.extend(true, {}, m_mouse);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/set current keyboard information
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.keyboard = function (newValue) {
 	    if (newValue === undefined) {
 	      return $.extend(true, {}, m_options.keyboard || {});
@@ -45934,16 +45423,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this.options({keyboard: newValue});
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the current interactor state
+	   *
+	   * @returns {geo.interactorState}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.state = function () {
 	    return $.extend(true, {}, m_state);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get or set the pause state of the interactor, which
 	   * ignores all native mouse and keyboard events.
@@ -45952,7 +45440,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *                        current state.
 	   * @returns {bool|this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.pause = function (value) {
 	    if (value === undefined) {
 	      return m_paused;
@@ -46021,7 +45508,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return removed;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Simulate a DOM mouse event on connected map.
 	   *
@@ -46040,7 +45526,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {object} options
 	   * @returns {mapInteractor}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.simulateEvent = function (type, options) {
 	    var evt, page, offset, which;
 
@@ -46137,7 +45622,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var inherit = __webpack_require__(8);
 	var feature = __webpack_require__(207);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class quadFeature
 	 *
@@ -46177,7 +45661,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *   attribute of the data item.
 	 * @returns {geo.quadFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var quadFeature = function (arg) {
 	  'use strict';
 
@@ -46190,11 +45673,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  feature.call(this, arg);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_init = this._init,
 	      m_cacheQuads,
@@ -46260,7 +45741,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Point search method for selection api.  Returns markers containing the
 	   * given point.
@@ -46271,7 +45751,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @returns {Object} an object with 'index': a list of quad indices, and
 	   *    'found': a list of quads that contain the specified coordinate.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.pointSearch = function (coordinate) {
 	    var found = [], indices = [], extra = {},
 	        poly1 = [{}, {}, {}, {}], poly2 = [{}, {}, {}, {}],
@@ -46331,7 +45810,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set position
 	   *
@@ -46340,7 +45818,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *    position of each quad.
 	   * @returns {geo.quadFeature}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.position = function (val) {
 	    if (val === undefined) {
 	      return m_this.style('position');
@@ -46590,11 +46067,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_quads;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    arg = arg || {};
 	    s_init.call(m_this, arg);
@@ -46682,7 +46157,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var inherit = __webpack_require__(8);
 	var feature = __webpack_require__(207);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class choroplethFeature
 	 *
@@ -46708,7 +46182,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *   If undefined input, return all the choropleth values as an object.
 	 * @returns {geo.choroplethFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var choroplethFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof choroplethFeature)) {
@@ -46720,11 +46193,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var $ = __webpack_require__(1);
 	  var ensureFunction = __webpack_require__(83).ensureFunction;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var d3 = __webpack_require__(225),
 	      m_this = this,
 	      s_init = this._init,
@@ -46759,7 +46230,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        arg.choropleth);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set choropleth scalar data
 	   *
@@ -46772,7 +46242,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *   is d3.mean.
 	   * @returns {geo.feature.choropleth}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.scalar = function (data, aggregator) {
 	    var scalarId, scalarValue;
 
@@ -46805,7 +46274,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set choropleth accessor
 	   *
@@ -46819,7 +46287,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {Object|String} [arg2] arg2 defines the value of the key (arg1).
 	   * @returns {geo.feature.choropleth}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.choropleth = function (arg1, arg2) {
 	    var choropleth;
 
@@ -46843,7 +46310,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set choropleth getter
 	   *
@@ -46855,7 +46321,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *  choropleth.
 	   * @return {function}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.choropleth.get = function (key) {
 	    var all = {}, k;
 	    if (key === undefined) {
@@ -46869,7 +46334,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return ensureFunction(m_choropleth[key]);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * A method that adds a polygon feature to the current layer.
 	   *
@@ -46877,7 +46341,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {geo.color} fillColor
 	   * @return {geo.feature}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._addPolygonFeature = function (feature, fillColor) {
 	    var newFeature = m_this.layer()
 	        .createFeature('polygon', {});
@@ -46916,7 +46379,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return newFeature;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * A method that adds polygons from a given feature to the current layer.
 	   *
@@ -46924,20 +46386,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param geo.color
 	   * @return [{geo.feature}]
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._featureToPolygons = function (feature, fillValue) {
 	    return m_this
 	      ._addPolygonFeature(feature, fillValue);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * A method that sets a choropleth scale's domain and range.
 	   *
 	   * @param {undefined | function({})} valueAccessor
 	   * @return {geo.feature.choropleth}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._generateScale = function (valueAccessor) {
 	    var extent =
 	        d3.extent(m_this.scalar(), valueAccessor || undefined);
@@ -46950,12 +46409,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Generate scale for choropleth.data(), make polygons from features.
 	   * @returns: [ [geo.feature.polygon, ...] , ... ]
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.createChoropleth = function () {
 	    var choropleth = m_this.choropleth,
 	        data = m_this.data(),
@@ -46983,11 +46440,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    s_init.call(m_this, arg);
 
@@ -47017,7 +46472,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var inherit = __webpack_require__(8);
 	var feature = __webpack_require__(207);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class contourFeature
 	 *
@@ -47026,7 +46480,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @returns {geo.contourFeature}
 	 *
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var contourFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof contourFeature)) {
@@ -47039,11 +46492,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  feature.call(this, arg);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      m_contour = {},
 	      s_init = this._init,
@@ -47057,24 +46508,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_contour = arg.contour;
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Override the parent data method to keep track of changes to the
 	   * internal coordinates.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.data = function (arg) {
 	    var ret = s_data(arg);
 	    return ret;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set contour accessor
 	   *
 	   * @returns {geo.pointFeature}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.contour = function (arg1, arg2) {
 	    if (arg1 === undefined) {
 	      return m_contour;
@@ -47126,7 +46573,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * A uniform getter that always returns a function even for constant values.
 	   * If undefined input, return all the contour values as an object.
@@ -47134,7 +46580,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {string|undefined} key
 	   * @return {function}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.contour.get = function (key) {
 	    if (key === undefined) {
 	      var all = {}, k;
@@ -47148,13 +46593,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return util.ensureFunction(m_contour[key]);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set position accessor
 	   *
 	   * @returns {geo.pointFeature}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.position = function (val) {
 	    if (val === undefined) {
 	      return m_this.style('position');
@@ -47166,7 +46609,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Create a set of vertices, values at the vertices, and opacities at the
 	   * vertices.  Create a set of triangles of indices into the vertex array.
@@ -47177,7 +46619,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *           contour data that can be used, only elements is guaranteed to
 	   *           exist, and it will be a zero-length array.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.createContours = function () {
 	    var i, i3, j, idx, k, val, numPts, usedPts = 0, usePos, item,
 	        idxMap = {},
@@ -47373,11 +46814,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return result;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    s_init.call(m_this, arg);
 
@@ -47527,7 +46966,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * This class implements a queue for Deferred objects.  Whenever one of the
 	   * objects in the queue completes (resolved or rejected), another item in the
@@ -47553,7 +46991,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *    Deferred object and must return a truthy value if the object is still
 	   *    needed.
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  var fetchQueue = function (options) {
 	    if (!(this instanceof fetchQueue)) {
 	      return new fetchQueue(options);
@@ -47757,7 +47194,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var featureLayer = __webpack_require__(219);
 	var object = __webpack_require__(203);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class fileReader
 	 *
@@ -47765,7 +47201,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.object
 	 * @returns {geo.fileReader}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var fileReader = function (arg) {
 	  'use strict';
 	  if (!(this instanceof fileReader)) {
@@ -47773,11 +47208,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  object.call(this);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  arg = arg || {};
 
 	  if (!(arg.layer instanceof featureLayer)) {
@@ -47786,41 +47219,33 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var m_layer = arg.layer;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the feature layer attached to the reader
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.layer = function () {
 	    return m_layer;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Tells the caller if it can handle the given file by returning a boolean.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.canRead = function () {
 	    return false;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Reads the file object and calls the done function when finished.  As an
 	   * argument to done, provides a boolean that reports if the read was a
 	   * success.  Possibly, it can call done with an object containing details
 	   * of the read operation.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.read = function (file, done) {
 	    done(false);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return a FileReader with handlers attached.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  function newFileReader(done, progress) {
 	    var reader = new FileReader();
 	    if (progress) {
@@ -47835,24 +47260,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return reader;
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Private method for reading a file object as a string.  Calls done with
 	   * the string content when finished or an error object if unsuccessful.
 	   * Optionally, the caller can provide a progress method that is called
 	   * after reading each slice.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._getString = function (file, done, progress) {
 	    var reader = newFileReader(done, progress);
 	    reader.readAsText(file);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Like _getString, but returns an ArrayBuffer object.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._getArrayBuffer = function (file, done, progress) {
 	    var reader = newFileReader(done, progress);
 	    reader.readAsText(file);
@@ -47872,7 +47293,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var inherit = __webpack_require__(8);
 	var feature = __webpack_require__(207);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class graphFeature
 	 *
@@ -47880,7 +47300,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.feature
 	 * @returns {geo.graphFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var graphFeature = function (arg) {
 	  'use strict';
 
@@ -47894,11 +47313,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var util = __webpack_require__(83);
 	  var registry = __webpack_require__(201);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_draw = this.draw,
 	      s_style = this.style,
@@ -47909,11 +47326,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      s_init = this._init,
 	      s_exit = this._exit;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    s_init.call(m_this, arg);
 
@@ -47937,33 +47352,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.nodes(function (d) { return d; });
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Call child _build methods
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    m_this.children().forEach(function (child) {
 	      child._build();
 	    });
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Call child _update methods
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    m_this.children().forEach(function (child) {
 	      child._update();
 	    });
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Custom _exit method to remove all sub-features
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.data([]);
 	    m_links.forEach(function (link) {
@@ -47977,11 +47386,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set style
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.style = function (arg, arg2) {
 	    var out = s_style.call(m_this, arg, arg2);
 	    if (out !== m_this) {
@@ -47995,11 +47402,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set links accessor.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.links = function (arg) {
 	    if (arg === undefined) {
 	      return m_children;
@@ -48009,11 +47414,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set nodes
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.nodes = function (val) {
 	    if (val === undefined) {
 	      return m_nodes;
@@ -48023,29 +47426,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get internal node feature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.nodeFeature = function () {
 	    return m_points;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get internal link features
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.linkFeatures = function () {
 	    return m_links;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build the feature for drawing
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.draw = function () {
 
 	    var layer = m_this.layer(),
@@ -48113,7 +47510,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var feature = __webpack_require__(207);
 	var transform = __webpack_require__(11);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class heatmapFeature
 	 *
@@ -48154,9 +47550,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *   gaussian distribution.
 	 * @returns {geo.heatmapFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 
-	//////////////////////////////////////////////////////////////////////////////
 	var heatmapFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof heatmapFeature)) {
@@ -48165,11 +47559,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  feature.call(this, arg);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      m_position,
 	      m_intensity,
@@ -48187,13 +47579,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  m_binned = arg.binned !== undefined ? arg.binned : 'auto';
 	  m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set maxIntensity
 	   *
 	   * @returns {geo.heatmap}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.maxIntensity = function (val) {
 	    if (val === undefined) {
 	      return m_maxIntensity;
@@ -48205,13 +47595,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set maxIntensity
 	   *
 	   * @returns {geo.heatmap}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.minIntensity = function (val) {
 	    if (val === undefined) {
 	      return m_minIntensity;
@@ -48223,13 +47611,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set updateDelay
 	   *
 	   * @returns {geo.heatmap}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.updateDelay = function (val) {
 	    if (val === undefined) {
 	      return m_updateDelay;
@@ -48239,13 +47625,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set binned
 	   *
 	   * @returns {geo.heatmap}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.binned = function (val) {
 	    if (val === undefined) {
 	      return m_binned;
@@ -48267,13 +47651,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set position accessor
 	   *
 	   * @returns {geo.heatmap}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.position = function (val) {
 	    if (val === undefined) {
 	      return m_position;
@@ -48285,25 +47667,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get pre-computed gcs position accessor
 	   *
 	   * @returns {geo.heatmap}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.gcsPosition = function () {
 	    this._update();
 	    return m_gcsPosition;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set intensity
 	   *
 	   * @returns {geo.heatmap}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.intensity = function (val) {
 	    if (val === undefined) {
 	      return m_intensity;
@@ -48315,11 +47693,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    s_init.call(m_this, arg);
 
@@ -48345,12 +47721,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    var data = m_this.data(),
 	        intensity = null,
@@ -48405,7 +47779,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = (function () {
 	  'use strict';
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * This class defines a tile that is part of a standard "image pyramid", such
 	   * as an open street map tile set.  Every tile is uniquely indexed by a row,
@@ -48435,7 +47808,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {number} [spec.overlap.x=0]
 	   * @param {number} [spec.overlap.y=0]
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  var imageTile = function (spec) {
 	    if (!(this instanceof imageTile)) {
 	      return new imageTile(spec);
@@ -48523,7 +47895,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * This class defines the raw interface for a "tile" on a map.  A tile is
 	   * defined as a rectangular section of a map.  The base implementation
@@ -48550,7 +47921,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {Number} [spec.overlap.x=0]
 	   * @param {Number} [spec.overlap.y=0]
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  var tile = function (spec) {
 	    if (!(this instanceof tile)) {
 	      return new tile(spec);
@@ -48751,7 +48121,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var registerFileReader = __webpack_require__(201).registerFileReader;
 	var fileReader = __webpack_require__(229);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	* Create a new instance of class jsonReader
 	*
@@ -48759,7 +48128,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	* @extends geo.fileReader
 	* @returns {geo.jsonReader}
 	*/
-	//////////////////////////////////////////////////////////////////////////////
 	var jsonReader = function (arg) {
 	  'use strict';
 	  if (!(this instanceof jsonReader)) {
@@ -49062,74 +48430,68 @@ return /******/ (function(modules) { // webpackBootstrap
 	var inherit = __webpack_require__(8);
 	var sceneObject = __webpack_require__(208);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Creates a new map object
-	 *
-	 * Map coordinates for default world map, where c = half circumference at
-	 * equator in meters, o = origin:
-	 *   (-c, c) + o                   (c, c) + o
-	 *            (center.x, center.y) + o            <-- center of viewport
-	 *   (-c, -c) + o                  (c, -c) + o
 	 *
 	 * @class
 	 * @alias geo.map
 	 * @extends geo.sceneObject
 	 *
-	 * *** Always required ***
-	 * @param {string} node DOM selector for the map container
+	 * @param {object} arg Options object
 	 *
-	 * *** Required when using a domain/CS different from OSM ***
-	 * @param {string|geo.transform} [gcs='EPSG:3857']
-	 *   The main coordinate system of the map
-	 * @param {number} [maxZoom=16] The maximum zoom level
-	 * @param {string|geo.transform} [ingcs='EPSG:4326']
-	 *   The default coordinate system of interface calls.
-	 * @param {number} [unitsPerPixel=156543] GCS to pixel unit scaling at zoom 0
-	 *   (i.e. meters per pixel or degrees per pixel).
-	 * @param {object?} maxBounds The maximum visable map bounds
-	 * @param {number} [maxBounds.left=-20037508] The left bound
-	 * @param {number} [maxBounds.right=20037508] The right bound
-	 * @param {number} [maxBounds.bottom=-20037508] The bottom bound
-	 * @param {number} [maxBounds.top=20037508] The top bound
+	 * @param {string} arg.node DOM selector for the map container.
+	 *   *** Always required ***
 	 *
-	 * *** Initial view ***
-	 * @param {number} [zoom=4] Initial zoom
-	 * @param {object?} center Map center
-	 * @param {number} [center.x=0]
-	 * @param {number} [center.y=0]
-	 * @param {number} [rotation=0] Clockwise rotation in radians
-	 * @param {number?} width The map width (default node width)
-	 * @param {number?} height The map height (default node height)
+	 * @param {string|geo.transform} [arg.gcs='EPSG:3857']
+	 *   The main coordinate system of the map (this is often web Mercator).
+	 *   * Required when using a domain/CS different from OSM *
+	 * @param {string|geo.transform} [arg.ingcs='EPSG:4326']
+	 *   The default coordinate system of interface calls (this is often latitude
+	 *   and longitude).
+	 * @param {number} [arg.unitsPerPixel=156543] GCS to pixel unit scaling at zoom
+	 *   0 (i.e. meters per pixel or degrees per pixel).
+	 * @param {object?} [arg.maxBounds] The maximum visible map bounds.
+	 * @param {number} [arg.maxBounds.left=-20037508] The left bound.
+	 * @param {number} [arg.maxBounds.right=20037508] The right bound.
+	 * @param {number} [arg.maxBounds.bottom=-20037508] The bottom bound.
+	 * @param {number} [arg.maxBounds.top=20037508] The top bound.
 	 *
-	 * *** Navigation ***
-	 * @param {number} [min=0]  Minimum zoom level (though fitting to the viewport
-	 *   may make it so this is smaller than the smallest possible value)
-	 * @param {number} [max=16]  Maximum zoom level
-	 * @param {boolean} [discreteZoom=false]  True to only allow integer zoom
-	 *   levels.  False for any zoom level.
-	 * @param {boolean} [allowRotation=true]  False prevents rotation, true allows
-	 *   any rotation.  If a function, the function is called with a rotation
-	 *   (angle in radians) and returns a valid rotation (this can be used to
-	 *   constrain the rotation to a range or specific values).
+	 * @param {number} [arg.zoom=4] Initial zoom.
+	 * @param {object?} [arg.center] Initial map center.
+	 * @param {number} arg.center.x=0
+	 * @param {number} arg.center.y=0
+	 * @param {number} [arg.rotation=0] Initial clockwise rotation in radians.
+	 * @param {number?} [arg.width] The map width (default node width).
+	 * @param {number?} [arg.height] The map height (default node height).
 	 *
-	 * *** Advanced parameters ***
-	 * @param {geo.camera?} camera The camera to control the view
-	 * @param {geo.mapInteractor?} interactor The UI event handler
-	 * @param {array} [animationQueue] An array used to synchonize animations.  If
-	 *   specified, this should be an empty array or the same array as passed to
+	 * @param {number} [arg.min=0] Minimum zoom level (though fitting to the
+	 *   viewport may make it so this is smaller than the smallest possible value).
+	 * @param {number} [arg.max=16] Maximum zoom level.
+	 * @param {boolean} [arg.discreteZoom=false] If `true`, only allow integer zoom
+	 *   levels.  `false` for any zoom level.
+	 * @param {boolean|function} [arg.allowRotation=true] `false` prevents
+	 *   rotation, `true` allows any rotation.  If a function, the function is
+	 *   called with a rotation (angle in radians) and returns a valid rotation
+	 *   (this can be used to constrain the rotation to a range or specific to
+	 *   values).
+	 *
+	 * @param {geo.camera?} [arg.camera] The camera to control the view.
+	 * @param {geo.mapInteractor?} [arg.interactor] The UI event handler.  If
+	 *   `undefined`, a default interactor is created and used.  If `null`, no
+	 *   interactor is attached to the map.
+	 * @param {array} [arg.animationQueue] An array used to synchronize animations.
+	 *   If specified, this should be an empty array or the same array as passed to
 	 *   other map instances.
-	 * @param {boolean} [autoResize=true] Adjust map size on window resize
-	 * @param {boolean} [clampBoundsX=false] Prevent panning outside of the
+	 * @param {boolean} [arg.autoResize=true] Adjust map size on window resize.
+	 * @param {boolean} [arg.clampBoundsX=false] Prevent panning outside of the
 	 *   maximum bounds in the horizontal direction.
-	 * @param {boolean} [clampBoundsY=true] Prevent panning outside of the
+	 * @param {boolean} [arg.clampBoundsY=true] Prevent panning outside of the
 	 *   maximum bounds in the vertical direction.
-	 * @param {boolean} [clampZoom=true] Prevent zooming out so that the map area
-	 *   is smaller than the window.
+	 * @param {boolean} [arg.clampZoom=true] Prevent zooming out so that the map
+	 *   area is smaller than the window.
 	 *
 	 * @returns {geo.map}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var map = function (arg) {
 	  'use strict';
 	  if (!(this instanceof map)) {
@@ -49152,18 +48514,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var mapInteractor = __webpack_require__(221);
 	  var uiLayer = __webpack_require__(236);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Private member variables
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_exit = this._exit,
 	      // See https://en.wikipedia.org/wiki/Web_Mercator
 	      // phiMax = 180 / Math.PI * (2 * Math.atan(Math.exp(Math.PI)) - Math.PI / 2),
-	      m_x = 0,
-	      m_y = 0,
 	      m_node = $(arg.node),
 	      m_width = arg.width || m_node.width() || 512,
 	      m_height = arg.height || m_node.height() || 512,
@@ -49188,8 +48546,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_clampBoundsY,
 	      m_clampZoom,
 	      m_animationQueue = arg.animationQueue || [],
-	      m_origin,
-	      m_scale = {x: 1, y: 1, z: 1}; // constant and ignored for the moment
+	      m_autoResize = arg.autoResize === undefined ? true : arg.autoResize,
+	      m_origin;
 
 	  /* Compute the maximum bounds on our map projection.  By default, x ranges
 	   * from [-180, 180] in the interface projection, and y matches the x range in
@@ -49213,26 +48571,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_maxBounds.right - m_maxBounds.left) / 256);
 
 	  m_camera.viewport = {
-	    width: m_width, height: m_height,
-	    left: m_node.offset().left, top: m_node.offset().top
+	    width: m_width,
+	    height: m_height,
+	    left: m_node.offset().left,
+	    top: m_node.offset().top
 	  };
 	  arg.center = util.normalizeCoordinates(arg.center);
-	  arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
 	  m_clampBoundsX = arg.clampBoundsX === undefined ? false : arg.clampBoundsX;
 	  m_clampBoundsY = arg.clampBoundsY === undefined ? true : arg.clampBoundsY;
 	  m_clampZoom = arg.clampZoom === undefined ? true : arg.clampZoom;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/set the number of world space units per display pixel at the given
 	   * zoom level.
 	   *
-	   * @param {Number} [zoom=0] The target zoom level
-	   * @param {Number?} unit If present, set the unitsPerPixel otherwise return
-	   *   the current value.
-	   * @returns {Number|this}
+	   * @param {number} [zoom=0] The target zoom level.
+	   * @param {number?} [unit] If present, set the `unitsPerPixel` at the
+	   *   specified zoom level.  Otherwise return the current value.
+	   * @returns {number|this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.unitsPerPixel = function (zoom, unit) {
 	    zoom = zoom || 0;
 	    if (unit) {
@@ -49246,15 +48603,65 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return Math.pow(2, -zoom) * m_unitsPerPixel;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get/set the clampBoundsX setting.  If changed, adjust the bounds of the
+	   * Get/set the animation queue.  Two maps can share a single animation queue
+	   * to ensure synchronized animations.  When setting, the animation queue will
+	   * merge values from the existing queue into the new queue.
+	   *
+	   * @param {array} [queue] The animation queue to use.
+	   * @returns {array|this} The current animation queue or the current map.
+	   */
+	  this.animationQueue = function (queue) {
+	    if (queue === undefined) {
+	      return m_animationQueue;
+	    }
+	    if (queue !== m_animationQueue) {
+	      if (m_animationQueue.length) {
+	        /* If the specified queue already has data in, don't copy the 0th
+	         * element of the existing queue, since the 0th element is always the
+	         * actual requestAnimationFrame reference.  In this case, cancel the
+	         * existing requestAnimationFrame.  By using a property of window,
+	         * tests can override this if needed. */
+	        if (queue.length && queue[0] !== m_animationQueue[0]) {
+	          window['cancelAnimationFrame'](m_animationQueue[0]);
+	        }
+	        for (var i = queue.length ? 1 : 0; i < m_animationQueue.length; i += 1) {
+	          queue.push(m_animationQueue[i]);
+	        }
+	      }
+	      m_animationQueue = queue;
+	    }
+	    return this;
+	  };
+
+	  /**
+	   * Get/set the autoResize flag.
+	   *
+	   * @param {boolean} [autoResize] Truthy to automaticaly resize the map when
+	   *    the size of the browser window changes.
+	   * @returns {boolean|this} The current state of autoResize or the current map.
+	   */
+	  this.autoResize = function (autoResize) {
+	    if (autoResize === undefined) {
+	      return m_autoResize;
+	    }
+	    if (autoResize !== m_autoResize) {
+	      $(window).off('resize', resizeSelf);
+	      m_autoResize = autoResize;
+	      if (m_autoResize) {
+	        $(window).on('resize', resizeSelf);
+	      }
+	    }
+	    return this;
+	  };
+
+	  /**
+	   * Get/set the `clampBoundsX` setting.  If changed, adjust the bounds of the
 	   * map as needed.
 	   *
-	   * @param {boolean?} clamp The new clamp value.
+	   * @param {boolean} [clamp] The new clamp value.
 	   * @returns {boolean|this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.clampBoundsX = function (clamp) {
 	    if (clamp === undefined) {
 	      return m_clampBoundsX;
@@ -49266,15 +48673,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get/set the clampBoundsY setting.  If changed, adjust the bounds of the
+	   * Get/set the `clampBoundsY` setting.  If changed, adjust the bounds of the
 	   * map as needed.
 	   *
-	   * @param {boolean?} clamp The new clamp value.
+	   * @param {boolean} [clamp] The new clamp value.
 	   * @returns {boolean|this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.clampBoundsY = function (clamp) {
 	    if (clamp === undefined) {
 	      return m_clampBoundsY;
@@ -49286,15 +48691,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get/set the clampZoom setting.  If changed, adjust the bounds of the map
+	   * Get/set the `clampZoom` setting.  If changed, adjust the bounds of the map
 	   * as needed.
 	   *
-	   * @param {boolean?} clamp The new clamp value.
+	   * @param {boolean} [clamp] The new clamp value.
 	   * @returns {boolean|this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.clampZoom = function (clamp) {
 	    if (clamp === undefined) {
 	      return m_clampZoom;
@@ -49307,14 +48710,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get/set the allowRotation setting.  If changed, adjust the map as needed.
+	   * Get/set the `allowRotation` setting.  If changed, adjust the map as
+	   * needed.
 	   *
-	   * @param {boolean|function} allowRotation the new allowRotation value.
+	   * @param {boolean|function} [allowRotation] The new `allowRotation` value.
+	   *    `false` prevents rotation, `true` allows any rotation.  If a function,
+	   *    the function is called with a rotation (angle in radians) and returns a
+	   *    valid rotation (this can be used to constrain the rotation to a range
+	   *    or to specific values).
 	   * @returns {boolean|function|this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.allowRotation = function (allowRotation) {
 	    if (allowRotation === undefined) {
 	      return m_allowRotation;
@@ -49329,46 +48735,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get the map's world coordinate origin in gcs coordinates
+	   * Get the map's world coordinate origin in gcs coordinates.
 	   *
-	   * @returns {object}
+	   * @returns {geo.geoPosition}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.origin = function () {
 	    return $.extend({}, m_origin);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get the map's world coordinate scaling relative gcs units
-	   *
-	   * @returns {object}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.scale = function () {
-	    return $.extend({}, m_scale);
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the camera
 	   *
 	   * @returns {geo.camera}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.camera = function () {
 	    return m_camera;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get map gcs
+	   * Get map gcs.  This is the coordinate system used in drawing the map.
 	   *
-	   * @returns {string}
+	   * @returns {string} A string used by {@linkcode geo.transform}.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.gcs = function (arg) {
 	    if (arg === undefined) {
 	      return m_gcs;
@@ -49386,13 +48775,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get map interface gcs
+	   * Get map interface gcs.  This is the coordinate system used when getting or
+	   * setting map bounds, center, and other values.
 	   *
-	   * @returns {string}
+	   * @returns {string} A string used by {@linkcode geo.transform}.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.ingcs = function (arg) {
 	    if (arg === undefined) {
 	      return m_ingcs;
@@ -49401,31 +48789,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get root node of the map
+	   * Get root DOM node of the map.
 	   *
 	   * @returns {object}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.node = function () {
 	    return m_node;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get/Set zoom level of the map
+	   * Get/Set zoom level of the map.
 	   *
-	   * @param {number} val if undefined, return the current zoom level.
+	   * @param {number} [val] If `undefined`, return the current zoom level.
 	   *    Otherwise, the new zoom level to set.
-	   * @param {object} origin if present, an object with 'geo' containing the
-	   *    gcs coordinates where the action started and 'map' containing the
-	   *    display coordinates of the same location before the zoom is applied.
-	   * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
+	   * @param {object} [origin] If present, specifies the center of the zoom;
+	   *    otherwise the map's display center is used.
+	   * @param {geo.geoPosition} origin.geo The gcs coordinates of the zoom
+	   *    center.
+	   * @param {geo.screenPosition} origin.map The display coordinates of the zoom
+	   *    center.
+	   * @param {boolean} [ignoreDiscreteZoom] If `true`, ignore the discreteZoom
 	   *    option when determining the new view.
-	   * @returns {Number|geo.map}
+	   * @returns {number|this}
+	   * @fires geo.event.zoom
+	   * @fires geo.event.pan
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.zoom = function (val, origin, ignoreDiscreteZoom) {
 	    if (val === undefined) {
 	      return m_zoom;
@@ -49450,7 +48839,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    camera_bounds(bounds, m_rotation);
 	    evt = {
-	      geo: {},
 	      zoomLevel: m_zoom,
 	      screenPosition: origin ? origin.map : undefined
 	    };
@@ -49467,23 +48855,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Pan the map by (x: dx, y: dy) pixels.
+	   * Pan the map by a number of display pixels.
 	   *
-	   * @param {Object} delta x and y delta in display pixels
-	   * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
+	   * @param {object} delta Amount to pan in display pixels.
+	   * @param {number} delta.x Horizontal distance on the display.
+	   * @param {number} delta.y Vertical distance on the display.
+	   * @param {boolean} [ignoreDiscreteZoom] If `true`, ignore the `discreteZoom`
 	   *    option when determining the new view.
-	   * @param {boolean} ignoreClampBounds if true or 'limited', ignore the
-	   *    clampBoundsX options (up to a point, see fix_bounds) when determining
-	   *    the new view.
-	   * @returns {geo.map}
-	   * @fires geo.event.event:pan
+	   * @param {boolean|'limited'} [ignoreClampBounds] If `true` ignore the
+	   *    `clampBoundsX` and `clampBoundsY` options when determining the new
+	   *    view.  When `'limited'`, the `clampBoundsX` and `clampBoundsY` options
+	   *    are selectively enforced so that the map will not end up more out of
+	   *    bounds than its current state.
+	   * @returns {this}
+	   * @fires geo.event.pan
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.pan = function (delta, ignoreDiscreteZoom, ignoreClampBounds) {
 	    var evt = {
-	      geo: {},
 	      screenDelta: delta
 	    };
 
@@ -49496,7 +48885,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        y: (delta.x * sinr + (-delta.y) * cosr) * unit
 	      });
 	    }
-	    /* If m_clampBounds* is true, clamp the pan */
+	    /* If m_clampBoundsX or m_clampBoundsY is true, clamp the pan */
 	    var bounds = m_camera.bounds;
 	    bounds = fix_bounds(bounds, m_rotation, ignoreClampBounds === 'limited' ? {
 	      x: delta.x, y: delta.y, unit: unit} : undefined,
@@ -49526,18 +48915,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/set the map rotation.  The rotation is performed around the current
-	   * view center.  Rotation mostly ignores clampBoundsX, as the behavior
+	   * view center.  Rotation mostly ignores `clampBoundsX`, as the behavior
 	   * feels peculiar otherwise.
 	   *
-	   * @param {Object} rotation angle in radians (positive is clockwise)
-	   * @param {Object} origin is specified, rotate about this origin
-	   * @param {boolean} ignoreRotationFunc if true, don't constrain the rotation.
-	   * @returns {geo.map}
+	   * @param {number} rotation Absolute angle in radians (positive is
+	   *    clockwise).
+	   * @param {object} [origin] If specified, rotate about this origin.
+	   * @param {geo.geoPosition} origin.geo The gcs coordinates of the
+	   *    rotation center.
+	   * @param {geo.screenPosition} origin.map The display coordinates of the
+	   *    rotation center.
+	   * @param {boolean} [ignoreRotationFunc] If `true`, don't constrain the
+	   *    rotation.
+	   * @returns {number|this}
+	   * @fires geo.event.rotate
+	   * @fires geo.event.pan
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.rotation = function (rotation, origin, ignoreRotationFunc) {
 	    if (rotation === undefined) {
 	      return m_rotation;
@@ -49557,7 +48952,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    camera_bounds(bounds, m_rotation);
 
 	    var evt = {
-	      geo: {},
 	      rotation: m_rotation,
 	      screenPosition: origin ? origin.map : undefined
 	    };
@@ -49577,24 +48971,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Set center of the map to the given geographic coordinates, or get the
 	   * current center.  Uses bare objects {x: 0, y: 0}.
 	   *
-	   * @param {Object} coordinates
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.  If setting the
-	   *    center, they are converted from this gcs to the map projection.  The
-	   *    returned center are converted from the map projection to this gcs.
-	   * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
+	   * @param {geo.geoPosition} coordinates If specified, the new center of the
+	   *    map.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.  If setting the
+	   *    center, it is converted from this gcs to the map projection.  The
+	   *    returned center is converted from the map projection to this gcs.
+	   * @param {boolean} [ignoreDiscreteZoom] If `true`, ignore the `discreteZoom`
 	   *    option when determining the new view.
-	   * @param {boolean} ignoreClampBounds if true or 'limited', ignore the
-	   *    clampBoundsX options (up to a point, see fix_bounds) when determining
-	   *    the new view.
-	   * @returns {Object|geo.map}
+	   * @param {boolean|'limited'} [ignoreClampBounds] If `true` ignore the
+	   *    `clampBoundsX` and `clampBoundsY` options when determining the new
+	   *    view.  When `'limited'`, the `clampBoundsX` and `clampBoundsY` options
+	   *    are selectively enforced so that the map will not end up more out of
+	   *    bounds than its current state.
+	   * @returns {geo.geoPosition|this}
+	   * @fires geo.event.pan
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.center = function (coordinates, gcs, ignoreDiscreteZoom,
 	                          ignoreClampBounds) {
 	    var center;
@@ -49612,20 +49008,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.modified();
 	    // trigger a pan event
 	    m_this.geoTrigger(geo_event.pan, {
-	      geo: coordinates,
-	      screenDelta: null
+	      screenDelta: {x: 0, y: 0}
 	    });
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Add layer to the map
+	   * Add a layer to the map.
 	   *
-	   * @param {geo.layer} layer to be added to the map
-	   * @return {geom.map}
+	   * @param {string} layerName The type of layer to add to the map.
+	   * @param {object} arg Parameters for the new layer.
+	   * @return {geo.layer}
+	   * @fires geo.event.layerAdd
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.createLayer = function (layerName, arg) {
 	    arg = arg || {};
 	    var newLayer = registry.createLayer(
@@ -49642,7 +49037,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_this.modified();
 
 	      m_this.geoTrigger(geo_event.layerAdd, {
-	        type: geo_event.layerAdd,
 	        target: m_this,
 	        layer: newLayer
 	      });
@@ -49651,14 +49045,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return newLayer;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Remove layer from the map
+	   * Remove a layer from the map.
 	   *
-	   * @param {geo.layer} layer that should be removed from the map
-	   * @return {geo.map}
+	   * @param {geo.layer?} layer Layer to remove from the map.
+	   * @return {geo.layer}
+	   * @fires geo.event.layerRemove
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.deleteLayer = function (layer) {
 
 	    if (layer !== null && layer !== undefined) {
@@ -49668,28 +49061,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_this.modified();
 
 	      m_this.geoTrigger(geo_event.layerRemove, {
-	        type: geo_event.layerRemove,
 	        target: m_this,
 	        layer: layer
 	      });
 	    }
 
-	    /// Return deleted layer (similar to createLayer) as in the future
-	    /// we may provide extension of this method to support deletion of
-	    /// layer using id or some sort.
+	    // Return deleted layer (similar to createLayer) as in the future
+	    // we may provide extension of this method to support deletion of
+	    // layer using id or some sort.
 	    return layer;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get or set the size of the map.
 	   *
-	   * @param {Object?} arg
-	   * @param {Number} arg.width width in pixels
-	   * @param {Number} arg.height height in pixels
-	   * @returns {Object} An object containing width and height as keys
+	   * @param {geo.screenSize} [arg] Size in pixels.
+	   * @returns {geo.screenSize|this} The size in pixels or the map object.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.size = function (arg) {
 	    if (arg === undefined) {
 	      return {
@@ -49697,18 +49085,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	        height: m_height
 	      };
 	    }
-	    m_this.resize(0, 0, arg.width, arg.height);
+	    // store the original center and restore it after the resize
+	    var oldCenter = m_this.center();
+	    m_width = arg.width || m_width;
+	    m_height = arg.height || m_height;
+
+	    reset_minimum_zoom();
+	    var newZoom = fix_zoom(m_zoom);
+	    if (newZoom !== m_zoom) {
+	      m_this.zoom(newZoom);
+	    }
+	    m_this.camera().viewport = {
+	      width: m_width,
+	      height: m_height,
+	      left: m_node.offset().left,
+	      top: m_node.offset().top
+	    };
+	    m_this.center(oldCenter);
+
+	    m_this.geoTrigger(geo_event.resize, {
+	      type: geo_event.resize,
+	      target: m_this,
+	      width: m_width,
+	      height: m_height
+	    });
+
+	    m_this.modified();
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the rotated size of the map.  This is the width and height of the
 	   * non-rotated area necessary to enclose the rotated area in pixels.
 	   *
-	   * @returns {Object} An object containing width and height as keys
+	   * @returns {geo.screenSize} The size that fits the rotated map.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.rotatedSize = function () {
 	    if (!this.rotation()) {
 	      return {
@@ -49724,60 +49135,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Resize map (deprecated)
-	   *
-	   * @param {Number} x x-offset in display space
-	   * @param {Number} y y-offset in display space
-	   * @param {Number} w width in display space
-	   * @param {Number} h height in display space
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.resize = function (x, y, w, h) {
-
-	    // store the original center and restore it after the resize
-	    var oldCenter = m_this.center();
-	    m_x = x;
-	    m_y = y;
-	    m_width = w || m_width;
-	    m_height = h || m_height;
-
-	    reset_minimum_zoom();
-	    var newZoom = fix_zoom(m_zoom);
-	    if (newZoom !== m_zoom) {
-	      m_this.zoom(newZoom);
-	    }
-	    m_this.camera().viewport = {
-	      width: m_width, height: m_height,
-	      left: m_node.offset().left, top: m_node.offset().top
-	    };
-	    m_this.center(oldCenter);
-
-	    m_this.geoTrigger(geo_event.resize, {
-	      type: geo_event.resize,
-	      target: m_this,
-	      x: m_x,
-	      y: m_y,
-	      width: m_width,
-	      height: m_height
-	    });
-
-	    m_this.modified();
-	    return m_this;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Convert from gcs coordinates to map world coordinates.
-	   * @param {object} c The input coordinate to convert
-	   * @param {object} c.x
-	   * @param {object} c.y
-	   * @param {object} [c.z=0]
-	   * @param {string?} gcs The gcs of the input (map.gcs() by default)
-	   * @return {object} World space coordinates
+	   *
+	   * @param {geo.geoPosition} c The input coordinate to convert.
+	   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+	   *    the interface gcs, `null` to use the map gcs, or any other transform.
+	   * @return {geo.worldPosition} World space coordinates.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.gcsToWorld = function (c, gcs) {
 	    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
 	    if (gcs !== m_gcs) {
@@ -49794,18 +49159,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return c;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Convert from map world coordinates to gcs coordinates.
-	   * @param {object} c The input coordinate to convert
-	   * @param {object} c.x
-	   * @param {object} c.y
-	   * @param {object} [c.z=0]
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {object} GCS space coordinates
+	   *
+	   * @param {geo.worldPosition} c The input coordinate to convert.
+	   * @param {string|geo.transform|null} [gcs] output gcs.  `undefined` to use
+	   *    the interface gcs, `null` to use the map gcs, or any other transform.
+	   * @return {geo.geoPosition} GCS space coordinates.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.worldToGcs = function (c, gcs) {
 	    if (m_origin.x || m_origin.y || m_origin.z) {
 	      c = transform.affineInverse(
@@ -49822,86 +49183,66 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return c;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Convert from gcs coordinates to display coordinates.
+	   * Convert from gcs coordinates to display coordinates.  This is identical to
+	   * calling `gcsToWorld` and then `worldToDisplay`.
 	   *
-	   *    gcsToWorld | worldToDisplay
-	   *
-	   * @param {object} c The input coordinate to convert
-	   * @param {object} c.x
-	   * @param {object} c.y
-	   * @param {object} [c.z=0]
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {object} Display space coordinates
+	   * @param {geo.geoPosition} c The input coordinate to convert.
+	   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+	   *    the interface gcs, `null` to use the map gcs, or any other transform.
+	   * @return {geo.screenPosition} Display space coordinates.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.gcsToDisplay = function (c, gcs) {
 	    c = m_this.gcsToWorld(c, gcs);
 	    return m_this.worldToDisplay(c);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Convert from world coordinates to display coordinates using the attached
 	   * camera.
-	   * @param {object} c The input coordinate to convert
-	   * @param {object} c.x
-	   * @param {object} c.y
-	   * @param {object} [c.z=0]
-	   * @return {object} Display space coordinates
+	   *
+	   * @param {geo.worldPosition} c The input coordinate to convert.
+	   * @return {geo.screenPosition} Display space coordinates.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.worldToDisplay = function (c) {
 	    return m_camera.worldToDisplay(c);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Convert from display to gcs coordinates
+	   * Convert from display to gcs coordinates.  This is identical to calling
+	   * `displayToWorld` and then `worldToGcs`.
 	   *
-	   *    displayToWorld | worldToGcs
-	   *
-	   * @param {object} c The input display coordinate to convert
-	   * @param {object} c.x
-	   * @param {object} c.y
-	   * @param {object} [c.z=0]
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {object} GCS space coordinates
+	   * @param {geo.screenPosition} c The input display coordinate to convert.
+	   * @param {string|geo.transform|null} [gcs] Output gcs.  `undefined` to use
+	   *    the interface gcs, `null` to use the map gcs, or any other transform.
+	   * @return {geo.geoPosition} GCS space coordinates.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.displayToGcs = function (c, gcs) {
 	    c = m_this.displayToWorld(c); // done via camera
 	    return m_this.worldToGcs(c, gcs);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Convert from display coordinates to world coordinates using the attached
 	   * camera.
-	   * @param {object} c The input coordinate to convert
-	   * @param {object} c.x
-	   * @param {object} c.y
-	   * @param {object} [c.z=0]
-	   * @return {object} World space coordinates
+	   *
+	   * @param {geo.screenPosition} c The input coordinate to convert.
+	   * @return {geo.worldPosition} World space coordinates.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.displayToWorld = function (c) {
 	    return m_camera.displayToWorld(c);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Manually force to render map
+	   * Redraw the map and all its layers.
+	   *
+	   * @fires geo.event.draw
+	   * @fires geo.event.drawEnd
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.draw = function () {
 	    var i, layers = m_this.children();
 
 	    m_this.geoTrigger(geo_event.draw, {
-	      type: geo_event.draw,
 	      target: m_this
 	    });
 
@@ -49912,26 +49253,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    m_this.geoTrigger(geo_event.drawEnd, {
-	      type: geo_event.drawEnd,
 	      target: m_this
 	    });
 
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get, set, or create and set a file reader to a layer in the map to be used
 	   * as a drop target.
 	   *
-	   * @param {string|object|undefined} readerOrName: undefined to get the
-	   *    current reader, an instance of a file reader to set the reader, or a
-	   *    name to create a file reader (see utils.createFileReader for options).
-	   * @param {object} opts: options for creating a file reader.  If this
-	   *    includes layer, use that layer, otherwise create a layer using these
-	   *    options.
+	   * @param {string|object} [readerOrName] `undefined` to get the current
+	   *    reader, an instance of a file reader to set the reader, or a name to
+	   *    create a file reader.
+	   * @param {object} [opts] options Parameters for creating a file reader when
+	   *    the reader is specified by name.  If this includes `layer`, use that
+	   *    layer, otherwise create a layer using these options.
+	   * @returns {geo.fileReader|this}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.fileReader = function (readerOrName, opts) {
 	    if (readerOrName === undefined) {
 	      return m_fileReader;
@@ -49949,11 +49288,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Initialize the map
+	   * Initialize the map.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 
 	    if (m_node === undefined || m_node === null) {
@@ -49968,11 +49305,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Update map
+	   * Update map.  This updates all layers of the map.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function (request) {
 	    var i, layers = m_this.children();
 	    for (i = 0; i < layers.length; i += 1) {
@@ -49981,11 +49316,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Exit this map
+	   * Exit this map.  This removes all layers, destroys current interactor, and
+	   * empties the associated DOM node.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.exit = function () {
 	    var i, layers = m_this.children();
 	    for (i = layers.length - 1; i >= 0; i -= 1) {
@@ -50004,44 +49338,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_exit();
 	  };
 
-	  this._init(arg);
-
-	  // set up drag/drop handling
-	  this.node().on('dragover.geo', function (e) {
-	    var evt = e.originalEvent;
-
-	    if (m_this.fileReader()) {
-	      evt.stopPropagation();
-	      evt.preventDefault();
-	      evt.dataTransfer.dropEffect = 'copy';
-	    }
-	  })
-	  .on('drop.geo', function (e) {
-	    var evt = e.originalEvent, reader = m_this.fileReader(),
-	        i, file;
-
-	    function done() {
-	      m_this.draw();
-	    }
-
-	    if (reader) {
-	      evt.stopPropagation();
-	      evt.preventDefault();
-
-	      for (i = 0; i < evt.dataTransfer.files.length; i += 1) {
-	        file = evt.dataTransfer.files[i];
-	        if (reader.canRead(file)) {
-	          reader.read(file, done); // to do: trigger event on done
-	        }
-	      }
-	    }
-	  });
-
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get or set the map interactor
+	   * Get or set the map interactor.
+	   *
+	   * @param {geo.mapInteractor} [arg] If specified, the map interactor to set.
+	   * @returns {geo.mapInteractor|this} The current map interactor or the map
+	   *    object.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.interactor = function (arg) {
 	    if (arg === undefined) {
 	      return m_interactor;
@@ -50063,16 +49366,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get or set the min/max zoom range.
 	   *
-	   * @param {Object} arg {min: minimumzoom, max: maximumzom}
-	   * @param {boolean} noRefresh if true, don't update the map if the zoom level
-	   *                            has changed.
-	   * @returns {Object|geo.map}
+	   * @param {object} [arg] The zoom range.
+	   * @param {number} [arg.min] The minimum zoom level.
+	   * @param {number} [arg.max] The maximum zoom level.
+	   * @param {boolean} [noRefresh] If `true`, don't update the map if the zoom
+	   *    level has changed.
+	   * @returns {object|this} The current zoom range or the map object.  The
+	   *    `min` value is the minimum value that the map can go to based on the
+	   *    current dimensions and settings, the `origMin` value is the value that
+	   *    was specified via this function or when the map was created.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.zoomRange = function (arg, noRefresh) {
 	    if (arg === undefined) {
 	      return $.extend({}, m_validZoomRange);
@@ -50090,36 +49396,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Start an animated zoom/pan/rotate.  If a second transition is requested
-	   * while a transition is already in progress, a new transition is created
-	   * that is functionally from whereever the map has moved to (possibly partway
-	   * through the first transition) going to the end point of the new
-	   * transition.
+	   * Get the current transition or start an animated zoom/pan/rotate.  If a
+	   * second transition is requested while a transition is already in progress,
+	   * a new transition is created that is functionally from wherever the map has
+	   * moved to (possibly partway through the first transition) going to the end
+	   * point of the new transition.
 	   *
-	   * Options:
-	   * <pre>
-	   *   opts = {
-	   *     center: { x: ... , y: ... } // the new center
-	   *     zoom: ... // the new zoom level
-	   *     zoomOrigin: ... // an origin to use when zooming.  Optional.
-	   *     rotation: ... // the new rotation angle
-	   *     duration: ... // the duration (in ms) of the transition
-	   *     ease: ... // an easing function [0, 1] -> [0, 1]
-	   *   }
-	   * </pre>
-	   *
-	   * Call with no arguments to return the current transition information.
-	   *
-	   * @param {object?} opts
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.  Applies only to the
-	   *    center coordinate of the opts and to converting zoom values to height,
+	   * @param {object} [opts] Options for a transition, or `undefined` to get the
+	   *    current transition.
+	   * @param {geo.geoPosition} [opts.center] A new map center.
+	   * @param {number} [opts.zoom] A new map zoom level.
+	   * @param {geo.geoPosition} [opts.zoomOrigin] An origin to use when zooming
+	   *    to a new zoom level.
+	   * @param {number} [opts.rotation] A new map rotation.
+	   * @param {number} [opts.duration=1000] Transition duration in milliseconds.
+	   * @param {function} [opts.ease] Easing function for the transition.  This is
+	   *    in the style of a d3 easing function.
+	   * @param {function} [opts.interp] Function to use when interpolating
+	   *    between values.  This gets passed two arrays, the start and end values
+	   *    for [`x`, `y`, `z` or `zoom`, `rotation`], and returns a function that,
+	   *    when passed a time value returns an array of the interpolated [`x`,
+	   *    `y`, `z` or `zoom`, `rotation`] values.
+	   * @param {boolean} [opts.zCoord] If `true`, convert zoom values to z values
+	   *    for interpolation.
+	   * @param {function} [opts.done] If specified, call this function when a
+	   *    transition completes.  The function is called with an object that
+	   *    contains `cancel`: a boolean if the transition was canceled, `source`:
+	   *    a value based on what canceled a transition, `transition`: the current
+	   *    transition that just completed, `next`: a boolean if another transition
+	   *    follows immediately.
+	   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+	   *    the interface gcs, `null` to use the map gcs, or any other transform.
+	   *    Applies only to `opts.center` and to converting zoom values to height,
 	   *    if specified.
+	   * @param {number} [animTime] The animation frame time (from a
+	   *    `window.requestAnimationFrame` callback).  Used if a new transition is
+	   *    requested because the current transition has completed to keep things
+	   *    synchronized.
 	   * @returns {geo.map}
+	   * @fires geo.event.transitionstart
+	   * @fires geo.event.transitionend
+	   * @fires geo.event.transitioncancel
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.transition = function (opts, gcs, animTime) {
 
 	    if (opts === undefined) {
@@ -50140,9 +49459,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return m_this;
 	    }
 
+	    /* Basic linear interpolation between two values. */
 	    function interp1(p0, p1, t) {
 	      return p0 + (p1 - p0) * t;
 	    }
+	    /**
+	     * Generate an interpolation function that interpolates all array entries.
+	     *
+	     * @param {array} p0 An array of numbers to interpolate from.
+	     * @param {array} p1 An array of numbers to interpolate to.
+	     * @returns {function} A function that, given `t`, returns an array of
+	     *      interpolated values.
+	     * @private
+	     */
 	    function defaultInterp(p0, p1) {
 	      return function (t) {
 	        var result = [];
@@ -50155,7 +49484,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var units = m_this.unitsPerPixel(0);
 
-	    // Transform zoom level into z-coordinate and inverse
+	    // Transform zoom level into z-coordinate and inverse.
 	    function zoom2z(z) {
 	      return vgl.zoomToHeight(z + 1, m_width, m_height) * units;
 	    }
@@ -50216,6 +49545,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_transition.end.rotation
 	    ]);
 
+	    /**
+	     * Process an animation from during a transition.
+	     *
+	     * @param {number} time The animation frame time.  Used to ensure multiple
+	     *      transitions are smooth.
+	     * @private
+	     */
 	    function anim(time) {
 	      var done = m_transition.done,
 	          next = m_queuedTransition;
@@ -50315,11 +49651,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Cancel any existing transition.  The transition will send a cancel event
 	   * at the next animation frame, but no further activity occurs.
 	   *
-	   * @param {string} [source] optional cause of the cancel.  This can be any
-	   *                 value, but something like <method name>.<action> is
-	   *                 recommended to allow other functions to determine the
-	   *                 source and cause of the transition being canceled.
-	   * @returns {bool} true if a transition was in progress.
+	   * @param {string} [source] Optional cause of the cancel.  This can be any
+	   *    value, but something like `(method name).(action)` is recommended to
+	   *    allow other functions to determine the source and cause of the
+	   *    transition being canceled.
+	   * @returns {boolean} `true` if a transition was in progress.
+	   * @fires geo.event.transitioncancel
 	   */
 	  this.transitionCancel = function (source) {
 	    if (m_transition && (m_transition.cancel !== true || m_queuedTransition)) {
@@ -50331,23 +49668,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return false;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get/set the locations of the current map corners as latitudes/longitudes.
-	   * When provided the argument should be an object containing the keys left,
-	   * top, right, bottom declaring the desired new map bounds.  The new bounds
-	   * will contain at least the min/max lat/lngs provided modified by clamp
-	   * settings.  In any case, the actual new bounds will be returned by this
-	   * function.
+	   * Get/set the locations of the current map edges.  When set, the left-top
+	   * and right-bottom corners are transformed to the map's gcs and then used
+	   * to set the bounds.
 	   *
-	   * @param {geo.geoBounds} [bds] The requested map bounds
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.  If setting the
+	   * @param {geo.geoBounds} [bds] The requested map bounds.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.  If setting the
 	   *    bounds, they are converted from this gcs to the map projection.  The
 	   *    returned bounds are converted from the map projection to this gcs.
-	   * @return {geo.geoBounds} The actual new map bounds
+	   * @return {geo.geoBounds} The actual new map bounds.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.bounds = function (bds, gcs) {
 	    var nav;
 
@@ -50376,6 +49708,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                          true);
 	  };
 
+	  /**
+	   * Get/set the maximum view area of the map.  If the map wraps, this is the
+	   * unwrapped area.
+	   *
+	   * @param {geo.geoBounds} [bds] The map bounds.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.  If setting the
+	   *    bounds, they are converted from this gcs to the map projection.  The
+	   *    returned bounds are converted from the map projection to this gcs.
+	   * @return {geo.geoBounds|this} The map maximum bounds or the map object.
+	   */
 	  this.maxBounds = function (bounds, gcs) {
 	    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
 	    if (bounds === undefined) {
@@ -50414,17 +49757,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get the center zoom level necessary to display the given lat/lon bounds.
+	   * Get the center zoom level necessary to display the given bounds.
 	   *
-	   * @param {geo.geoBounds} [bds] The requested map bounds
+	   * @param {geo.geoBounds} bounds The requested map bounds.  `right` must be
+	   *    greater than `left` and `bottom` must be greater than `top` in the
+	   *    map's gcs (after conversion from the provided gcs).
 	   * @param {number} rotation Rotation in clockwise radians.
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {object} Object containing keys 'center' and 'zoom'
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @return {geo.zoomAndCenter}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.zoomAndCenterFromBounds = function (bounds, rotation, gcs) {
 	    var center, zoom;
 
@@ -50465,26 +49808,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the bounds that will be displayed with the given zoom and center.
 	   *
 	   * Note: the bounds may not have the requested zoom and center due to map
 	   * restrictions.
 	   *
-	   * @param {number} zoom The requested zoom level
-	   * @param {geo.geoPosition} center The requested center
-	   * @param {number} rotation The requested rotation
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
+	   * @param {number} zoom The requested zoom level.
+	   * @param {geo.geoPosition} center The requested center.
+	   * @param {number} rotation The requested rotation in clockwise radians.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @param {boolean} ignoreDiscreteZoom If `true`, ignore the `discreteZoom`
 	   *    option when determining the new view.
-	   * @param {boolean} ignoreClampBounds if true or 'limited', ignore the
-	   *    clampBoundsX options (up to a point, see fix_bounds) when determining
-	   *    the new view.
+	   * @param {boolean} [ignoreClampBounds] If `true` and `clampBoundsX` or
+	   *    `clampBoundsY` is set, allow the bounds to be less clamped.
+	   *    The map's `maxBounds` can be shifted so that they lie no further than
+	   *    the center of the bounds (rather than being forced to be at the edge).
 	   * @return {geo.geoBounds}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.boundsFromZoomAndCenter = function (zoom, center, rotation, gcs,
 	        ignoreDiscreteZoom, ignoreClampBounds) {
 	    var width, height, halfw, halfh, bounds, units;
@@ -50538,15 +49880,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return bounds;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get/set the discrete zoom flag.
+	   * Get/set the discrete zoom flag.  If `true`, the map will snap to integer
+	   * zoom levels.
 	   *
-	   * @param {bool} If specified, the discrete zoom flag.
-	   * @return {bool} The current discrete zoom flag if no parameter is
-	   *                specified, otherwise the map object.
+	   * @param {boolean} [discreteZoom] If specified, the new discrete zoom flag.
+	   * @return {boolean|this} The current discrete zoom flag or the map object.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.discreteZoom = function (discreteZoom) {
 	    if (discreteZoom === undefined) {
 	      return m_discreteZoom;
@@ -50562,16 +49902,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the layers contained in the map.
 	   * Alias of {@linkcode geo.sceneObject#children}.
 	   * @method
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.layers = this.children;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update the attribution notice displayed on the bottom right corner of
 	   * the map.  The content of this notice is managed by individual layers.
@@ -50583,10 +49920,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *   * geo.event.layerRemove
 	   *
 	   * In addition, layers should call this method when their own attribution
-	   * notices has changed.  Users, in general, should not need to call this.
-	   * @returns {this} Chainable
+	   * notices have changed.  Users, in general, should not need to call this.
+	   *
+	   * @returns {this} Chainable.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.updateAttribution = function () {
 	    // clear any existing attribution content
 	    m_this.node().find('.geo-attribution').remove();
@@ -50617,56 +49954,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Draw a layer image to a canvas context.  The layer's opacity and transform
-	   * is applied.
-	   *
-	   * @param {context} context: the 2d canvas context to draw into.
-	   * @param {number} opacity: the opacity in the range [0, 1].
-	   * @param {object} elem: the element that might have a transform.
-	   * @param {HTMLImageObject} img: the image or canvas to draw to the canvas.
-	   */
-	  function drawLayerImageToContext(context, opacity, elem, img) {
-	    context.globalAlpha = opacity;
-	    var transform = elem.css('transform');
-	    // if the canvas is being transformed, apply the same transformation
-	    if (transform && transform.substr(0, 7) === 'matrix(') {
-	      context.setTransform.apply(context, transform.substr(7, transform.length - 8).split(',').map(parseFloat));
-	    } else {
-	      context.setTransform(1, 0, 0, 1, 0, 0);
-	    }
-	    context.drawImage(img, 0, 0);
-	  }
-
-	  /**
 	   * Get a screen-shot of all or some of the canvas layers of map.  Note that
 	   * webGL layers are rerendered, even if
-	   *   window.contextPreserveDrawingBuffer = true;
+	   *   `window.contextPreserveDrawingBuffer = true;`
 	   * is set before creating the map object.  Chrome, at least, may not keep the
 	   * drawing buffers if the tab loses focus (and returning focus won't
 	   * necessarily rerender).
 	   *
-	   * @param {object|array|undefined} layers: either a layer, a list of layers,
-	   *    falsy to get all layers, or an object that contains optional values of
-	   *    layers, type, encoderOptions, and values listed in the opts param
-	   *    (this last form allows a single argument for the function).
-	   * @param {string} type: see canvas.toDataURL.  Defaults to 'image/png'.
-	   *    Alternately, 'canvas' to return the canvas element (this can be used
-	   *    to get the results as a blob, which can be faster for some operations
-	   *    but is not supported as widely).
-	   * @param {Number} encoderOptions: see canvas.toDataURL.
-	   * @param {object} opts: additional screenshot options:
-	   *    background: if false or null, don't prefill the background.  If
-	   *        undefined, use the default (white).  Otherwise, a css color or
-	   *        CanvasRenderingContext2D.fillStyle to fill the initial canvas.
-	   *        This could match the background of the browser page, for instance.
-	   *    wait: if 'idle', wait for the map to be idle and one animation frame to
-	   *        occur.  If truthy, wait for an animation frame to occur.
-	   *        Otherwise, take the screenshot as sson as possible.
-	   *    attribution: if null or unspecified, include the attribution only if
-	   *        all layers are used.  If false, never include the attribution.  If
-	   *        true, always include it.
-	   * @returns {deferred}: a jQuery Deferred object.  The done function receives
-	   *    either a data URL or the HTMLCanvasElement with the result.
+	   * @param {geo.layer|geo.layer[]|false|object} [layers] Either a layer, a
+	   *    list of layers, falsy to get all layers, or an object that contains
+	   *    optional values of `layers`, `type`, `encoderOptions`, and additional
+	   *    values listed in the `opts` parameter (this last form allows a single
+	   *    argument for the function).
+	   * @param {string} [type='image/png'] See {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
+	   *    canvas.toDataURL}.  Use `'canvas'` to return the canvas element (this
+	   *    can be used to get the results as a blob, which can be faster for some
+	   *    operations but is not supported as widely).
+	   * @param {number} [encoderOptions] See {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
+	   *    canvas.toDataURL}.
+	   * @param {object} [opts] Additional screenshot options.
+	   * @param {false|string|CanvasRenderingContext2D.fillStyle}
+	   *    [opts.background='white'] If `false` or `null`, don't prefill the
+	   *    background.  Otherwise, a css color or
+	   *    `CanvasRenderingContext2D.fillStyle` to fill the initial canvas.  This
+	   *    could match the background of the browser page, for instance.
+	   * @param {boolean|'idle'} [opts.wait=false] If `'idle'`, wait for the map to
+	   *    be idle and one additional animation frame to occur.  If truthy, wait
+	   *    for an animation frame to occur.  Otherwise, take the screenshot as
+	   *    soon as possible.
+	   * @param {boolean|null} [opts.attribution=null] If `null` or unspecified,
+	   *    include the attribution only if all layers are used.  If false, never
+	   *    include the attribution.  If `true`, always include it.
+	   * @returns {deferred} A jQuery Deferred object.  The done function receives
+	   *    either a data URL or an `HTMLCanvasElement` with the result.
 	   */
 	  this.screenshot = function (layers, type, encoderOptions, opts) {
 	    var defer;
@@ -50792,19 +50112,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Instead of each function using window.requestAnimationFrame, schedule all
-	   * such frames here.  This allows the callbacks to be reordered or removed as
-	   * needed and reduces overhead in Chrome a small amount.  Also, if the
-	   * animation queue is shared between map instances, the callbacks will be
-	   * called as one, providing better synchronization.
+	   * Instead of each function using `window.requestAnimationFrame`, schedule
+	   * all such frames through this function.  This allows the callbacks to be
+	   * reordered or removed as needed and reduces overhead in Chrome a small
+	   * amount.  Also, if the animation queue is shared between map instances, the
+	   * callbacks will be called in a single time slice, providing better
+	   * synchronization.
 	   *
-	   * @param {function} callback: function to call during the animation frame.
-	   *    It is called with an animation epoch, exactly as requestAnimationFrame.
-	   * @param {string|boolean} action: falsy to only add the callback if it is
-	   *    not already scheduled.  'remove' to remove the callback (use this
-	   *    instead of cancelAnimationFrame).  Any other truthy value moves the
-	   *    callback to the end of the list.
-	   * @returns {integer} An integer as returned by window.requestAnimationFrame.
+	   * @param {function} callback Function to call during the animation frame.
+	   *    It is called with an animation epoch, exactly as
+	   *    `requestAnimationFrame`.
+	   * @param {boolean|'remove'} [action=false] Falsy to only add the callback if
+	   *    it is not already scheduled.  `'remove'` to remove the callback (use
+	   *    this instead of `cancelAnimationFrame`).  Any other truthy value moves
+	   *    the callback to the end of the list.
+	   * @returns {integer} An integer as returned by
+	   *    `window.requestAnimationFrame`.
 	   */
 	  this.scheduleAnimationFrame = function (callback, action) {
 	    if (!m_animationQueue.length) {
@@ -50829,8 +50152,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
+	   * Draw a layer image to a canvas context.  The layer's opacity and transform
+	   * are applied.  This is used as part of making a screenshot.
+	   *
+	   * @param {context} context The 2d canvas context to draw into.
+	   * @param {number} opacity The opacity in the range [0, 1].
+	   * @param {object} elem A jQuery element that might have a transform.
+	   * @param {HTMLImageObject} img The image or canvas to draw to the canvas.
+	   * @private
+	   */
+	  function drawLayerImageToContext(context, opacity, elem, img) {
+	    context.globalAlpha = opacity;
+	    var transform = elem.css('transform');
+	    // if the canvas is being transformed, apply the same transformation
+	    if (transform && transform.substr(0, 7) === 'matrix(') {
+	      context.setTransform.apply(context, transform.substr(7, transform.length - 8).split(',').map(parseFloat));
+	    } else {
+	      context.setTransform(1, 0, 0, 1, 0, 0);
+	    }
+	    context.drawImage(img, 0, 0);
+	  }
+
+	  /**
 	   * Sevice the callback during an animation frame.  This uses splice to modify
-	   * the animationQueue to allow multiple map instances to share the queue.
+	   * the `animationQueue` to allow multiple map instances to share the queue.
+	   * @private
 	   */
 	  function processAnimationFrame() {
 	    var queue = m_animationQueue.splice(0, m_animationQueue.length);
@@ -50841,22 +50187,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
-	  //
-	  // The following are some private methods for interacting with the camera.
-	  // In order to hide the complexity of dealing with map aspect ratios,
-	  // clamping behavior, reseting zoom levels on resize, etc. from the
-	  // layers, the map handles camera movements directly.  This requires
-	  // passing all camera movement events through the map initially.  The
-	  // map uses these methods to fix up the events according to the constraints
-	  // of the display and passes the event to the layers.
-	  //
-	  ////////////////////////////////////////////////////////////////////////////
+	  /*
+	   * The following are some private methods for interacting with the camera.
+	   * In order to hide the complexity of dealing with map aspect ratios,
+	   * clamping behavior, resetting zoom levels on resize, etc. from the
+	   * layers, the map handles camera movements directly.  This requires
+	   * passing all camera movement events through the map initially.  The
+	   * map uses these methods to fix up the events according to the constraints
+	   * of the display and passes the event to the layers.
+	   */
 	  /**
-	   * Calculate the scaling factor to fit the given map bounds
-	   * into the viewport with the correct aspect ratio.
-	   * @param {object} bounds A desired bounds
-	   * @return {object} Multiplicative aspect ratio correction
+	   * Calculate the scaling factor to fit the given map bounds into the viewport
+	   * with the correct aspect ratio.
+	   *
+	   * @param {geo.geoBounds} bounds A desired bounds.
+	   * @returns {object} Multiplicative aspect ratio correction with x and y
+	   *    values.
 	   * @private
 	   */
 	  function camera_scaling(bounds) {
@@ -50883,8 +50229,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  /**
-	   * Adjust a set of bounds based on a rotation.
-	   * @private.
+	   * Adjust a set of bounds based on a rotation.  If a rotation exists, the
+	   * returned bounds are typically larger than the source bounds.
+	   *
+	   * @param {geo.geoBounds} bounds Bounds to adjust.
+	   * @param {number} rotation Angle in radians (positive is clockwise).
+	   * @returns {geo.geoBounds}
+	   * @private
 	   */
 	  function rotate_bounds(bounds, rotation) {
 	    if (rotation) {
@@ -50904,7 +50255,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Generate a set of bounds based on a center point, a width and height, and
 	   * a rotation.
-	   * @private.
+	   *
+	   * @param {geo.geoPosition} center
+	   * @param {object} size Size of the screen in map gcs.
+	   * @param {number} size.width
+	   * @param {number} size.height
+	   * @param {number} rotation Angle in radians (positive is clockwise).
+	   * @returns {geo.geoBounds}
+	   * @private
 	   */
 	  function rotate_bounds_center(center, size, rotation) {
 	    // calculate the half width and height
@@ -50928,11 +50286,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  /**
-	   * Calculate the minimum zoom level to fit the given
-	   * bounds inside the view port using the view port size,
-	   * the given bounds, and the number of units per
-	   * pixel.  The method sets the valid zoom bounds as well
-	   * as the current zoom level to be within that range.
+	   * Calculate the minimum zoom level to fit the given bounds inside the view
+	   * port using the view port size, the given bounds, and the number of units
+	   * per pixel.  The method sets the valid zoom bounds as well as the current
+	   * zoom level to be within that range.
+	   *
+	   * @param {geo.geoBounds} bounds Bounds to fit to the screen.
+	   * @param {number} [rotation] Rotation in radians.  If unspecified, use the
+	   *    current map rotation.
+	   * @returns {number} The necessary zoom level.
 	   * @private
 	   */
 	  function calculate_zoom(bounds, rotation) {
@@ -50977,12 +50339,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Return the nearest valid zoom level to the requested zoom.
-	   * @private
-	   * @param {number} zoom a zoom level to adjust to current settings
-	   * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
+	   * @param {number} zoom A zoom level to adjust to current settings
+	   * @param {boolean} ignoreDiscreteZoom If `true`, ignore the `discreteZoom`
 	   *    option when determining the new view.
-	   * @returns {number} the zoom level clamped to the allowed zoom range and
+	   * @returns {number} The zoom level clamped to the allowed zoom range and
 	   *    with other settings applied.
+	   * @private
 	   */
 	  function fix_zoom(zoom, ignoreDiscreteZoom) {
 	    zoom = Math.round(zoom * 1e6) / 1e6;
@@ -51004,6 +50366,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Return a valid rotation angle.
+	   *
+	   * @param {number} rotation Proposed rotation.
+	   * @param {boolean} ignoreRotationFunc If truthy and rotations are allowed,
+	   *    allow any rotation.  Otherwise, the rotation is passed through the
+	   *    `allowRotation` function.
+	   * @param {boolean} noRangeLimit If falsy, ensure that the rotation is in the
+	   *    range [0, 2*PI).  If it is very close to zero, it is snapped to zero.
+	   *    If true, the rotation can have any value.
+	   * @returns {number} the validated rotation
 	   * @private
 	   */
 	  function fix_rotation(rotation, ignoreRotationFunc, noRangeLimit) {
@@ -51026,21 +50397,29 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Return the nearest valid bounds maintaining the width and height.  Does
-	   * nothing if m_clampBounds* is false.  If a delta is specified, will only
-	   * clamp if the out-of-bounds condition would be worse.  If ignoreClampBounds
-	   * is true, clamping is applied only to prevent more than half the image from
-	   * being off screen.
-	   * @private
-	   * @param {object} bounds: the new bounds to apply in map gcs coordinates.
-	   * @param {number} rotation: the angle of rotation in radians.  May be falsy
+	   * nothing if `clampBoundsX` and `clampBoundsY` are false.  If a delta is
+	   * specified, will only clamp if the out-of-bounds condition would be worse.
+	   * If `ignoreClampBounds` is true, clamping is applied only to prevent more
+	   * than half the image from being off screen.
+	   *
+	   * @param {geo.geoBounds} bounds The new bounds to apply in map gcs
+	   *    coordinates.
+	   * @param {number} [rotation] The angle of rotation in radians.  May be falsy
 	   *    to have no rotation.
-	   * @param {object} delta: if present, the shift in position in screen
+	   * @param {object} [delta] If present, the shift in position in screen
 	   *    coordinates.  Bounds will only be adjusted if the bounds would be
 	   *    more out of position after the shift.
-	   * @param {boolean} ignoreClampBounds: if true and clampBoundX is set, allow
-	   *    the bounds to be less clamped.  Specifically, the map's maxBounds can
-	   *    be shifted so that they lie no further than the center of the bounds
-	   *    (rather than being forced to be at the edge).
+	   * @param {number} delta.x
+	   * @param {number} delta.y
+	   * @param {number} delta.unit Units per pixel at the current zoom level.
+	   * @param {boolean} [ignoreClampBounds] If `true` and `clampBoundsX` or
+	   *    `clampBoundsY` are set, allow the bounds to be less clamped.
+	   *    Specifically, the map's `maxBounds` can be shifted so that they lie no
+	   *    further than the center of the bounds (rather than being forced to be
+	   *    at the edge).
+	   * @returns {geo.geoBounds} The adjusted bounds.  This may be the same object
+	   *    passed in `bounds`.
+	   * @private
 	   */
 	  function fix_bounds(bounds, rotation, delta, ignoreClampBounds) {
 	    if (!m_clampBoundsX && !m_clampBoundsY) {
@@ -51149,8 +50528,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  /**
-	   * Call the camera bounds method with the given bounds, but
-	   * correct for the viewport aspect ratio.
+	   * Call the camera bounds method with the given bounds, but correct for the
+	   * viewport aspect ratio.
+	   *
+	   * @param {geo.geoBounds} bounds The bounds for the camera.  If a rotation
+	   *    is specified, the bounds need to also contain the map gcs width and
+	   *    height.
+	   * @param {number} [rotation] The map rotation in radians.
 	   * @private
 	   */
 	  function camera_bounds(bounds, rotation) {
@@ -51171,13 +50555,59 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
-	  //
-	  // All the methods are now defined.  From here, we are initializing all
-	  // internal variables and event handlers.
-	  //
-	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Resize the map based on the size of the associated DOM node.
+	   * @private
+	   */
+	  function resizeSelf() {
+	    m_this.size({width: m_node.width(), height: m_node.height()});
+	  }
 
+	  /*
+	   * All the methods are now defined.  From here, we are initializing all
+	   * internal variables and event handlers.
+	   */
+
+	  this._init(arg);
+
+	  // set up drag/drop handling
+	  this.node().on('dragover.geo', function (e) {
+	    var evt = e.originalEvent;
+
+	    if (m_this.fileReader()) {
+	      evt.stopPropagation();
+	      evt.preventDefault();
+	      evt.dataTransfer.dropEffect = 'copy';
+	    }
+	  })
+	  .on('drop.geo', function (e) {
+	    var evt = e.originalEvent, reader = m_this.fileReader(),
+	        i, file;
+
+	    function done() {
+	      m_this.draw();
+	    }
+
+	    if (reader) {
+	      evt.stopPropagation();
+	      evt.preventDefault();
+
+	      for (i = 0; i < evt.dataTransfer.files.length; i += 1) {
+	        file = evt.dataTransfer.files[i];
+	        if (reader.canRead(file)) {
+	          reader.read(file, done); // to do: trigger event on done
+	        }
+	      }
+	    }
+	  });
+
+	  /*
+	   * The map coordinates for the default world map, where c = half
+	   * circumference at equator in meters, o = origin:
+	   *   (-c, c) + o                   (c, c) + o
+	   *            (center.x, center.y) + o            <-- center of viewport
+	   *   (-c, -c) + o                  (c, -c) + o
+	   */
 	  // Set the world origin
 	  m_origin = {x: 0, y: 0};
 
@@ -51192,12 +50622,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.interactor(arg.interactor || mapInteractor({discreteZoom: m_discreteZoom}));
 	  }
 
-	  function resizeSelf() {
-	    m_this.resize(0, 0, m_node.width(), m_node.height());
-	  }
-
-	  if (arg.autoResize) {
-	    $(window).resize(resizeSelf);
+	  if (m_autoResize) {
+	    $(window).on('resize', resizeSelf);
 	  }
 
 	  // attach attribution updates to layer events
@@ -51210,19 +50636,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	/**
-	 * General object specification for map types.  Any additional
-	 * values in the object are passed to the map constructor.
-	 * @typedef geo.map.spec
-	 * @type {object}
-	 * @property {object[]} [data=[]] The default data array to
-	 * apply to each feature if none exists
-	 * @property {geo.layer.spec[]} [layers=[]] Layers to create
-	 */
-
-	/**
 	 * Create a map from an object.  Any errors in the creation
-	 * of the map will result in returning null.
-	 * @param {geo.map.spec} spec The object specification
+	 * of the map will result in returning `null`.
+	 *
+	 * @param {geo.map.spec} spec The object specification.
 	 * @returns {geo.map|null}
 	 */
 	map.create = function (spec) {
@@ -51261,7 +50678,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var registerLayer = __webpack_require__(201).registerLayer;
 	var layer = __webpack_require__(210);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class uiLayer
 	 *
@@ -51269,7 +50685,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends {geo.layer}
 	 * @returns {geo.gui.uiLayer}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var uiLayer = function (arg) {
 	  'use strict';
 
@@ -51287,13 +50702,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var m_this = this,
 	      s_exit = this._exit;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Create a new ui control
 	   *
 	   * @returns {geo.gui.Widget} Will return a new control widget
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.createWidget = function (widgetName, arg) {
 	    var newWidget = createWidget(widgetName, m_this, arg);
 
@@ -51307,11 +50720,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return newWidget;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Delete a ui control
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.deleteWidget = function (widget) {
 	    widget._exit();
 	    m_this.removeChild(widget);
@@ -51319,11 +50730,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Free memory and destroy the layer.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.children().forEach(function (child) {
 	      m_this.deleteWidget(child);
@@ -51351,7 +50760,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var registry = __webpack_require__(201);
 	  var quadFeature = __webpack_require__(222);
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Create a new instance of osmLayer
 	   *
@@ -51362,7 +50770,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *        imageFormat (such as png or jpeg), and displayLast
 	   *        (to decide whether or not render tiles from last zoom level).
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  var osmLayer = function (arg) {
 
 	    var imageTile = __webpack_require__(232);
@@ -51400,8 +50807,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        queue: this._queue,
 	        overlap: this._options.tileOverlap,
 	        scale: this._options.tileScale,
-	        url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
-	                               this._options.subdomains)
+	        url: this._options.url.call(
+	            this, urlParams.x, urlParams.y, urlParams.level || 0,
+	            this._options.subdomains)
 	      });
 	    }.bind(this);
 	  };
@@ -51456,32 +50864,65 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Pick a subdomain from a list of subdomains based on a the tile location.
 	   *
-	   * @param {number} x: the x tile coordinate.
-	   * @param {number} y: the y tile coordinate.
-	   * @param {list} subdomains: the list of known subdomains.
+	   * @param {number} x The x tile coordinate.
+	   * @param {number} y The y tile coordinate.
+	   * @param {number} z The tile layer.
+	   * @param {string[]} subdomains The list of known subdomains.
+	   * @returns {string} A subdomain based on the location.
 	   */
-	  function m_getTileSubdomain(x, y, subdomains) {
-	    return subdomains[modulo(x + y, subdomains.length)];
+	  function m_getTileSubdomain(x, y, z, subdomains) {
+	    return subdomains[modulo(x + y + z, subdomains.length)];
 	  }
 
 	  /**
 	   * Returns an OSM tile server formatting function from a standard format
-	   * string. Replaces {s}, {z}, {x}, and {y}.
+	   * string. Replaces `{s}`, `{z}`, `{x}`, and `{y}`.  These may be any case
+	   * and may be prefixed with `$` (e.g., `${X}` is the same as `{x}`).  The
+	   * subdomain can be specifed by a string of characters, listed as a range,
+	   * or as a comma-separated list (e.g., `{s:abc}`, `{a-c}`, `{a,b,c}` are
+	   * all equivalent.  The comma-separated list can have subdimains that are of
+	   * any length; the string and range both use one-character subdomains.
 	   *
 	   * @param {string} base The tile format string
-	   * @returns: a conversion function.
+	   * @returns {function} A conversion function.
 	   * @private.
 	   */
 	  function m_tileUrlFromTemplate(base) {
+	    var xPattern = new RegExp(/\$?\{[xX]\}/),
+	        yPattern = new RegExp(/\$?\{[yY]\}/),
+	        zPattern = new RegExp(/\$?\{[zZ]\}/),
+	        sPattern = new RegExp(/\$?\{(s|S|[sS]:[^{}]+|[^-{}]-[^-{}]|([^,{}]+,)+[^,{}]+)\}/);
+	    var url = base
+	        .replace(sPattern, '{s}')
+	        .replace(xPattern, '{x}')
+	        .replace(yPattern, '{y}')
+	        .replace(zPattern, '{z}');
+	    var urlSubdomains;
+	    var sMatch = base.match(sPattern);
+	    if (sMatch) {
+	      if (sMatch[2]) {
+	        urlSubdomains = sMatch[1].split(',');
+	      } else if (sMatch[1][1] === ':') {
+	        urlSubdomains = sMatch[1].substr(2).split('');
+	      } else if (sMatch[1][1] === '-') {
+	        urlSubdomains = [];
+	        var start = sMatch[1].charCodeAt(0),
+	            end = sMatch[1].charCodeAt(2);
+	        for (var i = Math.min(start, end); i <= Math.max(start, end); i += 1) {
+	          urlSubdomains.push(String.fromCharCode(i));
+	        }
+	      }
+	    }
+
 	    return function (x, y, z, subdomains) {
-	      return base.replace('{s}', m_getTileSubdomain(x, y, subdomains))
-	        .replace('{z}', z)
+	      return url
+	        .replace('{s}', m_getTileSubdomain(x, y, z, urlSubdomains || subdomains))
 	        .replace('{x}', x)
-	        .replace('{y}', y);
+	        .replace('{y}', y)
+	        .replace('{z}', z);
 	    };
 	  }
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * This method defines a tileLayer, which is an abstract class defining a
 	   * layer divided into tiles of arbitrary data.  Notably, this class provides
@@ -51577,7 +51018,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *   local coordinates.
 	   * @returns {geo.tileLayer}
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  var tileLayer = function (options) {
 	    'use strict';
 	    if (!(this instanceof tileLayer)) {
@@ -51887,8 +51327,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        index: index,
 	        size: {x: this._options.tileWidth, y: this._options.tileHeight},
 	        queue: this._queue,
-	        url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
-	                               this._options.subdomains)
+	        url: this._options.url.call(
+	            this, urlParams.x, urlParams.y, urlParams.level || 0,
+	            this._options.subdomains)
 	      });
 	    };
 
@@ -52204,7 +51645,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._drawTile = function (tile) {
 	      // Make sure this method is not called when there is
 	      // a renderer attached.
-	      //
 	      if (this.renderer() !== null) {
 	        throw new Error('This draw method is not valid on renderer managed layers.');
 	      }
@@ -52875,7 +52315,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return m_tileOffsetValues[level];
 	    };
 
-	    ////////////////////////////////////////////////////////////////////////////
 	    /**
 	     * Get/Set visibility of the layer
 	     *
@@ -52884,7 +52323,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @return {boolean|object} either the visibility (if getting) or the layer
 	     *    (if setting).
 	     */
-	    ////////////////////////////////////////////////////////////////////////////
 	    this.visible = function (val) {
 	      if (val === undefined) {
 	        return s_visible();
@@ -52971,7 +52409,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = (function () {
 	  'use strict';
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * This class implements a simple cache for tile objects.  Each tile is
 	   * stored in cache object keyed by a configurable hashing function.  Another
@@ -52983,7 +52420,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {object?} [options] A configuratoin object for the cache
 	   * @param {number} [options.size=64] The maximum number of tiles to store
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  var tileCache = function (options) {
 	    if (!(this instanceof tileCache)) {
 	      return new tileCache(options);
@@ -53126,7 +52562,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var inherit = __webpack_require__(8);
 	var feature = __webpack_require__(207);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class pathFeature
 	 *
@@ -53134,7 +52569,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.feature
 	 * @returns {geo.pathFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var pathFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof pathFeature)) {
@@ -53143,22 +52577,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  feature.call(this, arg);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      m_position = arg.position === undefined ? [] : arg.position,
 	      s_init = this._init;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set positions
 	   *
 	   * @returns {geo.pathFeature}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.position = function (val) {
 	    if (val === undefined) {
 	      return m_position;
@@ -53170,11 +52600,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    s_init.call(m_this, arg);
 
@@ -53212,7 +52640,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var geo_event = __webpack_require__(9);
 	var util = __webpack_require__(83);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class imagemapFeature
 	 *
@@ -53240,9 +52667,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *   transformations for those two triangles.
 	 * @returns {geo.pixelmapFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 
-	//////////////////////////////////////////////////////////////////////////////
 	var pixelmapFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof pixelmapFeature)) {
@@ -53251,11 +52676,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  feature.call(this, arg);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      m_quadFeature,
 	      m_srcImage,
@@ -53264,13 +52687,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      s_init = this._init,
 	      s_exit = this._exit;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set position accessor
 	   *
 	   * @returns {geo.pixelmap}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.position = function (val) {
 	    if (val === undefined) {
 	      return m_this.style('position');
@@ -53282,13 +52703,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set url accessor
 	   *
 	   * @returns {geo.pixelmap}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.url = function (val) {
 	    if (val === undefined) {
 	      return m_this.style('url');
@@ -53301,14 +52720,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the maximum index value from the pixelmap.  This is a value present in
 	   * the pixelmap.
 	   *
 	   * @returns {geo.pixelmap}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.maxIndex = function () {
 	    if (m_info) {
 	      /* This isn't just m_info.mappedColors.length - 1, since there
@@ -53325,13 +52742,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set color accessor
 	   *
 	   * @returns {geo.pixelmap}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.color = function (val) {
 	    if (val === undefined) {
 	      return m_this.style('color');
@@ -53369,11 +52784,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return {index: [], found: []};
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    /* Set the build time at the start of the call.  A build can result in
 	     * drawing a quad, which can trigger a full layer update, which in tern
@@ -53564,11 +52977,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    s_update.call(m_this);
 	    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
@@ -53580,12 +52991,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
 	   * @memberof geo.pixelmapFeature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function (abc) {
 	    if (m_quadFeature && m_this.layer()) {
 	      m_this.layer().deleteFeature(m_quadFeature);
@@ -53595,11 +53004,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_exit();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    arg = arg || {};
 	    s_init.call(m_this, arg);
@@ -53662,12 +53069,227 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ }),
 /* 242 */
+/***/ (function(module, exports) {
+
+	/*
+	 * Type definitions for jsdoc.
+	 */
+
+	/**
+	 * General object specification for map types.  Any additional values in the
+	 * object are passed to the map constructor.
+	 *
+	 * @typedef geo.map.spec
+	 * @type {object}
+	 * @property {object[]} [data=[]] The default data array to apply to each
+	 *      feature if none exists.
+	 * @property {geo.layer.spec[]} [layers=[]] Layers to create.
+	 */
+
+	/**
+	 * General representation of rectangular bounds in world coordinates.
+	 *
+	 * @typedef geo.geoBounds
+	 * @type {object}
+	 * @property {number} left Horizontal coordinate of the top-left corner.
+	 * @property {number} top Vertical coordinate of the top-left corner.
+	 * @property {number} right Horizontal coordinate of the bottom-right corner.
+	 * @property {number} bottom Vertical coordinate of the bottom-right corner.
+	 */
+
+	/**
+	 * A location and zoom value.
+	 *
+	 * @typedef geo.zoomAndCenter
+	 * @type {object}
+	 * @property {geo.geoPosition} center The center coordinates.
+	 * @property {number} zoom The zoom level.
+	 */
+
+	/**
+	 * General representation of rectangular bounds in pixel coordinates.
+	 *
+	 * @typedef geo.screenBounds
+	 * @type {object}
+	 * @property {geo.screenPosition} upperLeft Upper left corner.
+	 * @property {geo.screenPosition} upperRight Upper right corner.
+	 * @property {geo.screenPosition} lowerLeft Lower left corner.
+	 * @property {geo.screenPosition} lowerRight Lower right corner.
+	 */
+
+	/**
+	 * General representation of a point on the screen.
+	 *
+	 * @typedef geo.screenPosition
+	 * @type {object}
+	 * @property {number} x Horizontal coordinate in pixels.
+	 * @property {number} y Vertical coordinate in pixels.
+	 */
+
+	/**
+	 * General represention of a point on the earth.  The coordinates are most
+	 * commonly in longitude and latitude, but the coordinate system is changed
+	 * by the interface gcs.
+	 *
+	 * @typedef geo.geoPosition
+	 * @type {object}
+	 * @property {number} x Horizontal coordinate, often degrees longitude.
+	 * @property {number} y Vertical coordinate, often degrees latitude.
+	 * @property {number} [z=0] Altitude coordinate.
+	 */
+
+	/**
+	 * Represention of a point on the map.  The coordinates are in the map's
+	 * reference system, possibly with an affine transformation.
+	 *
+	 * @typedef geo.worldPosition
+	 * @type {object}
+	 * @property {number} x Horizontal coordinate in map coordinates.
+	 * @property {number} y Vertical coordinate in map coordinates.
+	 * @property {number} [z=0] Altitude coordinate, often zero.
+	 */
+
+	/**
+	 * Represention of a size in pixels.
+	 *
+	 * @typedef geo.screenSize
+	 * @type {object}
+	 * @property {number} width Width in pixels.
+	 * @property {number} height Height in pixels.
+	 */
+
+	/**
+	 * The status of all mouse buttons.
+	 *
+	 * @typedef geo.mouseButtons
+	 * @type {object}
+	 * @property {boolean} left True if the left mouse button is down.
+	 * @property {boolean} right True if the right mouse button is down.
+	 * @property {boolean} middle True if the middle mouse button is down.
+	 */
+
+	/**
+	 * The status of all modifier keys.  These are usually copied from the
+	 * standard DOM events.
+	 *
+	 * @typedef geo.modifierKeys
+	 * @type {object}
+	 * @property {boolean} alt True if the alt or option key is down.
+	 * @property {boolean} ctrl True if the control key is down.
+	 * @property {boolean} shift True if the shift key is down.
+	 * @property {boolean} meta True if the meta, windows, or command key
+	 *      is down.
+	 */
+
+	/**
+	 * The state of the mouse.
+	 *
+	 * @typedef geo.mouseState
+	 * @type {object}
+	 * @property {geo.screenPosition} page Mouse location in pixel space.
+	 * @property {geo.geoPosition} map Mouse location in gcs space.
+	 * @property {geo.mouseButtons} buttons The current state of the mouse buttons.
+	 * @property {geo.modifierKeys} modifiers The current state of all modifier
+	 *      keys.
+	 * @property {Date} time The timestamp the event took place.
+	 * @property {number} deltaTime The time in milliseconds since the last mouse
+	 *      event.
+	 * @property {geo.screenPosition} velocity The velocity of the mouse pointer
+	 *      in pixels per millisecond.
+	 */
+
+	/**
+	 * The current brush selection (this is when a rectangular area is selected by
+	 * dragging).
+	 *
+	 * @typedef geo.brushSelection
+	 * @type {object}
+	 * @property {geo.screenBounds} display The selection bounds in pixel space.
+	 * @property {object} gcs The selection bounds in the map's gcs.
+	 * @property {geo.geoPosition} gcs.upperLeft Upper left corner.
+	 * @property {geo.geoPosition} gcs.upperRight Upper right corner.
+	 * @property {geo.geoPosition} gcs.lowerLeft Lower left corner.
+	 * @property {geo.geoPosition} gcs.lowerRight Lower right corner.
+	 * @property {geo.mouseState} mouse The current mouse state.
+	 * @property {geo.mouseState} origin The mouse state at the start of the
+	 *      brush action.
+	 */
+
+	/**
+	 * The conditions that are necessary to make an action occur.
+	 *
+	 * @typedef geo.actionRecord
+	 * @type {object}
+	 * @property {string} action The name of the action, from (@link geo.action}.
+	 * @property {string} [owner] A name of an owning process that can be used to
+	 *      locate or filter actions.
+	 * @property {string} [name] A human-readable name that can be used to locate
+	 *      or filter actions.
+	 * @property {string|object} input The name of an input that is used for the
+	 *      action, or an object with input names as keys and boolean values of
+	 *      inputs that are required to occur or required to not occur to trigger
+	 *      the action.  Input names include `left`, `right`, `middle` (for mouse
+	 *      buttons), `wheel` (the mouse wheel), `pan` (touch pan), `rotate` (touch
+	 *      rotate).
+	 * @property {string|object} [modifiers] The name of a modifier key or an
+	 *      object with modifiers as the keys and boolean values.  The listed
+	 *      modifiers must be set or unset depending on the boolean value.
+	 *      Modifiers include `shift`, `ctrl`, `alt`, and `meta`.
+	 * @property {boolean|string} [selectionRectangle] If truthy, a selection
+	 *      rectangle is shown during the action.  If a string, the name of an
+	 *      event that is triggered when the selection is complete.
+	 */
+
+	/**
+	 * The current action state a map interactor.
+	 *
+	 * @typedef geo.actionState
+	 * @type {object}
+	 * @property {string} action Name of the action that is being handled.
+	 * @property {geo.actionRecord} actionRecord The action record which triggered
+	 *      the current action.
+	 * @property {string} [origAction] The name of an action that triggered this
+	 *      action.
+	 * @property {geo.mouseState} origin The mouse state at the start of the
+	 *      action.
+	 * @property {number} initialZoom The zoom level at the start of the action.
+	 * @property {number} initialRotation The map's rotation in radians at the
+	 *      start of the action.
+	 * @property {number} initialEventRotation The rotation reported by the
+	 *      event that triggered this action.  For example, this could be the
+	 *      angle between two multi-touch points.
+	 * @property {object} delta The total movement of during the action in gcs
+	 *      coordinates.
+	 * @property {number} delta.x The horizontal movement during the action.
+	 * @property {number} delta.y The vertical movement during the action.
+	 * @property {boolean} boundDocumentHandlers `true` if the mouse is down and
+	 *      being tracked.
+	 * @property {Date} [start] The time when the action started.
+	 * @property {function} [handler] A function to call on every animation from
+	 *      while the action is occurring.
+	 * @property {geo.mouseState} [momentum] The mouse location when a momentum
+	 *      action starts.
+	 * @property {boolean} [zoomrotateAllowRotation] Truthy if enough movement has
+	 *      occurred that rotations are allowed.
+	 * @property {boolean} [zoomrotateAllowZoom] Truthy if enough movement has
+	 *      occurred that zooms are allowed.
+	 * @property {boolean} [zoomrotateAllowPan] Truthy if enough movement has
+	 *      occurred that pans are allowed.
+	 * @property {number} [lastRotationDelta] When rotating, the last amount that
+	 *      was rotated from the start of the action.  This is used to debounce
+	 *      jitter on touch events.
+	 * @property {geo.geoPosition} [initialEventGeo] The position of the mouse
+	 *      when significant movement first occurred.
+	 */
+
+
+/***/ }),
+/* 243 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var feature = __webpack_require__(207);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class vectorFeature
 	 *
@@ -53675,7 +53297,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.feature
 	 * @returns {geo.vectorFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var vectorFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof vectorFeature)) {
@@ -53687,22 +53308,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  feature.call(this, arg);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_init = this._init,
 	      s_style = this.style;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get or set the accessor for the origin of the vector.  This is the point
 	   * that the vector base resides at.  Defaults to (0, 0, 0).
 	   * @param {geo.accessor|geo.geoPosition} [accessor] The origin accessor
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.origin = function (val) {
 	    if (val === undefined) {
 	      return s_style('origin');
@@ -53714,12 +53331,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get or set the accessor for the displacement (coordinates) of the vector.
 	   * @param {geo.accessor|geo.geoPosition} [accessor] The accessor
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.delta = function (val) {
 	    if (val === undefined) {
 	      return s_style('delta');
@@ -53731,12 +53346,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    s_init.call(m_this, arg);
 
@@ -53769,54 +53382,54 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 243 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	module.exports = ("0.12.1");
-
-
-/***/ }),
 /* 244 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	module.exports = ("31bf6e5d4db730197fdb407e8d8c23b36b69b1fb");
+	module.exports = ("0.12.2");
 
 
 /***/ }),
 /* 245 */
 /***/ (function(module, exports, __webpack_require__) {
 
+	module.exports = ("bd5c88ae768f630b1de1f3cb8f1b35c28ad286c4");
+
+
+/***/ }),
+/* 246 */
+/***/ (function(module, exports, __webpack_require__) {
+
 	var geo_event = __webpack_require__(9);
 	geo_event.d3 = {
-	  rescale: __webpack_require__(246)
+	  rescale: __webpack_require__(247)
 	};
 
 	/**
 	 * @namespace geo.d3
 	 */
 	module.exports = {
-	  graphFeature: __webpack_require__(247),
-	  lineFeature: __webpack_require__(248),
-	  object: __webpack_require__(249),
-	  pathFeature: __webpack_require__(251),
-	  pointFeature: __webpack_require__(252),
-	  quadFeature: __webpack_require__(253),
-	  renderer: __webpack_require__(254),
-	  tileLayer: __webpack_require__(255),
-	  uniqueID: __webpack_require__(250),
-	  vectorFeature: __webpack_require__(256)
+	  graphFeature: __webpack_require__(248),
+	  lineFeature: __webpack_require__(249),
+	  object: __webpack_require__(250),
+	  pathFeature: __webpack_require__(252),
+	  pointFeature: __webpack_require__(253),
+	  quadFeature: __webpack_require__(254),
+	  renderer: __webpack_require__(255),
+	  tileLayer: __webpack_require__(256),
+	  uniqueID: __webpack_require__(251),
+	  vectorFeature: __webpack_require__(257)
 	};
 
 
 /***/ }),
-/* 246 */
+/* 247 */
 /***/ (function(module, exports) {
 
 	module.exports = 'geo_d3_rescale';
 
 
 /***/ }),
-/* 247 */
+/* 248 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -53837,11 +53450,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  graphFeature.call(this, arg);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	  *  Returns a d3 selection for the graph elements
 	  */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.select = function () {
 	    var renderer = m_this.renderer(),
 	        selection = {},
@@ -53865,14 +53476,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 248 */
+/* 249 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
 	var lineFeature = __webpack_require__(206);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class lineFeature
 	 *
@@ -53881,7 +53491,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.d3.object
 	 * @returns {geo.d3.lineFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var d3_lineFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof d3_lineFeature)) {
@@ -53889,7 +53498,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var d3 = __webpack_require__(225);
-	  var object = __webpack_require__(249);
+	  var object = __webpack_require__(250);
 	  var timestamp = __webpack_require__(209);
 	  var util = __webpack_require__(83);
 
@@ -53897,34 +53506,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  lineFeature.call(this, arg);
 	  object.call(this);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_init = this._init,
 	      m_buildTime = timestamp(),
 	      m_maxIdx = 0,
 	      s_update = this._update;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    s_init.call(m_this, arg);
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    var data = m_this.data() || [],
 	        s_style = m_this.style(),
@@ -53986,13 +53589,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    s_update.call(m_this);
 
@@ -54020,26 +53621,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 249 */
+/* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var sceneObject = __webpack_require__(208);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * D3 specific subclass of object which adds an id property for d3 selections
 	 * on groups of objects by class id.
 	 * @class geo.d3.object
 	 * @extends geo.sceneObject
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 
 	var d3_object = function (arg) {
 	  'use strict';
 
 	  var object = __webpack_require__(203);
-	  var uniqueID = __webpack_require__(250);
+	  var uniqueID = __webpack_require__(251);
 
 	  // this is used to extend other geojs classes, so only generate
 	  // a new object when that is not the case... like if this === window
@@ -54057,31 +53656,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_id;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	  *  Returns a d3 selection for the feature elements
 	  */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.select = function () {
 	    return m_this.renderer().select(m_this._d3id());
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	  *  Redraw the object.
 	  */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.draw = function () {
 	    m_this._update();
 	    s_draw();
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	  *  Removes the element from the svg and the renderer
 	  */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.renderer()._removeFeature(m_this._d3id());
 	    s_exit();
@@ -54095,19 +53688,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 250 */
+/* 251 */
 /***/ (function(module, exports) {
 
 	var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
 	    strLength = 8;
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Get a random string to use as a div ID
 	 * @function geo.d3.uniqueID
 	 * @returns {string}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var uniqueID = function () {
 	  var strArray = [],
 	      i;
@@ -54122,14 +53713,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 251 */
+/* 252 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
 	var pathFeature = __webpack_require__(240);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class pathFeature
 	 *
@@ -54138,7 +53728,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.d3.object
 	 * @returns {geo.d3.pathFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var d3_pathFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof d3_pathFeature)) {
@@ -54147,18 +53736,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var d3 = __webpack_require__(225);
-	  var object = __webpack_require__(249);
+	  var object = __webpack_require__(250);
 	  var timestamp = __webpack_require__(209);
 
 	  arg = arg || {};
 	  pathFeature.call(this, arg);
 	  object.call(this);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_init = this._init,
 	      m_buildTime = timestamp(),
@@ -54167,23 +53754,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  m_style.style = {};
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    s_init.call(m_this, arg);
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    var data = m_this.data() || [],
 	        s_style = m_this.style(),
@@ -54230,13 +53813,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    s_update.call(m_this);
 
@@ -54259,14 +53840,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 252 */
+/* 253 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
 	var pointFeature = __webpack_require__(212);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 *
 	 * Create a new instance of pointFeature
@@ -54276,48 +53856,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.d3.object
 	 * @returns {geo.d3.pointFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var d3_pointFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof d3_pointFeature)) {
 	    return new d3_pointFeature(arg);
 	  }
 
-	  var d3_object = __webpack_require__(249);
+	  var d3_object = __webpack_require__(250);
 	  var timestamp = __webpack_require__(209);
 
 	  arg = arg || {};
 	  pointFeature.call(this, arg);
 	  d3_object.call(this);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_init = this._init,
 	      s_update = this._update,
 	      m_buildTime = timestamp(),
 	      m_style = {};
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    s_init.call(m_this, arg);
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    var data = m_this.data(),
 	        s_style = m_this.style.get(),
@@ -54356,13 +53929,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    s_update.call(m_this);
 
@@ -54386,14 +53957,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 253 */
+/* 254 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
 	var quadFeature = __webpack_require__(222);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class quadFeature
 	 *
@@ -54402,7 +53972,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.quadFeature
 	 * @returns {geo.d3.quadFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var d3_quadFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof d3_quadFeature)) {
@@ -54411,7 +53980,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var d3 = __webpack_require__(225);
-	  var object = __webpack_require__(249);
+	  var object = __webpack_require__(250);
 
 	  quadFeature.call(this, arg);
 	  object.call(this);
@@ -54422,11 +53991,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      s_update = this._update,
 	      m_quads;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build this feature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    if (!this.position()) {
 	      return;
@@ -54581,11 +54148,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.buildTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    s_update.call(m_this);
 	    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
@@ -54595,20 +54160,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	    s_init.call(m_this, arg);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    s_exit.call(m_this);
 	  };
@@ -54633,14 +54194,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 254 */
+/* 255 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerRenderer = __webpack_require__(201).registerRenderer;
 	var renderer = __webpack_require__(202);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class d3Renderer
 	 *
@@ -54648,15 +54208,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.renderer
 	 * @returns {geo.d3.d3Renderer}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var d3Renderer = function (arg) {
 	  'use strict';
 
 	  var d3 = __webpack_require__(225);
-	  var object = __webpack_require__(249);
+	  var object = __webpack_require__(250);
 	  var util = __webpack_require__(83);
 	  var geo_event = __webpack_require__(9);
-	  var d3Rescale = __webpack_require__(246);
+	  var d3Rescale = __webpack_require__(247);
 
 	  if (!(this instanceof d3Renderer)) {
 	    return new d3Renderer(arg);
@@ -54683,12 +54242,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_svg = null,
 	      m_defs = null;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Set attributes to a d3 selection.
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  function setAttrs(select, attrs) {
 	    var key;
 	    for (key in attrs) {
@@ -54698,12 +54255,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Meta functions for converting from geojs styles to d3.
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._convertColor = function (f, g) {
 	    f = util.ensureFunction(f);
 	    g = g || function () { return true; };
@@ -54728,12 +54283,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Set styles to a d3 selection. Ignores unkown style keys.
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  function setStyles(select, styles) {
 	    var key, k, f;
 	    function fillFunc() {
@@ -54793,14 +54346,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the svg group element associated with this renderer instance, or of a
 	   * group within the render instance.
 	   *
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  function getGroup(parentId) {
 	    if (parentId) {
 	      return m_svg.select('.group-' + parentId);
@@ -54808,12 +54359,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_svg.select('.group-' + m_this._d3id());
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Set the initial lat-lon coordinates of the map view.
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  function initCorners() {
 	    var layer = m_this.layer(),
 	        map = layer.map(),
@@ -54827,19 +54376,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    m_diagonal = Math.pow(width * width + height * height, 0.5);
 	    m_corners = {
-	      upperLeft: map.displayToGcs({'x': 0, 'y': 0}, null),
-	      lowerRight: map.displayToGcs({'x': width, 'y': height}, null),
-	      center: map.displayToGcs({'x': width / 2, 'y': height / 2}, null)
+	      upperLeft: map.displayToGcs({x: 0, y: 0}, null),
+	      lowerRight: map.displayToGcs({x: width, y: height}, null),
+	      center: map.displayToGcs({x: width / 2, y: height / 2}, null)
 	    };
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Set the translation, scale, and zoom for the current view.
 	   * @note rotation not yet supported
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._setTransform = function () {
 	    if (!m_corners) {
 	      initCorners();
@@ -54889,13 +54436,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_transform.rotation = rotation;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Convert from screen pixel coordinates to the local coordinate system
 	   * in the SVG group element taking into account the transform.
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.baseToLocal = function (pt) {
 	    pt = {
 	      x: (pt.x - m_transform.dx) / m_scale,
@@ -54913,13 +54458,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return pt;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Convert from the local coordinate system in the SVG group element
 	   * to screen pixel coordinates.
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.localToBase = function (pt) {
 	    if (m_transform.rotation) {
 	      var sinr = Math.sin(m_transform.rotation),
@@ -54937,11 +54480,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return pt;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    if (!m_this.canvas()) {
 	      var canvas;
@@ -55019,16 +54560,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this._setTransform();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get API used by the renderer
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.api = function () {
 	    return 'd3';
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return the current scaling factor to build features that shouldn't
 	   * change size during zooms.  For example:
@@ -55039,16 +54577,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * This will create a circle element with radius r0 independent of the
 	   * current zoom level.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.scaleFactor = function () {
 	    return m_scale;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle resize event
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._resize = function (x, y, w, h) {
 	    if (!m_corners) {
 	      initCorners();
@@ -55059,19 +54594,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.layer().geoTrigger(d3Rescale, { scale: m_scale }, true);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update noop for geo.d3.object api.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Exit
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_features = {};
 	    m_this.canvas().remove();
@@ -55084,17 +54615,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_exit();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the definitions dom element for the layer
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._definitions = function () {
 	    return m_defs;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Create a new feature element from an object that describes the feature
 	   * attributes.  To be called from feature classes only.
@@ -55119,7 +54647,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *    parentId:   If set, the group ID of the parent element.
 	   *  }
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._drawFeatures = function (arg) {
 	    m_features[arg.id] = {
 	      data: arg.data,
@@ -55136,12 +54663,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this.__render(arg.id, arg.parentId);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	  *  Updates a feature by performing a d3 data join.  If no input id is
 	  *  provided then this method will update all features.
 	  */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.__render = function (id, parentId) {
 	    var key;
 	    if (id === undefined) {
@@ -55206,20 +54731,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	  *  Returns a d3 selection for the given feature id.
 	  */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.select = function (id, parentId) {
 	    return getGroup(parentId).selectAll('.' + id);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	  *  Removes a feature from the layer.
 	  */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._removeFeature = function (id) {
 	    m_removeIds[id] = true;
 	    m_this.layer().map().scheduleAnimationFrame(m_this._renderFrame);
@@ -55230,11 +54751,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	  *  Override draw method to do nothing.
 	  */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.draw = function () {
 	  };
 
@@ -55295,7 +54814,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 255 */
+/* 256 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(201).registerLayerAdjustment;
@@ -55390,14 +54909,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 256 */
+/* 257 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
-	var vectorFeature = __webpack_require__(242);
+	var vectorFeature = __webpack_require__(243);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of vectorFeature
 	 *
@@ -55406,14 +54924,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.d3.object
 	 * @returns {geo.d3.vectorFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var d3_vectorFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof d3_vectorFeature)) {
 	    return new d3_vectorFeature(arg);
 	  }
 
-	  var object = __webpack_require__(249);
+	  var object = __webpack_require__(250);
 	  var timestamp = __webpack_require__(209);
 	  var d3 = __webpack_require__(225);
 
@@ -55421,11 +54938,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  vectorFeature.call(this, arg);
 	  object.call(this);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_init = this._init,
 	      s_exit = this._exit,
@@ -55433,7 +54948,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_buildTime = timestamp(),
 	      m_style = {};
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Generate a unique ID for a marker definition
 	   * @private
@@ -55441,12 +54955,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {number} i The marker index
 	   * @param {string} position The marker's vector position (head or tail)
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  function markerID(d, i, position) {
 	    return m_this._d3id() + '_marker_' + i + '_' + position;
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Add marker styles for vector arrows.
 	   * @private
@@ -55456,7 +54968,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {function} originStyle The marker style for the vector head
 	   * @param {function} endStyle The marker style for the vector tail
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  function updateMarkers(data, stroke, opacity, originStyle, endStyle) {
 
 	    var markerConfigs = {
@@ -55549,23 +55060,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    sel.exit().remove();
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    s_init.call(m_this, arg);
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    var data = m_this.data(),
 	        s_style = m_this.style.get(),
@@ -55651,12 +55158,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    s_update.call(m_this);
 
@@ -55675,12 +55180,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Exit
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    s_exit.call(m_this);
 	    m_style = {};
@@ -55699,33 +55202,32 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 257 */
+/* 258 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.gl
 	 */
 	module.exports = {
-	  choroplethFeature: __webpack_require__(258),
-	  contourFeature: __webpack_require__(259),
-	  lineFeature: __webpack_require__(261),
-	  pointFeature: __webpack_require__(262),
-	  polygonFeature: __webpack_require__(263),
-	  quadFeature: __webpack_require__(265),
-	  tileLayer: __webpack_require__(266),
+	  choroplethFeature: __webpack_require__(259),
+	  contourFeature: __webpack_require__(260),
+	  lineFeature: __webpack_require__(262),
+	  pointFeature: __webpack_require__(263),
+	  polygonFeature: __webpack_require__(264),
+	  quadFeature: __webpack_require__(266),
+	  tileLayer: __webpack_require__(267),
 	  vglRenderer: __webpack_require__(200)
 	};
 
 
 /***/ }),
-/* 258 */
+/* 259 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
 	var choroplethFeature = __webpack_require__(224);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of choroplethFeature
 	 *
@@ -55733,7 +55235,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.choroplethFeature
 	 * @returns {geo.gl.choroplethFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var gl_choroplethFeature = function (arg) {
 	  'use strict';
 
@@ -55743,11 +55244,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  arg = arg || {};
 	  choroplethFeature.call(this, arg);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      m_gl_polygons = null,
 	      s_exit = this._exit,
@@ -55773,34 +55272,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    s_init.call(m_this, arg);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    m_this.buildTime().modified();
 	    return (m_gl_polygons = createGLChoropleth());
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    s_update.call(m_this);
 	    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
@@ -55811,11 +55304,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.updateTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy Polygon Sub-Features
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._wipePolygons = function () {
 	    if (m_gl_polygons) {
 	      m_gl_polygons.map(function (polygon) {
@@ -55825,11 +55316,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_gl_polygons = null;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this._wipePolygons();
 	    s_exit();
@@ -55848,14 +55337,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 259 */
+/* 260 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
 	var contourFeature = __webpack_require__(226);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of contourFeature
 	 *
@@ -55863,7 +55351,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.contourFeature
 	 * @returns {geo.gl.contourFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var gl_contourFeature = function (arg) {
 	  'use strict';
 
@@ -55876,15 +55363,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var vgl = __webpack_require__(86);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
-	  var object = __webpack_require__(260);
+	  var object = __webpack_require__(261);
 
 	  object.call(this);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_exit = this._exit,
 	      m_textureUnit = 7,
@@ -56017,11 +55502,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_mapper.boundsDirtyTimestamp().modified();
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    var blend = vgl.blend(),
 	        prog = vgl.shaderProgram(),
@@ -56087,13 +55570,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_mapper.setGeometryData(geom);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    if (m_actor) {
 	      m_this.renderer().contextRenderer().removeActor(m_actor);
@@ -56105,13 +55586,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.buildTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    s_update.call(m_this);
 
@@ -56125,11 +55604,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.updateTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.renderer().contextRenderer().removeActor(m_actor);
 	    s_exit();
@@ -56148,16 +55625,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 260 */
+/* 261 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * VGL specific subclass of object which rerenders when the object is drawn.
 	 * @class geo.gl.object
 	 * @extends geo.sceneObject
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 
 	var gl_object = function (arg) {
 	  'use strict';
@@ -56173,11 +55648,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var m_this = this,
 	      s_draw = this.draw;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	  *  Redraw the object.
 	  */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.draw = function () {
 	    m_this._update({mayDelay: true});
 	    m_this.renderer()._render();
@@ -56193,7 +55666,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 261 */
+/* 262 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -56231,7 +55704,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  debug: 1
 	};
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of lineFeature
 	 *
@@ -56239,7 +55711,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.lineFeature
 	 * @returns {geo.gl.lineFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var gl_lineFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof gl_lineFeature)) {
@@ -56251,15 +55722,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var vgl = __webpack_require__(86);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
-	  var object = __webpack_require__(260);
+	  var object = __webpack_require__(261);
 
 	  object.call(this);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_exit = this._exit,
 	      m_actor,
@@ -56734,35 +56203,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_mapper.boundsDirtyTimestamp().modified();
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return the arrangement of vertices used for each line segment.
 	   *
 	   * @returns {Number}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.featureVertices = function () {
 	    // return [[0, -1], [0, 1], [1, -1], [1, 1], [1, -1], [0, 1]];
 	    return [[0, 'corner', -1], [0, 'near', 1], [1, 'far', -1],
 	            [1, 'corner', 1], [1, 'near', -1], [0, 'far', 1]];
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return the number of vertices used for each line segment.
 	   *
 	   * @returns {Number}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.verticesPerFeature = function () {
 	    return m_this.featureVertices().length;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    var prog = vgl.shaderProgram(),
 	        vs = createVertexShader(),
@@ -56850,13 +56313,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_mapper.setGeometryData(geom);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return list of actors
 	   *
 	   * @returns {vgl.actor[]}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.actors = function () {
 	    if (!m_actor) {
 	      return [];
@@ -56864,13 +56325,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return [m_actor];
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    createGLLines();
 
@@ -56880,13 +56339,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.buildTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    s_update.call(m_this);
 
@@ -56903,11 +56360,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.updateTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.renderer().contextRenderer().removeActor(m_actor);
 	    m_actor = null;
@@ -56932,7 +56387,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 262 */
+/* 263 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -56940,7 +56395,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var registerFeature = __webpack_require__(201).registerFeature;
 	var pointFeature = __webpack_require__(212);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of pointFeature
 	 *
@@ -56948,7 +56402,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.pointFeature
 	 * @returns {geo.gl.pointFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var gl_pointFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof gl_pointFeature)) {
@@ -56960,15 +56413,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var vgl = __webpack_require__(86);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
-	  var object = __webpack_require__(260);
+	  var object = __webpack_require__(261);
 
 	  object.call(this);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_exit = this._exit,
 	      m_actor = null,
@@ -57290,13 +56741,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_mapper.boundsDirtyTimestamp().modified();
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return list of actors
 	   *
 	   * @returns {vgl.actor[]}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.actors = function () {
 	    if (!m_actor) {
 	      return [];
@@ -57304,13 +56753,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return [m_actor];
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return the number of vertices used for each point.
 	   *
 	   * @returns {Number}
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.verticesPerFeature = function () {
 	    var unit = pointPolygon(0, 0, 1, 1);
 	    return unit.length / 2;
@@ -57391,11 +56838,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	    var prog = vgl.shaderProgram(),
 	        vertexShader = createVertexShader(),
@@ -57492,13 +56937,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_mapper.setGeometryData(geom);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 
 	    if (m_actor) {
@@ -57512,13 +56955,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.buildTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   *
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 
 	    s_update.call(m_this);
@@ -57541,11 +56982,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.updateTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.renderer().contextRenderer().removeActor(m_actor);
 	    m_actor = null;
@@ -57565,14 +57004,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 263 */
+/* 264 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
 	var polygonFeature = __webpack_require__(217);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of polygonFeature
 	 *
@@ -57580,7 +57018,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.polygonFeature
 	 * @returns {geo.gl.polygonFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var gl_polygonFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof gl_polygonFeature)) {
@@ -57590,18 +57027,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  polygonFeature.call(this, arg);
 
 	  var vgl = __webpack_require__(86);
-	  var earcut = __webpack_require__(264);
+	  var earcut = __webpack_require__(265);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
-	  var object = __webpack_require__(260);
+	  var object = __webpack_require__(261);
 
 	  object.call(this);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_exit = this._exit,
 	      m_actor = vgl.actor(),
@@ -57833,12 +57268,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   * @memberof geo.gl.polygonFeature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    var prog = vgl.shaderProgram(),
 	        posAttr = vgl.vertexAttribute('pos'),
@@ -57882,14 +57315,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_init.call(m_this, arg);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   *
 	   * @memberof geo.gl.polygonFeature
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 
 	    createGLPolygons(m_this.dataTime().getMTime() < m_this.buildTime().getMTime() && m_geometry);
@@ -57900,14 +57331,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.buildTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   *
 	   * @memberof geo.gl.polygonFeature
 	   * @override
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function (opts) {
 	    if (opts && opts.mayDelay) {
 	      m_updateAnimFrameRef = m_this.layer().map().scheduleAnimationFrame(m_this._update);
@@ -57929,12 +57358,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.updateTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
 	   * @memberof geo.gl.polygonFeature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.renderer().contextRenderer().removeActor(m_actor);
 	    s_exit();
@@ -57952,7 +57379,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 264 */
+/* 265 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -58602,14 +58029,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 265 */
+/* 266 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
 	var quadFeature = __webpack_require__(222);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class quadFeature
 	 *
@@ -58618,7 +58044,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.quadFeature
 	 * @returns {geo.gl.quadFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var gl_quadFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof gl_quadFeature)) {
@@ -58628,7 +58053,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var vgl = __webpack_require__(86);
-	  var object = __webpack_require__(260);
+	  var object = __webpack_require__(261);
 
 	  object.call(this);
 
@@ -58748,11 +58173,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_glColorCompileTimestamp.modified();
 	  }
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build this feature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    var mapper, mat, prog, srctex, unicrop, geom;
 
@@ -58968,11 +58391,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    mapper.undoBindVertexData(renderState);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    s_update.call(m_this);
 	    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
@@ -58990,20 +58411,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.updateTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	    s_init.call(m_this, arg);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    if (m_actor_image) {
 	      m_this.renderer().contextRenderer().removeActor(m_actor_image);
@@ -59036,7 +58453,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 266 */
+/* 267 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(201).registerLayerAdjustment;
@@ -59140,31 +58557,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 267 */
+/* 268 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.canvas
 	 */
 	module.exports = {
-	  canvasRenderer: __webpack_require__(268),
-	  heatmapFeature: __webpack_require__(269),
-	  lineFeature: __webpack_require__(271),
-	  pixelmapFeature: __webpack_require__(272),
-	  quadFeature: __webpack_require__(273),
-	  tileLayer: __webpack_require__(274)
+	  canvasRenderer: __webpack_require__(269),
+	  heatmapFeature: __webpack_require__(270),
+	  lineFeature: __webpack_require__(272),
+	  pixelmapFeature: __webpack_require__(273),
+	  quadFeature: __webpack_require__(274),
+	  tileLayer: __webpack_require__(275)
 	};
 
 
 /***/ }),
-/* 268 */
+/* 269 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerRenderer = __webpack_require__(201).registerRenderer;
 	var renderer = __webpack_require__(202);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class canvasRenderer
 	 *
@@ -59173,7 +58589,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param canvas
 	 * @returns {geo.canvas.canvasRenderer}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var canvasRenderer = function (arg) {
 	  'use strict';
 
@@ -59194,20 +58609,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_clearCanvas = arg;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get API used by the renderer
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.api = function () {
 	    return 'canvas';
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	    if (m_this.initialized()) {
 	      return m_this;
@@ -59230,11 +58641,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Handle resize event
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._resize = function (x, y, w, h) {
 	    m_this.canvas().attr('width', w);
 	    m_this.canvas().attr('height', h);
@@ -59243,21 +58652,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Render
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._render = function () {
 	    m_this.layer().map().scheduleAnimationFrame(this._renderFrame);
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Render during an animation frame callback.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._renderFrame = function () {
 	    var layer = m_this.layer(),
 	        map = layer.map(),
@@ -59278,11 +58683,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Exit
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_this.canvas().remove();
 	    s_exit();
@@ -59335,7 +58738,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 269 */
+/* 270 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -59343,7 +58746,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var heatmapFeature = __webpack_require__(231);
 	var timestamp = __webpack_require__(209);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class heatmapFeature
 	 * Inspired from
@@ -59354,7 +58756,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.heatmapFeature
 	 * @returns {canvas_heatmapFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var canvas_heatmapFeature = function (arg) {
 	  'use strict';
 
@@ -59362,15 +58763,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new canvas_heatmapFeature(arg);
 	  }
 	  heatmapFeature.call(this, arg);
-	  var object = __webpack_require__(270);
+	  var object = __webpack_require__(271);
 
 	  object.call(this);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var geo_event = __webpack_require__(9);
 
 	  var m_this = this,
@@ -59384,12 +58783,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      s_update = this._update,
 	      m_renderTime = timestamp();
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Meta functions for converting from geojs styles to canvas.
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._convertColor = function (c) {
 	    var color;
 	    if (c.hasOwnProperty('r') &&
@@ -59402,12 +58799,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return color;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Compute gradient (color lookup table)
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._computeGradient = function () {
 	    var canvas, stop, context2d, gradient, colors;
 
@@ -59433,12 +58828,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Create circle for each data point
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._createCircle = function () {
 	    var circle, ctx, r, r2, blur, gaussian;
 	    r = m_this.style('radius');
@@ -59497,12 +58890,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Compute color for each pixel on the screen
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._colorize = function (pixels, gradient) {
 	    var grad = new Uint32Array(gradient.buffer),
 	        pixlen = pixels.length,
@@ -59523,7 +58914,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    pixels.set(m_typedClampedBuffer);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Render individual data points on the canvas.
 	   * @protected
@@ -59532,7 +58922,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {Array} data the main data array.
 	   * @param {number} radius the sum of radius and blurRadius.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._renderPoints = function (context2d, map, data, radius) {
 	    var position = m_this.gcsPosition(),
 	        intensityFunc = m_this.intensity(),
@@ -59553,7 +58942,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Render data points on the canvas by binning.
 	   * @protected
@@ -59563,7 +58951,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {number} radius the sum of radius and blurRadius.
 	   * @param {number} binSize size of the bins in pixels.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._renderBinnedData = function (context2d, map, data, radius, binSize) {
 	    var position = m_this.gcsPosition(),
 	        intensityFunc = m_this.intensity(),
@@ -59653,14 +59040,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Render the data on the canvas, then colorize the resulting opacity map.
 	   * @protected
 	   * @param {object} context2d the canvas context to draw in.
 	   * @param {object} map the parent map object.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._renderOnCanvas = function (context2d, map) {
 
 	    if (m_renderTime.getMTime() < m_this.buildTime().getMTime()) {
@@ -59721,12 +59106,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	    s_init.call(m_this, arg);
 
@@ -59735,12 +59118,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    s_update.call(m_this);
 	    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
@@ -59751,22 +59132,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update the css transform for the layer as part of an animation frame.
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._setTransform = function () {
 	    m_this.layer().canvas()[0].style.transform = m_heatMapTransform;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Animate pan (and zoom)
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._animatePan = function (e) {
 
 	    var map = m_this.layer().map(),
@@ -59815,12 +59192,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
 	   * @protected
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    s_exit.call(m_this);
 	  };
@@ -59837,19 +59212,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 270 */
+/* 271 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var sceneObject = __webpack_require__(208);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Canvas specific subclass of object which rerenders when the object is drawn.
 	 * @class geo.canvas.object
 	 * @extends geo.sceneObject
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 
 	var canvas_object = function (arg) {
 	  'use strict';
@@ -59872,11 +59245,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._renderOnCanvas = function () {
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	  *  Redraw the object.
 	  */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.draw = function () {
 	    m_this._update();
 	    m_this.renderer()._render();
@@ -59893,14 +59264,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 271 */
+/* 272 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
 	var lineFeature = __webpack_require__(206);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class lineFeature
 	 *
@@ -59909,34 +59279,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.canvas.object
 	 * @returns {geo.canvas.lineFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var canvas_lineFeature = function (arg) {
 	  'use strict';
 	  if (!(this instanceof canvas_lineFeature)) {
 	    return new canvas_lineFeature(arg);
 	  }
 
-	  var object = __webpack_require__(270);
+	  var object = __webpack_require__(271);
 
 	  arg = arg || {};
 	  lineFeature.call(this, arg);
 	  object.call(this);
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Render the data on the canvas.
 	   * @protected
 	   * @param {object} context2d the canvas context to draw in.
 	   * @param {object} map the parent map object.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._renderOnCanvas = function (context2d, map) {
 	    var data = m_this.data(),
 	        posFunc = m_this.position(),
@@ -60015,14 +59380,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 272 */
+/* 273 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
 	var pixelmapFeature = __webpack_require__(241);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class pixelmapFeature
 	 *
@@ -60031,7 +59395,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.pixelmapFeature
 	 * @returns {canvas_pixelmapFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var canvas_pixelmapFeature = function (arg) {
 	  'use strict';
 
@@ -60040,7 +59403,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  pixelmapFeature.call(this, arg);
 
-	  var object = __webpack_require__(270);
+	  var object = __webpack_require__(271);
 	  object.call(this);
 
 	  this._init(arg);
@@ -60055,14 +59418,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 273 */
+/* 274 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
 	var quadFeature = __webpack_require__(222);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class quadFeature
 	 *
@@ -60071,7 +59433,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.quadFeature
 	 * @returns {geo.canvas.quadFeature}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var canvas_quadFeature = function (arg) {
 	  'use strict';
 
@@ -60080,7 +59441,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  quadFeature.call(this, arg);
 
-	  var object = __webpack_require__(270);
+	  var object = __webpack_require__(271);
 	  object.call(this);
 
 	  var $ = __webpack_require__(1);
@@ -60091,11 +59452,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      s_update = this._update,
 	      m_quads;
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build this feature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    if (!m_this.position()) {
 	      return;
@@ -60167,11 +59526,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._renderColorQuads(context, map);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._update = function () {
 	    s_update.call(m_this);
 	    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
@@ -60182,20 +59539,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.updateTime().modified();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	    s_init.call(m_this, arg);
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 
 	    s_exit.call(m_this);
@@ -60221,7 +59574,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 274 */
+/* 275 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(201).registerLayerAdjustment;
@@ -60321,27 +59674,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 275 */
+/* 276 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.gui
 	 */
 	module.exports = {
-	  domWidget: __webpack_require__(276),
-	  legendWidget: __webpack_require__(278),
-	  sliderWidget: __webpack_require__(280),
-	  svgWidget: __webpack_require__(279),
+	  domWidget: __webpack_require__(277),
+	  legendWidget: __webpack_require__(279),
+	  sliderWidget: __webpack_require__(281),
+	  svgWidget: __webpack_require__(280),
 	  uiLayer: __webpack_require__(236),
-	  widget: __webpack_require__(277)
+	  widget: __webpack_require__(278)
 	};
 
 
 /***/ }),
-/* 276 */
+/* 277 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var widget = __webpack_require__(277);
+	var widget = __webpack_require__(278);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(201).registerWidget;
 
@@ -60356,13 +59709,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var m_this = this,
 	      m_default_canvas = 'div';
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initializes DOM Widget.
 	   * Sets the canvas for the widget, does parent/child relationship management,
 	   * appends it to it's parent and handles any positioning logic.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	    if (arg.hasOwnProperty('parent')) {
 	      arg.parent.addChild(m_this);
@@ -60378,12 +59729,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.reposition();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Creates the widget canvas.
 	   * This is just a simple DOM element (based on args.el, or defaults to a div)
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._createCanvas = function () {
 	    m_this.canvas(document.createElement(arg.el || m_default_canvas));
 	  };
@@ -60398,13 +59747,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 277 */
+/* 278 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var sceneObject = __webpack_require__(208);
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class widget
 	 *
@@ -60412,7 +59760,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends {geo.sceneObject}
 	 * @returns {geo.gui.widget}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var widget = function (arg) {
 	  'use strict';
 	  if (!(this instanceof widget)) {
@@ -60448,13 +59795,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_exit();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Create feature give a name
 	   *
 	   * @returns {geo.Feature} Will return a new feature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._createFeature = function (featureName, arg) {
 
 	    var newFeature = createFeature(
@@ -60465,40 +59810,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return newFeature;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Delete feature
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._deleteFeature = function (feature) {
 	    m_this.removeChild(feature);
 	    feature._exit();
 	    return m_this;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Return the layer associated with this widget.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.layer = function () {
 	    return m_layer;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Create the canvas this widget will operate on.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._createCanvas = function () {
 	    throw new Error('Must be defined in derived classes');
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get/Set the canvas for the widget
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.canvas = function (val) {
 	    if (val === undefined) {
 	      return m_canvas;
@@ -60507,22 +59844,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Appends a child to the widget
 	   * The widget determines how to append itself to a parent, the parent can either
 	   * be another widget, or the UI Layer.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._appendChild = function () {
 	    m_this.parentCanvas().appendChild(m_this.canvas());
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the parent canvas (top level widgets define their layer as their parent canvas)
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.parentCanvas = function () {
 	    if (m_this.parent === undefined) {
 	      return m_this.layer().canvas();
@@ -60531,12 +59864,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Gets the CSS positioning that a widget should be placed at.
 	   * { top: 0, left: 0 } by default.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.position = function (pos) {
 	    if (pos !== undefined) {
 	      arg.position = pos;
@@ -60563,14 +59894,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return arg.position;
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Repositions a widget based on the argument passed, or calling position on
 	   * the widget itself.
 	   * @param {object} position A position with the form:
 	   * { top: m, left: n }
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.reposition = function (position) {
 	    position = position || m_this.position();
 	    m_this.canvas().style.position = 'absolute';
@@ -60593,11 +59922,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this.reposition();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Determines whether or not the widget is completely within the viewport.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this.isInViewport = function () {
 	    var position = m_this.position();
 	    var layer = m_this.layer();
@@ -60618,14 +59945,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 278 */
+/* 279 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var svgWidget = __webpack_require__(279);
+	var svgWidget = __webpack_require__(280);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(201).registerWidget;
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class legendWidget
 	 *
@@ -60633,7 +59959,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends geo.gui.svgWidget
 	 * @returns {geo.gui.legendWidget}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var legendWidget = function (arg) {
 	  'use strict';
 	  if (!(this instanceof legendWidget)) {
@@ -60655,7 +59980,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      s_createCanvas = this._createCanvas,
 	      s_appendChild = this._appendChild;
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get or set the category array associated with
 	   * the legend.  Each element of this array is
@@ -60681,7 +60005,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *
 	   * @param {object[]?} categories The categories to display
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.categories = function (arg) {
 	    if (arg === undefined) {
 	      return m_categories.slice();
@@ -60697,12 +60020,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get the widget's size
 	   * @return {{width: number, height: number}} The size in pixels
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.size = function () {
 	    var width = 1, height;
 	    var test = d3.select(m_this.canvas()).append('text')
@@ -60721,11 +60042,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Redraw the legend
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this.draw = function () {
 
 	    m_this._init();
@@ -60819,12 +60138,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return m_this;
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get scales for the x and y axis for the current size.
 	   * @private
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this._scale = function () {
 	    return {
 	      x: d3.scale.linear()
@@ -60836,13 +60153,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Private initialization.  Creates the widget's DOM container and internal
 	   * variables.
 	   * @private
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	    // adding categories redraws the entire thing by calling _init, see
 	    // the m_top.remove() line below
@@ -60910,14 +60225,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 279 */
+/* 280 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var domWidget = __webpack_require__(276);
+	var domWidget = __webpack_require__(277);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(201).registerWidget;
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class geo.gui.svgWidget
 	 *
@@ -60934,7 +60248,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @returns {geo.gui.svgWidget}
 	 *
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var svgWidget = function (arg) {
 	  'use strict';
 	  if (!(this instanceof svgWidget)) {
@@ -60943,7 +60256,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  domWidget.call(this, arg);
 
-	  var d3Renderer = __webpack_require__(254);
+	  var d3Renderer = __webpack_require__(255);
 
 	  var m_this = this,
 	      m_renderer = null;
@@ -60966,13 +60279,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.reposition();
 	  };
 
-	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Creates the canvas for the svg widget.
 	   * This directly uses the {@link geo.d3.d3Renderer} as a helper to do all of the heavy
 	   * lifting.
 	   */
-	  ////////////////////////////////////////////////////////////////////////////
 	  this._createCanvas = function (d3Parent) {
 	    var rendererOpts = {
 	      layer: m_this.layer(),
@@ -61001,14 +60312,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 280 */
+/* 281 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var svgWidget = __webpack_require__(279);
+	var svgWidget = __webpack_require__(280);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(201).registerWidget;
 
-	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class sliderWidget
 	 *
@@ -61016,7 +60326,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends {geo.gui.svgWidget}
 	 * @returns {geo.gui.sliderWidget}
 	 */
-	//////////////////////////////////////////////////////////////////////////////
 	var sliderWidget = function (arg) {
 	  'use strict';
 	  if (!(this instanceof sliderWidget)) {
@@ -61056,7 +60365,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    black: '#505050'
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Add an icon from a path string.  Returns a d3 group element.
 	   *
@@ -61069,7 +60377,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @returns {object}
 	   * @private
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  function put_icon(icon, base, cx, cy, size) {
 	    var g = base.append('g');
 
@@ -61093,7 +60400,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return {width: m_width, height: m_height};
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize the slider widget in the map.
 	   *
@@ -61101,7 +60407,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @returns {geo.gui.sliderWidget}
 	   * @private
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	    s_createCanvas();
 	    s_appendChild();
@@ -61306,7 +60611,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this._update();
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Removes the slider element from the map and unbinds all handlers.
 	   *
@@ -61314,14 +60618,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @returns {geo.gui.sliderWidget}
 	   * @private
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    m_group.remove();
 	    m_this.layer().geoOff(geo_event.zoom);
 	    s_exit();
 	  };
 
-	  //////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Update the slider widget state in reponse to map changes.  I.e. zoom
 	   * range changes.
@@ -61330,7 +60632,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @returns {geo.gui.sliderWidget}
 	   * @private
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
 	  this._update = function (obj) {
 	    var map = m_this.layer().map(),
 	        zoomRange = map.zoomRange(),
