@@ -73,7 +73,7 @@ copyright = u'Kitware, Inc.'
 # built documents.
 #
 # The short X.Y version.
-version = '0.12.1'
+version = '0.12.2'
 # The full version, including alpha/beta/rc tags.
 release = version
 
