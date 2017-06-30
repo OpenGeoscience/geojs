@@ -21,6 +21,9 @@ block append mainContent
     .form-group(title='If enabled, immediately after adding one annotation, you can add another without either left-clicking or selecting a button.')
       label(for='keepadding') Keep adding annotations
       input#keepadding(param-name='keepadding', type='checkbox', placeholder='false')
+    .form-group(title='If disabled, hide all annotation labels.')
+      label(for='showLabels') Show annotation labels
+      input#showLabels(param-name='labels', type='checkbox', placeholder='true')
     .form-group#annotationheader
       .shortlabel Created Annotations
       a.entry-remove-all(action='remove-all', title='Delete all annotations') &#x2716;
@@ -44,6 +47,12 @@ block append mainContent
           .form-group
             label(for='edit-name') Name
             input#edit-name(option='name')
+          .form-group
+            label(for='edit-name') Label
+            input#edit-name(option='label')
+          .form-group
+            label(for='edit-name') Description
+            input#edit-name(option='description', type='textarea')
           .form-group(annotation-types='point')
             label(for='edit-radius') Radius
             input#edit-radius(option='radius', format='positive')
@@ -62,7 +71,7 @@ block append mainContent
             label(for='edit-fillOpacity') Fill Opacity
             input#edit-fillOpacity(option='fillOpacity', format='opacity')
           .form-group(annotation-types='point polygon rectangle')
-            label(for='edit-stroke') Stroke 
+            label(for='edit-stroke') Stroke
             select#edit-stroke(option='stroke', format='boolean')
               option(value='true') Yes
               option(value='false') No

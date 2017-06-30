@@ -12,6 +12,7 @@ $(function () {
   var query = utils.getQuery();
   $('#clickadd').prop('checked', query.clickadd !== 'false');
   $('#keepadding').prop('checked', query.keepadding === 'true');
+  $('#showLabels').prop('checked', query.labels !== 'false');
   if (query.lastannotation) {
     $('.annotationtype button').removeClass('lastused');
     $('.annotationtype button#' + query.lastannotation).addClass('lastused');
@@ -52,7 +53,8 @@ $(function () {
   // create an annotation layer
   layer = map.createLayer('annotation', {
     renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
-    annotations: query.renderer ? undefined : geo.listAnnotations()
+    annotations: query.renderer ? undefined : geo.listAnnotations(),
+    showLabels: query.labels !== 'false'
   });
   // bind to the mouse click and annotation mode events
   layer.geoOn(geo.event.mouseclick, mouseClickToStart);
@@ -121,6 +123,12 @@ $(function () {
     }
     if (!param || value === query[param]) {
       return;
+    }
+    switch (param) {
+      case 'labels':
+        layer.options('showLabels', '' + value !== 'false');
+        layer.draw();
+        break;
     }
     query[param] = value;
     if (value === '' || (ctl.attr('placeholder') &&
@@ -299,6 +307,8 @@ $(function () {
     dlg.attr('annotation-id', id);
     dlg.attr('annotation-type', type);
     $('[option="name"]', dlg).val(annotation.name());
+    $('[option="label"]', dlg).val(annotation.label(undefined, true));
+    $('[option="description"]', dlg).val(annotation.description());
     // populate each control with the current value of the annotation
     $('.form-group[annotation-types]').each(function () {
       var ctl = $(this),
@@ -363,6 +373,8 @@ $(function () {
       return;
     }
     annotation.name($('[option="name"]', dlg).val());
+    annotation.label($('[option="label"]', dlg).val() || null);
+    annotation.description($('[option="description"]', dlg).val() || '');
     annotation.options({style: newopt}).draw();
 
     dlg.modal('hide');

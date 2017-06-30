@@ -6,25 +6,41 @@ var registry = require('./registry');
 var transform = require('./transform');
 var $ = require('jquery');
 var Mousetrap = require('mousetrap');
+var textFeature = require('./textFeature');
+
+/**
+ * @typedef {object} geo.annotationLayer.labelRecord
+ * @property {string} text The text of the label
+ * @property {geo.geoPosition} position The position of the label in map gcs
+ *      coordinates.
+ * @property {object} [style] A `geo.textFeature` style object.
+ */
 
 /**
  * Layer to handle direct interactions with different features.  Annotations
  * (features) can be created by calling mode(<name of feature>) or cancelled
  * with mode(null).
  *
- * @class geo.annotationLayer
+ * @class
+ * @alias geo.annotationLayer
  * @extends geo.featureLayer
- * @param {object?} options
- * @param {number} [options.dblClickTime=300]  The delay in milliseconds that
- *    is treated as a double-click when working with annotations.
- * @param {number} [options.adjacentPointProximity=5]  The minimum distance in
+ * @param {object} [args] Layer options.
+ * @param {number} [args.dblClickTime=300] The delay in milliseconds that is
+ *    treated as a double-click when working with annotations.
+ * @param {number} [args.adjacentPointProximity=5] The minimum distance in
  *    display coordinates (pixels) between two adjacent points when creating a
- *    polygon.  A value of 0 requires an exact match.
- * @param {number} [options.finalPointProximity=10]  The maximum distance in
+ *    polygon or line.  A value of 0 requires an exact match.
+ * @param {number} [args.continousPointProximity=5] The minimum distance in
+ *    display coordinates (pixels) between two adjacent points when dragging
+ *    to create an annotation.  `false` disables continuous drawing mode.
+ * @param {number} [args.finalPointProximity=10] The maximum distance in
  *    display coordinates (pixels) between the starting point and the mouse
  *    coordinates to signal closing a polygon.  A value of 0 requires an exact
  *    match.  A negative value disables closing a polygon by clicking on the
  *    start point.
+ * @param {boolean} [args.showLabels=true] Truthy to show feature labels that
+ *    are allowed by the associated feature to be shown.
+ * @param {object} [args.defaultLabelStyle] Default styles for labels.
  * @returns {geo.annotationLayer}
  */
 var annotationLayer = function (args) {
@@ -41,12 +57,15 @@ var annotationLayer = function (args) {
   var m_this = this,
       s_init = this._init,
       s_exit = this._exit,
+      s_draw = this.draw,
       s_update = this._update,
       m_buildTime = timestamp(),
       m_options,
       m_mode = null,
       m_annotations = [],
-      m_features = [];
+      m_features = [],
+      m_labelFeature,
+      m_labelLayer;
 
   var geojsonStyleProperties = {
     'closed': {dataType: 'boolean', keys: ['closed', 'close']},
@@ -70,14 +89,15 @@ var annotationLayer = function (args) {
     // in pixels; set to continuousPointProximity to false to disable
     // continuous drawing modes.
     continuousPointProximity: 5,
-    finalPointProximity: 10  // in pixels, 0 is exact
+    finalPointProximity: 10,  // in pixels, 0 is exact
+    showLabels: true
   }, args);
 
   /**
    * Process an action event.  If we are in rectangle-creation mode, this
    * creates a rectangle.
    *
-   * @param {geo.event} evt the selection event.
+   * @param {geo.event} evt The selection event.
    */
   this._processAction = function (evt) {
     var update;
@@ -92,10 +112,10 @@ var annotationLayer = function (args) {
   /**
    * Handle updating the current annotation based on an update state.
    *
-   * @param {string|undefined} update: truthy to update.  'done' if the
-   *    annotation was completed and the mode should return to null.  'remove'
-   *    to remove the current annotation and set the mode to null.  Falsy to do
-   *    nothing.
+   * @param {string|undefined} update Truthy to update.  `'done'` if the
+   *    annotation was completed and the mode should return to `null`.
+   *    `'remove'` to remove the current annotation and set the mode to `null`.
+   *    Falsy to do nothing.
    */
   this._updateFromEvent = function (update) {
     switch (update) {
@@ -109,7 +129,6 @@ var annotationLayer = function (args) {
     }
     if (update) {
       m_this.modified();
-      m_this._update();
       m_this.draw();
     }
   };
@@ -118,14 +137,13 @@ var annotationLayer = function (args) {
    * Handle mouse movement.  If there is a current annotation, the movement
    * event is sent to it.
    *
-   * @param {geo.event} evt the mouse move event.
+   * @param {geo.event} evt The mouse move event.
    */
   this._handleMouseMove = function (evt) {
     if (this.mode() && this.currentAnnotation) {
       var update = this.currentAnnotation.mouseMove(evt);
       if (update) {
         m_this.modified();
-        m_this._update();
         m_this.draw();
       }
     }
@@ -135,7 +153,7 @@ var annotationLayer = function (args) {
    * Handle mouse clicks.  If there is a current annotation, the click event is
    * sent to it.
    *
-   * @param {geo.event} evt the mouse click event.
+   * @param {geo.event} evt The mouse click event.
    */
   this._handleMouseClick = function (evt) {
     if (this.mode() && this.currentAnnotation) {
@@ -147,13 +165,13 @@ var annotationLayer = function (args) {
   /**
    * Set or get options.
    *
-   * @param {string|object} arg1 if undefined, return the options object.  If
-   *    a string, either set or return the option of that name.  If an object,
-   *    update the options with the object's values.
-   * @param {object} arg2 if arg1 is a string and this is defined, set the
-   *    option to this value.
-   * @returns {object|this} if options are set, return the layer, otherwise
-   *    return the requested option or the set of options.
+   * @param {string|object} [arg1] If `undefined`, return the options object.
+   *    If a string, either set or return the option of that name.  If an
+   *    object, update the options with the object's values.
+   * @param {object} [arg2] If `arg1` is a string and this is defined, set
+   *    the option to this value.
+   * @returns {object|this} If options are set, return the annotation,
+   *    otherwise return the requested option or the set of options.
    */
   this.options = function (arg1, arg2) {
     if (arg1 === undefined) {
@@ -174,14 +192,14 @@ var annotationLayer = function (args) {
   /**
    * Calculate the display distance for two coordinate in the current map.
    *
-   * @param {object} coord1 the first coordinates.
-   * @param {string|geo.transform} [gcs1] undefined to use the interface gcs,
-   *    null to use the map gcs, 'display' if the coordinates are already in
-   *    display coordinates, or any other transform.
-   * @param {object} coord2 the second coordinates.
-   * @param {string|geo.transform} [gcs2] undefined to use the interface gcs,
-   *    null to use the map gcs, 'display' if the coordinates are already in
-   *    display coordinates, or any other transform.
+   * @param {geo.geoPosition|geo.screenPosition} coord1 The first coordinates.
+   * @param {string|geo.transform|null} gcs1 `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, `'display`' if the coordinates are
+   *    already in display coordinates, or any other transform.
+   * @param {geo.geoPosition|geo.screenPosition} coord2 the second coordinates.
+   * @param {string|geo.transform|null} [gcs2] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, `'display`' if the coordinates are
+   *    already in display coordinates, or any other transform.
    * @returns {number} the Euclidian distance between the two coordinates.
    */
   this.displayDistance = function (coord1, gcs1, coord2, gcs2) {
@@ -204,9 +222,10 @@ var annotationLayer = function (args) {
   /**
    * Add an annotation to the layer.  The annotation could be in any state.
    *
-   * @param {object} annotation the annotation to add.
-   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-   *    null to use the map gcs, or any other transform
+   * @param {geo.annotation} annotation Te annotation to add.
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.
+   * @returns {this} The current layer.
    */
   this.addAnnotation = function (annotation, gcs) {
     var pos = $.inArray(annotation, m_annotations);
@@ -224,7 +243,6 @@ var annotationLayer = function (args) {
             gcs, map.gcs(), annotation._coordinates()));
       }
       this.modified();
-      this._update();
       this.draw();
       m_this.geoTrigger(geo_event.annotation.add, {
         annotation: annotation
@@ -236,10 +254,10 @@ var annotationLayer = function (args) {
   /**
    * Remove an annotation from the layer.
    *
-   * @param {object} annotation the annotation to remove.
-   * @param {boolean} update if false, don't update the layer after removing
+   * @param {geo.annoation} annotation The annotation to remove.
+   * @param {boolean} update If `false`, don't update the layer after removing
    *    the annotation.
-   * @returns {boolean} true if an annotation was removed.
+   * @returns {boolean} `true` if an annotation was removed.
    */
   this.removeAnnotation = function (annotation, update) {
     var pos = $.inArray(annotation, m_annotations);
@@ -251,7 +269,6 @@ var annotationLayer = function (args) {
       m_annotations.splice(pos, 1);
       if (update !== false) {
         this.modified();
-        this._update();
         this.draw();
       }
       m_this.geoTrigger(geo_event.annotation.remove, {
@@ -264,11 +281,11 @@ var annotationLayer = function (args) {
   /**
    * Remove all annotations from the layer.
    *
-   * @param {boolean} skipCreating: if true, don't remove annotations that are
-   *    in the create state.
-   * @param {boolean} update if false, don't update the layer after removing
-   *    the annotation.
-   * @returns {number} the number of annotations that were removed.
+   * @param {boolean} [skipCreating] If truthy, don't remove annotations that
+   *    are in the create state.
+   * @param {boolean} [update] If `false`, don't update the layer after
+   *    removing the annotation.
+   * @returns {number} The number of annotations that were removed.
    */
   this.removeAllAnnotations = function (skipCreating, update) {
     var removed = 0, annotation, pos = 0;
@@ -283,7 +300,6 @@ var annotationLayer = function (args) {
     }
     if (removed && update !== false) {
       this.modified();
-      this._update();
       this.draw();
     }
     return removed;
@@ -292,7 +308,7 @@ var annotationLayer = function (args) {
   /**
    * Get the list of annotations on the layer.
    *
-   * @returns {array} An array of annotations.
+   * @returns {geo.annoation[]} An array of annotations.
    */
   this.annotations = function () {
     return m_annotations.slice();
@@ -301,7 +317,9 @@ var annotationLayer = function (args) {
   /**
    * Get an annotation by its id.
    *
-   * @returns {geo.annotation} The selected annotation or undefined.
+   * @param {number} id The annotation ID.
+   * @returns {geo.annotation} The selected annotation or `undefined` if none
+   *    matches the id.
    */
   this.annotationById = function (id) {
     if (id !== undefined && id !== null) {
@@ -316,10 +334,10 @@ var annotationLayer = function (args) {
   };
 
   /**
-   * Get or set the current mode.  The mode is either null for nothing being
+   * Get or set the current mode.  The mode is either `null` for nothing being
    * created, or the name of the type of annotation that is being created.
    *
-   * @param {string|null} arg the new mode or undefined to get the current
+   * @param {string|null} [arg] The new mode or `undefined` to get the current
    *    mode.
    * @returns {string|null|this} The current mode or the layer.
    */
@@ -382,23 +400,23 @@ var annotationLayer = function (args) {
    * Return the current set of annotations as a geojson object.  Alternately,
    * add a set of annotations from a geojson object.
    *
-   * @param {object} geojson: if present, add annotations based on the given
-   *    geojson object.  If undefined, return the current annotations as
-   *    geojson.  This may be a JSON string, a javascript object, or a File
-   *    object.
-   * @param {boolean} clear: if true, when adding annotations, first remove all
-   *    existing objects.  If 'update', update existing annotations and remove
-   *    annotations that no longer exit,  If false, update existing
+   * @param {string|objectFile} [geojson] If present, add annotations based on
+   *    the given geojson object.  If `undefined`, return the current
+   *    annotations as geojson.  This may be a JSON string, a javascript
+   *    object, or a File object.
+   * @param {boolean} [clear] If `true`, when adding annotations, first remove
+   *    all existing objects.  If `'update'`, update existing annotations and
+   *    remove annotations that no longer exit,  If falsy, update existing
    *    annotations and leave unchanged annotations.
-   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-   *    null to use the map gcs, or any other transform.
-   * @param {boolean} includeCrs: if true, include the coordinate system in the
-   *    output.
-   * @return {object|number|undefined} if geojson was undefined, the current
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.
+   * @param {boolean} [includeCrs] If truthy, include the coordinate system in
+   *    the output.
+   * @returns {object|number|undefined} If `geojson` was undefined, the current
    *    annotations as a javascript object that can be converted to geojson
-   *    using JSON.stringify.  If geojson is specified, either the number of
-   *    annotations now present upon success, or undefined if the value in
-   *    geojson was not able to be parsed.
+   *    using JSON.stringify.  If `geojson` is specified, either the number of
+   *    annotations now present upon success, or `undefined` if the value in
+   *    `geojson` was not able to be parsed.
    */
   this.geojson = function (geojson, clear, gcs, includeCrs) {
     if (geojson !== undefined) {
@@ -429,7 +447,6 @@ var annotationLayer = function (args) {
         });
       }
       this.modified();
-      this._update();
       this.draw();
       return m_annotations.length;
     }
@@ -454,9 +471,9 @@ var annotationLayer = function (args) {
    * Convert a feature as parsed by the geojson reader into one or more
    * annotations.
    *
-   * @param {geo.feature} feature: the feature to convert.
-   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-   *    null to use the map gcs, or any other transform.
+   * @param {geo.feature} feature The feature to convert.
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.
    */
   this._geojsonFeatureToAnnotation = function (feature, gcs) {
     var dataList = feature.data(),
@@ -516,7 +533,6 @@ var annotationLayer = function (args) {
         $.each(prop.keys, function (idx, altkey) {
           if (value === undefined) {
             value = m_this.validateAttribute(options[altkey], prop.dataType);
-            return;
           }
         });
         if (value === undefined) {
@@ -558,25 +574,25 @@ var annotationLayer = function (args) {
 
   /**
    * Validate a value for an attribute based on a specified data type.  This
-   * returns a sanitized value or undefined if the value was invalid.  Data
+   * returns a sanitized value or `undefined` if the value was invalid.  Data
    * types include:
-   *   color: a css string, #rrggbb hex string, #rgb hex string, number, or
-   *     object with r, g, b properties in the range of [0-1].
-   *   opacity: a floating point number in the range [0, 1].
-   *   positive: a floating point number greater than zero.
-   *   boolean: a string whose lowercase value is 'false', 'off', or 'no', and
-   *     falsy values are false, all else is true.  null and undefined are
-   *     still considered invalid values.
-   *   booleanOrNumber: a string whose lowercase value is 'false', 'off', no',
-   *     'true', 'on', or 'yes', falsy values that aren't 0, and true are
-   *     handled as booleans.  Otherwise, a floating point number that isn't
-   *     NaN or an infinity.
-   *   number: a floating point number that isn't NaN or an infinity.
-   *   text: any text string.
-   * @param {number|string|object|boolean} value: the value to validate.
-   * @param {string} dataType: the data type for validation.
-   * @returns {number|string|object|boolean|undefined} the sanitized value or
-   *    undefined.
+   * - `color`: a css string, `#rrggbb` hex string, `#rgb` hex string, number,
+   *   or object with r, g, b properties in the range of [0-1].
+   * - `opacity`: a floating point number in the range [0, 1].
+   * - `positive`: a floating point number greater than zero.
+   * - `boolean`: a string whose lowercase value is `'false'`, `'off'`, or
+   *   `'no'`, and falsy values are false, all else is true.  `null` and
+   *   `undefined` are still considered invalid values.
+   * - `booleanOrNumber`: a string whose lowercase value is `'false'`, `'off'`,
+   *   `'no'`, `'true'`, `'on'`, or `'yes'`, falsy values that aren't 0, and
+   *   `true` are handled as booleans.  Otherwise, a floating point number that
+   *   isn't NaN or an infinity.
+   * - `number`: a floating point number that isn't NaN or an infinity.
+   * - `text`: any text string.
+   * @param {number|string|object|boolean} value The value to validate.
+   * @param {string} dataType The data type for validation.
+   * @returns {number|string|object|boolean|undefined} The sanitized value or
+   *    `undefined`.
    */
   this.validateAttribute = function (value, dataType) {
     if (value === undefined || value === null) {
@@ -628,10 +644,13 @@ var annotationLayer = function (args) {
   };
 
   /**
-   * Update layer
+   * Update layer.
+   *
+   * @returns {this} The current layer.
    */
-  this._update = function (request) {
+  this._update = function () {
     if (m_this.getMTime() > m_buildTime.getMTime()) {
+      var labels = this.options('showLabels') ? [] : null;
       /* Interally, we have a set of feature levels (to provide z-index
        * support), each of which can have data from multiple annotations.  We
        * clear the data on each of these features, then build it up from each
@@ -646,6 +665,12 @@ var annotationLayer = function (args) {
       });
       $.each(m_annotations, function (annotation_idx, annotation) {
         var features = annotation.features();
+        if (labels) {
+          var annotationLabel = annotation.labelRecord();
+          if (annotationLabel) {
+            labels.push(annotationLabel);
+          }
+        }
         $.each(features, function (idx, featureLevel) {
           if (m_features[idx] === undefined) {
             m_features[idx] = {};
@@ -719,9 +744,56 @@ var annotationLayer = function (args) {
           feature.feature.data(feature.data);
         });
       });
+      m_this._updateLabels(labels);
       m_buildTime.modified();
     }
-    s_update.call(m_this, request);
+    s_update.call(m_this, arguments);
+    return this;
+  };
+
+  /**
+   * Show or hide annotation labels.  Create or destroy a child layer or a
+   * feature as needed.
+   *
+   * @param {object[]|null} labels The list of labels to display of `null` for
+   *    no labels.
+   * @returns {this} The class instance.
+   */
+  this._updateLabels = function (labels) {
+    if (!labels || !labels.length) {
+      m_this.removeLabelFeature();
+      return m_this;
+    }
+    if (!m_labelFeature) {
+      var renderer = registry.rendererForFeatures(['text']);
+      if (renderer !== m_this.renderer()) {
+        m_labelLayer = registry.createLayer('feature', m_this.map(), {renderer: renderer});
+        m_this.addChild(m_labelLayer);
+        m_labelLayer._update();
+        m_this.geoTrigger(geo_event.layerAdd, {
+          target: m_this,
+          layer: m_labelLayer
+        });
+      }
+      var style = {};
+      textFeature.usedStyles.forEach(function (key) {
+        style[key] = function (d, i) {
+          if (d.style && d.style[key] !== undefined) {
+            return d.style[key];
+          }
+          return (m_this.options('defaultLableStyle') || {})[key];
+        };
+      });
+      m_labelFeature = (m_labelLayer || m_this).createFeature('text', {
+        style: style,
+        gcs: m_this.map().gcs(),
+        position: function (d) {
+          return d.position;
+        }
+      });
+    }
+    m_labelFeature.data(labels);
+    return m_this;
   };
 
   /**
@@ -738,7 +810,42 @@ var annotationLayer = function (args) {
   };
 
   /**
-   * Initialize
+   * Remove the label feature if it exists.
+   *
+   * @returns {this} The current layer.
+   */
+  this.removeLabelFeature = function () {
+    if (m_labelLayer) {
+      m_labelLayer._exit();
+      m_this.removeChild(m_labelLayer);
+      m_this.geoTrigger(geo_event.layerRemove, {
+        target: m_this,
+        layer: m_labelLayer
+      });
+      m_labelLayer = m_labelFeature = null;
+    }
+    if (m_labelFeature) {
+      m_this.removeFeature(m_labelFeature);
+      m_labelFeature = null;
+    }
+    return m_this;
+  };
+
+  /**
+   * Update if necessary and draw the layer.
+   *
+   * @returns {this} The current layer.
+   */
+  this.draw = function () {
+    m_this._update();
+    s_draw.call(m_this);
+    return m_this;
+  };
+
+  /**
+   * Initialize.
+   *
+   * @returns {this} The current layer.
    */
   this._init = function () {
     // Call super class init
@@ -759,9 +866,12 @@ var annotationLayer = function (args) {
   };
 
   /**
-   * Free all resources
+   * Free all resources.
+   *
+   * @returns {this} The current layer.
    */
   this._exit = function () {
+    m_this.removeLabelFeature();
     // Call super class exit
     s_exit.call(m_this);
     m_annotations = [];
