@@ -4,6 +4,7 @@ describe('geo.util.convertColor', function () {
   'use strict';
 
   var geo = require('../test-utils').geo;
+  var closeToEqual = require('../test-utils').closeToEqual;
 
   var tests = {
     // #rrggbb
@@ -37,12 +38,18 @@ describe('geo.util.convertColor', function () {
     'rgba(18 86 171 0.3)': {r: 18 / 255, g: 86 / 255, b: 171 / 255, a: 0.3},
     'rgb(18 86 171 0.3)': {r: 18 / 255, g: 86 / 255, b: 171 / 255, a: 0.3},
     'rgba(10% 35% 63.2% 40%)': {r: 0.1, g: 0.35, b: 0.632, a: 0.4},
+    'rgba(10% 35% 63.2% / 40%)': {r: 0.1, g: 0.35, b: 0.632, a: 0.4},
+    'rgba(100e-1% .35e2% 6.32e1% 40%)': {r: 0.1, g: 0.35, b: 0.632, a: 0.4},
     // hsl() and hsla()
     'hsl(120, 100%, 25%)': {r: 0, g: 0.5, b: 0},
     'hsla(120, 100%, 25%)': {r: 0, g: 0.5, b: 0},
     'hsl(120, 100%, 25%, 0.3)': {r: 0, g: 0.5, b: 0, a: 0.3},
     'hsla(120, 100%, 25%, 30%)': {r: 0, g: 0.5, b: 0, a: 0.3},
+    'hsla(120, 100%, 25%/30%)': {r: 0, g: 0.5, b: 0, a: 0.3},
     'hsl(120deg 100% 25%)': {r: 0, g: 0.5, b: 0},
+    'hsl(133.33grad 100% 25%)': {r: 0, g: 0.5, b: 0},
+    'hsl(2.0944rad 100% 25%)': {r: 0, g: 0.5, b: 0},
+    'hsl(.33333turn 100% 25%)': {r: 0, g: 0.5, b: 0},
     'hsl(207 44% 49%)': {r: 0.2744, g: 0.51156, b: 0.7056},
     'hsl(207 100% 50%)': {r: 0, g: 0.55, b: 1},
     // transparent
@@ -55,7 +62,7 @@ describe('geo.util.convertColor', function () {
     $.each(tests, function (key, value) {
       it(key, function () {
         var c = geo.util.convertColor(key);
-        expect(c).toEqual(value);
+        expect(closeToEqual(c, value, 4));
       });
     });
   });

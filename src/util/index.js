@@ -13,8 +13,24 @@ var m_timingData = {},
     m_originalRequestAnimationFrame;
 
 /**
+ * @typedef {object} geo.util.cssColorConversionRecord
+ * @property {string} name The name of the color conversion.
+ * @property {RegEx} regex A regex that, if it matches the color string, will
+ *      cause the process function to be invoked.
+ * @property {function} process A function that takes (`color`, `match`) with
+ *      the original color string and the results of matching the regex using
+ *      the regex's `exec` function.  It outputs a {@link geo.geoColorObject}
+ *      color object or the original color string if there is still a parsing
+ *      failure.
+ */
+
+/**
  * Takes a variable number of arguments and returns the first numeric value
  * it finds.
+ *
+ * @param {...*} var_args Any number of arguments.
+ * @returns {number} The first numeric argument, or `undefined` if there are no
+ *      numeric arguments.
  * @private
  */
 function setNumeric() {
@@ -35,16 +51,23 @@ var util = module.exports = {
   ClusterGroup: ClusterGroup,
 
   /**
-   * Returns true if the given point lies in the given polygon.
+   * Check if a point is inside of a polygon.
    * Algorithm description:
    *   http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-   * @param {geo.screenPosition} point The test point
-   * @param {geo.screenPosition[]} outer The outer boundary of the polygon
-   * @param {geo.screenPosition[][]} [inner] Inner boundaries (holes)
-   * @param {Object} [range] If specified, range.min.x, range.min.y,
-   *   range.max.x, and range.max.y specified the extents of the outer
-   *   polygon and are used for early detection.
-   * @returns {boolean} true if the point is inside the polygon.
+   * The point and polygon must be in the same coordinate system.
+   *
+   * @param {geo.point2D} point The test point.
+   * @param {geo.point2D[]} outer The outer boundary of the polygon.
+   * @param {Array.<geo.point2D[]>} [inner] A list of inner boundaries
+   *    (holes).
+   * @param {object} [range] If specified, this is the extent of the outer
+   *    polygon and is used for early detection.
+   * @param {geo.point2D} range.min The minimum value of coordinates in
+   *    the outer polygon.
+   * @param {geo.point2D} range.max The maximum value of coordinates in
+   *    the outer polygon.
+   * @returns {boolean} `true` if the point is inside or on the border of the
+   *    polygon.
    * @memberof geo.util
    */
   pointInPolygon: function (point, outer, inner, range) {
@@ -81,16 +104,17 @@ var util = module.exports = {
 
   /**
    * Return a point in the basis of the triangle.  If the point is located on
-   * a vertex of the triangle, it will be at vert0: (0, 0), vert1: (1, 0),
-   * vert2: (0, 1).  If it is within the triangle, its coordinates will be
-   * 0 <= x <= 1, 0 <= y <= 1, x + y <= 1.
+   * a vertex of the triangle, it will be at `vert0`: (0, 0), `vert1`:
+   * (1, 0), `vert2`: (0, 1).  If it is within the triangle, its coordinates
+   * will be 0 <= x <= 1, 0 <= y <= 1, x + y <= 1.  The point and vertices
+   * must be in the same coordinate system.
    *
-   * @param {object} point: the point to convert.
-   * @param {object} vert0: vertex 0 of the triangle
-   * @param {object} vert1: vertex 1 (x direction) of the triangle
-   * @param {object} vert2: vertex 2 (y direction) of the triangle
-   * @returns {object} basisPoint: the point in the triangle basis, or
-   *    undefined if the triangle is degenerate.
+   * @param {geo.point2D} point The point to convert.
+   * @param {geo.point2D} vert0 Vertex 0 of the triangle.
+   * @param {geo.point2D} vert1 Vertex 1 (x direction) of the triangle.
+   * @param {geo.point2D} vert2 Vertex 2 (y direction) of the triangle.
+   * @returns {geo.point2D} The point in the triangle basis, or `undefined`
+   *    if the triangle is degenerate.
    * @memberof geo.util
    */
   pointTo2DTriangleBasis: function (point, vert0, vert1, vert2) {
@@ -107,14 +131,13 @@ var util = module.exports = {
   },
 
   /**
-   * Returns true if the argument is an HTML Image element that is fully
-   * loaded.
+   * Check if an object an HTML Image element that is fully loaded.
    *
-   * @param {object} img: an object that might be an HTML Image element.
-   * @param {boolean} [allowFailedImage]: if true, an image element that has
+   * @param {object} img an object that might be an HTML Image element.
+   * @param {boolean} [allowFailedImage] If `true`, an image element that has
    *     a source and has failed to load is also considered 'ready' in the
    *     sense that it isn't expected to change to a better state.
-   * @returns {boolean} true if this is an image that is ready.
+   * @returns {boolean} `true` if this is an image that is ready.
    * @memberof geo.util
    */
   isReadyImage: function (img, allowFailedImage) {
@@ -127,15 +150,24 @@ var util = module.exports = {
   },
 
   /**
-   * Returns true if the argument is a function.
+   * Test if an object is a function.
+   *
+   * @param {object} f An object that might be a function.
+   * @returns {boolean} `true` if the object is a function.
+   * @memberof geo.util
    */
   isFunction: function (f) {
     return typeof f === 'function';
   },
 
   /**
-   * Returns the argument if it is function, otherwise returns a function
-   * that returns the argument.
+   * Return a function.  If the supplied object is a function, return it.
+   * Otherwise, return a function that returns the argument.
+   *
+   * @param {object} f An object that might be a function.
+   * @returns {function} A function.  Either `f` or a function that returns
+   *    `f`.
+   * @memberof geo.util
    */
   ensureFunction: function (f) {
     if (util.isFunction(f)) {
@@ -146,7 +178,12 @@ var util = module.exports = {
   },
 
   /**
-   * Return a random string of length n || 8.
+   * Return a random string of length n || 8.  The string consists of
+   * mixed-case ASCII alphanumerics.
+   *
+   * @param {number} [n=8] The length of the string to return.
+   * @returns {string} A string of random characters.
+   * @memberof geo.util
    */
   randomString: function (n) {
     var s, i, r;
@@ -158,86 +195,6 @@ var util = module.exports = {
     }
     return s;
   },
-
-  /* This is a list of regex and processing functions for color conversions
-   * to rgb objects.  Each entry contains:
-   *   name: a name of the color conversion.
-   *   regex: a regex that, if it matches the color string, will cause the
-   *      process function to be invoked.
-   *   process: a function that takes (color, match) with the original color
-   *      string and the results of matching the regex.  It outputs an rgb
-   *      color object or the original color string if there is still a
-   *      parsing failure.
-   * In general, these conversions are somewhat more forgiving than the css
-   * specification (see https://drafts.csswg.org/css-color/) in that
-   * percentages may be mixed with numbers, and that floating point values
-   * are accepted for all numbers.  Commas are optional.  As per the latest
-   * draft standard, rgb and rgba are aliases of each other, as are hsl and
-   * hsla.
-   * @memberof geo.util
-   */
-  cssColorConversions: [{
-    name: 'rgb',
-    regex: new RegExp(
-      '^\\s*rgba?' +
-      '\\(\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
-      ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
-      ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
-      '(,?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*)?' +
-      '\\)\\s*$'),
-    process: function (color, match) {
-      color = {
-        r: Math.min(1, Math.max(0, +match[1] / (match[2] ? 100 : 255))),
-        g: Math.min(1, Math.max(0, +match[3] / (match[4] ? 100 : 255))),
-        b: Math.min(1, Math.max(0, +match[5] / (match[6] ? 100 : 255)))
-      };
-      if (match[7]) {
-        color.a = Math.min(1, Math.max(0, +match[8] / (match[9] ? 100 : 1)));
-      }
-      return color;
-    }
-  }, {
-    name: 'hsl',
-    regex: new RegExp(
-      '^\\s*hsla?' +
-      '\\(\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(deg)?\\s*' +
-      ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*%\\s*' +
-      ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*%\\s*' +
-      '(,?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*)?' +
-      '\\)\\s*$'),
-    process: function (color, match) {
-      /* Conversion from https://www.w3.org/TR/2011/REC-css3-color-20110607
-       */
-      var hue_to_rgb = function (m1, m2, h) {
-        h = h - Math.floor(h);
-        if (h * 6 < 1) {
-          return m1 + (m2 - m1) * h * 6;
-        }
-        if (h * 6 < 3) {
-          return m2;
-        }
-        if (h * 6 < 4) {
-          return m1 + (m2 - m1) * (2 / 3 - h) * 6;
-        }
-        return m1;
-      };
-
-      var h = +match[1] / 360,
-          s = Math.min(1, Math.max(0, +match[3] / 100)),
-          l = Math.min(1, Math.max(0, +match[4] / 100)),
-          m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s,
-          m1 = l * 2 - m2;
-      color = {
-        r: hue_to_rgb(m1, m2, h + 1 / 3),
-        g: hue_to_rgb(m1, m2, h),
-        b: hue_to_rgb(m1, m2, h - 1 / 3)
-      };
-      if (match[5]) {
-        color.a = Math.min(1, Math.max(0, +match[6] / (match[7] ? 100 : 1)));
-      }
-      return color;
-    }
-  }],
 
   /**
    * Convert a color to a standard rgb object.  Allowed inputs:
@@ -252,10 +209,10 @@ var util = module.exports = {
    * sure that all parameters are in the range of [0-1], but string inputs
    * are so validated.
    *
-   * @param {object|string} color: one of the various input formats.
-   * @returns {object} an rgb color object, possibly with an 'a' value.  If
-   *    the input cannot be converted to a valid color, the input value is
-   *    returned.
+   * @param {geo.geoColor} color Any valid color input.
+   * @returns {geo.geoColorObject} An rgb color object, possibly with an 'a'
+   *    value.  If the input cannot be converted to a valid color, the input
+   *    value is returned.
    * @memberof geo.util
    */
   convertColor: function (color) {
@@ -308,6 +265,11 @@ var util = module.exports = {
 
   /**
    * Convert a color to a six or eight digit hex value prefixed with #.
+   *
+   * @param {geo.geoColorObject} color The color object to convert.
+   * @param {boolean} [allowAlpha] If truthy and `color` has a defined `a`
+   *    value, include the alpha channel in the output.
+   * @returns {string} A color string.
    * @memberof geo.util
    */
   convertColorToHex: function (color, allowAlpha) {
@@ -326,10 +288,13 @@ var util = module.exports = {
   },
 
   /**
-   * Normalize a coordinate object into {x: ..., y: ..., z: ... } form.
-   * Accepts 2-3d arrays,
-   * latitude -> lat -> y
-   * longitude -> lon -> lng -> x
+   * Normalize a coordinate object into {@link geo.geoPosition} form.  The
+   * input can be a 2 or 3 element array or an object with a variety of
+   * properties.
+   *
+   * @param {object|array} p The point to convert.
+   * @returns {geo.geoPosition} The point as an object with `x`, `y`, and `z`
+   *    properties.
    * @memberof geo.util
    */
   normalizeCoordinates: function (p) {
@@ -366,16 +331,10 @@ var util = module.exports = {
   },
 
   /**
-   * Radius of the earth in meters, from the equatorial radius of SRID 4326.
-   * @memberof geo.util
-   */
-  radiusEarth: 6378137,
-
-  /**
    * Compare two arrays and return if their contents are equal.
-   * @param {array} a1 first array to compare
-   * @param {array} a2 second array to compare
-   * @returns {boolean} true if the contents of the arrays are equal.
+   * @param {array} a1 First array to compare.
+   * @param {array} a2 Second array to compare.
+   * @returns {boolean} `true` if the contents of the arrays are equal.
    * @memberof geo.util
    */
   compareArrays: function (a1, a2) {
@@ -385,11 +344,11 @@ var util = module.exports = {
   },
 
   /**
-   * Create a vec3 that is always an array.  This should only be used if it
+   * Create a `vec3` that is always an array.  This should only be used if it
    * will not be used in a WebGL context.  Plain arrays usually use 64-bit
-   * float values, whereas vec3 defaults to 32-bit floats.
+   * float values, whereas `vec3` defaults to 32-bit floats.
    *
-   * @returns {Array} zeroed-out vec3 compatible array.
+   * @returns {array} Zeroed-out vec3 compatible array.
    * @memberof geo.util
    */
   vec3AsArray: function () {
@@ -397,11 +356,11 @@ var util = module.exports = {
   },
 
   /**
-   * Create a mat4 that is always an array.  This should only be used if it
+   * Create a `mat4` that is always an array.  This should only be used if it
    * will not be used in a WebGL context.  Plain arrays usually use 64-bit
-   * float values, whereas mat4 defaults to 32-bit floats.
+   * float values, whereas `mat4` defaults to 32-bit floats.
    *
-   * @returns {Array} identity mat4 compatible array.
+   * @returns {array} Identity `mat4` compatible array.
    * @memberof geo.util
    */
   mat4AsArray: function () {
@@ -418,10 +377,10 @@ var util = module.exports = {
    * is the correct size, return it.  Otherwise, allocate a new buffer; any
    * data in an old buffer is discarded.
    *
-   * @param geom: the geometry to reference and modify.
-   * @param srcName: the name of the source.
-   * @param len: the number of elements for the array.
-   * @returns {Float32Array}
+   * @param {vgl.geometryData} geom The geometry to reference and modify.
+   * @param {string} srcName The name of the source.
+   * @param {number} len The number of elements for the array.
+   * @returns {Float32Array} A buffer for the named source.
    * @memberof geo.util
    */
   getGeomBuffer: function (geom, srcName, len) {
@@ -440,7 +399,8 @@ var util = module.exports = {
    * Ensure that the input and modifiers properties of all actions are
    * objects, not plain strings.
    *
-   * @param {Array} actions: an array of actions to adjust as needed.
+   * @param {geo.actionRecord[]} actions An array of actions to adjust as
+   *    needed.
    * @memberof geo.util
    */
   adjustActions: function (actions) {
@@ -466,13 +426,13 @@ var util = module.exports = {
   /**
    * Add an action to the list of handled actions.
    *
-   * @param {Array} actions: an array of actions to adjust as needed.
-   * @param {object} action: an object defining the action.  This must have
-   *    action and event properties, and may have modifiers, name, and owner.
-   *    Use action, name, and owner to make this entry distinct if it will
+   * @param {geo.actionRecord[]} actions An array of actions to adjust as
+   *    needed.
+   * @param {geo.actionRecord} action An object defining the action.  Use
+   *    `action`, `name`, and `owner` to make this entry distinct if it will
    *    need to be removed later.
-   * @param {boolean} toEnd: the action is added at the beginning of the
-   *    actions list unless toEnd is true.  Earlier actions prevent later
+   * @param {boolean} toEnd The action is added at the beginning of the
+   *    actions list unless `toEnd` is `true`.  Earlier actions prevent later
    *    actions with the similar input and modifiers.
    * @memberof geo.util
    */
@@ -487,16 +447,16 @@ var util = module.exports = {
 
   /**
    * Check if an action is in the actions list.  An action matches if the
-   * action, name, and owner match.  A null or undefined value will match all
-   * actions.  If using an action object, this is the same as passing
-   * (action.action, action.name, action.owner).
+   * `action`, `name`, and `owner` match.  A `null` or `undefined` value will
+   * match all actions.  If using a {@link geo.actionRecord} object, this is
+   * the same as passing (`action.action`, `action.name`, `action.owner`).
    *
-   * @param {Array} actions: an array of actions to search.
-   * @param {object|string} action Either an action object or the name of an
-   *    action.
-   * @param {string} name Optional name associated with the action.
-   * @param {string} owner Optional owner associated with the action.
-   * @return action the first matching action or null.
+   * @param {geo.actionRecord[]} actions An array of actions to search.
+   * @param {geo.actionRecord|string} action Either an action object or the
+   *    name of an action.
+   * @param {string} [name] Optional name associated with the action.
+   * @param {string} [owner] Optional owner associated with the action.
+   * @returns {geo.actionRecord?} The first matching action or `null`.
    * @memberof geo.util
    */
   hasAction: function (actions, action, name, owner) {
@@ -516,14 +476,15 @@ var util = module.exports = {
   },
 
   /**
-   * Remove all matching actions.  Actions are matched as with hasAction.
+   * Remove all matching actions.  Actions are matched as with `hasAction`.
    *
-   * @param {Array} actions: an array of actions to adjust as needed.
-   * @param {object|string} action Either an action object or the name of an
-   *    action.
-   * @param {string} name Optional name associated with the action.
-   * @param {string} owner Optional owner associated with the action.
-   * @return numRemoved the number of actions that were removed.
+   * @param {geo.actionRecord[]} actions An array of actions to adjust as
+   *    needed.
+   * @param {geo.actionRecord|string} action Either an action object or the
+   *    name of an action.
+   * @param {string} [name] Optional name associated with the action.
+   * @param {string} [owner] Optional owner associated with the action.
+   * @returns {number} The number of actions that were removed.
    * @memberof geo.util
    */
   removeAction: function (actions, action, name, owner) {
@@ -542,13 +503,16 @@ var util = module.exports = {
   /**
    * Determine if the current inputs and modifiers match a known action.
    *
-   * @param {object} inputs: an object where each input that is currently
-   *    active is truthy.  Common inputs are left, right, middle, wheel.
-   * @param {object} modifiers: an object where each currently applied
-   *    modifier is truthy.  Common modifiers are shift, ctrl, alt, meta.
-   * @param {Array} actions: a list of actions to compare to the inputs and
-   *    modifiers.  The first action that matches will be returned.
-   * @returns {object} action A matching action or undefined.
+   * @param {object} inputs Aan object where each input that is currently
+   *    active is truthy.  Common inputs are `left`, `right`, `middle`,
+   *    `wheel`, `pan`, `rotate`.
+   * @param {object} modifiers An object where each currently applied
+   *    modifier is truthy.  Common modifiers are `shift`, `ctrl`, `alt`,
+   *    `meta`.
+   * @param {geo.actionRecord[]} actions A list of actions to compare to the
+   *    inputs and modifiers.  The first action that matches will be
+   *    returned.
+   * @returns {geo.actionRecord} A matching action or `undefined`.
    * @memberof geo.util
    */
   actionMatch: function (inputs, modifiers, actions) {
@@ -582,18 +546,24 @@ var util = module.exports = {
   /**
    * Return recommended defaults for map parameters and osm or tile layer
    * paramaters where the expected intent is to use the map in pixel
-   * coordinates (upper left is (0, 0), lower right is (width, height).  The
-   * returned objects can be modified or extended.  For instance,
-   *   var results = pixelCoordinateParams('#map', 10000, 9000);
-   *   geo.map($.extend(results.map, {clampZoom: false}));
+   * coordinates (upper left is (0, 0), lower right is (`width`, `height`).
    *
-   * @param {string} [node] DOM selector for the map container
-   * @param {number} width width of the whole map contents in pixels
-   * @param {number} height height of the whole map contents in pixels
-   * @param {number} tileWidth if an osm or tile layer is going to be used,
-   *     the width of a tile.
-   * @param {number} tileHeight if an osm or tile layer is going to be used,
-   *     the height of a tile.
+   * @example <caption>The returned objects can be modified or
+   *    extended.</caption>
+   * var results = pixelCoordinateParams('#map', 10000, 9000);
+   * var map = geo.map($.extend(results.map, {clampZoom: false}));
+   * map.createLayer('osm', results.layer);
+   *
+   * @param {string} [node] DOM selector for the map container.
+   * @param {number} width Width of the whole map contents in pixels.
+   * @param {number} height Height of the whole map contents in pixels.
+   * @param {number} [tileWidth] If an osm or tile layer is going to be used,
+   *    the width of a tile.
+   * @param {number} [tileHeight] If an osm or tile layer is going to be used,
+   *    the height of a tile.
+   * @returns {object} An object with `map` and `layer` properties.  `map` is
+   *    an object that can be passed to {@link geo.map}, and `layer` is an
+   *    object that can be passed to `map.createLayer`.
    * @memberof geo.util
    */
   pixelCoordinateParams: function (node, width, height, tileWidth, tileHeight) {
@@ -658,8 +628,8 @@ var util = module.exports = {
   /**
    * Escape any character in a string that has a code point >= 127.
    *
-   * @param {string} text: the string to escape.
-   * @returns {string}: the escaped string.
+   * @param {string} text The string to escape.
+   * @returns {string} The escaped string.
    * @memberof geo.util
    */
   escapeUnicodeHTML: function (text) {
@@ -676,9 +646,10 @@ var util = module.exports = {
    * Check svg image and html img tags.  If the source is set, load images
    * explicitly and convert them to local data:image references.
    *
-   * @param {selector} elem: a jquery selector that may contain images.
-   * @returns {array}: a list of deferred objects that resolve when images
-   *      are dereferences.
+   * @param {jQuery.selector} elem A jQuery selector or element set that may
+   *    contain images.
+   * @returns {jQuery.Deferred[]} A list of deferred objects that resolve
+   *    when images are dereferenced.
    * @memberof geo.util
    */
   dereferenceElements: function (elem) {
@@ -720,13 +691,13 @@ var util = module.exports = {
    * images within the element.  If there are other external references, the
    * image may not work due to security considerations.
    *
-   * @param {object} elem: either a jquery selector or an html element.  This
-   *      may contain multiple elements.  The direct parent and grandparent
-   *      of the element are used for class information.
-   * @param {number} parents: number of layers up to travel to get class
-   *      information.
-   * @returns {deferred}: a jquery deferred object which receives an HTML
-   *      Image element when resolved.
+   * @param {jQuery.selector} elem Either a jquery selector or an HTML
+   *    element.  This may contain multiple elements.  The direct parent and
+   *    grandparent of the element are used for class information.
+   * @param {number} [parents] Number of layers up to travel to get class
+   *    information.
+   * @returns {jQuery.Deferred} A jquery deferred object which receives an
+   *    HTML Image element when resolved.
    * @memberof geo.util
    */
   htmlToImage: function (elem, parents) {
@@ -818,7 +789,10 @@ var util = module.exports = {
   /**
    * Report on one or all of the tracked timings.
    *
-   * @param {string} name name to report on, or undefined to report all.
+   * @param {string} [name] A name to report on, or `undefined` to report all.
+   * @returns {object} An object with timing information, or an object with
+   *    properties for all tracked timings, each of which contains timing
+   *    information.
    * @memberof geo.util
    */
   timeReport: function (name) {
@@ -841,11 +815,12 @@ var util = module.exports = {
 
   /**
    * Note the start time of a function (or any other section of code).  This
-   * should be paired with timeFunctionStop, which will collect statistics on
+   * should be paired with `timeFunctionStop`, which will collect statistics on
    * the amount of time spent in a function.
    *
-   * @param {string} name name to use for tracking the timing.
-   * @param {boolean} reset if true, clear old tracking data.
+   * @param {string} name Name to use for tracking the timing.
+   * @param {boolean} reset If `true`, clear old tracking data for this named
+   *    tracker.
    * @memberof geo.util
    */
   timeFunctionStart: function (name, reset) {
@@ -859,9 +834,9 @@ var util = module.exports = {
 
   /**
    * Note the stop time of a function (or any other section of code).  This
-   * should be paired with timeFunctionStart.
+   * should be paired with `timeFunctionStart`.
    *
-   * @param {string} name name to use for tracking the timing.
+   * @param {string} name Name to use for tracking the timing.
    * @memberof geo.util
    */
   timeFunctionStop: function (name) {
@@ -883,23 +858,28 @@ var util = module.exports = {
   },
 
   /**
-   * Start or stop tracking the time spent in requestAnimationFrame.  If
+   * Start or stop tracking the time spent in `requestAnimationFrame`.  If
    * tracked, the results can be fetched via
-   * timeFunctionReport('requestAnimationFrame').
+   * `timeFunctionReport('requestAnimationFrame')`.
    *
-   * @param {boolean} stop falsy to start tracking, truthy to start tracking.
-   * @param {boolean} reset if true, reset the statistics.
-   * @param {number} threshold if present, set the threshold used in tracking
-   *   slow callbacks.
-   * @param {number} keep if present, set the number of recent frame times
-   *   to track.
+   * @param {boolean} [stop] Falsy to start tracking, truthy to start tracking.
+   * @param {boolean} [reset] If truthy, reset the statistics.
+   * @param {number} [threshold=15] If present, set the threshold in
+   *    milliseconds used in tracking slow callbacks.
+   * @param {number} [keep=200] If present, set the number of recent frame
+   *    times to track.
    * @memberof geo.util
    */
   timeRequestAnimationFrame: function (stop, reset, threshold, keep) {
     if (!m_timingData.requestAnimationFrame || reset) {
       m_timingData.requestAnimationFrame = {
-        count: 0, sum: 0, sum2: 0, max: 0, above_threshold: 0,
-        recent: [], recentsub: []
+        count: 0,
+        sum: 0,
+        sum2: 0,
+        max: 0,
+        above_threshold: 0,
+        recent: [],
+        recentsub: []
       };
     }
     if (threshold) {
@@ -966,7 +946,35 @@ var util = module.exports = {
     }
   },
 
+  ///////////////////////////////////////////////////////////////////////////
+  /*
+   * Utility member properties.
+   */
+  ///////////////////////////////////////////////////////////////////////////
+
   /**
+   * Radius of the earth in meters, from the equatorial radius of SRID 4326.
+   * @memberof geo.util
+   */
+  radiusEarth: 6378137,
+
+  /**
+   * A regular expression string that will parse a number (integer or floating
+   * point) for CSS properties.
+   * @memberof geo.util
+   */
+  cssNumberRegex: '[+-]?(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?',
+
+  /**
+   * A dictionary of conversion factors for angular CSS measurements.
+   * @memberof geo.util
+   */
+  cssAngleUnitsBase: {deg: 360, grad: 400, rad: 2 * Math.PI, turn: 1},
+
+  /**
+   * The predefined CSS colors.  See
+   * {@link https://drafts.csswg.org/css-color}.
+   *
    * @memberof geo.util
    */
   cssColors: {
@@ -1121,4 +1129,87 @@ var util = module.exports = {
   }
 };
 
+///////////////////////////////////////////////////////////////////////////
+/*
+ * Utility member properties that need to refer to util functions and
+ * properties.
+ */
+///////////////////////////////////////////////////////////////////////////
+
+/**
+ * A list of regex and processing functions for color conversions to rgb
+ * objects.  Each entry is a {@link geo.util.cssColorConversionRecord}.  In
+ * general, these conversions are somewhat more forgiving than the css
+ * specification (see https://drafts.csswg.org/css-color/) in that
+ * percentages may be mixed with numbers, and that floating point values are
+ * accepted for all numbers.  Commas are optional.  As per the latest draft
+ * standard, `rgb` and `rgba` are aliases of each other, as are `hsl` and
+ * `hsla`.
+ * @alias cssColorConversions
+ * @memberof geo.util
+ */
+util.cssColorConversions = [{
+  name: 'rgb',
+  regex: new RegExp(
+    '^\\s*rgba?' +
+    '\\(\\s*(' + util.cssNumberRegex + ')\\s*(%?)\\s*' +
+    ',?\\s*(' + util.cssNumberRegex + ')\\s*(%?)\\s*' +
+    ',?\\s*(' + util.cssNumberRegex + ')\\s*(%?)\\s*' +
+    '([/,]?\\s*(' + util.cssNumberRegex + ')\\s*(%?)\\s*)?' +
+    '\\)\\s*$'),
+  process: function (color, match) {
+    color = {
+      r: Math.min(1, Math.max(0, +match[1] / (match[2] ? 100 : 255))),
+      g: Math.min(1, Math.max(0, +match[3] / (match[4] ? 100 : 255))),
+      b: Math.min(1, Math.max(0, +match[5] / (match[6] ? 100 : 255)))
+    };
+    if (match[7]) {
+      color.a = Math.min(1, Math.max(0, +match[8] / (match[9] ? 100 : 1)));
+    }
+    return color;
+  }
+}, {
+  name: 'hsl',
+  regex: new RegExp(
+    '^\\s*hsla?' +
+    '\\(\\s*(' + util.cssNumberRegex + ')\\s*(deg|grad|rad|turn)?\\s*' +
+    ',?\\s*(' + util.cssNumberRegex + ')\\s*%\\s*' +
+    ',?\\s*(' + util.cssNumberRegex + ')\\s*%\\s*' +
+    '([/,]?\\s*(' + util.cssNumberRegex + ')\\s*(%?)\\s*)?' +
+    '\\)\\s*$'),
+  process: function (color, match) {
+    /* Conversion from https://www.w3.org/TR/2011/REC-css3-color-20110607
+     */
+    var hue_to_rgb = function (m1, m2, h) {
+      h = h - Math.floor(h);
+      if (h * 6 < 1) {
+        return m1 + (m2 - m1) * h * 6;
+      }
+      if (h * 6 < 3) {
+        return m2;
+      }
+      if (h * 6 < 4) {
+        return m1 + (m2 - m1) * (2 / 3 - h) * 6;
+      }
+      return m1;
+    };
+
+    var h = +match[1] / (util.cssAngleUnitsBase[match[2]] || 360),
+        s = Math.min(1, Math.max(0, +match[3] / 100)),
+        l = Math.min(1, Math.max(0, +match[4] / 100)),
+        m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s,
+        m1 = l * 2 - m2;
+    color = {
+      r: hue_to_rgb(m1, m2, h + 1 / 3),
+      g: hue_to_rgb(m1, m2, h),
+      b: hue_to_rgb(m1, m2, h - 1 / 3)
+    };
+    if (match[5]) {
+      color.a = Math.min(1, Math.max(0, +match[6] / (match[7] ? 100 : 1)));
+    }
+    return color;
+  }
+}];
+
+/* Add additional utilities to the main object. */
 $.extend(util, throttle, mockVGL);

@@ -2,12 +2,132 @@ var inherit = require('./inherit');
 var feature = require('./feature');
 
 /**
- * Create a new instance of class contourFeature
+ * Contour feature specification.
  *
- * @class geo.contourFeature
+ * @typedef {geo.feature.spec} geo.contourFeature.spec
+ * @property {object[]} [data=[]] An array of arbitrary objects used to
+ *  construct the feature.
+ * @property {object} [style] An object that contains style values for the
+ *      feature.
+ * @property {function|number} [style.opacity=1] The opacity on a scale of 0 to
+ *      1.
+ * @property {function|geo.geoPosition} [style.position=data] The position of
+ *      each data element.  This defaults to just using `x`, `y`, and `z`
+ *      properties of the data element itself.  The position is in the
+ *      feature's gcs coordinates.
+ * @property {function|number} [style.value=data.z] The contour value of each
+ *      data element.  This defaults `z` properties of the data element.  If
+ *      the value of a grid point is `null` or `undefined`, that point will not
+ *      be included in the contour display.  Since the values are on a grid, if
+ *      this point is in the interior of the grid, this can remove up to four
+ *      squares.
+ * @property {geo.contourFeature.contourSpec} [contour] The contour
+ *      specification for the feature.
+ */
+
+/**
+ * Contour specification.
+ *
+ * @typedef {object} geo.contourFeature.contourSpec
+ * @property {function|number} [gridWidth] The number of data columns in the
+ *      grid.  If this is not specified and `gridHeight` is given, this is the
+ *      number of data elements divided by `gridHeight`.  If neither
+ *      `gridWidth` not `gridHeight` are specified,  the square root of the
+ *      number of data elements is used.  If both are specified, some data
+ *      could be unused.
+ * @property {function|number} [gridHeight] The number of data rows in the
+ *      grid.  If this is not specified and `gridWidth` is given, this is the
+ *      number of data elements divided by `gridWidth`.  If neither
+ *      `gridWidth` not `gridHeight` are specified,  the square root of the
+ *      number of data elements is used.  If both are specified, some data
+ *      could be unused.
+ * @property {function|number} [x0] The x coordinate of the 0th point in the
+ *      `value` array.  If `null` or `undefined`, the coordinate is taken from
+ *      the `position` style.
+ * @property {function|number} [y0] The y coordinate of the 0th point in the
+ *      `value` array.  If `null` or `undefined`, the coordinate is taken from
+ *      the `position` style.
+ * @property {function|number} [dx] The distance in the x direction between the
+ *      0th and 1st point in the `value` array.  This may be positive or
+ *      negative.  If 0, `null`, or `undefined`, the coordinate is taken from
+ *      the `position` style.
+ * @property {function|number} [dy] The distance in the y direction between the
+ *      0th and `gridWidth`th point in the `value` array.  This may be positive
+ *      or negative.  If 0, `null`, or `undefined`, the coordinate is taken
+ *      from the `position` style.
+ * @property {function|boolean} [wrapLongitude] If truthy and `position` is not
+ *      used (`x0`, `y0`, `dx`, and `dy` are all set appropriately), assume the
+ *      x coordinates is longitude and should be adjusted to be within -180 to
+ *      180.  If the data spans 180 degrees, the points or squares that
+ *      straddle the meridian will be duplicated to ensure that
+ *      the map is covered from -180 to 180 as appropriate.  Set this to
+ *      `false` if using a non-longitude x coordinate.  This is ignored if
+ *      `position` is used.
+ * @property {function|number} [min] Minimum contour value.  If unspecified,
+ *      taken from the computed minimum of the `value` style.
+ * @property {function|number} [max] Maximum contour value.  If unspecified,
+ *      taken from the computed maxi,um of the `value` style.
+ * @property {function|geo.geoColor} [minColor='black'] Color used for any
+ *      value below the minimum.
+ * @property {function|number} [minOpacity=0] Opacity used for any value below
+ *      the minimum.
+ * @property {function|geo.geoColor} [maxColor='black'] Color used for any
+ *      value above the maximum.
+ * @property {function|number} [maxOpacity=0] Opacity used for any value above
+ *      the maximum.
+ * @property {function|boolean} [stepped] If falsy but not `undefined`, smooth
+ *      transitions between colors.
+ * @property {function|geo.geoColor[]} [colorRange=<color table>] An array of
+ *      colors used to show the range of values.  The default is a 9-step color
+ *      table.
+ * @property {function|number[]} [opacityRange] An array of opacities used to
+ *      show the range of values.  If unspecified, the opacity is 1.  If this
+ *      is a shorter list than the `colorRange`, an opacity of 1 is used for
+ *      the entries near the end of the color range.
+ * @property {function|number[]} [rangeValues] An array used to map values to
+ *      the `colorRange`.  By default, values are spaced linearly.  If
+ *      specified, the entries must be increasing weakly monotonic, and there
+ *      must be one more entry then the length of `colorRange`.
+ */
+
+/**
+ * Computed contour information.
+ *
+ * @typedef {object} geo.contourFeature.contourInfo
+ * @property {number[]} elements An array of 0-based indices into the values
+ *    array.  Each set of the three values forms a triangle that should be
+ *    rendered.  If no contour data can be used, this will be a zero-length
+ *    array and other properties may not be set.
+ * @property {number[]} pos An flat array of coordinates for the vertices in
+ *    the triangular mesh.  The array is in the order x0, y0, z0, x1, y1, z1,
+ *    x2, ..., and is always three times as long as the number of vertices.
+ * @property {number[]} value An array of values that have been normalized to a
+ *    range of [0, steps].  There is one value per vertex.
+ * @property {number[]} opacity An array of opacities per vertex.
+ * @property {number} minValue the minimum value used for the contour.  If
+ *    `rangeValues` was specified, this is the first entry of that array.
+ * @property {number} maxValue the maximum value used for the contour.  If
+ *    `rangeValues` was specified, this is the last entry of that array.
+ * @property {number} factor If linear value scaling is used, this is the
+ *    number of color values divided by the difference between the maximum and
+ *    minimum values.  It is ignored if non-linear value scaling is used.
+ * @property {geo.geoColorObject} minColor The color used for values below
+ *    minValue.  Includes opacity.
+ * @property {geo.geoColorObject} maxColor The color used for values above
+ *    maxValue.  Includes opacity.
+ * @property {geo.geoColorObject[]} colorMap The specified `colorRange` and
+ *    `opacityRange` converted into objects that include opacity.
+ */
+
+/**
+ * Create a new instance of class contourFeature.
+ *
+ * @class
+ * @alias geo.contourFeature
  * @extends geo.feature
- * @returns {geo.contourFeature}
  *
+ * @param {geo.contourFeature.spec} arg
+ * @returns {geo.contourFeature}
  */
 var contourFeature = function (arg) {
   'use strict';
@@ -26,8 +146,7 @@ var contourFeature = function (arg) {
    */
   var m_this = this,
       m_contour = {},
-      s_init = this._init,
-      s_data = this.data;
+      s_init = this._init;
 
   if (arg.contour === undefined) {
     m_contour = function (d) {
@@ -38,39 +157,40 @@ var contourFeature = function (arg) {
   }
 
   /**
-   * Override the parent data method to keep track of changes to the
-   * internal coordinates.
-   */
-  this.data = function (arg) {
-    var ret = s_data(arg);
-    return ret;
-  };
-
-  /**
-   * Get/Set contour accessor
+   * Get/Set contour accessor.
    *
-   * @returns {geo.pointFeature}
+   * @param {string|geo.contourFeature.contourSpec} [specOrProperty] If
+   *    `undefined`, return the current contour specification.  If a string is
+   *    specified, either get or set the named contour property.  If an object
+   *    is given, set or update the contour specification with the specified
+   *    parameters.
+   * @param {object} [value] If `specOrProperty` is a string, set that property
+   *    to `value`.  If `undefined`, return the current value of the named
+   *    property.
+   * @returns {geo.contourFeature.contourSpec|object|this} The current contour
+   *    specification, the value of a named contour property, or this contour
+   *    feature.
    */
-  this.contour = function (arg1, arg2) {
-    if (arg1 === undefined) {
+  this.contour = function (specOrProperty, value) {
+    if (specOrProperty === undefined) {
       return m_contour;
     }
-    if (typeof arg1 === 'string' && arg2 === undefined) {
-      return m_contour[arg1];
+    if (typeof specOrProperty === 'string' && value === undefined) {
+      return m_contour[specOrProperty];
     }
-    if (arg2 === undefined) {
+    if (value === undefined) {
       var contour = $.extend(
         {},
         {
           gridWidth: function () {
-            if (arg1.gridHeight) {
-              return Math.floor(m_this.data().length / arg1.gridHeight);
+            if (specOrProperty.gridHeight) {
+              return Math.floor(m_this.data().length / specOrProperty.gridHeight);
             }
             return Math.floor(Math.sqrt(m_this.data().length));
           },
           gridHeight: function () {
-            if (arg1.gridWidth) {
-              return Math.floor(m_this.data().length / arg1.gridWidth);
+            if (specOrProperty.gridWidth) {
+              return Math.floor(m_this.data().length / specOrProperty.gridWidth);
             }
             return Math.floor(Math.sqrt(m_this.data().length));
           },
@@ -78,7 +198,7 @@ var contourFeature = function (arg) {
           minOpacity: 0,
           maxColor: 'black',
           maxOpacity: 0,
-        /* 9-step based on paraview bwr colortable */
+          /* 9-step based on paraview bwr colortable */
           colorRange: [
             {r: 0.07514311, g: 0.468049805, b: 1},
             {r: 0.468487184, g: 0.588057293, b: 1},
@@ -92,11 +212,11 @@ var contourFeature = function (arg) {
           ]
         },
         m_contour,
-        arg1
+        specOrProperty
       );
       m_contour = contour;
     } else {
-      m_contour[arg1] = arg2;
+      m_contour[specOrProperty] = value;
     }
     m_this.modified();
     return m_this;
@@ -106,8 +226,10 @@ var contourFeature = function (arg) {
    * A uniform getter that always returns a function even for constant values.
    * If undefined input, return all the contour values as an object.
    *
-   * @param {string|undefined} key
-   * @return {function}
+   * @param {string|undefined} key The name of the contour key or `undefined`
+   *    to return an object with all keys as functions.
+   * @returns {function|object} A function related to the key, or an object
+   *    with all contour keys, each of which is a function.
    */
   this.contour.get = function (key) {
     if (key === undefined) {
@@ -123,9 +245,12 @@ var contourFeature = function (arg) {
   };
 
   /**
-   * Get/Set position accessor
+   * Get/Set position accessor.  This is identical to getting or setting the
+   * `position` style.
    *
-   * @returns {geo.pointFeature}
+   * @param {function|array} [val] If specified, set the position style.  If
+   *    `undefined`, return the current value.
+   * @returns {function|array|this} Either the position style or this.
    */
   this.position = function (val) {
     if (val === undefined) {
@@ -143,10 +268,8 @@ var contourFeature = function (arg) {
    * vertices.  Create a set of triangles of indices into the vertex array.
    * Create a color and opacity map corresponding to the values.
    *
-   * @returns: an object with pos, value, opacity, elements, minValue,
-   *           maxValue, minColor, maxColor, colorMap, factor.  If there is no
-   *           contour data that can be used, only elements is guaranteed to
-   *           exist, and it will be a zero-length array.
+   * @returns {geo.contourFeature.contourInfo} An object with the contour
+   *    information.
    */
   this.createContours = function () {
     var i, i3, j, idx, k, val, numPts, usedPts = 0, usePos, item,
@@ -344,7 +467,9 @@ var contourFeature = function (arg) {
   };
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @param {geo.contourFeature.spec} arg The contour feature specification.
    */
   this._init = function (arg) {
     s_init.call(m_this, arg);
@@ -354,7 +479,10 @@ var contourFeature = function (arg) {
       {
         opacity: 1.0,
         position: function (d) {
-          return {x: d.x, y: d.y, z: d.z};
+          /* We could construct a new object and return
+           *  {x: d.x, y: d.y, z: d.z};
+           * but that isn't necessary. */
+          return d;
         },
         value: function (d) {
           return m_this.position()(d).z;
@@ -423,16 +551,4 @@ layer.createFeature('contour', {
     spacing.  Must be increasing monotonic and one value longer than the length
     of colorRange>]
 })
-
-Notes:
-* The position array is only used for position if not all of x0, y0, dx, and dy
-    are specified (not null or undefined).  If a value array is not specified,
-    the position array could still be used for the value.
-* If the value() of a grid point is null or undefined, that point will not be
-    included in the contour display.  Since the values are on a grid, if this
-    point is in the interior of the grid, this can remove up to four squares.
-* Only one of gridWidth and gridHeight needs to be specified.  If both are
-    specified and gridWidth * gridHeight < data().length, not all the data will
-    be used.  If neither are specified, floor(sqrt(data().length)) is used for
-    both.
  */
