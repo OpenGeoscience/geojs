@@ -82,6 +82,17 @@ var annotationLayer = function (args) {
     'strokeOpacity': {dataType: 'opacity', keys: ['strokeOpacity', 'stroke-opacity']},
     'strokeWidth': {dataType: 'positive', keys: ['strokeWidth', 'stroke-width']}
   };
+  textFeature.usedStyles.forEach(function (key) {
+    geojsonStyleProperties[key] = {
+      option: 'labelStyle',
+      dataType: ['visible', 'rotateWithMap', 'scaleWithMap'].indexOf(key) >= 0 ? 'boolean' : 'text',
+      keys: [
+        key,
+        'label' + key.charAt(0).toUpperCase() + key.slice(1),
+        key.replace(/([A-Z])/g, '-$1').toLowerCase(),
+        'label-' + key.replace(/([A-Z])/g, '-$1').toLowerCase()]
+    };
+  });
 
   m_options = $.extend(true, {}, {
     dblClickTime: 300,
@@ -485,9 +496,8 @@ var annotationLayer = function (args) {
       if ($.inArray(type, annotationList) < 0) {
         return;
       }
-      if (!options.style) {
-        options.style = {};
-      }
+      options.style = options.style || {};
+      options.labelStyle = options.labelStyle || {};
       delete options.annotationType;
       // the geoJSON reader can only emit line, polygon, and point
       switch (feature.featureType) {
@@ -540,7 +550,7 @@ var annotationLayer = function (args) {
             feature.style.get(key)(data, data_idx), prop.dataType);
         }
         if (value !== undefined) {
-          options.style[key] = value;
+          options[prop.option || 'style'][key] = value;
         }
       });
       /* Delete property keys we have used */
@@ -625,6 +635,9 @@ var annotationLayer = function (args) {
         }
         break;
       case 'opacity':
+        if (value === undefined || value === null || value === '') {
+          return;
+        }
         value = +value;
         if (isNaN(value) || value < 0 || value > 1) {
           return;
@@ -781,7 +794,7 @@ var annotationLayer = function (args) {
           if (d.style && d.style[key] !== undefined) {
             return d.style[key];
           }
-          return (m_this.options('defaultLableStyle') || {})[key];
+          return (m_this.options('defaultLabelStyle') || {})[key];
         };
       });
       m_labelFeature = (m_labelLayer || m_this).createFeature('text', {

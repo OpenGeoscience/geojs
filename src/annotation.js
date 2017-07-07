@@ -8,6 +8,7 @@ var registerAnnotation = require('./registry').registerAnnotation;
 var lineFeature = require('./lineFeature');
 var pointFeature = require('./pointFeature');
 var polygonFeature = require('./polygonFeature');
+var textFeature = require('./textFeature');
 
 var annotationId = 0;
 
@@ -507,7 +508,8 @@ var annotation = function (type, args) {
     var coor = this._geojsonCoordinates(gcs),
         geotype = this._geojsonGeometryType(),
         styles = this._geojsonStyles(),
-        objStyle = this.options('style'),
+        objStyle = this.options('style') || {},
+        objLabelStyle = this.options('labelStyle') || {},
         i, key, value;
     if (!coor || !coor.length || !geotype) {
       return;
@@ -538,6 +540,16 @@ var annotation = function (type, args) {
           value = util.convertColorToHex(value);
         }
         obj.properties[key] = value;
+      }
+    }
+    for (i = 0; i < textFeature.usedStyles.length; i += 1) {
+      key = textFeature.usedStyles[i];
+      value = util.ensureFunction(objLabelStyle[key])();
+      if (value !== undefined) {
+        if (key.toLowerCase().match(/color$/)) {
+          value = util.convertColorToHex(value);
+        }
+        obj.properties['label' + key.charAt(0).toUpperCase() + key.slice(1)] = value;
       }
     }
     if (includeCrs) {

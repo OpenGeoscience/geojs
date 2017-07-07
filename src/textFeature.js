@@ -37,13 +37,16 @@ var feature = require('./feature');
  *      `ideographic`, or `bottom`.
  * @property {string|function} [style.direction='inherit'] Text direction.  One
  *      of `ltr`, `rtl`, or `inherit`.
- * @property {geo.geoColor|function} [style.color='black'] Text color.
+ * @property {geo.geoColor|function} [style.color='black'] Text color.  May
+ *      include opacity.
  * @property {number|function} [style.opacity=1] The opacity of the text.  If
  *      the color includes opacity, this is combined with that value.
  * @property {number|function} [style.rotation=0] Text rotation in radians.
  * @property {boolean|function} [style.rotateWithMap=false] If truthy, rotate
  *      the text when the map rotates.  Otherwise, the text is always in the
  *      same orientation.
+ * @property {number|function} [style.scale=4] The zoom basis value used when
+ *      `scaleWithMap` is truthy.
  * @property {boolean|function} [style.scaleWithMap=false] If truthy, use the
  *      `scale` style as the basis of the map zoom value for the font size.
  *      The size is scaled from this point.
@@ -51,6 +54,15 @@ var feature = require('./feature');
  *      default position for the text.  This is applied before rotation.
  * @property {number|function} [style.width] The maximum width of the text in
  *      pixels.  `null` or 0 for no maximum.
+ * @property {geo.geoColor|function} [style.shadowColor='black'] Text shadow
+ *      color.  May include opacity.
+ * @property {geo.screenPosition|function} [style.shadowOffset] Offset for a
+ *      text shadow.  This is applied before rotation.
+ * @property {number|null|function} [style.shadowBlur] If not null, add a text
+ *      shadow with this much blur.
+ * @property {boolean|function} [style.shadowRotate=false] If truthy, rotate
+ *      the shadow offset based on the text rotation (the `shadowOffset` is
+ *      the offset if the text has a 0 rotation).
  */
 
 /**
@@ -166,8 +178,9 @@ var textFeature = function (arg) {
 textFeature.usedStyles = [
   'visible', 'font', 'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch',
   'fontSize', 'lineHeight', 'fontFamily', 'textAlign', 'textBaseline',
-  'direction', 'color', 'opacity', 'rotation', 'rotateWithMap', 'scaleWithMap',
-  'offset', 'width'
+  'direction', 'color', 'textOpacity', 'rotation', 'rotateWithMap', 'scale',
+  'scaleWithMap', 'offset', 'width', 'shadowColor', 'shadowOffset',
+  'shadowBlur', 'shadowRotate'
 ];
 
 /**

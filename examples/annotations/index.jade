@@ -47,61 +47,90 @@ block append mainContent
           .form-group
             label(for='edit-name') Name
             input#edit-name(option='name')
-          .form-group
-            label(for='edit-name') Label
-            input#edit-name(option='label')
-          .form-group
-            label(for='edit-name') Description
-            input#edit-name(option='description', type='textarea')
-          .form-group(annotation-types='point')
-            label(for='edit-radius') Radius
-            input#edit-radius(option='radius', format='positive')
-          .form-group(annotation-types='point', title='Set to "false" to disable, "true" to use the specified radius at the current zoom, or a zoom level to use the specified radius at that zoom level.')
-            label(for='edit-scaled') Scale with Zoom
-            input#edit-radius(option='scaled', format='booleanOrNumber')
-          .form-group(annotation-types='point polygon rectangle')
-            label(for='edit-fill') Fill
-            select#edit-stroke(option='fill', format='boolean')
-              option(value='true') Yes
-              option(value='false') No
-          .form-group(annotation-types='point polygon rectangle')
-            label(for='edit-fillColor') Fill Color
-            input#edit-fillColor(option='fillColor', format='color')
-          .form-group(annotation-types='point polygon rectangle')
-            label(for='edit-fillOpacity') Fill Opacity
-            input#edit-fillOpacity(option='fillOpacity', format='opacity')
-          .form-group(annotation-types='point polygon rectangle')
-            label(for='edit-stroke') Stroke
-            select#edit-stroke(option='stroke', format='boolean')
-              option(value='true') Yes
-              option(value='false') No
-          .form-group(annotation-types='point polygon rectangle line')
-            label(for='edit-strokeWidth') Stroke Width
-            input#edit-strokeWidth(option='strokeWidth', format='positive')
-          .form-group(annotation-types='point polygon rectangle line')
-            label(for='edit-strokeColor') Stroke Color
-            input#edit-strokeColor(option='strokeColor', format='color')
-          .form-group(annotation-types='point polygon rectangle line')
-            label(for='edit-strokeOpacity') Stroke Opacity
-            input#edit-strokeOpacity(option='strokeOpacity', format='opacity')
-          .form-group(annotation-types='line')
-            label(for='edit-closed') Closed
-            select#edit-closed(option='closed', format='boolean')
-              option(value='true') Yes
-              option(value='false') No
-          .form-group(annotation-types='line')
-            label(for='edit-lineCap') Line End Caps
-            select#edit-lineCap(option='lineCap', format='text')
-              option(value='butt') Butt
-              option(value='round') Round
-              option(value='square') Square
-          .form-group(annotation-types='line')
-            label(for='edit-lineJoin') Line Joins
-            select#edit-lineJoin(option='lineJoin', format='text')
-              option(value='miter') Miter
-              option(value='bevel') Bevel
-              option(value='round') Round
-              option(value='miter-clip') Miter-Clip
+          .row
+            .col-md-6
+              .form-group
+                label(for='edit-description') Description
+                input#edit-description(option='description', type='textarea')
+              .form-group(annotation-types='point')
+                label(for='edit-radius') Radius
+                input#edit-radius(option='radius', format='positive')
+              .form-group(annotation-types='point', title='Set to "false" to disable, "true" to use the specified radius at the current zoom, or a zoom level to use the specified radius at that zoom level.')
+                label(for='edit-scaled') Scale with Zoom
+                input#edit-radius(option='scaled', format='booleanOrNumber')
+              .form-group(annotation-types='point polygon rectangle')
+                label(for='edit-fill') Fill
+                select#edit-stroke(option='fill', format='boolean')
+                  option(value='true') Yes
+                  option(value='false') No
+              .form-group(annotation-types='point polygon rectangle')
+                label(for='edit-fillColor') Fill Color
+                input#edit-fillColor(option='fillColor', format='color')
+              .form-group(annotation-types='point polygon rectangle')
+                label(for='edit-fillOpacity') Fill Opacity
+                input#edit-fillOpacity(option='fillOpacity', format='opacity')
+              .form-group(annotation-types='point polygon rectangle')
+                label(for='edit-stroke') Stroke
+                select#edit-stroke(option='stroke', format='boolean')
+                  option(value='true') Yes
+                  option(value='false') No
+              .form-group(annotation-types='point polygon rectangle line')
+                label(for='edit-strokeWidth') Stroke Width
+                input#edit-strokeWidth(option='strokeWidth', format='positive')
+              .form-group(annotation-types='point polygon rectangle line')
+                label(for='edit-strokeColor') Stroke Color
+                input#edit-strokeColor(option='strokeColor', format='color')
+              .form-group(annotation-types='point polygon rectangle line')
+                label(for='edit-strokeOpacity') Stroke Opacity
+                input#edit-strokeOpacity(option='strokeOpacity', format='opacity')
+              .form-group(annotation-types='line')
+                label(for='edit-closed') Closed
+                select#edit-closed(option='closed', format='boolean')
+                  option(value='true') Yes
+                  option(value='false') No
+              .form-group(annotation-types='line')
+                label(for='edit-lineCap') Line End Caps
+                select#edit-lineCap(option='lineCap', format='text')
+                  option(value='butt') Butt
+                  option(value='round') Round
+                  option(value='square') Square
+              .form-group(annotation-types='line')
+                label(for='edit-lineJoin') Line Joins
+                select#edit-lineJoin(option='lineJoin', format='text')
+                  option(value='miter') Miter
+                  option(value='bevel') Bevel
+                  option(value='round') Round
+                  option(value='miter-clip') Miter-Clip
+            .col-md-6
+              .form-group
+                label(for='edit-label') Label
+                input#edit-label(option='label')
+              .form-group(annotation-types='all')
+                label(for='edit-color') Label Color
+                input#edit-color(option='color', format='color', optiontype='label')
+              .form-group(annotation-types='all')
+                label(for='edit-textOpacity') Label Opacity
+                input#edit-textOpacity(option='textOpacity', format='opacity', optiontype='label')
+              .form-group(annotation-types='all', title='This is of the form [italic|oblique] [small-caps] [bold|bolder|lighter|<weight>] [<stretch>] <size>[/<line height>] <family>')
+                label(for='edit-font') Font
+                input#edit-font(option='font', optiontype='label')
+              .form-group(annotation-types='all', title='Horizontal alignment')
+                label(for='edit-textAlign') Horizontal Align.
+                select#edit-textAlign(option='textAlign', format='text', optiontype='label')
+                  option(value='middle') Middle
+                  option(value='start') Start
+                  option(value='end') End
+                  option(value='left') Left
+                  option(value='right') Right
+              .form-group(annotation-types='all', title='Verticall alignment')
+                label(for='edit-textBaseline') Vertical Align.
+                select#edit-textAlign(option='textBaseline', format='text', optiontype='label')
+                  option(value='middle') Middle
+                  option(value='top') Top
+                  option(value='hanging') Hanging
+                  option(value='alphabetic') Alphabetic
+                  option(value='ideographic') Ideographic
+                  option(value='bottom') Bottom
           .form-group
             #edit-validation-error
         .modal-footer

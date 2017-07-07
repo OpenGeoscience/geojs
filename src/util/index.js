@@ -286,6 +286,24 @@ var util = module.exports = {
     }
     return value;
   },
+  /**
+   * Convert a color to a css rgba() value.
+   *
+   * @param {geo.geoColorObject} color The color object to convert.
+   * @returns {string} A color string.
+   * @memberof geo.util
+   */
+  convertColorToRGBA: function (color) {
+    var rgb = util.convertColor(color);
+    if (!rgb) {
+      rgb = {r: 0, g: 0, b: 0};
+    }
+    if (rgb.a === undefined) {
+      rgb.a = 1;
+    }
+    return 'rgba(' + Math.round(rgb.r * 255) + ', ' + Math.round(rgb.g * 255) +
+           ', ' + Math.round(rgb.b * 255) + ', ' + rgb.a + ')';
+  },
 
   /**
    * Normalize a coordinate object into {@link geo.geoPosition} form.  The
