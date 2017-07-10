@@ -682,7 +682,6 @@ var map = function (arg) {
     m_this.center(oldCenter);
 
     m_this.geoTrigger(geo_event.resize, {
-      type: geo_event.resize,
       target: m_this,
       width: m_width,
       height: m_height
