@@ -333,7 +333,7 @@ $(function () {
       switch (format) {
         case 'color':
           // always show colors as hex values
-          value = geo.util.convertColorToHex(value || {r: 0, g: 0, b: 0});
+          value = geo.util.convertColorToHex(value || {r: 0, g: 0, b: 0}, 'needed');
           break;
       }
       if (value !== undefined) {

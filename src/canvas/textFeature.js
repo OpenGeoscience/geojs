@@ -89,7 +89,7 @@ var canvas_textFeature = function (arg) {
     var data = m_this.data(),
         posFunc = m_this.style.get('position'),
         textFunc = m_this.style.get('text'),
-        fontFromSubValues, text, pos, val, opac;
+        fontFromSubValues, text, pos, val;
 
     /* If any of the font styles other than `font` have values, then we need to
      * construct a single font value from the subvalues.  Otherwise, we can
@@ -97,11 +97,20 @@ var canvas_textFeature = function (arg) {
     fontFromSubValues = ['fontStyle', 'fontVariant', 'fontWeight', 'fontStretch', 'fontSize', 'lineHeight', 'fontFamily'].some(function (key) {
       return m_this.style(key) !== null && m_this.style(key) !== undefined;
     });
+    /* Clear the canvas property buffer */
+    m_this._canvasProperty();
     data.forEach(function (d, i) {
       val = m_this.style.get('visible')(d, i);
       if (!val && val !== undefined) {
         return;
       }
+      val = util.convertColorAndOpacity(
+        m_this.style.get('color')(d, i), m_this.style.get('textOpacity')(d, i));
+      if (val.a === 0) {
+        return;
+      }
+      m_this._canvasProperty(context2d, 'globalAlpha', val.a);
+      m_this._canvasProperty(context2d, 'fillStyle', util.convertColorToHex(val));
       // TODO: get the position position without transform.  If it is outside
       // of the map to an extent that there is no chance of text showing,
       // skip further processing.
@@ -110,24 +119,11 @@ var canvas_textFeature = function (arg) {
       m_this._canvasProperty(context2d, 'font', m_this.getFontFromStyles(fontFromSubValues, d, i));
       m_this._canvasProperty(context2d, 'textAlign', m_this.style.get('textAlign')(d, i) || 'center');
       m_this._canvasProperty(context2d, 'textBaseline', m_this.style.get('textBaseline')(d, i) || 'middle');
-      val = m_this.style.get('color')(d, i) || {r: 0, g: 0, b: 0};
-      opac = m_this.style.get('textOpacity')(d, i);
-      if (opac === undefined || opac === null) {
-        opac = 1;
-      }
-      if (val.a !== undefined && val.a !== null && val.a !== 1) {
-        opac *= val.a;
-      }
-      if (opac <= 0) {
-        return;
-      }
-      m_this._canvasProperty(context2d, 'globalAlpha', opac > 1 ? 1 : opac);
-      m_this._canvasProperty(context2d, 'fillStyle', util.convertColorToHex(val));
 
       // TODO: fetch and use other properties:
       // 'direction', 'rotation', 'rotateWithMap', 'scale',
       // 'scaleWithMap', 'offset', 'width', 'shadowColor', 'shadowOffset',
-      // 'shadowBlur', 'shadowRotate'
+      // 'shadowBlur', 'shadowRotate', 'shadowOpacity'
       m_this._canvasProperty(context2d, 'direction', 'inherit'); // ltr, rtl, inherit
       /*
       ctx.shadowColor = "black";

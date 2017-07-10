@@ -273,6 +273,13 @@ var annotation = function (type, args) {
     }
     if (arg2 === undefined) {
       m_options = $.extend(true, m_options, arg1);
+      /* For style objects, reextend them without recursiion.  This allows
+       * setting colors without an opacity field, for instance. */
+      ['style', 'editStyle', 'labelStyle'].forEach(function (key) {
+        if (arg1[key] !== undefined) {
+          $.extend(m_options[key], arg1[key]);
+        }
+      });
     } else {
       m_options[arg1] = arg2;
     }
@@ -340,17 +347,17 @@ var annotation = function (type, args) {
    * @returns {object|this} Either the entire style object, the value of a
    *    specific style, or the current class instance.
    */
-  this.editstyle = function (arg1, arg2) {
+  this.editStyle = function (arg1, arg2) {
     if (arg1 === undefined) {
-      return m_options.editstyle;
+      return m_options.editStyle;
     }
     if (typeof arg1 === 'string' && arg2 === undefined) {
-      return m_options.editstyle[arg1];
+      return m_options.editStyle[arg1];
     }
     if (arg2 === undefined) {
-      m_options.editstyle = $.extend(true, m_options.editstyle, arg1);
+      m_options.editStyle = $.extend(true, m_options.editStyle, arg1);
     } else {
-      m_options.editstyle[arg1] = arg2;
+      m_options.editStyle[arg1] = arg2;
     }
     this.modified();
     return this;
@@ -537,7 +544,7 @@ var annotation = function (type, args) {
       value = util.ensureFunction(objStyle[key])();
       if (value !== undefined) {
         if (key.toLowerCase().match(/color$/)) {
-          value = util.convertColorToHex(value);
+          value = util.convertColorToHex(value, 'needed');
         }
         obj.properties[key] = value;
       }
@@ -547,7 +554,7 @@ var annotation = function (type, args) {
       value = util.ensureFunction(objLabelStyle[key])();
       if (value !== undefined) {
         if (key.toLowerCase().match(/color$/)) {
-          value = util.convertColorToHex(value);
+          value = util.convertColorToHex(value, 'needed');
         }
         obj.properties['label' + key.charAt(0).toUpperCase() + key.slice(1)] = value;
       }
@@ -596,7 +603,7 @@ var annotation = function (type, args) {
  *    This uses styles for polygons, including `fill`, `fillColor`,
  *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
  *    `strokeOpacity`.
- * @param {object} [args.editstyle] The style to apply to a rectangle in edit
+ * @param {object} [args.editStyle] The style to apply to a rectangle in edit
  *    mode.  This uses styles for polygons and lines, including `fill`,
  *    `fillColor`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
  *    `strokeOpacity`.
@@ -619,7 +626,7 @@ var rectangleAnnotation = function (args) {
       strokeWidth: 3,
       uniformPolygon: true
     },
-    editstyle: {
+    editStyle: {
       fill: true,
       fillColor: {r: 0.3, g: 0.3, b: 0.3},
       fillOpacity: 0.25,
@@ -705,7 +712,7 @@ var rectangleAnnotation = function (args) {
           features = [{
             polygon: {
               polygon: opt.corners,
-              style: opt.editstyle
+              style: opt.editStyle
             }
           }];
         }
@@ -887,7 +894,7 @@ registerAnnotation('rectangle', rectangleAnnotation, rectangleRequiredFeatures);
  *    This uses styles for polygons, including `fill`, `fillColor`,
  *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
  *    `strokeOpacity`.
- * @param {object} [args.editstyle] The style to apply to a polygon in edit
+ * @param {object} [args.editStyle] The style to apply to a polygon in edit
  *    mode.  This uses styles for polygons and lines, including `fill`,
  *    `fillColor`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
  *    `strokeOpacity`.
@@ -912,7 +919,7 @@ var polygonAnnotation = function (args) {
       strokeWidth: 3,
       uniformPolygon: true
     },
-    editstyle: {
+    editStyle: {
       closed: false,
       fill: true,
       fillColor: {r: 0.3, g: 0.3, b: 0.3},
@@ -956,7 +963,7 @@ var polygonAnnotation = function (args) {
           features[1] = {
             polygon: {
               polygon: opt.vertices,
-              style: opt.editstyle
+              style: opt.editStyle
             }
           };
         }
@@ -964,7 +971,7 @@ var polygonAnnotation = function (args) {
           features[2] = {
             line: {
               line: opt.vertices,
-              style: opt.editstyle
+              style: opt.editStyle
             }
           };
         }
@@ -1145,7 +1152,7 @@ registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
  * @param {object} [args.style] The style to apply to a finished line.
  *    This uses styles for lines, including `strokeWidth`, `strokeColor`,
  *    `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`, and `lineJoin`.
- * @param {object} [args.editstyle] The style to apply to a line in edit
+ * @param {object} [args.editStyle] The style to apply to a line in edit
  *    mode.  This uses styles for lines, including `strokeWidth`,
  *    `strokeColor`, `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`,
  *    and `lineJoin`.
@@ -1176,7 +1183,7 @@ var lineAnnotation = function (args) {
       lineCap: 'butt',
       lineJoin: 'miter'
     },
-    editstyle: {
+    editStyle: {
       line: function (d) {
         /* Return an array that has the same number of items as we have
          * vertices. */
@@ -1212,7 +1219,7 @@ var lineAnnotation = function (args) {
         features = [{
           line: {
             line: opt.vertices,
-            style: opt.editstyle
+            style: opt.editStyle
           }
         }];
         break;
@@ -1459,7 +1466,7 @@ registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
  *    zoom level.  If it is `true`, the radius is based on the zoom level at
  *    first instantiation.  Otherwise, if it is a number, the radius is used
  *    at that zoom level.
- * @param {object} [args.editstyle] The style to apply to a line in edit
+ * @param {object} [args.editStyle] The style to apply to a line in edit
  *    mode.  This uses styles for lines.
  */
 var pointAnnotation = function (args) {

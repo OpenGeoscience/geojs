@@ -39,8 +39,8 @@ var feature = require('./feature');
  *      of `ltr`, `rtl`, or `inherit`.
  * @property {geo.geoColor|function} [style.color='black'] Text color.  May
  *      include opacity.
- * @property {number|function} [style.opacity=1] The opacity of the text.  If
- *      the color includes opacity, this is combined with that value.
+ * @property {number|function} [style.textOpacity=1] The opacity of the text.
+ *      If the color includes opacity, this is combined with that value.
  * @property {number|function} [style.rotation=0] Text rotation in radians.
  * @property {boolean|function} [style.rotateWithMap=false] If truthy, rotate
  *      the text when the map rotates.  Otherwise, the text is always in the
@@ -56,6 +56,9 @@ var feature = require('./feature');
  *      pixels.  `null` or 0 for no maximum.
  * @property {geo.geoColor|function} [style.shadowColor='black'] Text shadow
  *      color.  May include opacity.
+ * @property {number|function} [style.shadowOpacity=1] The opacity of the
+ *      shadow.  If the color includes opacity, this is combined with that
+ *      value.
  * @property {geo.screenPosition|function} [style.shadowOffset] Offset for a
  *      text shadow.  This is applied before rotation.
  * @property {number|null|function} [style.shadowBlur] If not null, add a text
@@ -179,8 +182,8 @@ textFeature.usedStyles = [
   'visible', 'font', 'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch',
   'fontSize', 'lineHeight', 'fontFamily', 'textAlign', 'textBaseline',
   'direction', 'color', 'textOpacity', 'rotation', 'rotateWithMap', 'scale',
-  'scaleWithMap', 'offset', 'width', 'shadowColor', 'shadowOffset',
-  'shadowBlur', 'shadowRotate'
+  'scaleWithMap', 'offset', 'width', 'shadowColor', 'shadowOpacity',
+  'shadowOffset', 'shadowBlur', 'shadowRotate'
 ];
 
 /**

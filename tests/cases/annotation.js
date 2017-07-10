@@ -120,9 +120,9 @@ describe('geo.annotation', function () {
       expect(ann.options().coordinates).toBe(undefined);
       expect(ann._coordinates()).toBe(testval);
     });
-    it('style and editstyle', function () {
+    it('style and editStyle', function () {
       var ann = geo.annotation.annotation('test', {
-        layer: layer, style: {testopt: 30}, editstyle: {testopt: 50}});
+        layer: layer, style: {testopt: 30}, editStyle: {testopt: 50}});
       expect(ann.options('style').testopt).toBe(30);
       expect(ann.style().testopt).toBe(30);
       expect(ann.style('testopt')).toBe(30);
@@ -130,13 +130,13 @@ describe('geo.annotation', function () {
       expect(ann.style().testopt).toBe(40);
       expect(ann.style({testopt: 30})).toBe(ann);
       expect(ann.style().testopt).toBe(30);
-      expect(ann.options('editstyle').testopt).toBe(50);
-      expect(ann.editstyle().testopt).toBe(50);
-      expect(ann.editstyle('testopt')).toBe(50);
-      expect(ann.editstyle('testopt', 60)).toBe(ann);
-      expect(ann.editstyle().testopt).toBe(60);
-      expect(ann.editstyle({testopt: 50})).toBe(ann);
-      expect(ann.editstyle().testopt).toBe(50);
+      expect(ann.options('editStyle').testopt).toBe(50);
+      expect(ann.editStyle().testopt).toBe(50);
+      expect(ann.editStyle('testopt')).toBe(50);
+      expect(ann.editStyle('testopt', 60)).toBe(ann);
+      expect(ann.editStyle().testopt).toBe(60);
+      expect(ann.editStyle({testopt: 50})).toBe(ann);
+      expect(ann.editStyle().testopt).toBe(50);
     });
     it('coordinates', function () {
       var ann = geo.annotation.annotation('test', {layer: layer});

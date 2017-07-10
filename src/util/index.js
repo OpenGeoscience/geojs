@@ -257,8 +257,42 @@ var util = module.exports = {
         b: ((color & 0xff)) / 255
       };
     }
-    if (opacity !== undefined) {
+    if (opacity !== undefined && color && color.r !== undefined) {
       color.a = opacity;
+    }
+    return color;
+  },
+
+  /**
+   * Convert a color (possibly with opacity) and an optional opacity value to
+   * a color object that always has opacity.  The opacity is guaranteed to be
+   * within [0-1].  A valid color object is always returned.
+   *
+   * @param {geo.geoColor} [color] Any valid color input.  If an invalid value
+   *    or no value is supplied, the `defaultColor` is used.
+   * @param {number} [opacity=1] A value from [0-1].  This is multipled with
+   *    the opacity from `color`.
+   * @param {geo.geoColorObject} [defaultColor={r: 0, g: 0, b: 0}] The color
+   *    to use if an invalid color is supplied.
+   * @returns {geo.geoColorObject} An rgba color object.
+   * @memberof geo.util
+   */
+  convertColorAndOpacity: function (color, opacity, defaultColor) {
+    color = util.convertColor(color);
+    if (!color || color.r === undefined || color.g === undefined || color.b === undefined) {
+      color = util.convertColor(defaultColor || {r: 0, g: 0, b: 0});
+    }
+    if (!color || color.r === undefined || color.g === undefined || color.b === undefined) {
+      color = {r: 0, g: 0, b: 0};
+    }
+    color = {
+      r: isFinite(color.r) && color.r >= 0 ? (color.r <= 1 ? +color.r : 1) : 0,
+      g: isFinite(color.g) && color.g >= 0 ? (color.g <= 1 ? +color.g : 1) : 0,
+      b: isFinite(color.b) && color.b >= 0 ? (color.b <= 1 ? +color.b : 1) : 0,
+      a: isFinite(color.a) && color.a >= 0 ? (color.a <= 1 ? +color.a : 1) : 1
+    };
+    if (isFinite(opacity) && opacity < 1) {
+      color.a = opacity <= 0 ? 0 : color.a * opacity;
     }
     return color;
   },
@@ -268,7 +302,8 @@ var util = module.exports = {
    *
    * @param {geo.geoColorObject} color The color object to convert.
    * @param {boolean} [allowAlpha] If truthy and `color` has a defined `a`
-   *    value, include the alpha channel in the output.
+   *    value, include the alpha channel in the output.  If `'needed'`, only
+   *    include the alpha channel if it is set and not 1.
    * @returns {string} A color string.
    * @memberof geo.util
    */
@@ -281,7 +316,7 @@ var util = module.exports = {
                      (Math.round(rgb.g * 255) << 8) +
                       Math.round(rgb.b * 255)).toString(16).slice(1);
     }
-    if (rgb.a !== undefined && allowAlpha) {
+    if (rgb.a !== undefined && allowAlpha && (rgb.a < 1 || allowAlpha !== 'needed')) {
       value += (256 + Math.round(rgb.a * 255)).toString(16).slice(1);
     }
     return value;
