@@ -28,6 +28,8 @@ describe('geo.util.convertColor', function () {
     'green': {r: 0, g: 128 / 255, b: 0},
     'blue': {r: 0, g: 0, b: 1},
     'steelblue': {r: 70 / 255, g: 130 / 255, b: 180 / 255},
+    'SteelBlue': {r: 70 / 255, g: 130 / 255, b: 180 / 255},
+    'STEELBLUE': {r: 70 / 255, g: 130 / 255, b: 180 / 255},
     // rgb() and rgba()
     'rgb(18, 86, 171)': {r: 18 / 255, g: 86 / 255, b: 171 / 255},
     'rgb(18 86 171)': {r: 18 / 255, g: 86 / 255, b: 171 / 255},
@@ -40,6 +42,7 @@ describe('geo.util.convertColor', function () {
     'rgba(10% 35% 63.2% 40%)': {r: 0.1, g: 0.35, b: 0.632, a: 0.4},
     'rgba(10% 35% 63.2% / 40%)': {r: 0.1, g: 0.35, b: 0.632, a: 0.4},
     'rgba(100e-1% .35e2% 6.32e1% 40%)': {r: 0.1, g: 0.35, b: 0.632, a: 0.4},
+    'RGBA(100E-1% .35E2% 6.32E1% 40%)': {r: 0.1, g: 0.35, b: 0.632, a: 0.4},
     // hsl() and hsla()
     'hsl(120, 100%, 25%)': {r: 0, g: 0.5, b: 0},
     'hsla(120, 100%, 25%)': {r: 0, g: 0.5, b: 0},
@@ -49,11 +52,13 @@ describe('geo.util.convertColor', function () {
     'hsl(120deg 100% 25%)': {r: 0, g: 0.5, b: 0},
     'hsl(133.33grad 100% 25%)': {r: 0, g: 0.5, b: 0},
     'hsl(2.0944rad 100% 25%)': {r: 0, g: 0.5, b: 0},
+    'HSL(2.0944RAD 100% 25%)': {r: 0, g: 0.5, b: 0},
     'hsl(.33333turn 100% 25%)': {r: 0, g: 0.5, b: 0},
     'hsl(207 44% 49%)': {r: 0.2744, g: 0.51156, b: 0.7056},
     'hsl(207 100% 50%)': {r: 0, g: 0.55, b: 1},
     // transparent
     'transparent': {r: 0, g: 0, b: 0, a: 0},
+    'TRANSPARENT': {r: 0, g: 0, b: 0, a: 0},
     // unknown strings
     'none': 'none'
   };

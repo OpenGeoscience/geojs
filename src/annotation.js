@@ -539,6 +539,9 @@ var annotation = function (type, args) {
     if (m_description) {
       obj.properties.description = m_description;
     }
+    if (this.options('showLabel') === false) {
+      obj.properties.showLabel = this.options('showLabel');
+    }
     for (i = 0; i < styles.length; i += 1) {
       key = styles[i];
       value = util.ensureFunction(objStyle[key])();

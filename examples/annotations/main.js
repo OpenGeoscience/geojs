@@ -323,6 +323,9 @@ $(function () {
       }
       ctl.show();
       switch ($('[option]', ctl).attr('optiontype')) {
+        case 'option':
+          value = opt[key];
+          break;
         case 'label':
           value = (opt.labelStyle || {})[key];
           break;
@@ -336,9 +339,10 @@ $(function () {
           value = geo.util.convertColorToHex(value || {r: 0, g: 0, b: 0}, 'needed');
           break;
       }
-      if (value !== undefined) {
-        $('[option]', ctl).val('' + value);
+      if ((value === undefined || value === '' || value === null) && $('[option]', ctl).is('select')) {
+        value = $('[option] option', ctl).eq(0).val();
       }
+      $('[option]', ctl).val(value === undefined ? '' : '' + value);
     });
     dlg.one('shown.bs.modal', function () {
       $('[option="name"]', dlg).focus();
@@ -356,31 +360,47 @@ $(function () {
     var dlg = $('#editdialog'),
         id = dlg.attr('annotation-id'),
         annotation = layer.annotationById(id),
+        opt = annotation.options(),
         type = annotation.type(),
         typeMatch = new RegExp('(^| )(' + type + '|all)( |$)'),
-        error,
-        newopt = {},
-        labelopt = {};
+        newopt = {style: {}, labelStyle: {}},
+        error;
 
     // validate form values
     $('.form-group[annotation-types]').each(function () {
       var ctl = $(this),
           key = $('[option]', ctl).attr('option'),
-          value;
+          value, oldvalue;
       if (!ctl.attr('annotation-types').match(typeMatch)) {
         return;
       }
       value = layer.validateAttribute($('[option]', ctl).val(),
                                       $('[option]', ctl).attr('format'));
-      if (value === undefined) {
+      switch ($('[option]', ctl).attr('optiontype')) {
+        case 'option':
+          oldvalue = opt[key];
+          break;
+        case 'label':
+          oldvalue = (opt.labelStyle || {})[key];
+          break;
+        default:
+          oldvalue = opt.style[key];
+          break;
+      }
+      if (value === oldvalue || (oldvalue === undefined && value === '')) {
+        // don't change anything
+      } else if (value === undefined) {
         error = $('label', ctl).text() + ' is not a valid value';
       } else {
         switch ($('[option]', ctl).attr('optiontype')) {
+          case 'option':
+            newopt[key] = value;
+            break;
           case 'label':
-            labelopt[key] = value;
+            newopt.labelStyle[key] = value;
             break;
           default:
-            newopt[key] = value;
+            newopt.style[key] = value;
             break;
         }
       }
@@ -392,7 +412,7 @@ $(function () {
     annotation.name($('[option="name"]', dlg).val());
     annotation.label($('[option="label"]', dlg).val() || null);
     annotation.description($('[option="description"]', dlg).val() || '');
-    annotation.options({style: newopt, labelStyle: labelopt}).draw();
+    annotation.options(newopt).draw();
 
     dlg.modal('hide');
     // refresh the annotation list

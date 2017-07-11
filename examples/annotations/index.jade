@@ -102,9 +102,14 @@ block append mainContent
                   option(value='round') Round
                   option(value='miter-clip') Miter-Clip
             .col-md-6
-              .form-group
+              .form-group(title='The label defaults to the annotation name')
                 label(for='edit-label') Label
                 input#edit-label(option='label')
+              .form-group(annotation-types='all', title='The label will only be shown if both this and the global option are selected')
+                label(for='edit-showLabel') Show Label
+                select#edit-showLabel(option='showLabel', format='boolean', optiontype='option')
+                  option(value='true') Yes
+                  option(value='false') No
               .form-group(annotation-types='all')
                 label(for='edit-color') Label Color
                 input#edit-color(option='color', format='color', optiontype='label')

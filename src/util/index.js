@@ -222,8 +222,9 @@ var util = module.exports = {
     }
     var opacity;
     if (typeof color === 'string') {
-      if (util.cssColors.hasOwnProperty(color)) {
-        color = util.cssColors[color];
+      var lowerColor = color.toLowerCase();
+      if (util.cssColors.hasOwnProperty(lowerColor)) {
+        color = util.cssColors[lowerColor];
       } else if (color.charAt(0) === '#') {
         if (color.length === 4 || color.length === 5) {
           /* interpret values of the form #rgb as #rrggbb and #rgba as
@@ -239,13 +240,13 @@ var util = module.exports = {
           }
           color = parseInt(color.slice(1, 7), 16);
         }
-      } else if (color === 'transparent') {
+      } else if (lowerColor === 'transparent') {
         opacity = color = 0;
-      } else if (color.indexOf('(') >= 0) {
+      } else if (lowerColor.indexOf('(') >= 0) {
         for (var idx = 0; idx < util.cssColorConversions.length; idx += 1) {
-          var match = util.cssColorConversions[idx].regex.exec(color);
+          var match = util.cssColorConversions[idx].regex.exec(lowerColor);
           if (match) {
-            return util.cssColorConversions[idx].process(color, match);
+            return util.cssColorConversions[idx].process(lowerColor, match);
           }
         }
       }
