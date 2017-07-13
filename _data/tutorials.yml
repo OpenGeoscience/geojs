@@ -1,0 +1,60 @@
+- id: deepzoom
+  title: Deepzoom tiled image example
+  description: Rendering a tiled image using the Deepzoom protocol.
+
+- id: geoJSON
+  title: GeoJSON file reader
+  description: Shows how to use the included geoJSON reader, and how to use the properties to adjust the style of the features.  In this example, you can edit the json file while the features on the map update in response.  You can also drop a new geoJSON file onto the text editor to load it.
+
+- id: heatmap
+  title: Heatmap Feature
+  description: This example shows how to add a heatmap to a map.
+
+- id: hurricanes
+  title: Hurricane tracking data
+  description: Explore historic hurricane paths since 1980 on an interactive map.
+
+- id: legend
+  title: Feature legends
+  description: This example shows how to create a legend to describe feature styles on a map.
+
+- id: lines
+  title: Line Feature
+  description: This example shows the variations that are available for line features.
+
+- id: pixelmap
+  title: Pixelmap feature
+  description: This example shows how to use a pixelmap feature.  The pixelmap colors areas based on an index derived from an image and some data per index.
+
+- id: polygons
+  title: Polygon features
+  description: This example shows how to add polygons to a map.
+
+- id: quads
+  title: Quad features
+  description: This example shows how to add dynamic quads to a map.
+
+- id: reprojection
+  title: Reproject tiles
+  description: This example shows how you can reproject tiles from one projection to another.  The source tiles are in Web Mercator (EPSG:3857), but can be drawn in many different projections.
+
+- id: sld
+  title: Adding styles to WMS raster layers
+  description: Rendering tiles from a WMS server by customizing the style.
+
+- id: tiles
+  title: Tile layer with controllable options
+  description: This example provides controls for changing many options on tile layers.  The code and query parameters allow even more options to be adjusted.
+
+- id: transitions
+  title: Using animated transitions
+  description: Using animations to transition between points on a map.
+
+- id: widgets
+  title: Map Widgets
+  description: This example shows how the widgets API can be used to place elements on top of the map.
+
+- id: wms
+  title: Rendering tiles from a WMS server
+  description: Rendering tiles from a WMS server by customizing the tile URL of an OSM layer.
+
