@@ -1,3 +1,2 @@
-tests
-data/tiles*
-data/vtk*
+node_modules
+/_site
