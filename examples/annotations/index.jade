@@ -102,6 +102,7 @@ block append mainContent
                   option(value='round') Round
                   option(value='miter-clip') Miter-Clip
             .col-md-6
+              //- label
               .form-group(title='The label defaults to the annotation name')
                 label(for='edit-label') Label
                 input#edit-label(option='label')
@@ -110,15 +111,22 @@ block append mainContent
                 select#edit-showLabel(option='showLabel', format='boolean', optiontype='option')
                   option(value='true') Yes
                   option(value='false') No
-              .form-group(annotation-types='all')
-                label(for='edit-color') Label Color
-                input#edit-color(option='color', format='color', optiontype='label')
-              .form-group(annotation-types='all')
-                label(for='edit-textOpacity') Label Opacity
-                input#edit-textOpacity(option='textOpacity', format='opacity', optiontype='label')
               .form-group(annotation-types='all', title='This is of the form [italic|oblique] [small-caps] [bold|bolder|lighter|<weight>] [<stretch>] <size>[/<line height>] <family>')
                 label(for='edit-font') Font
                 input#edit-font(option='font', optiontype='label')
+              .form-group(annotation-types='all', title='This applies to both the filled text and the stroke')
+                label(for='edit-textOpacity') Label Opacity
+                input#edit-textOpacity(option='textOpacity', format='opacity', optiontype='label')
+              .form-group(annotation-types='all', title='The color of the filled text.  Use an rgba() form to specify opacity.')
+                label(for='edit-color') Fill Color
+                input#edit-color(option='color', format='color', optiontype='label')
+              .form-group(annotation-types='all', title='The color of a stroke around the text.  If used with Fill Color, this adds a perimeter half the Stroke Width outside of the text.  Use an rgba() form to specify opacity.')
+                label(for='edit-textStrokeColor') Stroke Color
+                input#edit-textStrokeColor(option='textStrokeColor', format='textStrokeColor', optiontype='label')
+              .form-group(annotation-types='all')
+                label(for='edit-textStrokeWidth') Stroke Width
+                input#edit-textStrokeWidth(option='textStrokeWidth', format='numberOrBlank', optiontype='label')
+              //- positioning
               .form-group(annotation-types='all', title='Horizontal alignment')
                 label(for='edit-textAlign') Horizontal Align.
                 select#edit-textAlign(option='textAlign', format='text', optiontype='label')
@@ -150,6 +158,21 @@ block append mainContent
               .form-group(annotation-types='all', title='This is the x, y offset of the label in pixels from its default position before rotation and scale.  Example: "5, -4"')
                 label(for='edit-offset') Offset
                 input#edit-offset(option='offset', format='coordinate2', optiontype='label')
+              //- shadow options
+              .form-group(annotation-types='all')
+                label(for='edit-shadowColor') Shadow Color
+                input#edit-shadowColor(option='shadowColor', format='shadowColor', optiontype='label')
+              .form-group(annotation-types='all')
+                label(for='edit-shadowBlur') Shadow Blur
+                input#edit-shadowBlur(option='shadowBlur', format='numberOrBlank', optiontype='label')
+              .form-group(annotation-types='all', title='This is the x, y shadowOffset of the shadow in pixels from its default position before rotation.  Example: "5, -4"')
+                label(for='edit-shadowOffset') Shadow Offset
+                input#edit-shadowOffset(option='shadowOffset', format='coordinate2', optiontype='label')
+              .form-group(annotation-types='all', title='Enable to rotate the shadow absed on the label\'s rotation.')
+                label(for='edit-shadowRotate') Rotate Shadow
+                select#edit-shadowRotate(option='shadowRotate', format='boolean', optiontype='label')
+                  option(value='false') No
+                  option(value='true') Yes
           .form-group
             #edit-validation-error
         .modal-footer

@@ -64,6 +64,10 @@ var feature = require('./feature');
  * @property {boolean|function} [style.shadowRotate=false] If truthy, rotate
  *      the shadow offset based on the text rotation (the `shadowOffset` is
  *      the offset if the text has a 0 rotation).
+ * @property {geo.geoColor|function} [style.textStrokeColor='transparent'] Text
+ *      stroke color.  May include opacity.
+ * @property {geo.geoColor|function} [style.textStrokeWidth=0] Text stroke
+ *      width in pixels.
  */
 
 /**
@@ -181,7 +185,7 @@ textFeature.usedStyles = [
   'fontSize', 'lineHeight', 'fontFamily', 'textAlign', 'textBaseline',
   'direction', 'color', 'textOpacity', 'rotation', 'rotateWithMap',
   'textScaled', 'offset', 'shadowColor', 'shadowOpacity', 'shadowOffset',
-  'shadowBlur', 'shadowRotate'
+  'shadowBlur', 'shadowRotate', 'textStrokeColor', 'textStrokeWidth'
 ];
 
 /**

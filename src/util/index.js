@@ -301,9 +301,9 @@ var util = module.exports = {
       r: isFinite(color.r) && color.r >= 0 ? (color.r <= 1 ? +color.r : 1) : 0,
       g: isFinite(color.g) && color.g >= 0 ? (color.g <= 1 ? +color.g : 1) : 0,
       b: isFinite(color.b) && color.b >= 0 ? (color.b <= 1 ? +color.b : 1) : 0,
-      a: isFinite(color.a) && color.a >= 0 ? (color.a <= 1 ? +color.a : 1) : 1
+      a: util.isNonNullFinite(color.a) && color.a >= 0 && color.a < 1 ? +color.a : 1
     };
-    if (isFinite(opacity) && opacity < 1) {
+    if (util.isNonNullFinite(opacity) && opacity < 1) {
       color.a = opacity <= 0 ? 0 : color.a * opacity;
     }
     return color;

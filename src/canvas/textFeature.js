@@ -3,6 +3,7 @@ var registerFeature = require('../registry').registerFeature;
 var textFeature = require('../textFeature');
 var util = require('../util');
 var mat3 = require('gl-mat3');
+var vec3 = require('gl-vec3');
 
 /**
  * Create a new instance of class canvas.textFeature.
@@ -92,7 +93,7 @@ var canvas_textFeature = function (arg) {
         textFunc = m_this.style.get('text'),
         mapRotation = map.rotation(),
         mapZoom = map.zoom(),
-        fontFromSubValues, text, pos, val,
+        fontFromSubValues, text, pos, visible, color, blur, stroke, width,
         rotation, rotateWithMap, scale, offset,
         transform, lastTransform = util.mat3AsArray();
 
@@ -105,17 +106,18 @@ var canvas_textFeature = function (arg) {
     /* Clear the canvas property buffer */
     m_this._canvasProperty();
     data.forEach(function (d, i) {
-      val = m_this.style.get('visible')(d, i);
-      if (!val && val !== undefined) {
+      visible = m_this.style.get('visible')(d, i);
+      if (!visible && visible !== undefined) {
         return;
       }
-      val = util.convertColorAndOpacity(
+      color = util.convertColorAndOpacity(
         m_this.style.get('color')(d, i), m_this.style.get('textOpacity')(d, i));
-      if (val.a === 0) {
+      stroke = util.convertColorAndOpacity(
+        m_this.style.get('textStrokeColor')(d, i), m_this.style.get('textOpacity')(d, i), {r: 0, g: 0, b: 0, a: 0});
+      if (color.a === 0 && stroke.a === 0) {
         return;
       }
-      m_this._canvasProperty(context2d, 'globalAlpha', val.a);
-      m_this._canvasProperty(context2d, 'fillStyle', util.convertColorToHex(val));
+      m_this._canvasProperty(context2d, 'fillStyle', util.convertColorToRGBA(color));
       // TODO: get the position position without transform.  If it is outside
       // of the map to an extent that there is no chance of text showing,
       // skip further processing.
@@ -154,17 +156,37 @@ var canvas_textFeature = function (arg) {
         context2d.setTransform(transform[0], transform[1], transform[3], transform[4], transform[6], transform[7]);
         mat3.copy(lastTransform, transform);
       }
-
-      // TODO: fetch and use other properties:
-      // 'shadowColor', 'shadowOffset', 'shadowBlur', 'shadowRotate',
-      // 'shadowOpacity'
-      /*
-      ctx.shadowColor = "black";
-      ctx.shadowOffsetX = 5;
-      ctx.shadowOffsetY = 5;
-      ctx.shadowBlur = 7;
-      */
-
+      /* shadow */
+      color = util.convertColorAndOpacity(
+        m_this.style.get('shadowColor')(d, i), undefined, {r: 0, g: 0, b: 0, a: 0});
+      if (color.a) {
+        offset = m_this.style.get('shadowOffset')(d, i);
+        blur = m_this.style.get('shadowBlur')(d, i);
+      }
+      if (color.a && ((offset && (offset.x || offset.y)) || blur)) {
+        m_this._canvasProperty(context2d, 'shadowColor', util.convertColorToRGBA(color));
+        if (offset && (rotation || rotateWithMap) && m_this.style.get('shadowRotate')(d, i)) {
+          transform = [+offset.x, +offset.y, 0];
+          vec3.rotateZ(transform, transform, [0, 0, 0],
+                       rotation + (rotateWithMap ? mapRotation : 0));
+          offset = {x: transform[0], y: transform[1]};
+        }
+        m_this._canvasProperty(context2d, 'shadowOffsetX', offset && offset.x ? +offset.x : 0);
+        m_this._canvasProperty(context2d, 'shadowOffsetY', offset && offset.y ? +offset.y : 0);
+        m_this._canvasProperty(context2d, 'shadowBlur', blur || 0);
+      } else {
+        m_this._canvasProperty(context2d, 'shadowColor', 'rgba(0,0,0,0)');
+      }
+      /* draw the text */
+      if (stroke.a) {
+        width = m_this.style.get('textStrokeWidth')(d, i);
+        if (isFinite(width) && width > 0) {
+          m_this._canvasProperty(context2d, 'strokeStyle', util.convertColorToRGBA(stroke));
+          m_this._canvasProperty(context2d, 'lineWidth', width);
+          context2d.strokeText(text, pos.x, pos.y);
+          m_this._canvasProperty(context2d, 'shadowColor', 'rgba(0,0,0,0)');
+        }
+      }
       context2d.fillText(text, pos.x, pos.y);
     });
     m_this._canvasProperty(context2d, 'globalAlpha', 1);

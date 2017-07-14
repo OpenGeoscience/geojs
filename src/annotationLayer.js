@@ -88,8 +88,9 @@ var annotationLayer = function (args) {
       dataType: ['visible', 'rotateWithMap', 'scaleWithMap'].indexOf(key) >= 0 ? 'boolean' : (
         ['scale'].indexOf(key) >= 0 ? 'booleanOrNumber' : (
         ['rotation'].indexOf(key) >= 0 ? 'angle' : (
-        ['offset'].indexOf(key) >= 0 ? 'coordinate2' :
-        'text'))),
+        ['offset', 'shadowOffset'].indexOf(key) >= 0 ? 'coordinate2' : (
+        ['shadowBlur, strokeWidth'].indexOf(key) >= 0 ? 'numberOrBlank' :
+        'text')))),
       keys: [
         key,
         'label' + key.charAt(0).toUpperCase() + key.slice(1),
@@ -680,6 +681,15 @@ var annotationLayer = function (args) {
         }
         break;
       case 'number':
+        value = +value;
+        if (!util.isNonNullFinite(value)) {
+          return;
+        }
+        break;
+      case 'numberOrBlank':
+        if (value === '') {
+          break;
+        }
         value = +value;
         if (!util.isNonNullFinite(value)) {
           return;

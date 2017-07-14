@@ -393,9 +393,6 @@ $(function () {
           break;
       }
       switch (key) {
-        case 'offset':
-            //DWM::
-          break;
         case 'textScaled':
           if (['true', 'on', 'yes'].indexOf(value.trim().toLowerCase()) >= 0) {
             value = map.zoom();
