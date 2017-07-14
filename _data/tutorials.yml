@@ -1,14 +1,14 @@
-- id: deepzoom
+- id: heatmap
+  title: Heatmap Feature
+  description: This example shows how to add a heatmap to a map.
+  
+  - id: deepzoom
   title: Deepzoom tiled image example
   description: Rendering a tiled image using the Deepzoom protocol.
 
 - id: geoJSON
   title: GeoJSON file reader
   description: Shows how to use the included geoJSON reader, and how to use the properties to adjust the style of the features.  In this example, you can edit the json file while the features on the map update in response.  You can also drop a new geoJSON file onto the text editor to load it.
-
-- id: heatmap
-  title: Heatmap Feature
-  description: This example shows how to add a heatmap to a map.
 
 - id: hurricanes
   title: Hurricane tracking data
