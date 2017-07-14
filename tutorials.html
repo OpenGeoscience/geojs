@@ -1,19 +1,24 @@
 --- 
-layout: default 
-title: Tutorials
-foo: title
+layout: default
+<!-- title: Tutorials -->
 ---
 <div class="container">
-    {% for tutorial_name in site.data.tutorial_order %}
-    {% assign tutorial = site.tutorial | where: "name", tutorial_name | first %}
     <div class="row">
-        <div class="col-xs-12">
-            <div class="tutorials">
-                <>
-                <img src="{{"tutorial"|relative_url}}/{{tutorial.name}}/thumb.jpg">
-                {{tutorial.title}} - {{tutorial.description}}
+        <div class="col-md-8 col-md-offset-2">
+            <h2>Tutorials</h2>
+            {% for tutorial in site.data.tutorials %}
+            <div class="row tutorial-container">
+                <div class="col-sm-4 thumbnail-container">
+                    <a href="{{"tutorial"|relative_url}}/{{tutorial.name}}">
+                        <img src="{{"tutorial"|relative_url}}/{{tutorial.name}}/thumb.jpg">
+                    </a>
+                </div>
+                <div class="col-sm-8">
+                    <a href="{{"tutorial"|relative_url}}/{{tutorial.name}}"><h4 class="title">{{tutorial.title}}</h4></a>
+                    <div class="description">{{tutorial.description}}</div>
+                </div>
             </div>
+            {% endfor %}
         </div>
     </div>
-    {% endfor %}
 </div>

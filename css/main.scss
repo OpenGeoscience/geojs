@@ -1,5 +1,45 @@
 ---
 ---
+
+// overwrites
+
+.navbar-custom .nav li a{
+    text-transform: none;
+}
+// @media (min-width: 768px) {
+//     .navbar-nav>li>a {
+//         padding: 12px 10px;
+//     }
+// }
+
+
+// main page
+
 .content-wrapper {
-    margin-top: 120px;
+    margin-top: 100px;
+}
+
+
+// tutorials page
+
+.tutorial-container{
+    // clear: both;
+    background-color: white;
+    padding: 25px 0;
+    border-bottom: 1px solid #eee;
+
+    .thumbnail-container{
+        // width: 250px;
+        // float: left;
+
+        img{
+            width: 100%;
+            border: 1px solid #eee;
+            border-radius: 2px;
+        }
+    }
+
+    .description{
+        margin-top:20px;
+    }
 }
