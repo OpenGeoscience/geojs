@@ -227,7 +227,7 @@ var util = module.exports = {
    * @memberof geo.util
    */
   convertColor: function (color) {
-    if (color === undefined || (color.r !== undefined &&
+    if (color === undefined || color === null || (color.r !== undefined &&
         color.g !== undefined && color.b !== undefined)) {
       return color;
     }
@@ -345,11 +345,11 @@ var util = module.exports = {
     if (!rgb) {
       rgb = {r: 0, g: 0, b: 0};
     }
-    if (rgb.a === undefined) {
+    if (!util.isNonNullFinite(rgb.a) || rgb.a > 1) {
       rgb.a = 1;
     }
     return 'rgba(' + Math.round(rgb.r * 255) + ', ' + Math.round(rgb.g * 255) +
-           ', ' + Math.round(rgb.b * 255) + ', ' + rgb.a + ')';
+           ', ' + Math.round(rgb.b * 255) + ', ' + +((+rgb.a).toFixed(5)) + ')';
   },
 
   /**

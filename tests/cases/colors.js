@@ -217,3 +217,51 @@ describe('geo.util.convertColorToHex', function () {
     });
   });
 });
+
+describe('geo.util.convertColorToRGBA', function () {
+  'use strict';
+
+  var geo = require('../test-utils').geo;
+  /* The first entry is the expected result, the second is the input */
+  var rgbaTests = [
+    ['rgba(0, 0, 0, 1)', null],
+    ['rgba(0, 0, 0, 1)', 'black'],
+    ['rgba(0, 0, 0, 1)', '#000'],
+    ['rgba(0, 0, 0, 1)', {r: 0, g: 0, b: 0}],
+    ['rgba(0, 0, 0, 0.50196)', '#00000080'],
+    ['rgba(100, 120, 140, 0.5)', {r: 0.393, g: 0.4706, b: 0.548, a: 0.5}],
+    ['rgba(100, 120, 140, 1)', {r: 0.393, g: 0.4706, b: 0.548, a: 2}],
+    ['rgba(100, 120, 140, 1)', {r: 0.393, g: 0.4706, b: 0.548}],
+    ['rgba(100, 120, 140, 1)', {r: 0.393, g: 0.4706, b: 0.548, a: 'bad'}]
+  ];
+
+  $.each(rgbaTests, function (idx, record) {
+    it('test ' + idx + ' - ' + record[0], function () {
+      expect(geo.util.convertColorToRGBA(record[1])).toEqual(record[0]);
+    });
+  });
+});
+
+describe('geo.util.convertColorAndOpacity', function () {
+  'use strict';
+
+  var geo = require('../test-utils').geo;
+  /* The first entry is the expected result, the second are the input arguments
+   */
+  var candoTests = [
+    [{r: 0, g: 0, b: 0, a: 1}, []],
+    [{r: 0, g: 0, b: 0, a: 0}, [undefined, undefined, 'transparent']],
+    [{r: 0, g: 0, b: 0, a: 1}, [undefined, undefined, 'no such color']],
+    [{r: 0, g: 0, b: 0, a: 0.5}, [undefined, undefined, {r: 0, g: 0, b: 0, a: 0.5}]],
+    [{r: 1, g: 1, b: 1, a: 1}, ['white', undefined, {r: 0, g: 0, b: 0, a: 0.5}]],
+    [{r: 0, g: 0, b: 0, a: 0.2}, [undefined, 0.4, {r: 0, g: 0, b: 0, a: 0.5}]],
+    [{r: 1, g: 1, b: 1, a: 0.4}, ['white', 0.4, {r: 0, g: 0, b: 0, a: 0.5}]],
+    [{r: 1, g: 1, b: 1, a: 0.4}, ['white', 0.4]]
+  ];
+
+  $.each(candoTests, function (idx, record) {
+    it('test ' + idx + ' - ' + record[0], function () {
+      expect(geo.util.convertColorAndOpacity.apply(geo.util, record[1])).toEqual(record[0]);
+    });
+  });
+});
