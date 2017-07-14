@@ -52,8 +52,6 @@ var feature = require('./feature');
  *      The size is scaled from this point.
  * @property {geo.screenPosition|function} [style.offset] Offset from the
  *      default position for the text.  This is applied before rotation.
- * @property {number|function} [style.width] The maximum width of the text in
- *      pixels.  `null` or 0 for no maximum.
  * @property {geo.geoColor|function} [style.shadowColor='black'] Text shadow
  *      color.  May include opacity.
  * @property {number|function} [style.shadowOpacity=1] The opacity of the
@@ -151,7 +149,7 @@ var textFeature = function (arg) {
         color: { r: 0, g: 0, b: 0 },
         rotation: 0,  /* in radians */
         rotateWithMap: false,
-        scaleWithMap: false,
+        textScaled: false,
         position: function (d) { return d; },
         text: function (d) { return d.text; }
       },
@@ -181,9 +179,9 @@ var textFeature = function (arg) {
 textFeature.usedStyles = [
   'visible', 'font', 'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch',
   'fontSize', 'lineHeight', 'fontFamily', 'textAlign', 'textBaseline',
-  'direction', 'color', 'textOpacity', 'rotation', 'rotateWithMap', 'scale',
-  'scaleWithMap', 'offset', 'width', 'shadowColor', 'shadowOpacity',
-  'shadowOffset', 'shadowBlur', 'shadowRotate'
+  'direction', 'color', 'textOpacity', 'rotation', 'rotateWithMap',
+  'textScaled', 'offset', 'shadowColor', 'shadowOpacity', 'shadowOffset',
+  'shadowBlur', 'shadowRotate'
 ];
 
 /**

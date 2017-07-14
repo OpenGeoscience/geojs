@@ -85,7 +85,11 @@ var annotationLayer = function (args) {
   textFeature.usedStyles.forEach(function (key) {
     geojsonStyleProperties[key] = {
       option: 'labelStyle',
-      dataType: ['visible', 'rotateWithMap', 'scaleWithMap'].indexOf(key) >= 0 ? 'boolean' : 'text',
+      dataType: ['visible', 'rotateWithMap', 'scaleWithMap'].indexOf(key) >= 0 ? 'boolean' : (
+        ['scale'].indexOf(key) >= 0 ? 'booleanOrNumber' : (
+        ['rotation'].indexOf(key) >= 0 ? 'angle' : (
+        ['offset'].indexOf(key) >= 0 ? 'coordinate2' :
+        'text'))),
       keys: [
         key,
         'label' + key.charAt(0).toUpperCase() + key.slice(1),
@@ -597,7 +601,14 @@ var annotationLayer = function (args) {
    *   `'no'`, `'true'`, `'on'`, or `'yes'`, falsy values that aren't 0, and
    *   `true` are handled as booleans.  Otherwise, a floating point number that
    *   isn't NaN or an infinity.
+   * - `coordinate2`: either an object with x and y properties that are
+   *   numbers, or a string of the form <x>[,]<y> with optional whitespace, or
+   *   a JSON encoded object with x and y values, or a JSON encoded list of at
+   *   leasst two numbers.
    * - `number`: a floating point number that isn't NaN or an infinity.
+   * - `angle`: a number that represents radians.  If followed by one of `deg`,
+   *   `grad`, or `turn`, it is converted to radians.  An empty string is also
+   *   allowed.
    * - `text`: any text string.
    * @param {number|string|object|boolean} value The value to validate.
    * @param {string} dataType The data type for validation.
@@ -605,22 +616,62 @@ var annotationLayer = function (args) {
    *    `undefined`.
    */
   this.validateAttribute = function (value, dataType) {
+    var parts;
+
     if (value === undefined || value === null) {
       return;
     }
     switch (dataType) {
+      case 'angle':
+        if (value === '') {
+          break;
+        }
+        parts = /^\s*([-.0-9eE]+)\s*(deg|rad|grad|turn)?\s*$/.exec(('' + value).toLowerCase());
+        if (!parts || !isFinite(parts[1])) {
+          return;
+        }
+        var factor = (parts[2] === 'grad' ? Math.PI / 200 :
+            (parts[2] === 'deg' ? Math.PI / 180 :
+            (parts[2] === 'turn' ? 2 * Math.PI : 1)));
+        value = +parts[1] * factor;
+        break;
+      case 'boolean':
+        value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
+        break;
       case 'booleanOrNumber':
         if ((!value && value !== 0) || ['true', 'false', 'off', 'on', 'no', 'yes'].indexOf(('' + value).toLowerCase()) >= 0) {
           value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
         } else {
           value = +value;
-          if (isNaN(value) || !isFinite(value)) {
+          if (!isFinite(value)) {
             return;
           }
         }
         break;
-      case 'boolean':
-        value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
+      case 'coordinate2':
+        if (value === '') {
+          break;
+        }
+        if (value && isFinite(value.x) && isFinite(value.y)) {
+          value.x = +value.x;
+          value.y = +value.y;
+          break;
+        }
+        try { value = JSON.parse(value); } catch (err) { }
+        if (value && isFinite(value.x) && isFinite(value.y)) {
+          value.x = +value.x;
+          value.y = +value.y;
+          break;
+        }
+        if (Array.isArray(value) && isFinite(value[0]) && isFinite(value[1])) {
+          value = {x: +value[0], y: +value[1]};
+          break;
+        }
+        parts = /^\s*([-.0-9eE]+)\s*,?\s*([-.0-9eE]+)\s*$/.exec('' + value);
+        if (!parts || !isFinite(parts[1]) || !isFinite(parts[2])) {
+          return;
+        }
+        value = {x: +parts[1], y: +parts[2]};
         break;
       case 'color':
         value = util.convertColor(value);
@@ -630,7 +681,7 @@ var annotationLayer = function (args) {
         break;
       case 'number':
         value = +value;
-        if (isNaN(value) || !isFinite(value)) {
+        if (!util.isNonNullFinite(value)) {
           return;
         }
         break;
@@ -645,7 +696,7 @@ var annotationLayer = function (args) {
         break;
       case 'positive':
         value = +value;
-        if (isNaN(value) || !isFinite(value) || value <= 0) {
+        if (!isFinite(value) || value <= 0) {
           return;
         }
         break;

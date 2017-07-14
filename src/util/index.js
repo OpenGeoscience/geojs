@@ -178,6 +178,17 @@ var util = module.exports = {
   },
 
   /**
+   * Check if a value coerces to a number that is finite, not a NaN, and not
+   * `null` or `false`.
+   *
+   * @param {object} val The value to check.
+   * @returns {boolean} True if `val` is a non-null, non-false, finite number.
+   */
+  isNonNullFinite: function (val) {
+    return isFinite(val) && val !== null && val !== false;
+  },
+
+  /**
    * Return a random string of length n || 8.  The string consists of
    * mixed-case ASCII alphanumerics.
    *
@@ -407,6 +418,22 @@ var util = module.exports = {
    */
   vec3AsArray: function () {
     return [0, 0, 0];
+  },
+
+  /**
+   * Create a `mat3` that is always an array.  This should only be used if it
+   * will not be used in a WebGL context.  Plain arrays usually use 64-bit
+   * float values, whereas `mat3` defaults to 32-bit floats.
+   *
+   * @returns {array} Identity `mat3` compatible array.
+   * @memberof geo.util
+   */
+  mat3AsArray: function () {
+    return [
+      1, 0, 0,
+      0, 1, 0,
+      0, 0, 1
+    ];
   },
 
   /**

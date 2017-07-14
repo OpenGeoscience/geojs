@@ -2,6 +2,7 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var textFeature = require('../textFeature');
 var util = require('../util');
+var mat3 = require('gl-mat3');
 
 /**
  * Create a new instance of class canvas.textFeature.
@@ -89,7 +90,11 @@ var canvas_textFeature = function (arg) {
     var data = m_this.data(),
         posFunc = m_this.style.get('position'),
         textFunc = m_this.style.get('text'),
-        fontFromSubValues, text, pos, val;
+        mapRotation = map.rotation(),
+        mapZoom = map.zoom(),
+        fontFromSubValues, text, pos, val,
+        rotation, rotateWithMap, scale, offset,
+        transform, lastTransform = util.mat3AsArray();
 
     /* If any of the font styles other than `font` have values, then we need to
      * construct a single font value from the subvalues.  Otherwise, we can
@@ -119,12 +124,40 @@ var canvas_textFeature = function (arg) {
       m_this._canvasProperty(context2d, 'font', m_this.getFontFromStyles(fontFromSubValues, d, i));
       m_this._canvasProperty(context2d, 'textAlign', m_this.style.get('textAlign')(d, i) || 'center');
       m_this._canvasProperty(context2d, 'textBaseline', m_this.style.get('textBaseline')(d, i) || 'middle');
+      m_this._canvasProperty(context2d, 'direction', m_this.style.get('direction')(d, i) || 'inherit');
+      /* rotation, scale, and offset */
+      rotation = m_this.style.get('rotation')(d, i) || 0;
+      rotateWithMap = m_this.style.get('rotateWithMap')(d, i) && mapRotation;
+      scale = m_this.style.get('textScaled')(d, i);
+      scale = util.isNonNullFinite(scale) ? Math.pow(2, mapZoom - scale) : null;
+      offset = m_this.style.get('offset')(d, i);
+      transform = util.mat3AsArray();
+      if (rotation || rotateWithMap || (scale && scale !== 1) || (offset && (offset.x || offset.y))) {
+        mat3.translate(transform, transform, [pos.x, pos.y]);
+        if (rotateWithMap && mapRotation) {
+          mat3.rotate(transform, transform, mapRotation);
+        }
+        mat3.translate(transform, transform, [
+          offset && offset.x ? +offset.x : 0,
+          offset && offset.y ? +offset.y : 0]);
+        if (rotation) {
+          mat3.rotate(transform, transform, rotation);
+        }
+        if (scale && scale !== 1) {
+          mat3.scale(transform, transform, [scale, scale]);
+        }
+        mat3.translate(transform, transform, [-pos.x, -pos.y]);
+      }
+      if (lastTransform[0] !== transform[0] || lastTransform[1] !== transform[1] ||
+          lastTransform[3] !== transform[3] || lastTransform[4] !== transform[4] ||
+          lastTransform[6] !== transform[6] || lastTransform[7] !== transform[7]) {
+        context2d.setTransform(transform[0], transform[1], transform[3], transform[4], transform[6], transform[7]);
+        mat3.copy(lastTransform, transform);
+      }
 
       // TODO: fetch and use other properties:
-      // 'direction', 'rotation', 'rotateWithMap', 'scale',
-      // 'scaleWithMap', 'offset', 'width', 'shadowColor', 'shadowOffset',
-      // 'shadowBlur', 'shadowRotate', 'shadowOpacity'
-      m_this._canvasProperty(context2d, 'direction', 'inherit'); // ltr, rtl, inherit
+      // 'shadowColor', 'shadowOffset', 'shadowBlur', 'shadowRotate',
+      // 'shadowOpacity'
       /*
       ctx.shadowColor = "black";
       ctx.shadowOffsetX = 5;
@@ -135,6 +168,7 @@ var canvas_textFeature = function (arg) {
       context2d.fillText(text, pos.x, pos.y);
     });
     m_this._canvasProperty(context2d, 'globalAlpha', 1);
+    context2d.setTransform(1, 0, 0, 1, 0, 0);
   };
 
   this._init(arg);

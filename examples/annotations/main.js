@@ -334,10 +334,19 @@ $(function () {
           break;
       }
       switch (format) {
+        case 'angle':
+          if (value !== undefined && value !== null && value !== '') {
+            value = '' + +(+value * 180.0 / Math.PI).toFixed(4) + ' deg';
+          }
+          break;
         case 'color':
           // always show colors as hex values
           value = geo.util.convertColorToHex(value || {r: 0, g: 0, b: 0}, 'needed');
           break;
+        case 'coordinate2':
+          if (value !== undefined && value !== null && value !== '') {
+            value = '' + value.x + ', ' + value.y;
+          }
       }
       if ((value === undefined || value === '' || value === null) && $('[option]', ctl).is('select')) {
         value = $('[option] option', ctl).eq(0).val();
@@ -370,12 +379,30 @@ $(function () {
     $('.form-group[annotation-types]').each(function () {
       var ctl = $(this),
           key = $('[option]', ctl).attr('option'),
+          format = $('[option]', ctl).attr('format'),
           value, oldvalue;
       if (!ctl.attr('annotation-types').match(typeMatch)) {
         return;
       }
-      value = layer.validateAttribute($('[option]', ctl).val(),
-                                      $('[option]', ctl).attr('format'));
+      value = $('[option]', ctl).val();
+      switch (format) {
+        case 'angle':
+          if (/^\s*[.0-9eE]+\s*$/.exec(value)) {
+            value += 'deg';
+          }
+          break;
+      }
+      switch (key) {
+        case 'offset':
+            //DWM::
+          break;
+        case 'textScaled':
+          if (['true', 'on', 'yes'].indexOf(value.trim().toLowerCase()) >= 0) {
+            value = map.zoom();
+          }
+          break;
+      }
+      value = layer.validateAttribute(value, format);
       switch ($('[option]', ctl).attr('optiontype')) {
         case 'option':
           oldvalue = opt[key];

@@ -44,11 +44,11 @@ block append mainContent
           button.close(type='button', data-dismiss='modal') &times;
           h4.modal-title Edit Annotation
         .modal-body
-          .form-group
-            label(for='edit-name') Name
-            input#edit-name(option='name')
           .row
             .col-md-6
+              .form-group
+                label(for='edit-name') Name
+                input#edit-name(option='name')
               .form-group
                 label(for='edit-description') Description
                 input#edit-description(option='description', type='textarea')
@@ -127,7 +127,7 @@ block append mainContent
                   option(value='end') End
                   option(value='left') Left
                   option(value='right') Right
-              .form-group(annotation-types='all', title='Verticall alignment')
+              .form-group(annotation-types='all', title='Vertical alignment')
                 label(for='edit-textBaseline') Vertical Align.
                 select#edit-textAlign(option='textBaseline', format='text', optiontype='label')
                   option(value='middle') Middle
@@ -136,6 +136,20 @@ block append mainContent
                   option(value='alphabetic') Alphabetic
                   option(value='ideographic') Ideographic
                   option(value='bottom') Bottom
+              .form-group(annotation-types='all')
+                label(for='edit-rotateWithMap') Rotate with Map
+                select#edit-rotateWithMap(option='rotateWithMap', format='boolean', optiontype='label')
+                  option(value='false') No
+                  option(value='true') Yes
+              .form-group(annotation-types='all')
+                label(for='edit-rotation') Rotation
+                input#edit-rotation(option='rotation', format='angle', optiontype='label')
+              .form-group(annotation-types='all', title='Set to "false" to disable, "true" to use the specified font size at the current zoom, or a zoom level to use the specified font size at that zoom level.')
+                label(for='edit-textScaled') Base Scale
+                input#edit-textScaled(option='textScaled', format='booleanOrNumber', optiontype='label')
+              .form-group(annotation-types='all', title='This is the x, y offset of the label in pixels from its default position before rotation and scale.  Example: "5, -4"')
+                label(for='edit-offset') Offset
+                input#edit-offset(option='offset', format='coordinate2', optiontype='label')
           .form-group
             #edit-validation-error
         .modal-footer
