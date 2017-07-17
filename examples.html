@@ -1,0 +1,27 @@
+--- 
+layout: default
+title: Examples 
+---
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <section>
+                <h2>Examples</h2>
+                <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima maxime quam architecto quo inventore harum ex magni, dicta impedit.</p>
+            </section>
+            {% for example in site.data.examples %}
+            <div class="row example-container">
+                <div class="col-sm-4 thumbnail-container">
+                    <a href="{{"example"|relative_url}}/{{example.name}}">
+                        <img src="{{"example"|relative_url}}/{{example.name}}/thumb.jpg">
+                    </a>
+                </div>
+                <div class="col-sm-8">
+                    <a href="{{"example"|relative_url}}/{{example.name}}"><h4 class="title">{{tutorial.title}}</h4></a>
+                    <div class="description">{{example.description}}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

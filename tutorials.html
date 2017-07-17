@@ -4,21 +4,29 @@ title: Tutorials
 ---
 <div class="container">
     <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <h2>Tutorials</h2>
+        <div class="col-md-10 col-md-offset-1">
+            <section>
+                <h2>Tutorials</h2>
+                <p class="text-muted">Lorem ipsum dolor sit amet adipisicing elit. Minima maxime quam architecto quo inventore harum ex magni, dicta impedit.</p>
+            </section>
+            <div class="row">
             {% for tutorial in site.data.tutorials %}
-            <div class="row tutorial-container">
-                <div class="col-sm-4 thumbnail-container">
-                    <a href="{{"tutorial"|relative_url}}/{{tutorial.name}}">
-                        <img src="{{"tutorial"|relative_url}}/{{tutorial.name}}/thumb.jpg">
+                <div class="col-md-4 col-sm-6 portfolio-item">
+                    <a href="#">
+                        <div class="portfolio-hover">
+                            <div class="portfolio-hover-content">
+                                <i class="fa fa-plus fa-3x"></i>
+                            </div>
+                        </div>
+                        <img src="img/portfolio/startup-framework.png" class="img-responsive" alt="">
                     </a>
+                    <div class="portfolio-caption">
+                        <h4>Startup Framework</h4>
+                        <p class="text-muted">Website Design</p>
+                    </div>
                 </div>
-                <div class="col-sm-8">
-                    <a href="{{"tutorial"|relative_url}}/{{tutorial.name}}"><h4 class="title">{{tutorial.title}}</h4></a>
-                    <div class="description">{{tutorial.description}}</div>
-                </div>
-            </div>
             {% endfor %}
+            </div>
         </div>
     </div>
 </div>

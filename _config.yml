@@ -11,5 +11,5 @@ defaults:
       layout: ""
 
 collections:
-  tutorial:
+  example:
     output: true

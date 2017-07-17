@@ -20,8 +20,10 @@ p{
     font-size: 16px;
 }
 
-section {
-    padding: 50px 0 30px 0;
+@media (min-width: 768px) {
+    section {
+        padding: 50px 0 30px 0;
+    }
 }
 
 
@@ -71,7 +73,7 @@ section {
 }
 
 // tutorials page
-.tutorial-container{
+.example-container{
     // clear: both;
     background-color: white;
     padding: 25px 0;
@@ -83,7 +85,7 @@ section {
 
         img{
             width: 100%;
-            border: 1px solid #eee;
+            border: 1px solid #b9b9b9;
             border-radius: 2px;
         }
     }

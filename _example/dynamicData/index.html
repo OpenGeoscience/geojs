@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+    <title>Dynamic Data</title>
+    <!-- include the main bundle-->
+    <script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
+    <!-- include example sources-->
+    <!-- Include example specific files-->
+    <link rel="stylesheet" href="main.css">
+    <script type="text/javascript" src="main.js"></script>
+    <script type="text/javascript" src="clock.js"></script>
+  </head>
+  <body>
+    <!-- Add a navbar-->
+    <nav role="navigation" class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" data-toggle="collapse" data-target="gj-navbar-collapse" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a href="https://github.com/OpenGeoscience/geojs" target="gj-homepage" class="navbar-brand">GeoJS</a>
+        </div>
+        <div id="gj-navbar-collapse" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a tabindex="0" class="gj-screenshot-link">Screenshot</a></li>
+            <li class="gj-screenshot-waiting"><a>...</a></li>
+            <li class="gj-screenshot-result"><a download="screenshot.png" class="gj-screenshot-download"><img></a></li>
+            <li><a href="docs/main.html" target="gj-docco" class="gj-show-source-link">Source</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#about-modal" class="gj-show-about-link">About</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- Add an about modal dialog-->
+    <div id="about-modal" class="modal fade">
+      <div class="modal-dialog modal-md">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Dynamic Data</h4>
+          </div>
+          <div class="modal-body">
+            <p class="text-left">Rendering data that changes with time.</p>
+            <p class="text-right">© Kitware, Inc.</p>
+          </div>
+          <div class="modal-footer">
+            <button data-dismiss="modal" data-target="#about-modal" class="btn btn-primary">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Add the default main content element-->
+    <div id="map"></div>
+  </body>
+</html>
