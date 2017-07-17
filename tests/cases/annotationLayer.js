@@ -238,12 +238,33 @@ describe('geo.annotationLayer', function () {
     it('validateAttribute', function () {
       expect(layer.validateAttribute(undefined, 'other')).toBe(undefined);
       expect(layer.validateAttribute(null, 'other')).toBe(undefined);
-
       expect(layer.validateAttribute('value', 'other')).toBe('value');
+
+      expect(layer.validateAttribute(0.5, 'angle')).toBe(0.5);
+      expect(layer.validateAttribute('0.5', 'angle')).toBe(0.5);
+      expect(layer.validateAttribute('', 'angle')).toBe('');
+      expect(layer.validateAttribute(-1, 'angle')).toBe(-1);
+      expect(layer.validateAttribute('value', 'angle')).toBe(undefined);
+      expect(layer.validateAttribute('90deg ', 'angle')).toBeCloseTo(Math.PI / 2);
+      expect(layer.validateAttribute(' 100grad', 'angle')).toBeCloseTo(Math.PI / 2);
+      expect(layer.validateAttribute('0.25 turn', 'angle')).toBeCloseTo(Math.PI / 2);
+      expect(layer.validateAttribute('1.57079rad', 'angle')).toBeCloseTo(Math.PI / 2);
+      expect(layer.validateAttribute('1.57079', 'angle')).toBeCloseTo(Math.PI / 2);
+
       expect(layer.validateAttribute('value', 'boolean')).toBe(true);
       expect(layer.validateAttribute(true, 'boolean')).toBe(true);
       expect(layer.validateAttribute(0, 'boolean')).toBe(false);
       expect(layer.validateAttribute('false', 'boolean')).toBe(false);
+
+      expect(layer.validateAttribute(true, 'booleanOrNumber')).toBe(true);
+      expect(layer.validateAttribute('false', 'booleanOrNumber')).toBe(false);
+      expect(layer.validateAttribute(0.5, 'booleanOrNumber')).toBe(0.5);
+      expect(layer.validateAttribute('0.5', 'booleanOrNumber')).toBe(0.5);
+      expect(layer.validateAttribute(0, 'booleanOrNumber')).toBe(0);
+      expect(layer.validateAttribute(-1, 'booleanOrNumber')).toBe(-1);
+      expect(layer.validateAttribute(1.2, 'booleanOrNumber')).toBe(1.2);
+      expect(layer.validateAttribute('', 'booleanOrNumber')).toBe(undefined);
+      expect(layer.validateAttribute('value', 'booleanOrNumber')).toBe(undefined);
 
       expect(layer.validateAttribute('not a color', 'color')).toBe(undefined);
       expect(layer.validateAttribute('yellow', 'color')).toEqual({r: 1, g: 1, b: 0});
@@ -251,13 +272,47 @@ describe('geo.annotationLayer', function () {
       expect(layer.validateAttribute('#ff0', 'color')).toEqual({r: 1, g: 1, b: 0});
       expect(layer.validateAttribute({r: 1, g: 1, b: 0}, 'color')).toEqual({r: 1, g: 1, b: 0});
 
+      expect(layer.validateAttribute('', 'coordinate2')).toBe('');
+      expect(layer.validateAttribute(0.5, 'coordinate2')).toBe(undefined);
+      expect(layer.validateAttribute({x: 1, y: 2}, 'coordinate2')).toEqual({x: 1, y: 2});
+      expect(layer.validateAttribute({x: 1, y: null}, 'coordinate2')).toEqual(undefined);
+      expect(layer.validateAttribute('{"x": 1, "y": 2}', 'coordinate2')).toEqual({x: 1, y: 2});
+      expect(layer.validateAttribute('{"x": 1, "y": "value"}', 'coordinate2')).toEqual(undefined);
+      expect(layer.validateAttribute([1, 2], 'coordinate2')).toEqual({x: 1, y: 2});
+      expect(layer.validateAttribute([1, 2, 3], 'coordinate2')).toEqual({x: 1, y: 2});
+      expect(layer.validateAttribute('1, 2', 'coordinate2')).toEqual({x: 1, y: 2});
+      expect(layer.validateAttribute('1 2', 'coordinate2')).toEqual({x: 1, y: 2});
+      expect(layer.validateAttribute('  1 , 2 ', 'coordinate2')).toEqual({x: 1, y: 2});
+      expect(layer.validateAttribute('1 value', 'coordinate2')).toEqual(undefined);
+
       expect(layer.validateAttribute(0.5, 'opacity')).toBe(0.5);
       expect(layer.validateAttribute('0.5', 'opacity')).toBe(0.5);
       expect(layer.validateAttribute(0, 'opacity')).toBe(0);
       expect(layer.validateAttribute(-1, 'opacity')).toBe(undefined);
       expect(layer.validateAttribute(1, 'opacity')).toBe(1);
       expect(layer.validateAttribute(1.2, 'opacity')).toBe(undefined);
+      expect(layer.validateAttribute('', 'opacity')).toBe(undefined);
       expect(layer.validateAttribute('value', 'opacity')).toBe(undefined);
+
+      expect(layer.validateAttribute(0.5, 'number')).toBe(0.5);
+      expect(layer.validateAttribute('0.5', 'number')).toBe(0.5);
+      expect(layer.validateAttribute(0, 'number')).toBe(0);
+      expect(layer.validateAttribute(-1, 'number')).toBe(-1);
+      expect(layer.validateAttribute(1.2, 'number')).toBe(1.2);
+      expect(layer.validateAttribute('1.2e2', 'number')).toBe(120);
+      expect(layer.validateAttribute('1.2e-2', 'number')).toBe(0.012);
+      expect(layer.validateAttribute('', 'number')).toBe(undefined);
+      expect(layer.validateAttribute('value', 'number')).toBe(undefined);
+
+      expect(layer.validateAttribute(0.5, 'numberOrBlank')).toBe(0.5);
+      expect(layer.validateAttribute('0.5', 'numberOrBlank')).toBe(0.5);
+      expect(layer.validateAttribute(0, 'numberOrBlank')).toBe(0);
+      expect(layer.validateAttribute(-1, 'numberOrBlank')).toBe(-1);
+      expect(layer.validateAttribute(1.2, 'numberOrBlank')).toBe(1.2);
+      expect(layer.validateAttribute('1.2e2', 'numberOrBlank')).toBe(120);
+      expect(layer.validateAttribute('1.2e-2', 'numberOrBlank')).toBe(0.012);
+      expect(layer.validateAttribute('', 'numberOrBlank')).toBe('');
+      expect(layer.validateAttribute('value', 'numberOrBlank')).toBe(undefined);
 
       expect(layer.validateAttribute(0.5, 'positive')).toBe(0.5);
       expect(layer.validateAttribute('0.5', 'positive')).toBe(0.5);
@@ -265,6 +320,9 @@ describe('geo.annotationLayer', function () {
       expect(layer.validateAttribute(-1, 'positive')).toBe(undefined);
       expect(layer.validateAttribute(1.2, 'positive')).toBe(1.2);
       expect(layer.validateAttribute('value', 'positive')).toBe(undefined);
+
+      expect(layer.validateAttribute(0.5, 'text')).toBe('0.5');
+      expect(layer.validateAttribute('value', 'text')).toBe('value');
     });
   });
   describe('Private utility functions', function () {
@@ -278,7 +336,8 @@ describe('geo.annotationLayer', function () {
       });
       point = geo.annotation.pointAnnotation({
         layer: layer,
-        position: {x: 2, y: 3}});
+        position: {x: 2, y: 3},
+        labelStyle: {opacity: 0.8}});
       rect = geo.annotation.rectangleAnnotation({
         layer: layer,
         corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
@@ -289,6 +348,36 @@ describe('geo.annotationLayer', function () {
       layer.addAnnotation(rect);
       layer.addAnnotation(rect2);
       expect(layer.features.length).toBe(1);
+    });
+    it('_updateLabels and _removeLabelFeature', function () {
+      var numChild, canvasLayer, canvasLine;
+      var labels = [point.labelRecord()];
+      /* calling _updateLabels with no argument or an empty list implicitly
+       * calls _removeLabelFeature.  The call to _updateLabels with a list will
+       * add it back. */
+      layer._updateLabels([]);
+      numChild = layer.children().length;
+      layer._updateLabels(labels);
+      expect(layer.children().length).toBe(numChild + 1);
+      expect(layer.children()[layer.children().length - 1] instanceof geo.featureLayer);
+      layer._updateLabels();  // implicitly calls _removeLabelFeature
+      expect(layer.children().length).toBe(numChild);
+      // canvas layers shouldn't add a sublayer, but instead a feature
+      canvasLayer = map.createLayer('annotation', {
+        renderer: 'canvas'
+      });
+      canvasLine = geo.annotation.lineAnnotation({
+        layer: layer,
+        vertices: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
+      canvasLayer.addAnnotation(canvasLine);
+      canvasLayer._updateLabels([]);
+      numChild = canvasLayer.children().length;
+      canvasLayer._updateLabels(labels);
+      expect(layer.children()[layer.children().length - 1] instanceof geo.textFeature);
+      expect(canvasLayer.children().length).toBe(numChild + 1);
+      canvasLayer._updateLabels();
+      expect(canvasLayer.children().length).toBe(numChild);
+      map.deleteLayer(canvasLayer);
     });
     it('_handleMouseClick', function () {
       layer.removeAllAnnotations();

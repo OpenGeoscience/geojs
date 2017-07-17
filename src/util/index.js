@@ -179,13 +179,13 @@ var util = module.exports = {
 
   /**
    * Check if a value coerces to a number that is finite, not a NaN, and not
-   * `null` or `false`.
+   * `null`, `false`, or the empty string.
    *
    * @param {object} val The value to check.
    * @returns {boolean} True if `val` is a non-null, non-false, finite number.
    */
   isNonNullFinite: function (val) {
-    return isFinite(val) && val !== null && val !== false;
+    return isFinite(val) && val !== null && val !== false && val !== '';
   },
 
   /**

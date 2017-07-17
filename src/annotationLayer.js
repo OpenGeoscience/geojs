@@ -640,35 +640,35 @@ var annotationLayer = function (args) {
         value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
         break;
       case 'booleanOrNumber':
-        if ((!value && value !== 0) || ['true', 'false', 'off', 'on', 'no', 'yes'].indexOf(('' + value).toLowerCase()) >= 0) {
+        if ((!value && value !== 0 && value !== '') || ['true', 'false', 'off', 'on', 'no', 'yes'].indexOf(('' + value).toLowerCase()) >= 0) {
           value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
         } else {
-          value = +value;
-          if (!isFinite(value)) {
+          if (!util.isNonNullFinite(value)) {
             return;
           }
+          value = +value;
         }
         break;
       case 'coordinate2':
         if (value === '') {
           break;
         }
-        if (value && isFinite(value.x) && isFinite(value.y)) {
+        if (value && util.isNonNullFinite(value.x) && util.isNonNullFinite(value.y)) {
           value.x = +value.x;
           value.y = +value.y;
           break;
         }
         try { value = JSON.parse(value); } catch (err) { }
-        if (value && isFinite(value.x) && isFinite(value.y)) {
+        if (value && util.isNonNullFinite(value.x) && util.isNonNullFinite(value.y)) {
           value.x = +value.x;
           value.y = +value.y;
           break;
         }
-        if (Array.isArray(value) && isFinite(value[0]) && isFinite(value[1])) {
+        if (Array.isArray(value) && util.isNonNullFinite(value[0]) && util.isNonNullFinite(value[1])) {
           value = {x: +value[0], y: +value[1]};
           break;
         }
-        parts = /^\s*([-.0-9eE]+)\s*,?\s*([-.0-9eE]+)\s*$/.exec('' + value);
+        parts = /^\s*([-.0-9eE]+)(?:\s+|\s*,)\s*([-.0-9eE]+)\s*$/.exec('' + value);
         if (!parts || !isFinite(parts[1]) || !isFinite(parts[2])) {
           return;
         }
@@ -681,19 +681,19 @@ var annotationLayer = function (args) {
         }
         break;
       case 'number':
-        value = +value;
         if (!util.isNonNullFinite(value)) {
           return;
         }
+        value = +value;
         break;
       case 'numberOrBlank':
         if (value === '') {
           break;
         }
-        value = +value;
         if (!util.isNonNullFinite(value)) {
           return;
         }
+        value = +value;
         break;
       case 'opacity':
         if (value === undefined || value === null || value === '') {
@@ -835,12 +835,12 @@ var annotationLayer = function (args) {
    */
   this._updateLabels = function (labels) {
     if (!labels || !labels.length) {
-      m_this.removeLabelFeature();
+      m_this._removeLabelFeature();
       return m_this;
     }
     if (!m_labelFeature) {
       var renderer = registry.rendererForFeatures(['text']);
-      if (renderer !== m_this.renderer()) {
+      if (renderer !== m_this.renderer().api()) {
         m_labelLayer = registry.createLayer('feature', m_this.map(), {renderer: renderer});
         m_this.addChild(m_labelLayer);
         m_labelLayer._update();
@@ -888,7 +888,7 @@ var annotationLayer = function (args) {
    *
    * @returns {this} The current layer.
    */
-  this.removeLabelFeature = function () {
+  this._removeLabelFeature = function () {
     if (m_labelLayer) {
       m_labelLayer._exit();
       m_this.removeChild(m_labelLayer);
@@ -945,7 +945,7 @@ var annotationLayer = function (args) {
    * @returns {this} The current layer.
    */
   this._exit = function () {
-    m_this.removeLabelFeature();
+    m_this._removeLabelFeature();
     // Call super class exit
     s_exit.call(m_this);
     m_annotations = [];
