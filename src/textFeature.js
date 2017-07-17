@@ -35,8 +35,6 @@ var feature = require('./feature');
  * @property {string|function} [style.textBaseline='middle'] The vertical text
  *      alignment.  One of `top`, `hanging`, `middle`, `alphabetic`,
  *      `ideographic`, or `bottom`.
- * @property {string|function} [style.direction='inherit'] Text direction.  One
- *      of `ltr`, `rtl`, or `inherit`.
  * @property {geo.geoColor|function} [style.color='black'] Text color.  May
  *      include opacity.
  * @property {number|function} [style.textOpacity=1] The opacity of the text.
@@ -54,9 +52,6 @@ var feature = require('./feature');
  *      default position for the text.  This is applied before rotation.
  * @property {geo.geoColor|function} [style.shadowColor='black'] Text shadow
  *      color.  May include opacity.
- * @property {number|function} [style.shadowOpacity=1] The opacity of the
- *      shadow.  If the color includes opacity, this is combined with that
- *      value.
  * @property {geo.screenPosition|function} [style.shadowOffset] Offset for a
  *      text shadow.  This is applied before rotation.
  * @property {number|null|function} [style.shadowBlur] If not null, add a text
@@ -149,7 +144,6 @@ var textFeature = function (arg) {
         font: 'bold 16px sans-serif',
         textAlign: 'center',
         textBaseline: 'middle',
-        direction: 'inherit',
         color: { r: 0, g: 0, b: 0 },
         rotation: 0,  /* in radians */
         rotateWithMap: false,
@@ -177,15 +171,16 @@ var textFeature = function (arg) {
     m_this.dataTime().modified();
   };
 
+  this._init(arg);
   return m_this;
 };
 
 textFeature.usedStyles = [
   'visible', 'font', 'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch',
-  'fontSize', 'lineHeight', 'fontFamily', 'textAlign', 'textBaseline',
-  'direction', 'color', 'textOpacity', 'rotation', 'rotateWithMap',
-  'textScaled', 'offset', 'shadowColor', 'shadowOpacity', 'shadowOffset',
-  'shadowBlur', 'shadowRotate', 'textStrokeColor', 'textStrokeWidth'
+  'fontSize', 'lineHeight', 'fontFamily', 'textAlign', 'textBaseline', 'color',
+  'textOpacity', 'rotation', 'rotateWithMap', 'textScaled', 'offset',
+  'shadowColor', 'shadowOffset', 'shadowBlur', 'shadowRotate',
+  'textStrokeColor', 'textStrokeWidth'
 ];
 
 /**

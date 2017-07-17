@@ -77,12 +77,21 @@ var canvas_textFeature = function (arg) {
              (parts[3] || '') + ' ' + (parts[4] || '') + ' ' +
              (parts[5] || '') + (parts[6] ? '/' + parts[6] : '') + ' ' +
              parts[7];
+      font = font.trim().replace(/\s\s+/g, ' ');
     }
     return font;
   };
 
   /**
    * Render the data on the canvas.
+   *
+   * This does not currently support multiline text or word wrapping, since
+   * canvas doesn't implement that directly.  To support these, each text item
+   * would need to be split on line breaks, and have the width of the text
+   * calculated with context2d.measureText to determine word wrapping.  This
+   * would also need to calculate the effective line height from the font
+   * specification.
+   *
    * @protected
    * @param {CanvasRenderingContext2D} context2d The canvas context to draw in.
    * @param {geo.map} map The parent map object.
@@ -126,7 +135,6 @@ var canvas_textFeature = function (arg) {
       m_this._canvasProperty(context2d, 'font', m_this.getFontFromStyles(fontFromSubValues, d, i));
       m_this._canvasProperty(context2d, 'textAlign', m_this.style.get('textAlign')(d, i) || 'center');
       m_this._canvasProperty(context2d, 'textBaseline', m_this.style.get('textBaseline')(d, i) || 'middle');
-      m_this._canvasProperty(context2d, 'direction', m_this.style.get('direction')(d, i) || 'inherit');
       /* rotation, scale, and offset */
       rotation = m_this.style.get('rotation')(d, i) || 0;
       rotateWithMap = m_this.style.get('rotateWithMap')(d, i) && mapRotation;
@@ -193,7 +201,6 @@ var canvas_textFeature = function (arg) {
     context2d.setTransform(1, 0, 0, 1, 0, 0);
   };
 
-  this._init(arg);
   return this;
 };
 
