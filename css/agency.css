@@ -40,7 +40,8 @@ a:hover, a:focus, a:active, a.active {
 
 h1, h2, h3, h4, h5, h6 {
     /*text-transform: uppercase;*/
-    font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /* font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif; */
+    
     font-weight: 700;
 }
 
@@ -127,7 +128,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .navbar-custom .navbar-brand {
     /*font-family: "Kaushan Script","Helvetica Neue",Helvetica,Arial,cursive;*/
-    font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, cursive;
+    /* font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, cursive; */
     font-weight: bold;
     color: #1b70b5;
 }
@@ -141,21 +142,20 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar-custom .navbar-toggle {
-    border-color: #1b70b5;
-    background-color: #1b70b5;
     font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-transform: uppercase;
-    color: white;
-    font-size: 12px;
+    color: #555;
+    font-size: 20px;
+    border: none;
+    padding: 2px 10px;
 }
 
 .navbar-custom .navbar-toggle .icon-bar {
     background-color: #fff;
 }
 
-.navbar-custom .navbar-toggle:hover, .navbar-custom .navbar-toggle:focus {
-    border-color: #0097d9;
-    background-color: #0097d9;
+.navbar-custom .navbar-toggle:hover, .navbar-custom .navbar-toggle:focus  {
+    background-color: #ccc;
 }
 
 .navbar-custom .nav li a {
@@ -216,6 +216,17 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+@media (max-width: 768px) {
+    .navbar-custom.affix {
+        background-color: #f7f7f7;
+        border-bottom-color: #e5e5e5;
+    }
+
+    .navbar-custom .navbar-brand {
+        padding: 18px 15px;
+    }
+}
+
 header {
     text-align: center;
     color: #333;
@@ -237,7 +248,7 @@ header .intro-text {
 header .intro-text .intro-lead-in {
     margin-top: 40px;
     margin-bottom: 25px;
-    font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /* font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif; */
     font-size: 18px;
     font-style: italic;
     line-height: 18px;
@@ -260,7 +271,7 @@ header .intro-text .intro-heading {
     header .intro-text .intro-lead-in {
         margin-top: 40px;
         margin-bottom: 25px;
-        font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        /* font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif; */
         font-size: 30px;
         font-style: italic;
         line-height: 30px;
@@ -287,7 +298,7 @@ section h2.section-heading {
 
 section h3.section-subheading {
     font-size: 24px;
-    font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /* font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif; */
     text-transform: none;
     font-style: italic;
     font-weight: 400;

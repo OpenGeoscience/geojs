@@ -1,60 +1,31 @@
-- name: heatmap
-  title: Heatmap Feature
-  description: This example shows how to add a heatmap to a map.
+- name: basemap
+  title: Create Basemap
+  description: Hello world to GeoJs
   
-- name: deepzoom
-  title: Deepzoom tiled image example
-  description: Rendering a tiled image using the Deepzoom protocol.
+- name: vector-layer
+  title: Vector Layer
+  description: Create Vector Layer and vector geometries
+  
+- name: wms-layer
+  title: WMS Layer
+  description: create WMS layer
 
-- name: geoJSON
-  title: GeoJSON file reader
-  description: Shows how to use the included geoJSON reader, and how to use the properties to adjust the style of the features.  In this example, you can edit the json file while the features on the map update in response.  You can also drop a new geoJSON file onto the text editor to load it.
+- name: basemap
+  title: Create Basemap
+  description: Hello world to GeoJs
+  
+- name: vector-layer
+  title: Vector Layer
+  description: Create Vector Layer and vector geometries
+  
+- name: basemap
+  title: Create Basemap
+  description: Hello world to GeoJs
+  
+- name: vector-layer
+  title: Vector Layer
+  description: Create Vector Layer and vector geometries
 
-- name: hurricanes
-  title: Hurricane tracking data
-  description: Explore historic hurricane paths since 1980 on an interactive map.
-
-- name: legend
-  title: Feature legends
-  description: This example shows how to create a legend to describe feature styles on a map.
-
-- name: lines
-  title: Line Feature
-  description: This example shows the variations that are available for line features.
-
-- name: pixelmap
-  title: Pixelmap feature
-  description: This example shows how to use a pixelmap feature.  The pixelmap colors areas based on an index derived from an image and some data per index.
-
-- name: polygons
-  title: Polygon features
-  description: This example shows how to add polygons to a map.
-
-- name: quads
-  title: Quad features
-  description: This example shows how to add dynamic quads to a map.
-
-- name: reprojection
-  title: Reproject tiles
-  description: This example shows how you can reproject tiles from one projection to another.  The source tiles are in Web Mercator (EPSG:3857), but can be drawn in many different projections.
-
-- name: sld
-  title: Adding styles to WMS raster layers
-  description: Rendering tiles from a WMS server by customizing the style.
-
-- name: tiles
-  title: Tile layer with controllable options
-  description: This example provides controls for changing many options on tile layers.  The code and query parameters allow even more options to be adjusted.
-
-- name: transitions
-  title: Using animated transitions
-  description: Using animations to transition between points on a map.
-
-- name: widgets
-  title: Map Widgets
-  description: This example shows how the widgets API can be used to place elements on top of the map.
-
-- name: wms
-  title: Rendering tiles from a WMS server
-  description: Rendering tiles from a WMS server by customizing the tile URL of an OSM layer.
-
+- name: wms-layer
+  title: WMS Layer
+  description: create WMS layer

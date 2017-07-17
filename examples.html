@@ -13,11 +13,13 @@ title: Examples
             <div class="row example-container">
                 <div class="col-sm-4 thumbnail-container">
                     <a href="{{"example"|relative_url}}/{{example.name}}">
+                        <div class="thumbnail-hover">
+                        </div>
                         <img src="{{"example"|relative_url}}/{{example.name}}/thumb.jpg">
                     </a>
                 </div>
                 <div class="col-sm-8">
-                    <a href="{{"example"|relative_url}}/{{example.name}}"><h4 class="title">{{tutorial.title}}</h4></a>
+                    <a href="{{"example"|relative_url}}/{{example.name}}"><h4 class="title">{{example.title}}</h4></a>
                     <div class="description">{{example.description}}</div>
                 </div>
             </div>

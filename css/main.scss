@@ -55,7 +55,7 @@ p{
     }
 
     h1{
-        font-size: 18px;
+        font-size: 16px;
         color: #999;
         text-transform: uppercase;
     }
@@ -72,25 +72,99 @@ p{
     }
 }
 
-// tutorials page
+// examples page
 .example-container{
     // clear: both;
     background-color: white;
     padding: 25px 0;
     border-bottom: 1px solid #eee;
 
-    .thumbnail-container{
-        // width: 250px;
-        // float: left;
+    .thumbnail-container {
+        a{
+            position: relative;
+            display: block;
+        }
 
         img{
             width: 100%;
             border: 1px solid #b9b9b9;
             border-radius: 2px;
         }
+
+        .thumbnail-hover {
+            background: rgba(18, 100, 183, .9);
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: all ease 0.5s;
+            -webkit-transition: all ease 0.5s;
+            -moz-transition: all ease 0.5s;
+        }
+
+        .thumbnail-hover:hover {
+            opacity: 0.4;
+        }
+    }
+
+    h4.title{
+        font-size: 17px;
     }
 
     .description{
         margin-top:20px;
+    }
+}
+
+// tutorials page
+.page.tutorials{
+    .portfolio-item {
+        right: 0;
+        margin: 0 0 15px;
+        color: #fff;
+    }
+
+    .portfolio-item .portfolio-link {
+        display: block;
+        position: relative;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .portfolio-item .portfolio-link .portfolio-hover {
+        background: rgba(18, 100, 183, .9);
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: all ease 0.5s;
+        -webkit-transition: all ease 0.5s;
+        -moz-transition: all ease 0.5s;
+    }
+
+    .portfolio-item .portfolio-link .portfolio-hover:hover {
+        opacity: 0.4;
+    }
+
+    .portfolio-item .portfolio-caption {
+        max-width: 400px;
+        margin: 0 auto;
+        background-color: white;
+        text-align: center;
+        padding: 25px;
+        height: 120px;
+        background-color: #333;
+    }
+
+    .portfolio-item .portfolio-caption h4 {
+        text-transform: none;
+        margin: 0 0 10px 0;
+    }
+
+    .portfolio-item .portfolio-caption p {
+        font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-style: italic;
+        font-size: 14px;
+        margin: 0;
     }
 }

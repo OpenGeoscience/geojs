@@ -13,3 +13,5 @@ defaults:
 collections:
   example:
     output: true
+  tutorial:
+    output: true

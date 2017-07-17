@@ -2,7 +2,7 @@
 layout: default
 title: Tutorials 
 ---
-<div class="container">
+<div class="container page tutorials">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
             <section>
@@ -12,17 +12,14 @@ title: Tutorials
             <div class="row">
             {% for tutorial in site.data.tutorials %}
                 <div class="col-md-4 col-sm-6 portfolio-item">
-                    <a href="#">
+                    <a class="portfolio-link" href="#">
                         <div class="portfolio-hover">
-                            <div class="portfolio-hover-content">
-                                <i class="fa fa-plus fa-3x"></i>
-                            </div>
                         </div>
-                        <img src="img/portfolio/startup-framework.png" class="img-responsive" alt="">
+                        <img src="{{"tutorial"|relative_url}}/{{tutorial.name}}/thumb.jpg" class="img-responsive" alt="">
                     </a>
                     <div class="portfolio-caption">
-                        <h4>Startup Framework</h4>
-                        <p class="text-muted">Website Design</p>
+                        <h4>{{tutorial.title}}</h4>
+                        <p class="text-muted">{{tutorial.description}}</p>
                     </div>
                 </div>
             {% endfor %}
