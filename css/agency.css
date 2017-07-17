@@ -190,9 +190,9 @@ h1, h2, h3, h4, h5, h6 {
         border-bottom-width: 1px;
         border-bottom-style: solid;
         background-color: white;
-        -webkit-transition: padding .3s;
-        -moz-transition: padding .3s;
-        transition: padding .3s;
+        -webkit-transition: all .3s;
+        -moz-transition: all .3s;
+        transition: all .3s;
     }
     .navbar-custom .navbar-brand {
         font-size: 2em;
@@ -207,7 +207,8 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (min-width: 768px) {
     .navbar-custom.affix {
-        background-color: #fff;
+        background-color: #f7f7f7;
+        border-bottom-color: #e5e5e5;
         padding: 10px 0;
     }
     .navbar-custom.affix .navbar-brand {
