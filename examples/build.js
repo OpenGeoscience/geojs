@@ -42,7 +42,7 @@ var examples = glob('examples/*/example.json')
     json.docHTML = 'docs/' + path.basename(main).replace(/js$/, 'html');
     json.bundle = '../bundle.js';
 
-    var fn = jade.compileFile(path.relative('.', path.resolve(dir, 'index.jade')), {pretty: true});
+    var fn = jade.compileFile(path.relative('.', path.resolve(dir, 'index.jade')), {pretty: false});
     fs.writeFileSync(path.resolve(output, 'index.html'), fn(json));
     return json;
   });
