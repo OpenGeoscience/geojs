@@ -9,10 +9,12 @@
     });
 
     // Offset for Main Navigation
-    $('#mainNav').affix({
-        offset: {
-            top: 100
-        }
-    })
+    if(!$('#mainNav').hasClass('affix')){
+        $('#mainNav').affix({
+            offset: {
+                top: 100
+            }
+        });
+    }
 
 })(jQuery); // End of use strict

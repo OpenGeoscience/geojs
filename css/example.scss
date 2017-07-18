@@ -1,0 +1,35 @@
+---
+---
+
+@media (min-height: 768px){
+    html, body {
+        height: 100%;
+        width: 100%;
+    }
+
+    .content-wrapper{
+        height: calc(100% - 90px);
+        padding-top: 70px;
+    }
+
+    .page.example{
+        height: 100%;
+
+        #map {
+            width: 100%;
+            height: 70%;
+            overflow: hidden;
+        }
+    }
+}
+
+@media (max-height: 768px){
+    .content-wrapper{
+        height: calc(100% - 90px);
+        padding-top: 50px;
+    }
+
+    .page.example{
+        height: 70vh;
+    }
+}

@@ -61,7 +61,7 @@
 <body id="page-top" class="index">
 
     <!-- Navigation -->
-    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top{%if layout.navbar_affix %} affix{%endif%}">
         <div class="container">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
@@ -80,10 +80,10 @@
                     <li class="{%if page.url == "/"%}active{%endif%}">
                         <a href="/">Welcome</a>
                     </li>
-                    <li class="{%if page.url contains "tutorials"%}active{%endif%}">
+                    <li class="{%if page.url contains "tutorial"%}active{%endif%}">
                         <a href="/tutorials">Tutorials</a>
                     </li>
-                    <li class="{%if page.url contains "examples"%}active{%endif%}">
+                    <li class="{%if page.url contains "example"%}active{%endif%}">
                         <a href="/examples">Examples</a>
                     </li>
                     <li>

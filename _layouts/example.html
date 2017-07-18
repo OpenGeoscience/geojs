@@ -1,10 +1,17 @@
 ---
 layout: default
+navbar_affix: true
 ---
-<link href="{{ "css/example.css" | relative_url }}" rel="stylesheet">
-<!-- include the main bundle-->
-<script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
 <div class="page example">
-    {{ content }}
+    <link href="{{ "css/example.css" | relative_url }}" rel="stylesheet">
+    <script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
     <div id="map"></div>
+    {{ content }}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                {{page.about}}
+            </div>
+        </div>
+    </div>
 </div>

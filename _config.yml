@@ -15,3 +15,10 @@ collections:
     output: true
   tutorial:
     output: true
+
+# # otherwise some big files in this data folder will hang jekyll build
+# exclude:
+#   - data
+
+keep_files:
+  - data
