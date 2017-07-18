@@ -1,6 +1,10 @@
 ---
 layout: default
 ---
+<link href="{{ "css/example.css" | relative_url }}" rel="stylesheet">
 <!-- include the main bundle-->
 <script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
-{{ content }}
+<div class="page example">
+    {{ content }}
+    <div id="map"></div>
+</div>
