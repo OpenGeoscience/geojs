@@ -2,15 +2,30 @@
 layout: default
 navbar_affix: true
 ---
+<script type="text/javascript" src="{{ "js/example.js" | relative_url }}"></script>
 <div class="page example">
     <link href="{{ "css/example.css" | relative_url }}" rel="stylesheet">
     <script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
     <div id="map"></div>
     {{ content }}
     <div class="container">
-        <div class="row">
+        <div class="row source-screenshot">
             <div class="col-md-12">
-                {{page.about}}
+                <a class="source" href="docs/main.html">Source code</a>
+                <a class="screenshot" href="#">Take screenshot</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 screenshot-result-container">
+                <a class="screenshot-loading" href="#">...</a>
+                <div class="pull-right screenshot-result">
+                    <a download="screenshot.png"><img /></a>
+                </div>
+            </div>
+        </div>
+        <div class="row about">
+            <div class="col-md-12">
+                <p>{{page.about}}</p>
             </div>
         </div>
     </div>
