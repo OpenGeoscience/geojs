@@ -429,7 +429,7 @@ $(function () {
 
   // Load the data
   $.ajax({
-    url: '../../data/hurricanes.json',
+    url: '../data/hurricanes.json',
     success: draw
   });
 
