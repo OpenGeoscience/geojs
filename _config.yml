@@ -6,9 +6,9 @@ defaults:
       layout: default
   - scope:
       path: ""
-      type: my_collection
+      type: example
     values:
-      layout: ""
+      layout: example
 
 collections:
   example:

@@ -1,6 +1,6 @@
 - name: basemap
   title: Create Basemap
-  description: Hello world to GeoJs
+  description: Hello world to GeoJS
   
 - name: vector-layer
   title: Vector Layer
@@ -12,7 +12,7 @@
 
 - name: basemap
   title: Create Basemap
-  description: Hello world to GeoJs
+  description: Hello world to GeoJS
   
 - name: vector-layer
   title: Vector Layer
@@ -20,7 +20,7 @@
   
 - name: basemap
   title: Create Basemap
-  description: Hello world to GeoJs
+  description: Hello world to GeoJS
   
 - name: vector-layer
   title: Vector Layer

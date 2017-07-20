@@ -3,9 +3,11 @@ layout: default
 navbar_affix: true
 ---
 <script type="text/javascript" src="{{ "js/example.js" | relative_url }}"></script>
+<link rel="stylesheet" href="{{ "css/example.css" | relative_url }}">
+<script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
 <div class="page example">
-    <link href="{{ "css/example.css" | relative_url }}" rel="stylesheet">
-    <script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="main.js" charset="UTF-8"></script>
+    <link rel="stylesheet" href="main.css">
     <div id="map"></div>
     {{ content }}
     <div class="container">

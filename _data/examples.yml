@@ -6,13 +6,25 @@
   title: Deepzoom tiled image example
   description: Rendering a tiled image using the Deepzoom protocol.
 
-- name: geoJSON
-  title: GeoJSON file reader
-  description: Shows how to use the included geoJSON reader, and how to use the properties to adjust the style of the features.  In this example, you can edit the json file while the features on the map update in response.  You can also drop a new geoJSON file onto the text editor to load it.
-
 - name: hurricanes
   title: Hurricane tracking data
   description: Explore historic hurricane paths since 1980 on an interactive map.
+
+- name: annotations
+  title: Annotation Layer
+  description: Add annotations, such as marked rectangles, to a map.
+
+- name: choropleth
+  title: Choropleth plot
+  description: Add choropleth features to a map. Choropleths color each region in a set of regions based on a scalar value for each region.
+
+- name: contour
+  title: Contour plot
+  description: Add contour features to a map.  Contours color a region based on an array of scalar values.
+
+- name: geoJSON
+  title: GeoJSON file reader
+  description: Shows how to use the included geoJSON reader, and how to use the properties to adjust the style of the features.  In this example, you can edit the json file while the features on the map update in response.  You can also drop a new geoJSON file onto the text editor to load it.
 
 - name: legend
   title: Feature legends
