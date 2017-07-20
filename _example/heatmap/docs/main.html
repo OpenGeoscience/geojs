@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Run after the DOM loads</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-meta">  'use strict'</span>;
+
+  <span class="hljs-keyword">var</span> map = geo.map({
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-98</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">39</span>
+    },
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">3</span>
+  });
+  <span class="hljs-keyword">var</span> layer, heatmap, points, datapoints;
+
+  <span class="hljs-keyword">var</span> layerOptions = {
+    <span class="hljs-attr">features</span>: [<span class="hljs-string">'heatmap'</span>],
+    <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.75</span>
+  };
+  <span class="hljs-keyword">var</span> heatmapOptions = {
+    <span class="hljs-attr">binned</span>: <span class="hljs-string">'auto'</span>,
+    <span class="hljs-attr">minIntensity</span>: <span class="hljs-literal">null</span>,
+    <span class="hljs-attr">maxIntensity</span>: <span class="hljs-literal">null</span>,
+    <span class="hljs-attr">style</span>: {
+      <span class="hljs-attr">blurRadius</span>: <span class="hljs-number">15</span>,
+      <span class="hljs-attr">color</span>: {
+        <span class="hljs-number">0.00</span>: {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">0.0</span>},
+        <span class="hljs-number">0.25</span>: {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">0.5</span>},
+        <span class="hljs-number">0.50</span>: {<span class="hljs-attr">r</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">0.8</span>},
+        <span class="hljs-number">1.00</span>: {<span class="hljs-attr">r</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">1.0</span>}
+      },
+      <span class="hljs-attr">radius</span>: <span class="hljs-number">25</span>
+    },
+    <span class="hljs-attr">updateDelay</span>: <span class="hljs-number">50</span>
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Parse query parameters into an object for ease of access</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> query = <span class="hljs-built_in">document</span>.location.search.replace(<span class="hljs-regexp">/(^\?)/</span>, <span class="hljs-string">''</span>).split(
+    <span class="hljs-string">'&amp;'</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">n</span>) </span>{
+      n = n.split(<span class="hljs-string">'='</span>);
+      <span class="hljs-keyword">if</span> (n[<span class="hljs-number">0</span>]) {
+        <span class="hljs-keyword">this</span>[<span class="hljs-built_in">decodeURIComponent</span>(n[<span class="hljs-number">0</span>])] = <span class="hljs-built_in">decodeURIComponent</span>(n[<span class="hljs-number">1</span>]);
+      }
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }.bind({}))[<span class="hljs-number">0</span>];
+  $.each(query, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">key, value</span>) </span>{
+    <span class="hljs-keyword">var</span> ctlvalue, ctlkey = key;
+    <span class="hljs-keyword">switch</span> (key) {
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'binned'</span>:
+        ctlvalue = value ? value : <span class="hljs-string">'auto'</span>;
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'dataset'</span>:
+        ctlvalue = value ? value : <span class="hljs-string">'adderall'</span>;
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'gaussian'</span>:
+        ctlvalue = value === <span class="hljs-string">'true'</span>;
+        heatmapOptions.style[key] = value;
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'gradient'</span>:
+        <span class="hljs-keyword">var</span> parts = value.split(<span class="hljs-string">','</span>).map(<span class="hljs-built_in">parseFloat</span>);
+        <span class="hljs-keyword">if</span> (parts.length &gt;= <span class="hljs-number">5</span>) {
+          <span class="hljs-keyword">var</span> gradient = {<span class="hljs-number">0</span>: {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">0</span>}};
+          <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; parts.length - <span class="hljs-number">4</span>; i += <span class="hljs-number">5</span>) {
+            gradient[parts[i]] = {
+              <span class="hljs-attr">r</span>: parts[i + <span class="hljs-number">1</span>] / <span class="hljs-number">255</span>,
+              <span class="hljs-attr">g</span>: parts[i + <span class="hljs-number">2</span>] / <span class="hljs-number">255</span>,
+              <span class="hljs-attr">b</span>: parts[i + <span class="hljs-number">3</span>] / <span class="hljs-number">255</span>,
+              <span class="hljs-attr">a</span>: parts[i + <span class="hljs-number">4</span>]
+            };
+          }
+          heatmapOptions.style.color = gradient;
+        }
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'minIntensity'</span>: <span class="hljs-keyword">case</span> <span class="hljs-string">'maxIntensity'</span>:
+        value = value.length ? <span class="hljs-built_in">parseFloat</span>(value) : <span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">isNaN</span>(value)) {
+          heatmapOptions[key] = ctlvalue = value;
+        }
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'opacity'</span>:
+        value = value.length ? <span class="hljs-built_in">parseFloat</span>(value) : <span class="hljs-number">0.75</span>;
+        <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">isNaN</span>(value)) {
+          layerOptions[key] = ctlvalue = value;
+        }
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'points'</span>:
+        <span class="hljs-keyword">if</span> (value.length) {
+          points = ctlvalue = <span class="hljs-built_in">parseInt</span>(value, <span class="hljs-number">10</span>);
+        }
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'radius'</span>: <span class="hljs-keyword">case</span> <span class="hljs-string">'blurRadius'</span>:
+        <span class="hljs-keyword">if</span> (value.length) {
+          value = <span class="hljs-built_in">parseFloat</span>(value);
+          <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">isNaN</span>(value)) {
+            heatmapOptions.style[key] = ctlvalue = value;
+          }
+        }
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'updateDelay'</span>:
+        <span class="hljs-keyword">if</span> (value.length) {
+          heatmapOptions[key] = ctlvalue = <span class="hljs-built_in">parseInt</span>(value, <span class="hljs-number">10</span>);
+        }
+        <span class="hljs-keyword">break</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>add gaussian and binning when they are added as features</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    }
+    <span class="hljs-keyword">if</span> (ctlvalue !== <span class="hljs-literal">undefined</span>) {
+      $(<span class="hljs-string">'#'</span> + ctlkey).val(ctlvalue);
+    }
+  });
+  <span class="hljs-comment">/* Set gradient controls */</span>
+  <span class="hljs-keyword">var</span> gradkeys = <span class="hljs-built_in">Object</span>.keys(heatmapOptions.style.color).sort();
+  $.each(gradkeys, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">idx, key</span>) </span>{
+    <span class="hljs-keyword">var</span> entry = heatmapOptions.style.color[key];
+    $(<span class="hljs-string">'#gradI'</span> + (idx + <span class="hljs-number">1</span>)).val(key);
+    $(<span class="hljs-string">'#gradR'</span> + (idx + <span class="hljs-number">1</span>)).val(<span class="hljs-built_in">Math</span>.round(entry.r * <span class="hljs-number">255</span>));
+    $(<span class="hljs-string">'#gradG'</span> + (idx + <span class="hljs-number">1</span>)).val(<span class="hljs-built_in">Math</span>.round(entry.g * <span class="hljs-number">255</span>));
+    $(<span class="hljs-string">'#gradB'</span> + (idx + <span class="hljs-number">1</span>)).val(<span class="hljs-built_in">Math</span>.round(entry.b * <span class="hljs-number">255</span>));
+    $(<span class="hljs-string">'#gradA'</span> + (idx + <span class="hljs-number">1</span>)).val(entry.a);
+  });
+
+  <span class="hljs-comment">/* Based on the current controls, fetch a data set and show it as a heatmap.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetch_data</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> dataset = $(<span class="hljs-string">'#dataset'</span>).val(),
+        url = <span class="hljs-string">'../data/'</span> + $(<span class="hljs-string">'#dataset option:selected'</span>).attr(<span class="hljs-string">'url'</span>);
+    $.ajax(url, {
+      <span class="hljs-attr">success</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) </span>{
+        <span class="hljs-built_in">window</span>.heatmap.datapoints = <span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">var</span> rows;
+        <span class="hljs-keyword">switch</span> (dataset) {
+          <span class="hljs-keyword">case</span> <span class="hljs-string">'adderall'</span>:
+            rows = resp.split(<span class="hljs-regexp">/\r\n|\n|\r/</span>);
+            rows.splice(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+            rows = rows.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">r</span>) </span>{
+              <span class="hljs-keyword">var</span> fields = r.split(<span class="hljs-string">','</span>);
+              <span class="hljs-keyword">return</span> [fields[<span class="hljs-number">12</span>], fields[<span class="hljs-number">24</span>], fields[<span class="hljs-number">25</span>]].map(<span class="hljs-built_in">parseFloat</span>);
+            });
+            <span class="hljs-keyword">break</span>;
+          <span class="hljs-keyword">case</span> <span class="hljs-string">'cities'</span>:
+            rows = resp.split(<span class="hljs-regexp">/\r\n|\n|\r/</span>);
+            rows.splice(rows.length - <span class="hljs-number">1</span>, <span class="hljs-number">1</span>);
+            rows = rows.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">r</span>) </span>{
+              <span class="hljs-keyword">var</span> fields = r.split(<span class="hljs-string">'","'</span>);
+              <span class="hljs-keyword">return</span> [<span class="hljs-string">''</span> + fields[<span class="hljs-number">0</span>].replace(<span class="hljs-regexp">/(^\s+|\s+$|^"|"$)/g</span>, <span class="hljs-string">''</span>).length, fields[<span class="hljs-number">2</span>].replace(<span class="hljs-regexp">/(^\s+|\s+$|^"|"$)/g</span>, <span class="hljs-string">''</span>), fields[<span class="hljs-number">3</span>].replace(<span class="hljs-regexp">/(^\s+|\s+$|^"|"$)/g</span>, <span class="hljs-string">''</span>)].map(<span class="hljs-built_in">parseFloat</span>);
+            });
+            <span class="hljs-keyword">break</span>;
+          <span class="hljs-keyword">case</span> <span class="hljs-string">'earthquakes'</span>:
+            rows = resp;
+            <span class="hljs-keyword">break</span>;
+        }
+        datapoints = rows;
+        <span class="hljs-built_in">window</span>.heatmap.datapoints = datapoints;
+        <span class="hljs-keyword">var</span> text = <span class="hljs-string">'Loaded: '</span> + datapoints.length;
+        $(<span class="hljs-string">'#points-loaded'</span>).text(text).attr(<span class="hljs-string">'title'</span>, text);
+        show_points(datapoints);
+      }
+    });
+  }
+
+  <span class="hljs-comment">/* Given a set of datapoints, optionally truncate or expand it, then show it
+   * as a heatmap.
+   *
+   * @param {array} datapoints: an array of points to show.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show_points</span>(<span class="hljs-params">datapoints</span>) </span>{
+    <span class="hljs-built_in">window</span>.heatmap.rows = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">var</span> rows = datapoints;
+    <span class="hljs-keyword">var</span> maxrows = <span class="hljs-built_in">parseInt</span>(points, <span class="hljs-number">10</span>) || rows.length;
+    <span class="hljs-keyword">if</span> (rows.length &gt; maxrows) {
+      rows = rows.slice(<span class="hljs-number">0</span>, maxrows);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (rows.length &lt; maxrows) {
+      rows = rows.slice();
+      <span class="hljs-keyword">while</span> (rows.length &lt; maxrows) {
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = rows.length - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span> &amp;&amp; rows.length &lt; maxrows; i -= <span class="hljs-number">1</span>) {
+          rows.push([rows[i][<span class="hljs-number">0</span>] + <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>,
+                     rows[i][<span class="hljs-number">1</span>] + <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>,
+                     rows[i][<span class="hljs-number">2</span>] + <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>]);
+        }
+      }
+    }
+    heatmap.data(rows);
+    <span class="hljs-built_in">window</span>.heatmap.rows = rows;
+    heatmap.draw();
+    <span class="hljs-keyword">var</span> text = <span class="hljs-string">'Shown: '</span> + rows.length;
+    $(<span class="hljs-string">'#points-shown'</span>).text(text).attr(<span class="hljs-string">'title'</span>, text);
+  }
+
+  <span class="hljs-comment">/**
+   * Handle changes to our controls.
+   *
+   * @param {object} evt jquery evt that triggered this call.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">change_controls</span>(<span class="hljs-params">evt</span>) </span>{
+    <span class="hljs-keyword">var</span> ctl = $(evt.target),
+        param = ctl.attr(<span class="hljs-string">'id'</span>),
+        value = ctl.val();
+    <span class="hljs-keyword">if</span> (ctl.is(<span class="hljs-string">'[type="checkbox"]'</span>)) {
+      value = ctl.is(<span class="hljs-string">':checked'</span>) ? <span class="hljs-string">'true'</span> : <span class="hljs-string">'false'</span>;
+    }
+    <span class="hljs-keyword">if</span> (value === <span class="hljs-string">''</span> &amp;&amp; ctl.attr(<span class="hljs-string">'placeholder'</span>)) {
+      value = ctl.attr(<span class="hljs-string">'placeholder'</span>);
+    }
+    <span class="hljs-keyword">if</span> (!param || value === query[param]) {
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">var</span> processedValue = (ctl.is(<span class="hljs-string">'[type="checkbox"]'</span>) ?
+                          (value === <span class="hljs-string">'true'</span>) : value);
+    <span class="hljs-keyword">if</span> (ctl.closest(<span class="hljs-string">'table.gradient'</span>).length) {
+      param = <span class="hljs-string">'gradient'</span>;
+    }
+    <span class="hljs-keyword">switch</span> (param) {
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'binned'</span>:
+        heatmapOptions[param] = value;
+        heatmap[param](value);
+        heatmap.draw();
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'blurRadius'</span>: <span class="hljs-keyword">case</span> <span class="hljs-string">'radius'</span>:
+        processedValue = value.length ? <span class="hljs-built_in">parseFloat</span>(value) : <span class="hljs-literal">undefined</span>;
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">isNaN</span>(processedValue) || processedValue === <span class="hljs-literal">undefined</span> ||
+            processedValue &lt; <span class="hljs-number">0</span>) {
+          <span class="hljs-keyword">return</span>;
+        }
+        heatmapOptions.style[param] = processedValue;
+        heatmap.style(param, processedValue);
+        heatmap.draw();
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'dataset'</span>:
+        fetch_data();
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'gaussian'</span>:
+        heatmapOptions.style[param] = processedValue;
+        heatmap.style(param, processedValue);
+        heatmap.draw();
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'gradient'</span>:
+        <span class="hljs-keyword">var</span> gradient = {};
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> idx = <span class="hljs-number">1</span>; idx &lt;= <span class="hljs-number">6</span>; idx += <span class="hljs-number">1</span>) {
+          <span class="hljs-keyword">var</span> gradkey = <span class="hljs-built_in">parseFloat</span>($(<span class="hljs-string">'#gradI'</span> + idx).val());
+          <span class="hljs-keyword">if</span> (<span class="hljs-built_in">isNaN</span>(gradkey)) {
+            <span class="hljs-keyword">continue</span>;
+          }
+          gradient[gradkey] = {
+            <span class="hljs-attr">r</span>: <span class="hljs-built_in">parseInt</span>($(<span class="hljs-string">'#gradR'</span> + idx).val() || <span class="hljs-number">0</span>) / <span class="hljs-number">255</span>,
+            <span class="hljs-attr">g</span>: <span class="hljs-built_in">parseInt</span>($(<span class="hljs-string">'#gradG'</span> + idx).val() || <span class="hljs-number">0</span>) / <span class="hljs-number">255</span>,
+            <span class="hljs-attr">b</span>: <span class="hljs-built_in">parseInt</span>($(<span class="hljs-string">'#gradB'</span> + idx).val() || <span class="hljs-number">0</span>) / <span class="hljs-number">255</span>,
+            <span class="hljs-attr">a</span>: <span class="hljs-built_in">parseFloat</span>($(<span class="hljs-string">'#gradA'</span> + idx).val() || <span class="hljs-number">0</span>)
+          };
+        }
+        <span class="hljs-keyword">if</span> (!(<span class="hljs-number">0</span> <span class="hljs-keyword">in</span> gradient &amp;&amp; <span class="hljs-number">1</span> <span class="hljs-keyword">in</span> gradient)) {
+          value = <span class="hljs-string">''</span>;
+          <span class="hljs-keyword">break</span>;
+        }
+        heatmapOptions.style.color = gradient;
+        heatmap.style(<span class="hljs-string">'color'</span>, gradient);
+        heatmap.draw();
+        <span class="hljs-keyword">var</span> gradkeys = <span class="hljs-built_in">Object</span>.keys(heatmapOptions.style.color).sort();
+        value = gradkeys.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">key</span>) </span>{
+          <span class="hljs-keyword">return</span> [key, <span class="hljs-built_in">Math</span>.round(gradient[key].r * <span class="hljs-number">255</span>), <span class="hljs-built_in">Math</span>.round(gradient[key].g * <span class="hljs-number">255</span>), <span class="hljs-built_in">Math</span>.round(gradient[key].b * <span class="hljs-number">255</span>), gradient[key].a].join(<span class="hljs-string">','</span>);
+        }).join(<span class="hljs-string">','</span>);
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'minIntensity'</span>: <span class="hljs-keyword">case</span> <span class="hljs-string">'maxIntensity'</span>:
+        processedValue = value.length ? <span class="hljs-built_in">parseFloat</span>(value) : <span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">isNaN</span>(processedValue)) {
+          <span class="hljs-keyword">return</span>;
+        }
+        heatmapOptions[param] = processedValue;
+        heatmap[param](processedValue);
+        heatmap.draw();
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'opacity'</span>:
+        processedValue = value.length ? <span class="hljs-built_in">parseFloat</span>(value) : <span class="hljs-literal">undefined</span>;
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">isNaN</span>(processedValue) || processedValue === <span class="hljs-literal">undefined</span>) {
+          <span class="hljs-keyword">return</span>;
+        }
+        layerOptions[param] = processedValue;
+        layer[param](processedValue);
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'points'</span>:
+        points = <span class="hljs-built_in">parseInt</span>(value);
+        show_points(datapoints);
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'updateDelay'</span>:
+        processedValue = value.length ? <span class="hljs-built_in">parseInt</span>(value) : <span class="hljs-number">50</span>;
+        heatmapOptions[param] = processedValue;
+        heatmap[param](processedValue);
+        <span class="hljs-keyword">break</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>update the url to reflect the changes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    query[param] = value;
+    <span class="hljs-keyword">if</span> (value === <span class="hljs-string">''</span> || (ctl.attr(<span class="hljs-string">'placeholder'</span>) &amp;&amp;
+        value === ctl.attr(<span class="hljs-string">'placeholder'</span>))) {
+      <span class="hljs-keyword">delete</span> query[param];
+    }
+    <span class="hljs-keyword">var</span> newurl = <span class="hljs-built_in">window</span>.location.protocol + <span class="hljs-string">'//'</span> + <span class="hljs-built_in">window</span>.location.host +
+        <span class="hljs-built_in">window</span>.location.pathname + <span class="hljs-string">'?'</span> + $.param(query);
+    <span class="hljs-built_in">window</span>.history.replaceState(query, <span class="hljs-string">''</span>, newurl);
+  }
+
+  map.createLayer(<span class="hljs-string">'osm'</span>);
+  layer = map.createLayer(<span class="hljs-string">'feature'</span>, layerOptions);
+  heatmap = layer.createFeature(<span class="hljs-string">'heatmap'</span>, heatmapOptions)
+    .intensity(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+      <span class="hljs-keyword">return</span> d[<span class="hljs-number">0</span>];
+    })
+    .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+      <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: d[<span class="hljs-number">2</span>], <span class="hljs-attr">y</span>: d[<span class="hljs-number">1</span>]};
+    });
+  <span class="hljs-comment">/* Make some values available in the global context so curious people can
+   * play with them. */</span>
+  <span class="hljs-built_in">window</span>.heatmap = {
+    <span class="hljs-attr">map</span>: map,
+    <span class="hljs-attr">layer</span>: layer,
+    <span class="hljs-attr">layerOptions</span>: layerOptions,
+    <span class="hljs-attr">heatmap</span>: heatmap,
+    <span class="hljs-attr">heatmapOptions</span>: heatmapOptions
+  };
+
+  fetch_data();
+  $(<span class="hljs-string">'#controls'</span>).on(<span class="hljs-string">'change'</span>, change_controls);
+});</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

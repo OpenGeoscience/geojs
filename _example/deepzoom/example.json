@@ -1,0 +1,9 @@
+{
+  "path": "deepzoom",
+  "title": "Deepzoom tiled image example",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "Rendering a tiled image using the Deepzoom protocol."
+  }
+}

@@ -1,0 +1,50 @@
+body {
+  overflow: hidden;
+}
+#app-hovered-info {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+}
+
+.bar rect {
+  shape-rendering: crispEdges;
+}
+
+.bar text {
+  fill: black;
+  font: 16px sans-serif;
+  pointer-events: none;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.app-background {
+  fill: rgba(255, 255, 255, 0.5);
+  stroke: black;
+  stroke-width: 1.5;
+  transition: fill 250ms;
+  pointer-events: visible !important;
+}
+
+.app-info-box .axis text {
+  font: 12px sans-serif;
+}
+
+path.plot-line {
+  fill: none;
+  stroke: black;
+  stroke-width: 2px;
+}
+
+.app-histogram *,.app-info-box text {
+  pointer-events: none;
+}
+.app-background:hover {
+  fill: rgba(255, 255, 255, 1);
+}
+

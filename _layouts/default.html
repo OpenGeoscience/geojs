@@ -68,7 +68,7 @@
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
                     <span class="sr-only">Toggle navigation</span><i class="fa fa-bars"></i>
                 </button>
-                <a class="navbar-brand" href="/"><img src="{{ "img/logo_transparent.png" | relative_url }}" /></a>
+                <a class="navbar-brand" href="{{ "/" | relative_url }}"><img src="{{ "img/logo_transparent.png" | relative_url }}" /></a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
@@ -78,13 +78,13 @@
                         <a href="#page-top"></a>
                     </li>
                     <li class="{%if page.url == "/"%}active{%endif%}">
-                        <a href="/">Welcome</a>
+                        <a href="{{ "/" | relative_url }}">Welcome</a>
                     </li>
                     <li class="{%if page.url contains "tutorial"%}active{%endif%}">
-                        <a href="/tutorials">Tutorials</a>
+                        <a href="{{ "tutorials" | relative_url }}">Tutorials</a>
                     </li>
                     <li class="{%if page.url contains "example"%}active{%endif%}">
-                        <a href="/examples">Examples</a>
+                        <a href="{{ "examples" | relative_url }}">Examples</a>
                     </li>
                     <li>
                         <a href="https://github.com/OpenGeoscience/geojs">Github</a>

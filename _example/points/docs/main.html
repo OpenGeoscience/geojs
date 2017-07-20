@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Run after the DOM loads</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-meta">  'use strict'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Define a function we will use to generate points.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">makePoints</span>(<span class="hljs-params">data, layer, color</span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>The API for creating features is similar to d3’s data API.
+The data is an array of arbitrary objects.  Each object in
+the array is assumed to be a “point”.  You provide accessors
+that return styles and positions.
+Here we also use the option <code>selectionAPI</code> to turn on the
+optional mouse handling API.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> layer.createFeature(<span class="hljs-string">'point'</span>, {<span class="hljs-attr">selectionAPI</span>: <span class="hljs-literal">true</span>})
+      .data(data)                                               <span class="hljs-comment">// bind data</span>
+        .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: d.x, <span class="hljs-attr">y</span>: d.y}; })    <span class="hljs-comment">// position accessor</span>
+        .style(<span class="hljs-string">'radius'</span>, <span class="hljs-number">100</span>)                                   <span class="hljs-comment">// circle radius</span>
+        .style(<span class="hljs-string">'fillColor'</span>, color)
+        .style(<span class="hljs-string">'fillOpacity'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d.opacity; })
+        .style(<span class="hljs-string">'strokeColor'</span>, {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>})
+        .style(<span class="hljs-string">'strokeWidth'</span>, <span class="hljs-number">2</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Here we bind mouse event handlers to the markers.  In this case,
+we are increasing the opacity of the feature on mouse hover.
+You are given access to the original data as <code>evt.data</code>,
+the index in the data as <code>evt.index</code>, as well as all
+information given by <code>geo.event.mousemove</code> events.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        .geoOn(geo.event.feature.mouseover, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
+          evt.data.opacity = <span class="hljs-number">0.5</span>;
+          <span class="hljs-keyword">this</span>.modified();        <span class="hljs-comment">// mark the feature as modified</span>
+          <span class="hljs-keyword">this</span>.draw();            <span class="hljs-comment">// we must redraw as necessary</span>
+        })
+        .geoOn(geo.event.feature.mouseout, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
+          evt.data.opacity = <span class="hljs-number">0.1</span>;
+          <span class="hljs-keyword">this</span>.modified();
+          <span class="hljs-keyword">this</span>.draw();
+        })</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>You must call the draw method after setting all feature
+properties.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        .draw();
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Create a map object with the OpenStreetMaps base layer.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-98.0</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">39.5</span>
+    },
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">4.9</span>
+  });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Create an osm layer with custom tile url for a white background.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  map.createLayer(
+    <span class="hljs-string">'osm'</span>,
+    {
+      <span class="hljs-attr">url</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'white.jpg'</span>;
+      }
+    }
+  );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Create a gl feature layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> vglLayer = map.createLayer(
+    <span class="hljs-string">'feature'</span>,
+    {
+      <span class="hljs-attr">renderer</span>: <span class="hljs-string">'vgl'</span>
+    }
+  );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Create an svg feature layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> svgLayer = map.createLayer(
+    <span class="hljs-string">'feature'</span>,
+    {
+      <span class="hljs-attr">renderer</span>: <span class="hljs-string">'d3'</span>
+    }
+  );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Define unique colors for each layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> vglColor = <span class="hljs-string">'red'</span>;
+  <span class="hljs-keyword">var</span> svgColor = <span class="hljs-string">'blue'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Generate some data for vgl</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> data = d3.range(<span class="hljs-number">2</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">i</span>) </span>{
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-95</span>,             <span class="hljs-comment">// longitude</span>
+      y: <span class="hljs-number">39.5</span> + <span class="hljs-number">4.5</span> * i,  <span class="hljs-comment">// latitude</span>
+      c: vglColor,        <span class="hljs-comment">// fill color</span>
+      opacity: <span class="hljs-number">0.1</span>        <span class="hljs-comment">// fill opacity</span>
+    };
+  });
+  makePoints(data, vglLayer, vglColor);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Generate some data for svg</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  data = d3.range(<span class="hljs-number">2</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">i</span>) </span>{
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-101</span>,            <span class="hljs-comment">// longitude</span>
+      y: <span class="hljs-number">39.5</span> + <span class="hljs-number">4.5</span> * i,  <span class="hljs-comment">// latitude</span>
+      c: svgColor,        <span class="hljs-comment">// fill color</span>
+      opacity: <span class="hljs-number">0.1</span>        <span class="hljs-comment">// fill opacity</span>
+    };
+  });
+  makePoints(data, svgLayer, svgColor);
+});</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

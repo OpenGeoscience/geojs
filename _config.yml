@@ -1,3 +1,6 @@
+baseurl: /geojs
+destination:  ./_site
+
 timezone: America/New_York
 defaults:
   - scope:
@@ -21,4 +24,5 @@ collections:
 #   - data
 
 keep_files:
-  - data
+  - example/data
+  - example\data

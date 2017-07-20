@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/* globals utils */</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Run after the DOM loads</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-meta">  'use strict'</span>;
+
+  <span class="hljs-keyword">var</span> query = utils.getQuery();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Create a map object with the OpenStreetMaps base layer.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
+        <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+        <span class="hljs-attr">center</span>: {
+          <span class="hljs-attr">x</span>: <span class="hljs-number">-98.0</span>,
+          <span class="hljs-attr">y</span>: <span class="hljs-number">39.5</span>
+        },
+        <span class="hljs-attr">zoom</span>: <span class="hljs-number">4</span>
+      }),
+      over = <span class="hljs-number">0</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Create an osm layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  map.createLayer(<span class="hljs-string">'osm'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Create a gl feature layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> vglLayer = map.createLayer(
+    <span class="hljs-string">'feature'</span>,
+    {
+      <span class="hljs-attr">renderer</span>: <span class="hljs-string">'vgl'</span>
+    }
+  );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Create an svg feature layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> svgLayer = map.createLayer(
+    <span class="hljs-string">'feature'</span>,
+    {
+      <span class="hljs-attr">renderer</span>: <span class="hljs-string">'d3'</span>
+    }
+  );
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleMouseOver</span>(<span class="hljs-params"></span>) </span>{
+    over += <span class="hljs-number">1</span>;
+    $(<span class="hljs-string">'#map'</span>).css(<span class="hljs-string">'cursor'</span>, <span class="hljs-string">'pointer'</span>);
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleMouseOut</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">if</span> (over &gt; <span class="hljs-number">0</span>) {
+      over -= <span class="hljs-number">1</span>;
+    }
+    <span class="hljs-keyword">if</span> (over === <span class="hljs-number">0</span>) {
+      $(<span class="hljs-string">'#map'</span>).css(<span class="hljs-string">'cursor'</span>, <span class="hljs-string">''</span>);
+    }
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleMouseClick</span>(<span class="hljs-params">evt</span>) </span>{
+    evt.data.clicked = !evt.data.clicked;
+    <span class="hljs-keyword">this</span>.modified();
+    <span class="hljs-keyword">this</span>.draw();
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleBrush</span>(<span class="hljs-params">evt</span>) </span>{
+    evt.data.clicked = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">this</span>.modified();
+    <span class="hljs-keyword">this</span>.draw();
+  }
+
+  <span class="hljs-keyword">var</span> color = d3.scale.category10();
+  vglLayer.createFeature(<span class="hljs-string">'line'</span>, {<span class="hljs-attr">selectionAPI</span>: <span class="hljs-literal">true</span>})
+    .data([<span class="hljs-built_in">window</span>.randomPath(<span class="hljs-number">1000</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">-88</span>, <span class="hljs-number">30</span>), <span class="hljs-built_in">window</span>.randomPath(<span class="hljs-number">500</span>, <span class="hljs-number">0.05</span>, <span class="hljs-number">-110</span>, <span class="hljs-number">40</span>)])
+    .style({
+      <span class="hljs-attr">strokeColor</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, i, e, j</span>) </span>{ <span class="hljs-keyword">return</span> (j % <span class="hljs-number">2</span>) ? color(<span class="hljs-number">0</span>) : color(<span class="hljs-number">1</span>); },
+      <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">5</span>,
+      <span class="hljs-attr">strokeOpacity</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, i, e</span>) </span>{ <span class="hljs-keyword">return</span> e.clicked ? <span class="hljs-number">1</span> : <span class="hljs-number">0.5</span>; },
+      <span class="hljs-attr">closed</span>: query.closed === <span class="hljs-string">'true'</span>
+    })
+    .geoOn(geo.event.feature.mouseover, handleMouseOver)
+    .geoOn(geo.event.feature.mouseout, handleMouseOut)
+    .geoOn(geo.event.feature.mouseclick, handleMouseClick)
+    .geoOn(geo.event.feature.brushend, handleBrush);
+
+  svgLayer.createFeature(<span class="hljs-string">'line'</span>, {<span class="hljs-attr">selectionAPI</span>: <span class="hljs-literal">true</span>})
+    .data([<span class="hljs-built_in">window</span>.randomPath(<span class="hljs-number">1000</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">-108</span>, <span class="hljs-number">30</span>), <span class="hljs-built_in">window</span>.randomPath(<span class="hljs-number">500</span>, <span class="hljs-number">0.05</span>, <span class="hljs-number">-88</span>, <span class="hljs-number">40</span>)])
+    .style({
+      <span class="hljs-attr">strokeColor</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, i, l, j</span>) </span>{ <span class="hljs-keyword">return</span> (j % <span class="hljs-number">2</span>) ? color(<span class="hljs-number">2</span>) : color(<span class="hljs-number">3</span>); },
+      <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">5</span>,
+      <span class="hljs-attr">strokeOpacity</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, i, e</span>) </span>{ <span class="hljs-keyword">return</span> e.clicked ? <span class="hljs-number">1</span> : <span class="hljs-number">0.5</span>; },
+      <span class="hljs-attr">closed</span>: query.closed === <span class="hljs-string">'true'</span>
+    })
+    .geoOn(geo.event.feature.mouseover, handleMouseOver)
+    .geoOn(geo.event.feature.mouseout, handleMouseOut)
+    .geoOn(geo.event.feature.mouseclick, handleMouseClick)
+    .geoOn(geo.event.feature.brushend, handleBrush);
+
+  vglLayer.draw();
+  svgLayer.draw();
+});</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
