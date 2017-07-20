@@ -24,7 +24,7 @@
 
 - name: geoJSON
   title: GeoJSON file reader
-  description: Shows how to use the included geoJSON reader, and how to use the properties to adjust the style of the features.  In this example, you can edit the json file while the features on the map update in response.  You can also drop a new geoJSON file onto the text editor to load it.
+  description: Shows how to use geoJSON reader and use properties to adjust the style of the features. You can edit the json file while the features on the map update in response. 
 
 - name: legend
   title: Feature legends
@@ -48,7 +48,7 @@
 
 - name: reprojection
   title: Reproject tiles
-  description: This example shows how you can reproject tiles from one projection to another.  The source tiles are in Web Mercator (EPSG:3857), but can be drawn in many different projections.
+  description: Shows how you can reproject tiles from one projection to another.  The source tiles are in Web Mercator, but can be drawn in many different projections.
 
 - name: sld
   title: Adding styles to WMS raster layers
@@ -56,7 +56,7 @@
 
 - name: tiles
   title: Tile layer with controllable options
-  description: This example provides controls for changing many options on tile layers.  The code and query parameters allow even more options to be adjusted.
+  description: This example shows the options on tile layers. The code and query parameters allow even more options to be adjusted.
 
 - name: transitions
   title: Using animated transitions

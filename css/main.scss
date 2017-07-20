@@ -86,13 +86,17 @@ footer{
 }
 
 // examples page
-.example-container{
+.example-container {
     // clear: both;
     background-color: white;
-    padding: 25px 0;
+    padding-top: 25px;
+    padding-bottom: 25px;
     border-bottom: 1px solid #eee;
 
     .thumbnail-container {
+        padding-right: 0;
+        width: 45.83333%;
+
         a{
             position: relative;
             display: block;
@@ -118,6 +122,11 @@ footer{
         .thumbnail-hover:hover {
             opacity: 0.4;
         }
+    }
+
+    .word-container {        
+        width: 54.16666%;
+        padding-right: 5px;
     }
 
     h4.title{
