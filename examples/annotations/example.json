@@ -1,9 +1,0 @@
-{
-  "path": "annotations",
-  "title": "Annotation Layer",
-  "exampleCss": ["main.css"],
-  "exampleJs": ["main.js"],
-  "about": {
-    "text": "This example shows how to add annotations, such as marked rectangles, to a map."
-  }
-}
