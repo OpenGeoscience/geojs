@@ -21,7 +21,7 @@ glob('examples/*/example.json')
     var main = path.resolve(dir, json.exampleJs[0]);
 
     // the output directory where the example will be compiled
-    var output = path.resolve('dist', 'examples', json.path);
+    var output = path.resolve('dist', '_examples', json.path);
 
     // create, empty, and copy the source directory
     fs.emptyDirSync(output);
