@@ -6,7 +6,7 @@ var jade = require('jade');
 
 // generate the examples
 fs.ensureDirSync('dist/examples');
-var examples = glob('examples/*/example.json')
+glob('examples/*/example.json')
   .map(function (f) {
     // /path/to/example.json
     f = path.resolve(f);
@@ -46,28 +46,3 @@ var examples = glob('examples/*/example.json')
     fs.writeFileSync(path.resolve(output, 'index.html'), fn(json));
     return json;
   });
-
-// copy common files
-fs.copySync('examples/common', 'dist/examples/common');
-
-// create the main example page
-var data = {
-  hideNavbar: false,
-  exampleCss: ['main.css'],
-  exampleJs: ['main.js'],
-  examples: examples,
-  bundle: './bundle.js',
-  about: {hidden: true},
-  title: 'GeoJS'
-};
-
-// copy assets for the main page
-fs.copySync('examples/main.js', 'dist/examples/main.js');
-fs.copySync('examples/main.css', 'dist/examples/main.css');
-
-var fn = jade.compileFile('./examples/index.jade', {pretty: true});
-fs.writeFileSync(
-  path.resolve('dist', 'examples', 'index.html'),
-  fn(data)
-);
-
