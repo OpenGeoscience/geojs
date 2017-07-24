@@ -1,10 +1,10 @@
-extends ./common/templates/index.jade
+extends ./common/templates/index.pug
 
 mixin thumbnail(ex)
   .col-md-4
     .thumbnail
-      a(href="#{ex.path}/")
-        img(src="#{ex.path}/thumb.jpg" onerror="this.src='osm/thumb.jpg';")
+      a(href=ex.path + "/")
+        img(src=ex.path + "/thumb.jpg", onerror="this.src='osm/thumb.jpg';")
         .caption
           h3= ex.title
           if ex.about.text
@@ -30,9 +30,9 @@ block mainContent
   .jumbotron
     .container
       h1 Welcome to GeoJS
-      p   GeoJS is a javascript library for visualizing geospatial 
-        | data in a browser.  Its flexible API provides users with 
-        | the ability to combine multiple visualizations drawn 
+      p   GeoJS is a javascript library for visualizing geospatial
+        | data in a browser.  Its flexible API provides users with
+        | the ability to combine multiple visualizations drawn
         | in WebGL, canvas, and SVG into a single dynamic map.
       p   What can GeoJS do for you?  See the examples below.
 
@@ -46,4 +46,3 @@ block mainContent
             - i += 1
             +thumbnail(examples[iExample])
           - iExample += 1
-

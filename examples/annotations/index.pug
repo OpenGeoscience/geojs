@@ -1,4 +1,4 @@
-extends ../common/templates/index.jade
+extends ../common/templates/index.pug
 
 block append mainContent
   #controls
@@ -35,7 +35,7 @@ block append mainContent
           a.entry-remove(action='remove', title='Delete this annotation') &#x2716;
     .form-group
       textarea#geojson(type='textarea', rows=15, autocomplete='off',
-        autocorrect='off', autocapitalize='off', spellcheck='false')
+          autocorrect='off', autocapitalize='off', spellcheck='false')
 
   #editdialog.modal.fade
     .modal-dialog
