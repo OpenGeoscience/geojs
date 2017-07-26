@@ -3,41 +3,47 @@ var inherit = require('./inherit');
 var feature = require('./feature');
 
 /**
- * Create a new instance of class polygonFeature
+ * Polygon feature specification.
  *
- * @class geo.polygonFeature
- * @extends geo.feature
- * @param {Object} arg Options object
- * @param {Object|Function} [arg.position] Position of the data.  Default is
+ * @typedef {geo.feature.spec} geo.polygonFeature.spec
+ * @param {object|Function} [position] Position of the data.  Default is
  *   (data).
- * @param {Object|Function} [arg.polygon] Polygons from the data.  Default is
- *   (data).  Typically, the data is an array of polygons, each of which is
- *   of the form {outer: [(coordinates)], inner: [[(coordinates of first
- *   hole)], [(coordinates of second hole)], ...]}.  The inner record is
- *   optional.  Alternately, if there are no holes, a polygon can just be an
- *   array of coordinates.  Coordinates are in the form {x: (x), y: (y),
- *   z: (z)}, with z being optional.  The first and last point of each polygon
- *   must be the same.
- * @param {Object} [arg.style] Style object with default style options.
- * @param {boolean|Function} [arg.style.fill] True to fill polygon.  Defaults
- *   to true.
- * @param {Object|Function} [arg.style.fillColor] Color to fill each polygon.
+ * @param {object|Function} [polygon] Polygons from the data.  Default is
+ *   (data).  Typically, the data is an array of polygons, each of which is of
+ *   the form {outer: [(coordinates)], inner: [[(coordinates of first hole)],
+ *   [(coordinates of second hole)], ...]}.  The inner record is optional.
+ *   Alternately, if there are no holes, a polygon can just be an array of
+ *   coordinates in the form of geo.geoPosition.  The first and last point of
+ *   each polygon may be the same.
+ * @param {object} [style] Style object with default style options.
+ * @param {boolean|Function} [style.fill] True to fill polygon.  Defaults to
+ *   true.
+ * @param {object|Function} [style.fillColor] Color to fill each polygon.  The
+ *   color can vary by vertex.  Colors can be css names or hex values, or an
+ *   object with r, g, b on a [0-1] scale.
+ * @param {number|Function} [style.fillOpacity] Opacity for each polygon.  The
+ *   opacity can vary by vertex.  Opacity is on a [0-1] scale.
+ * @param {boolean|Function} [style.stroke] True to stroke polygon.  Defaults
+ *   to false.
+ * @param {object|Function} [style.strokeColor] Color to stroke each polygon.
  *   The color can vary by vertex.  Colors can be css names or hex values, or
  *   an object with r, g, b on a [0-1] scale.
- * @param {number|Function} [arg.style.fillOpacity] Opacity for each polygon.
- *   The opacity can vary by vertex.  Opacity is on a [0-1] scale.
- * @param {boolean|Function} [arg.style.stroke] True to stroke polygon.
- *   Defaults to false.
- * @param {Object|Function} [arg.style.strokeColor] Color to stroke each
- *   polygon.  The color can vary by vertex.  Colors can be css names or hex
- *   values, or an object with r, g, b on a [0-1] scale.
- * @param {number|Function} [arg.style.strokeOpacity] Opacity for each polygon
+ * @param {number|Function} [style.strokeOpacity] Opacity for each polygon
  *   stroke.  The opacity can vary by vertex.  Opacity is on a [0-1] scale.
- * @param {number|Function} [arg.style.strokeWidth] The weight of the polygon
+ * @param {number|Function} [style.strokeWidth] The weight of the polygon
  *   stroke in pixels.  The width can vary by vertex.
- * @param {boolean|Function} [arg.style.uniformPolygon] Boolean indicating if
- *   each polygon has a uniform style (uniform fill color, fill opacity, stroke
+ * @param {boolean|Function} [style.uniformPolygon] Boolean indicating if each
+ *   polygon has a uniform style (uniform fill color, fill opacity, stroke
  *   color, and stroke opacity).   Defaults to false.  Can vary by polygon.
+ */
+
+/**
+ * Create a new instance of class polygonFeature.
+ *
+ * @class
+ * @alias geo.polygonFeature
+ * @extends geo.feature
+ * @param {geo.polygonFeature.spec} arg
  * @returns {geo.polygonFeature}
  */
 var polygonFeature = function (arg) {
@@ -78,10 +84,9 @@ var polygonFeature = function (arg) {
   /**
    * Get/set data.
    *
-   * @memberof geo.polygonFeature
-   * @param {Object} [data] if specified, use this for the data and return the
+   * @param {object} [arg] if specified, use this for the data and return the
    *    feature.  If not specified, return the current data.
-   * @returns {geo.polygonFeature|Object}
+   * @returns {geo.polygonFeature|object}
    */
   this.data = function (arg) {
     var ret = s_data(arg);
@@ -97,7 +102,6 @@ var polygonFeature = function (arg) {
    * the computation in world coordinates, but we will need to work in GCS
    * for other projections.  Also compute the extents of the outside of each
    * polygon for faster checking if points are in the polygon.
-   * @memberof geo.polygonFeature
    * @private
    */
   function getCoordinates() {
@@ -110,7 +114,7 @@ var polygonFeature = function (arg) {
       }
       var outer, inner, range, coord, j, x, y;
 
-      coord = poly.outer || (poly instanceof Array ? poly : []);
+      coord = poly.outer || (Array.isArray(poly) ? poly : []);
       outer = new Array(coord.length);
       for (j = 0; j < coord.length; j += 1) {
         outer[j] = posFunc.call(m_this, coord[j], j, d, i);
@@ -168,10 +172,9 @@ var polygonFeature = function (arg) {
   /**
    * Get/set polygon accessor.
    *
-   * @memberof geo.polygonFeature
-   * @param {Object} [polygon] if specified, use this for the polygon accessor
+   * @param {object} [val] if specified, use this for the polygon accessor
    *    and return the feature.  If not specified, return the current polygon.
-   * @returns {geo.polygonFeature|Object}
+   * @returns {object|this} The current polygon or this feature.
    */
   this.polygon = function (val) {
     if (val === undefined) {
@@ -188,11 +191,10 @@ var polygonFeature = function (arg) {
   /**
    * Get/Set position accessor.
    *
-   * @memberof geo.polygonFeature
-   * @param {Object} [position] if specified, use this for the position
-   *    accessor and return the feature.  If not specified, return the current
+   * @param {object} [val] if specified, use this for the position accessor
+   *    and return the feature.  If not specified, return the current
    *    position.
-   * @returns {geo.polygonFeature|Object}
+   * @returns {object|this} The current position or this feature.
    */
   this.position = function (val) {
     if (val === undefined) {
@@ -210,7 +212,6 @@ var polygonFeature = function (arg) {
    * Point search method for selection api.  Returns markers containing the
    * given point.
    *
-   * @memberof geo.polygonFeature
    * @argument {object} coordinate
    * @returns {object}
    */
@@ -237,6 +238,15 @@ var polygonFeature = function (arg) {
   /**
    * Get/Set style used by the feature.  This calls the super function, then
    * checks if strokes are required.
+   *
+   * @param {string|object} [arg1] If `undefined`, return the current style
+   *    object.  If a string and `arg2` is undefined, return the style
+   *    associated with the specified key.  If a string and `arg2` is defined,
+   *    set the named style to the specified value.  Otherwise, extend the
+   *    current style with the values in the specified object.
+   * @param {*} [arg2] If `arg1` is a string, the new value for that style.
+   * @returns {object|this} Either the entire style object, the value of a
+   *    specific style, or the current class instance.
    */
   this.style = function (arg1, arg2) {
     var result = s_style.apply(this, arguments);
@@ -317,7 +327,7 @@ var polygonFeature = function (arg) {
         if (!polygon) {
           continue;
         }
-        loop = polygon.outer || (polygon instanceof Array ? polygon : []);
+        loop = polygon.outer || (Array.isArray(polygon) ? polygon : []);
         lineData.push(m_this._getLoopData(data[i], i, loop));
         if (polygon.inner) {
           polygon.inner.forEach(function (loop) {
@@ -335,8 +345,10 @@ var polygonFeature = function (arg) {
   };
 
   /**
-  * Redraw the object.
-  */
+   * Redraw the object.
+   *
+   * @returns {object} The results of the superclass draw function.
+   */
   this.draw = function () {
     var result = s_draw();
     if (m_lineFeature) {
@@ -346,9 +358,11 @@ var polygonFeature = function (arg) {
   };
 
   /**
-  * When the feature is marked as modified, mark our sub-feature as modified,
-  * too.
-  */
+   * When the feature is marked as modified, mark our sub-feature as
+   * modified, too.
+   *
+   * @returns {object} The results of the superclass modified function.
+   */
   this.modified = function () {
     var result = s_modified();
     if (m_lineFeature) {
@@ -358,8 +372,7 @@ var polygonFeature = function (arg) {
   };
 
   /**
-   * Destroy
-   * @memberof geo.polygonFeature
+   * Destroy.
    */
   this._exit = function () {
     if (m_lineFeature && m_this.layer()) {
@@ -371,8 +384,10 @@ var polygonFeature = function (arg) {
   };
 
   /**
-   * Initialize
-   * @memberof geo.polygonFeature
+   * Initialize.
+   *
+   * @param {geo.polygonFeature.spec} arg An object with options for the
+   *    feature.
    */
   this._init = function (arg) {
     arg = arg || {};
