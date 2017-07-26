@@ -67,6 +67,7 @@ module.exports = $.extend({
   pixelmapFeature: require('./pixelmapFeature'),
   renderer: require('./renderer'),
   sceneObject: require('./sceneObject'),
+  textFeature: require('./textFeature'),
   tile: require('./tile'),
   tileCache: require('./tileCache'),
   tileLayer: require('./tileLayer'),

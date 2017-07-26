@@ -178,6 +178,17 @@ var util = module.exports = {
   },
 
   /**
+   * Check if a value coerces to a number that is finite, not a NaN, and not
+   * `null`, `false`, or the empty string.
+   *
+   * @param {object} val The value to check.
+   * @returns {boolean} True if `val` is a non-null, non-false, finite number.
+   */
+  isNonNullFinite: function (val) {
+    return isFinite(val) && val !== null && val !== false && val !== '';
+  },
+
+  /**
    * Return a random string of length n || 8.  The string consists of
    * mixed-case ASCII alphanumerics.
    *
@@ -216,14 +227,15 @@ var util = module.exports = {
    * @memberof geo.util
    */
   convertColor: function (color) {
-    if (color === undefined || (color.r !== undefined &&
+    if (color === undefined || color === null || (color.r !== undefined &&
         color.g !== undefined && color.b !== undefined)) {
       return color;
     }
     var opacity;
     if (typeof color === 'string') {
-      if (util.cssColors.hasOwnProperty(color)) {
-        color = util.cssColors[color];
+      var lowerColor = color.toLowerCase();
+      if (util.cssColors.hasOwnProperty(lowerColor)) {
+        color = util.cssColors[lowerColor];
       } else if (color.charAt(0) === '#') {
         if (color.length === 4 || color.length === 5) {
           /* interpret values of the form #rgb as #rrggbb and #rgba as
@@ -239,13 +251,13 @@ var util = module.exports = {
           }
           color = parseInt(color.slice(1, 7), 16);
         }
-      } else if (color === 'transparent') {
+      } else if (lowerColor === 'transparent') {
         opacity = color = 0;
-      } else if (color.indexOf('(') >= 0) {
+      } else if (lowerColor.indexOf('(') >= 0) {
         for (var idx = 0; idx < util.cssColorConversions.length; idx += 1) {
-          var match = util.cssColorConversions[idx].regex.exec(color);
+          var match = util.cssColorConversions[idx].regex.exec(lowerColor);
           if (match) {
-            return util.cssColorConversions[idx].process(color, match);
+            return util.cssColorConversions[idx].process(lowerColor, match);
           }
         }
       }
@@ -257,8 +269,42 @@ var util = module.exports = {
         b: ((color & 0xff)) / 255
       };
     }
-    if (opacity !== undefined) {
+    if (opacity !== undefined && color && color.r !== undefined) {
       color.a = opacity;
+    }
+    return color;
+  },
+
+  /**
+   * Convert a color (possibly with opacity) and an optional opacity value to
+   * a color object that always has opacity.  The opacity is guaranteed to be
+   * within [0-1].  A valid color object is always returned.
+   *
+   * @param {geo.geoColor} [color] Any valid color input.  If an invalid value
+   *    or no value is supplied, the `defaultColor` is used.
+   * @param {number} [opacity=1] A value from [0-1].  This is multipled with
+   *    the opacity from `color`.
+   * @param {geo.geoColorObject} [defaultColor={r: 0, g: 0, b: 0}] The color
+   *    to use if an invalid color is supplied.
+   * @returns {geo.geoColorObject} An rgba color object.
+   * @memberof geo.util
+   */
+  convertColorAndOpacity: function (color, opacity, defaultColor) {
+    color = util.convertColor(color);
+    if (!color || color.r === undefined || color.g === undefined || color.b === undefined) {
+      color = util.convertColor(defaultColor || {r: 0, g: 0, b: 0});
+    }
+    if (!color || color.r === undefined || color.g === undefined || color.b === undefined) {
+      color = {r: 0, g: 0, b: 0};
+    }
+    color = {
+      r: isFinite(color.r) && color.r >= 0 ? (color.r <= 1 ? +color.r : 1) : 0,
+      g: isFinite(color.g) && color.g >= 0 ? (color.g <= 1 ? +color.g : 1) : 0,
+      b: isFinite(color.b) && color.b >= 0 ? (color.b <= 1 ? +color.b : 1) : 0,
+      a: util.isNonNullFinite(color.a) && color.a >= 0 && color.a < 1 ? +color.a : 1
+    };
+    if (util.isNonNullFinite(opacity) && opacity < 1) {
+      color.a = opacity <= 0 ? 0 : color.a * opacity;
     }
     return color;
   },
@@ -268,7 +314,8 @@ var util = module.exports = {
    *
    * @param {geo.geoColorObject} color The color object to convert.
    * @param {boolean} [allowAlpha] If truthy and `color` has a defined `a`
-   *    value, include the alpha channel in the output.
+   *    value, include the alpha channel in the output.  If `'needed'`, only
+   *    include the alpha channel if it is set and not 1.
    * @returns {string} A color string.
    * @memberof geo.util
    */
@@ -281,10 +328,28 @@ var util = module.exports = {
                      (Math.round(rgb.g * 255) << 8) +
                       Math.round(rgb.b * 255)).toString(16).slice(1);
     }
-    if (rgb.a !== undefined && allowAlpha) {
+    if (rgb.a !== undefined && allowAlpha && (rgb.a < 1 || allowAlpha !== 'needed')) {
       value += (256 + Math.round(rgb.a * 255)).toString(16).slice(1);
     }
     return value;
+  },
+  /**
+   * Convert a color to a css rgba() value.
+   *
+   * @param {geo.geoColorObject} color The color object to convert.
+   * @returns {string} A color string.
+   * @memberof geo.util
+   */
+  convertColorToRGBA: function (color) {
+    var rgb = util.convertColor(color);
+    if (!rgb) {
+      rgb = {r: 0, g: 0, b: 0};
+    }
+    if (!util.isNonNullFinite(rgb.a) || rgb.a > 1) {
+      rgb.a = 1;
+    }
+    return 'rgba(' + Math.round(rgb.r * 255) + ', ' + Math.round(rgb.g * 255) +
+           ', ' + Math.round(rgb.b * 255) + ', ' + +((+rgb.a).toFixed(5)) + ')';
   },
 
   /**
@@ -353,6 +418,22 @@ var util = module.exports = {
    */
   vec3AsArray: function () {
     return [0, 0, 0];
+  },
+
+  /**
+   * Create a `mat3` that is always an array.  This should only be used if it
+   * will not be used in a WebGL context.  Plain arrays usually use 64-bit
+   * float values, whereas `mat3` defaults to 32-bit floats.
+   *
+   * @returns {array} Identity `mat3` compatible array.
+   * @memberof geo.util
+   */
+  mat3AsArray: function () {
+    return [
+      1, 0, 0,
+      0, 1, 0,
+      0, 0, 1
+    ];
   },
 
   /**

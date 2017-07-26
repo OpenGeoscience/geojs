@@ -12,6 +12,7 @@ $(function () {
   var query = utils.getQuery();
   $('#clickadd').prop('checked', query.clickadd !== 'false');
   $('#keepadding').prop('checked', query.keepadding === 'true');
+  $('#showLabels').prop('checked', query.labels !== 'false');
   if (query.lastannotation) {
     $('.annotationtype button').removeClass('lastused');
     $('.annotationtype button#' + query.lastannotation).addClass('lastused');
@@ -52,7 +53,8 @@ $(function () {
   // create an annotation layer
   layer = map.createLayer('annotation', {
     renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
-    annotations: query.renderer ? undefined : geo.listAnnotations()
+    annotations: query.renderer ? undefined : geo.listAnnotations(),
+    showLabels: query.labels !== 'false'
   });
   // bind to the mouse click and annotation mode events
   layer.geoOn(geo.event.mouseclick, mouseClickToStart);
@@ -121,6 +123,12 @@ $(function () {
     }
     if (!param || value === query[param]) {
       return;
+    }
+    switch (param) {
+      case 'labels':
+        layer.options('showLabels', '' + value !== 'false');
+        layer.draw();
+        break;
     }
     query[param] = value;
     if (value === '' || (ctl.attr('placeholder') &&
@@ -291,7 +299,7 @@ $(function () {
   function show_edit_dialog(id) {
     var annotation = layer.annotationById(id),
         type = annotation.type(),
-        typeMatch = new RegExp('(^| )' + type + '( |$)'),
+        typeMatch = new RegExp('(^| )(' + type + '|all)( |$)'),
         opt = annotation.options(),
         dlg = $('#editdialog');
 
@@ -299,6 +307,8 @@ $(function () {
     dlg.attr('annotation-id', id);
     dlg.attr('annotation-type', type);
     $('[option="name"]', dlg).val(annotation.name());
+    $('[option="label"]', dlg).val(annotation.label(undefined, true));
+    $('[option="description"]', dlg).val(annotation.description());
     // populate each control with the current value of the annotation
     $('.form-group[annotation-types]').each(function () {
       var ctl = $(this),
@@ -312,14 +322,36 @@ $(function () {
         return;
       }
       ctl.show();
-      value = opt.style[key];
-      switch (format) {
-        case 'color':
-          // always show colors as hex values
-          value = geo.util.convertColorToHex(value);
+      switch ($('[option]', ctl).attr('optiontype')) {
+        case 'option':
+          value = opt[key];
+          break;
+        case 'label':
+          value = (opt.labelStyle || {})[key];
+          break;
+        default:
+          value = opt.style[key];
           break;
       }
-      $('[option]', ctl).val('' + value);
+      switch (format) {
+        case 'angle':
+          if (value !== undefined && value !== null && value !== '') {
+            value = '' + +(+value * 180.0 / Math.PI).toFixed(4) + ' deg';
+          }
+          break;
+        case 'color':
+          // always show colors as hex values
+          value = geo.util.convertColorToHex(value || {r: 0, g: 0, b: 0}, 'needed');
+          break;
+        case 'coordinate2':
+          if (value !== undefined && value !== null && value !== '') {
+            value = '' + value.x + ', ' + value.y;
+          }
+      }
+      if ((value === undefined || value === '' || value === null) && $('[option]', ctl).is('select')) {
+        value = $('[option] option', ctl).eq(0).val();
+      }
+      $('[option]', ctl).val(value === undefined ? '' : '' + value);
     });
     dlg.one('shown.bs.modal', function () {
       $('[option="name"]', dlg).focus();
@@ -337,25 +369,64 @@ $(function () {
     var dlg = $('#editdialog'),
         id = dlg.attr('annotation-id'),
         annotation = layer.annotationById(id),
+        opt = annotation.options(),
         type = annotation.type(),
-        typeMatch = new RegExp('(^| )' + type + '( |$)'),
-        error,
-        newopt = {};
+        typeMatch = new RegExp('(^| )(' + type + '|all)( |$)'),
+        newopt = {style: {}, labelStyle: {}},
+        error;
 
     // validate form values
     $('.form-group[annotation-types]').each(function () {
       var ctl = $(this),
           key = $('[option]', ctl).attr('option'),
-          value;
+          format = $('[option]', ctl).attr('format'),
+          value, oldvalue;
       if (!ctl.attr('annotation-types').match(typeMatch)) {
         return;
       }
-      value = layer.validateAttribute($('[option]', ctl).val(),
-                                      $('[option]', ctl).attr('format'));
-      if (value === undefined) {
+      value = $('[option]', ctl).val();
+      switch (format) {
+        case 'angle':
+          if (/^\s*[.0-9eE]+\s*$/.exec(value)) {
+            value += 'deg';
+          }
+          break;
+      }
+      switch (key) {
+        case 'textScaled':
+          if (['true', 'on', 'yes'].indexOf(value.trim().toLowerCase()) >= 0) {
+            value = map.zoom();
+          }
+          break;
+      }
+      value = layer.validateAttribute(value, format);
+      switch ($('[option]', ctl).attr('optiontype')) {
+        case 'option':
+          oldvalue = opt[key];
+          break;
+        case 'label':
+          oldvalue = (opt.labelStyle || {})[key];
+          break;
+        default:
+          oldvalue = opt.style[key];
+          break;
+      }
+      if (value === oldvalue || (oldvalue === undefined && value === '')) {
+        // don't change anything
+      } else if (value === undefined) {
         error = $('label', ctl).text() + ' is not a valid value';
       } else {
-        newopt[key] = value;
+        switch ($('[option]', ctl).attr('optiontype')) {
+          case 'option':
+            newopt[key] = value;
+            break;
+          case 'label':
+            newopt.labelStyle[key] = value;
+            break;
+          default:
+            newopt.style[key] = value;
+            break;
+        }
       }
     });
     if (error) {
@@ -363,7 +434,9 @@ $(function () {
       return;
     }
     annotation.name($('[option="name"]', dlg).val());
-    annotation.options({style: newopt}).draw();
+    annotation.label($('[option="label"]', dlg).val() || null);
+    annotation.description($('[option="description"]', dlg).val() || '');
+    annotation.options(newopt).draw();
 
     dlg.modal('hide');
     // refresh the annotation list

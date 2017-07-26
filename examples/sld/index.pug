@@ -1,0 +1,26 @@
+extends ../common/templates/index.pug
+
+block append mainContent
+  #controls
+
+    .form-group(title="Select a color palette.")
+      label(for="palette") Color Palette
+      select#palette.mapparam(param-name="palette", placeholder="YlGn")
+
+    .form-group(title="Select number of colors.")
+      label(for="color-count") Number of colors
+      select#color-count.mapparam(param-name="color-count")
+
+    .form-group(title="Discrete or continuous colors.")
+      label(for="palette-type") Palette Type
+      select#palette-type.mapparam(param-name="palette-type", placeholder="continuous")
+        option(value="continuous") Continuous
+        option(value="discrete") Discrete
+
+    .form-group(title="Minimum value for your data")
+      label(for="min") Minimum
+      input#min.mapparam(param-name="x", placeholder="0")
+
+    .form-group(title="Maximum value for your data.")
+      label(for="max") Maximum
+      input#max.mapparam(param-name="x", placeholder="300")

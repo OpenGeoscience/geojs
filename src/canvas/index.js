@@ -7,5 +7,6 @@ module.exports = {
   lineFeature: require('./lineFeature'),
   pixelmapFeature: require('./pixelmapFeature'),
   quadFeature: require('./quadFeature'),
+  textFeature: require('./textFeature'),
   tileLayer: require('./tileLayer')
 };

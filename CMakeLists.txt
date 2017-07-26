@@ -161,5 +161,9 @@ if(${ESLINT_TESTS})
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     COMMAND "${NPM_EXECUTABLE}" "run" "lint"
   )
-
+  add_test(
+    NAME "puglint"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND "${NPM_EXECUTABLE}" "run" "puglint"
+  )
 endif() # ESLINT_TESTS

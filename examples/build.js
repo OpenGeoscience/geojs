@@ -2,7 +2,7 @@ var path = require('path');
 var glob = require('glob').sync;
 var fs = require('fs-extra');
 var docco = require('docco').document;
-var jade = require('jade');
+var pug = require('pug');
 
 // generate the examples
 fs.ensureDirSync('dist/examples');
@@ -42,7 +42,7 @@ var examples = glob('examples/*/example.json')
     json.docHTML = 'docs/' + path.basename(main).replace(/js$/, 'html');
     json.bundle = '../bundle.js';
 
-    var fn = jade.compileFile(path.relative('.', path.resolve(dir, 'index.jade')), {pretty: true});
+    var fn = pug.compileFile(path.relative('.', path.resolve(dir, 'index.pug')), {pretty: true});
     fs.writeFileSync(path.resolve(output, 'index.html'), fn(json));
     return json;
   });
@@ -65,9 +65,8 @@ var data = {
 fs.copySync('examples/main.js', 'dist/examples/main.js');
 fs.copySync('examples/main.css', 'dist/examples/main.css');
 
-var fn = jade.compileFile('./examples/index.jade', {pretty: true});
+var fn = pug.compileFile('./examples/index.pug', {pretty: true});
 fs.writeFileSync(
   path.resolve('dist', 'examples', 'index.html'),
   fn(data)
 );
-
