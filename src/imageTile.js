@@ -72,7 +72,7 @@ module.exports = (function () {
             this._url.indexOf('/') === this._url.indexOf(':') + 1) {
           this._image.crossOrigin = this._cors;
         }
-        defer = new $.Deferred();
+        defer = $.Deferred();
         this._image.onload = defer.resolve;
         this._image.onerror = defer.reject;
         this._image.src = this._url;
@@ -93,7 +93,7 @@ module.exports = (function () {
      * @returns {this} chainable
      */
     this.fadeIn = function (duration) {
-      var promise = this.fetch(), defer = new $.Deferred();
+      var promise = this.fetch(), defer = $.Deferred();
       $(this._image).css('display', 'none');
       promise.then(function () {
         $(this._image).fadeIn(duration, function () {

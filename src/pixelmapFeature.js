@@ -164,7 +164,7 @@ var pixelmapFeature = function (arg) {
         m_srcImage = src;
         this._computePixelmap();
       } else if (src) {
-        var defer = new $.Deferred(), prev_onload, prev_onerror;
+        var defer = $.Deferred(), prev_onload, prev_onerror;
         if (src instanceof Image) {
           /* we have an unloaded image.  Hook to the load and error callbacks
            * so that when it is loaded we can use it. */

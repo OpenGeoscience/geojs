@@ -94,8 +94,8 @@ module.exports = (function () {
           return defer;
         }
       }
-      var wait = new $.Deferred();
-      var process = new $.Deferred();
+      var wait = $.Deferred();
+      var process = $.Deferred();
       wait.then(function () {
         $.when(callback.call(defer)).always(process.resolve);
       }, process.resolve);

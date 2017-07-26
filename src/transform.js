@@ -196,7 +196,7 @@ transform.defs = proj4.defs;
  */
 transform.lookup = function (projection) {
   var $ = require('jquery');
-  var code, defer = new $.Deferred(), parts;
+  var code, defer = $.Deferred(), parts;
 
   if (proj4.defs.hasOwnProperty(projection)) {
     return defer.resolve(proj4.defs[projection]);

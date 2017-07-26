@@ -1,0 +1,94 @@
+/* Find all tutorials. */
+var tutorials = require.context('../tutorials', true, /\/tutorial.json$/);
+
+describe('tutorials', function () {
+  'use strict';
+
+  var $ = require('jquery');
+  var geo = require('./test-utils').geo;
+  var mockVGLRenderer = geo.util.mockVGLRenderer;
+  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+
+  var imageTest = require('./image-test');
+
+  beforeAll(function () {
+    mockVGLRenderer();
+    imageTest.prepareIframeTest();
+  });
+
+  afterEach(function () {
+    restoreVGLRenderer();
+  });
+
+  /* Test each tutorial */
+  tutorials.keys().forEach(function (tutorialPath) {
+    var tutorialName = tutorialPath.split('/')[1];
+    describe('Test ' + tutorialName, function () {
+      /* Load the tutorial in the test iframe */
+      beforeEach(function (done) {
+        $('#map').on('load', done);
+        $('#map').attr('src', '/tutorials/' + tutorialName + '/index.html');
+      });
+      it('Run tutorial tests', function (done) {
+        var base$, tests;
+
+        base$ = $('iframe#map')[0].contentWindow.jQuery;
+        /* Find all codeblock_tests.  We chain them together and end on the it
+         * function's done callback, so reverse them so that they run in the
+         * order written. */
+        tests = base$(base$('.codeblock_test').get().reverse());
+        tests.each(function () {
+          var test = base$(this),
+              codeblock = test.prevAll('.codeblock').eq(0),
+              target = base$('#' + codeblock.attr('target')),
+              testDefer = $.Deferred();
+          testDefer.then(done);
+          done = function () {
+            /* When the codeblock's target has runm handle the results */
+            var onCodeLoaded = function () {
+              var targetWindow = target[0].contentWindow,
+                  tut$ = targetWindow.$,
+                  deferreds = [];
+              /* Evaluate and wait for each idle function and promises. */
+              test.data('idlefuncs').forEach(function (idleFunc) {
+                var defer = tut$.Deferred();
+                deferreds.push(defer);
+                var idle = targetWindow.eval(idleFunc);
+                if (!tut$.isFunction(idle)) {
+                  idle = idle.done;
+                }
+                idle(function () {
+                  defer.resolve();
+                });
+              });
+              /* When all idle functions have resolved, evaluate each test in
+               * the test list. */
+              tut$.when.apply(tut$, deferreds).fail(function () {
+                throw new Error('Idle functions were rejected');
+              }).then(function () {
+                test.data('tests').forEach(function (testExp) {
+                  var result = targetWindow.eval(testExp);
+                  /* If the result isn't truthy, make sure our expect has a
+                   * description telling which test block and specific test
+                   * failed. */
+                  expect(result).toBeTruthy(test.data('description') + ' -> ' + testExp);
+                });
+                testDefer.resolve();
+              });
+            };
+            /* If we have already run the specific codeblock, don't run it
+             * again.  If not, click run and wait for the results. */
+            if (codeblock.is(base$('.codeblock.active:last'))) {
+              onCodeLoaded();
+            } else {
+              target.one('load', onCodeLoaded);
+              codeblock.find('.codeblock_run').click();
+            }
+          };
+        });
+        /* Call the first step in the chained tests */
+        done();
+      }, 15000);
+    });
+  });
+});

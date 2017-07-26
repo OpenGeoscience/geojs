@@ -52,6 +52,7 @@
     "jsdoc": "^3.4",
     "jsdoc-autoprivate": "0.0.1",
     "json-loader": "^0.5.4",
+    "jstransformer-markdown-it": "^2.0.0",
     "karma": "^0.13.22",
     "karma-coverage": "^1.0.0",
     "karma-firefox-launcher": "^1.0.0",
@@ -85,6 +86,7 @@
   "scripts": {
     "build": "webpack --config webpack.config.js && webpack --config external.config.js",
     "build-examples": "webpack --config webpack-examples.config.js",
+    "build-tutorials": "webpack --config webpack-tutorials.config.js",
     "lint": "eslint --cache .",
     "puglint": "pug-lint src examples",
     "test": "GEOJS_TEST_CASE=tests/test-unit.js karma start karma-cov.conf.js --single-run --browsers PhantomJS",
@@ -92,6 +94,7 @@
     "ci": "GEOJS_TEST_CASE=tests/test-unit.js karma start karma-cov.conf.js --single-run --browsers PhantomJS",
     "ffci": "GEOJS_TEST_CASE=tests/test-gl.js karma start karma-cov.conf.js --single-run --browsers Firefox",
     "examplesci": "GEOJS_TEST_CASE=tests/test-examples.js karma start karma-cov.conf.js --single-run --browsers FirefoxWithProxy",
+    "tutorialsci": "GEOJS_TEST_CASE=tests/tutorials.js karma start karma-cov.conf.js --single-run --browsers PhantomJS",
     "test-webgl": "GEOJS_TEST_CASE=tests/test-gl.js xvfb-run -s '-ac -screen 0 1280x1024x24' karma start karma-cov.conf.js --single-run --browsers Firefox",
     "test-examples": "GEOJS_TEST_CASE=tests/test-examples.js xvfb-run -s '-ac -screen 0 1280x1024x24' karma start karma-cov.conf.js --single-run --browsers FirefoxWithProxy",
     "codecov": "codecov",

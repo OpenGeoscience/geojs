@@ -641,8 +641,8 @@ describe('geo.tileLayer', function () {
     });
     it('prefetch', function (done) {
       var l = geo.tileLayer({map: map(), url: function () { return '/testdata/white.jpg'; }}),
-          d1 = new $.Deferred(),
-          d2 = new $.Deferred();
+          d1 = $.Deferred(),
+          d2 = $.Deferred();
 
       // replace the standard getTiles method to return our pseudo-tiles
       l._getTiles = function (level, bounds) {

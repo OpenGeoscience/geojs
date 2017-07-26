@@ -1,0 +1,9 @@
+{
+  "title": "Tutorial - Simple Map",
+  "hideNavbar": true,
+  "tutorialCss": [],
+  "tutorialJs": [],
+  "about": {
+    "text": "Make a simple map.  Includes HTML, CSS, and Javascript."
+  }
+}
