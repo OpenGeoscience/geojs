@@ -109,7 +109,10 @@ var canvas_textFeature = function (arg) {
     /* If any of the font styles other than `font` have values, then we need to
      * construct a single font value from the subvalues.  Otherwise, we can
      * skip it. */
-    fontFromSubValues = ['fontStyle', 'fontVariant', 'fontWeight', 'fontStretch', 'fontSize', 'lineHeight', 'fontFamily'].some(function (key) {
+    fontFromSubValues = [
+      'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch', 'fontSize',
+      'lineHeight', 'fontFamily'
+    ].some(function (key) {
       return m_this.style(key) !== null && m_this.style(key) !== undefined;
     });
     /* Clear the canvas property buffer */

@@ -1444,7 +1444,7 @@ lineRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
 registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
 
 /**
- * Point annotation classa.
+ * Point annotation class.
  *
  * @class
  * @alias geo.poinyAnnotation
