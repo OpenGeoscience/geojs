@@ -1,10 +1,10 @@
-extends ../common/templates/index.jade
+extends ../common/templates/index.pug
 
 block append mainContent
-  div#controls
+  #controls
     .form-group(title="Number of lines segments.  Leave blank for a small default value.")
       label(for="lines") Number of Lines
-      input#lines(type="number" min="1" step="100")
+      input#lines(type="number", min="1", step="100")
       span#lines-shown
     .form-group(title="Stroke Color (any css color).  A comma-separated list will cycle through the listed colors.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to colors, with undefined values using the 'other' entry.")
       label(for="strokeColor") strokeColor
@@ -42,4 +42,3 @@ block append mainContent
       button.preset(strokeColor='', strokeWidth='{"residential":1,"service":0.25,"other":3}', lineCap='round', lineJoin='', miterLimit='', showmap='false', title='Thin lines based on road category') Thin
       button.preset(strokeColor='line:red,orange,yellow,green,blue,indigo,violet', strokeWidth='line:1,2,4,8,16', lineCap='line:butt,round,square', lineJoin='line:miter,bevel,round,miter-clip', miterLimit=4, title='Properties varied by line') Lines
       button.preset(strokeColor='red,orange,yellow,green,blue,indigo,violet', strokeWidth='1,2,4,8,16', lineCap='butt,round,square', lineJoin='miter,bevel,round,miter-clip', miterLimit=4, title='Properties varied by line segment') Segments
-

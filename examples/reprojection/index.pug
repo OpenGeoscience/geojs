@@ -1,7 +1,7 @@
-extends ../common/templates/index.jade
+extends ../common/templates/index.pug
 
 block append mainContent
-  div#controls
+  #controls
     .form-group(title="The url used to fetch tiles.  Use {x}, {y}, {z}, and {s} for templating.")
       label(for="layer-url") Tile URL
       select#layer-url.layerparam(param-name="url", list="url-list", placeholder="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
