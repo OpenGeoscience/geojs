@@ -68,6 +68,7 @@
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> query = utils.getQuery();
   $(<span class="hljs-string">'#clickadd'</span>).prop(<span class="hljs-string">'checked'</span>, query.clickadd !== <span class="hljs-string">'false'</span>);
   $(<span class="hljs-string">'#keepadding'</span>).prop(<span class="hljs-string">'checked'</span>, query.keepadding === <span class="hljs-string">'true'</span>);
+  $(<span class="hljs-string">'#showLabels'</span>).prop(<span class="hljs-string">'checked'</span>, query.labels !== <span class="hljs-string">'false'</span>);
   <span class="hljs-keyword">if</span> (query.lastannotation) {
     $(<span class="hljs-string">'.annotationtype button'</span>).removeClass(<span class="hljs-string">'lastused'</span>);
     $(<span class="hljs-string">'.annotationtype button#'</span> + query.lastannotation).addClass(<span class="hljs-string">'lastused'</span>);
@@ -171,7 +172,8 @@ geojson.  This can become too long for some browsers.</p>
             
             <div class="content"><div class='highlight'><pre>  layer = map.createLayer(<span class="hljs-string">'annotation'</span>, {
     <span class="hljs-attr">renderer</span>: query.renderer ? (query.renderer === <span class="hljs-string">'html'</span> ? <span class="hljs-literal">null</span> : query.renderer) : <span class="hljs-literal">undefined</span>,
-    <span class="hljs-attr">annotations</span>: query.renderer ? <span class="hljs-literal">undefined</span> : geo.listAnnotations()
+    <span class="hljs-attr">annotations</span>: query.renderer ? <span class="hljs-literal">undefined</span> : geo.listAnnotations(),
+    <span class="hljs-attr">showLabels</span>: query.labels !== <span class="hljs-string">'false'</span>
   });</pre></div></div>
             
         </li>
@@ -289,6 +291,12 @@ geojson.  This can become too long for some browsers.</p>
     }
     <span class="hljs-keyword">if</span> (!param || value === query[param]) {
       <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">switch</span> (param) {
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'labels'</span>:
+        layer.options(<span class="hljs-string">'showLabels'</span>, <span class="hljs-string">''</span> + value !== <span class="hljs-string">'false'</span>);
+        layer.draw();
+        <span class="hljs-keyword">break</span>;
     }
     query[param] = value;
     <span class="hljs-keyword">if</span> (value === <span class="hljs-string">''</span> || (ctl.attr(<span class="hljs-string">'placeholder'</span>) &amp;&amp;
@@ -563,14 +571,16 @@ wasn’t caused by clicking the button, reenable the annotation mode.</p>
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show_edit_dialog</span>(<span class="hljs-params">id</span>) </span>{
     <span class="hljs-keyword">var</span> annotation = layer.annotationById(id),
         type = annotation.type(),
-        typeMatch = <span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">'(^| )'</span> + type + <span class="hljs-string">'( |$)'</span>),
+        typeMatch = <span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">'(^| )('</span> + type + <span class="hljs-string">'|all)( |$)'</span>),
         opt = annotation.options(),
         dlg = $(<span class="hljs-string">'#editdialog'</span>);
 
     $(<span class="hljs-string">'#edit-validation-error'</span>, dlg).text(<span class="hljs-string">''</span>);
     dlg.attr(<span class="hljs-string">'annotation-id'</span>, id);
     dlg.attr(<span class="hljs-string">'annotation-type'</span>, type);
-    $(<span class="hljs-string">'[option="name"]'</span>, dlg).val(annotation.name());</pre></div></div>
+    $(<span class="hljs-string">'[option="name"]'</span>, dlg).val(annotation.name());
+    $(<span class="hljs-string">'[option="label"]'</span>, dlg).val(annotation.label(<span class="hljs-literal">undefined</span>, <span class="hljs-literal">true</span>));
+    $(<span class="hljs-string">'[option="description"]'</span>, dlg).val(annotation.description());</pre></div></div>
             
         </li>
         
@@ -610,8 +620,23 @@ the control</p>
         <span class="hljs-keyword">return</span>;
       }
       ctl.show();
-      value = opt.style[key];
+      <span class="hljs-keyword">switch</span> ($(<span class="hljs-string">'[option]'</span>, ctl).attr(<span class="hljs-string">'optiontype'</span>)) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'option'</span>:
+          value = opt[key];
+          <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'label'</span>:
+          value = (opt.labelStyle || {})[key];
+          <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">default</span>:
+          value = opt.style[key];
+          <span class="hljs-keyword">break</span>;
+      }
       <span class="hljs-keyword">switch</span> (format) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'angle'</span>:
+          <span class="hljs-keyword">if</span> (value !== <span class="hljs-literal">undefined</span> &amp;&amp; value !== <span class="hljs-literal">null</span> &amp;&amp; value !== <span class="hljs-string">''</span>) {
+            value = <span class="hljs-string">''</span> + +(+value * <span class="hljs-number">180.0</span> / <span class="hljs-built_in">Math</span>.PI).toFixed(<span class="hljs-number">4</span>) + <span class="hljs-string">' deg'</span>;
+          }
+          <span class="hljs-keyword">break</span>;
         <span class="hljs-keyword">case</span> <span class="hljs-string">'color'</span>:</pre></div></div>
             
         </li>
@@ -627,10 +652,17 @@ the control</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          value = geo.util.convertColorToHex(value);
+            <div class="content"><div class='highlight'><pre>          value = geo.util.convertColorToHex(value || {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>}, <span class="hljs-string">'needed'</span>);
           <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'coordinate2'</span>:
+          <span class="hljs-keyword">if</span> (value !== <span class="hljs-literal">undefined</span> &amp;&amp; value !== <span class="hljs-literal">null</span> &amp;&amp; value !== <span class="hljs-string">''</span>) {
+            value = <span class="hljs-string">''</span> + value.x + <span class="hljs-string">', '</span> + value.y;
+          }
       }
-      $(<span class="hljs-string">'[option]'</span>, ctl).val(<span class="hljs-string">''</span> + value);
+      <span class="hljs-keyword">if</span> ((value === <span class="hljs-literal">undefined</span> || value === <span class="hljs-string">''</span> || value === <span class="hljs-literal">null</span>) &amp;&amp; $(<span class="hljs-string">'[option]'</span>, ctl).is(<span class="hljs-string">'select'</span>)) {
+        value = $(<span class="hljs-string">'[option] option'</span>, ctl).eq(<span class="hljs-number">0</span>).val();
+      }
+      $(<span class="hljs-string">'[option]'</span>, ctl).val(value === <span class="hljs-literal">undefined</span> ? <span class="hljs-string">''</span> : <span class="hljs-string">''</span> + value);
     });
     dlg.one(<span class="hljs-string">'shown.bs.modal'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       $(<span class="hljs-string">'[option="name"]'</span>, dlg).focus();
@@ -648,10 +680,11 @@ the control</p>
     <span class="hljs-keyword">var</span> dlg = $(<span class="hljs-string">'#editdialog'</span>),
         id = dlg.attr(<span class="hljs-string">'annotation-id'</span>),
         annotation = layer.annotationById(id),
+        opt = annotation.options(),
         type = annotation.type(),
-        typeMatch = <span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">'(^| )'</span> + type + <span class="hljs-string">'( |$)'</span>),
-        error,
-        newopt = {};</pre></div></div>
+        typeMatch = <span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">'(^| )('</span> + type + <span class="hljs-string">'|all)( |$)'</span>),
+        newopt = {<span class="hljs-attr">style</span>: {}, <span class="hljs-attr">labelStyle</span>: {}},
+        error;</pre></div></div>
             
         </li>
         
@@ -669,26 +702,39 @@ the control</p>
             <div class="content"><div class='highlight'><pre>    $(<span class="hljs-string">'.form-group[annotation-types]'</span>).each(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       <span class="hljs-keyword">var</span> ctl = $(<span class="hljs-keyword">this</span>),
           key = $(<span class="hljs-string">'[option]'</span>, ctl).attr(<span class="hljs-string">'option'</span>),
-          value;
+          format = $(<span class="hljs-string">'[option]'</span>, ctl).attr(<span class="hljs-string">'format'</span>),
+          value, oldvalue;
       <span class="hljs-keyword">if</span> (!ctl.attr(<span class="hljs-string">'annotation-types'</span>).match(typeMatch)) {
         <span class="hljs-keyword">return</span>;
       }
-      value = layer.validateAttribute($(<span class="hljs-string">'[option]'</span>, ctl).val(),
-                                      $(<span class="hljs-string">'[option]'</span>, ctl).attr(<span class="hljs-string">'format'</span>));
-      <span class="hljs-keyword">if</span> (value === <span class="hljs-literal">undefined</span>) {
-        error = $(<span class="hljs-string">'label'</span>, ctl).text() + <span class="hljs-string">' is not a valid value'</span>;
-      } <span class="hljs-keyword">else</span> {
-        newopt[key] = value;
+      value = $(<span class="hljs-string">'[option]'</span>, ctl).val();
+      <span class="hljs-keyword">switch</span> (format) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'angle'</span>:
+          <span class="hljs-keyword">if</span> (<span class="hljs-regexp">/^\s*[.0-9eE]+\s*$/</span>.exec(value)) {
+            value += <span class="hljs-string">'deg'</span>;
+          }
+          <span class="hljs-keyword">break</span>;
       }
-    });
-    <span class="hljs-keyword">if</span> (error) {
-      $(<span class="hljs-string">'#edit-validation-error'</span>, dlg).text(error);
-      <span class="hljs-keyword">return</span>;
-    }
-    annotation.name($(<span class="hljs-string">'[option="name"]'</span>, dlg).val());
-    annotation.options({<span class="hljs-attr">style</span>: newopt}).draw();
-
-    dlg.modal(<span class="hljs-string">'hide'</span>);</pre></div></div>
+      <span class="hljs-keyword">switch</span> (key) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'textScaled'</span>:
+          <span class="hljs-keyword">if</span> ([<span class="hljs-string">'true'</span>, <span class="hljs-string">'on'</span>, <span class="hljs-string">'yes'</span>].indexOf(value.trim().toLowerCase()) &gt;= <span class="hljs-number">0</span>) {
+            value = map.zoom();
+          }
+          <span class="hljs-keyword">break</span>;
+      }
+      value = layer.validateAttribute(value, format);
+      <span class="hljs-keyword">switch</span> ($(<span class="hljs-string">'[option]'</span>, ctl).attr(<span class="hljs-string">'optiontype'</span>)) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'option'</span>:
+          oldvalue = opt[key];
+          <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'label'</span>:
+          oldvalue = (opt.labelStyle || {})[key];
+          <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">default</span>:
+          oldvalue = opt.style[key];
+          <span class="hljs-keyword">break</span>;
+      }
+      <span class="hljs-keyword">if</span> (value === oldvalue || (oldvalue === <span class="hljs-literal">undefined</span> &amp;&amp; value === <span class="hljs-string">''</span>)) {</pre></div></div>
             
         </li>
         
@@ -698,6 +744,46 @@ the control</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>don’t change anything</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (value === <span class="hljs-literal">undefined</span>) {
+        error = $(<span class="hljs-string">'label'</span>, ctl).text() + <span class="hljs-string">' is not a valid value'</span>;
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">switch</span> ($(<span class="hljs-string">'[option]'</span>, ctl).attr(<span class="hljs-string">'optiontype'</span>)) {
+          <span class="hljs-keyword">case</span> <span class="hljs-string">'option'</span>:
+            newopt[key] = value;
+            <span class="hljs-keyword">break</span>;
+          <span class="hljs-keyword">case</span> <span class="hljs-string">'label'</span>:
+            newopt.labelStyle[key] = value;
+            <span class="hljs-keyword">break</span>;
+          <span class="hljs-keyword">default</span>:
+            newopt.style[key] = value;
+            <span class="hljs-keyword">break</span>;
+        }
+      }
+    });
+    <span class="hljs-keyword">if</span> (error) {
+      $(<span class="hljs-string">'#edit-validation-error'</span>, dlg).text(error);
+      <span class="hljs-keyword">return</span>;
+    }
+    annotation.name($(<span class="hljs-string">'[option="name"]'</span>, dlg).val());
+    annotation.label($(<span class="hljs-string">'[option="label"]'</span>, dlg).val() || <span class="hljs-literal">null</span>);
+    annotation.description($(<span class="hljs-string">'[option="description"]'</span>, dlg).val() || <span class="hljs-string">''</span>);
+    annotation.options(newopt).draw();
+
+    dlg.modal(<span class="hljs-string">'hide'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>refresh the annotation list</p>
 

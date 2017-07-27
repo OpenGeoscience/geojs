@@ -53,22 +53,22 @@
 	// require('bootstrap');
 	
 	// codemirror and plugins
-	__webpack_require__(286);
-	__webpack_require__(288);
-	__webpack_require__(290);
+	__webpack_require__(307);
+	__webpack_require__(309);
+	__webpack_require__(311);
 	
 	// Colorbrewer
-	__webpack_require__(292);
+	__webpack_require__(313);
 	
-	__webpack_require__(295);
-	__webpack_require__(297);
-	__webpack_require__(299);
-	__webpack_require__(300);
-	__webpack_require__(301);
-	__webpack_require__(302);
-	__webpack_require__(303);
-	__webpack_require__(304);
-	__webpack_require__(305);
+	__webpack_require__(316);
+	__webpack_require__(318);
+	__webpack_require__(320);
+	__webpack_require__(321);
+	__webpack_require__(322);
+	__webpack_require__(323);
+	__webpack_require__(324);
+	__webpack_require__(325);
+	__webpack_require__(326);
 	
 	// common example code
 	// require('./common/css/examples.css');
@@ -12360,51 +12360,52 @@
 	
 	module.exports = $.extend({
 	  annotation: __webpack_require__(13),
-	  annotationLayer: __webpack_require__(224),
+	  annotationLayer: __webpack_require__(225),
 	  camera: __webpack_require__(217),
-	  choroplethFeature: __webpack_require__(229),
-	  contourFeature: __webpack_require__(230),
-	  domRenderer: __webpack_require__(231),
+	  choroplethFeature: __webpack_require__(230),
+	  contourFeature: __webpack_require__(231),
+	  domRenderer: __webpack_require__(232),
 	  event: __webpack_require__(15),
 	  feature: __webpack_require__(213),
-	  featureLayer: __webpack_require__(225),
-	  fetchQueue: __webpack_require__(232),
-	  fileReader: __webpack_require__(233),
+	  featureLayer: __webpack_require__(226),
+	  fetchQueue: __webpack_require__(233),
+	  fileReader: __webpack_require__(234),
 	  geo_action: __webpack_require__(16),
-	  graphFeature: __webpack_require__(234),
-	  heatmapFeature: __webpack_require__(235),
-	  imageTile: __webpack_require__(236),
-	  jsonReader: __webpack_require__(238),
+	  graphFeature: __webpack_require__(235),
+	  heatmapFeature: __webpack_require__(236),
+	  imageTile: __webpack_require__(237),
+	  jsonReader: __webpack_require__(239),
 	  layer: __webpack_require__(216),
 	  lineFeature: __webpack_require__(212),
-	  map: __webpack_require__(239),
-	  mapInteractor: __webpack_require__(227),
+	  map: __webpack_require__(240),
+	  mapInteractor: __webpack_require__(228),
 	  object: __webpack_require__(209),
-	  osmLayer: __webpack_require__(241),
-	  pathFeature: __webpack_require__(244),
+	  osmLayer: __webpack_require__(242),
+	  pathFeature: __webpack_require__(245),
 	  pointFeature: __webpack_require__(218),
 	  polygonFeature: __webpack_require__(223),
-	  quadFeature: __webpack_require__(228),
-	  pixelmapFeature: __webpack_require__(245),
+	  quadFeature: __webpack_require__(229),
+	  pixelmapFeature: __webpack_require__(246),
 	  renderer: __webpack_require__(208),
 	  sceneObject: __webpack_require__(214),
-	  tile: __webpack_require__(237),
-	  tileCache: __webpack_require__(243),
-	  tileLayer: __webpack_require__(242),
+	  textFeature: __webpack_require__(224),
+	  tile: __webpack_require__(238),
+	  tileCache: __webpack_require__(244),
+	  tileLayer: __webpack_require__(243),
 	  timestamp: __webpack_require__(215),
 	  transform: __webpack_require__(17),
-	  typedef: __webpack_require__(246),
-	  vectorFeature: __webpack_require__(247),
+	  typedef: __webpack_require__(247),
+	  vectorFeature: __webpack_require__(248),
 	  inherit: __webpack_require__(14),
-	  version: __webpack_require__(248),
-	  sha: __webpack_require__(249),
+	  version: __webpack_require__(249),
+	  sha: __webpack_require__(250),
 	
 	  util: __webpack_require__(89),
 	  jQuery: $,
-	  d3: __webpack_require__(250),
-	  gl: __webpack_require__(262),
-	  canvas: __webpack_require__(272),
-	  gui: __webpack_require__(280)
+	  d3: __webpack_require__(251),
+	  gl: __webpack_require__(263),
+	  canvas: __webpack_require__(273),
+	  gui: __webpack_require__(301)
 	}, __webpack_require__(207));
 	
 	if (window && !window.$) {
@@ -22639,6 +22640,7 @@
 	var lineFeature = __webpack_require__(212);
 	var pointFeature = __webpack_require__(218);
 	var polygonFeature = __webpack_require__(223);
+	var textFeature = __webpack_require__(224);
 	
 	var annotationId = 0;
 	
@@ -22651,18 +22653,22 @@
 	var annotationActionOwner = 'annotationAction';
 	
 	/**
-	 * Base annotation class
+	 * Base annotation class.
 	 *
-	 * @class geo.annotation
-	 * @param {string} type the type of annotation.  These should be registered
+	 * @class
+	 * @alias geo.annotation
+	 * @param {string} type The type of annotation.  These should be registered
 	 *    with utils.registerAnnotation and can be listed with same function.
-	 * @param {object?} options Inidividual annotations have additional options.
-	 * @param {string} [options.name] A name for the annotation.  This defaults to
+	 * @param {object?} [args] Individual annotations have additional options.
+	 * @param {string} [args.name] A name for the annotation.  This defaults to
 	 *    the type with a unique ID suffixed to it.
-	 * @param {geo.annotationLayer} [options.layer] a reference to the controlling
+	 * @param {geo.annotationLayer} [arg.layer] A reference to the controlling
 	 *    layer.  This is used for coordinate transforms.
-	 * @param {string} [options.state] initial annotation state.  One of the
-	 *    annotation.state values.
+	 * @param {string} [args.state] Initial annotation state.  One of the
+	 *    `geo.annotation.state` values.
+	 * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+	 *    annotation label on annotations in done or edit states.  Alternately, a
+	 *    list of states in which to show the label.  Falsy to not show the label.
 	 * @returns {geo.annotation}
 	 */
 	var annotation = function (type, args) {
@@ -22672,10 +22678,12 @@
 	  }
 	
 	  annotationId += 1;
-	  var m_options = $.extend({}, args || {}),
+	  var m_options = $.extend({}, {showLabel: true}, args || {}),
 	      m_id = annotationId,
 	      m_name = m_options.name || (
 	        type.charAt(0).toUpperCase() + type.substr(1) + ' ' + annotationId),
+	      m_label = m_options.label || null,
+	      m_description = m_options.description || undefined,
 	      m_type = type,
 	      m_layer = m_options.layer,
 	      /* one of annotationState.* */
@@ -22683,6 +22691,8 @@
 	  delete m_options.state;
 	  delete m_options.layer;
 	  delete m_options.name;
+	  delete m_options.label;
+	  delete m_options.description;
 	
 	  /**
 	   * Clean up any resources that the annotation is using.
@@ -22693,7 +22703,7 @@
 	  /**
 	   * Get a unique annotation id.
 	   *
-	   * @returns {number} the annotation id.
+	   * @returns {number} The annotation id.
 	   */
 	  this.id = function () {
 	    return m_id;
@@ -22702,16 +22712,113 @@
 	  /**
 	   * Get or set the name of this annotation.
 	   *
-	   * @param {string|undefined} arg if undefined, return the name, otherwise
-	   *    change it.
-	   * @returns {this|string} the current name or this annotation.
+	   * @param {string|undefined} arg If `undefined`, return the name, otherwise
+	   *    change it.  When setting the name, the value is trimmed of
+	   *    whitespace.  The name will not be changed to an empty string.
+	   * @returns {this|string} The current name or this annotation.
 	   */
 	  this.name = function (arg) {
 	    if (arg === undefined) {
 	      return m_name;
 	    }
 	    if (arg !== null && ('' + arg).trim()) {
-	      m_name = ('' + arg).trim();
+	      arg = ('' + arg).trim();
+	      if (arg !== m_name) {
+	        m_name = arg;
+	        this.modified();
+	      }
+	    }
+	    return this;
+	  };
+	
+	  /**
+	   * Get or set the label of this annotation.
+	   *
+	   * @param {string|null|undefined} arg If `undefined`, return the label,
+	   *    otherwise change it.  `null` to clear the label.
+	   * @param {boolean} noFallback If not truthy and the label is `null`, return
+	   *    the name, otherwise return the actual value for label.
+	   * @returns {this|string} The current label or this annotation.
+	   */
+	  this.label = function (arg, noFallback) {
+	    if (arg === undefined) {
+	      return m_label === null && !noFallback ? m_name : m_label;
+	    }
+	    if (arg !== m_label) {
+	      m_label = arg;
+	      this.modified();
+	    }
+	    return this;
+	  };
+	
+	  /**
+	   * Return the coordinate associated with the label.
+	   *
+	   * @returns {geo.geoPosition|undefined} The map gcs position for the label,
+	   *    or `undefined` if no such position exists.
+	   */
+	  this._labelPosition = function () {
+	    var coor = this._coordinates(), position = {x: 0, y: 0}, i;
+	    if (!coor || !coor.length) {
+	      return undefined;
+	    }
+	    if (coor.length === 1) {
+	      return coor[0];
+	    }
+	    for (i = 0; i < coor.length; i += 1) {
+	      position.x += coor[i].x;
+	      position.y += coor[i].y;
+	    }
+	    position.x /= coor.length;
+	    position.y /= coor.length;
+	    return position;
+	  };
+	
+	  /**
+	   * If the label should be shown, get a record of the label that can be used
+	   * in a `geo.textFeature`.
+	   *
+	   * @returns {geo.annotationLayer.labelRecord|undefined} A label record, or
+	   *    `undefined` if it should not be shown.
+	   */
+	  this.labelRecord = function () {
+	    var show = this.options('showLabel');
+	    if (!show) {
+	      return;
+	    }
+	    var state = this.state();
+	    if ((show === true && state === annotationState.create) ||
+	        (show !== true && show.indexOf(state) < 0)) {
+	      return;
+	    }
+	    var style = this.options('labelStyle');
+	    var labelRecord = {
+	      text: this.label(),
+	      position: this._labelPosition()
+	    };
+	    if (!labelRecord.position) {
+	      return;
+	    }
+	    if (style) {
+	      labelRecord.style = style;
+	    }
+	    return labelRecord;
+	  };
+	
+	  /**
+	   * Get or set the description of this annotation.
+	   *
+	   * @param {string|undefined} arg If `undefined`, return the description,
+	   *    otherwise change it.
+	   * @returns {this|string} The current description or this annotation.
+	   */
+	  this.description = function (arg) {
+	    if (arg === undefined) {
+	      return m_description;
+	    }
+	    if (arg !== m_description) {
+	      m_description = arg;
+	      this.modified();
 	    }
 	    return this;
 	  };
@@ -22734,9 +22841,10 @@
 	  /**
 	   * Get or set the state of this annotation.
 	   *
-	   * @param {string|undefined} arg if undefined, return the state, otherwise
-	   *    change it.
-	   * @returns {this|string} the current state or this annotation.
+	   * @param {string|undefined} arg If `undefined`, return the state,
+	   *    otherwise change it.  This should be one of the
+	   *    `geo.annotation.state` values.
+	   * @returns {this|string} The current state or this annotation.
 	   */
 	  this.state = function (arg) {
 	    if (arg === undefined) {
@@ -22756,9 +22864,9 @@
 	  /**
 	   * Return actions needed for the specified state of this annotation.
 	   *
-	   * @param {string} state: the state to return actions for.  Defaults to
+	   * @param {string} [state] The state to return actions for.  Defaults to
 	   *    the current state.
-	   * @returns {array}: a list of actions.
+	   * @returns {geo.actionRecord[]} A list of actions.
 	   */
 	  this.actions = function () {
 	    return [];
@@ -22767,24 +22875,26 @@
 	  /**
 	   * Process any actions for this annotation.
 	   *
-	   * @param {object} evt: the action event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The action event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if the
+	   *    annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.processAction = function () {
+	    return undefined;
 	  };
 	
 	  /**
 	   * Set or get options.
 	   *
-	   * @param {string|object} arg1 if undefined, return the options object.  If
-	   *    a string, either set or return the option of that name.  If an object,
-	   *    update the options with the object's values.
-	   * @param {object} arg2 if arg1 is a string and this is defined, set the
-	   *    option to this value.
-	   * @returns {object|this} if options are set, return the layer, otherwise
-	   *    return the requested option or the set of options.
+	   * @param {string|object} [arg1] If `undefined`, return the options object.
+	   *    If a string, either set or return the option of that name.  If an
+	   *    object, update the options with the object's values.
+	   * @param {object} [arg2] If `arg1` is a string and this is defined, set
+	   *    the option to this value.
+	   * @returns {object|this} If options are set, return the annotation,
+	   *    otherwise return the requested option or the set of options.
 	   */
 	  this.options = function (arg1, arg2) {
 	    if (arg1 === undefined) {
@@ -22795,6 +22905,13 @@
 	    }
 	    if (arg2 === undefined) {
 	      m_options = $.extend(true, m_options, arg1);
+	      /* For style objects, reextend them without recursiion.  This allows
+	       * setting colors without an opacity field, for instance. */
+	      ['style', 'editStyle', 'labelStyle'].forEach(function (key) {
+	        if (arg1[key] !== undefined) {
+	          $.extend(m_options[key], arg1[key]);
+	        }
+	      });
 	    } else {
 	      m_options[arg1] = arg2;
 	    }
@@ -22808,6 +22925,16 @@
 	      delete m_options.name;
 	      this.name(name);
 	    }
+	    if (m_options.label !== undefined) {
+	      var label = m_options.label;
+	      delete m_options.label;
+	      this.label(label);
+	    }
+	    if (m_options.description !== undefined) {
+	      var description = m_options.description;
+	      delete m_options.description;
+	      this.description(description);
+	    }
 	    this.modified();
 	    return this;
 	  };
@@ -22815,13 +22942,14 @@
 	  /**
 	   * Set or get style.
 	   *
-	   * @param {string|object} arg1 if undefined, return the options.style object.
-	   *    If a string, either set or return the style of that name.  If an
-	   *    object, update the style with the object's values.
-	   * @param {object} arg2 if arg1 is a string and this is defined, set the
-	   *    style to this value.
-	   * @returns {object|this} if styles are set, return the layer, otherwise
-	   *    return the requested style or the set of styles.
+	   * @param {string|object} [arg1] If `undefined`, return the current style
+	   *    object.  If a string and `arg2` is undefined, return the style
+	   *    associated with the specified key.  If a string and `arg2` is defined,
+	   *    set the named style to the specified value.  Otherwise, extend the
+	   *    current style with the values in the specified object.
+	   * @param {*} [arg2] If `arg1` is a string, the new value for that style.
+	   * @returns {object|this} Either the entire style object, the value of a
+	   *    specific style, or the current class instance.
 	   */
 	  this.style = function (arg1, arg2) {
 	    if (arg1 === undefined) {
@@ -22840,27 +22968,28 @@
 	  };
 	
 	  /**
-	   * Set or get edit style.
+	   * Set or get edit style.  These are the styles used in edit and create mode.
 	   *
-	   * @param {string|object} arg1 if undefined, return the options.editstyle
-	   *    object.  If a string, either set or return the style of that name.  If
-	   *    an object, update the style with the object's values.
-	   * @param {object} arg2 if arg1 is a string and this is defined, set the
-	   *    style to this value.
-	   * @returns {object|this} if styles are set, return the layer, otherwise
-	   *    return the requested style or the set of styles.
+	   * @param {string|object} [arg1] If `undefined`, return the current style
+	   *    object.  If a string and `arg2` is undefined, return the style
+	   *    associated with the specified key.  If a string and `arg2` is defined,
+	   *    set the named style to the specified value.  Otherwise, extend the
+	   *    current style with the values in the specified object.
+	   * @param {*} [arg2] If `arg1` is a string, the new value for that style.
+	   * @returns {object|this} Either the entire style object, the value of a
+	   *    specific style, or the current class instance.
 	   */
-	  this.editstyle = function (arg1, arg2) {
+	  this.editStyle = function (arg1, arg2) {
 	    if (arg1 === undefined) {
-	      return m_options.editstyle;
+	      return m_options.editStyle;
 	    }
 	    if (typeof arg1 === 'string' && arg2 === undefined) {
-	      return m_options.editstyle[arg1];
+	      return m_options.editStyle[arg1];
 	    }
 	    if (arg2 === undefined) {
-	      m_options.editstyle = $.extend(true, m_options.editstyle, arg1);
+	      m_options.editStyle = $.extend(true, m_options.editStyle, arg1);
 	    } else {
-	      m_options.editstyle[arg1] = arg2;
+	      m_options.editStyle[arg1] = arg2;
 	    }
 	    this.modified();
 	    return this;
@@ -22869,7 +22998,7 @@
 	  /**
 	   * Get the type of this annotation.
 	   *
-	   * @returns {string} the annotation type.
+	   * @returns {string} The annotation type.
 	   */
 	  this.type = function () {
 	    return m_type;
@@ -22878,11 +23007,11 @@
 	  /**
 	   * Get a list of renderable features for this annotation.  The list index is
 	   * functionally a z-index for the feature.  Each entry is a dictionary with
-	   * the key as the feature name (such as line, quad, or polygon), and the
-	   * value a dictionary of values to pass to the feature constructor, such as
-	   * style and coordinates.
+	   * the key as the feature name (such as `line`, `quad`, or `polygon`), and
+	   * the value a dictionary of values to pass to the feature constructor, such
+	   * as `style` and `coordinates`.
 	   *
-	   * @returns {array} an array of features.
+	   * @returns {array} An array of features.
 	   */
 	  this.features = function () {
 	    return [];
@@ -22890,32 +23019,36 @@
 	
 	  /**
 	   * Handle a mouse click on this annotation.  If the event is processed,
-	   * evt.handled should be set to true to prevent further processing.
+	   * evt.handled should be set to `true` to prevent further processing.
 	   *
-	   * @param {geo.event} evt the mouse click event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The mouse click event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+	   *    the annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.mouseClick = function (evt) {
+	    return undefined;
 	  };
 	
 	  /**
 	   * Handle a mouse move on this annotation.
 	   *
-	   * @param {geo.event} evt the mouse move event.
-	   * @returns {boolean|string} true to update the annotation, falsy to not
+	   * @param {geo.event} evt The mouse move event.
+	   * @returns {boolean} Truthy to update the annotation, falsy to not
 	   *    update anything.
 	   */
 	  this.mouseMove = function (evt) {
+	    return undefined;
 	  };
 	
 	  /**
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
-	   * @param {array} coordinates: an optional array of coordinates to set.
-	   * @returns {array} an array of coordinates.
+	   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+	   *  to set.
+	   * @returns {geo.geoPosition[]} The current array of coordinates.
 	   */
 	  this._coordinates = function (coordinates) {
 	    return [];
@@ -22924,9 +23057,9 @@
 	  /**
 	   * Get coordinates associated with this annotation.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @returns {array} an array of coordinates.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {geo.geoPosition[]} An array of coordinates.
 	   */
 	  this.coordinates = function (gcs) {
 	    var coord = this._coordinates() || [];
@@ -22944,6 +23077,8 @@
 	  /**
 	   * Mark this annotation as modified.  This just marks the parent layer as
 	   * modified.
+	   *
+	   * @returns {this} The annotation.
 	   */
 	  this.modified = function () {
 	    if (this.layer()) {
@@ -22954,6 +23089,8 @@
 	
 	  /**
 	   * Draw this annotation.  This just updates and draws the parent layer.
+	   *
+	   * @returns {this} The annotation.
 	   */
 	  this.draw = function () {
 	    if (this.layer()) {
@@ -22967,7 +23104,7 @@
 	   * Return a list of styles that should be preserved in a geojson
 	   * representation of the annotation.
 	   *
-	   * @return {array} a list of style names to store.
+	   * @returns {string[]} A list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
 	    return [
@@ -22977,38 +23114,41 @@
 	  };
 	
 	  /**
-	   * Return the coordinates to be stored in a geojson geometery object.
+	   * Return the coordinates to be stored in a geojson geometry object.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {array} an array of flattened coordinates in the ingcs coordinate
-	   *    system.  Undefined if this annotation is incompelte.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {array} An array of flattened coordinates in the interface gcs
+	   *    coordinate system.  `undefined` if this annotation is incomplete.
 	   */
 	  this._geojsonCoordinates = function (gcs) {
+	    return [];
 	  };
 	
 	  /**
 	   * Return the geometry type that is used to store this annotation in geojson.
 	   *
-	   * @return {string} a geojson geometry type.
+	   * @returns {string} A geojson geometry type.
 	   */
 	  this._geojsonGeometryType = function () {
+	    return '';
 	  };
 	
 	  /**
 	   * Return the annotation as a geojson object.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @param {boolean} includeCrs: if true, include the coordinate system.
-	   * @return {object} the annotation as a geojson object, or undefined if it
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @param {boolean} [includeCrs] If truthy, include the coordinate system.
+	   * @returns {object} The annotation as a geojson object, or `undefined` if it
 	   *    should not be represented (for instance, while it is being created).
 	   */
 	  this.geojson = function (gcs, includeCrs) {
 	    var coor = this._geojsonCoordinates(gcs),
 	        geotype = this._geojsonGeometryType(),
 	        styles = this._geojsonStyles(),
-	        objStyle = this.options('style'),
+	        objStyle = this.options('style') || {},
+	        objLabelStyle = this.options('labelStyle') || {},
 	        i, key, value;
 	    if (!coor || !coor.length || !geotype) {
 	      return;
@@ -23025,14 +23165,33 @@
 	        annotationId: this.id()
 	      }
 	    };
+	    if (m_label) {
+	      obj.properties.label = m_label;
+	    }
+	    if (m_description) {
+	      obj.properties.description = m_description;
+	    }
+	    if (this.options('showLabel') === false) {
+	      obj.properties.showLabel = this.options('showLabel');
+	    }
 	    for (i = 0; i < styles.length; i += 1) {
 	      key = styles[i];
 	      value = util.ensureFunction(objStyle[key])();
 	      if (value !== undefined) {
 	        if (key.toLowerCase().match(/color$/)) {
-	          value = util.convertColorToHex(value);
+	          value = util.convertColorToHex(value, 'needed');
 	        }
 	        obj.properties[key] = value;
+	      }
+	    }
+	    for (i = 0; i < textFeature.usedStyles.length; i += 1) {
+	      key = textFeature.usedStyles[i];
+	      value = util.ensureFunction(objLabelStyle[key])();
+	      if (value !== undefined) {
+	        if (key.toLowerCase().match(/color$/)) {
+	          value = util.convertColorToHex(value, 'needed');
+	        }
+	        obj.properties['label' + key.charAt(0).toUpperCase() + key.slice(1)] = value;
 	      }
 	    }
 	    if (includeCrs) {
@@ -23052,18 +23211,37 @@
 	};
 	
 	/**
-	 * Rectangle annotation class
+	 * Rectangle annotation class.
 	 *
 	 * Rectangles are always rendered as polygons.  This could be changed -- if no
 	 * stroke is specified, the quad feature would be sufficient and work on more
 	 * renderers.
 	 *
-	 * Must specify:
-	 *   corners: a list of four corners {x: x, y: y} in map gcs coordinates.
-	 * May specify:
-	 *   style.
-	 *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
-	 *     strokeOpacity
+	 * @class
+	 * @alias geo.rectangleAnnotation
+	 * @extends geo.annotation
+	 *
+	 * @param {object?} [args] Options for the annotation.
+	 * @param {string} [args.name] A name for the annotation.  This defaults to
+	 *    the type with a unique ID suffixed to it.
+	 * @param {string} [args.state] initial annotation state.  One of the
+	 *    annotation.state values.
+	 * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+	 *    annotation label on annotations in done or edit states.  Alternately, a
+	 *    list of states in which to show the label.  Falsy to not show the label.
+	 * @param {geo.geoPosition[]} [args.corners] A list of four corners in map
+	 *    gcs coordinates.  These must be in order around the perimeter of the
+	 *    rectangle (in either direction).
+	 * @param {geo.geoPosition[]} [args.coordinates] An alternate name for
+	 *    `args.corners`.
+	 * @param {object} [args.style] The style to apply to a finished rectangle.
+	 *    This uses styles for polygons, including `fill`, `fillColor`,
+	 *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+	 *    `strokeOpacity`.
+	 * @param {object} [args.editStyle] The style to apply to a rectangle in edit
+	 *    mode.  This uses styles for polygons and lines, including `fill`,
+	 *    `fillColor`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+	 *    `strokeOpacity`.
 	 */
 	var rectangleAnnotation = function (args) {
 	  'use strict';
@@ -23083,7 +23261,7 @@
 	      strokeWidth: 3,
 	      uniformPolygon: true
 	    },
-	    editstyle: {
+	    editStyle: {
 	      fill: true,
 	      fillColor: {r: 0.3, g: 0.3, b: 0.3},
 	      fillOpacity: 0.25,
@@ -23102,9 +23280,9 @@
 	  /**
 	   * Return actions needed for the specified state of this annotation.
 	   *
-	   * @param {string} state: the state to return actions for.  Defaults to
+	   * @param {string} [state] The state to return actions for.  Defaults to
 	   *    the current state.
-	   * @returns {array}: a list of actions.
+	   * @returns {geo.actionRecord[]} A list of actions.
 	   */
 	  this.actions = function (state) {
 	    if (!state) {
@@ -23128,10 +23306,11 @@
 	  /**
 	   * Process any actions for this annotation.
 	   *
-	   * @param {object} evt: the action event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The action event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if the
+	   *    annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.processAction = function (evt) {
 	    var layer = this.layer();
@@ -23155,7 +23334,7 @@
 	  /**
 	   * Get a list of renderable features for this annotation.
 	   *
-	   * @returns {array} an array of features.
+	   * @returns {array} An array of features.
 	   */
 	  this.features = function () {
 	    var opt = this.options(),
@@ -23168,7 +23347,7 @@
 	          features = [{
 	            polygon: {
 	              polygon: opt.corners,
-	              style: opt.editstyle
+	              style: opt.editStyle
 	            }
 	          }];
 	        }
@@ -23189,8 +23368,9 @@
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
-	   * @param {array} coordinates: an optional array of coordinates to set.
-	   * @returns {array} an array of coordinates.
+	   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+	   *  to set.
+	   * @returns {geo.geoPosition[]} The current array of coordinates.
 	   */
 	  this._coordinates = function (coordinates) {
 	    if (coordinates && coordinates.length >= 4) {
@@ -23202,12 +23382,12 @@
 	  };
 	
 	  /**
-	   * Return the coordinates to be stored in a geojson geometery object.
+	   * Return the coordinates to be stored in a geojson geometry object.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {array} an array of flattened coordinates in the ingcs coordinate
-	   *    system.  Undefined if this annotation is incompelte.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {array} An array of flattened coordinates in the interface gcs
+	   *    coordinate system.  `undefined` if this annotation is incomplete.
 	   */
 	  this._geojsonCoordinates = function (gcs) {
 	    var src = this.coordinates(gcs);
@@ -23225,7 +23405,7 @@
 	  /**
 	   * Return the geometry type that is used to store this annotation in geojson.
 	   *
-	   * @return {string} a geojson geometry type.
+	   * @returns {string} A geojson geometry type.
 	   */
 	  this._geojsonGeometryType = function () {
 	    return 'Polygon';
@@ -23235,7 +23415,7 @@
 	   * Return a list of styles that should be preserved in a geojson
 	   * representation of the annotation.
 	   *
-	   * @return {array} a list of style names to store.
+	   * @returns {string[]} A list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
 	    return [
@@ -23246,8 +23426,8 @@
 	  /**
 	   * Set three corners based on an initial corner and a mouse event.
 	   *
-	   * @param {array} an array of four corners to update.
-	   * @param {geo.event} evt the mouse move event.
+	   * @param {geo.geoPosition} corners An array of four corners to update.
+	   * @param {geo.event} evt The mouse move event.
 	   */
 	  this._setCornersFromMouse = function (corners, evt) {
 	    var map = this.layer().map(),
@@ -23263,8 +23443,8 @@
 	  /**
 	   * Handle a mouse move on this annotation.
 	   *
-	   * @param {geo.event} evt the mouse move event.
-	   * @returns {boolean|string} true to update the annotation, falsy to not
+	   * @param {geo.event} evt The mouse move event.
+	   * @returns {boolean} Truthy to update the annotation, falsy to not
 	   *    update anything.
 	   */
 	  this.mouseMove = function (evt) {
@@ -23280,12 +23460,13 @@
 	
 	  /**
 	   * Handle a mouse click on this annotation.  If the event is processed,
-	   * evt.handled should be set to true to prevent further processing.
+	   * evt.handled should be set to `true` to prevent further processing.
 	   *
-	   * @param {geo.event} evt the mouse click event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The mouse click event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+	   *    the annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.mouseClick = function (evt) {
 	    var layer = this.layer();
@@ -23327,15 +23508,31 @@
 	 * When complete, polygons are rendered as polygons.  During creation they are
 	 * rendered as lines and polygons.
 	 *
-	 * Must specify:
-	 *   vertices: a list of vertices {x: x, y: y} in map gcs coordinates.
-	 * May specify:
-	 *   style.
-	 *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
-	 *     strokeOpacity
-	 *   editstyle.
-	 *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
-	 *     strokeOpacity
+	 * @class
+	 * @alias geo.polygonAnnotation
+	 * @extends geo.annotation
+	 *
+	 * @param {object?} [args] Options for the annotation.
+	 * @param {string} [args.name] A name for the annotation.  This defaults to
+	 *    the type with a unique ID suffixed to it.
+	 * @param {string} [args.state] initial annotation state.  One of the
+	 *    annotation.state values.
+	 * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+	 *    annotation label on annotations in done or edit states.  Alternately, a
+	 *    list of states in which to show the label.  Falsy to not show the label.
+	 * @param {geo.geoPosition[]} [args.vertices] A list of vertices in map gcs
+	 *    coordinates.  These must be in order around the perimeter of the
+	 *    polygon (in either direction).
+	 * @param {geo.geoPosition[]} [args.coordinates] An alternate name for
+	 *    `args.vertices`.
+	 * @param {object} [args.style] The style to apply to a finished polygon.
+	 *    This uses styles for polygons, including `fill`, `fillColor`,
+	 *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+	 *    `strokeOpacity`.
+	 * @param {object} [args.editStyle] The style to apply to a polygon in edit
+	 *    mode.  This uses styles for polygons and lines, including `fill`,
+	 *    `fillColor`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+	 *    `strokeOpacity`.
 	 */
 	var polygonAnnotation = function (args) {
 	  'use strict';
@@ -23357,7 +23554,7 @@
 	      strokeWidth: 3,
 	      uniformPolygon: true
 	    },
-	    editstyle: {
+	    editStyle: {
 	      closed: false,
 	      fill: true,
 	      fillColor: {r: 0.3, g: 0.3, b: 0.3},
@@ -23388,7 +23585,7 @@
 	   * is done, this is just a single polygon.  During creation this can be a
 	   * polygon and line at z-levels 1 and 2.
 	   *
-	   * @returns {array} an array of features.
+	   * @returns {array} An array of features.
 	   */
 	  this.features = function () {
 	    var opt = this.options(),
@@ -23401,7 +23598,7 @@
 	          features[1] = {
 	            polygon: {
 	              polygon: opt.vertices,
-	              style: opt.editstyle
+	              style: opt.editStyle
 	            }
 	          };
 	        }
@@ -23409,7 +23606,7 @@
 	          features[2] = {
 	            line: {
 	              line: opt.vertices,
-	              style: opt.editstyle
+	              style: opt.editStyle
 	            }
 	          };
 	        }
@@ -23430,8 +23627,9 @@
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
-	   * @param {array} coordinates: an optional array of coordinates to set.
-	   * @returns {array} an array of coordinates.
+	   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+	   *  to set.
+	   * @returns {geo.geoPosition[]} The current array of coordinates.
 	   */
 	  this._coordinates = function (coordinates) {
 	    if (coordinates) {
@@ -23443,8 +23641,8 @@
 	  /**
 	   * Handle a mouse move on this annotation.
 	   *
-	   * @param {geo.event} evt the mouse move event.
-	   * @returns {boolean|string} true to update the annotation, falsy to not
+	   * @param {geo.event} evt The mouse move event.
+	   * @returns {boolean} Truthy to update the annotation, falsy to not
 	   *    update anything.
 	   */
 	  this.mouseMove = function (evt) {
@@ -23460,12 +23658,13 @@
 	
 	  /**
 	   * Handle a mouse click on this annotation.  If the event is processed,
-	   * evt.handled should be set to true to prevent further processing.
+	   * evt.handled should be set to `true` to prevent further processing.
 	   *
-	   * @param {geo.event} evt the mouse click event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The mouse click event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+	   *    the annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.mouseClick = function (evt) {
 	    var layer = this.layer();
@@ -23518,12 +23717,12 @@
 	  };
 	
 	  /**
-	   * Return the coordinates to be stored in a geojson geometery object.
+	   * Return the coordinates to be stored in a geojson geometry object.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {array} an array of flattened coordinates in the ingcs coordinate
-	   *    system.  Undefined if this annotation is incompelte.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {array} An array of flattened coordinates in the interface gcs
+	   *    coordinate system.  `undefined` if this annotation is incomplete.
 	   */
 	  this._geojsonCoordinates = function (gcs) {
 	    var src = this.coordinates(gcs);
@@ -23541,7 +23740,7 @@
 	  /**
 	   * Return the geometry type that is used to store this annotation in geojson.
 	   *
-	   * @return {string} a geojson geometry type.
+	   * @returns {string} A geojson geometry type.
 	   */
 	  this._geojsonGeometryType = function () {
 	    return 'Polygon';
@@ -23551,7 +23750,7 @@
 	   * Return a list of styles that should be preserved in a geojson
 	   * representation of the annotation.
 	   *
-	   * @return {array} a list of style names to store.
+	   * @returns {string[]} A list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
 	    return [
@@ -23567,17 +23766,31 @@
 	registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
 	
 	/**
-	 * Line annotation class
+	 * Line annotation class.
 	 *
-	 * Must specify:
-	 *   vertices: a list of vertices {x: x, y: y} in map gcs coordinates.
-	 * May specify:
-	 *   style.
-	 *     strokeWidth, strokeColor, strokeOpacity, strokeOffset, closed, lineCap,
-	 *     lineJoin
-	 *   editstyle.
-	 *     strokeWidth, strokeColor, strokeOpacity, strokeOffset, closed, lineCap,
-	 *     lineJoin
+	 * @class
+	 * @alias geo.lineAnnotation
+	 * @extends geo.annotation
+	 *
+	 * @param {object?} [args] Options for the annotation.
+	 * @param {string} [args.name] A name for the annotation.  This defaults to
+	 *    the type with a unique ID suffixed to it.
+	 * @param {string} [args.state] initial annotation state.  One of the
+	 *    annotation.state values.
+	 * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+	 *    annotation label on annotations in done or edit states.  Alternately, a
+	 *    list of states in which to show the label.  Falsy to not show the label.
+	 * @param {geo.geoPosition[]} [args.vertices] A list of vertices in map gcs
+	 *    coordinates.
+	 * @param {geo.geoPosition[]} [args.coordinates] An alternate name for
+	 *    `args.corners`.
+	 * @param {object} [args.style] The style to apply to a finished line.
+	 *    This uses styles for lines, including `strokeWidth`, `strokeColor`,
+	 *    `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`, and `lineJoin`.
+	 * @param {object} [args.editStyle] The style to apply to a line in edit
+	 *    mode.  This uses styles for lines, including `strokeWidth`,
+	 *    `strokeColor`, `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`,
+	 *    and `lineJoin`.
 	 */
 	var lineAnnotation = function (args) {
 	  'use strict';
@@ -23605,7 +23818,7 @@
 	      lineCap: 'butt',
 	      lineJoin: 'miter'
 	    },
-	    editstyle: {
+	    editStyle: {
 	      line: function (d) {
 	        /* Return an array that has the same number of items as we have
 	         * vertices. */
@@ -23630,7 +23843,7 @@
 	  /**
 	   * Get a list of renderable features for this annotation.
 	   *
-	   * @returns {array} an array of features.
+	   * @returns {array} An array of features.
 	   */
 	  this.features = function () {
 	    var opt = this.options(),
@@ -23641,7 +23854,7 @@
 	        features = [{
 	          line: {
 	            line: opt.vertices,
-	            style: opt.editstyle
+	            style: opt.editStyle
 	          }
 	        }];
 	        break;
@@ -23661,8 +23874,9 @@
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
-	   * @param {array} coordinates: an optional array of coordinates to set.
-	   * @returns {array} an array of coordinates.
+	   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+	   *  to set.
+	   * @returns {geo.geoPosition[]} The current array of coordinates.
 	   */
 	  this._coordinates = function (coordinates) {
 	    if (coordinates) {
@@ -23674,8 +23888,8 @@
 	  /**
 	   * Handle a mouse move on this annotation.
 	   *
-	   * @param {geo.event} evt the mouse move event.
-	   * @returns {boolean|string} true to update the annotation, falsy to not
+	   * @param {geo.event} evt The mouse move event.
+	   * @returns {boolean} Truthy to update the annotation, falsy to not
 	   *    update anything.
 	   */
 	  this.mouseMove = function (evt) {
@@ -23691,12 +23905,13 @@
 	
 	  /**
 	   * Handle a mouse click on this annotation.  If the event is processed,
-	   * evt.handled should be set to true to prevent further processing.
+	   * evt.handled should be set to `true` to prevent further processing.
 	   *
-	   * @param {geo.event} evt the mouse click event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The mouse click event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+	   *    the annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.mouseClick = function (evt) {
 	    var layer = this.layer();
@@ -23752,9 +23967,9 @@
 	  /**
 	   * Return actions needed for the specified state of this annotation.
 	   *
-	   * @param {string} state: the state to return actions for.  Defaults to
+	   * @param {string} [state] The state to return actions for.  Defaults to
 	   *    the current state.
-	   * @returns {array}: a list of actions.
+	   * @returns {geo.actionRecord[]} A list of actions.
 	   */
 	  this.actions = function (state) {
 	    if (!state) {
@@ -23782,10 +23997,11 @@
 	  /**
 	   * Process any actions for this annotation.
 	   *
-	   * @param {object} evt: the action event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The action event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if the
+	   *    annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.processAction = function (evt) {
 	    var layer = this.layer();
@@ -23813,12 +24029,12 @@
 	  };
 	
 	  /**
-	   * Return the coordinates to be stored in a geojson geometery object.
+	   * Return the coordinates to be stored in a geojson geometry object.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {array} an array of flattened coordinates in the ingcs coordinate
-	   *    system.  Undefined if this annotation is incompelte.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {array} An array of flattened coordinates in the interface gcs
+	   *    coordinate system.  `undefined` if this annotation is incomplete.
 	   */
 	  this._geojsonCoordinates = function (gcs) {
 	    var src = this.coordinates(gcs);
@@ -23835,7 +24051,7 @@
 	  /**
 	   * Return the geometry type that is used to store this annotation in geojson.
 	   *
-	   * @return {string} a geojson geometry type.
+	   * @returns {string} A geojson geometry type.
 	   */
 	  this._geojsonGeometryType = function () {
 	    return 'LineString';
@@ -23845,7 +24061,7 @@
 	   * Return a list of styles that should be preserved in a geojson
 	   * representation of the annotation.
 	   *
-	   * @return {array} a list of style names to store.
+	   * @returns {string[]} A list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
 	    return [
@@ -23860,18 +24076,33 @@
 	registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
 	
 	/**
-	 * Point annotation class
+	 * Point annotation class.
 	 *
-	 * Must specify:
-	 *   position: {x: x, y: y} in map gcs coordinates.
-	 * May specify:
-	 *   style.
-	 *     radius, fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
-	 *     strokeOpacity, scaled
+	 * @class
+	 * @alias geo.poinyAnnotation
+	 * @extends geo.annotation
 	 *
-	 * If scaled is false, the point is not scaled with zoom level.  If it is true,
-	 * the radius is based on the zoom level at first instantiation.  Otherwise, if
-	 * it is a number, the radius is used at that zoom level.
+	 * @param {object?} [args] Options for the annotation.
+	 * @param {string} [args.name] A name for the annotation.  This defaults to
+	 *    the type with a unique ID suffixed to it.
+	 * @param {string} [args.state] initial annotation state.  One of the
+	 *    annotation.state values.
+	 * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+	 *    annotation label on annotations in done or edit states.  Alternately, a
+	 *    list of states in which to show the label.  Falsy to not show the label.
+	 * @param {geo.geoPosition} [args.position] A coordinate in map gcs
+	 *    coordinates.
+	 * @param {geo.geoPosition[]} [args.coordinates] An array with one coordinate
+	 *  to use in place of `args.position`.
+	 * @param {object} [args.style] The style to apply to a finished point.
+	 *    This uses styles for points, including `radius`, `fill`, `fillColor`,
+	 *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, `strokeOpacity`,
+	 *    and `scaled`.  If `scaled` is `false`, the point is not scaled with
+	 *    zoom level.  If it is `true`, the radius is based on the zoom level at
+	 *    first instantiation.  Otherwise, if it is a number, the radius is used
+	 *    at that zoom level.
+	 * @param {object} [args.editStyle] The style to apply to a line in edit
+	 *    mode.  This uses styles for lines.
 	 */
 	var pointAnnotation = function (args) {
 	  'use strict';
@@ -23900,7 +24131,7 @@
 	  /**
 	   * Get a list of renderable features for this annotation.
 	   *
-	   * @returns {array} an array of features.
+	   * @returns {array} An array of features.
 	   */
 	  this.features = function () {
 	    var opt = this.options(),
@@ -23946,8 +24177,9 @@
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
-	   * @param {array} coordinates: an optional array of coordinates to set.
-	   * @returns {array} an array of coordinates.
+	   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+	   *  to set.
+	   * @returns {geo.geoPosition[]} The current array of coordinates.
 	   */
 	  this._coordinates = function (coordinates) {
 	    if (coordinates && coordinates.length >= 1) {
@@ -23961,12 +24193,13 @@
 	
 	  /**
 	   * Handle a mouse click on this annotation.  If the event is processed,
-	   * evt.handled should be set to true to prevent further processing.
+	   * evt.handled should be set to `true` to prevent further processing.
 	   *
-	   * @param {geo.event} evt the mouse click event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The mouse click event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+	   *    the annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.mouseClick = function (evt) {
 	    if (this.state() !== annotationState.create) {
@@ -23985,7 +24218,7 @@
 	   * Return a list of styles that should be preserved in a geojson
 	   * representation of the annotation.
 	   *
-	   * @return {array} a list of style names to store.
+	   * @returns {string[]} A list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
 	    return [
@@ -23994,12 +24227,12 @@
 	  };
 	
 	  /**
-	   * Return the coordinates to be stored in a geojson geometery object.
+	   * Return the coordinates to be stored in a geojson geometry object.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {array} an array of flattened coordinates in the ingcs coordinate
-	   *    system.  Undefined if this annotation is incompelte.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {array} An array of flattened coordinates in the interface gcs
+	   *    coordinate system.  `undefined` if this annotation is incomplete.
 	   */
 	  this._geojsonCoordinates = function (gcs) {
 	    var src = this.coordinates(gcs);
@@ -24012,7 +24245,7 @@
 	  /**
 	   * Return the geometry type that is used to store this annotation in geojson.
 	   *
-	   * @return {string} a geojson geometry type.
+	   * @returns {string} A geojson geometry type.
 	   */
 	  this._geojsonGeometryType = function () {
 	    return 'Point';
@@ -30912,6 +31145,17 @@
 	  },
 	
 	  /**
+	   * Check if a value coerces to a number that is finite, not a NaN, and not
+	   * `null`, `false`, or the empty string.
+	   *
+	   * @param {object} val The value to check.
+	   * @returns {boolean} True if `val` is a non-null, non-false, finite number.
+	   */
+	  isNonNullFinite: function (val) {
+	    return isFinite(val) && val !== null && val !== false && val !== '';
+	  },
+	
+	  /**
 	   * Return a random string of length n || 8.  The string consists of
 	   * mixed-case ASCII alphanumerics.
 	   *
@@ -30950,14 +31194,15 @@
 	   * @memberof geo.util
 	   */
 	  convertColor: function (color) {
-	    if (color === undefined || (color.r !== undefined &&
+	    if (color === undefined || color === null || (color.r !== undefined &&
 	        color.g !== undefined && color.b !== undefined)) {
 	      return color;
 	    }
 	    var opacity;
 	    if (typeof color === 'string') {
-	      if (util.cssColors.hasOwnProperty(color)) {
-	        color = util.cssColors[color];
+	      var lowerColor = color.toLowerCase();
+	      if (util.cssColors.hasOwnProperty(lowerColor)) {
+	        color = util.cssColors[lowerColor];
 	      } else if (color.charAt(0) === '#') {
 	        if (color.length === 4 || color.length === 5) {
 	          /* interpret values of the form #rgb as #rrggbb and #rgba as
@@ -30973,13 +31218,13 @@
 	          }
 	          color = parseInt(color.slice(1, 7), 16);
 	        }
-	      } else if (color === 'transparent') {
+	      } else if (lowerColor === 'transparent') {
 	        opacity = color = 0;
-	      } else if (color.indexOf('(') >= 0) {
+	      } else if (lowerColor.indexOf('(') >= 0) {
 	        for (var idx = 0; idx < util.cssColorConversions.length; idx += 1) {
-	          var match = util.cssColorConversions[idx].regex.exec(color);
+	          var match = util.cssColorConversions[idx].regex.exec(lowerColor);
 	          if (match) {
-	            return util.cssColorConversions[idx].process(color, match);
+	            return util.cssColorConversions[idx].process(lowerColor, match);
 	          }
 	        }
 	      }
@@ -30991,8 +31236,42 @@
 	        b: ((color & 0xff)) / 255
 	      };
 	    }
-	    if (opacity !== undefined) {
+	    if (opacity !== undefined && color && color.r !== undefined) {
 	      color.a = opacity;
+	    }
+	    return color;
+	  },
+	
+	  /**
+	   * Convert a color (possibly with opacity) and an optional opacity value to
+	   * a color object that always has opacity.  The opacity is guaranteed to be
+	   * within [0-1].  A valid color object is always returned.
+	   *
+	   * @param {geo.geoColor} [color] Any valid color input.  If an invalid value
+	   *    or no value is supplied, the `defaultColor` is used.
+	   * @param {number} [opacity=1] A value from [0-1].  This is multipled with
+	   *    the opacity from `color`.
+	   * @param {geo.geoColorObject} [defaultColor={r: 0, g: 0, b: 0}] The color
+	   *    to use if an invalid color is supplied.
+	   * @returns {geo.geoColorObject} An rgba color object.
+	   * @memberof geo.util
+	   */
+	  convertColorAndOpacity: function (color, opacity, defaultColor) {
+	    color = util.convertColor(color);
+	    if (!color || color.r === undefined || color.g === undefined || color.b === undefined) {
+	      color = util.convertColor(defaultColor || {r: 0, g: 0, b: 0});
+	    }
+	    if (!color || color.r === undefined || color.g === undefined || color.b === undefined) {
+	      color = {r: 0, g: 0, b: 0};
+	    }
+	    color = {
+	      r: isFinite(color.r) && color.r >= 0 ? (color.r <= 1 ? +color.r : 1) : 0,
+	      g: isFinite(color.g) && color.g >= 0 ? (color.g <= 1 ? +color.g : 1) : 0,
+	      b: isFinite(color.b) && color.b >= 0 ? (color.b <= 1 ? +color.b : 1) : 0,
+	      a: util.isNonNullFinite(color.a) && color.a >= 0 && color.a < 1 ? +color.a : 1
+	    };
+	    if (util.isNonNullFinite(opacity) && opacity < 1) {
+	      color.a = opacity <= 0 ? 0 : color.a * opacity;
 	    }
 	    return color;
 	  },
@@ -31002,7 +31281,8 @@
 	   *
 	   * @param {geo.geoColorObject} color The color object to convert.
 	   * @param {boolean} [allowAlpha] If truthy and `color` has a defined `a`
-	   *    value, include the alpha channel in the output.
+	   *    value, include the alpha channel in the output.  If `'needed'`, only
+	   *    include the alpha channel if it is set and not 1.
 	   * @returns {string} A color string.
 	   * @memberof geo.util
 	   */
@@ -31015,10 +31295,28 @@
 	                     (Math.round(rgb.g * 255) << 8) +
 	                      Math.round(rgb.b * 255)).toString(16).slice(1);
 	    }
-	    if (rgb.a !== undefined && allowAlpha) {
+	    if (rgb.a !== undefined && allowAlpha && (rgb.a < 1 || allowAlpha !== 'needed')) {
 	      value += (256 + Math.round(rgb.a * 255)).toString(16).slice(1);
 	    }
 	    return value;
+	  },
+	  /**
+	   * Convert a color to a css rgba() value.
+	   *
+	   * @param {geo.geoColorObject} color The color object to convert.
+	   * @returns {string} A color string.
+	   * @memberof geo.util
+	   */
+	  convertColorToRGBA: function (color) {
+	    var rgb = util.convertColor(color);
+	    if (!rgb) {
+	      rgb = {r: 0, g: 0, b: 0};
+	    }
+	    if (!util.isNonNullFinite(rgb.a) || rgb.a > 1) {
+	      rgb.a = 1;
+	    }
+	    return 'rgba(' + Math.round(rgb.r * 255) + ', ' + Math.round(rgb.g * 255) +
+	           ', ' + Math.round(rgb.b * 255) + ', ' + +((+rgb.a).toFixed(5)) + ')';
 	  },
 	
 	  /**
@@ -31087,6 +31385,22 @@
 	   */
 	  vec3AsArray: function () {
 	    return [0, 0, 0];
+	  },
+	
+	  /**
+	   * Create a `mat3` that is always an array.  This should only be used if it
+	   * will not be used in a WebGL context.  Plain arrays usually use 64-bit
+	   * float values, whereas `mat3` defaults to 32-bit floats.
+	   *
+	   * @returns {array} Identity `mat3` compatible array.
+	   * @memberof geo.util
+	   */
+	  mat3AsArray: function () {
+	    return [
+	      1, 0, 0,
+	      0, 1, 0,
+	      0, 0, 1
+	    ];
 	  },
 	
 	  /**
@@ -53983,32 +54297,261 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
-	var featureLayer = __webpack_require__(225);
+	var feature = __webpack_require__(213);
+	
+	/**
+	 * Object specification for a text feature.
+	 *
+	 * @typedef {geo.feature.spec} geo.textFeature.spec
+	 * @property {geo.geoPosition[]|function} [position] The position of each data
+	 *      element.  Defaults to the `x`, `y`, and `z` properties of the data
+	 *      element.
+	 * @property {string[]|function} [text] The text of each data element.
+	 *      Defaults to the `text` property of the data element.
+	 * @property {object} [style] The style to apply to each data element.
+	 * @property {boolean|function} [style.visible=true] If falsy, don't show this
+	 *      data element.
+	 * @property {string|function} [style.font] A css font specification.  This
+	 *      is of the form `[style] [variant] [weight] [stretch] size[/line-height]
+	 *      family`.  Individual font styles override this value if a style is
+	 *      specified in each.  See the individual font styles for details.
+	 * @property {string|function} [style.fontStyle='normal'] The font style.  One
+	 *      of `normal`, `italic`, or `oblique`.
+	 * @property {string|function} [style.fontVariant='normal'] The font variant.
+	 *      This can have values such as `small-caps` or `slashed-zero`.
+	 * @property {string|function} [style.fontWeight='normal'] The font weight.
+	 *      This may be a numeric value where 400 is normal and 700 is bold, or a
+	 *      string such as `bold` or `lighter`.
+	 * @property {string|function} [style.fontStretch='normal'] The font stretch,
+	 *      such as `condensed`.
+	 * @property {string|function} [style.fontSize='medium'] The font size.
+	 * @property {string|function} [style.lineHeight='normal'] The font line
+	 *      height.
+	 * @property {string|function} [style.fontFamily] The font family.
+	 * @property {string|function} [style.textAlign='center'] The horizontal text
+	 *      alignment.  One of `start`, `end`, `left`, `right`, or `center`.
+	 * @property {string|function} [style.textBaseline='middle'] The vertical text
+	 *      alignment.  One of `top`, `hanging`, `middle`, `alphabetic`,
+	 *      `ideographic`, or `bottom`.
+	 * @property {geo.geoColor|function} [style.color='black'] Text color.  May
+	 *      include opacity.
+	 * @property {number|function} [style.textOpacity=1] The opacity of the text.
+	 *      If the color includes opacity, this is combined with that value.
+	 * @property {number|function} [style.rotation=0] Text rotation in radians.
+	 * @property {boolean|function} [style.rotateWithMap=false] If truthy, rotate
+	 *      the text when the map rotates.  Otherwise, the text is always in the
+	 *      same orientation.
+	 * @property {number|function} [style.scale=4] The zoom basis value used when
+	 *      `scaleWithMap` is truthy.
+	 * @property {boolean|function} [style.scaleWithMap=false] If truthy, use the
+	 *      `scale` style as the basis of the map zoom value for the font size.
+	 *      The size is scaled from this point.
+	 * @property {geo.screenPosition|function} [style.offset] Offset from the
+	 *      default position for the text.  This is applied before rotation.
+	 * @property {geo.geoColor|function} [style.shadowColor='black'] Text shadow
+	 *      color.  May include opacity.
+	 * @property {geo.screenPosition|function} [style.shadowOffset] Offset for a
+	 *      text shadow.  This is applied before rotation.
+	 * @property {number|null|function} [style.shadowBlur] If not null, add a text
+	 *      shadow with this much blur.
+	 * @property {boolean|function} [style.shadowRotate=false] If truthy, rotate
+	 *      the shadow offset based on the text rotation (the `shadowOffset` is
+	 *      the offset if the text has a 0 rotation).
+	 * @property {geo.geoColor|function} [style.textStrokeColor='transparent'] Text
+	 *      stroke color.  May include opacity.
+	 * @property {geo.geoColor|function} [style.textStrokeWidth=0] Text stroke
+	 *      width in pixels.
+	 */
+	
+	/**
+	 * Create a new instance of class textFeature.
+	 *
+	 * @class
+	 * @alias geo.textFeature
+	 * @extends geo.feature
+	 *
+	 * @param {geo.textFeature.spec} [arg] Options for the feature.
+	 * @returns {geo.textFeature} The created feature.
+	 */
+	var textFeature = function (arg) {
+	  'use strict';
+	  if (!(this instanceof textFeature)) {
+	    return new textFeature(arg);
+	  }
+	  arg = arg || {};
+	  feature.call(this, arg);
+	
+	  var $ = __webpack_require__(7);
+	
+	  /**
+	   * @private
+	   */
+	  var m_this = this,
+	      s_init = this._init;
+	
+	  this.featureType = 'text';
+	
+	  /**
+	   * Get/Set position.
+	   *
+	   * @param {array|function} [val] If `undefined`, return the current position
+	   *    setting.  Otherwise, modify the current position setting.
+	   * @returns {array|function|this} The current position or this feature.
+	   */
+	  this.position = function (val) {
+	    if (val === undefined) {
+	      return m_this.style('position');
+	    } else if (val !== m_this.style('position')) {
+	      m_this.style('position', val);
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+	
+	  /**
+	   * Get/Set text.
+	   *
+	   * @param {array|function} [val] If `undefined`, return the current text
+	   *    setting.  Otherwise, modify the current text setting.
+	   * @returns {array|function|this} The current text or this feature.
+	   */
+	  this.text = function (val) {
+	    if (val === undefined) {
+	      return m_this.style('text');
+	    } else if (val !== m_this.style('text')) {
+	      m_this.style('text', val);
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+	
+	  /**
+	   * Initialize.
+	   *
+	   * @param {geo.textFeature.spec} [arg] The feature specification.
+	   */
+	  this._init = function (arg) {
+	    arg = arg || {};
+	    s_init.call(m_this, arg);
+	
+	    var style = $.extend(
+	      {},
+	      {
+	        font: 'bold 16px sans-serif',
+	        textAlign: 'center',
+	        textBaseline: 'middle',
+	        color: { r: 0, g: 0, b: 0 },
+	        rotation: 0,  /* in radians */
+	        rotateWithMap: false,
+	        textScaled: false,
+	        position: function (d) { return d; },
+	        text: function (d) { return d.text; }
+	      },
+	      arg.style === undefined ? {} : arg.style
+	    );
+	
+	    if (arg.position !== undefined) {
+	      style.position = arg.position;
+	    }
+	    if (arg.text !== undefined) {
+	      style.text = arg.text;
+	    }
+	
+	    m_this.style(style);
+	    if (style.position) {
+	      m_this.position(style.position);
+	    }
+	    if (style.text) {
+	      m_this.text(style.text);
+	    }
+	    m_this.dataTime().modified();
+	  };
+	
+	  this._init(arg);
+	  return m_this;
+	};
+	
+	textFeature.usedStyles = [
+	  'visible', 'font', 'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch',
+	  'fontSize', 'lineHeight', 'fontFamily', 'textAlign', 'textBaseline', 'color',
+	  'textOpacity', 'rotation', 'rotateWithMap', 'textScaled', 'offset',
+	  'shadowColor', 'shadowOffset', 'shadowBlur', 'shadowRotate',
+	  'textStrokeColor', 'textStrokeWidth'
+	];
+	
+	/**
+	 * Create a textFeature from an object.
+	 * @see {@link geo.feature.create}
+	 * @param {geo.layer} layer The layer to add the feature to
+	 * @param {geo.textFeature.spec} spec The object specification
+	 * @returns {geo.textFeature|null}
+	 */
+	textFeature.create = function (layer, spec) {
+	  'use strict';
+	
+	  spec = spec || {};
+	  spec.type = 'text';
+	  return feature.create(layer, spec);
+	};
+	
+	textFeature.capabilities = {
+	  /* core feature name -- support in any manner */
+	  feature: 'text'
+	};
+	
+	inherit(textFeature, feature);
+	module.exports = textFeature;
+
+
+/***/ }),
+/* 225 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(14);
+	var featureLayer = __webpack_require__(226);
 	var geo_annotation = __webpack_require__(13);
 	var geo_event = __webpack_require__(15);
 	var registry = __webpack_require__(207);
 	var transform = __webpack_require__(17);
 	var $ = __webpack_require__(7);
-	var Mousetrap = __webpack_require__(226);
+	var Mousetrap = __webpack_require__(227);
+	var textFeature = __webpack_require__(224);
+	
+	/**
+	 * @typedef {object} geo.annotationLayer.labelRecord
+	 * @property {string} text The text of the label
+	 * @property {geo.geoPosition} position The position of the label in map gcs
+	 *      coordinates.
+	 * @property {object} [style] A `geo.textFeature` style object.
+	 */
 	
 	/**
 	 * Layer to handle direct interactions with different features.  Annotations
 	 * (features) can be created by calling mode(<name of feature>) or cancelled
 	 * with mode(null).
 	 *
-	 * @class geo.annotationLayer
+	 * @class
+	 * @alias geo.annotationLayer
 	 * @extends geo.featureLayer
-	 * @param {object?} options
-	 * @param {number} [options.dblClickTime=300]  The delay in milliseconds that
-	 *    is treated as a double-click when working with annotations.
-	 * @param {number} [options.adjacentPointProximity=5]  The minimum distance in
+	 * @param {object} [args] Layer options.
+	 * @param {number} [args.dblClickTime=300] The delay in milliseconds that is
+	 *    treated as a double-click when working with annotations.
+	 * @param {number} [args.adjacentPointProximity=5] The minimum distance in
 	 *    display coordinates (pixels) between two adjacent points when creating a
-	 *    polygon.  A value of 0 requires an exact match.
-	 * @param {number} [options.finalPointProximity=10]  The maximum distance in
+	 *    polygon or line.  A value of 0 requires an exact match.
+	 * @param {number} [args.continousPointProximity=5] The minimum distance in
+	 *    display coordinates (pixels) between two adjacent points when dragging
+	 *    to create an annotation.  `false` disables continuous drawing mode.
+	 * @param {number} [args.finalPointProximity=10] The maximum distance in
 	 *    display coordinates (pixels) between the starting point and the mouse
 	 *    coordinates to signal closing a polygon.  A value of 0 requires an exact
 	 *    match.  A negative value disables closing a polygon by clicking on the
 	 *    start point.
+	 * @param {boolean} [args.showLabels=true] Truthy to show feature labels that
+	 *    are allowed by the associated feature to be shown.
+	 * @param {object} [args.defaultLabelStyle] Default styles for labels.
 	 * @returns {geo.annotationLayer}
 	 */
 	var annotationLayer = function (args) {
@@ -54018,19 +54561,22 @@
 	  }
 	  featureLayer.call(this, args);
 	
-	  var mapInteractor = __webpack_require__(227);
+	  var mapInteractor = __webpack_require__(228);
 	  var timestamp = __webpack_require__(215);
 	  var util = __webpack_require__(89);
 	
 	  var m_this = this,
 	      s_init = this._init,
 	      s_exit = this._exit,
+	      s_draw = this.draw,
 	      s_update = this._update,
 	      m_buildTime = timestamp(),
 	      m_options,
 	      m_mode = null,
 	      m_annotations = [],
-	      m_features = [];
+	      m_features = [],
+	      m_labelFeature,
+	      m_labelLayer;
 	
 	  var geojsonStyleProperties = {
 	    'closed': {dataType: 'boolean', keys: ['closed', 'close']},
@@ -54047,6 +54593,22 @@
 	    'strokeOpacity': {dataType: 'opacity', keys: ['strokeOpacity', 'stroke-opacity']},
 	    'strokeWidth': {dataType: 'positive', keys: ['strokeWidth', 'stroke-width']}
 	  };
+	  textFeature.usedStyles.forEach(function (key) {
+	    geojsonStyleProperties[key] = {
+	      option: 'labelStyle',
+	      dataType: ['visible', 'rotateWithMap', 'scaleWithMap'].indexOf(key) >= 0 ? 'boolean' : (
+	        ['scale'].indexOf(key) >= 0 ? 'booleanOrNumber' : (
+	        ['rotation'].indexOf(key) >= 0 ? 'angle' : (
+	        ['offset', 'shadowOffset'].indexOf(key) >= 0 ? 'coordinate2' : (
+	        ['shadowBlur, strokeWidth'].indexOf(key) >= 0 ? 'numberOrBlank' :
+	        'text')))),
+	      keys: [
+	        key,
+	        'label' + key.charAt(0).toUpperCase() + key.slice(1),
+	        key.replace(/([A-Z])/g, '-$1').toLowerCase(),
+	        'label-' + key.replace(/([A-Z])/g, '-$1').toLowerCase()]
+	    };
+	  });
 	
 	  m_options = $.extend(true, {}, {
 	    dblClickTime: 300,
@@ -54054,14 +54616,15 @@
 	    // in pixels; set to continuousPointProximity to false to disable
 	    // continuous drawing modes.
 	    continuousPointProximity: 5,
-	    finalPointProximity: 10  // in pixels, 0 is exact
+	    finalPointProximity: 10,  // in pixels, 0 is exact
+	    showLabels: true
 	  }, args);
 	
 	  /**
 	   * Process an action event.  If we are in rectangle-creation mode, this
 	   * creates a rectangle.
 	   *
-	   * @param {geo.event} evt the selection event.
+	   * @param {geo.event} evt The selection event.
 	   */
 	  this._processAction = function (evt) {
 	    var update;
@@ -54076,10 +54639,10 @@
 	  /**
 	   * Handle updating the current annotation based on an update state.
 	   *
-	   * @param {string|undefined} update: truthy to update.  'done' if the
-	   *    annotation was completed and the mode should return to null.  'remove'
-	   *    to remove the current annotation and set the mode to null.  Falsy to do
-	   *    nothing.
+	   * @param {string|undefined} update Truthy to update.  `'done'` if the
+	   *    annotation was completed and the mode should return to `null`.
+	   *    `'remove'` to remove the current annotation and set the mode to `null`.
+	   *    Falsy to do nothing.
 	   */
 	  this._updateFromEvent = function (update) {
 	    switch (update) {
@@ -54093,7 +54656,6 @@
 	    }
 	    if (update) {
 	      m_this.modified();
-	      m_this._update();
 	      m_this.draw();
 	    }
 	  };
@@ -54102,14 +54664,13 @@
 	   * Handle mouse movement.  If there is a current annotation, the movement
 	   * event is sent to it.
 	   *
-	   * @param {geo.event} evt the mouse move event.
+	   * @param {geo.event} evt The mouse move event.
 	   */
 	  this._handleMouseMove = function (evt) {
 	    if (this.mode() && this.currentAnnotation) {
 	      var update = this.currentAnnotation.mouseMove(evt);
 	      if (update) {
 	        m_this.modified();
-	        m_this._update();
 	        m_this.draw();
 	      }
 	    }
@@ -54119,7 +54680,7 @@
 	   * Handle mouse clicks.  If there is a current annotation, the click event is
 	   * sent to it.
 	   *
-	   * @param {geo.event} evt the mouse click event.
+	   * @param {geo.event} evt The mouse click event.
 	   */
 	  this._handleMouseClick = function (evt) {
 	    if (this.mode() && this.currentAnnotation) {
@@ -54131,13 +54692,13 @@
 	  /**
 	   * Set or get options.
 	   *
-	   * @param {string|object} arg1 if undefined, return the options object.  If
-	   *    a string, either set or return the option of that name.  If an object,
-	   *    update the options with the object's values.
-	   * @param {object} arg2 if arg1 is a string and this is defined, set the
-	   *    option to this value.
-	   * @returns {object|this} if options are set, return the layer, otherwise
-	   *    return the requested option or the set of options.
+	   * @param {string|object} [arg1] If `undefined`, return the options object.
+	   *    If a string, either set or return the option of that name.  If an
+	   *    object, update the options with the object's values.
+	   * @param {object} [arg2] If `arg1` is a string and this is defined, set
+	   *    the option to this value.
+	   * @returns {object|this} If options are set, return the annotation,
+	   *    otherwise return the requested option or the set of options.
 	   */
 	  this.options = function (arg1, arg2) {
 	    if (arg1 === undefined) {
@@ -54158,14 +54719,14 @@
 	  /**
 	   * Calculate the display distance for two coordinate in the current map.
 	   *
-	   * @param {object} coord1 the first coordinates.
-	   * @param {string|geo.transform} [gcs1] undefined to use the interface gcs,
-	   *    null to use the map gcs, 'display' if the coordinates are already in
-	   *    display coordinates, or any other transform.
-	   * @param {object} coord2 the second coordinates.
-	   * @param {string|geo.transform} [gcs2] undefined to use the interface gcs,
-	   *    null to use the map gcs, 'display' if the coordinates are already in
-	   *    display coordinates, or any other transform.
+	   * @param {geo.geoPosition|geo.screenPosition} coord1 The first coordinates.
+	   * @param {string|geo.transform|null} gcs1 `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, `'display`' if the coordinates are
+	   *    already in display coordinates, or any other transform.
+	   * @param {geo.geoPosition|geo.screenPosition} coord2 the second coordinates.
+	   * @param {string|geo.transform|null} [gcs2] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, `'display`' if the coordinates are
+	   *    already in display coordinates, or any other transform.
 	   * @returns {number} the Euclidian distance between the two coordinates.
 	   */
 	  this.displayDistance = function (coord1, gcs1, coord2, gcs2) {
@@ -54188,9 +54749,10 @@
 	  /**
 	   * Add an annotation to the layer.  The annotation could be in any state.
 	   *
-	   * @param {object} annotation the annotation to add.
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform
+	   * @param {geo.annotation} annotation Te annotation to add.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {this} The current layer.
 	   */
 	  this.addAnnotation = function (annotation, gcs) {
 	    var pos = $.inArray(annotation, m_annotations);
@@ -54208,7 +54770,6 @@
 	            gcs, map.gcs(), annotation._coordinates()));
 	      }
 	      this.modified();
-	      this._update();
 	      this.draw();
 	      m_this.geoTrigger(geo_event.annotation.add, {
 	        annotation: annotation
@@ -54220,10 +54781,10 @@
 	  /**
 	   * Remove an annotation from the layer.
 	   *
-	   * @param {object} annotation the annotation to remove.
-	   * @param {boolean} update if false, don't update the layer after removing
+	   * @param {geo.annoation} annotation The annotation to remove.
+	   * @param {boolean} update If `false`, don't update the layer after removing
 	   *    the annotation.
-	   * @returns {boolean} true if an annotation was removed.
+	   * @returns {boolean} `true` if an annotation was removed.
 	   */
 	  this.removeAnnotation = function (annotation, update) {
 	    var pos = $.inArray(annotation, m_annotations);
@@ -54235,7 +54796,6 @@
 	      m_annotations.splice(pos, 1);
 	      if (update !== false) {
 	        this.modified();
-	        this._update();
 	        this.draw();
 	      }
 	      m_this.geoTrigger(geo_event.annotation.remove, {
@@ -54248,11 +54808,11 @@
 	  /**
 	   * Remove all annotations from the layer.
 	   *
-	   * @param {boolean} skipCreating: if true, don't remove annotations that are
-	   *    in the create state.
-	   * @param {boolean} update if false, don't update the layer after removing
-	   *    the annotation.
-	   * @returns {number} the number of annotations that were removed.
+	   * @param {boolean} [skipCreating] If truthy, don't remove annotations that
+	   *    are in the create state.
+	   * @param {boolean} [update] If `false`, don't update the layer after
+	   *    removing the annotation.
+	   * @returns {number} The number of annotations that were removed.
 	   */
 	  this.removeAllAnnotations = function (skipCreating, update) {
 	    var removed = 0, annotation, pos = 0;
@@ -54267,7 +54827,6 @@
 	    }
 	    if (removed && update !== false) {
 	      this.modified();
-	      this._update();
 	      this.draw();
 	    }
 	    return removed;
@@ -54276,7 +54835,7 @@
 	  /**
 	   * Get the list of annotations on the layer.
 	   *
-	   * @returns {array} An array of annotations.
+	   * @returns {geo.annoation[]} An array of annotations.
 	   */
 	  this.annotations = function () {
 	    return m_annotations.slice();
@@ -54285,7 +54844,9 @@
 	  /**
 	   * Get an annotation by its id.
 	   *
-	   * @returns {geo.annotation} The selected annotation or undefined.
+	   * @param {number} id The annotation ID.
+	   * @returns {geo.annotation} The selected annotation or `undefined` if none
+	   *    matches the id.
 	   */
 	  this.annotationById = function (id) {
 	    if (id !== undefined && id !== null) {
@@ -54300,10 +54861,10 @@
 	  };
 	
 	  /**
-	   * Get or set the current mode.  The mode is either null for nothing being
+	   * Get or set the current mode.  The mode is either `null` for nothing being
 	   * created, or the name of the type of annotation that is being created.
 	   *
-	   * @param {string|null} arg the new mode or undefined to get the current
+	   * @param {string|null} [arg] The new mode or `undefined` to get the current
 	   *    mode.
 	   * @returns {string|null|this} The current mode or the layer.
 	   */
@@ -54366,23 +54927,23 @@
 	   * Return the current set of annotations as a geojson object.  Alternately,
 	   * add a set of annotations from a geojson object.
 	   *
-	   * @param {object} geojson: if present, add annotations based on the given
-	   *    geojson object.  If undefined, return the current annotations as
-	   *    geojson.  This may be a JSON string, a javascript object, or a File
-	   *    object.
-	   * @param {boolean} clear: if true, when adding annotations, first remove all
-	   *    existing objects.  If 'update', update existing annotations and remove
-	   *    annotations that no longer exit,  If false, update existing
+	   * @param {string|objectFile} [geojson] If present, add annotations based on
+	   *    the given geojson object.  If `undefined`, return the current
+	   *    annotations as geojson.  This may be a JSON string, a javascript
+	   *    object, or a File object.
+	   * @param {boolean} [clear] If `true`, when adding annotations, first remove
+	   *    all existing objects.  If `'update'`, update existing annotations and
+	   *    remove annotations that no longer exit,  If falsy, update existing
 	   *    annotations and leave unchanged annotations.
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @param {boolean} includeCrs: if true, include the coordinate system in the
-	   *    output.
-	   * @return {object|number|undefined} if geojson was undefined, the current
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @param {boolean} [includeCrs] If truthy, include the coordinate system in
+	   *    the output.
+	   * @returns {object|number|undefined} If `geojson` was undefined, the current
 	   *    annotations as a javascript object that can be converted to geojson
-	   *    using JSON.stringify.  If geojson is specified, either the number of
-	   *    annotations now present upon success, or undefined if the value in
-	   *    geojson was not able to be parsed.
+	   *    using JSON.stringify.  If `geojson` is specified, either the number of
+	   *    annotations now present upon success, or `undefined` if the value in
+	   *    `geojson` was not able to be parsed.
 	   */
 	  this.geojson = function (geojson, clear, gcs, includeCrs) {
 	    if (geojson !== undefined) {
@@ -54413,7 +54974,6 @@
 	        });
 	      }
 	      this.modified();
-	      this._update();
 	      this.draw();
 	      return m_annotations.length;
 	    }
@@ -54438,9 +54998,9 @@
 	   * Convert a feature as parsed by the geojson reader into one or more
 	   * annotations.
 	   *
-	   * @param {geo.feature} feature: the feature to convert.
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
+	   * @param {geo.feature} feature The feature to convert.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
 	   */
 	  this._geojsonFeatureToAnnotation = function (feature, gcs) {
 	    var dataList = feature.data(),
@@ -54452,9 +55012,8 @@
 	      if ($.inArray(type, annotationList) < 0) {
 	        return;
 	      }
-	      if (!options.style) {
-	        options.style = {};
-	      }
+	      options.style = options.style || {};
+	      options.labelStyle = options.labelStyle || {};
 	      delete options.annotationType;
 	      // the geoJSON reader can only emit line, polygon, and point
 	      switch (feature.featureType) {
@@ -54500,7 +55059,6 @@
 	        $.each(prop.keys, function (idx, altkey) {
 	          if (value === undefined) {
 	            value = m_this.validateAttribute(options[altkey], prop.dataType);
-	            return;
 	          }
 	        });
 	        if (value === undefined) {
@@ -54508,7 +55066,7 @@
 	            feature.style.get(key)(data, data_idx), prop.dataType);
 	        }
 	        if (value !== undefined) {
-	          options.style[key] = value;
+	          options[prop.option || 'style'][key] = value;
 	        }
 	      });
 	      /* Delete property keys we have used */
@@ -54542,43 +55100,90 @@
 	
 	  /**
 	   * Validate a value for an attribute based on a specified data type.  This
-	   * returns a sanitized value or undefined if the value was invalid.  Data
+	   * returns a sanitized value or `undefined` if the value was invalid.  Data
 	   * types include:
-	   *   color: a css string, #rrggbb hex string, #rgb hex string, number, or
-	   *     object with r, g, b properties in the range of [0-1].
-	   *   opacity: a floating point number in the range [0, 1].
-	   *   positive: a floating point number greater than zero.
-	   *   boolean: a string whose lowercase value is 'false', 'off', or 'no', and
-	   *     falsy values are false, all else is true.  null and undefined are
-	   *     still considered invalid values.
-	   *   booleanOrNumber: a string whose lowercase value is 'false', 'off', no',
-	   *     'true', 'on', or 'yes', falsy values that aren't 0, and true are
-	   *     handled as booleans.  Otherwise, a floating point number that isn't
-	   *     NaN or an infinity.
-	   *   number: a floating point number that isn't NaN or an infinity.
-	   *   text: any text string.
-	   * @param {number|string|object|boolean} value: the value to validate.
-	   * @param {string} dataType: the data type for validation.
-	   * @returns {number|string|object|boolean|undefined} the sanitized value or
-	   *    undefined.
+	   * - `color`: a css string, `#rrggbb` hex string, `#rgb` hex string, number,
+	   *   or object with r, g, b properties in the range of [0-1].
+	   * - `opacity`: a floating point number in the range [0, 1].
+	   * - `positive`: a floating point number greater than zero.
+	   * - `boolean`: a string whose lowercase value is `'false'`, `'off'`, or
+	   *   `'no'`, and falsy values are false, all else is true.  `null` and
+	   *   `undefined` are still considered invalid values.
+	   * - `booleanOrNumber`: a string whose lowercase value is `'false'`, `'off'`,
+	   *   `'no'`, `'true'`, `'on'`, or `'yes'`, falsy values that aren't 0, and
+	   *   `true` are handled as booleans.  Otherwise, a floating point number that
+	   *   isn't NaN or an infinity.
+	   * - `coordinate2`: either an object with x and y properties that are
+	   *   numbers, or a string of the form <x>[,]<y> with optional whitespace, or
+	   *   a JSON encoded object with x and y values, or a JSON encoded list of at
+	   *   leasst two numbers.
+	   * - `number`: a floating point number that isn't NaN or an infinity.
+	   * - `angle`: a number that represents radians.  If followed by one of `deg`,
+	   *   `grad`, or `turn`, it is converted to radians.  An empty string is also
+	   *   allowed.
+	   * - `text`: any text string.
+	   * @param {number|string|object|boolean} value The value to validate.
+	   * @param {string} dataType The data type for validation.
+	   * @returns {number|string|object|boolean|undefined} The sanitized value or
+	   *    `undefined`.
 	   */
 	  this.validateAttribute = function (value, dataType) {
+	    var parts;
+	
 	    if (value === undefined || value === null) {
 	      return;
 	    }
 	    switch (dataType) {
-	      case 'booleanOrNumber':
-	        if ((!value && value !== 0) || ['true', 'false', 'off', 'on', 'no', 'yes'].indexOf(('' + value).toLowerCase()) >= 0) {
-	          value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
-	        } else {
-	          value = +value;
-	          if (isNaN(value) || !isFinite(value)) {
-	            return;
-	          }
+	      case 'angle':
+	        if (value === '') {
+	          break;
 	        }
+	        parts = /^\s*([-.0-9eE]+)\s*(deg|rad|grad|turn)?\s*$/.exec(('' + value).toLowerCase());
+	        if (!parts || !isFinite(parts[1])) {
+	          return;
+	        }
+	        var factor = (parts[2] === 'grad' ? Math.PI / 200 :
+	            (parts[2] === 'deg' ? Math.PI / 180 :
+	            (parts[2] === 'turn' ? 2 * Math.PI : 1)));
+	        value = +parts[1] * factor;
 	        break;
 	      case 'boolean':
 	        value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
+	        break;
+	      case 'booleanOrNumber':
+	        if ((!value && value !== 0 && value !== '') || ['true', 'false', 'off', 'on', 'no', 'yes'].indexOf(('' + value).toLowerCase()) >= 0) {
+	          value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
+	        } else {
+	          if (!util.isNonNullFinite(value)) {
+	            return;
+	          }
+	          value = +value;
+	        }
+	        break;
+	      case 'coordinate2':
+	        if (value === '') {
+	          break;
+	        }
+	        if (value && util.isNonNullFinite(value.x) && util.isNonNullFinite(value.y)) {
+	          value.x = +value.x;
+	          value.y = +value.y;
+	          break;
+	        }
+	        try { value = JSON.parse(value); } catch (err) { }
+	        if (value && util.isNonNullFinite(value.x) && util.isNonNullFinite(value.y)) {
+	          value.x = +value.x;
+	          value.y = +value.y;
+	          break;
+	        }
+	        if (Array.isArray(value) && util.isNonNullFinite(value[0]) && util.isNonNullFinite(value[1])) {
+	          value = {x: +value[0], y: +value[1]};
+	          break;
+	        }
+	        parts = /^\s*([-.0-9eE]+)(?:\s+|\s*,)\s*([-.0-9eE]+)\s*$/.exec('' + value);
+	        if (!parts || !isFinite(parts[1]) || !isFinite(parts[2])) {
+	          return;
+	        }
+	        value = {x: +parts[1], y: +parts[2]};
 	        break;
 	      case 'color':
 	        value = util.convertColor(value);
@@ -54587,12 +55192,24 @@
 	        }
 	        break;
 	      case 'number':
-	        value = +value;
-	        if (isNaN(value) || !isFinite(value)) {
+	        if (!util.isNonNullFinite(value)) {
 	          return;
 	        }
+	        value = +value;
+	        break;
+	      case 'numberOrBlank':
+	        if (value === '') {
+	          break;
+	        }
+	        if (!util.isNonNullFinite(value)) {
+	          return;
+	        }
+	        value = +value;
 	        break;
 	      case 'opacity':
+	        if (value === undefined || value === null || value === '') {
+	          return;
+	        }
 	        value = +value;
 	        if (isNaN(value) || value < 0 || value > 1) {
 	          return;
@@ -54600,7 +55217,7 @@
 	        break;
 	      case 'positive':
 	        value = +value;
-	        if (isNaN(value) || !isFinite(value) || value <= 0) {
+	        if (!isFinite(value) || value <= 0) {
 	          return;
 	        }
 	        break;
@@ -54612,10 +55229,13 @@
 	  };
 	
 	  /**
-	   * Update layer
+	   * Update layer.
+	   *
+	   * @returns {this} The current layer.
 	   */
-	  this._update = function (request) {
+	  this._update = function () {
 	    if (m_this.getMTime() > m_buildTime.getMTime()) {
+	      var labels = this.options('showLabels') ? [] : null;
 	      /* Interally, we have a set of feature levels (to provide z-index
 	       * support), each of which can have data from multiple annotations.  We
 	       * clear the data on each of these features, then build it up from each
@@ -54630,6 +55250,12 @@
 	      });
 	      $.each(m_annotations, function (annotation_idx, annotation) {
 	        var features = annotation.features();
+	        if (labels) {
+	          var annotationLabel = annotation.labelRecord();
+	          if (annotationLabel) {
+	            labels.push(annotationLabel);
+	          }
+	        }
 	        $.each(features, function (idx, featureLevel) {
 	          if (m_features[idx] === undefined) {
 	            m_features[idx] = {};
@@ -54703,9 +55329,56 @@
 	          feature.feature.data(feature.data);
 	        });
 	      });
+	      m_this._updateLabels(labels);
 	      m_buildTime.modified();
 	    }
-	    s_update.call(m_this, request);
+	    s_update.call(m_this, arguments);
+	    return this;
+	  };
+	
+	  /**
+	   * Show or hide annotation labels.  Create or destroy a child layer or a
+	   * feature as needed.
+	   *
+	   * @param {object[]|null} labels The list of labels to display of `null` for
+	   *    no labels.
+	   * @returns {this} The class instance.
+	   */
+	  this._updateLabels = function (labels) {
+	    if (!labels || !labels.length) {
+	      m_this._removeLabelFeature();
+	      return m_this;
+	    }
+	    if (!m_labelFeature) {
+	      var renderer = registry.rendererForFeatures(['text']);
+	      if (renderer !== m_this.renderer().api()) {
+	        m_labelLayer = registry.createLayer('feature', m_this.map(), {renderer: renderer});
+	        m_this.addChild(m_labelLayer);
+	        m_labelLayer._update();
+	        m_this.geoTrigger(geo_event.layerAdd, {
+	          target: m_this,
+	          layer: m_labelLayer
+	        });
+	      }
+	      var style = {};
+	      textFeature.usedStyles.forEach(function (key) {
+	        style[key] = function (d, i) {
+	          if (d.style && d.style[key] !== undefined) {
+	            return d.style[key];
+	          }
+	          return (m_this.options('defaultLabelStyle') || {})[key];
+	        };
+	      });
+	      m_labelFeature = (m_labelLayer || m_this).createFeature('text', {
+	        style: style,
+	        gcs: m_this.map().gcs(),
+	        position: function (d) {
+	          return d.position;
+	        }
+	      });
+	    }
+	    m_labelFeature.data(labels);
+	    return m_this;
 	  };
 	
 	  /**
@@ -54722,7 +55395,42 @@
 	  };
 	
 	  /**
-	   * Initialize
+	   * Remove the label feature if it exists.
+	   *
+	   * @returns {this} The current layer.
+	   */
+	  this._removeLabelFeature = function () {
+	    if (m_labelLayer) {
+	      m_labelLayer._exit();
+	      m_this.removeChild(m_labelLayer);
+	      m_this.geoTrigger(geo_event.layerRemove, {
+	        target: m_this,
+	        layer: m_labelLayer
+	      });
+	      m_labelLayer = m_labelFeature = null;
+	    }
+	    if (m_labelFeature) {
+	      m_this.removeFeature(m_labelFeature);
+	      m_labelFeature = null;
+	    }
+	    return m_this;
+	  };
+	
+	  /**
+	   * Update if necessary and draw the layer.
+	   *
+	   * @returns {this} The current layer.
+	   */
+	  this.draw = function () {
+	    m_this._update();
+	    s_draw.call(m_this);
+	    return m_this;
+	  };
+	
+	  /**
+	   * Initialize.
+	   *
+	   * @returns {this} The current layer.
 	   */
 	  this._init = function () {
 	    // Call super class init
@@ -54743,9 +55451,12 @@
 	  };
 	
 	  /**
-	   * Free all resources
+	   * Free all resources.
+	   *
+	   * @returns {this} The current layer.
 	   */
 	  this._exit = function () {
+	    m_this._removeLabelFeature();
 	    // Call super class exit
 	    s_exit.call(m_this);
 	    m_annotations = [];
@@ -54762,7 +55473,7 @@
 
 
 /***/ }),
-/* 225 */
+/* 226 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -55063,7 +55774,7 @@
 
 
 /***/ }),
-/* 226 */
+/* 227 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
@@ -56113,13 +56824,13 @@
 
 
 /***/ }),
-/* 227 */
+/* 228 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
 	var object = __webpack_require__(209);
 	var util = __webpack_require__(89);
-	var Mousetrap = __webpack_require__(226);
+	var Mousetrap = __webpack_require__(227);
 	
 	/**
 	 * The mapInteractor class is responsible for handling raw events from the
@@ -56144,7 +56855,7 @@
 	  var throttle = __webpack_require__(89).throttle;
 	  var debounce = __webpack_require__(89).debounce;
 	  var actionMatch = __webpack_require__(89).actionMatch;
-	  var quadFeature = __webpack_require__(228);
+	  var quadFeature = __webpack_require__(229);
 	
 	  var m_options,
 	      m_this = this,
@@ -58093,7 +58804,7 @@
 
 
 /***/ }),
-/* 228 */
+/* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(7);
@@ -58623,7 +59334,7 @@
 
 
 /***/ }),
-/* 229 */
+/* 230 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -58932,7 +59643,7 @@
 
 
 /***/ }),
-/* 230 */
+/* 231 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -59492,7 +60203,7 @@
 
 
 /***/ }),
-/* 231 */
+/* 232 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -59540,7 +60251,7 @@
 
 
 /***/ }),
-/* 232 */
+/* 233 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
@@ -59769,11 +60480,11 @@
 
 
 /***/ }),
-/* 233 */
+/* 234 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
-	var featureLayer = __webpack_require__(225);
+	var featureLayer = __webpack_require__(226);
 	var object = __webpack_require__(209);
 	
 	/**
@@ -59869,7 +60580,7 @@
 
 
 /***/ }),
-/* 234 */
+/* 235 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -60084,7 +60795,7 @@
 
 
 /***/ }),
-/* 235 */
+/* 236 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(7);
@@ -60352,11 +61063,11 @@
 
 
 /***/ }),
-/* 236 */
+/* 237 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
-	var tile = __webpack_require__(237);
+	var tile = __webpack_require__(238);
 	
 	module.exports = (function () {
 	  'use strict';
@@ -60469,7 +61180,7 @@
 
 
 /***/ }),
-/* 237 */
+/* 238 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
@@ -60696,12 +61407,12 @@
 
 
 /***/ }),
-/* 238 */
+/* 239 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
 	var registerFileReader = __webpack_require__(207).registerFileReader;
-	var fileReader = __webpack_require__(233);
+	var fileReader = __webpack_require__(234);
 	
 	/**
 	* Create a new instance of class jsonReader
@@ -61004,7 +61715,7 @@
 
 
 /***/ }),
-/* 239 */
+/* 240 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(7);
@@ -61093,8 +61804,8 @@
 	  var util = __webpack_require__(89);
 	  var registry = __webpack_require__(207);
 	  var geo_event = __webpack_require__(15);
-	  var mapInteractor = __webpack_require__(227);
-	  var uiLayer = __webpack_require__(240);
+	  var mapInteractor = __webpack_require__(228);
+	  var uiLayer = __webpack_require__(241);
 	
 	  /**
 	   * Private member variables
@@ -63265,7 +63976,7 @@
 
 
 /***/ }),
-/* 240 */
+/* 241 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -63342,7 +64053,7 @@
 
 
 /***/ }),
-/* 241 */
+/* 242 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
@@ -63350,9 +64061,9 @@
 	
 	  var $ = __webpack_require__(7);
 	  var inherit = __webpack_require__(14);
-	  var tileLayer = __webpack_require__(242);
+	  var tileLayer = __webpack_require__(243);
 	  var registry = __webpack_require__(207);
-	  var quadFeature = __webpack_require__(228);
+	  var quadFeature = __webpack_require__(229);
 	
 	  /**
 	   * Create a new instance of osmLayer
@@ -63366,7 +64077,7 @@
 	   */
 	  var osmLayer = function (arg) {
 	
-	    var imageTile = __webpack_require__(236);
+	    var imageTile = __webpack_require__(237);
 	
 	    if (!(this instanceof osmLayer)) {
 	      return new osmLayer(arg);
@@ -63438,14 +64149,14 @@
 
 
 /***/ }),
-/* 242 */
+/* 243 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
 	  'use strict';
 	
 	  var inherit = __webpack_require__(14);
-	  var featureLayer = __webpack_require__(225);
+	  var featureLayer = __webpack_require__(226);
 	
 	  /**
 	   * Standard modulo operator where the output is in [0, b) for all inputs.
@@ -63622,10 +64333,10 @@
 	    var $ = __webpack_require__(7);
 	    var geo_event = __webpack_require__(15);
 	    var transform = __webpack_require__(17);
-	    var tileCache = __webpack_require__(243);
-	    var fetchQueue = __webpack_require__(232);
+	    var tileCache = __webpack_require__(244);
+	    var fetchQueue = __webpack_require__(233);
 	    var adjustLayerForRenderer = __webpack_require__(207).adjustLayerForRenderer;
-	    var Tile = __webpack_require__(237);
+	    var Tile = __webpack_require__(238);
 	
 	    options = $.extend(true, {}, this.constructor.defaults, options || {});
 	    if (!options.cacheSize) {
@@ -64997,7 +65708,7 @@
 
 
 /***/ }),
-/* 243 */
+/* 244 */
 /***/ (function(module, exports) {
 
 	module.exports = (function () {
@@ -65149,7 +65860,7 @@
 
 
 /***/ }),
-/* 244 */
+/* 245 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(7);
@@ -65225,7 +65936,7 @@
 
 
 /***/ }),
-/* 245 */
+/* 246 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(7);
@@ -65662,7 +66373,7 @@
 
 
 /***/ }),
-/* 246 */
+/* 247 */
 /***/ (function(module, exports) {
 
 	/*
@@ -65941,7 +66652,7 @@
 
 
 /***/ }),
-/* 247 */
+/* 248 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -66039,59 +66750,59 @@
 
 
 /***/ }),
-/* 248 */
+/* 249 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = ("0.12.2");
 
 
 /***/ }),
-/* 249 */
+/* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	module.exports = ("11837dd952a93746c946edabe18eac43844113c9");
+	module.exports = ("2ee576f9c46e91864678120a12a1daae3914e8b1");
 
 
 /***/ }),
-/* 250 */
+/* 251 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var geo_event = __webpack_require__(15);
 	geo_event.d3 = {
-	  rescale: __webpack_require__(251)
+	  rescale: __webpack_require__(252)
 	};
 	
 	/**
 	 * @namespace geo.d3
 	 */
 	module.exports = {
-	  graphFeature: __webpack_require__(252),
-	  lineFeature: __webpack_require__(253),
-	  object: __webpack_require__(254),
-	  pathFeature: __webpack_require__(256),
-	  pointFeature: __webpack_require__(257),
-	  quadFeature: __webpack_require__(258),
-	  renderer: __webpack_require__(259),
-	  tileLayer: __webpack_require__(260),
-	  uniqueID: __webpack_require__(255),
-	  vectorFeature: __webpack_require__(261)
+	  graphFeature: __webpack_require__(253),
+	  lineFeature: __webpack_require__(254),
+	  object: __webpack_require__(255),
+	  pathFeature: __webpack_require__(257),
+	  pointFeature: __webpack_require__(258),
+	  quadFeature: __webpack_require__(259),
+	  renderer: __webpack_require__(260),
+	  tileLayer: __webpack_require__(261),
+	  uniqueID: __webpack_require__(256),
+	  vectorFeature: __webpack_require__(262)
 	};
 
 
 /***/ }),
-/* 251 */
+/* 252 */
 /***/ (function(module, exports) {
 
 	module.exports = 'geo_d3_rescale';
 
 
 /***/ }),
-/* 252 */
+/* 253 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
 	var registerFeature = __webpack_require__(207).registerFeature;
-	var graphFeature = __webpack_require__(234);
+	var graphFeature = __webpack_require__(235);
 	
 	/**
 	 * @class geo.d3.graphFeature
@@ -66133,7 +66844,7 @@
 
 
 /***/ }),
-/* 253 */
+/* 254 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -66155,7 +66866,7 @@
 	  }
 	
 	  var d3 = __webpack_require__(2);
-	  var object = __webpack_require__(254);
+	  var object = __webpack_require__(255);
 	  var timestamp = __webpack_require__(215);
 	  var util = __webpack_require__(89);
 	
@@ -66278,7 +66989,7 @@
 
 
 /***/ }),
-/* 254 */
+/* 255 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -66295,7 +67006,7 @@
 	  'use strict';
 	
 	  var object = __webpack_require__(209);
-	  var uniqueID = __webpack_require__(255);
+	  var uniqueID = __webpack_require__(256);
 	
 	  // this is used to extend other geojs classes, so only generate
 	  // a new object when that is not the case... like if this === window
@@ -66345,7 +67056,7 @@
 
 
 /***/ }),
-/* 255 */
+/* 256 */
 /***/ (function(module, exports) {
 
 	var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
@@ -66370,12 +67081,12 @@
 
 
 /***/ }),
-/* 256 */
+/* 257 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
 	var registerFeature = __webpack_require__(207).registerFeature;
-	var pathFeature = __webpack_require__(244);
+	var pathFeature = __webpack_require__(245);
 	
 	/**
 	 * Create a new instance of class pathFeature
@@ -66393,7 +67104,7 @@
 	
 	  var $ = __webpack_require__(7);
 	  var d3 = __webpack_require__(2);
-	  var object = __webpack_require__(254);
+	  var object = __webpack_require__(255);
 	  var timestamp = __webpack_require__(215);
 	
 	  arg = arg || {};
@@ -66497,7 +67208,7 @@
 
 
 /***/ }),
-/* 257 */
+/* 258 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -66519,7 +67230,7 @@
 	    return new d3_pointFeature(arg);
 	  }
 	
-	  var d3_object = __webpack_require__(254);
+	  var d3_object = __webpack_require__(255);
 	  var timestamp = __webpack_require__(215);
 	
 	  arg = arg || {};
@@ -66614,12 +67325,12 @@
 
 
 /***/ }),
-/* 258 */
+/* 259 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
 	var registerFeature = __webpack_require__(207).registerFeature;
-	var quadFeature = __webpack_require__(228);
+	var quadFeature = __webpack_require__(229);
 	
 	/**
 	 * Create a new instance of class quadFeature
@@ -66637,7 +67348,7 @@
 	
 	  var $ = __webpack_require__(7);
 	  var d3 = __webpack_require__(2);
-	  var object = __webpack_require__(254);
+	  var object = __webpack_require__(255);
 	
 	  quadFeature.call(this, arg);
 	  object.call(this);
@@ -66851,7 +67562,7 @@
 
 
 /***/ }),
-/* 259 */
+/* 260 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -66869,10 +67580,10 @@
 	  'use strict';
 	
 	  var d3 = __webpack_require__(2);
-	  var object = __webpack_require__(254);
+	  var object = __webpack_require__(255);
 	  var util = __webpack_require__(89);
 	  var geo_event = __webpack_require__(15);
-	  var d3Rescale = __webpack_require__(251);
+	  var d3Rescale = __webpack_require__(252);
 	
 	  if (!(this instanceof d3Renderer)) {
 	    return new d3Renderer(arg);
@@ -67471,7 +68182,7 @@
 
 
 /***/ }),
-/* 260 */
+/* 261 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(207).registerLayerAdjustment;
@@ -67566,12 +68277,12 @@
 
 
 /***/ }),
-/* 261 */
+/* 262 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
 	var registerFeature = __webpack_require__(207).registerFeature;
-	var vectorFeature = __webpack_require__(247);
+	var vectorFeature = __webpack_require__(248);
 	
 	/**
 	 * Create a new instance of vectorFeature
@@ -67587,7 +68298,7 @@
 	    return new d3_vectorFeature(arg);
 	  }
 	
-	  var object = __webpack_require__(254);
+	  var object = __webpack_require__(255);
 	  var timestamp = __webpack_require__(215);
 	  var d3 = __webpack_require__(2);
 	
@@ -67859,31 +68570,31 @@
 
 
 /***/ }),
-/* 262 */
+/* 263 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.gl
 	 */
 	module.exports = {
-	  choroplethFeature: __webpack_require__(263),
-	  contourFeature: __webpack_require__(264),
-	  lineFeature: __webpack_require__(266),
-	  pointFeature: __webpack_require__(267),
-	  polygonFeature: __webpack_require__(268),
-	  quadFeature: __webpack_require__(270),
-	  tileLayer: __webpack_require__(271),
+	  choroplethFeature: __webpack_require__(264),
+	  contourFeature: __webpack_require__(265),
+	  lineFeature: __webpack_require__(267),
+	  pointFeature: __webpack_require__(268),
+	  polygonFeature: __webpack_require__(269),
+	  quadFeature: __webpack_require__(271),
+	  tileLayer: __webpack_require__(272),
 	  vglRenderer: __webpack_require__(206)
 	};
 
 
 /***/ }),
-/* 263 */
+/* 264 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
 	var registerFeature = __webpack_require__(207).registerFeature;
-	var choroplethFeature = __webpack_require__(229);
+	var choroplethFeature = __webpack_require__(230);
 	
 	/**
 	 * Create a new instance of choroplethFeature
@@ -67994,12 +68705,12 @@
 
 
 /***/ }),
-/* 264 */
+/* 265 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
 	var registerFeature = __webpack_require__(207).registerFeature;
-	var contourFeature = __webpack_require__(230);
+	var contourFeature = __webpack_require__(231);
 	
 	/**
 	 * Create a new instance of contourFeature
@@ -68020,7 +68731,7 @@
 	  var vgl = __webpack_require__(92);
 	  var transform = __webpack_require__(17);
 	  var util = __webpack_require__(89);
-	  var object = __webpack_require__(265);
+	  var object = __webpack_require__(266);
 	
 	  object.call(this);
 	
@@ -68282,7 +68993,7 @@
 
 
 /***/ }),
-/* 265 */
+/* 266 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
@@ -68323,7 +69034,7 @@
 
 
 /***/ }),
-/* 266 */
+/* 267 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -68379,7 +69090,7 @@
 	  var vgl = __webpack_require__(92);
 	  var transform = __webpack_require__(17);
 	  var util = __webpack_require__(89);
-	  var object = __webpack_require__(265);
+	  var object = __webpack_require__(266);
 	
 	  object.call(this);
 	
@@ -69044,7 +69755,7 @@
 
 
 /***/ }),
-/* 267 */
+/* 268 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(7);
@@ -69070,7 +69781,7 @@
 	  var vgl = __webpack_require__(92);
 	  var transform = __webpack_require__(17);
 	  var util = __webpack_require__(89);
-	  var object = __webpack_require__(265);
+	  var object = __webpack_require__(266);
 	
 	  object.call(this);
 	
@@ -69661,7 +70372,7 @@
 
 
 /***/ }),
-/* 268 */
+/* 269 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -69684,10 +70395,10 @@
 	  polygonFeature.call(this, arg);
 	
 	  var vgl = __webpack_require__(92);
-	  var earcut = __webpack_require__(269);
+	  var earcut = __webpack_require__(270);
 	  var transform = __webpack_require__(17);
 	  var util = __webpack_require__(89);
-	  var object = __webpack_require__(265);
+	  var object = __webpack_require__(266);
 	
 	  object.call(this);
 	
@@ -70036,7 +70747,7 @@
 
 
 /***/ }),
-/* 269 */
+/* 270 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -70686,12 +71397,12 @@
 
 
 /***/ }),
-/* 270 */
+/* 271 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
 	var registerFeature = __webpack_require__(207).registerFeature;
-	var quadFeature = __webpack_require__(228);
+	var quadFeature = __webpack_require__(229);
 	
 	/**
 	 * Create a new instance of class quadFeature
@@ -70710,7 +71421,7 @@
 	
 	  var $ = __webpack_require__(7);
 	  var vgl = __webpack_require__(92);
-	  var object = __webpack_require__(265);
+	  var object = __webpack_require__(266);
 	
 	  object.call(this);
 	
@@ -71110,7 +71821,7 @@
 
 
 /***/ }),
-/* 271 */
+/* 272 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(207).registerLayerAdjustment;
@@ -71214,24 +71925,25 @@
 
 
 /***/ }),
-/* 272 */
+/* 273 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.canvas
 	 */
 	module.exports = {
-	  canvasRenderer: __webpack_require__(273),
-	  heatmapFeature: __webpack_require__(274),
-	  lineFeature: __webpack_require__(276),
-	  pixelmapFeature: __webpack_require__(277),
-	  quadFeature: __webpack_require__(278),
-	  tileLayer: __webpack_require__(279)
+	  canvasRenderer: __webpack_require__(274),
+	  heatmapFeature: __webpack_require__(275),
+	  lineFeature: __webpack_require__(277),
+	  pixelmapFeature: __webpack_require__(278),
+	  quadFeature: __webpack_require__(279),
+	  textFeature: __webpack_require__(280),
+	  tileLayer: __webpack_require__(300)
 	};
 
 
 /***/ }),
-/* 273 */
+/* 274 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -71395,12 +72107,12 @@
 
 
 /***/ }),
-/* 274 */
+/* 275 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
 	var registerFeature = __webpack_require__(207).registerFeature;
-	var heatmapFeature = __webpack_require__(235);
+	var heatmapFeature = __webpack_require__(236);
 	var timestamp = __webpack_require__(215);
 	
 	/**
@@ -71420,7 +72132,7 @@
 	    return new canvas_heatmapFeature(arg);
 	  }
 	  heatmapFeature.call(this, arg);
-	  var object = __webpack_require__(275);
+	  var object = __webpack_require__(276);
 	
 	  object.call(this);
 	
@@ -71869,7 +72581,7 @@
 
 
 /***/ }),
-/* 275 */
+/* 276 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -71877,7 +72589,8 @@
 	
 	/**
 	 * Canvas specific subclass of object which rerenders when the object is drawn.
-	 * @class geo.canvas.object
+	 * @class
+	 * @alias geo.canvas.object
 	 * @extends geo.sceneObject
 	 */
 	
@@ -71894,7 +72607,8 @@
 	  sceneObject.call(this);
 	
 	  var m_this = this,
-	      s_draw = this.draw;
+	      s_draw = this.draw,
+	      m_canvasProperties = {};
 	
 	  /**
 	   * This must be overridden by any feature that needs to render.
@@ -71903,8 +72617,33 @@
 	  };
 	
 	  /**
-	  *  Redraw the object.
-	  */
+	   * Check if a property has already been set on a canvas's context.  If so,
+	   * don't set it again.  Some browsers are much slower if the properties are
+	   * set, even if no change is made.
+	   *
+	   * @param {CanvasRenderingContext2D} [context] The canvas context to modify.
+	   *    If `undefined`, clear the internal property buffer.
+	   * @param {string} [key] The property to set on the canvas.
+	   * @param {object} [value] The value for the property.
+	   * @returns {this} The current object.
+	   */
+	  this._canvasProperty = function (context, key, value) {
+	    if (!context || !key) {
+	      m_canvasProperties = {};
+	      return m_this;
+	    }
+	    if (m_canvasProperties[key] !== value) {
+	      m_canvasProperties[key] = value;
+	      context[key] = value;
+	    }
+	    return m_this;
+	  };
+	
+	  /**
+	   *  Redraw the object.
+	   *
+	   * @returns {this} The current object.
+	   */
 	  this.draw = function () {
 	    m_this._update();
 	    m_this.renderer()._render();
@@ -71917,11 +72656,10 @@
 	
 	inherit(canvas_object, sceneObject);
 	module.exports = canvas_object;
-	
 
 
 /***/ }),
-/* 276 */
+/* 277 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -71942,7 +72680,7 @@
 	    return new canvas_lineFeature(arg);
 	  }
 	
-	  var object = __webpack_require__(275);
+	  var object = __webpack_require__(276);
 	
 	  arg = arg || {};
 	  lineFeature.call(this, arg);
@@ -72037,12 +72775,12 @@
 
 
 /***/ }),
-/* 277 */
+/* 278 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
 	var registerFeature = __webpack_require__(207).registerFeature;
-	var pixelmapFeature = __webpack_require__(245);
+	var pixelmapFeature = __webpack_require__(246);
 	
 	/**
 	 * Create a new instance of class pixelmapFeature
@@ -72060,7 +72798,7 @@
 	  }
 	  pixelmapFeature.call(this, arg);
 	
-	  var object = __webpack_require__(275);
+	  var object = __webpack_require__(276);
 	  object.call(this);
 	
 	  this._init(arg);
@@ -72075,12 +72813,12 @@
 
 
 /***/ }),
-/* 278 */
+/* 279 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
 	var registerFeature = __webpack_require__(207).registerFeature;
-	var quadFeature = __webpack_require__(228);
+	var quadFeature = __webpack_require__(229);
 	
 	/**
 	 * Create a new instance of class quadFeature
@@ -72098,7 +72836,7 @@
 	  }
 	  quadFeature.call(this, arg);
 	
-	  var object = __webpack_require__(275);
+	  var object = __webpack_require__(276);
 	  object.call(this);
 	
 	  var $ = __webpack_require__(7);
@@ -72231,7 +72969,876 @@
 
 
 /***/ }),
-/* 279 */
+/* 280 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(14);
+	var registerFeature = __webpack_require__(207).registerFeature;
+	var textFeature = __webpack_require__(224);
+	var util = __webpack_require__(89);
+	var mat3 = __webpack_require__(281);
+	var vec3 = __webpack_require__(144);
+	
+	/**
+	 * Create a new instance of class canvas.textFeature.
+	 *
+	 * @class
+	 * @alias geo.canvas.textFeature
+	 * @extends geo.textFeature
+	 * @extends geo.canvas.object
+	 *
+	 * @param {geo.textFeature.spec} [arg] Options for the feature.
+	 * @returns {geo.canvas.textFeature} The created feature.
+	 */
+	var canvas_textFeature = function (arg) {
+	  'use strict';
+	  if (!(this instanceof canvas_textFeature)) {
+	    return new canvas_textFeature(arg);
+	  }
+	
+	  var object = __webpack_require__(276);
+	
+	  arg = arg || {};
+	  textFeature.call(this, arg);
+	  object.call(this);
+	
+	  /**
+	   * @private
+	   */
+	  var m_this = this,
+	      m_defaultFont = 'bold 16px sans-serif',
+	      /* This regexp parses css font specifications into style, variant,
+	       * weight, stretch, size, line height, and family.  It is based on a
+	       * regexp here: https://stackoverflow.com/questions/10135697/regex-to-parse-any-css-font,
+	       * but has been modified to fix some issues and handle font stretch. */
+	      m_cssFontRegExp = new RegExp(
+	        '^\\s*' +
+	        '(?=(?:(?:[-a-z0-9]+\\s+){0,3}(italic|oblique))?)' +
+	        '(?=(?:(?:[-a-z0-9]+\\s+){0,3}(small-caps))?)' +
+	        '(?=(?:(?:[-a-z0-9]+\\s+){0,3}(bold(?:er)?|lighter|[1-9]00))?)' +
+	        '(?=(?:(?:[-a-z0-9]+\\s+){0,3}((?:ultra-|extra-|semi-)?(?:condensed|expanded)))?)' +
+	        '(?:(?:normal|\\1|\\2|\\3|\\4)\\s+){0,4}' +
+	        '((?:xx?-)?(?:small|large)|medium|smaller|larger|[.\\d]+(?:\\%|in|[cem]m|ex|p[ctx]))' +
+	        '(?:/(normal|[.\\d]+(?:\\%|in|[cem]m|ex|p[ctx])))?\\s+' +
+	        '([-,\\"\\sa-z]+?)\\s*$', 'i');
+	
+	  /**
+	   * Get the font for a specific data item.  This falls back to the default
+	   * font if the value is unset or doesn't contain sufficient information.
+	   *
+	   * @param {boolean} useSubValues If truthy, check all font styles (such as
+	   *    `fontSize`, `lineHeight`, etc., and override the code `font` style
+	   *    with those values.  If falsy, only use `font`.
+	   * @param {object} d The current data element.
+	   * @param {number} i The index of the current data element.
+	   * @returns {string} The font style.
+	   */
+	  this.getFontFromStyles = function (useSubValues, d, i) {
+	    var font = m_this.style.get('font')(d, i) || m_defaultFont;
+	    if (useSubValues) {
+	      var parts = m_cssFontRegExp.exec(font);
+	      if (parts === null) {
+	        parts = m_cssFontRegExp.exec(m_defaultFont);
+	      }
+	      parts[1] = m_this.style.get('fontStyle')(d, i) || parts[1];
+	      parts[2] = m_this.style.get('fontVariant')(d, i) || parts[2];
+	      parts[3] = m_this.style.get('fontWeight')(d, i) || parts[3];
+	      parts[4] = m_this.style.get('fontStretch')(d, i) || parts[4];
+	      parts[5] = m_this.style.get('fontSize')(d, i) || parts[5] || '16px';
+	      parts[6] = m_this.style.get('lineHeight')(d, i) || parts[6];
+	      parts[7] = m_this.style.get('fontFamily')(d, i) || parts[7] || 'sans-serif';
+	      font = (parts[1] || '') + ' ' + (parts[2] || '') + ' ' +
+	             (parts[3] || '') + ' ' + (parts[4] || '') + ' ' +
+	             (parts[5] || '') + (parts[6] ? '/' + parts[6] : '') + ' ' +
+	             parts[7];
+	      font = font.trim().replace(/\s\s+/g, ' ');
+	    }
+	    return font;
+	  };
+	
+	  /**
+	   * Render the data on the canvas.
+	   *
+	   * This does not currently support multiline text or word wrapping, since
+	   * canvas doesn't implement that directly.  To support these, each text item
+	   * would need to be split on line breaks, and have the width of the text
+	   * calculated with context2d.measureText to determine word wrapping.  This
+	   * would also need to calculate the effective line height from the font
+	   * specification.
+	   *
+	   * @protected
+	   * @param {CanvasRenderingContext2D} context2d The canvas context to draw in.
+	   * @param {geo.map} map The parent map object.
+	   */
+	  this._renderOnCanvas = function (context2d, map) {
+	    var data = m_this.data(),
+	        posFunc = m_this.style.get('position'),
+	        textFunc = m_this.style.get('text'),
+	        mapRotation = map.rotation(),
+	        mapZoom = map.zoom(),
+	        fontFromSubValues, text, pos, visible, color, blur, stroke, width,
+	        rotation, rotateWithMap, scale, offset,
+	        transform, lastTransform = util.mat3AsArray();
+	
+	    /* If any of the font styles other than `font` have values, then we need to
+	     * construct a single font value from the subvalues.  Otherwise, we can
+	     * skip it. */
+	    fontFromSubValues = [
+	      'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch', 'fontSize',
+	      'lineHeight', 'fontFamily'
+	    ].some(function (key) {
+	      return m_this.style(key) !== null && m_this.style(key) !== undefined;
+	    });
+	    /* Clear the canvas property buffer */
+	    m_this._canvasProperty();
+	    data.forEach(function (d, i) {
+	      visible = m_this.style.get('visible')(d, i);
+	      if (!visible && visible !== undefined) {
+	        return;
+	      }
+	      color = util.convertColorAndOpacity(
+	        m_this.style.get('color')(d, i), m_this.style.get('textOpacity')(d, i));
+	      stroke = util.convertColorAndOpacity(
+	        m_this.style.get('textStrokeColor')(d, i), m_this.style.get('textOpacity')(d, i), {r: 0, g: 0, b: 0, a: 0});
+	      if (color.a === 0 && stroke.a === 0) {
+	        return;
+	      }
+	      m_this._canvasProperty(context2d, 'fillStyle', util.convertColorToRGBA(color));
+	      // TODO: get the position position without transform.  If it is outside
+	      // of the map to an extent that there is no chance of text showing,
+	      // skip further processing.
+	      pos = m_this.featureGcsToDisplay(posFunc(d, i));
+	      text = textFunc(d, i);
+	      m_this._canvasProperty(context2d, 'font', m_this.getFontFromStyles(fontFromSubValues, d, i));
+	      m_this._canvasProperty(context2d, 'textAlign', m_this.style.get('textAlign')(d, i) || 'center');
+	      m_this._canvasProperty(context2d, 'textBaseline', m_this.style.get('textBaseline')(d, i) || 'middle');
+	      /* rotation, scale, and offset */
+	      rotation = m_this.style.get('rotation')(d, i) || 0;
+	      rotateWithMap = m_this.style.get('rotateWithMap')(d, i) && mapRotation;
+	      scale = m_this.style.get('textScaled')(d, i);
+	      scale = util.isNonNullFinite(scale) ? Math.pow(2, mapZoom - scale) : null;
+	      offset = m_this.style.get('offset')(d, i);
+	      transform = util.mat3AsArray();
+	      if (rotation || rotateWithMap || (scale && scale !== 1) || (offset && (offset.x || offset.y))) {
+	        mat3.translate(transform, transform, [pos.x, pos.y]);
+	        if (rotateWithMap && mapRotation) {
+	          mat3.rotate(transform, transform, mapRotation);
+	        }
+	        mat3.translate(transform, transform, [
+	          offset && offset.x ? +offset.x : 0,
+	          offset && offset.y ? +offset.y : 0]);
+	        if (rotation) {
+	          mat3.rotate(transform, transform, rotation);
+	        }
+	        if (scale && scale !== 1) {
+	          mat3.scale(transform, transform, [scale, scale]);
+	        }
+	        mat3.translate(transform, transform, [-pos.x, -pos.y]);
+	      }
+	      if (lastTransform[0] !== transform[0] || lastTransform[1] !== transform[1] ||
+	          lastTransform[3] !== transform[3] || lastTransform[4] !== transform[4] ||
+	          lastTransform[6] !== transform[6] || lastTransform[7] !== transform[7]) {
+	        context2d.setTransform(transform[0], transform[1], transform[3], transform[4], transform[6], transform[7]);
+	        mat3.copy(lastTransform, transform);
+	      }
+	      /* shadow */
+	      color = util.convertColorAndOpacity(
+	        m_this.style.get('shadowColor')(d, i), undefined, {r: 0, g: 0, b: 0, a: 0});
+	      if (color.a) {
+	        offset = m_this.style.get('shadowOffset')(d, i);
+	        blur = m_this.style.get('shadowBlur')(d, i);
+	      }
+	      if (color.a && ((offset && (offset.x || offset.y)) || blur)) {
+	        m_this._canvasProperty(context2d, 'shadowColor', util.convertColorToRGBA(color));
+	        if (offset && (rotation || rotateWithMap) && m_this.style.get('shadowRotate')(d, i)) {
+	          transform = [+offset.x, +offset.y, 0];
+	          vec3.rotateZ(transform, transform, [0, 0, 0],
+	                       rotation + (rotateWithMap ? mapRotation : 0));
+	          offset = {x: transform[0], y: transform[1]};
+	        }
+	        m_this._canvasProperty(context2d, 'shadowOffsetX', offset && offset.x ? +offset.x : 0);
+	        m_this._canvasProperty(context2d, 'shadowOffsetY', offset && offset.y ? +offset.y : 0);
+	        m_this._canvasProperty(context2d, 'shadowBlur', blur || 0);
+	      } else {
+	        m_this._canvasProperty(context2d, 'shadowColor', 'rgba(0,0,0,0)');
+	      }
+	      /* draw the text */
+	      if (stroke.a) {
+	        width = m_this.style.get('textStrokeWidth')(d, i);
+	        if (isFinite(width) && width > 0) {
+	          m_this._canvasProperty(context2d, 'strokeStyle', util.convertColorToRGBA(stroke));
+	          m_this._canvasProperty(context2d, 'lineWidth', width);
+	          context2d.strokeText(text, pos.x, pos.y);
+	          m_this._canvasProperty(context2d, 'shadowColor', 'rgba(0,0,0,0)');
+	        }
+	      }
+	      context2d.fillText(text, pos.x, pos.y);
+	    });
+	    m_this._canvasProperty(context2d, 'globalAlpha', 1);
+	    context2d.setTransform(1, 0, 0, 1, 0, 0);
+	  };
+	
+	  return this;
+	};
+	
+	inherit(canvas_textFeature, textFeature);
+	
+	// Now register it
+	var capabilities = {};
+	
+	registerFeature('canvas', 'text', canvas_textFeature, capabilities);
+	
+	module.exports = canvas_textFeature;
+
+
+/***/ }),
+/* 281 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	module.exports = {
+	  adjoint: __webpack_require__(282)
+	  , clone: __webpack_require__(283)
+	  , copy: __webpack_require__(284)
+	  , create: __webpack_require__(285)
+	  , determinant: __webpack_require__(286)
+	  , frob: __webpack_require__(287)
+	  , fromMat2: __webpack_require__(288)
+	  , fromMat4: __webpack_require__(289)
+	  , fromQuat: __webpack_require__(290)
+	  , identity: __webpack_require__(291)
+	  , invert: __webpack_require__(292)
+	  , multiply: __webpack_require__(293)
+	  , normalFromMat4: __webpack_require__(294)
+	  , rotate: __webpack_require__(295)
+	  , scale: __webpack_require__(296)
+	  , str: __webpack_require__(297)
+	  , translate: __webpack_require__(298)
+	  , transpose: __webpack_require__(299)
+	}
+
+
+/***/ }),
+/* 282 */
+/***/ (function(module, exports) {
+
+	module.exports = adjoint
+	
+	/**
+	 * Calculates the adjugate of a mat3
+	 *
+	 * @alias mat3.adjoint
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the source matrix
+	 * @returns {mat3} out
+	 */
+	function adjoint(out, a) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2]
+	  var a10 = a[3], a11 = a[4], a12 = a[5]
+	  var a20 = a[6], a21 = a[7], a22 = a[8]
+	
+	  out[0] = (a11 * a22 - a12 * a21)
+	  out[1] = (a02 * a21 - a01 * a22)
+	  out[2] = (a01 * a12 - a02 * a11)
+	  out[3] = (a12 * a20 - a10 * a22)
+	  out[4] = (a00 * a22 - a02 * a20)
+	  out[5] = (a02 * a10 - a00 * a12)
+	  out[6] = (a10 * a21 - a11 * a20)
+	  out[7] = (a01 * a20 - a00 * a21)
+	  out[8] = (a00 * a11 - a01 * a10)
+	
+	  return out
+	}
+
+
+/***/ }),
+/* 283 */
+/***/ (function(module, exports) {
+
+	module.exports = clone
+	
+	/**
+	 * Creates a new mat3 initialized with values from an existing matrix
+	 *
+	 * @alias mat3.clone
+	 * @param {mat3} a matrix to clone
+	 * @returns {mat3} a new 3x3 matrix
+	 */
+	function clone(a) {
+	  var out = new Float32Array(9)
+	  out[0] = a[0]
+	  out[1] = a[1]
+	  out[2] = a[2]
+	  out[3] = a[3]
+	  out[4] = a[4]
+	  out[5] = a[5]
+	  out[6] = a[6]
+	  out[7] = a[7]
+	  out[8] = a[8]
+	  return out
+	}
+
+
+/***/ }),
+/* 284 */
+/***/ (function(module, exports) {
+
+	module.exports = copy
+	
+	/**
+	 * Copy the values from one mat3 to another
+	 *
+	 * @alias mat3.copy
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the source matrix
+	 * @returns {mat3} out
+	 */
+	function copy(out, a) {
+	  out[0] = a[0]
+	  out[1] = a[1]
+	  out[2] = a[2]
+	  out[3] = a[3]
+	  out[4] = a[4]
+	  out[5] = a[5]
+	  out[6] = a[6]
+	  out[7] = a[7]
+	  out[8] = a[8]
+	  return out
+	}
+
+
+/***/ }),
+/* 285 */
+/***/ (function(module, exports) {
+
+	module.exports = create
+	
+	/**
+	 * Creates a new identity mat3
+	 *
+	 * @alias mat3.create
+	 * @returns {mat3} a new 3x3 matrix
+	 */
+	function create() {
+	  var out = new Float32Array(9)
+	  out[0] = 1
+	  out[1] = 0
+	  out[2] = 0
+	  out[3] = 0
+	  out[4] = 1
+	  out[5] = 0
+	  out[6] = 0
+	  out[7] = 0
+	  out[8] = 1
+	  return out
+	}
+
+
+/***/ }),
+/* 286 */
+/***/ (function(module, exports) {
+
+	module.exports = determinant
+	
+	/**
+	 * Calculates the determinant of a mat3
+	 *
+	 * @alias mat3.determinant
+	 * @param {mat3} a the source matrix
+	 * @returns {Number} determinant of a
+	 */
+	function determinant(a) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2]
+	  var a10 = a[3], a11 = a[4], a12 = a[5]
+	  var a20 = a[6], a21 = a[7], a22 = a[8]
+	
+	  return a00 * (a22 * a11 - a12 * a21)
+	       + a01 * (a12 * a20 - a22 * a10)
+	       + a02 * (a21 * a10 - a11 * a20)
+	}
+
+
+/***/ }),
+/* 287 */
+/***/ (function(module, exports) {
+
+	module.exports = frob
+	
+	/**
+	 * Returns Frobenius norm of a mat3
+	 *
+	 * @alias mat3.frob
+	 * @param {mat3} a the matrix to calculate Frobenius norm of
+	 * @returns {Number} Frobenius norm
+	 */
+	function frob(a) {
+	  return Math.sqrt(
+	      a[0]*a[0]
+	    + a[1]*a[1]
+	    + a[2]*a[2]
+	    + a[3]*a[3]
+	    + a[4]*a[4]
+	    + a[5]*a[5]
+	    + a[6]*a[6]
+	    + a[7]*a[7]
+	    + a[8]*a[8]
+	  )
+	}
+
+
+/***/ }),
+/* 288 */
+/***/ (function(module, exports) {
+
+	module.exports = fromMat2d
+	
+	/**
+	 * Copies the values from a mat2d into a mat3
+	 *
+	 * @alias mat3.fromMat2d
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat2d} a the matrix to copy
+	 * @returns {mat3} out
+	 **/
+	function fromMat2d(out, a) {
+	  out[0] = a[0]
+	  out[1] = a[1]
+	  out[2] = 0
+	
+	  out[3] = a[2]
+	  out[4] = a[3]
+	  out[5] = 0
+	
+	  out[6] = a[4]
+	  out[7] = a[5]
+	  out[8] = 1
+	
+	  return out
+	}
+
+
+/***/ }),
+/* 289 */
+/***/ (function(module, exports) {
+
+	module.exports = fromMat4
+	
+	/**
+	 * Copies the upper-left 3x3 values into the given mat3.
+	 *
+	 * @alias mat3.fromMat4
+	 * @param {mat3} out the receiving 3x3 matrix
+	 * @param {mat4} a   the source 4x4 matrix
+	 * @returns {mat3} out
+	 */
+	function fromMat4(out, a) {
+	  out[0] = a[0]
+	  out[1] = a[1]
+	  out[2] = a[2]
+	  out[3] = a[4]
+	  out[4] = a[5]
+	  out[5] = a[6]
+	  out[6] = a[8]
+	  out[7] = a[9]
+	  out[8] = a[10]
+	  return out
+	}
+
+
+/***/ }),
+/* 290 */
+/***/ (function(module, exports) {
+
+	module.exports = fromQuat
+	
+	/**
+	* Calculates a 3x3 matrix from the given quaternion
+	*
+	* @alias mat3.fromQuat
+	* @param {mat3} out mat3 receiving operation result
+	* @param {quat} q Quaternion to create matrix from
+	*
+	* @returns {mat3} out
+	*/
+	function fromQuat(out, q) {
+	  var x = q[0]
+	  var y = q[1]
+	  var z = q[2]
+	  var w = q[3]
+	
+	  var x2 = x + x
+	  var y2 = y + y
+	  var z2 = z + z
+	
+	  var xx = x * x2
+	  var yx = y * x2
+	  var yy = y * y2
+	  var zx = z * x2
+	  var zy = z * y2
+	  var zz = z * z2
+	  var wx = w * x2
+	  var wy = w * y2
+	  var wz = w * z2
+	
+	  out[0] = 1 - yy - zz
+	  out[3] = yx - wz
+	  out[6] = zx + wy
+	
+	  out[1] = yx + wz
+	  out[4] = 1 - xx - zz
+	  out[7] = zy - wx
+	
+	  out[2] = zx - wy
+	  out[5] = zy + wx
+	  out[8] = 1 - xx - yy
+	
+	  return out
+	}
+
+
+/***/ }),
+/* 291 */
+/***/ (function(module, exports) {
+
+	module.exports = identity
+	
+	/**
+	 * Set a mat3 to the identity matrix
+	 *
+	 * @alias mat3.identity
+	 * @param {mat3} out the receiving matrix
+	 * @returns {mat3} out
+	 */
+	function identity(out) {
+	  out[0] = 1
+	  out[1] = 0
+	  out[2] = 0
+	  out[3] = 0
+	  out[4] = 1
+	  out[5] = 0
+	  out[6] = 0
+	  out[7] = 0
+	  out[8] = 1
+	  return out
+	}
+
+
+/***/ }),
+/* 292 */
+/***/ (function(module, exports) {
+
+	module.exports = invert
+	
+	/**
+	 * Inverts a mat3
+	 *
+	 * @alias mat3.invert
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the source matrix
+	 * @returns {mat3} out
+	 */
+	function invert(out, a) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2]
+	  var a10 = a[3], a11 = a[4], a12 = a[5]
+	  var a20 = a[6], a21 = a[7], a22 = a[8]
+	
+	  var b01 = a22 * a11 - a12 * a21
+	  var b11 = -a22 * a10 + a12 * a20
+	  var b21 = a21 * a10 - a11 * a20
+	
+	  // Calculate the determinant
+	  var det = a00 * b01 + a01 * b11 + a02 * b21
+	
+	  if (!det) return null
+	  det = 1.0 / det
+	
+	  out[0] = b01 * det
+	  out[1] = (-a22 * a01 + a02 * a21) * det
+	  out[2] = (a12 * a01 - a02 * a11) * det
+	  out[3] = b11 * det
+	  out[4] = (a22 * a00 - a02 * a20) * det
+	  out[5] = (-a12 * a00 + a02 * a10) * det
+	  out[6] = b21 * det
+	  out[7] = (-a21 * a00 + a01 * a20) * det
+	  out[8] = (a11 * a00 - a01 * a10) * det
+	
+	  return out
+	}
+
+
+/***/ }),
+/* 293 */
+/***/ (function(module, exports) {
+
+	module.exports = multiply
+	
+	/**
+	 * Multiplies two mat3's
+	 *
+	 * @alias mat3.multiply
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the first operand
+	 * @param {mat3} b the second operand
+	 * @returns {mat3} out
+	 */
+	function multiply(out, a, b) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2]
+	  var a10 = a[3], a11 = a[4], a12 = a[5]
+	  var a20 = a[6], a21 = a[7], a22 = a[8]
+	
+	  var b00 = b[0], b01 = b[1], b02 = b[2]
+	  var b10 = b[3], b11 = b[4], b12 = b[5]
+	  var b20 = b[6], b21 = b[7], b22 = b[8]
+	
+	  out[0] = b00 * a00 + b01 * a10 + b02 * a20
+	  out[1] = b00 * a01 + b01 * a11 + b02 * a21
+	  out[2] = b00 * a02 + b01 * a12 + b02 * a22
+	
+	  out[3] = b10 * a00 + b11 * a10 + b12 * a20
+	  out[4] = b10 * a01 + b11 * a11 + b12 * a21
+	  out[5] = b10 * a02 + b11 * a12 + b12 * a22
+	
+	  out[6] = b20 * a00 + b21 * a10 + b22 * a20
+	  out[7] = b20 * a01 + b21 * a11 + b22 * a21
+	  out[8] = b20 * a02 + b21 * a12 + b22 * a22
+	
+	  return out
+	}
+
+
+/***/ }),
+/* 294 */
+/***/ (function(module, exports) {
+
+	module.exports = normalFromMat4
+	
+	/**
+	* Calculates a 3x3 normal matrix (transpose inverse) from the 4x4 matrix
+	*
+	* @alias mat3.normalFromMat4
+	* @param {mat3} out mat3 receiving operation result
+	* @param {mat4} a Mat4 to derive the normal matrix from
+	*
+	* @returns {mat3} out
+	*/
+	function normalFromMat4(out, a) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3]
+	  var a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7]
+	  var a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11]
+	  var a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15]
+	
+	  var b00 = a00 * a11 - a01 * a10
+	  var b01 = a00 * a12 - a02 * a10
+	  var b02 = a00 * a13 - a03 * a10
+	  var b03 = a01 * a12 - a02 * a11
+	  var b04 = a01 * a13 - a03 * a11
+	  var b05 = a02 * a13 - a03 * a12
+	  var b06 = a20 * a31 - a21 * a30
+	  var b07 = a20 * a32 - a22 * a30
+	  var b08 = a20 * a33 - a23 * a30
+	  var b09 = a21 * a32 - a22 * a31
+	  var b10 = a21 * a33 - a23 * a31
+	  var b11 = a22 * a33 - a23 * a32
+	
+	  // Calculate the determinant
+	  var det = b00 * b11
+	          - b01 * b10
+	          + b02 * b09
+	          + b03 * b08
+	          - b04 * b07
+	          + b05 * b06
+	
+	  if (!det) return null
+	  det = 1.0 / det
+	
+	  out[0] = (a11 * b11 - a12 * b10 + a13 * b09) * det
+	  out[1] = (a12 * b08 - a10 * b11 - a13 * b07) * det
+	  out[2] = (a10 * b10 - a11 * b08 + a13 * b06) * det
+	
+	  out[3] = (a02 * b10 - a01 * b11 - a03 * b09) * det
+	  out[4] = (a00 * b11 - a02 * b08 + a03 * b07) * det
+	  out[5] = (a01 * b08 - a00 * b10 - a03 * b06) * det
+	
+	  out[6] = (a31 * b05 - a32 * b04 + a33 * b03) * det
+	  out[7] = (a32 * b02 - a30 * b05 - a33 * b01) * det
+	  out[8] = (a30 * b04 - a31 * b02 + a33 * b00) * det
+	
+	  return out
+	}
+
+
+/***/ }),
+/* 295 */
+/***/ (function(module, exports) {
+
+	module.exports = rotate
+	
+	/**
+	 * Rotates a mat3 by the given angle
+	 *
+	 * @alias mat3.rotate
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the matrix to rotate
+	 * @param {Number} rad the angle to rotate the matrix by
+	 * @returns {mat3} out
+	 */
+	function rotate(out, a, rad) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2]
+	  var a10 = a[3], a11 = a[4], a12 = a[5]
+	  var a20 = a[6], a21 = a[7], a22 = a[8]
+	
+	  var s = Math.sin(rad)
+	  var c = Math.cos(rad)
+	
+	  out[0] = c * a00 + s * a10
+	  out[1] = c * a01 + s * a11
+	  out[2] = c * a02 + s * a12
+	
+	  out[3] = c * a10 - s * a00
+	  out[4] = c * a11 - s * a01
+	  out[5] = c * a12 - s * a02
+	
+	  out[6] = a20
+	  out[7] = a21
+	  out[8] = a22
+	
+	  return out
+	}
+
+
+/***/ }),
+/* 296 */
+/***/ (function(module, exports) {
+
+	module.exports = scale
+	
+	/**
+	 * Scales the mat3 by the dimensions in the given vec2
+	 *
+	 * @alias mat3.scale
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the matrix to rotate
+	 * @param {vec2} v the vec2 to scale the matrix by
+	 * @returns {mat3} out
+	 **/
+	function scale(out, a, v) {
+	  var x = v[0]
+	  var y = v[1]
+	
+	  out[0] = x * a[0]
+	  out[1] = x * a[1]
+	  out[2] = x * a[2]
+	
+	  out[3] = y * a[3]
+	  out[4] = y * a[4]
+	  out[5] = y * a[5]
+	
+	  out[6] = a[6]
+	  out[7] = a[7]
+	  out[8] = a[8]
+	
+	  return out
+	}
+
+
+/***/ }),
+/* 297 */
+/***/ (function(module, exports) {
+
+	module.exports = str
+	
+	/**
+	 * Returns a string representation of a mat3
+	 *
+	 * @alias mat3.str
+	 * @param {mat3} mat matrix to represent as a string
+	 * @returns {String} string representation of the matrix
+	 */
+	function str(a) {
+	  return 'mat3(' + a[0] + ', ' + a[1] + ', ' + a[2] + ', ' +
+	                   a[3] + ', ' + a[4] + ', ' + a[5] + ', ' +
+	                   a[6] + ', ' + a[7] + ', ' + a[8] + ')'
+	}
+
+
+/***/ }),
+/* 298 */
+/***/ (function(module, exports) {
+
+	module.exports = translate
+	
+	/**
+	 * Translate a mat3 by the given vector
+	 *
+	 * @alias mat3.translate
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the matrix to translate
+	 * @param {vec2} v vector to translate by
+	 * @returns {mat3} out
+	 */
+	function translate(out, a, v) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2]
+	  var a10 = a[3], a11 = a[4], a12 = a[5]
+	  var a20 = a[6], a21 = a[7], a22 = a[8]
+	  var x = v[0], y = v[1]
+	
+	  out[0] = a00
+	  out[1] = a01
+	  out[2] = a02
+	
+	  out[3] = a10
+	  out[4] = a11
+	  out[5] = a12
+	
+	  out[6] = x * a00 + y * a10 + a20
+	  out[7] = x * a01 + y * a11 + a21
+	  out[8] = x * a02 + y * a12 + a22
+	
+	  return out
+	}
+
+
+/***/ }),
+/* 299 */
+/***/ (function(module, exports) {
+
+	module.exports = transpose
+	
+	/**
+	 * Transpose the values of a mat3
+	 *
+	 * @alias mat3.transpose
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the source matrix
+	 * @returns {mat3} out
+	 */
+	function transpose(out, a) {
+	  // If we are transposing ourselves we can skip a few steps but have to cache some values
+	  if (out === a) {
+	    var a01 = a[1], a02 = a[2], a12 = a[5]
+	    out[1] = a[3]
+	    out[2] = a[6]
+	    out[3] = a01
+	    out[5] = a[7]
+	    out[6] = a02
+	    out[7] = a12
+	  } else {
+	    out[0] = a[0]
+	    out[1] = a[3]
+	    out[2] = a[6]
+	    out[3] = a[1]
+	    out[4] = a[4]
+	    out[5] = a[7]
+	    out[6] = a[2]
+	    out[7] = a[5]
+	    out[8] = a[8]
+	  }
+	
+	  return out
+	}
+
+
+/***/ }),
+/* 300 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(207).registerLayerAdjustment;
@@ -72331,27 +73938,27 @@
 
 
 /***/ }),
-/* 280 */
+/* 301 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.gui
 	 */
 	module.exports = {
-	  domWidget: __webpack_require__(281),
-	  legendWidget: __webpack_require__(283),
-	  sliderWidget: __webpack_require__(285),
-	  svgWidget: __webpack_require__(284),
-	  uiLayer: __webpack_require__(240),
-	  widget: __webpack_require__(282)
+	  domWidget: __webpack_require__(302),
+	  legendWidget: __webpack_require__(304),
+	  sliderWidget: __webpack_require__(306),
+	  svgWidget: __webpack_require__(305),
+	  uiLayer: __webpack_require__(241),
+	  widget: __webpack_require__(303)
 	};
 
 
 /***/ }),
-/* 281 */
+/* 302 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var widget = __webpack_require__(282);
+	var widget = __webpack_require__(303);
 	var inherit = __webpack_require__(14);
 	var registerWidget = __webpack_require__(207).registerWidget;
 	
@@ -72404,7 +74011,7 @@
 
 
 /***/ }),
-/* 282 */
+/* 303 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(14);
@@ -72602,10 +74209,10 @@
 
 
 /***/ }),
-/* 283 */
+/* 304 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var svgWidget = __webpack_require__(284);
+	var svgWidget = __webpack_require__(305);
 	var inherit = __webpack_require__(14);
 	var registerWidget = __webpack_require__(207).registerWidget;
 	
@@ -72882,10 +74489,10 @@
 
 
 /***/ }),
-/* 284 */
+/* 305 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var domWidget = __webpack_require__(281);
+	var domWidget = __webpack_require__(302);
 	var inherit = __webpack_require__(14);
 	var registerWidget = __webpack_require__(207).registerWidget;
 	
@@ -72913,7 +74520,7 @@
 	
 	  domWidget.call(this, arg);
 	
-	  var d3Renderer = __webpack_require__(259);
+	  var d3Renderer = __webpack_require__(260);
 	
 	  var m_this = this,
 	      m_renderer = null;
@@ -72969,10 +74576,10 @@
 
 
 /***/ }),
-/* 285 */
+/* 306 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var svgWidget = __webpack_require__(284);
+	var svgWidget = __webpack_require__(305);
 	var inherit = __webpack_require__(14);
 	var registerWidget = __webpack_require__(207).registerWidget;
 	
@@ -73312,13 +74919,13 @@
 
 
 /***/ }),
-/* 286 */
+/* 307 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(287);
+	var content = __webpack_require__(308);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
 	var update = __webpack_require__(12)(content, {});
@@ -73338,7 +74945,7 @@
 	}
 
 /***/ }),
-/* 287 */
+/* 308 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	exports = module.exports = __webpack_require__(11)();
@@ -73352,13 +74959,13 @@
 
 
 /***/ }),
-/* 288 */
+/* 309 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(289);
+	var content = __webpack_require__(310);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
 	var update = __webpack_require__(12)(content, {});
@@ -73378,7 +74985,7 @@
 	}
 
 /***/ }),
-/* 289 */
+/* 310 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	exports = module.exports = __webpack_require__(11)();
@@ -73392,13 +74999,13 @@
 
 
 /***/ }),
-/* 290 */
+/* 311 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(291);
+	var content = __webpack_require__(312);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
 	var update = __webpack_require__(12)(content, {});
@@ -73418,7 +75025,7 @@
 	}
 
 /***/ }),
-/* 291 */
+/* 312 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	exports = module.exports = __webpack_require__(11)();
@@ -73432,21 +75039,21 @@
 
 
 /***/ }),
-/* 292 */
+/* 313 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {module.exports = global["colorbrewer"] = __webpack_require__(293);
+	/* WEBPACK VAR INJECTION */(function(global) {module.exports = global["colorbrewer"] = __webpack_require__(314);
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }),
-/* 293 */
+/* 314 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(294);
+	module.exports = __webpack_require__(315);
 
 
 /***/ }),
-/* 294 */
+/* 315 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;// This product includes color specifications and designs developed by Cynthia Brewer (http://colorbrewer.org/).
@@ -73767,14 +75374,14 @@
 
 
 /***/ }),
-/* 295 */
+/* 316 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {module.exports = global["jsonlint"] = __webpack_require__(296);
+	/* WEBPACK VAR INJECTION */(function(global) {module.exports = global["jsonlint"] = __webpack_require__(317);
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }),
-/* 296 */
+/* 317 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* Jison generated parser */
@@ -74203,14 +75810,14 @@
 
 
 /***/ }),
-/* 297 */
+/* 318 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {module.exports = global["CodeMirror"] = __webpack_require__(298);
+	/* WEBPACK VAR INJECTION */(function(global) {module.exports = global["CodeMirror"] = __webpack_require__(319);
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }),
-/* 298 */
+/* 319 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -75349,7 +76956,7 @@
 	        ch = dir < 0 ? lineObj.text.length - 1 : 0;
 	        var targetTop = measureCharPrepared(cm, prep, ch).top;
 	        ch = findFirst(function (ch) { return measureCharPrepared(cm, prep, ch).top == targetTop; }, (dir < 0) == (part.level == 1) ? part.from : part.to - 1, ch);
-	        if (sticky == "before") { ch = moveCharLogically(lineObj, ch, 1); }
+	        if (sticky == "before") { ch = moveCharLogically(lineObj, ch, 1, true); }
 	      } else { ch = dir < 0 ? part.to : part.from; }
 	      return new Pos(lineNo, ch, sticky)
 	    }
@@ -77363,6 +78970,49 @@
 	  setTimeout(function () { if (!cm.state.focused) { cm.display.shift = false; } }, 150);
 	}
 	
+	// Re-align line numbers and gutter marks to compensate for
+	// horizontal scrolling.
+	function alignHorizontally(cm) {
+	  var display = cm.display, view = display.view;
+	  if (!display.alignWidgets && (!display.gutters.firstChild || !cm.options.fixedGutter)) { return }
+	  var comp = compensateForHScroll(display) - display.scroller.scrollLeft + cm.doc.scrollLeft;
+	  var gutterW = display.gutters.offsetWidth, left = comp + "px";
+	  for (var i = 0; i < view.length; i++) { if (!view[i].hidden) {
+	    if (cm.options.fixedGutter) {
+	      if (view[i].gutter)
+	        { view[i].gutter.style.left = left; }
+	      if (view[i].gutterBackground)
+	        { view[i].gutterBackground.style.left = left; }
+	    }
+	    var align = view[i].alignable;
+	    if (align) { for (var j = 0; j < align.length; j++)
+	      { align[j].style.left = left; } }
+	  } }
+	  if (cm.options.fixedGutter)
+	    { display.gutters.style.left = (comp + gutterW) + "px"; }
+	}
+	
+	// Used to ensure that the line number gutter is still the right
+	// size for the current document size. Returns true when an update
+	// is needed.
+	function maybeUpdateLineNumberWidth(cm) {
+	  if (!cm.options.lineNumbers) { return false }
+	  var doc = cm.doc, last = lineNumberFor(cm.options, doc.first + doc.size - 1), display = cm.display;
+	  if (last.length != display.lineNumChars) {
+	    var test = display.measure.appendChild(elt("div", [elt("div", last)],
+	                                               "CodeMirror-linenumber CodeMirror-gutter-elt"));
+	    var innerW = test.firstChild.offsetWidth, padding = test.offsetWidth - innerW;
+	    display.lineGutter.style.width = "";
+	    display.lineNumInnerWidth = Math.max(innerW, display.lineGutter.offsetWidth - padding) + 1;
+	    display.lineNumWidth = display.lineNumInnerWidth + padding;
+	    display.lineNumChars = display.lineNumInnerWidth ? last.length : -1;
+	    display.lineGutter.style.width = display.lineNumWidth + "px";
+	    updateGutterSpace(cm);
+	    return true
+	  }
+	  return false
+	}
+	
 	// Read the actual heights of the rendered lines, and update their
 	// stored heights to match.
 	function updateHeightsInViewport(cm) {
@@ -77421,216 +79071,137 @@
 	  return {from: from, to: Math.max(to, from + 1)}
 	}
 	
-	// Re-align line numbers and gutter marks to compensate for
-	// horizontal scrolling.
-	function alignHorizontally(cm) {
-	  var display = cm.display, view = display.view;
-	  if (!display.alignWidgets && (!display.gutters.firstChild || !cm.options.fixedGutter)) { return }
-	  var comp = compensateForHScroll(display) - display.scroller.scrollLeft + cm.doc.scrollLeft;
-	  var gutterW = display.gutters.offsetWidth, left = comp + "px";
-	  for (var i = 0; i < view.length; i++) { if (!view[i].hidden) {
-	    if (cm.options.fixedGutter) {
-	      if (view[i].gutter)
-	        { view[i].gutter.style.left = left; }
-	      if (view[i].gutterBackground)
-	        { view[i].gutterBackground.style.left = left; }
-	    }
-	    var align = view[i].alignable;
-	    if (align) { for (var j = 0; j < align.length; j++)
-	      { align[j].style.left = left; } }
-	  } }
-	  if (cm.options.fixedGutter)
-	    { display.gutters.style.left = (comp + gutterW) + "px"; }
-	}
-	
-	// Used to ensure that the line number gutter is still the right
-	// size for the current document size. Returns true when an update
-	// is needed.
-	function maybeUpdateLineNumberWidth(cm) {
-	  if (!cm.options.lineNumbers) { return false }
-	  var doc = cm.doc, last = lineNumberFor(cm.options, doc.first + doc.size - 1), display = cm.display;
-	  if (last.length != display.lineNumChars) {
-	    var test = display.measure.appendChild(elt("div", [elt("div", last)],
-	                                               "CodeMirror-linenumber CodeMirror-gutter-elt"));
-	    var innerW = test.firstChild.offsetWidth, padding = test.offsetWidth - innerW;
-	    display.lineGutter.style.width = "";
-	    display.lineNumInnerWidth = Math.max(innerW, display.lineGutter.offsetWidth - padding) + 1;
-	    display.lineNumWidth = display.lineNumInnerWidth + padding;
-	    display.lineNumChars = display.lineNumInnerWidth ? last.length : -1;
-	    display.lineGutter.style.width = display.lineNumWidth + "px";
-	    updateGutterSpace(cm);
-	    return true
-	  }
-	  return false
-	}
-	
-	// SCROLLING THINGS INTO VIEW
-	
-	// If an editor sits on the top or bottom of the window, partially
-	// scrolled out of view, this ensures that the cursor is visible.
-	function maybeScrollWindow(cm, rect) {
-	  if (signalDOMEvent(cm, "scrollCursorIntoView")) { return }
-	
-	  var display = cm.display, box = display.sizer.getBoundingClientRect(), doScroll = null;
-	  if (rect.top + box.top < 0) { doScroll = true; }
-	  else if (rect.bottom + box.top > (window.innerHeight || document.documentElement.clientHeight)) { doScroll = false; }
-	  if (doScroll != null && !phantom) {
-	    var scrollNode = elt("div", "\u200b", null, ("position: absolute;\n                         top: " + (rect.top - display.viewOffset - paddingTop(cm.display)) + "px;\n                         height: " + (rect.bottom - rect.top + scrollGap(cm) + display.barHeight) + "px;\n                         left: " + (rect.left) + "px; width: " + (Math.max(2, rect.right - rect.left)) + "px;"));
-	    cm.display.lineSpace.appendChild(scrollNode);
-	    scrollNode.scrollIntoView(doScroll);
-	    cm.display.lineSpace.removeChild(scrollNode);
-	  }
-	}
-	
-	// Scroll a given position into view (immediately), verifying that
-	// it actually became visible (as line heights are accurately
-	// measured, the position of something may 'drift' during drawing).
-	function scrollPosIntoView(cm, pos, end, margin) {
-	  if (margin == null) { margin = 0; }
-	  var rect;
-	  for (var limit = 0; limit < 5; limit++) {
-	    var changed = false;
-	    var coords = cursorCoords(cm, pos);
-	    var endCoords = !end || end == pos ? coords : cursorCoords(cm, end);
-	    rect = {left: Math.min(coords.left, endCoords.left),
-	            top: Math.min(coords.top, endCoords.top) - margin,
-	            right: Math.max(coords.left, endCoords.left),
-	            bottom: Math.max(coords.bottom, endCoords.bottom) + margin};
-	    var scrollPos = calculateScrollPos(cm, rect);
-	    var startTop = cm.doc.scrollTop, startLeft = cm.doc.scrollLeft;
-	    if (scrollPos.scrollTop != null) {
-	      updateScrollTop(cm, scrollPos.scrollTop);
-	      if (Math.abs(cm.doc.scrollTop - startTop) > 1) { changed = true; }
-	    }
-	    if (scrollPos.scrollLeft != null) {
-	      setScrollLeft(cm, scrollPos.scrollLeft);
-	      if (Math.abs(cm.doc.scrollLeft - startLeft) > 1) { changed = true; }
-	    }
-	    if (!changed) { break }
-	  }
-	  return rect
-	}
-	
-	// Scroll a given set of coordinates into view (immediately).
-	function scrollIntoView(cm, rect) {
-	  var scrollPos = calculateScrollPos(cm, rect);
-	  if (scrollPos.scrollTop != null) { updateScrollTop(cm, scrollPos.scrollTop); }
-	  if (scrollPos.scrollLeft != null) { setScrollLeft(cm, scrollPos.scrollLeft); }
-	}
-	
-	// Calculate a new scroll position needed to scroll the given
-	// rectangle into view. Returns an object with scrollTop and
-	// scrollLeft properties. When these are undefined, the
-	// vertical/horizontal position does not need to be adjusted.
-	function calculateScrollPos(cm, rect) {
-	  var display = cm.display, snapMargin = textHeight(cm.display);
-	  if (rect.top < 0) { rect.top = 0; }
-	  var screentop = cm.curOp && cm.curOp.scrollTop != null ? cm.curOp.scrollTop : display.scroller.scrollTop;
-	  var screen = displayHeight(cm), result = {};
-	  if (rect.bottom - rect.top > screen) { rect.bottom = rect.top + screen; }
-	  var docBottom = cm.doc.height + paddingVert(display);
-	  var atTop = rect.top < snapMargin, atBottom = rect.bottom > docBottom - snapMargin;
-	  if (rect.top < screentop) {
-	    result.scrollTop = atTop ? 0 : rect.top;
-	  } else if (rect.bottom > screentop + screen) {
-	    var newTop = Math.min(rect.top, (atBottom ? docBottom : rect.bottom) - screen);
-	    if (newTop != screentop) { result.scrollTop = newTop; }
-	  }
-	
-	  var screenleft = cm.curOp && cm.curOp.scrollLeft != null ? cm.curOp.scrollLeft : display.scroller.scrollLeft;
-	  var screenw = displayWidth(cm) - (cm.options.fixedGutter ? display.gutters.offsetWidth : 0);
-	  var tooWide = rect.right - rect.left > screenw;
-	  if (tooWide) { rect.right = rect.left + screenw; }
-	  if (rect.left < 10)
-	    { result.scrollLeft = 0; }
-	  else if (rect.left < screenleft)
-	    { result.scrollLeft = Math.max(0, rect.left - (tooWide ? 0 : 10)); }
-	  else if (rect.right > screenw + screenleft - 3)
-	    { result.scrollLeft = rect.right + (tooWide ? 0 : 10) - screenw; }
-	  return result
-	}
-	
-	// Store a relative adjustment to the scroll position in the current
-	// operation (to be applied when the operation finishes).
-	function addToScrollTop(cm, top) {
-	  if (top == null) { return }
-	  resolveScrollToPos(cm);
-	  cm.curOp.scrollTop = (cm.curOp.scrollTop == null ? cm.doc.scrollTop : cm.curOp.scrollTop) + top;
-	}
-	
-	// Make sure that at the end of the operation the current cursor is
-	// shown.
-	function ensureCursorVisible(cm) {
-	  resolveScrollToPos(cm);
-	  var cur = cm.getCursor(), from = cur, to = cur;
-	  if (!cm.options.lineWrapping) {
-	    from = cur.ch ? Pos(cur.line, cur.ch - 1) : cur;
-	    to = Pos(cur.line, cur.ch + 1);
-	  }
-	  cm.curOp.scrollToPos = {from: from, to: to, margin: cm.options.cursorScrollMargin};
-	}
-	
-	function scrollToCoords(cm, x, y) {
-	  if (x != null || y != null) { resolveScrollToPos(cm); }
-	  if (x != null) { cm.curOp.scrollLeft = x; }
-	  if (y != null) { cm.curOp.scrollTop = y; }
-	}
-	
-	function scrollToRange(cm, range$$1) {
-	  resolveScrollToPos(cm);
-	  cm.curOp.scrollToPos = range$$1;
-	}
-	
-	// When an operation has its scrollToPos property set, and another
-	// scroll action is applied before the end of the operation, this
-	// 'simulates' scrolling that position into view in a cheap way, so
-	// that the effect of intermediate scroll commands is not ignored.
-	function resolveScrollToPos(cm) {
-	  var range$$1 = cm.curOp.scrollToPos;
-	  if (range$$1) {
-	    cm.curOp.scrollToPos = null;
-	    var from = estimateCoords(cm, range$$1.from), to = estimateCoords(cm, range$$1.to);
-	    scrollToCoordsRange(cm, from, to, range$$1.margin);
-	  }
-	}
-	
-	function scrollToCoordsRange(cm, from, to, margin) {
-	  var sPos = calculateScrollPos(cm, {
-	    left: Math.min(from.left, to.left),
-	    top: Math.min(from.top, to.top) - margin,
-	    right: Math.max(from.right, to.right),
-	    bottom: Math.max(from.bottom, to.bottom) + margin
-	  });
-	  scrollToCoords(cm, sPos.scrollLeft, sPos.scrollTop);
-	}
-	
 	// Sync the scrollable area and scrollbars, ensure the viewport
 	// covers the visible area.
-	function updateScrollTop(cm, val) {
+	function setScrollTop(cm, val) {
 	  if (Math.abs(cm.doc.scrollTop - val) < 2) { return }
+	  cm.doc.scrollTop = val;
 	  if (!gecko) { updateDisplaySimple(cm, {top: val}); }
-	  setScrollTop(cm, val, true);
+	  if (cm.display.scroller.scrollTop != val) { cm.display.scroller.scrollTop = val; }
+	  cm.display.scrollbars.setScrollTop(val);
 	  if (gecko) { updateDisplaySimple(cm); }
 	  startWorker(cm, 100);
 	}
-	
-	function setScrollTop(cm, val, forceScroll) {
-	  val = Math.min(cm.display.scroller.scrollHeight - cm.display.scroller.clientHeight, val);
-	  if (cm.display.scroller.scrollTop == val && !forceScroll) { return }
-	  cm.doc.scrollTop = val;
-	  cm.display.scrollbars.setScrollTop(val);
-	  if (cm.display.scroller.scrollTop != val) { cm.display.scroller.scrollTop = val; }
-	}
-	
 	// Sync scroller and scrollbar, ensure the gutter elements are
 	// aligned.
-	function setScrollLeft(cm, val, isScroller, forceScroll) {
+	function setScrollLeft(cm, val, isScroller) {
+	  if (isScroller ? val == cm.doc.scrollLeft : Math.abs(cm.doc.scrollLeft - val) < 2) { return }
 	  val = Math.min(val, cm.display.scroller.scrollWidth - cm.display.scroller.clientWidth);
-	  if ((isScroller ? val == cm.doc.scrollLeft : Math.abs(cm.doc.scrollLeft - val) < 2) && !forceScroll) { return }
 	  cm.doc.scrollLeft = val;
 	  alignHorizontally(cm);
 	  if (cm.display.scroller.scrollLeft != val) { cm.display.scroller.scrollLeft = val; }
 	  cm.display.scrollbars.setScrollLeft(val);
+	}
+	
+	// Since the delta values reported on mouse wheel events are
+	// unstandardized between browsers and even browser versions, and
+	// generally horribly unpredictable, this code starts by measuring
+	// the scroll effect that the first few mouse wheel events have,
+	// and, from that, detects the way it can convert deltas to pixel
+	// offsets afterwards.
+	//
+	// The reason we want to know the amount a wheel event will scroll
+	// is that it gives us a chance to update the display before the
+	// actual scrolling happens, reducing flickering.
+	
+	var wheelSamples = 0;
+	var wheelPixelsPerUnit = null;
+	// Fill in a browser-detected starting value on browsers where we
+	// know one. These don't have to be accurate -- the result of them
+	// being wrong would just be a slight flicker on the first wheel
+	// scroll (if it is large enough).
+	if (ie) { wheelPixelsPerUnit = -.53; }
+	else if (gecko) { wheelPixelsPerUnit = 15; }
+	else if (chrome) { wheelPixelsPerUnit = -.7; }
+	else if (safari) { wheelPixelsPerUnit = -1/3; }
+	
+	function wheelEventDelta(e) {
+	  var dx = e.wheelDeltaX, dy = e.wheelDeltaY;
+	  if (dx == null && e.detail && e.axis == e.HORIZONTAL_AXIS) { dx = e.detail; }
+	  if (dy == null && e.detail && e.axis == e.VERTICAL_AXIS) { dy = e.detail; }
+	  else if (dy == null) { dy = e.wheelDelta; }
+	  return {x: dx, y: dy}
+	}
+	function wheelEventPixels(e) {
+	  var delta = wheelEventDelta(e);
+	  delta.x *= wheelPixelsPerUnit;
+	  delta.y *= wheelPixelsPerUnit;
+	  return delta
+	}
+	
+	function onScrollWheel(cm, e) {
+	  var delta = wheelEventDelta(e), dx = delta.x, dy = delta.y;
+	
+	  var display = cm.display, scroll = display.scroller;
+	  // Quit if there's nothing to scroll here
+	  var canScrollX = scroll.scrollWidth > scroll.clientWidth;
+	  var canScrollY = scroll.scrollHeight > scroll.clientHeight;
+	  if (!(dx && canScrollX || dy && canScrollY)) { return }
+	
+	  // Webkit browsers on OS X abort momentum scrolls when the target
+	  // of the scroll event is removed from the scrollable element.
+	  // This hack (see related code in patchDisplay) makes sure the
+	  // element is kept around.
+	  if (dy && mac && webkit) {
+	    outer: for (var cur = e.target, view = display.view; cur != scroll; cur = cur.parentNode) {
+	      for (var i = 0; i < view.length; i++) {
+	        if (view[i].node == cur) {
+	          cm.display.currentWheelTarget = cur;
+	          break outer
+	        }
+	      }
+	    }
+	  }
+	
+	  // On some browsers, horizontal scrolling will cause redraws to
+	  // happen before the gutter has been realigned, causing it to
+	  // wriggle around in a most unseemly way. When we have an
+	  // estimated pixels/delta value, we just handle horizontal
+	  // scrolling entirely here. It'll be slightly off from native, but
+	  // better than glitching out.
+	  if (dx && !gecko && !presto && wheelPixelsPerUnit != null) {
+	    if (dy && canScrollY)
+	      { setScrollTop(cm, Math.max(0, Math.min(scroll.scrollTop + dy * wheelPixelsPerUnit, scroll.scrollHeight - scroll.clientHeight))); }
+	    setScrollLeft(cm, Math.max(0, Math.min(scroll.scrollLeft + dx * wheelPixelsPerUnit, scroll.scrollWidth - scroll.clientWidth)));
+	    // Only prevent default scrolling if vertical scrolling is
+	    // actually possible. Otherwise, it causes vertical scroll
+	    // jitter on OSX trackpads when deltaX is small and deltaY
+	    // is large (issue #3579)
+	    if (!dy || (dy && canScrollY))
+	      { e_preventDefault(e); }
+	    display.wheelStartX = null; // Abort measurement, if in progress
+	    return
+	  }
+	
+	  // 'Project' the visible viewport to cover the area that is being
+	  // scrolled into view (if we know enough to estimate it).
+	  if (dy && wheelPixelsPerUnit != null) {
+	    var pixels = dy * wheelPixelsPerUnit;
+	    var top = cm.doc.scrollTop, bot = top + display.wrapper.clientHeight;
+	    if (pixels < 0) { top = Math.max(0, top + pixels - 50); }
+	    else { bot = Math.min(cm.doc.height, bot + pixels + 50); }
+	    updateDisplaySimple(cm, {top: top, bottom: bot});
+	  }
+	
+	  if (wheelSamples < 20) {
+	    if (display.wheelStartX == null) {
+	      display.wheelStartX = scroll.scrollLeft; display.wheelStartY = scroll.scrollTop;
+	      display.wheelDX = dx; display.wheelDY = dy;
+	      setTimeout(function () {
+	        if (display.wheelStartX == null) { return }
+	        var movedX = scroll.scrollLeft - display.wheelStartX;
+	        var movedY = scroll.scrollTop - display.wheelStartY;
+	        var sample = (movedY && display.wheelDY && movedY / display.wheelDY) ||
+	          (movedX && display.wheelDX && movedX / display.wheelDX);
+	        display.wheelStartX = display.wheelStartY = null;
+	        if (!sample) { return }
+	        wheelPixelsPerUnit = (wheelPixelsPerUnit * wheelSamples + sample) / (wheelSamples + 1);
+	        ++wheelSamples;
+	      }, 200);
+	    } else {
+	      display.wheelDX += dx; display.wheelDY += dy;
+	    }
+	  }
 	}
 	
 	// SCROLLBARS
@@ -77809,10 +79380,137 @@
 	    node.setAttribute("cm-not-content", "true");
 	  }, function (pos, axis) {
 	    if (axis == "horizontal") { setScrollLeft(cm, pos); }
-	    else { updateScrollTop(cm, pos); }
+	    else { setScrollTop(cm, pos); }
 	  }, cm);
 	  if (cm.display.scrollbars.addClass)
 	    { addClass(cm.display.wrapper, cm.display.scrollbars.addClass); }
+	}
+	
+	// SCROLLING THINGS INTO VIEW
+	
+	// If an editor sits on the top or bottom of the window, partially
+	// scrolled out of view, this ensures that the cursor is visible.
+	function maybeScrollWindow(cm, rect) {
+	  if (signalDOMEvent(cm, "scrollCursorIntoView")) { return }
+	
+	  var display = cm.display, box = display.sizer.getBoundingClientRect(), doScroll = null;
+	  if (rect.top + box.top < 0) { doScroll = true; }
+	  else if (rect.bottom + box.top > (window.innerHeight || document.documentElement.clientHeight)) { doScroll = false; }
+	  if (doScroll != null && !phantom) {
+	    var scrollNode = elt("div", "\u200b", null, ("position: absolute;\n                         top: " + (rect.top - display.viewOffset - paddingTop(cm.display)) + "px;\n                         height: " + (rect.bottom - rect.top + scrollGap(cm) + display.barHeight) + "px;\n                         left: " + (rect.left) + "px; width: " + (Math.max(2, rect.right - rect.left)) + "px;"));
+	    cm.display.lineSpace.appendChild(scrollNode);
+	    scrollNode.scrollIntoView(doScroll);
+	    cm.display.lineSpace.removeChild(scrollNode);
+	  }
+	}
+	
+	// Scroll a given position into view (immediately), verifying that
+	// it actually became visible (as line heights are accurately
+	// measured, the position of something may 'drift' during drawing).
+	function scrollPosIntoView(cm, pos, end, margin) {
+	  if (margin == null) { margin = 0; }
+	  var rect;
+	  for (var limit = 0; limit < 5; limit++) {
+	    var changed = false;
+	    var coords = cursorCoords(cm, pos);
+	    var endCoords = !end || end == pos ? coords : cursorCoords(cm, end);
+	    rect = {left: Math.min(coords.left, endCoords.left),
+	            top: Math.min(coords.top, endCoords.top) - margin,
+	            right: Math.max(coords.left, endCoords.left),
+	            bottom: Math.max(coords.bottom, endCoords.bottom) + margin};
+	    var scrollPos = calculateScrollPos(cm, rect);
+	    var startTop = cm.doc.scrollTop, startLeft = cm.doc.scrollLeft;
+	    if (scrollPos.scrollTop != null) {
+	      setScrollTop(cm, scrollPos.scrollTop);
+	      if (Math.abs(cm.doc.scrollTop - startTop) > 1) { changed = true; }
+	    }
+	    if (scrollPos.scrollLeft != null) {
+	      setScrollLeft(cm, scrollPos.scrollLeft);
+	      if (Math.abs(cm.doc.scrollLeft - startLeft) > 1) { changed = true; }
+	    }
+	    if (!changed) { break }
+	  }
+	  return rect
+	}
+	
+	// Scroll a given set of coordinates into view (immediately).
+	function scrollIntoView(cm, rect) {
+	  var scrollPos = calculateScrollPos(cm, rect);
+	  if (scrollPos.scrollTop != null) { setScrollTop(cm, scrollPos.scrollTop); }
+	  if (scrollPos.scrollLeft != null) { setScrollLeft(cm, scrollPos.scrollLeft); }
+	}
+	
+	// Calculate a new scroll position needed to scroll the given
+	// rectangle into view. Returns an object with scrollTop and
+	// scrollLeft properties. When these are undefined, the
+	// vertical/horizontal position does not need to be adjusted.
+	function calculateScrollPos(cm, rect) {
+	  var display = cm.display, snapMargin = textHeight(cm.display);
+	  if (rect.top < 0) { rect.top = 0; }
+	  var screentop = cm.curOp && cm.curOp.scrollTop != null ? cm.curOp.scrollTop : display.scroller.scrollTop;
+	  var screen = displayHeight(cm), result = {};
+	  if (rect.bottom - rect.top > screen) { rect.bottom = rect.top + screen; }
+	  var docBottom = cm.doc.height + paddingVert(display);
+	  var atTop = rect.top < snapMargin, atBottom = rect.bottom > docBottom - snapMargin;
+	  if (rect.top < screentop) {
+	    result.scrollTop = atTop ? 0 : rect.top;
+	  } else if (rect.bottom > screentop + screen) {
+	    var newTop = Math.min(rect.top, (atBottom ? docBottom : rect.bottom) - screen);
+	    if (newTop != screentop) { result.scrollTop = newTop; }
+	  }
+	
+	  var screenleft = cm.curOp && cm.curOp.scrollLeft != null ? cm.curOp.scrollLeft : display.scroller.scrollLeft;
+	  var screenw = displayWidth(cm) - (cm.options.fixedGutter ? display.gutters.offsetWidth : 0);
+	  var tooWide = rect.right - rect.left > screenw;
+	  if (tooWide) { rect.right = rect.left + screenw; }
+	  if (rect.left < 10)
+	    { result.scrollLeft = 0; }
+	  else if (rect.left < screenleft)
+	    { result.scrollLeft = Math.max(0, rect.left - (tooWide ? 0 : 10)); }
+	  else if (rect.right > screenw + screenleft - 3)
+	    { result.scrollLeft = rect.right + (tooWide ? 0 : 10) - screenw; }
+	  return result
+	}
+	
+	// Store a relative adjustment to the scroll position in the current
+	// operation (to be applied when the operation finishes).
+	function addToScrollPos(cm, left, top) {
+	  if (left != null || top != null) { resolveScrollToPos(cm); }
+	  if (left != null)
+	    { cm.curOp.scrollLeft = (cm.curOp.scrollLeft == null ? cm.doc.scrollLeft : cm.curOp.scrollLeft) + left; }
+	  if (top != null)
+	    { cm.curOp.scrollTop = (cm.curOp.scrollTop == null ? cm.doc.scrollTop : cm.curOp.scrollTop) + top; }
+	}
+	
+	// Make sure that at the end of the operation the current cursor is
+	// shown.
+	function ensureCursorVisible(cm) {
+	  resolveScrollToPos(cm);
+	  var cur = cm.getCursor(), from = cur, to = cur;
+	  if (!cm.options.lineWrapping) {
+	    from = cur.ch ? Pos(cur.line, cur.ch - 1) : cur;
+	    to = Pos(cur.line, cur.ch + 1);
+	  }
+	  cm.curOp.scrollToPos = {from: from, to: to, margin: cm.options.cursorScrollMargin};
+	}
+	
+	// When an operation has its scrollToPos property set, and another
+	// scroll action is applied before the end of the operation, this
+	// 'simulates' scrolling that position into view in a cheap way, so
+	// that the effect of intermediate scroll commands is not ignored.
+	function resolveScrollToPos(cm) {
+	  var range$$1 = cm.curOp.scrollToPos;
+	  if (range$$1) {
+	    cm.curOp.scrollToPos = null;
+	    var from = estimateCoords(cm, range$$1.from), to = estimateCoords(cm, range$$1.to);
+	    var sPos = calculateScrollPos(cm, {
+	      left: Math.min(from.left, to.left),
+	      top: Math.min(from.top, to.top) - range$$1.margin,
+	      right: Math.max(from.right, to.right),
+	      bottom: Math.max(from.bottom, to.bottom) + range$$1.margin
+	    });
+	    cm.scrollTo(sPos.scrollLeft, sPos.scrollTop);
+	  }
 	}
 	
 	// Operations are used to wrap a series of changes to the editor
@@ -77943,9 +79641,17 @@
 	    { display.wheelStartX = display.wheelStartY = null; }
 	
 	  // Propagate the scroll position to the actual DOM scroller
-	  if (op.scrollTop != null) { setScrollTop(cm, op.scrollTop, op.forceScroll); }
-	
-	  if (op.scrollLeft != null) { setScrollLeft(cm, op.scrollLeft, true, true); }
+	  if (op.scrollTop != null && (display.scroller.scrollTop != op.scrollTop || op.forceScroll)) {
+	    doc.scrollTop = Math.max(0, Math.min(display.scroller.scrollHeight - display.scroller.clientHeight, op.scrollTop));
+	    display.scrollbars.setScrollTop(doc.scrollTop);
+	    display.scroller.scrollTop = doc.scrollTop;
+	  }
+	  if (op.scrollLeft != null && (display.scroller.scrollLeft != op.scrollLeft || op.forceScroll)) {
+	    doc.scrollLeft = Math.max(0, Math.min(display.scroller.scrollWidth - display.scroller.clientWidth, op.scrollLeft));
+	    display.scrollbars.setScrollLeft(doc.scrollLeft);
+	    display.scroller.scrollLeft = doc.scrollLeft;
+	    alignHorizontally(cm);
+	  }
 	  // If we need to scroll a specific position into view, do so.
 	  if (op.scrollToPos) {
 	    var rect = scrollPosIntoView(cm, clipPos(doc, op.scrollToPos.from),
@@ -78239,36 +79945,6 @@
 	  }
 	}
 	
-	function selectionSnapshot(cm) {
-	  if (cm.hasFocus()) { return null }
-	  var active = activeElt();
-	  if (!active || !contains(cm.display.lineDiv, active)) { return null }
-	  var result = {activeElt: active};
-	  if (window.getSelection) {
-	    var sel = window.getSelection();
-	    if (sel.anchorNode && sel.extend && contains(cm.display.lineDiv, sel.anchorNode)) {
-	      result.anchorNode = sel.anchorNode;
-	      result.anchorOffset = sel.anchorOffset;
-	      result.focusNode = sel.focusNode;
-	      result.focusOffset = sel.focusOffset;
-	    }
-	  }
-	  return result
-	}
-	
-	function restoreSelection(snapshot) {
-	  if (!snapshot || !snapshot.activeElt || snapshot.activeElt == activeElt()) { return }
-	  snapshot.activeElt.focus();
-	  if (snapshot.anchorNode && contains(document.body, snapshot.anchorNode) && contains(document.body, snapshot.focusNode)) {
-	    var sel = window.getSelection(), range$$1 = document.createRange();
-	    range$$1.setEnd(snapshot.anchorNode, snapshot.anchorOffset);
-	    range$$1.collapse(false);
-	    sel.removeAllRanges();
-	    sel.addRange(range$$1);
-	    sel.extend(snapshot.focusNode, snapshot.focusOffset);
-	  }
-	}
-	
 	// Does the actual updating of the line display. Bails out
 	// (returning false) when there is nothing to be done and forced is
 	// false.
@@ -78318,14 +79994,14 @@
 	
 	  // For big changes, we hide the enclosing element during the
 	  // update, since that speeds up the operations on most browsers.
-	  var selSnapshot = selectionSnapshot(cm);
+	  var focused = activeElt();
 	  if (toUpdate > 4) { display.lineDiv.style.display = "none"; }
 	  patchDisplay(cm, display.updateLineNumbers, update.dims);
 	  if (toUpdate > 4) { display.lineDiv.style.display = ""; }
 	  display.renderedView = display.view;
 	  // There might have been a widget with a focused element that got
 	  // hidden or updated, if so re-focus it.
-	  restoreSelection(selSnapshot);
+	  if (focused && activeElt() != focused && focused.offsetHeight) { focused.focus(); }
 	
 	  // Prevent selection and cursors from interfering with the scroll
 	  // width and height.
@@ -78470,117 +80146,6 @@
 	  } else if (found > -1 && !options.lineNumbers) {
 	    options.gutters = options.gutters.slice(0);
 	    options.gutters.splice(found, 1);
-	  }
-	}
-	
-	// Since the delta values reported on mouse wheel events are
-	// unstandardized between browsers and even browser versions, and
-	// generally horribly unpredictable, this code starts by measuring
-	// the scroll effect that the first few mouse wheel events have,
-	// and, from that, detects the way it can convert deltas to pixel
-	// offsets afterwards.
-	//
-	// The reason we want to know the amount a wheel event will scroll
-	// is that it gives us a chance to update the display before the
-	// actual scrolling happens, reducing flickering.
-	
-	var wheelSamples = 0;
-	var wheelPixelsPerUnit = null;
-	// Fill in a browser-detected starting value on browsers where we
-	// know one. These don't have to be accurate -- the result of them
-	// being wrong would just be a slight flicker on the first wheel
-	// scroll (if it is large enough).
-	if (ie) { wheelPixelsPerUnit = -.53; }
-	else if (gecko) { wheelPixelsPerUnit = 15; }
-	else if (chrome) { wheelPixelsPerUnit = -.7; }
-	else if (safari) { wheelPixelsPerUnit = -1/3; }
-	
-	function wheelEventDelta(e) {
-	  var dx = e.wheelDeltaX, dy = e.wheelDeltaY;
-	  if (dx == null && e.detail && e.axis == e.HORIZONTAL_AXIS) { dx = e.detail; }
-	  if (dy == null && e.detail && e.axis == e.VERTICAL_AXIS) { dy = e.detail; }
-	  else if (dy == null) { dy = e.wheelDelta; }
-	  return {x: dx, y: dy}
-	}
-	function wheelEventPixels(e) {
-	  var delta = wheelEventDelta(e);
-	  delta.x *= wheelPixelsPerUnit;
-	  delta.y *= wheelPixelsPerUnit;
-	  return delta
-	}
-	
-	function onScrollWheel(cm, e) {
-	  var delta = wheelEventDelta(e), dx = delta.x, dy = delta.y;
-	
-	  var display = cm.display, scroll = display.scroller;
-	  // Quit if there's nothing to scroll here
-	  var canScrollX = scroll.scrollWidth > scroll.clientWidth;
-	  var canScrollY = scroll.scrollHeight > scroll.clientHeight;
-	  if (!(dx && canScrollX || dy && canScrollY)) { return }
-	
-	  // Webkit browsers on OS X abort momentum scrolls when the target
-	  // of the scroll event is removed from the scrollable element.
-	  // This hack (see related code in patchDisplay) makes sure the
-	  // element is kept around.
-	  if (dy && mac && webkit) {
-	    outer: for (var cur = e.target, view = display.view; cur != scroll; cur = cur.parentNode) {
-	      for (var i = 0; i < view.length; i++) {
-	        if (view[i].node == cur) {
-	          cm.display.currentWheelTarget = cur;
-	          break outer
-	        }
-	      }
-	    }
-	  }
-	
-	  // On some browsers, horizontal scrolling will cause redraws to
-	  // happen before the gutter has been realigned, causing it to
-	  // wriggle around in a most unseemly way. When we have an
-	  // estimated pixels/delta value, we just handle horizontal
-	  // scrolling entirely here. It'll be slightly off from native, but
-	  // better than glitching out.
-	  if (dx && !gecko && !presto && wheelPixelsPerUnit != null) {
-	    if (dy && canScrollY)
-	      { updateScrollTop(cm, Math.max(0, scroll.scrollTop + dy * wheelPixelsPerUnit)); }
-	    setScrollLeft(cm, Math.max(0, scroll.scrollLeft + dx * wheelPixelsPerUnit));
-	    // Only prevent default scrolling if vertical scrolling is
-	    // actually possible. Otherwise, it causes vertical scroll
-	    // jitter on OSX trackpads when deltaX is small and deltaY
-	    // is large (issue #3579)
-	    if (!dy || (dy && canScrollY))
-	      { e_preventDefault(e); }
-	    display.wheelStartX = null; // Abort measurement, if in progress
-	    return
-	  }
-	
-	  // 'Project' the visible viewport to cover the area that is being
-	  // scrolled into view (if we know enough to estimate it).
-	  if (dy && wheelPixelsPerUnit != null) {
-	    var pixels = dy * wheelPixelsPerUnit;
-	    var top = cm.doc.scrollTop, bot = top + display.wrapper.clientHeight;
-	    if (pixels < 0) { top = Math.max(0, top + pixels - 50); }
-	    else { bot = Math.min(cm.doc.height, bot + pixels + 50); }
-	    updateDisplaySimple(cm, {top: top, bottom: bot});
-	  }
-	
-	  if (wheelSamples < 20) {
-	    if (display.wheelStartX == null) {
-	      display.wheelStartX = scroll.scrollLeft; display.wheelStartY = scroll.scrollTop;
-	      display.wheelDX = dx; display.wheelDY = dy;
-	      setTimeout(function () {
-	        if (display.wheelStartX == null) { return }
-	        var movedX = scroll.scrollLeft - display.wheelStartX;
-	        var movedY = scroll.scrollTop - display.wheelStartY;
-	        var sample = (movedY && display.wheelDY && movedY / display.wheelDY) ||
-	          (movedX && display.wheelDX && movedX / display.wheelDX);
-	        display.wheelStartX = display.wheelStartY = null;
-	        if (!sample) { return }
-	        wheelPixelsPerUnit = (wheelPixelsPerUnit * wheelSamples + sample) / (wheelSamples + 1);
-	        ++wheelSamples;
-	      }, 200);
-	    } else {
-	      display.wheelDX += dx; display.wheelDY += dy;
-	    }
 	  }
 	}
 	
@@ -79180,7 +80745,7 @@
 	// Verify that the selection does not partially select any atomic
 	// marked ranges.
 	function reCheckSelection(doc) {
-	  setSelectionInner(doc, skipAtomicInSelection(doc, doc.sel, null, false));
+	  setSelectionInner(doc, skipAtomicInSelection(doc, doc.sel, null, false), sel_dontScroll);
 	}
 	
 	// Return a selection that does not partially select any atomic
@@ -79808,7 +81373,7 @@
 	
 	function adjustScrollWhenAboveVisible(cm, line, diff) {
 	  if (heightAtLine(line) < ((cm.curOp && cm.curOp.scrollTop) || cm.doc.scrollTop))
-	    { addToScrollTop(cm, diff); }
+	    { addToScrollPos(cm, null, diff); }
 	}
 	
 	function addLineWidget(doc, handle, node, options) {
@@ -79823,7 +81388,7 @@
 	    if (cm && !lineIsHidden(doc, line)) {
 	      var aboveVisible = heightAtLine(line) < doc.scrollTop;
 	      updateLineHeight(line, line.height + widgetHeight(widget));
-	      if (aboveVisible) { addToScrollTop(cm, widget.height); }
+	      if (aboveVisible) { addToScrollPos(cm, null, widget.height); }
 	      cm.curOp.forceUpdate = true;
 	    }
 	    return true
@@ -80171,7 +81736,7 @@
 	    var top = Pos(this.first, 0), last = this.first + this.size - 1;
 	    makeChange(this, {from: top, to: Pos(last, getLine(this, last).text.length),
 	                      text: this.splitLines(code), origin: "setValue", full: true}, true);
-	    if (this.cm) { scrollToCoords(this.cm, 0, 0); }
+	    if (this.cm) { this.cm.scrollTo(0, 0); }
 	    setSelection(this, simpleSelection(top), sel_dontScroll);
 	  }),
 	  replaceRange: function(code, from, to, origin) {
@@ -81816,7 +83381,7 @@
 	  // area, ensure viewport is updated when scrolling.
 	  on(d.scroller, "scroll", function () {
 	    if (d.scroller.clientHeight) {
-	      updateScrollTop(cm, d.scroller.scrollTop);
+	      setScrollTop(cm, d.scroller.scrollTop);
 	      setScrollLeft(cm, d.scroller.scrollLeft, true);
 	      signal(cm, "scroll", cm);
 	    }
@@ -82349,7 +83914,7 @@
 	        goals.push(headPos.left);
 	        var pos = findPosV(this$1, headPos, dir, unit);
 	        if (unit == "page" && range$$1 == doc.sel.primary())
-	          { addToScrollTop(this$1, charCoords(this$1, pos, "div").top - headPos.top); }
+	          { addToScrollPos(this$1, null, charCoords(this$1, pos, "div").top - headPos.top); }
 	        return pos
 	      }, sel_move);
 	      if (goals.length) { for (var i = 0; i < doc.sel.ranges.length; i++)
@@ -82386,7 +83951,11 @@
 	    hasFocus: function() { return this.display.input.getField() == activeElt() },
 	    isReadOnly: function() { return !!(this.options.readOnly || this.doc.cantEdit) },
 	
-	    scrollTo: methodOp(function (x, y) { scrollToCoords(this, x, y); }),
+	    scrollTo: methodOp(function(x, y) {
+	      if (x != null || y != null) { resolveScrollToPos(this); }
+	      if (x != null) { this.curOp.scrollLeft = x; }
+	      if (y != null) { this.curOp.scrollTop = y; }
+	    }),
 	    getScrollInfo: function() {
 	      var scroller = this.display.scroller;
 	      return {left: scroller.scrollLeft, top: scroller.scrollTop,
@@ -82408,9 +83977,16 @@
 	      range$$1.margin = margin || 0;
 	
 	      if (range$$1.from.line != null) {
-	        scrollToRange(this, range$$1);
+	        resolveScrollToPos(this);
+	        this.curOp.scrollToPos = range$$1;
 	      } else {
-	        scrollToCoordsRange(this, range$$1.from, range$$1.to, range$$1.margin);
+	        var sPos = calculateScrollPos(this, {
+	          left: Math.min(range$$1.from.left, range$$1.to.left),
+	          top: Math.min(range$$1.from.top, range$$1.to.top) - range$$1.margin,
+	          right: Math.max(range$$1.from.right, range$$1.to.right),
+	          bottom: Math.max(range$$1.from.bottom, range$$1.to.bottom) + range$$1.margin
+	        });
+	        this.scrollTo(sPos.scrollLeft, sPos.scrollTop);
 	      }
 	    }),
 	
@@ -82438,7 +84014,7 @@
 	      regChange(this);
 	      this.curOp.forceUpdate = true;
 	      clearCaches(this);
-	      scrollToCoords(this, this.doc.scrollLeft, this.doc.scrollTop);
+	      this.scrollTo(this.doc.scrollLeft, this.doc.scrollTop);
 	      updateGutterSpace(this);
 	      if (oldHeight == null || Math.abs(oldHeight - textHeight(this.display)) > .5)
 	        { estimateLineHeights(this); }
@@ -82451,7 +84027,7 @@
 	      attachDoc(this, doc);
 	      clearCaches(this);
 	      this.display.input.reset();
-	      scrollToCoords(this, doc.scrollLeft, doc.scrollTop);
+	      this.scrollTo(doc.scrollLeft, doc.scrollTop);
 	      this.curOp.forceScroll = true;
 	      signalLater(this, "swapDoc", this, old);
 	      return old
@@ -83206,7 +84782,7 @@
 	// Reset the input to correspond to the selection (or to be empty,
 	// when not typing and nothing is selected)
 	TextareaInput.prototype.reset = function (typing) {
-	  if (this.contextMenuPending || this.composing) { return }
+	  if (this.contextMenuPending) { return }
 	  var minimal, selected, cm = this.cm, doc = cm.doc;
 	  if (cm.somethingSelected()) {
 	    this.prevInput = "";
@@ -83571,7 +85147,7 @@
 	
 	addLegacyProps(CodeMirror$1);
 	
-	CodeMirror$1.version = "5.26.0";
+	CodeMirror$1.version = "5.25.2";
 	
 	return CodeMirror$1;
 	
@@ -83579,7 +85155,7 @@
 
 
 /***/ }),
-/* 299 */
+/* 320 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -83587,7 +85163,7 @@
 	
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(297));
+	    mod(__webpack_require__(318));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror"], mod);
 	  else // Plain browser env
@@ -83638,6 +85214,7 @@
 	        "namespace": C,
 	        "module": kw("module"),
 	        "enum": kw("module"),
+	        "type": kw("type"),
 	
 	        // scope modifiers
 	        "public": kw("modifier"),
@@ -83944,15 +85521,8 @@
 	    }
 	    if (type == "function") return cont(functiondef);
 	    if (type == "for") return cont(pushlex("form"), forspec, statement, poplex);
-	    if (type == "variable") {
-	      if (isTS && value == "type") {
-	        cx.marked = "keyword"
-	        return cont(typeexpr, expect("operator"), typeexpr, expect(";"));
-	      } else {
-	        return cont(pushlex("stat"), maybelabel);
-	      }
-	    }
-	    if (type == "switch") return cont(pushlex("form"), parenExpr, expect("{"), pushlex("}", "switch"),
+	    if (type == "variable") return cont(pushlex("stat"), maybelabel);
+	    if (type == "switch") return cont(pushlex("form"), parenExpr, pushlex("}", "switch"), expect("{"),
 	                                      block, poplex, poplex);
 	    if (type == "case") return cont(expression, expect(":"));
 	    if (type == "default") return cont(expect(":"));
@@ -83961,7 +85531,8 @@
 	    if (type == "class") return cont(pushlex("form"), className, poplex);
 	    if (type == "export") return cont(pushlex("stat"), afterExport, poplex);
 	    if (type == "import") return cont(pushlex("stat"), afterImport, poplex);
-	    if (type == "module") return cont(pushlex("form"), pattern, expect("{"), pushlex("}"), block, poplex, poplex)
+	    if (type == "module") return cont(pushlex("form"), pattern, pushlex("}"), expect("{"), block, poplex, poplex)
+	    if (type == "type") return cont(typeexpr, expect("operator"), typeexpr, expect(";"));
 	    if (type == "async") return cont(statement)
 	    if (value == "@") return cont(expression, statement)
 	    return pass(pushlex("stat"), expression, expect(";"), poplex);
@@ -84131,7 +85702,7 @@
 	  function typeexpr(type) {
 	    if (type == "variable") {cx.marked = "variable-3"; return cont(afterType);}
 	    if (type == "string" || type == "number" || type == "atom") return cont(afterType);
-	    if (type == "{") return cont(pushlex("}"), commasep(typeprop, "}", ",;"), poplex, afterType)
+	    if (type == "{") return cont(pushlex("}"), commasep(typeprop, "}", ",;"), poplex)
 	    if (type == "(") return cont(commasep(typearg, ")"), maybeReturnType)
 	  }
 	  function maybeReturnType(type) {
@@ -84145,8 +85716,6 @@
 	      return cont(typeprop)
 	    } else if (type == ":") {
 	      return cont(typeexpr)
-	    } else if (type == "[") {
-	      return cont(expression, maybetype, expect("]"), typeprop)
 	    }
 	  }
 	  function typearg(type) {
@@ -84157,7 +85726,6 @@
 	    if (value == "<") return cont(pushlex(">"), commasep(typeexpr, ">"), poplex, afterType)
 	    if (value == "|" || type == ".") return cont(typeexpr)
 	    if (type == "[") return cont(expect("]"), afterType)
-	    if (value == "extends") return cont(typeexpr)
 	  }
 	  function vardef() {
 	    return pass(pattern, maybetype, maybeAssign, vardefCont);
@@ -84398,7 +85966,7 @@
 
 
 /***/ }),
-/* 300 */
+/* 321 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -84406,7 +85974,7 @@
 	
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(297));
+	    mod(__webpack_require__(318));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror"], mod);
 	  else // Plain browser env
@@ -84648,7 +86216,7 @@
 
 
 /***/ }),
-/* 301 */
+/* 322 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -84660,7 +86228,7 @@
 	
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(297));
+	    mod(__webpack_require__(318));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror"], mod);
 	  else // Plain browser env
@@ -84685,7 +86253,7 @@
 
 
 /***/ }),
-/* 302 */
+/* 323 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -84693,7 +86261,7 @@
 	
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(297));
+	    mod(__webpack_require__(318));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror"], mod);
 	  else // Plain browser env
@@ -84796,7 +86364,7 @@
 
 
 /***/ }),
-/* 303 */
+/* 324 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -84804,7 +86372,7 @@
 	
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(297));
+	    mod(__webpack_require__(318));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror"], mod);
 	  else // Plain browser env
@@ -84952,7 +86520,7 @@
 
 
 /***/ }),
-/* 304 */
+/* 325 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -84960,7 +86528,7 @@
 	
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(297), __webpack_require__(303));
+	    mod(__webpack_require__(318), __webpack_require__(324));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "./foldcode"], mod);
 	  else // Plain browser env
@@ -85104,7 +86672,7 @@
 
 
 /***/ }),
-/* 305 */
+/* 326 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -85112,7 +86680,7 @@
 	
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(297));
+	    mod(__webpack_require__(318));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror"], mod);
 	  else // Plain browser env
