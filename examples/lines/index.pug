@@ -3,10 +3,10 @@
 |about: This example shows the variations that are available for line features.
 |---
 | 
-div#controls
+#controls
   .form-group(title="Number of lines segments.  Leave blank for a small default value.")
     label(for="lines") Number of Lines
-    input#lines(type="number" min="1" step="100")
+    input#lines(type="number", min="1", step="100")
     span#lines-shown
   .form-group(title="Stroke Color (any css color).  A comma-separated list will cycle through the listed colors.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to colors, with undefined values using the 'other' entry.")
     label(for="strokeColor") strokeColor

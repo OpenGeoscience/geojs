@@ -2,20 +2,20 @@ doctype html
 html(lang="en")
   head
     meta(charset="UTF-8")
-    link(rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon")
+    link(rel="shortcut icon", href="data:image/x-icon;,", type="image/x-icon")
     title= title
 
     // include the main bundle
-    script(type='text/javascript' src='#{bundle}' charset='UTF-8')
+    script(type='text/javascript', src=bundle, charset='UTF-8')
 
     // include example sources
     block exampleHeader
       // Include example specific files
       each css in exampleCss
-        link(rel="stylesheet" href="#{css}")
+        link(rel="stylesheet", href=css)
       each src in exampleJs
-        if(typeof src == "string")
-          script(type="text/javascript" src="#{src}")
+        if(typeof src === "string")
+          script(type="text/javascript", src=src)
         else
           script&attributes(src)
 
@@ -47,11 +47,11 @@ html(lang="en")
               block showSource
                 if docHTML
                   li
-                    a.gj-show-source-link(href="#{docHTML}", target="gj-docco")
+                    a.gj-show-source-link(href=docHTML, target="gj-docco")
                       | Source
               if !about.hidden
                 li
-                  a.gj-show-about-link(href="#" data-toggle="modal" data-target="#about-modal")
+                  a.gj-show-about-link(href="#", data-toggle="modal", data-target="#about-modal")
                     | About
 
       if ! about.hidden
@@ -65,8 +65,7 @@ html(lang="en")
                 p.text-left !{about.text}
                 p.text-right © Kitware, Inc.
               .modal-footer
-                button.btn.btn-primary(data-dismiss="modal" data-target="#about-modal") Close
-
+                button.btn.btn-primary(data-dismiss="modal", data-target="#about-modal") Close
 
     // Add the default main content element
     block mainContent

@@ -6,8 +6,8 @@ var external = require('./external.config');
 require('./examples/build');
 
 var loaders = base.module.loaders.concat([{
-  test: /\.jade$/,
-  loader: 'jade'
+  test: /\.pug$/,
+  loader: 'pug'
 }, {
   test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
   loader: 'url?limit=10000&mimetype=application/font-woff'
@@ -36,7 +36,7 @@ loaders = loaders.concat(external.module.loaders);
 var plugins = base.exposed_plugins;
 
 var resolve = {
-  extentions: ['.js', '.css', '.jade', ''],
+  extentions: ['.js', '.css', '.pug', ''],
   alias: base.resolve.alias
 };
 

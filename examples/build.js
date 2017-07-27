@@ -2,10 +2,10 @@ var path = require('path');
 var glob = require('glob').sync;
 var fs = require('fs-extra');
 var docco = require('docco').document;
-var jade = require('jade');
+var pug = require('pug');
 
 // generate the examples
-fs.ensureDirSync('dist/examples');
+fs.ensureDirSync('dist/_examples');
 glob('examples/*/example.json')
   .map(function (f) {
     // /path/to/example.json
@@ -42,7 +42,8 @@ glob('examples/*/example.json')
     json.docHTML = 'docs/' + path.basename(main).replace(/js$/, 'html');
     json.bundle = '../bundle.js';
 
-    var fn = jade.compileFile(path.relative('.', path.resolve(dir, 'index.jade')), {pretty: false});
+    var fn = pug.compileFile(path.relative('.', path.resolve(dir, 'index.pug')), {pretty: false});
     fs.writeFileSync(path.resolve(output, 'index.html'), fn(json));
     return json;
   });
+

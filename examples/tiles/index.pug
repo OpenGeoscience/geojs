@@ -3,7 +3,7 @@
 |about: This example provides controls for changing many options on tile layers. The code and query parameters allow even more options to be adjusted.
 |---
 | 
-div#controls
+#controls
   .form-group(title="Tiles can be drawn using WebGL, Canvas, HTML, or SVG.  WebGL is generally the fastest and HTML the most compatible.")
     label(for="map-renderer") Renderer
     select#map-renderer.mapparam(param-name="renderer", placeholder="default")
@@ -61,11 +61,11 @@ div#controls
     input#layer-url.layerparam(param-name="url", list="url-list", placeholder="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
     datalist#url-list
       option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", credit="© OpenStreetMap contributors") OSM
-      option(value="../data/tilefancy.png", credit="") Fancy Test Tile
-      option(value="http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", credit='Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.') Toner Lite
+      option(value="../../data/tilefancy.png", credit="") Fancy Test Tile
+      option(value="http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", credit='Map tiles by <a href="http://stamen.com"<Stamen Design</a<, under <a href="http://creativecommons.org/licenses/by/3.0"<CC BY 3.0</a<. Data by <a href="http://openstreetmap.org"<OpenStreetMap</a<, under <a href="http://www.openstreetmap.org/copyright"<ODbL</a<.') Toner Lite
   .form-group(title="The subdomains used to fetch tiles.  This can be a comma-separated list or a string of single-letter subdomains.")
     label(for="layer-subdomains") URL Subdomains
-    input#layer-subdomains.layerparam(param-name="subdomains" placeholder="abc")
+    input#layer-subdomains.layerparam(param-name="subdomains", placeholder="abc")
   .form-group(title="Change the attribution text shown in the corner of the map.")
     label(for="layer-attribution") Attribution
     input#layer-attribution.layerparam(param-name="attribution", placeholder="Tile data copyright OpenStreetMap contributors")
@@ -105,7 +105,7 @@ div#controls
     label(for="css-fade") HTML Fade-in
     input#css-fade.cssparam(param-name="fade", type="checkbox", placeholder="false")
 
-// There are additional controls that could be implemented:
+//- There are additional controls that could be implemented:
   on the map object: gcs, ingcs, maxBounds, unitsPerPixel
   on the tile layer object: maxLevel
   pixel-coordinate systems for images, including setting image width and height

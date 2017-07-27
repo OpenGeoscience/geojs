@@ -4,7 +4,7 @@
   position: absolute;
   left: 10px;
   top: 80px;
-  z-index: 1;
+  z-index: 1000;
   border-radius: 5px;
   border: 1px solid grey;
   box-shadow: 1px 1px 3px black;

@@ -8,6 +8,7 @@ var registerAnnotation = require('./registry').registerAnnotation;
 var lineFeature = require('./lineFeature');
 var pointFeature = require('./pointFeature');
 var polygonFeature = require('./polygonFeature');
+var textFeature = require('./textFeature');
 
 var annotationId = 0;
 
@@ -20,18 +21,22 @@ var annotationState = {
 var annotationActionOwner = 'annotationAction';
 
 /**
- * Base annotation class
+ * Base annotation class.
  *
- * @class geo.annotation
- * @param {string} type the type of annotation.  These should be registered
+ * @class
+ * @alias geo.annotation
+ * @param {string} type The type of annotation.  These should be registered
  *    with utils.registerAnnotation and can be listed with same function.
- * @param {object?} options Inidividual annotations have additional options.
- * @param {string} [options.name] A name for the annotation.  This defaults to
+ * @param {object?} [args] Individual annotations have additional options.
+ * @param {string} [args.name] A name for the annotation.  This defaults to
  *    the type with a unique ID suffixed to it.
- * @param {geo.annotationLayer} [options.layer] a reference to the controlling
+ * @param {geo.annotationLayer} [arg.layer] A reference to the controlling
  *    layer.  This is used for coordinate transforms.
- * @param {string} [options.state] initial annotation state.  One of the
- *    annotation.state values.
+ * @param {string} [args.state] Initial annotation state.  One of the
+ *    `geo.annotation.state` values.
+ * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+ *    annotation label on annotations in done or edit states.  Alternately, a
+ *    list of states in which to show the label.  Falsy to not show the label.
  * @returns {geo.annotation}
  */
 var annotation = function (type, args) {
@@ -41,10 +46,12 @@ var annotation = function (type, args) {
   }
 
   annotationId += 1;
-  var m_options = $.extend({}, args || {}),
+  var m_options = $.extend({}, {showLabel: true}, args || {}),
       m_id = annotationId,
       m_name = m_options.name || (
         type.charAt(0).toUpperCase() + type.substr(1) + ' ' + annotationId),
+      m_label = m_options.label || null,
+      m_description = m_options.description || undefined,
       m_type = type,
       m_layer = m_options.layer,
       /* one of annotationState.* */
@@ -52,6 +59,8 @@ var annotation = function (type, args) {
   delete m_options.state;
   delete m_options.layer;
   delete m_options.name;
+  delete m_options.label;
+  delete m_options.description;
 
   /**
    * Clean up any resources that the annotation is using.
@@ -62,7 +71,7 @@ var annotation = function (type, args) {
   /**
    * Get a unique annotation id.
    *
-   * @returns {number} the annotation id.
+   * @returns {number} The annotation id.
    */
   this.id = function () {
     return m_id;
@@ -71,16 +80,113 @@ var annotation = function (type, args) {
   /**
    * Get or set the name of this annotation.
    *
-   * @param {string|undefined} arg if undefined, return the name, otherwise
-   *    change it.
-   * @returns {this|string} the current name or this annotation.
+   * @param {string|undefined} arg If `undefined`, return the name, otherwise
+   *    change it.  When setting the name, the value is trimmed of
+   *    whitespace.  The name will not be changed to an empty string.
+   * @returns {this|string} The current name or this annotation.
    */
   this.name = function (arg) {
     if (arg === undefined) {
       return m_name;
     }
     if (arg !== null && ('' + arg).trim()) {
-      m_name = ('' + arg).trim();
+      arg = ('' + arg).trim();
+      if (arg !== m_name) {
+        m_name = arg;
+        this.modified();
+      }
+    }
+    return this;
+  };
+
+  /**
+   * Get or set the label of this annotation.
+   *
+   * @param {string|null|undefined} arg If `undefined`, return the label,
+   *    otherwise change it.  `null` to clear the label.
+   * @param {boolean} noFallback If not truthy and the label is `null`, return
+   *    the name, otherwise return the actual value for label.
+   * @returns {this|string} The current label or this annotation.
+   */
+  this.label = function (arg, noFallback) {
+    if (arg === undefined) {
+      return m_label === null && !noFallback ? m_name : m_label;
+    }
+    if (arg !== m_label) {
+      m_label = arg;
+      this.modified();
+    }
+    return this;
+  };
+
+  /**
+   * Return the coordinate associated with the label.
+   *
+   * @returns {geo.geoPosition|undefined} The map gcs position for the label,
+   *    or `undefined` if no such position exists.
+   */
+  this._labelPosition = function () {
+    var coor = this._coordinates(), position = {x: 0, y: 0}, i;
+    if (!coor || !coor.length) {
+      return undefined;
+    }
+    if (coor.length === 1) {
+      return coor[0];
+    }
+    for (i = 0; i < coor.length; i += 1) {
+      position.x += coor[i].x;
+      position.y += coor[i].y;
+    }
+    position.x /= coor.length;
+    position.y /= coor.length;
+    return position;
+  };
+
+  /**
+   * If the label should be shown, get a record of the label that can be used
+   * in a `geo.textFeature`.
+   *
+   * @returns {geo.annotationLayer.labelRecord|undefined} A label record, or
+   *    `undefined` if it should not be shown.
+   */
+  this.labelRecord = function () {
+    var show = this.options('showLabel');
+    if (!show) {
+      return;
+    }
+    var state = this.state();
+    if ((show === true && state === annotationState.create) ||
+        (show !== true && show.indexOf(state) < 0)) {
+      return;
+    }
+    var style = this.options('labelStyle');
+    var labelRecord = {
+      text: this.label(),
+      position: this._labelPosition()
+    };
+    if (!labelRecord.position) {
+      return;
+    }
+    if (style) {
+      labelRecord.style = style;
+    }
+    return labelRecord;
+  };
+
+  /**
+   * Get or set the description of this annotation.
+   *
+   * @param {string|undefined} arg If `undefined`, return the description,
+   *    otherwise change it.
+   * @returns {this|string} The current description or this annotation.
+   */
+  this.description = function (arg) {
+    if (arg === undefined) {
+      return m_description;
+    }
+    if (arg !== m_description) {
+      m_description = arg;
+      this.modified();
     }
     return this;
   };
@@ -103,9 +209,10 @@ var annotation = function (type, args) {
   /**
    * Get or set the state of this annotation.
    *
-   * @param {string|undefined} arg if undefined, return the state, otherwise
-   *    change it.
-   * @returns {this|string} the current state or this annotation.
+   * @param {string|undefined} arg If `undefined`, return the state,
+   *    otherwise change it.  This should be one of the
+   *    `geo.annotation.state` values.
+   * @returns {this|string} The current state or this annotation.
    */
   this.state = function (arg) {
     if (arg === undefined) {
@@ -125,9 +232,9 @@ var annotation = function (type, args) {
   /**
    * Return actions needed for the specified state of this annotation.
    *
-   * @param {string} state: the state to return actions for.  Defaults to
+   * @param {string} [state] The state to return actions for.  Defaults to
    *    the current state.
-   * @returns {array}: a list of actions.
+   * @returns {geo.actionRecord[]} A list of actions.
    */
   this.actions = function () {
     return [];
@@ -136,24 +243,26 @@ var annotation = function (type, args) {
   /**
    * Process any actions for this annotation.
    *
-   * @param {object} evt: the action event.
-   * @returns {boolean|string} true to update the annotation, 'done' if the
-   *    annotation was completed (changed from create to done state), 'remove'
-   *    if the annotation should be removed, falsy to not update anything.
+   * @param {geo.event} evt The action event.
+   * @returns {boolean|string} `true` to update the annotation, `'done'` if the
+   *    annotation was completed (changed from create to done state),
+   *    `'remove'` if the annotation should be removed, falsy to not update
+   *    anything.
    */
   this.processAction = function () {
+    return undefined;
   };
 
   /**
    * Set or get options.
    *
-   * @param {string|object} arg1 if undefined, return the options object.  If
-   *    a string, either set or return the option of that name.  If an object,
-   *    update the options with the object's values.
-   * @param {object} arg2 if arg1 is a string and this is defined, set the
-   *    option to this value.
-   * @returns {object|this} if options are set, return the layer, otherwise
-   *    return the requested option or the set of options.
+   * @param {string|object} [arg1] If `undefined`, return the options object.
+   *    If a string, either set or return the option of that name.  If an
+   *    object, update the options with the object's values.
+   * @param {object} [arg2] If `arg1` is a string and this is defined, set
+   *    the option to this value.
+   * @returns {object|this} If options are set, return the annotation,
+   *    otherwise return the requested option or the set of options.
    */
   this.options = function (arg1, arg2) {
     if (arg1 === undefined) {
@@ -164,6 +273,13 @@ var annotation = function (type, args) {
     }
     if (arg2 === undefined) {
       m_options = $.extend(true, m_options, arg1);
+      /* For style objects, reextend them without recursiion.  This allows
+       * setting colors without an opacity field, for instance. */
+      ['style', 'editStyle', 'labelStyle'].forEach(function (key) {
+        if (arg1[key] !== undefined) {
+          $.extend(m_options[key], arg1[key]);
+        }
+      });
     } else {
       m_options[arg1] = arg2;
     }
@@ -177,6 +293,16 @@ var annotation = function (type, args) {
       delete m_options.name;
       this.name(name);
     }
+    if (m_options.label !== undefined) {
+      var label = m_options.label;
+      delete m_options.label;
+      this.label(label);
+    }
+    if (m_options.description !== undefined) {
+      var description = m_options.description;
+      delete m_options.description;
+      this.description(description);
+    }
     this.modified();
     return this;
   };
@@ -184,13 +310,14 @@ var annotation = function (type, args) {
   /**
    * Set or get style.
    *
-   * @param {string|object} arg1 if undefined, return the options.style object.
-   *    If a string, either set or return the style of that name.  If an
-   *    object, update the style with the object's values.
-   * @param {object} arg2 if arg1 is a string and this is defined, set the
-   *    style to this value.
-   * @returns {object|this} if styles are set, return the layer, otherwise
-   *    return the requested style or the set of styles.
+   * @param {string|object} [arg1] If `undefined`, return the current style
+   *    object.  If a string and `arg2` is undefined, return the style
+   *    associated with the specified key.  If a string and `arg2` is defined,
+   *    set the named style to the specified value.  Otherwise, extend the
+   *    current style with the values in the specified object.
+   * @param {*} [arg2] If `arg1` is a string, the new value for that style.
+   * @returns {object|this} Either the entire style object, the value of a
+   *    specific style, or the current class instance.
    */
   this.style = function (arg1, arg2) {
     if (arg1 === undefined) {
@@ -209,27 +336,28 @@ var annotation = function (type, args) {
   };
 
   /**
-   * Set or get edit style.
+   * Set or get edit style.  These are the styles used in edit and create mode.
    *
-   * @param {string|object} arg1 if undefined, return the options.editstyle
-   *    object.  If a string, either set or return the style of that name.  If
-   *    an object, update the style with the object's values.
-   * @param {object} arg2 if arg1 is a string and this is defined, set the
-   *    style to this value.
-   * @returns {object|this} if styles are set, return the layer, otherwise
-   *    return the requested style or the set of styles.
+   * @param {string|object} [arg1] If `undefined`, return the current style
+   *    object.  If a string and `arg2` is undefined, return the style
+   *    associated with the specified key.  If a string and `arg2` is defined,
+   *    set the named style to the specified value.  Otherwise, extend the
+   *    current style with the values in the specified object.
+   * @param {*} [arg2] If `arg1` is a string, the new value for that style.
+   * @returns {object|this} Either the entire style object, the value of a
+   *    specific style, or the current class instance.
    */
-  this.editstyle = function (arg1, arg2) {
+  this.editStyle = function (arg1, arg2) {
     if (arg1 === undefined) {
-      return m_options.editstyle;
+      return m_options.editStyle;
     }
     if (typeof arg1 === 'string' && arg2 === undefined) {
-      return m_options.editstyle[arg1];
+      return m_options.editStyle[arg1];
     }
     if (arg2 === undefined) {
-      m_options.editstyle = $.extend(true, m_options.editstyle, arg1);
+      m_options.editStyle = $.extend(true, m_options.editStyle, arg1);
     } else {
-      m_options.editstyle[arg1] = arg2;
+      m_options.editStyle[arg1] = arg2;
     }
     this.modified();
     return this;
@@ -238,7 +366,7 @@ var annotation = function (type, args) {
   /**
    * Get the type of this annotation.
    *
-   * @returns {string} the annotation type.
+   * @returns {string} The annotation type.
    */
   this.type = function () {
     return m_type;
@@ -247,11 +375,11 @@ var annotation = function (type, args) {
   /**
    * Get a list of renderable features for this annotation.  The list index is
    * functionally a z-index for the feature.  Each entry is a dictionary with
-   * the key as the feature name (such as line, quad, or polygon), and the
-   * value a dictionary of values to pass to the feature constructor, such as
-   * style and coordinates.
+   * the key as the feature name (such as `line`, `quad`, or `polygon`), and
+   * the value a dictionary of values to pass to the feature constructor, such
+   * as `style` and `coordinates`.
    *
-   * @returns {array} an array of features.
+   * @returns {array} An array of features.
    */
   this.features = function () {
     return [];
@@ -259,32 +387,36 @@ var annotation = function (type, args) {
 
   /**
    * Handle a mouse click on this annotation.  If the event is processed,
-   * evt.handled should be set to true to prevent further processing.
+   * evt.handled should be set to `true` to prevent further processing.
    *
-   * @param {geo.event} evt the mouse click event.
-   * @returns {boolean|string} true to update the annotation, 'done' if the
-   *    annotation was completed (changed from create to done state), 'remove'
-   *    if the annotation should be removed, falsy to not update anything.
+   * @param {geo.event} evt The mouse click event.
+   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+   *    the annotation was completed (changed from create to done state),
+   *    `'remove'` if the annotation should be removed, falsy to not update
+   *    anything.
    */
   this.mouseClick = function (evt) {
+    return undefined;
   };
 
   /**
    * Handle a mouse move on this annotation.
    *
-   * @param {geo.event} evt the mouse move event.
-   * @returns {boolean|string} true to update the annotation, falsy to not
+   * @param {geo.event} evt The mouse move event.
+   * @returns {boolean} Truthy to update the annotation, falsy to not
    *    update anything.
    */
   this.mouseMove = function (evt) {
+    return undefined;
   };
 
   /**
    * Get coordinates associated with this annotation in the map gcs coordinate
    * system.
    *
-   * @param {array} coordinates: an optional array of coordinates to set.
-   * @returns {array} an array of coordinates.
+   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+   *  to set.
+   * @returns {geo.geoPosition[]} The current array of coordinates.
    */
   this._coordinates = function (coordinates) {
     return [];
@@ -293,9 +425,9 @@ var annotation = function (type, args) {
   /**
    * Get coordinates associated with this annotation.
    *
-   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-   *    null to use the map gcs, or any other transform.
-   * @returns {array} an array of coordinates.
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.
+   * @returns {geo.geoPosition[]} An array of coordinates.
    */
   this.coordinates = function (gcs) {
     var coord = this._coordinates() || [];
@@ -313,6 +445,8 @@ var annotation = function (type, args) {
   /**
    * Mark this annotation as modified.  This just marks the parent layer as
    * modified.
+   *
+   * @returns {this} The annotation.
    */
   this.modified = function () {
     if (this.layer()) {
@@ -323,6 +457,8 @@ var annotation = function (type, args) {
 
   /**
    * Draw this annotation.  This just updates and draws the parent layer.
+   *
+   * @returns {this} The annotation.
    */
   this.draw = function () {
     if (this.layer()) {
@@ -336,7 +472,7 @@ var annotation = function (type, args) {
    * Return a list of styles that should be preserved in a geojson
    * representation of the annotation.
    *
-   * @return {array} a list of style names to store.
+   * @returns {string[]} A list of style names to store.
    */
   this._geojsonStyles = function () {
     return [
@@ -346,38 +482,41 @@ var annotation = function (type, args) {
   };
 
   /**
-   * Return the coordinates to be stored in a geojson geometery object.
+   * Return the coordinates to be stored in a geojson geometry object.
    *
-   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-   *    null to use the map gcs, or any other transform.
-   * @return {array} an array of flattened coordinates in the ingcs coordinate
-   *    system.  Undefined if this annotation is incompelte.
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.
+   * @returns {array} An array of flattened coordinates in the interface gcs
+   *    coordinate system.  `undefined` if this annotation is incomplete.
    */
   this._geojsonCoordinates = function (gcs) {
+    return [];
   };
 
   /**
    * Return the geometry type that is used to store this annotation in geojson.
    *
-   * @return {string} a geojson geometry type.
+   * @returns {string} A geojson geometry type.
    */
   this._geojsonGeometryType = function () {
+    return '';
   };
 
   /**
    * Return the annotation as a geojson object.
    *
-   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-   *    null to use the map gcs, or any other transform.
-   * @param {boolean} includeCrs: if true, include the coordinate system.
-   * @return {object} the annotation as a geojson object, or undefined if it
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.
+   * @param {boolean} [includeCrs] If truthy, include the coordinate system.
+   * @returns {object} The annotation as a geojson object, or `undefined` if it
    *    should not be represented (for instance, while it is being created).
    */
   this.geojson = function (gcs, includeCrs) {
     var coor = this._geojsonCoordinates(gcs),
         geotype = this._geojsonGeometryType(),
         styles = this._geojsonStyles(),
-        objStyle = this.options('style'),
+        objStyle = this.options('style') || {},
+        objLabelStyle = this.options('labelStyle') || {},
         i, key, value;
     if (!coor || !coor.length || !geotype) {
       return;
@@ -394,14 +533,33 @@ var annotation = function (type, args) {
         annotationId: this.id()
       }
     };
+    if (m_label) {
+      obj.properties.label = m_label;
+    }
+    if (m_description) {
+      obj.properties.description = m_description;
+    }
+    if (this.options('showLabel') === false) {
+      obj.properties.showLabel = this.options('showLabel');
+    }
     for (i = 0; i < styles.length; i += 1) {
       key = styles[i];
       value = util.ensureFunction(objStyle[key])();
       if (value !== undefined) {
         if (key.toLowerCase().match(/color$/)) {
-          value = util.convertColorToHex(value);
+          value = util.convertColorToHex(value, 'needed');
         }
         obj.properties[key] = value;
+      }
+    }
+    for (i = 0; i < textFeature.usedStyles.length; i += 1) {
+      key = textFeature.usedStyles[i];
+      value = util.ensureFunction(objLabelStyle[key])();
+      if (value !== undefined) {
+        if (key.toLowerCase().match(/color$/)) {
+          value = util.convertColorToHex(value, 'needed');
+        }
+        obj.properties['label' + key.charAt(0).toUpperCase() + key.slice(1)] = value;
       }
     }
     if (includeCrs) {
@@ -421,18 +579,37 @@ var annotation = function (type, args) {
 };
 
 /**
- * Rectangle annotation class
+ * Rectangle annotation class.
  *
  * Rectangles are always rendered as polygons.  This could be changed -- if no
  * stroke is specified, the quad feature would be sufficient and work on more
  * renderers.
  *
- * Must specify:
- *   corners: a list of four corners {x: x, y: y} in map gcs coordinates.
- * May specify:
- *   style.
- *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
- *     strokeOpacity
+ * @class
+ * @alias geo.rectangleAnnotation
+ * @extends geo.annotation
+ *
+ * @param {object?} [args] Options for the annotation.
+ * @param {string} [args.name] A name for the annotation.  This defaults to
+ *    the type with a unique ID suffixed to it.
+ * @param {string} [args.state] initial annotation state.  One of the
+ *    annotation.state values.
+ * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+ *    annotation label on annotations in done or edit states.  Alternately, a
+ *    list of states in which to show the label.  Falsy to not show the label.
+ * @param {geo.geoPosition[]} [args.corners] A list of four corners in map
+ *    gcs coordinates.  These must be in order around the perimeter of the
+ *    rectangle (in either direction).
+ * @param {geo.geoPosition[]} [args.coordinates] An alternate name for
+ *    `args.corners`.
+ * @param {object} [args.style] The style to apply to a finished rectangle.
+ *    This uses styles for polygons, including `fill`, `fillColor`,
+ *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+ *    `strokeOpacity`.
+ * @param {object} [args.editStyle] The style to apply to a rectangle in edit
+ *    mode.  This uses styles for polygons and lines, including `fill`,
+ *    `fillColor`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+ *    `strokeOpacity`.
  */
 var rectangleAnnotation = function (args) {
   'use strict';
@@ -452,7 +629,7 @@ var rectangleAnnotation = function (args) {
       strokeWidth: 3,
       uniformPolygon: true
     },
-    editstyle: {
+    editStyle: {
       fill: true,
       fillColor: {r: 0.3, g: 0.3, b: 0.3},
       fillOpacity: 0.25,
@@ -471,9 +648,9 @@ var rectangleAnnotation = function (args) {
   /**
    * Return actions needed for the specified state of this annotation.
    *
-   * @param {string} state: the state to return actions for.  Defaults to
+   * @param {string} [state] The state to return actions for.  Defaults to
    *    the current state.
-   * @returns {array}: a list of actions.
+   * @returns {geo.actionRecord[]} A list of actions.
    */
   this.actions = function (state) {
     if (!state) {
@@ -497,10 +674,11 @@ var rectangleAnnotation = function (args) {
   /**
    * Process any actions for this annotation.
    *
-   * @param {object} evt: the action event.
-   * @returns {boolean|string} true to update the annotation, 'done' if the
-   *    annotation was completed (changed from create to done state), 'remove'
-   *    if the annotation should be removed, falsy to not update anything.
+   * @param {geo.event} evt The action event.
+   * @returns {boolean|string} `true` to update the annotation, `'done'` if the
+   *    annotation was completed (changed from create to done state),
+   *    `'remove'` if the annotation should be removed, falsy to not update
+   *    anything.
    */
   this.processAction = function (evt) {
     var layer = this.layer();
@@ -524,7 +702,7 @@ var rectangleAnnotation = function (args) {
   /**
    * Get a list of renderable features for this annotation.
    *
-   * @returns {array} an array of features.
+   * @returns {array} An array of features.
    */
   this.features = function () {
     var opt = this.options(),
@@ -537,7 +715,7 @@ var rectangleAnnotation = function (args) {
           features = [{
             polygon: {
               polygon: opt.corners,
-              style: opt.editstyle
+              style: opt.editStyle
             }
           }];
         }
@@ -558,8 +736,9 @@ var rectangleAnnotation = function (args) {
    * Get coordinates associated with this annotation in the map gcs coordinate
    * system.
    *
-   * @param {array} coordinates: an optional array of coordinates to set.
-   * @returns {array} an array of coordinates.
+   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+   *  to set.
+   * @returns {geo.geoPosition[]} The current array of coordinates.
    */
   this._coordinates = function (coordinates) {
     if (coordinates && coordinates.length >= 4) {
@@ -571,12 +750,12 @@ var rectangleAnnotation = function (args) {
   };
 
   /**
-   * Return the coordinates to be stored in a geojson geometery object.
+   * Return the coordinates to be stored in a geojson geometry object.
    *
-   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-   *    null to use the map gcs, or any other transform.
-   * @return {array} an array of flattened coordinates in the ingcs coordinate
-   *    system.  Undefined if this annotation is incompelte.
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.
+   * @returns {array} An array of flattened coordinates in the interface gcs
+   *    coordinate system.  `undefined` if this annotation is incomplete.
    */
   this._geojsonCoordinates = function (gcs) {
     var src = this.coordinates(gcs);
@@ -594,7 +773,7 @@ var rectangleAnnotation = function (args) {
   /**
    * Return the geometry type that is used to store this annotation in geojson.
    *
-   * @return {string} a geojson geometry type.
+   * @returns {string} A geojson geometry type.
    */
   this._geojsonGeometryType = function () {
     return 'Polygon';
@@ -604,7 +783,7 @@ var rectangleAnnotation = function (args) {
    * Return a list of styles that should be preserved in a geojson
    * representation of the annotation.
    *
-   * @return {array} a list of style names to store.
+   * @returns {string[]} A list of style names to store.
    */
   this._geojsonStyles = function () {
     return [
@@ -615,8 +794,8 @@ var rectangleAnnotation = function (args) {
   /**
    * Set three corners based on an initial corner and a mouse event.
    *
-   * @param {array} an array of four corners to update.
-   * @param {geo.event} evt the mouse move event.
+   * @param {geo.geoPosition} corners An array of four corners to update.
+   * @param {geo.event} evt The mouse move event.
    */
   this._setCornersFromMouse = function (corners, evt) {
     var map = this.layer().map(),
@@ -632,8 +811,8 @@ var rectangleAnnotation = function (args) {
   /**
    * Handle a mouse move on this annotation.
    *
-   * @param {geo.event} evt the mouse move event.
-   * @returns {boolean|string} true to update the annotation, falsy to not
+   * @param {geo.event} evt The mouse move event.
+   * @returns {boolean} Truthy to update the annotation, falsy to not
    *    update anything.
    */
   this.mouseMove = function (evt) {
@@ -649,12 +828,13 @@ var rectangleAnnotation = function (args) {
 
   /**
    * Handle a mouse click on this annotation.  If the event is processed,
-   * evt.handled should be set to true to prevent further processing.
+   * evt.handled should be set to `true` to prevent further processing.
    *
-   * @param {geo.event} evt the mouse click event.
-   * @returns {boolean|string} true to update the annotation, 'done' if the
-   *    annotation was completed (changed from create to done state), 'remove'
-   *    if the annotation should be removed, falsy to not update anything.
+   * @param {geo.event} evt The mouse click event.
+   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+   *    the annotation was completed (changed from create to done state),
+   *    `'remove'` if the annotation should be removed, falsy to not update
+   *    anything.
    */
   this.mouseClick = function (evt) {
     var layer = this.layer();
@@ -696,15 +876,31 @@ registerAnnotation('rectangle', rectangleAnnotation, rectangleRequiredFeatures);
  * When complete, polygons are rendered as polygons.  During creation they are
  * rendered as lines and polygons.
  *
- * Must specify:
- *   vertices: a list of vertices {x: x, y: y} in map gcs coordinates.
- * May specify:
- *   style.
- *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
- *     strokeOpacity
- *   editstyle.
- *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
- *     strokeOpacity
+ * @class
+ * @alias geo.polygonAnnotation
+ * @extends geo.annotation
+ *
+ * @param {object?} [args] Options for the annotation.
+ * @param {string} [args.name] A name for the annotation.  This defaults to
+ *    the type with a unique ID suffixed to it.
+ * @param {string} [args.state] initial annotation state.  One of the
+ *    annotation.state values.
+ * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+ *    annotation label on annotations in done or edit states.  Alternately, a
+ *    list of states in which to show the label.  Falsy to not show the label.
+ * @param {geo.geoPosition[]} [args.vertices] A list of vertices in map gcs
+ *    coordinates.  These must be in order around the perimeter of the
+ *    polygon (in either direction).
+ * @param {geo.geoPosition[]} [args.coordinates] An alternate name for
+ *    `args.vertices`.
+ * @param {object} [args.style] The style to apply to a finished polygon.
+ *    This uses styles for polygons, including `fill`, `fillColor`,
+ *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+ *    `strokeOpacity`.
+ * @param {object} [args.editStyle] The style to apply to a polygon in edit
+ *    mode.  This uses styles for polygons and lines, including `fill`,
+ *    `fillColor`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+ *    `strokeOpacity`.
  */
 var polygonAnnotation = function (args) {
   'use strict';
@@ -726,7 +922,7 @@ var polygonAnnotation = function (args) {
       strokeWidth: 3,
       uniformPolygon: true
     },
-    editstyle: {
+    editStyle: {
       closed: false,
       fill: true,
       fillColor: {r: 0.3, g: 0.3, b: 0.3},
@@ -757,7 +953,7 @@ var polygonAnnotation = function (args) {
    * is done, this is just a single polygon.  During creation this can be a
    * polygon and line at z-levels 1 and 2.
    *
-   * @returns {array} an array of features.
+   * @returns {array} An array of features.
    */
   this.features = function () {
     var opt = this.options(),
@@ -770,7 +966,7 @@ var polygonAnnotation = function (args) {
           features[1] = {
             polygon: {
               polygon: opt.vertices,
-              style: opt.editstyle
+              style: opt.editStyle
             }
           };
         }
@@ -778,7 +974,7 @@ var polygonAnnotation = function (args) {
           features[2] = {
             line: {
               line: opt.vertices,
-              style: opt.editstyle
+              style: opt.editStyle
             }
           };
         }
@@ -799,8 +995,9 @@ var polygonAnnotation = function (args) {
    * Get coordinates associated with this annotation in the map gcs coordinate
    * system.
    *
-   * @param {array} coordinates: an optional array of coordinates to set.
-   * @returns {array} an array of coordinates.
+   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+   *  to set.
+   * @returns {geo.geoPosition[]} The current array of coordinates.
    */
   this._coordinates = function (coordinates) {
     if (coordinates) {
@@ -812,8 +1009,8 @@ var polygonAnnotation = function (args) {
   /**
    * Handle a mouse move on this annotation.
    *
-   * @param {geo.event} evt the mouse move event.
-   * @returns {boolean|string} true to update the annotation, falsy to not
+   * @param {geo.event} evt The mouse move event.
+   * @returns {boolean} Truthy to update the annotation, falsy to not
    *    update anything.
    */
   this.mouseMove = function (evt) {
@@ -829,12 +1026,13 @@ var polygonAnnotation = function (args) {
 
   /**
    * Handle a mouse click on this annotation.  If the event is processed,
-   * evt.handled should be set to true to prevent further processing.
+   * evt.handled should be set to `true` to prevent further processing.
    *
-   * @param {geo.event} evt the mouse click event.
-   * @returns {boolean|string} true to update the annotation, 'done' if the
-   *    annotation was completed (changed from create to done state), 'remove'
-   *    if the annotation should be removed, falsy to not update anything.
+   * @param {geo.event} evt The mouse click event.
+   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+   *    the annotation was completed (changed from create to done state),
+   *    `'remove'` if the annotation should be removed, falsy to not update
+   *    anything.
    */
   this.mouseClick = function (evt) {
     var layer = this.layer();
@@ -887,12 +1085,12 @@ var polygonAnnotation = function (args) {
   };
 
   /**
-   * Return the coordinates to be stored in a geojson geometery object.
+   * Return the coordinates to be stored in a geojson geometry object.
    *
-   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-   *    null to use the map gcs, or any other transform.
-   * @return {array} an array of flattened coordinates in the ingcs coordinate
-   *    system.  Undefined if this annotation is incompelte.
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.
+   * @returns {array} An array of flattened coordinates in the interface gcs
+   *    coordinate system.  `undefined` if this annotation is incomplete.
    */
   this._geojsonCoordinates = function (gcs) {
     var src = this.coordinates(gcs);
@@ -910,7 +1108,7 @@ var polygonAnnotation = function (args) {
   /**
    * Return the geometry type that is used to store this annotation in geojson.
    *
-   * @return {string} a geojson geometry type.
+   * @returns {string} A geojson geometry type.
    */
   this._geojsonGeometryType = function () {
     return 'Polygon';
@@ -920,7 +1118,7 @@ var polygonAnnotation = function (args) {
    * Return a list of styles that should be preserved in a geojson
    * representation of the annotation.
    *
-   * @return {array} a list of style names to store.
+   * @returns {string[]} A list of style names to store.
    */
   this._geojsonStyles = function () {
     return [
@@ -936,17 +1134,31 @@ polygonRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.creat
 registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
 
 /**
- * Line annotation class
+ * Line annotation class.
  *
- * Must specify:
- *   vertices: a list of vertices {x: x, y: y} in map gcs coordinates.
- * May specify:
- *   style.
- *     strokeWidth, strokeColor, strokeOpacity, strokeOffset, closed, lineCap,
- *     lineJoin
- *   editstyle.
- *     strokeWidth, strokeColor, strokeOpacity, strokeOffset, closed, lineCap,
- *     lineJoin
+ * @class
+ * @alias geo.lineAnnotation
+ * @extends geo.annotation
+ *
+ * @param {object?} [args] Options for the annotation.
+ * @param {string} [args.name] A name for the annotation.  This defaults to
+ *    the type with a unique ID suffixed to it.
+ * @param {string} [args.state] initial annotation state.  One of the
+ *    annotation.state values.
+ * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+ *    annotation label on annotations in done or edit states.  Alternately, a
+ *    list of states in which to show the label.  Falsy to not show the label.
+ * @param {geo.geoPosition[]} [args.vertices] A list of vertices in map gcs
+ *    coordinates.
+ * @param {geo.geoPosition[]} [args.coordinates] An alternate name for
+ *    `args.corners`.
+ * @param {object} [args.style] The style to apply to a finished line.
+ *    This uses styles for lines, including `strokeWidth`, `strokeColor`,
+ *    `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`, and `lineJoin`.
+ * @param {object} [args.editStyle] The style to apply to a line in edit
+ *    mode.  This uses styles for lines, including `strokeWidth`,
+ *    `strokeColor`, `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`,
+ *    and `lineJoin`.
  */
 var lineAnnotation = function (args) {
   'use strict';
@@ -974,7 +1186,7 @@ var lineAnnotation = function (args) {
       lineCap: 'butt',
       lineJoin: 'miter'
     },
-    editstyle: {
+    editStyle: {
       line: function (d) {
         /* Return an array that has the same number of items as we have
          * vertices. */
@@ -999,7 +1211,7 @@ var lineAnnotation = function (args) {
   /**
    * Get a list of renderable features for this annotation.
    *
-   * @returns {array} an array of features.
+   * @returns {array} An array of features.
    */
   this.features = function () {
     var opt = this.options(),
@@ -1010,7 +1222,7 @@ var lineAnnotation = function (args) {
         features = [{
           line: {
             line: opt.vertices,
-            style: opt.editstyle
+            style: opt.editStyle
           }
         }];
         break;
@@ -1030,8 +1242,9 @@ var lineAnnotation = function (args) {
    * Get coordinates associated with this annotation in the map gcs coordinate
    * system.
    *
-   * @param {array} coordinates: an optional array of coordinates to set.
-   * @returns {array} an array of coordinates.
+   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+   *  to set.
+   * @returns {geo.geoPosition[]} The current array of coordinates.
    */
   this._coordinates = function (coordinates) {
     if (coordinates) {
@@ -1043,8 +1256,8 @@ var lineAnnotation = function (args) {
   /**
    * Handle a mouse move on this annotation.
    *
-   * @param {geo.event} evt the mouse move event.
-   * @returns {boolean|string} true to update the annotation, falsy to not
+   * @param {geo.event} evt The mouse move event.
+   * @returns {boolean} Truthy to update the annotation, falsy to not
    *    update anything.
    */
   this.mouseMove = function (evt) {
@@ -1060,12 +1273,13 @@ var lineAnnotation = function (args) {
 
   /**
    * Handle a mouse click on this annotation.  If the event is processed,
-   * evt.handled should be set to true to prevent further processing.
+   * evt.handled should be set to `true` to prevent further processing.
    *
-   * @param {geo.event} evt the mouse click event.
-   * @returns {boolean|string} true to update the annotation, 'done' if the
-   *    annotation was completed (changed from create to done state), 'remove'
-   *    if the annotation should be removed, falsy to not update anything.
+   * @param {geo.event} evt The mouse click event.
+   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+   *    the annotation was completed (changed from create to done state),
+   *    `'remove'` if the annotation should be removed, falsy to not update
+   *    anything.
    */
   this.mouseClick = function (evt) {
     var layer = this.layer();
@@ -1121,9 +1335,9 @@ var lineAnnotation = function (args) {
   /**
    * Return actions needed for the specified state of this annotation.
    *
-   * @param {string} state: the state to return actions for.  Defaults to
+   * @param {string} [state] The state to return actions for.  Defaults to
    *    the current state.
-   * @returns {array}: a list of actions.
+   * @returns {geo.actionRecord[]} A list of actions.
    */
   this.actions = function (state) {
     if (!state) {
@@ -1151,10 +1365,11 @@ var lineAnnotation = function (args) {
   /**
    * Process any actions for this annotation.
    *
-   * @param {object} evt: the action event.
-   * @returns {boolean|string} true to update the annotation, 'done' if the
-   *    annotation was completed (changed from create to done state), 'remove'
-   *    if the annotation should be removed, falsy to not update anything.
+   * @param {geo.event} evt The action event.
+   * @returns {boolean|string} `true` to update the annotation, `'done'` if the
+   *    annotation was completed (changed from create to done state),
+   *    `'remove'` if the annotation should be removed, falsy to not update
+   *    anything.
    */
   this.processAction = function (evt) {
     var layer = this.layer();
@@ -1182,12 +1397,12 @@ var lineAnnotation = function (args) {
   };
 
   /**
-   * Return the coordinates to be stored in a geojson geometery object.
+   * Return the coordinates to be stored in a geojson geometry object.
    *
-   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-   *    null to use the map gcs, or any other transform.
-   * @return {array} an array of flattened coordinates in the ingcs coordinate
-   *    system.  Undefined if this annotation is incompelte.
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.
+   * @returns {array} An array of flattened coordinates in the interface gcs
+   *    coordinate system.  `undefined` if this annotation is incomplete.
    */
   this._geojsonCoordinates = function (gcs) {
     var src = this.coordinates(gcs);
@@ -1204,7 +1419,7 @@ var lineAnnotation = function (args) {
   /**
    * Return the geometry type that is used to store this annotation in geojson.
    *
-   * @return {string} a geojson geometry type.
+   * @returns {string} A geojson geometry type.
    */
   this._geojsonGeometryType = function () {
     return 'LineString';
@@ -1214,7 +1429,7 @@ var lineAnnotation = function (args) {
    * Return a list of styles that should be preserved in a geojson
    * representation of the annotation.
    *
-   * @return {array} a list of style names to store.
+   * @returns {string[]} A list of style names to store.
    */
   this._geojsonStyles = function () {
     return [
@@ -1229,18 +1444,33 @@ lineRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
 registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
 
 /**
- * Point annotation class
+ * Point annotation class.
  *
- * Must specify:
- *   position: {x: x, y: y} in map gcs coordinates.
- * May specify:
- *   style.
- *     radius, fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
- *     strokeOpacity, scaled
+ * @class
+ * @alias geo.poinyAnnotation
+ * @extends geo.annotation
  *
- * If scaled is false, the point is not scaled with zoom level.  If it is true,
- * the radius is based on the zoom level at first instantiation.  Otherwise, if
- * it is a number, the radius is used at that zoom level.
+ * @param {object?} [args] Options for the annotation.
+ * @param {string} [args.name] A name for the annotation.  This defaults to
+ *    the type with a unique ID suffixed to it.
+ * @param {string} [args.state] initial annotation state.  One of the
+ *    annotation.state values.
+ * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+ *    annotation label on annotations in done or edit states.  Alternately, a
+ *    list of states in which to show the label.  Falsy to not show the label.
+ * @param {geo.geoPosition} [args.position] A coordinate in map gcs
+ *    coordinates.
+ * @param {geo.geoPosition[]} [args.coordinates] An array with one coordinate
+ *  to use in place of `args.position`.
+ * @param {object} [args.style] The style to apply to a finished point.
+ *    This uses styles for points, including `radius`, `fill`, `fillColor`,
+ *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, `strokeOpacity`,
+ *    and `scaled`.  If `scaled` is `false`, the point is not scaled with
+ *    zoom level.  If it is `true`, the radius is based on the zoom level at
+ *    first instantiation.  Otherwise, if it is a number, the radius is used
+ *    at that zoom level.
+ * @param {object} [args.editStyle] The style to apply to a line in edit
+ *    mode.  This uses styles for lines.
  */
 var pointAnnotation = function (args) {
   'use strict';
@@ -1269,7 +1499,7 @@ var pointAnnotation = function (args) {
   /**
    * Get a list of renderable features for this annotation.
    *
-   * @returns {array} an array of features.
+   * @returns {array} An array of features.
    */
   this.features = function () {
     var opt = this.options(),
@@ -1315,8 +1545,9 @@ var pointAnnotation = function (args) {
    * Get coordinates associated with this annotation in the map gcs coordinate
    * system.
    *
-   * @param {array} coordinates: an optional array of coordinates to set.
-   * @returns {array} an array of coordinates.
+   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+   *  to set.
+   * @returns {geo.geoPosition[]} The current array of coordinates.
    */
   this._coordinates = function (coordinates) {
     if (coordinates && coordinates.length >= 1) {
@@ -1330,12 +1561,13 @@ var pointAnnotation = function (args) {
 
   /**
    * Handle a mouse click on this annotation.  If the event is processed,
-   * evt.handled should be set to true to prevent further processing.
+   * evt.handled should be set to `true` to prevent further processing.
    *
-   * @param {geo.event} evt the mouse click event.
-   * @returns {boolean|string} true to update the annotation, 'done' if the
-   *    annotation was completed (changed from create to done state), 'remove'
-   *    if the annotation should be removed, falsy to not update anything.
+   * @param {geo.event} evt The mouse click event.
+   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+   *    the annotation was completed (changed from create to done state),
+   *    `'remove'` if the annotation should be removed, falsy to not update
+   *    anything.
    */
   this.mouseClick = function (evt) {
     if (this.state() !== annotationState.create) {
@@ -1354,7 +1586,7 @@ var pointAnnotation = function (args) {
    * Return a list of styles that should be preserved in a geojson
    * representation of the annotation.
    *
-   * @return {array} a list of style names to store.
+   * @returns {string[]} A list of style names to store.
    */
   this._geojsonStyles = function () {
     return [
@@ -1363,12 +1595,12 @@ var pointAnnotation = function (args) {
   };
 
   /**
-   * Return the coordinates to be stored in a geojson geometery object.
+   * Return the coordinates to be stored in a geojson geometry object.
    *
-   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-   *    null to use the map gcs, or any other transform.
-   * @return {array} an array of flattened coordinates in the ingcs coordinate
-   *    system.  Undefined if this annotation is incompelte.
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.
+   * @returns {array} An array of flattened coordinates in the interface gcs
+   *    coordinate system.  `undefined` if this annotation is incomplete.
    */
   this._geojsonCoordinates = function (gcs) {
     var src = this.coordinates(gcs);
@@ -1381,7 +1613,7 @@ var pointAnnotation = function (args) {
   /**
    * Return the geometry type that is used to store this annotation in geojson.
    *
-   * @return {string} a geojson geometry type.
+   * @returns {string} A geojson geometry type.
    */
   this._geojsonGeometryType = function () {
     return 'Point';

@@ -35,6 +35,9 @@ describe('geo.annotation', function () {
       expect(ann.state()).toBe(geo.annotation.state.done);
       expect(ann.id()).toBeGreaterThan(0);
       expect(ann.name()).toBe('Test ' + ann.id());
+      expect(ann.label()).toBe('Test ' + ann.id());
+      expect(ann.label(undefined, true)).toBe(null);
+      expect(ann.description()).toBe(undefined);
       expect(ann.layer()).toBe(undefined);
       expect(ann.features()).toEqual([]);
       expect(ann.coordinates()).toEqual([]);
@@ -72,6 +75,26 @@ describe('geo.annotation', function () {
       expect(ann.name('')).toBe(ann);
       expect(ann.name()).toBe('New Name');
     });
+    it('label', function () {
+      var ann = geo.annotation.annotation('test');
+      expect(ann.label()).toBe('Test ' + ann.id());
+      expect(ann.label(undefined, true)).toBe(null);
+      expect(ann.label('New Label')).toBe(ann);
+      expect(ann.label()).toBe('New Label');
+      expect(ann.label('')).toBe(ann);
+      expect(ann.label()).toBe('');
+      expect(ann.label(null)).toBe(ann);
+      expect(ann.label()).toBe('Test ' + ann.id());
+      expect(ann.label(undefined, true)).toBe(null);
+    });
+    it('description', function () {
+      var ann = geo.annotation.annotation('test');
+      expect(ann.description()).toBe(undefined);
+      expect(ann.description('New Description')).toBe(ann);
+      expect(ann.description()).toBe('New Description');
+      expect(ann.description('')).toBe(ann);
+      expect(ann.description()).toBe('');
+    });
     it('layer', function () {
       var ann = geo.annotation.annotation('test');
       expect(ann.layer()).toBe(undefined);
@@ -103,10 +126,16 @@ describe('geo.annotation', function () {
       expect(ann.options().testopt).toBe(40);
       expect(ann.options({testopt: 30})).toBe(ann);
       expect(ann.options().testopt).toBe(30);
-      /* name and coordinates are handled specially */
+      /* name, label, description, and coordinates are handled specially */
       ann.options('name', 'newname');
       expect(ann.options().name).toBe(undefined);
       expect(ann.name()).toBe('newname');
+      ann.options('label', 'newlabel');
+      expect(ann.options().label).toBe(undefined);
+      expect(ann.label()).toBe('newlabel');
+      ann.options('description', 'newdescription');
+      expect(ann.options().description).toBe(undefined);
+      expect(ann.description()).toBe('newdescription');
       var coord = null, testval = [[1, 2], [3, 4]];
       ann._coordinates = function (arg) {
         if (arg !== undefined) {
@@ -120,9 +149,9 @@ describe('geo.annotation', function () {
       expect(ann.options().coordinates).toBe(undefined);
       expect(ann._coordinates()).toBe(testval);
     });
-    it('style and editstyle', function () {
+    it('style and editStyle', function () {
       var ann = geo.annotation.annotation('test', {
-        layer: layer, style: {testopt: 30}, editstyle: {testopt: 50}});
+        layer: layer, style: {testopt: 30}, editStyle: {testopt: 50}});
       expect(ann.options('style').testopt).toBe(30);
       expect(ann.style().testopt).toBe(30);
       expect(ann.style('testopt')).toBe(30);
@@ -130,13 +159,13 @@ describe('geo.annotation', function () {
       expect(ann.style().testopt).toBe(40);
       expect(ann.style({testopt: 30})).toBe(ann);
       expect(ann.style().testopt).toBe(30);
-      expect(ann.options('editstyle').testopt).toBe(50);
-      expect(ann.editstyle().testopt).toBe(50);
-      expect(ann.editstyle('testopt')).toBe(50);
-      expect(ann.editstyle('testopt', 60)).toBe(ann);
-      expect(ann.editstyle().testopt).toBe(60);
-      expect(ann.editstyle({testopt: 50})).toBe(ann);
-      expect(ann.editstyle().testopt).toBe(50);
+      expect(ann.options('editStyle').testopt).toBe(50);
+      expect(ann.editStyle().testopt).toBe(50);
+      expect(ann.editStyle('testopt')).toBe(50);
+      expect(ann.editStyle('testopt', 60)).toBe(ann);
+      expect(ann.editStyle().testopt).toBe(60);
+      expect(ann.editStyle({testopt: 50})).toBe(ann);
+      expect(ann.editStyle().testopt).toBe(50);
     });
     it('coordinates', function () {
       var ann = geo.annotation.annotation('test', {layer: layer});
@@ -168,6 +197,9 @@ describe('geo.annotation', function () {
       var ann = geo.annotation.annotation('test', {
         layer: layer,
         style: {fillColor: 'red'},
+        labelStyle: {color: 'blue', textStrokeColor: 'rgba(0, 255, 0, 0.5)'},
+        label: 'testLabel',
+        description: 'testDescription',
         name: 'testAnnotation'
       });
       expect(ann.geojson()).toBe(undefined);
@@ -188,6 +220,11 @@ describe('geo.annotation', function () {
       expect(geojson.geometry.coordinates[1]).toBeCloseTo(42.849775);
       expect(geojson.properties.name).toBe('testAnnotation');
       expect(geojson.properties.fillColor).toBe('#ff0000');
+      expect(geojson.properties.description).toBe('testDescription');
+      expect(geojson.properties.label).toBe('testLabel');
+      expect(geojson.properties.labelColor).toBe('#0000ff');
+      expect(geojson.properties.labelTextStrokeColor).toBe('#00ff0080');
+      expect(geojson.properties.showLabel).toBe(undefined);
       expect(geojson.crs).toBe(undefined);
       geojson = ann.geojson('EPSG:3857');
       expect(geojson.geometry.coordinates[1]).toBeCloseTo(5289134.103576);
@@ -196,6 +233,45 @@ describe('geo.annotation', function () {
       expect(geojson.crs.properties.name).toBe('EPSG:3857');
       geojson = ann.geojson(undefined, true);
       expect(geojson.crs.properties.name).toBe('EPSG:4326');
+      ann.options('showLabel', false);
+      geojson = ann.geojson(undefined, true);
+      expect(geojson.properties.showLabel).toBe(false);
+    });
+    it('_labelPosition', function () {
+      var ann = geo.annotation.annotation('test', {
+        layer: layer,
+        name: 'testAnnotation'
+      });
+      ann._coordinates = function () {
+      };
+      expect(ann._labelPosition()).toBe(undefined);
+      ann._coordinates = function () {
+        return [{x: 1, y: 2}];
+      };
+      expect(ann._labelPosition()).toEqual({x: 1, y: 2});
+      ann._coordinates = function () {
+        return [{x: 1, y: 2}, {x: 3, y: 5}, {x: 8, y: 11}];
+      };
+      expect(ann._labelPosition()).toEqual({x: 4, y: 6});
+    });
+    it('labelRecord', function () {
+      var ann = geo.annotation.annotation('test', {
+        layer: layer,
+        name: 'testAnnotation'
+      });
+      ann._coordinates = function () {
+      };
+      expect(ann.labelRecord()).toBe(undefined);
+      ann._coordinates = function () {
+        return [{x: 1, y: 2}];
+      };
+      expect(ann.labelRecord().text).toBe('testAnnotation');
+      expect(ann.labelRecord().position).toEqual({x: 1, y: 2});
+      expect(ann.labelRecord().style).toBe(undefined);
+      ann.options('labelStyle', {opacity: 0.8});
+      expect(ann.labelRecord().style.opacity).toBe(0.8);
+      ann.options('showLabel', false);
+      expect(ann.labelRecord()).toBe(undefined);
     });
   });
 
