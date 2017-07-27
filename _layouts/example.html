@@ -1,6 +1,7 @@
 ---
 layout: default
 navbar_affix: true
+footer-narrow: true
 ---
 <!-- This will put script and link in the body, which has certain drawbacks, but it's relatively minor for the current use -->
 <script type="text/javascript" src="{{ "js/example.js" | relative_url }}"></script>
@@ -11,18 +12,33 @@ navbar_affix: true
     <link rel="stylesheet" href="main.css">
     <div id="map"></div>
     {{ content }}
-    <div class="container">
-        <div class="row source-screenshot">
-            <div class="col-md-12">
-                <a class="source" href="docs/main.html">Source code</a>
-                <a class="screenshot" href="#">Take screenshot</a>
+    <div class="modal fade screenshot-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Screenshot</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="screenshot-result">
+                        <img />
+                        <a download="screenshot.png">Download</a>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12 screenshot-result-container">
-                <a class="screenshot-loading" href="#">...</a>
-                <div class="pull-right screenshot-result">
-                    <a download="screenshot.png"><img /></a>
+    </div>
+    <div class="container">
+        <div class="row source-screenshot">
+            <div class="col-md-4 col-md-offset-8 col-sm-6 col-sm-offset-6 col-xs-9 col-xs-offset-3">
+                <div class="row">
+                    <div class="col-xs-6">
+                        <a class="source" target="gj-docco-{{page.title}}" href="docs/main.html">Source code</a>
+                    </div>
+                    <div class="col-xs-6">
+                        <a class="screenshot" href="#">Take screenshot</a>
+                        <div class="screenshot-loading">...</div>
+                    </div>
                 </div>
             </div>
         </div>

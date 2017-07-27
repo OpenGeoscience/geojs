@@ -39,19 +39,17 @@ window.utils = exampleUtils;
  * click on it to save it or right-click to copy it. */
 $(function () {
     $('a.screenshot').on('click', function (e) {
-        $('.screenshot-result').hide();
+        e.preventDefault();
+        $(this).hide();
         $('.screenshot-loading').show();
         // Use the geojs internal jQuery to get the map instance
         var map = geo.jQuery('#map').data('data-geojs-map');
         map.screenshot({wait:'idle'}).then(function (res) {
             $('.screenshot-result img').attr({src: res});
             $('.screenshot-result a').attr({href: res});
-            $('.screenshot-result').show();
+            $('a.screenshot').show();
             $('.screenshot-loading').hide();
-            /* If you want to trigger an automatic download, enable this line (and,
-            * perhaps, always hide the waiting and result elements).
-            $('.screenshot-result a')[0].click();
-            */
+            $('.screenshot-modal').modal('show');
         });
     });
     $('a.screenshot').keypress(function (evt) {

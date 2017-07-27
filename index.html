@@ -2,13 +2,14 @@
 layout: default
 title: Welcome
 ---
-
+<script type="text/javascript" src="{{ "js/logo-zoom.js" | relative_url }}"></script>
+<link rel="stylesheet" href="{{ "css/logo-zoom.css" | relative_url }}">
 <div class="page welcome">
     <section class="header">
         <div class="container">
             <div class="row">
                 <div class="col-sm-6 col-sm-offset-3">
-                    <img src="{{ "images/logo_256.png" | relative_url }}" />
+                    <img class="logo" src="{{ "images/logo_256.png" | relative_url }}" />
                 </div>
             </div>
             <div class="row">
@@ -29,26 +30,20 @@ title: Welcome
             </div>
             <div class="row text-center">
                 <div class="col-md-4">
-                    <span class="fa-stack fa-4x">
-                            <i class="fa fa-circle fa-stack-2x text-primary"></i>
-                            <i class="fa fa-map fa-stack-1x fa-inverse"></i>
-                        </span>
+                    <div class="highlight-icon choropleth">
+                    </div>
                     <h4 class="service-heading">Vector Layer</h4>
                     <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima maxime quam architecto quo inventore harum ex magni, dicta impedit.</p>
                 </div>
                 <div class="col-md-4">
-                    <span class="fa-stack fa-4x">
-                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fa fa-laptop fa-stack-1x fa-inverse"></i>
-                    </span>
+                    <div class="highlight-icon contour">
+                    </div>
                     <h4 class="service-heading">Responsive Design</h4>
                     <p class="text-muted">Lorem ipsum consectetur adipisicing elit. Minima maxime quam architecto quo inventore harum ex magni, dicta.</p>
                 </div>
                 <div class="col-md-4">
-                    <span class="fa-stack fa-4x">
-                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fa fa-bar-chart fa-stack-1x fa-inverse"></i>
-                    </span>
+                    <div class="highlight-icon heatmap">
+                    </div>
                     <h4 class="service-heading">Infovis</h4>
                     <p class="text-muted">Lorem dolor sit amet, consectetur adipisicing elit. Minimaquam architecto quo inventore harum ex magni, dicta impedit.</p>
                 </div>

@@ -20,17 +20,6 @@ p{
     font-size: 16px;
 }
 
-@media (min-width: 768px) {
-    section {
-        padding: 45px 0 35px 0;
-    }
-}
-
-footer {
-    padding: 14px 0;
-}
-
-
 // default layout
 .navbar-brand img{
     height: 2em;
@@ -45,6 +34,21 @@ footer {
 .content-wrapper {
     padding-top: 100px;
     position: relative;
+}
+
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding-top: 50px;
+    }
+}
+
+footer{
+    padding: 14px 0;
+    border-top: 1px solid #eee;
+
+    &.narrow {
+        padding: 4px 0;
+    }
 }
 
 // welcome page
@@ -70,8 +74,42 @@ footer {
         color: #1B70B5;
     }
 
-    section.highlight{
+    @media (min-width: 768px) {
+        section {
+            padding: 45px 0 35px 0;
+        }
+    }
+
+    section.highlight {
         background-color: #f5f5f5;
+
+        .highlight-icon {
+            width: 110px;
+            height: 110px;
+            margin: 0 auto;
+            border-radius: 55px;
+            overflow: hidden;
+
+            &.heatmap {
+                background-image:url({{ "examples/heatmap/thumb.jpg" | relative_url }});
+                    background-size: auto 80px;
+                    background-position: 3px 15px;
+                    background-repeat: no-repeat;
+                    background-color: white;
+            }
+
+            &.contour{
+                background-image:url({{ "examples/contour/thumb.jpg" | relative_url }});
+                background-size: auto 110px;
+                background-position: -20px -5px;
+            }
+
+            &.choropleth {
+                background-image:url({{ "examples/choropleth/thumb.jpg" | relative_url }});
+                background-size: auto 105px;
+                background-position: -5px 5px;
+            }
+        }
     }
 
     section.get-started{
@@ -79,10 +117,7 @@ footer {
             width: 1.4em;
         }
     }
-}
 
-footer{
-    border-top: 1px solid #eee;
 }
 
 // examples page
@@ -124,7 +159,7 @@ footer{
         }
     }
 
-    .word-container {        
+    .word-container {
         width: 54.16666%;
         padding-right: 5px;
     }
