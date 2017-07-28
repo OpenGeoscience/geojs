@@ -1027,6 +1027,18 @@ var util = module.exports = {
     }
   },
 
+  /**
+   * Test if an item is an object.  This uses typeof not instanceof, since
+   * instanceof will return false for some things that we expect to be objects.
+   *
+   * @param {*} value The item to test.
+   * @returns {boolean} True if the tested item is an object.
+   */
+  isObject: function (value) {
+    var type = typeof value;
+    return value !== null && value !== undefined && (type === 'object' || type === 'function');
+  },
+
   ///////////////////////////////////////////////////////////////////////////
   /*
    * Utility member properties.

@@ -3,10 +3,12 @@ var registerFeature = require('../registry').registerFeature;
 var polygonFeature = require('../polygonFeature');
 
 /**
- * Create a new instance of polygonFeature
+ * Create a new instance of gl.polygonFeature.
  *
- * @class geo.gl.polygonFeature
+ * @class
+ * @alias geo.gl.polygonFeature
  * @extends geo.polygonFeature
+ * @param {geo.polygonFeature.spec} arg
  * @returns {geo.gl.polygonFeature}
  */
 var gl_polygonFeature = function (arg) {
@@ -89,7 +91,6 @@ var gl_polygonFeature = function (arg) {
    * Array.map is slower in Chrome that using a loop, so loops are used in
    * places that would be conceptually served by maps.
    *
-   * @memberof geo.gl.polygonFeature
    * @param {boolean} onlyStyle if true, use the existing geoemtry and just
    *    recalculate the style.
    */
@@ -126,7 +127,7 @@ var gl_polygonFeature = function (arg) {
         if (!polygon) {
           return;
         }
-        outer = polygon.outer || (polygon instanceof Array ? polygon : []);
+        outer = polygon.outer || (Array.isArray(polygon) ? polygon : []);
 
         /* expand to an earcut polygon geometry.  We had been using a map call,
          * but using loops is much faster in Chrome (4 versus 33 ms for one
@@ -260,8 +261,10 @@ var gl_polygonFeature = function (arg) {
   }
 
   /**
-   * Initialize
-   * @memberof geo.gl.polygonFeature
+   * Initialize.
+   *
+   * @param {geo.polygonFeature.spec} arg An object with options for the
+   *    feature.
    */
   this._init = function (arg) {
     var prog = vgl.shaderProgram(),
@@ -307,9 +310,8 @@ var gl_polygonFeature = function (arg) {
   };
 
   /**
-   * Build
+   * Build.
    *
-   * @memberof geo.gl.polygonFeature
    * @override
    */
   this._build = function () {
@@ -323,9 +325,8 @@ var gl_polygonFeature = function (arg) {
   };
 
   /**
-   * Update
+   * Update.
    *
-   * @memberof geo.gl.polygonFeature
    * @override
    */
   this._update = function (opts) {
@@ -350,8 +351,7 @@ var gl_polygonFeature = function (arg) {
   };
 
   /**
-   * Destroy
-   * @memberof geo.gl.polygonFeature
+   * Destroy.
    */
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);

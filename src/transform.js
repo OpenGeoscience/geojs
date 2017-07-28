@@ -1,4 +1,5 @@
 var proj4 = require('proj4');
+var util = require('./util');
 
 /**
  * This purpose of this class is to provide a generic interface for computing
@@ -65,7 +66,12 @@ var transform = function (options) {
   }
 
   /**
-   * Get/Set the source projection
+   * Get/Set the source projection.
+   *
+   * @param {string} [arg] The new source projection.  If `undefined`, return
+   *    the current source projection.
+   * @returns {string|this} The current source projection if it was queried,
+   *    otherwise the current transform object.
    */
   this.source = function (arg) {
     if (arg === undefined) {
@@ -77,7 +83,12 @@ var transform = function (options) {
   };
 
   /**
-   * Get/Set the target projection
+   * Get/Set the target projection.
+   *
+   * @param {string} [arg] The new target projection.  If `undefined`, return
+   *    the current target projection.
+   * @returns {string|this} The current target projection if it was queried,
+   *    otherwise the current transform object.
    */
   this.target = function (arg) {
     if (arg === undefined) {
@@ -89,15 +100,11 @@ var transform = function (options) {
   };
 
   /**
-   * Perform a forward transformation (source -> target)
+   * Perform a forward transformation (source -> target).
    * @protected
    *
-   * @param {object}   point      The point coordinates
-   * @param {number}   point.x    The x-coordinate (i.e. longitude)
-   * @param {number}   point.y    The y-coordinate (i.e. latitude)
-   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
-   *
-   * @returns {object} A point object in the target coordinates
+   * @param {geo.geoPosition} point The point in source coordinates.
+   * @returns {geo.geoPosition} A point object in the target coordinates.
    */
   this._forward = function (point) {
     var pt = m_proj.forward(point);
@@ -106,15 +113,11 @@ var transform = function (options) {
   };
 
   /**
-   * Perform an inverse transformation (target -> source)
+   * Perform an inverse transformation (target -> source).
    * @protected
    *
-   * @param {object}   point     The point coordinates
-   * @param {number}   point.x   The x-coordinate (i.e. longitude)
-   * @param {number}   point.y   The y-coordinate (i.e. latitude)
-   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
-   *
-   * @returns {object} A point object in the source coordinates
+   * @param {geo.geoPosition} point The point in target coordinates.
+   * @returns {geo.geoPosition} A point object in the source coordinates.
    */
   this._inverse = function (point) {
     var pt = m_proj.inverse(point);
@@ -123,14 +126,13 @@ var transform = function (options) {
   };
 
   /**
-   * Perform a forward transformation (source -> target) in place
+   * Perform a forward transformation (source -> target) in place.
+   * @protected
    *
-   * @param {object[]} point      The point coordinates or array of points
-   * @param {number}   point.x    The x-coordinate (i.e. longitude)
-   * @param {number}   point.y    The y-coordinate (i.e. latitude)
-   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
-   *
-   * @returns {object} A point object or array in the target coordinates
+   * @param {geo.geoPosition|geo.geoPosition[]} point The point coordinates
+   *    or array of points in source coordinates.
+   * @returns {geo.geoPosition|geo.geoPosition[]} A point object or array in
+   *    the target coordinates.
    */
   this.forward = function (point) {
     if (Array.isArray(point)) {
@@ -140,15 +142,13 @@ var transform = function (options) {
   };
 
   /**
-   * Perform an inverse transformation (target -> source) in place
+   * Perform an inverse transformation (target -> source) in place.
    * @protected
    *
-   * @param {object[]} point      The point coordinates or array of points
-   * @param {number}   point.x    The x-coordinate (i.e. longitude)
-   * @param {number}   point.y    The y-coordinate (i.e. latitude)
-   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
-   *
-   * @returns {object} A point object in the source coordinates
+   * @param {geo.geoPosition|geo.geoPosition[]} point The point coordinates
+   *    or array of points in target coordinates.
+   * @returns {geo.geoPosition|geo.geoPosition[]} A point object or array in
+   *    the source coordinates.
    */
   this.inverse = function (point) {
     if (Array.isArray(point)) {
@@ -188,7 +188,7 @@ var transform = function (options) {
 transform.defs = proj4.defs;
 
 /**
- * Look up a projection definition from epsg.io
+ * Look up a projection definition from epsg.io.
  * For the moment, we only handle `EPSG` codes.
  *
  * @param {string} projection A projection alias (e.g. EPSG:4326)
@@ -224,18 +224,19 @@ transform.lookup = function (projection) {
 /**
  * Transform an array of coordinates from one projection into another.  The
  * transformation may occur in place (modifying the input coordinate array),
- * depending on the input format.  The coordinates can be an object with x, y,
- * and (optionally z) or an array of 2 or 3 values, or an array of either of
- * those, or a single flat array with 2 or 3 components per coordinate.  Arrays
- * are always modified in place.  Individual point objects are not altered; new
- * point objects are returned unless no transform is needed.
+ * depending on the input format.  The coordinates can be an object with x,
+ * y, and (optionally z) or an array of 2 or 3 values, or an array of either
+ * of those, or a single flat array with 2 or 3 components per coordinate.
+ * Arrays are always modified in place.  Individual point objects are not
+ * altered; new point objects are returned unless no transform is needed.
  *
- * @param {string}        srcPrj The source projection
- * @param {string}        tgtPrj The destination projection
- * @param {geoPosition[]} coordinates An array of coordinate objects
- * @param {number}        numberOfComponents for flat arrays, either 2 or 3.
- *
- * @returns {geoPosition[]} The transformed coordinates
+ * @param {string} srcPrj The source projection.
+ * @param {string} tgtPrj The destination projection.
+ * @param {geoPosition|geoPosition[]|number[]} coordinates An array of
+ *      coordinate objects.  These may be in object or array form, or a flat
+ *      array.
+ * @param {number} numberOfComponents For flat arrays, either 2 or 3.
+ * @returns {geoPosition|geoPosition[]|number[]} The transformed coordinates.
  */
 transform.transformCoordinates = function (
         srcPrj, tgtPrj, coordinates, numberOfComponents) {
@@ -246,14 +247,16 @@ transform.transformCoordinates = function (
   }
 
   var trans = transform({source: srcPrj, target: tgtPrj}), output;
-  if (coordinates instanceof Object && 'x' in coordinates && 'y' in coordinates) {
+  if (util.isObject(coordinates) && 'x' in coordinates && 'y' in coordinates) {
     output = trans.forward({x: coordinates.x, y: coordinates.y, z: coordinates.z || 0});
     if ('z' in coordinates) {
       return output;
     }
     return {x: output.x, y: output.y};
   }
-  if (coordinates instanceof Array && coordinates.length === 1 && coordinates[0] instanceof Object && 'x' in coordinates[0] && 'y' in coordinates[0]) {
+  if (Array.isArray(coordinates) && coordinates.length === 1 &&
+      util.isObject(coordinates[0]) && 'x' in coordinates[0] &&
+      'y' in coordinates[0]) {
     output = trans.forward({x: coordinates[0].x, y: coordinates[0].y, z: coordinates[0].z || 0});
     if ('z' in coordinates[0]) {
       return [output];
@@ -270,11 +273,11 @@ transform.transformCoordinates = function (
  * values, or an array of either of those, or a single flat array with 2 or 3
  * components per coordinate.  The array is modified in place.
  *
- * @param {object} trans The transformation object.
- * @param {geoPosition[]} coordinates An array of coordinate objects
- * @param {number} numberOfComponents for flat arrays, either 2 or 3.
- *
- * @returns {geoPosition[]} The transformed coordinates
+ * @param {transform} trans The transformation object.
+ * @param {geoPosition[]|number[]} coordinates An array of coordinate
+ *      objects or a flat array.
+ * @param {number} numberOfComponents For flat arrays, either 2 or 3.
+ * @returns {geoPosition[]|number[]} The transformed coordinates
  */
 transform.transformCoordinatesArray = function (trans, coordinates, numberOfComponents) {
   var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint;
@@ -286,7 +289,7 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
 
   // Helper methods
   function handleArrayCoordinates() {
-    if (coordinates[0] instanceof Array) {
+    if (Array.isArray(coordinates[0])) {
       if (coordinates[0].length === 2) {
         xAcc = function (index) {
           return coordinates[index][0];
@@ -407,7 +410,7 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
     }
   }
 
-  if (coordinates instanceof Array) {
+  if (Array.isArray(coordinates)) {
     output = [];
     output.length = coordinates.length;
     count = coordinates.length;
@@ -415,13 +418,12 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
     if (!coordinates.length) {
       return output;
     }
-    if (coordinates[0] instanceof Array ||
-        coordinates[0] instanceof Object) {
+    if (Array.isArray(coordinates[0]) || util.isObject(coordinates[0])) {
       offset = 1;
 
-      if (coordinates[0] instanceof Array) {
+      if (Array.isArray(coordinates[0])) {
         handleArrayCoordinates();
-      } else if (coordinates[0] instanceof Object) {
+      } else if (util.isObject(coordinates[0])) {
         handleObjectCoordinates();
       }
     } else {
@@ -439,19 +441,16 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
 };
 
 /**
- * Apply an affine transformation consisting of a translation
- * then a scaling to the given coordinate array.  Note, the
- * transformation occurs in place so the input coordinate
- * object are mutated.
- *
- * (Possibly extend to support rotations as well)
+ * Apply an affine transformation consisting of a translation then a scaling
+ * to the given coordinate array.  Note, the transformation occurs in place
+ * so the input coordinate object are mutated.
  *
  * @param {object} def
- * @param {object} def.origin The transformed origin
- * @param {object} def.scale The transformed scale factor
- * @param {object[]} coords An array of coordinate objects
- *
- * @returns {object[]} The transformed coordinates
+ * @param {geo.geoPosition} def.origin The transformed origin
+ * @param {object} def.scale The transformed scale factor.  This is an object
+ *  with `x`, `y`, and `z` parameters.
+ * @param {geo.geoPosition[]} coords An array of coordinate objects.
+ * @returns {geo.geoPosition[]} The transformed coordinates.
  */
 transform.affineForward = function (def, coords) {
   'use strict';
@@ -465,19 +464,16 @@ transform.affineForward = function (def, coords) {
 };
 
 /**
- * Apply an inverse affine transformation which is the
- * inverse to {@link geo.transform.affineForward}.  Note, the
- * transformation occurs in place so the input coordinate
- * object are mutated.
- *
- * (Possibly extend to support rotations as well)
+ * Apply an inverse affine transformation which is the inverse to {@link
+ * geo.transform.affineForward}.  Note, the transformation occurs in place so
+ * the input coordinate object are mutated.
  *
  * @param {object} def
- * @param {object} def.origin The transformed origin
- * @param {object} def.scale The transformed scale factor
- * @param {object[]} coords An array of coordinate objects
- *
- * @returns {object[]} The transformed coordinates
+ * @param {geo.geoPosition} def.origin The transformed origin
+ * @param {object} def.scale The transformed scale factor.  This is an object
+ *  with `x`, `y`, and `z` parameters.
+ * @param {geo.geoPosition[]} coords An array of coordinate objects.
+ * @returns {geo.geoPosition[]} The transformed coordinates.
  */
 transform.affineInverse = function (def, coords) {
   'use strict';
