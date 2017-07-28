@@ -105,7 +105,7 @@ $(function () {
    * Based on the current controls, fetch a data set and show it.
    */
   function fetch_data() {
-    var url = '../../data/roads.json';
+    var url = '../data/roads.json';
     $.ajax(url, {
       success: function (resp) {
         window.example.rawdata = rawdata = resp;
