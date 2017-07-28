@@ -254,7 +254,9 @@ transform.transformCoordinates = function (
     }
     return {x: output.x, y: output.y};
   }
-  if (Array.isArray(coordinates) && coordinates.length === 1 && util.isObject(coordinates[0]) && 'x' in coordinates[0] && 'y' in coordinates[0]) {
+  if (Array.isArray(coordinates) && coordinates.length === 1 &&
+      util.isObject(coordinates[0]) && 'x' in coordinates[0] &&
+      'y' in coordinates[0]) {
     output = trans.forward({x: coordinates[0].x, y: coordinates[0].y, z: coordinates[0].z || 0});
     if ('z' in coordinates[0]) {
       return [output];
