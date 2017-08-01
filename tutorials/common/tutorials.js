@@ -36,14 +36,19 @@ var processBlockInfo = {
  * @param {boolean} notLast If true, don't force this to be the last active
  *      block of code for this set.
  * @param {boolean} debounce If true, debounce the update.
+ * @param {boolean} forceRun If true, rerun, even if we think it isn't
+ *      necessary.
  */
-function run_block(selector, notLast, debounce) {
+function run_block(selector, notLast, debounce, forceRun) {
   var elem = $(selector).closest('.codeblock'),
       target = elem.attr('target'),
       parentstep = elem.attr('parentstep'),
       group = $('.codeblock[target="' + target + '"]'),
       activeGroup = elem,
       parents;
+  if (forceRun) {
+    processBlockInfo.lastsrc = '';
+  }
   notLast = notLast && elem.hasClass('active');
   if (!notLast) {
     while (parentstep) {
@@ -233,7 +238,7 @@ function start_tutorial(useCodeMirror) {
     run_block(evt.target, true);
   });
   $('.codeblock_run').click(function (evt) {
-    run_block(evt.target);
+    run_block(evt.target, undefined, undefined, evt.shiftKey);
   });
 }
 

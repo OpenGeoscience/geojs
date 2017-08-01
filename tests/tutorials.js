@@ -37,7 +37,7 @@ describe('tutorials', function () {
          * function's done callback, so reverse them so that they run in the
          * order written. */
         tests = base$(base$('.codeblock_test').get().reverse());
-        tests.each(function () {
+        tests.each(function (testIdx) {
           var test = base$(this),
               codeblock = test.prevAll('.codeblock').eq(0),
               target = base$('#' + codeblock.attr('target')),
@@ -77,12 +77,20 @@ describe('tutorials', function () {
               });
             };
             /* If we have already run the specific codeblock, don't run it
-             * again.  If not, click run and wait for the results. */
-            if (codeblock.is(base$('.codeblock.active:last'))) {
+             * again.  If not, click run and wait for the results.  On the
+             * first test (which will be the last added), always force the code
+             * block to run, as it ensures that we catch the load event. */
+            if (codeblock.is(base$('.codeblock.active:last')) && testIdx !== tests.length - 1) {
               onCodeLoaded();
             } else {
               target.one('load', onCodeLoaded);
-              codeblock.find('.codeblock_run').click();
+              if (testIdx !== tests.length - 1) {
+                codeblock.find('.codeblock_run').click();
+              } else {
+                var evt = base$.Event('click');
+                evt.shiftKey = true;
+                codeblock.find('.codeblock_run').trigger(evt);
+              }
             }
           };
         });
