@@ -59,7 +59,7 @@ html(lang="en")
   head
     meta(charset="UTF-8")
     link(rel="shortcut icon", href="data:image/x-icon;,", type="image/x-icon")
-    title= title
+    title GeoJS Tutotial - #{title}
 
     // include the main bundle
     script(type='text/javascript', src=bundle, charset='UTF-8')
@@ -78,7 +78,7 @@ html(lang="en")
         script(type="text/javascript").
           $(start_tutorial);
 
-  body
+  body(class=hideNavbar ? undefined : 'navbar')
     if !hideNavbar
       // Add a navbar
       nav.navbar.navbar-default(role="navigation")

@@ -34,6 +34,23 @@ var tutorials = glob('tutorials/*/tutorial.json')
     return json;
   });
 
+/* Sort tutorials.  Tutorials are sorted by level, order, title, and path.
+ * undefined or null levels are orders are sorted after defined values.  level
+ * should be used for the approximate difficulty of the tutorial, and order for
+ * making specific tutorials appear sooner in the list. */
+tutorials.sort(function (a, b) {
+  if (a.level !== b.level) {
+    return a.level === undefined ? 1 : b.level === undefined ? -1 : a.level - b.level;
+  }
+  if (a.order !== b.order) {
+    return a.order === undefined ? 1 : b.order === undefined ? -1 : a.order - b.order;
+  }
+  if (a.title !== b.title) {
+    return a.title < b.title ? -1 : 1;
+  }
+  return a.path < b.path ? -1 : 1;
+});
+
 // copy common files
 fs.copySync('tutorials/common', 'dist/tutorials/common');
 

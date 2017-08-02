@@ -13,6 +13,9 @@ html, body {
   height: 100%;
   overflow: hidden;
 }
+.navbar #maincontent {
+  height: calc(100% - 60px);
+}
 #tutorial, #workframe {
   width: 50%;
   height: 100%;
@@ -49,7 +52,6 @@ html, body {
 }
 .codeblock .CodeMirror {
   height: inherit;
-  max-height: 16em;
   border: 1px solid rgba(0, 0, 0, 0.5);
 }
 .codeblock_controls {

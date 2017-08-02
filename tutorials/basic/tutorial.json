@@ -1,6 +1,8 @@
 {
-  "title": "Tutorial - Simple Map",
+  "title": "Simple Map",
   "hideNavbar": true,
+  "level": 0,
+  "order": 0,
   "tutorialCss": [],
   "tutorialJs": [],
   "about": {

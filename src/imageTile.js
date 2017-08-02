@@ -43,8 +43,7 @@ module.exports = (function () {
     spec.size = spec.size || {x: 256, y: 256};
     this._image = null;
 
-    // Cache the coordinate scaling
-    this._cors = spec.crossDomain || 'anonymous';
+    this._cors = (spec.crossDomain || spec.crossDomain === null) ? spec.crossDomain : 'anonymous';
 
     // Call superclass constructor
     tile.call(this, spec);
@@ -62,13 +61,15 @@ module.exports = (function () {
 
     /**
      * Initiate the image request.
+     *
+     * @returns {this} The current tile class instance.
      */
     this.fetch = function () {
       var defer;
       if (!this._image) {
         this._image = new Image(this.size.x, this.size.y);
         // Only set the crossOrigin parameter if this is going across origins.
-        if (this._url.indexOf(':') >= 0 &&
+        if (this._cors && this._url.indexOf(':') >= 0 &&
             this._url.indexOf('/') === this._url.indexOf(':') + 1) {
           this._image.crossOrigin = this._cors;
         }

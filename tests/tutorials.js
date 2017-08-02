@@ -5,19 +5,11 @@ describe('tutorials', function () {
   'use strict';
 
   var $ = require('jquery');
-  var geo = require('./test-utils').geo;
-  var mockVGLRenderer = geo.util.mockVGLRenderer;
-  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 
   var imageTest = require('./image-test');
 
-  beforeAll(function () {
-    mockVGLRenderer();
+  beforeEach(function () {
     imageTest.prepareIframeTest();
-  });
-
-  afterEach(function () {
-    restoreVGLRenderer();
   });
 
   /* Test each tutorial */
@@ -26,7 +18,7 @@ describe('tutorials', function () {
     describe('Test ' + tutorialName, function () {
       /* Load the tutorial in the test iframe */
       beforeEach(function (done) {
-        $('#map').on('load', done);
+        $('#map').one('load', done);
         $('#map').attr('src', '/tutorials/' + tutorialName + '/index.html');
       });
       it('Run tutorial tests', function (done) {

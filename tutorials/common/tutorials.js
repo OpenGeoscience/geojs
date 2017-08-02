@@ -10,6 +10,9 @@ var processBlockInfo = {
   defaultHTML: '<!DOCTYPE html>\n' +
     '<html>\n' +
     '<head>\n' +
+    /* We could also load from the CDN:
+     *   https://cdnjs.cloudflare.com/ajax/libs/geojs/0.12.2/geo.min.js
+     * or the non-minified versions to make debug easier. */
     '  <script type="text/javascript" src="../../built/geo.min.js"></script>\n' +
     '  <script type="text/javascript" src="../../built/geo.ext.min.js"></script>\n' +
     '</head>\n' +
@@ -76,7 +79,7 @@ function process_block(selector) {
       target = elem.attr('target'),
       targetelem = $('#' + target),
       code = {},
-      html, css, js, pos, jsurl;
+      html, css, js, pos, jsurl, webgl;
 
   $('.codeblock[target="' + target + '"]').each(function () {
     var block = $(this),
@@ -89,6 +92,7 @@ function process_block(selector) {
     if (!block.hasClass('active')) {
       return;
     }
+    webgl = webgl || block.attr('webgl');
     while (code[format].length <= step) {
       code[format].push('');
     }
@@ -104,8 +108,6 @@ function process_block(selector) {
     });
     code[key] = processed;
   });
-  /* We could also load from the CDN:
-   * https://cdnjs.cloudflare.com/ajax/libs/geojs/0.12.2/geo.min.js */
   html = code.html !== undefined ? code.html : processBlockInfo.defaultHTML;
   css = code.css !== undefined ? code.css : processBlockInfo.defaultCSS;
   js = code.javascript || '';
@@ -121,6 +123,12 @@ function process_block(selector) {
     pos = html.length;
   }
   if (js) {
+    /* If any code block is marked as needing webgl and the current window's
+     * parent has a geojs element that reports that it doesn't support webgl,
+     * mock webgl.  This is expected to only happen in the automated tests. */
+    if (webgl && window.parent && window.parent !== window && window.parent.geo && !window.parent.geo.gl.vglRenderer.supported()) {
+      js = 'geo.util.mockVGLRenderer();\n' + js;
+    }
     html = html.substr(0, pos).replace(/\s+$/, '') + '\n<script type="text/javascript">\n' + js + '</script>\n' + html.substr(pos);
   }
   if (processBlockInfo.lastsrc !== html) {
