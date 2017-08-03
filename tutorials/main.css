@@ -1,0 +1,26 @@
+html, body {
+  overflow: auto;
+}
+
+.thumbnail {
+  position: relative;
+  overflow: hidden;
+}
+
+.thumbnail .caption .description{
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  background: rgba(50, 50, 50, 0.8) !important;
+  width: 100%;
+  padding: 2%;
+  display: none;
+  text-align: center;
+  color: #fff !important;
+  z-index: 2;
+  border-radius: 3px;
+}
+
+.navbar {
+  margin: 0;
+}

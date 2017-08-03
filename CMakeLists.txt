@@ -79,6 +79,14 @@ if(PHANTOMJS_TESTS)
   set_property(TEST "phantomjs" APPEND PROPERTY DEPENDS "notes-reset")
   set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "phantomjs")
   set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "phantomjs")
+
+  add_test(
+    NAME "tutorials"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND npm run tutorialsci
+  )
+  set_property(TEST "tutorials" APPEND PROPERTY DEPENDS "build_tutorials")
+  set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "tutorials")
 endif()
 
 add_custom_target(
@@ -97,6 +105,16 @@ add_custom_command(OUTPUT "${GEOJS_DEPLOY_DIR}/examples/bundle.js"
 add_custom_target(examples DEPENDS "${GEOJS_DEPLOY_DIR}/examples/bundle.js")
 add_test(NAME build_examples COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target examples)
 set_property(TEST "build_examples" APPEND PROPERTY DEPENDS "get_data_files")
+
+add_custom_command(OUTPUT "${GEOJS_DEPLOY_DIR}/tutorials/bundle.js"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  COMMAND npm run build-tutorials
+  COMMENT "Build tutorials"
+  VERBATIM
+)
+add_custom_target(tutorials DEPENDS "${GEOJS_DEPLOY_DIR}/tutorials/bundle.js")
+add_test(NAME build_tutorials COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target tutorials)
+set_property(TEST "build_tutorials" APPEND PROPERTY DEPENDS "get_data_files")
 
 if(FFHEADLESS_TESTS)
   find_program(NPM_EXECUTABLE npm)
