@@ -1,31 +1,11 @@
-- name: basemap
-  title: Create Basemap
-  description: Hello world to GeoJS
+- name: basic
+  title: Simple Map
+  description: Make a simple map.  Includes HTML, CSS, and Javascript
   
-- name: vector-layer
-  title: Vector Layer
-  description: Create Vector Layer and vector geometries
-  
-- name: wms-layer
-  title: WMS Layer
-  description: create WMS layer
+- name: tile_source
+  title: Changing Tile Source
+  description: Make a simple map and change the tile source
 
-- name: basemap
-  title: Create Basemap
-  description: Hello world to GeoJS
-  
-- name: vector-layer
-  title: Vector Layer
-  description: Create Vector Layer and vector geometries
-  
-- name: basemap
-  title: Create Basemap
-  description: Hello world to GeoJS
-  
-- name: vector-layer
-  title: Vector Layer
-  description: Create Vector Layer and vector geometries
-
-- name: wms-layer
-  title: WMS Layer
-  description: create WMS layer
+- name: wms
+  title: Using a WMS Tile Source
+  description: Make a map with a custom function for getting tiles from a WMS server.  This also shows how to get tile bounds in different coordinates

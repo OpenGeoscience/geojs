@@ -12,11 +12,16 @@ defaults:
       type: examples
     values:
       layout: example
+  - scope:
+      path: ""
+      type: tutorials
+    values:
+      layout: tutorial
 
 collections:
   examples:
     output: true
-  tutorial:
+  tutorials:
     output: true
 
 # # otherwise some big files in this data folder will hang jekyll build
