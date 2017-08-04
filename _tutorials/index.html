@@ -1,0 +1,29 @@
+--- 
+layout: default
+title: Tutorials 
+---
+<div class="container page tutorials">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <section>
+                <h2>Tutorials</h2>
+                <p class="text-muted">Lorem ipsum dolor sit amet adipisicing elit. Minima maxime quam architecto quo inventore harum ex magni, dicta impedit.</p>
+            </section>
+            <div class="row">
+            {% for tutorial in site.data.tutorials %}
+                <div class="col-md-4 col-sm-6 portfolio-item">
+                    <a class="portfolio-link" href="{{"tutorials"|relative_url}}/{{tutorial.name}}">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="{{"tutorials"|relative_url}}/{{tutorial.name}}/thumb.jpg" onerror="var url = '{{"tutorials"|relative_url}}/common/thumb.png'; if (this.src!=url) this.src = url;">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">{{tutorial.description}}</div>
+                        <h4><a class="portfolio-link" href="{{"tutorials"|relative_url}}/{{tutorial.name}}">{{tutorial.title}}</a></h4>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>

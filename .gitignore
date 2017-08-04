@@ -1,3 +1,3 @@
-tests
-data/tiles*
-data/vtk*
+node_modules
+/_site
+/_examples/*/*.jade

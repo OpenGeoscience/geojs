@@ -7,7 +7,7 @@
 		exports["geo"] = factory(require("Hammer"), require("d3"));
 	else
 		root["geo"] = factory(root["Hammer"], root["d3"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_223__, __WEBPACK_EXTERNAL_MODULE_225__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_224__, __WEBPACK_EXTERNAL_MODULE_226__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -95,51 +95,52 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = $.extend({
 	  annotation: __webpack_require__(7),
-	  annotationLayer: __webpack_require__(218),
+	  annotationLayer: __webpack_require__(219),
 	  camera: __webpack_require__(211),
-	  choroplethFeature: __webpack_require__(224),
-	  contourFeature: __webpack_require__(226),
-	  domRenderer: __webpack_require__(227),
+	  choroplethFeature: __webpack_require__(225),
+	  contourFeature: __webpack_require__(227),
+	  domRenderer: __webpack_require__(228),
 	  event: __webpack_require__(9),
 	  feature: __webpack_require__(207),
-	  featureLayer: __webpack_require__(219),
-	  fetchQueue: __webpack_require__(228),
-	  fileReader: __webpack_require__(229),
+	  featureLayer: __webpack_require__(220),
+	  fetchQueue: __webpack_require__(229),
+	  fileReader: __webpack_require__(230),
 	  geo_action: __webpack_require__(10),
-	  graphFeature: __webpack_require__(230),
-	  heatmapFeature: __webpack_require__(231),
-	  imageTile: __webpack_require__(232),
-	  jsonReader: __webpack_require__(234),
+	  graphFeature: __webpack_require__(231),
+	  heatmapFeature: __webpack_require__(232),
+	  imageTile: __webpack_require__(233),
+	  jsonReader: __webpack_require__(235),
 	  layer: __webpack_require__(210),
 	  lineFeature: __webpack_require__(206),
-	  map: __webpack_require__(235),
-	  mapInteractor: __webpack_require__(221),
+	  map: __webpack_require__(236),
+	  mapInteractor: __webpack_require__(222),
 	  object: __webpack_require__(203),
-	  osmLayer: __webpack_require__(237),
-	  pathFeature: __webpack_require__(240),
+	  osmLayer: __webpack_require__(238),
+	  pathFeature: __webpack_require__(241),
 	  pointFeature: __webpack_require__(212),
 	  polygonFeature: __webpack_require__(217),
-	  quadFeature: __webpack_require__(222),
-	  pixelmapFeature: __webpack_require__(241),
+	  quadFeature: __webpack_require__(223),
+	  pixelmapFeature: __webpack_require__(242),
 	  renderer: __webpack_require__(202),
 	  sceneObject: __webpack_require__(208),
-	  tile: __webpack_require__(233),
-	  tileCache: __webpack_require__(239),
-	  tileLayer: __webpack_require__(238),
+	  textFeature: __webpack_require__(218),
+	  tile: __webpack_require__(234),
+	  tileCache: __webpack_require__(240),
+	  tileLayer: __webpack_require__(239),
 	  timestamp: __webpack_require__(209),
 	  transform: __webpack_require__(11),
-	  typedef: __webpack_require__(242),
-	  vectorFeature: __webpack_require__(243),
+	  typedef: __webpack_require__(243),
+	  vectorFeature: __webpack_require__(244),
 	  inherit: __webpack_require__(8),
-	  version: __webpack_require__(244),
-	  sha: __webpack_require__(245),
+	  version: __webpack_require__(245),
+	  sha: __webpack_require__(246),
 
 	  util: __webpack_require__(83),
 	  jQuery: $,
-	  d3: __webpack_require__(246),
-	  gl: __webpack_require__(258),
-	  canvas: __webpack_require__(268),
-	  gui: __webpack_require__(276)
+	  d3: __webpack_require__(247),
+	  gl: __webpack_require__(259),
+	  canvas: __webpack_require__(269),
+	  gui: __webpack_require__(297)
 	}, __webpack_require__(201));
 
 	if (window && !window.$) {
@@ -10374,6 +10375,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var lineFeature = __webpack_require__(206);
 	var pointFeature = __webpack_require__(212);
 	var polygonFeature = __webpack_require__(217);
+	var textFeature = __webpack_require__(218);
 
 	var annotationId = 0;
 
@@ -10386,18 +10388,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	var annotationActionOwner = 'annotationAction';
 
 	/**
-	 * Base annotation class
+	 * Base annotation class.
 	 *
-	 * @class geo.annotation
-	 * @param {string} type the type of annotation.  These should be registered
+	 * @class
+	 * @alias geo.annotation
+	 * @param {string} type The type of annotation.  These should be registered
 	 *    with utils.registerAnnotation and can be listed with same function.
-	 * @param {object?} options Inidividual annotations have additional options.
-	 * @param {string} [options.name] A name for the annotation.  This defaults to
+	 * @param {object?} [args] Individual annotations have additional options.
+	 * @param {string} [args.name] A name for the annotation.  This defaults to
 	 *    the type with a unique ID suffixed to it.
-	 * @param {geo.annotationLayer} [options.layer] a reference to the controlling
+	 * @param {geo.annotationLayer} [arg.layer] A reference to the controlling
 	 *    layer.  This is used for coordinate transforms.
-	 * @param {string} [options.state] initial annotation state.  One of the
-	 *    annotation.state values.
+	 * @param {string} [args.state] Initial annotation state.  One of the
+	 *    `geo.annotation.state` values.
+	 * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+	 *    annotation label on annotations in done or edit states.  Alternately, a
+	 *    list of states in which to show the label.  Falsy to not show the label.
 	 * @returns {geo.annotation}
 	 */
 	var annotation = function (type, args) {
@@ -10407,10 +10413,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  annotationId += 1;
-	  var m_options = $.extend({}, args || {}),
+	  var m_options = $.extend({}, {showLabel: true}, args || {}),
 	      m_id = annotationId,
 	      m_name = m_options.name || (
 	        type.charAt(0).toUpperCase() + type.substr(1) + ' ' + annotationId),
+	      m_label = m_options.label || null,
+	      m_description = m_options.description || undefined,
 	      m_type = type,
 	      m_layer = m_options.layer,
 	      /* one of annotationState.* */
@@ -10418,6 +10426,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  delete m_options.state;
 	  delete m_options.layer;
 	  delete m_options.name;
+	  delete m_options.label;
+	  delete m_options.description;
 
 	  /**
 	   * Clean up any resources that the annotation is using.
@@ -10428,7 +10438,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get a unique annotation id.
 	   *
-	   * @returns {number} the annotation id.
+	   * @returns {number} The annotation id.
 	   */
 	  this.id = function () {
 	    return m_id;
@@ -10437,16 +10447,113 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get or set the name of this annotation.
 	   *
-	   * @param {string|undefined} arg if undefined, return the name, otherwise
-	   *    change it.
-	   * @returns {this|string} the current name or this annotation.
+	   * @param {string|undefined} arg If `undefined`, return the name, otherwise
+	   *    change it.  When setting the name, the value is trimmed of
+	   *    whitespace.  The name will not be changed to an empty string.
+	   * @returns {this|string} The current name or this annotation.
 	   */
 	  this.name = function (arg) {
 	    if (arg === undefined) {
 	      return m_name;
 	    }
 	    if (arg !== null && ('' + arg).trim()) {
-	      m_name = ('' + arg).trim();
+	      arg = ('' + arg).trim();
+	      if (arg !== m_name) {
+	        m_name = arg;
+	        this.modified();
+	      }
+	    }
+	    return this;
+	  };
+
+	  /**
+	   * Get or set the label of this annotation.
+	   *
+	   * @param {string|null|undefined} arg If `undefined`, return the label,
+	   *    otherwise change it.  `null` to clear the label.
+	   * @param {boolean} noFallback If not truthy and the label is `null`, return
+	   *    the name, otherwise return the actual value for label.
+	   * @returns {this|string} The current label or this annotation.
+	   */
+	  this.label = function (arg, noFallback) {
+	    if (arg === undefined) {
+	      return m_label === null && !noFallback ? m_name : m_label;
+	    }
+	    if (arg !== m_label) {
+	      m_label = arg;
+	      this.modified();
+	    }
+	    return this;
+	  };
+
+	  /**
+	   * Return the coordinate associated with the label.
+	   *
+	   * @returns {geo.geoPosition|undefined} The map gcs position for the label,
+	   *    or `undefined` if no such position exists.
+	   */
+	  this._labelPosition = function () {
+	    var coor = this._coordinates(), position = {x: 0, y: 0}, i;
+	    if (!coor || !coor.length) {
+	      return undefined;
+	    }
+	    if (coor.length === 1) {
+	      return coor[0];
+	    }
+	    for (i = 0; i < coor.length; i += 1) {
+	      position.x += coor[i].x;
+	      position.y += coor[i].y;
+	    }
+	    position.x /= coor.length;
+	    position.y /= coor.length;
+	    return position;
+	  };
+
+	  /**
+	   * If the label should be shown, get a record of the label that can be used
+	   * in a `geo.textFeature`.
+	   *
+	   * @returns {geo.annotationLayer.labelRecord|undefined} A label record, or
+	   *    `undefined` if it should not be shown.
+	   */
+	  this.labelRecord = function () {
+	    var show = this.options('showLabel');
+	    if (!show) {
+	      return;
+	    }
+	    var state = this.state();
+	    if ((show === true && state === annotationState.create) ||
+	        (show !== true && show.indexOf(state) < 0)) {
+	      return;
+	    }
+	    var style = this.options('labelStyle');
+	    var labelRecord = {
+	      text: this.label(),
+	      position: this._labelPosition()
+	    };
+	    if (!labelRecord.position) {
+	      return;
+	    }
+	    if (style) {
+	      labelRecord.style = style;
+	    }
+	    return labelRecord;
+	  };
+
+	  /**
+	   * Get or set the description of this annotation.
+	   *
+	   * @param {string|undefined} arg If `undefined`, return the description,
+	   *    otherwise change it.
+	   * @returns {this|string} The current description or this annotation.
+	   */
+	  this.description = function (arg) {
+	    if (arg === undefined) {
+	      return m_description;
+	    }
+	    if (arg !== m_description) {
+	      m_description = arg;
+	      this.modified();
 	    }
 	    return this;
 	  };
@@ -10469,9 +10576,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get or set the state of this annotation.
 	   *
-	   * @param {string|undefined} arg if undefined, return the state, otherwise
-	   *    change it.
-	   * @returns {this|string} the current state or this annotation.
+	   * @param {string|undefined} arg If `undefined`, return the state,
+	   *    otherwise change it.  This should be one of the
+	   *    `geo.annotation.state` values.
+	   * @returns {this|string} The current state or this annotation.
 	   */
 	  this.state = function (arg) {
 	    if (arg === undefined) {
@@ -10491,9 +10599,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Return actions needed for the specified state of this annotation.
 	   *
-	   * @param {string} state: the state to return actions for.  Defaults to
+	   * @param {string} [state] The state to return actions for.  Defaults to
 	   *    the current state.
-	   * @returns {array}: a list of actions.
+	   * @returns {geo.actionRecord[]} A list of actions.
 	   */
 	  this.actions = function () {
 	    return [];
@@ -10502,24 +10610,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Process any actions for this annotation.
 	   *
-	   * @param {object} evt: the action event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The action event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if the
+	   *    annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.processAction = function () {
+	    return undefined;
 	  };
 
 	  /**
 	   * Set or get options.
 	   *
-	   * @param {string|object} arg1 if undefined, return the options object.  If
-	   *    a string, either set or return the option of that name.  If an object,
-	   *    update the options with the object's values.
-	   * @param {object} arg2 if arg1 is a string and this is defined, set the
-	   *    option to this value.
-	   * @returns {object|this} if options are set, return the layer, otherwise
-	   *    return the requested option or the set of options.
+	   * @param {string|object} [arg1] If `undefined`, return the options object.
+	   *    If a string, either set or return the option of that name.  If an
+	   *    object, update the options with the object's values.
+	   * @param {object} [arg2] If `arg1` is a string and this is defined, set
+	   *    the option to this value.
+	   * @returns {object|this} If options are set, return the annotation,
+	   *    otherwise return the requested option or the set of options.
 	   */
 	  this.options = function (arg1, arg2) {
 	    if (arg1 === undefined) {
@@ -10530,6 +10640,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    if (arg2 === undefined) {
 	      m_options = $.extend(true, m_options, arg1);
+	      /* For style objects, reextend them without recursiion.  This allows
+	       * setting colors without an opacity field, for instance. */
+	      ['style', 'editStyle', 'labelStyle'].forEach(function (key) {
+	        if (arg1[key] !== undefined) {
+	          $.extend(m_options[key], arg1[key]);
+	        }
+	      });
 	    } else {
 	      m_options[arg1] = arg2;
 	    }
@@ -10543,6 +10660,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	      delete m_options.name;
 	      this.name(name);
 	    }
+	    if (m_options.label !== undefined) {
+	      var label = m_options.label;
+	      delete m_options.label;
+	      this.label(label);
+	    }
+	    if (m_options.description !== undefined) {
+	      var description = m_options.description;
+	      delete m_options.description;
+	      this.description(description);
+	    }
 	    this.modified();
 	    return this;
 	  };
@@ -10550,13 +10677,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Set or get style.
 	   *
-	   * @param {string|object} arg1 if undefined, return the options.style object.
-	   *    If a string, either set or return the style of that name.  If an
-	   *    object, update the style with the object's values.
-	   * @param {object} arg2 if arg1 is a string and this is defined, set the
-	   *    style to this value.
-	   * @returns {object|this} if styles are set, return the layer, otherwise
-	   *    return the requested style or the set of styles.
+	   * @param {string|object} [arg1] If `undefined`, return the current style
+	   *    object.  If a string and `arg2` is undefined, return the style
+	   *    associated with the specified key.  If a string and `arg2` is defined,
+	   *    set the named style to the specified value.  Otherwise, extend the
+	   *    current style with the values in the specified object.
+	   * @param {*} [arg2] If `arg1` is a string, the new value for that style.
+	   * @returns {object|this} Either the entire style object, the value of a
+	   *    specific style, or the current class instance.
 	   */
 	  this.style = function (arg1, arg2) {
 	    if (arg1 === undefined) {
@@ -10575,27 +10703,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Set or get edit style.
+	   * Set or get edit style.  These are the styles used in edit and create mode.
 	   *
-	   * @param {string|object} arg1 if undefined, return the options.editstyle
-	   *    object.  If a string, either set or return the style of that name.  If
-	   *    an object, update the style with the object's values.
-	   * @param {object} arg2 if arg1 is a string and this is defined, set the
-	   *    style to this value.
-	   * @returns {object|this} if styles are set, return the layer, otherwise
-	   *    return the requested style or the set of styles.
+	   * @param {string|object} [arg1] If `undefined`, return the current style
+	   *    object.  If a string and `arg2` is undefined, return the style
+	   *    associated with the specified key.  If a string and `arg2` is defined,
+	   *    set the named style to the specified value.  Otherwise, extend the
+	   *    current style with the values in the specified object.
+	   * @param {*} [arg2] If `arg1` is a string, the new value for that style.
+	   * @returns {object|this} Either the entire style object, the value of a
+	   *    specific style, or the current class instance.
 	   */
-	  this.editstyle = function (arg1, arg2) {
+	  this.editStyle = function (arg1, arg2) {
 	    if (arg1 === undefined) {
-	      return m_options.editstyle;
+	      return m_options.editStyle;
 	    }
 	    if (typeof arg1 === 'string' && arg2 === undefined) {
-	      return m_options.editstyle[arg1];
+	      return m_options.editStyle[arg1];
 	    }
 	    if (arg2 === undefined) {
-	      m_options.editstyle = $.extend(true, m_options.editstyle, arg1);
+	      m_options.editStyle = $.extend(true, m_options.editStyle, arg1);
 	    } else {
-	      m_options.editstyle[arg1] = arg2;
+	      m_options.editStyle[arg1] = arg2;
 	    }
 	    this.modified();
 	    return this;
@@ -10604,7 +10733,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get the type of this annotation.
 	   *
-	   * @returns {string} the annotation type.
+	   * @returns {string} The annotation type.
 	   */
 	  this.type = function () {
 	    return m_type;
@@ -10613,11 +10742,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get a list of renderable features for this annotation.  The list index is
 	   * functionally a z-index for the feature.  Each entry is a dictionary with
-	   * the key as the feature name (such as line, quad, or polygon), and the
-	   * value a dictionary of values to pass to the feature constructor, such as
-	   * style and coordinates.
+	   * the key as the feature name (such as `line`, `quad`, or `polygon`), and
+	   * the value a dictionary of values to pass to the feature constructor, such
+	   * as `style` and `coordinates`.
 	   *
-	   * @returns {array} an array of features.
+	   * @returns {array} An array of features.
 	   */
 	  this.features = function () {
 	    return [];
@@ -10625,32 +10754,36 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Handle a mouse click on this annotation.  If the event is processed,
-	   * evt.handled should be set to true to prevent further processing.
+	   * evt.handled should be set to `true` to prevent further processing.
 	   *
-	   * @param {geo.event} evt the mouse click event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The mouse click event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+	   *    the annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.mouseClick = function (evt) {
+	    return undefined;
 	  };
 
 	  /**
 	   * Handle a mouse move on this annotation.
 	   *
-	   * @param {geo.event} evt the mouse move event.
-	   * @returns {boolean|string} true to update the annotation, falsy to not
+	   * @param {geo.event} evt The mouse move event.
+	   * @returns {boolean} Truthy to update the annotation, falsy to not
 	   *    update anything.
 	   */
 	  this.mouseMove = function (evt) {
+	    return undefined;
 	  };
 
 	  /**
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
-	   * @param {array} coordinates: an optional array of coordinates to set.
-	   * @returns {array} an array of coordinates.
+	   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+	   *  to set.
+	   * @returns {geo.geoPosition[]} The current array of coordinates.
 	   */
 	  this._coordinates = function (coordinates) {
 	    return [];
@@ -10659,9 +10792,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get coordinates associated with this annotation.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @returns {array} an array of coordinates.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {geo.geoPosition[]} An array of coordinates.
 	   */
 	  this.coordinates = function (gcs) {
 	    var coord = this._coordinates() || [];
@@ -10679,6 +10812,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Mark this annotation as modified.  This just marks the parent layer as
 	   * modified.
+	   *
+	   * @returns {this} The annotation.
 	   */
 	  this.modified = function () {
 	    if (this.layer()) {
@@ -10689,6 +10824,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Draw this annotation.  This just updates and draws the parent layer.
+	   *
+	   * @returns {this} The annotation.
 	   */
 	  this.draw = function () {
 	    if (this.layer()) {
@@ -10702,7 +10839,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Return a list of styles that should be preserved in a geojson
 	   * representation of the annotation.
 	   *
-	   * @return {array} a list of style names to store.
+	   * @returns {string[]} A list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
 	    return [
@@ -10712,38 +10849,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Return the coordinates to be stored in a geojson geometery object.
+	   * Return the coordinates to be stored in a geojson geometry object.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {array} an array of flattened coordinates in the ingcs coordinate
-	   *    system.  Undefined if this annotation is incompelte.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {array} An array of flattened coordinates in the interface gcs
+	   *    coordinate system.  `undefined` if this annotation is incomplete.
 	   */
 	  this._geojsonCoordinates = function (gcs) {
+	    return [];
 	  };
 
 	  /**
 	   * Return the geometry type that is used to store this annotation in geojson.
 	   *
-	   * @return {string} a geojson geometry type.
+	   * @returns {string} A geojson geometry type.
 	   */
 	  this._geojsonGeometryType = function () {
+	    return '';
 	  };
 
 	  /**
 	   * Return the annotation as a geojson object.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @param {boolean} includeCrs: if true, include the coordinate system.
-	   * @return {object} the annotation as a geojson object, or undefined if it
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @param {boolean} [includeCrs] If truthy, include the coordinate system.
+	   * @returns {object} The annotation as a geojson object, or `undefined` if it
 	   *    should not be represented (for instance, while it is being created).
 	   */
 	  this.geojson = function (gcs, includeCrs) {
 	    var coor = this._geojsonCoordinates(gcs),
 	        geotype = this._geojsonGeometryType(),
 	        styles = this._geojsonStyles(),
-	        objStyle = this.options('style'),
+	        objStyle = this.options('style') || {},
+	        objLabelStyle = this.options('labelStyle') || {},
 	        i, key, value;
 	    if (!coor || !coor.length || !geotype) {
 	      return;
@@ -10760,14 +10900,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	        annotationId: this.id()
 	      }
 	    };
+	    if (m_label) {
+	      obj.properties.label = m_label;
+	    }
+	    if (m_description) {
+	      obj.properties.description = m_description;
+	    }
+	    if (this.options('showLabel') === false) {
+	      obj.properties.showLabel = this.options('showLabel');
+	    }
 	    for (i = 0; i < styles.length; i += 1) {
 	      key = styles[i];
 	      value = util.ensureFunction(objStyle[key])();
 	      if (value !== undefined) {
 	        if (key.toLowerCase().match(/color$/)) {
-	          value = util.convertColorToHex(value);
+	          value = util.convertColorToHex(value, 'needed');
 	        }
 	        obj.properties[key] = value;
+	      }
+	    }
+	    for (i = 0; i < textFeature.usedStyles.length; i += 1) {
+	      key = textFeature.usedStyles[i];
+	      value = util.ensureFunction(objLabelStyle[key])();
+	      if (value !== undefined) {
+	        if (key.toLowerCase().match(/color$/)) {
+	          value = util.convertColorToHex(value, 'needed');
+	        }
+	        obj.properties['label' + key.charAt(0).toUpperCase() + key.slice(1)] = value;
 	      }
 	    }
 	    if (includeCrs) {
@@ -10787,18 +10946,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	/**
-	 * Rectangle annotation class
+	 * Rectangle annotation class.
 	 *
 	 * Rectangles are always rendered as polygons.  This could be changed -- if no
 	 * stroke is specified, the quad feature would be sufficient and work on more
 	 * renderers.
 	 *
-	 * Must specify:
-	 *   corners: a list of four corners {x: x, y: y} in map gcs coordinates.
-	 * May specify:
-	 *   style.
-	 *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
-	 *     strokeOpacity
+	 * @class
+	 * @alias geo.rectangleAnnotation
+	 * @extends geo.annotation
+	 *
+	 * @param {object?} [args] Options for the annotation.
+	 * @param {string} [args.name] A name for the annotation.  This defaults to
+	 *    the type with a unique ID suffixed to it.
+	 * @param {string} [args.state] initial annotation state.  One of the
+	 *    annotation.state values.
+	 * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+	 *    annotation label on annotations in done or edit states.  Alternately, a
+	 *    list of states in which to show the label.  Falsy to not show the label.
+	 * @param {geo.geoPosition[]} [args.corners] A list of four corners in map
+	 *    gcs coordinates.  These must be in order around the perimeter of the
+	 *    rectangle (in either direction).
+	 * @param {geo.geoPosition[]} [args.coordinates] An alternate name for
+	 *    `args.corners`.
+	 * @param {object} [args.style] The style to apply to a finished rectangle.
+	 *    This uses styles for polygons, including `fill`, `fillColor`,
+	 *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+	 *    `strokeOpacity`.
+	 * @param {object} [args.editStyle] The style to apply to a rectangle in edit
+	 *    mode.  This uses styles for polygons and lines, including `fill`,
+	 *    `fillColor`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+	 *    `strokeOpacity`.
 	 */
 	var rectangleAnnotation = function (args) {
 	  'use strict';
@@ -10818,7 +10996,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      strokeWidth: 3,
 	      uniformPolygon: true
 	    },
-	    editstyle: {
+	    editStyle: {
 	      fill: true,
 	      fillColor: {r: 0.3, g: 0.3, b: 0.3},
 	      fillOpacity: 0.25,
@@ -10837,9 +11015,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Return actions needed for the specified state of this annotation.
 	   *
-	   * @param {string} state: the state to return actions for.  Defaults to
+	   * @param {string} [state] The state to return actions for.  Defaults to
 	   *    the current state.
-	   * @returns {array}: a list of actions.
+	   * @returns {geo.actionRecord[]} A list of actions.
 	   */
 	  this.actions = function (state) {
 	    if (!state) {
@@ -10863,10 +11041,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Process any actions for this annotation.
 	   *
-	   * @param {object} evt: the action event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The action event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if the
+	   *    annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.processAction = function (evt) {
 	    var layer = this.layer();
@@ -10890,7 +11069,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get a list of renderable features for this annotation.
 	   *
-	   * @returns {array} an array of features.
+	   * @returns {array} An array of features.
 	   */
 	  this.features = function () {
 	    var opt = this.options(),
@@ -10903,7 +11082,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          features = [{
 	            polygon: {
 	              polygon: opt.corners,
-	              style: opt.editstyle
+	              style: opt.editStyle
 	            }
 	          }];
 	        }
@@ -10924,8 +11103,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
-	   * @param {array} coordinates: an optional array of coordinates to set.
-	   * @returns {array} an array of coordinates.
+	   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+	   *  to set.
+	   * @returns {geo.geoPosition[]} The current array of coordinates.
 	   */
 	  this._coordinates = function (coordinates) {
 	    if (coordinates && coordinates.length >= 4) {
@@ -10937,12 +11117,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Return the coordinates to be stored in a geojson geometery object.
+	   * Return the coordinates to be stored in a geojson geometry object.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {array} an array of flattened coordinates in the ingcs coordinate
-	   *    system.  Undefined if this annotation is incompelte.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {array} An array of flattened coordinates in the interface gcs
+	   *    coordinate system.  `undefined` if this annotation is incomplete.
 	   */
 	  this._geojsonCoordinates = function (gcs) {
 	    var src = this.coordinates(gcs);
@@ -10960,7 +11140,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Return the geometry type that is used to store this annotation in geojson.
 	   *
-	   * @return {string} a geojson geometry type.
+	   * @returns {string} A geojson geometry type.
 	   */
 	  this._geojsonGeometryType = function () {
 	    return 'Polygon';
@@ -10970,7 +11150,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Return a list of styles that should be preserved in a geojson
 	   * representation of the annotation.
 	   *
-	   * @return {array} a list of style names to store.
+	   * @returns {string[]} A list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
 	    return [
@@ -10981,8 +11161,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Set three corners based on an initial corner and a mouse event.
 	   *
-	   * @param {array} an array of four corners to update.
-	   * @param {geo.event} evt the mouse move event.
+	   * @param {geo.geoPosition} corners An array of four corners to update.
+	   * @param {geo.event} evt The mouse move event.
 	   */
 	  this._setCornersFromMouse = function (corners, evt) {
 	    var map = this.layer().map(),
@@ -10998,8 +11178,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Handle a mouse move on this annotation.
 	   *
-	   * @param {geo.event} evt the mouse move event.
-	   * @returns {boolean|string} true to update the annotation, falsy to not
+	   * @param {geo.event} evt The mouse move event.
+	   * @returns {boolean} Truthy to update the annotation, falsy to not
 	   *    update anything.
 	   */
 	  this.mouseMove = function (evt) {
@@ -11015,12 +11195,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Handle a mouse click on this annotation.  If the event is processed,
-	   * evt.handled should be set to true to prevent further processing.
+	   * evt.handled should be set to `true` to prevent further processing.
 	   *
-	   * @param {geo.event} evt the mouse click event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The mouse click event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+	   *    the annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.mouseClick = function (evt) {
 	    var layer = this.layer();
@@ -11062,15 +11243,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * When complete, polygons are rendered as polygons.  During creation they are
 	 * rendered as lines and polygons.
 	 *
-	 * Must specify:
-	 *   vertices: a list of vertices {x: x, y: y} in map gcs coordinates.
-	 * May specify:
-	 *   style.
-	 *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
-	 *     strokeOpacity
-	 *   editstyle.
-	 *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
-	 *     strokeOpacity
+	 * @class
+	 * @alias geo.polygonAnnotation
+	 * @extends geo.annotation
+	 *
+	 * @param {object?} [args] Options for the annotation.
+	 * @param {string} [args.name] A name for the annotation.  This defaults to
+	 *    the type with a unique ID suffixed to it.
+	 * @param {string} [args.state] initial annotation state.  One of the
+	 *    annotation.state values.
+	 * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+	 *    annotation label on annotations in done or edit states.  Alternately, a
+	 *    list of states in which to show the label.  Falsy to not show the label.
+	 * @param {geo.geoPosition[]} [args.vertices] A list of vertices in map gcs
+	 *    coordinates.  These must be in order around the perimeter of the
+	 *    polygon (in either direction).
+	 * @param {geo.geoPosition[]} [args.coordinates] An alternate name for
+	 *    `args.vertices`.
+	 * @param {object} [args.style] The style to apply to a finished polygon.
+	 *    This uses styles for polygons, including `fill`, `fillColor`,
+	 *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+	 *    `strokeOpacity`.
+	 * @param {object} [args.editStyle] The style to apply to a polygon in edit
+	 *    mode.  This uses styles for polygons and lines, including `fill`,
+	 *    `fillColor`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+	 *    `strokeOpacity`.
 	 */
 	var polygonAnnotation = function (args) {
 	  'use strict';
@@ -11092,7 +11289,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      strokeWidth: 3,
 	      uniformPolygon: true
 	    },
-	    editstyle: {
+	    editStyle: {
 	      closed: false,
 	      fill: true,
 	      fillColor: {r: 0.3, g: 0.3, b: 0.3},
@@ -11123,7 +11320,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * is done, this is just a single polygon.  During creation this can be a
 	   * polygon and line at z-levels 1 and 2.
 	   *
-	   * @returns {array} an array of features.
+	   * @returns {array} An array of features.
 	   */
 	  this.features = function () {
 	    var opt = this.options(),
@@ -11136,7 +11333,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          features[1] = {
 	            polygon: {
 	              polygon: opt.vertices,
-	              style: opt.editstyle
+	              style: opt.editStyle
 	            }
 	          };
 	        }
@@ -11144,7 +11341,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          features[2] = {
 	            line: {
 	              line: opt.vertices,
-	              style: opt.editstyle
+	              style: opt.editStyle
 	            }
 	          };
 	        }
@@ -11165,8 +11362,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
-	   * @param {array} coordinates: an optional array of coordinates to set.
-	   * @returns {array} an array of coordinates.
+	   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+	   *  to set.
+	   * @returns {geo.geoPosition[]} The current array of coordinates.
 	   */
 	  this._coordinates = function (coordinates) {
 	    if (coordinates) {
@@ -11178,8 +11376,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Handle a mouse move on this annotation.
 	   *
-	   * @param {geo.event} evt the mouse move event.
-	   * @returns {boolean|string} true to update the annotation, falsy to not
+	   * @param {geo.event} evt The mouse move event.
+	   * @returns {boolean} Truthy to update the annotation, falsy to not
 	   *    update anything.
 	   */
 	  this.mouseMove = function (evt) {
@@ -11195,12 +11393,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Handle a mouse click on this annotation.  If the event is processed,
-	   * evt.handled should be set to true to prevent further processing.
+	   * evt.handled should be set to `true` to prevent further processing.
 	   *
-	   * @param {geo.event} evt the mouse click event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The mouse click event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+	   *    the annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.mouseClick = function (evt) {
 	    var layer = this.layer();
@@ -11253,12 +11452,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Return the coordinates to be stored in a geojson geometery object.
+	   * Return the coordinates to be stored in a geojson geometry object.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {array} an array of flattened coordinates in the ingcs coordinate
-	   *    system.  Undefined if this annotation is incompelte.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {array} An array of flattened coordinates in the interface gcs
+	   *    coordinate system.  `undefined` if this annotation is incomplete.
 	   */
 	  this._geojsonCoordinates = function (gcs) {
 	    var src = this.coordinates(gcs);
@@ -11276,7 +11475,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Return the geometry type that is used to store this annotation in geojson.
 	   *
-	   * @return {string} a geojson geometry type.
+	   * @returns {string} A geojson geometry type.
 	   */
 	  this._geojsonGeometryType = function () {
 	    return 'Polygon';
@@ -11286,7 +11485,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Return a list of styles that should be preserved in a geojson
 	   * representation of the annotation.
 	   *
-	   * @return {array} a list of style names to store.
+	   * @returns {string[]} A list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
 	    return [
@@ -11302,17 +11501,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
 
 	/**
-	 * Line annotation class
+	 * Line annotation class.
 	 *
-	 * Must specify:
-	 *   vertices: a list of vertices {x: x, y: y} in map gcs coordinates.
-	 * May specify:
-	 *   style.
-	 *     strokeWidth, strokeColor, strokeOpacity, strokeOffset, closed, lineCap,
-	 *     lineJoin
-	 *   editstyle.
-	 *     strokeWidth, strokeColor, strokeOpacity, strokeOffset, closed, lineCap,
-	 *     lineJoin
+	 * @class
+	 * @alias geo.lineAnnotation
+	 * @extends geo.annotation
+	 *
+	 * @param {object?} [args] Options for the annotation.
+	 * @param {string} [args.name] A name for the annotation.  This defaults to
+	 *    the type with a unique ID suffixed to it.
+	 * @param {string} [args.state] initial annotation state.  One of the
+	 *    annotation.state values.
+	 * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+	 *    annotation label on annotations in done or edit states.  Alternately, a
+	 *    list of states in which to show the label.  Falsy to not show the label.
+	 * @param {geo.geoPosition[]} [args.vertices] A list of vertices in map gcs
+	 *    coordinates.
+	 * @param {geo.geoPosition[]} [args.coordinates] An alternate name for
+	 *    `args.corners`.
+	 * @param {object} [args.style] The style to apply to a finished line.
+	 *    This uses styles for lines, including `strokeWidth`, `strokeColor`,
+	 *    `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`, and `lineJoin`.
+	 * @param {object} [args.editStyle] The style to apply to a line in edit
+	 *    mode.  This uses styles for lines, including `strokeWidth`,
+	 *    `strokeColor`, `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`,
+	 *    and `lineJoin`.
 	 */
 	var lineAnnotation = function (args) {
 	  'use strict';
@@ -11340,7 +11553,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      lineCap: 'butt',
 	      lineJoin: 'miter'
 	    },
-	    editstyle: {
+	    editStyle: {
 	      line: function (d) {
 	        /* Return an array that has the same number of items as we have
 	         * vertices. */
@@ -11365,7 +11578,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get a list of renderable features for this annotation.
 	   *
-	   * @returns {array} an array of features.
+	   * @returns {array} An array of features.
 	   */
 	  this.features = function () {
 	    var opt = this.options(),
@@ -11376,7 +11589,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        features = [{
 	          line: {
 	            line: opt.vertices,
-	            style: opt.editstyle
+	            style: opt.editStyle
 	          }
 	        }];
 	        break;
@@ -11396,8 +11609,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
-	   * @param {array} coordinates: an optional array of coordinates to set.
-	   * @returns {array} an array of coordinates.
+	   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+	   *  to set.
+	   * @returns {geo.geoPosition[]} The current array of coordinates.
 	   */
 	  this._coordinates = function (coordinates) {
 	    if (coordinates) {
@@ -11409,8 +11623,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Handle a mouse move on this annotation.
 	   *
-	   * @param {geo.event} evt the mouse move event.
-	   * @returns {boolean|string} true to update the annotation, falsy to not
+	   * @param {geo.event} evt The mouse move event.
+	   * @returns {boolean} Truthy to update the annotation, falsy to not
 	   *    update anything.
 	   */
 	  this.mouseMove = function (evt) {
@@ -11426,12 +11640,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Handle a mouse click on this annotation.  If the event is processed,
-	   * evt.handled should be set to true to prevent further processing.
+	   * evt.handled should be set to `true` to prevent further processing.
 	   *
-	   * @param {geo.event} evt the mouse click event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The mouse click event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+	   *    the annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.mouseClick = function (evt) {
 	    var layer = this.layer();
@@ -11487,9 +11702,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Return actions needed for the specified state of this annotation.
 	   *
-	   * @param {string} state: the state to return actions for.  Defaults to
+	   * @param {string} [state] The state to return actions for.  Defaults to
 	   *    the current state.
-	   * @returns {array}: a list of actions.
+	   * @returns {geo.actionRecord[]} A list of actions.
 	   */
 	  this.actions = function (state) {
 	    if (!state) {
@@ -11517,10 +11732,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Process any actions for this annotation.
 	   *
-	   * @param {object} evt: the action event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The action event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if the
+	   *    annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.processAction = function (evt) {
 	    var layer = this.layer();
@@ -11548,12 +11764,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Return the coordinates to be stored in a geojson geometery object.
+	   * Return the coordinates to be stored in a geojson geometry object.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {array} an array of flattened coordinates in the ingcs coordinate
-	   *    system.  Undefined if this annotation is incompelte.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {array} An array of flattened coordinates in the interface gcs
+	   *    coordinate system.  `undefined` if this annotation is incomplete.
 	   */
 	  this._geojsonCoordinates = function (gcs) {
 	    var src = this.coordinates(gcs);
@@ -11570,7 +11786,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Return the geometry type that is used to store this annotation in geojson.
 	   *
-	   * @return {string} a geojson geometry type.
+	   * @returns {string} A geojson geometry type.
 	   */
 	  this._geojsonGeometryType = function () {
 	    return 'LineString';
@@ -11580,7 +11796,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Return a list of styles that should be preserved in a geojson
 	   * representation of the annotation.
 	   *
-	   * @return {array} a list of style names to store.
+	   * @returns {string[]} A list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
 	    return [
@@ -11595,18 +11811,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
 
 	/**
-	 * Point annotation class
+	 * Point annotation class.
 	 *
-	 * Must specify:
-	 *   position: {x: x, y: y} in map gcs coordinates.
-	 * May specify:
-	 *   style.
-	 *     radius, fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
-	 *     strokeOpacity, scaled
+	 * @class
+	 * @alias geo.poinyAnnotation
+	 * @extends geo.annotation
 	 *
-	 * If scaled is false, the point is not scaled with zoom level.  If it is true,
-	 * the radius is based on the zoom level at first instantiation.  Otherwise, if
-	 * it is a number, the radius is used at that zoom level.
+	 * @param {object?} [args] Options for the annotation.
+	 * @param {string} [args.name] A name for the annotation.  This defaults to
+	 *    the type with a unique ID suffixed to it.
+	 * @param {string} [args.state] initial annotation state.  One of the
+	 *    annotation.state values.
+	 * @param {boolean|string[]} [args.showLabel=true] `true` to show the
+	 *    annotation label on annotations in done or edit states.  Alternately, a
+	 *    list of states in which to show the label.  Falsy to not show the label.
+	 * @param {geo.geoPosition} [args.position] A coordinate in map gcs
+	 *    coordinates.
+	 * @param {geo.geoPosition[]} [args.coordinates] An array with one coordinate
+	 *  to use in place of `args.position`.
+	 * @param {object} [args.style] The style to apply to a finished point.
+	 *    This uses styles for points, including `radius`, `fill`, `fillColor`,
+	 *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, `strokeOpacity`,
+	 *    and `scaled`.  If `scaled` is `false`, the point is not scaled with
+	 *    zoom level.  If it is `true`, the radius is based on the zoom level at
+	 *    first instantiation.  Otherwise, if it is a number, the radius is used
+	 *    at that zoom level.
+	 * @param {object} [args.editStyle] The style to apply to a line in edit
+	 *    mode.  This uses styles for lines.
 	 */
 	var pointAnnotation = function (args) {
 	  'use strict';
@@ -11635,7 +11866,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get a list of renderable features for this annotation.
 	   *
-	   * @returns {array} an array of features.
+	   * @returns {array} An array of features.
 	   */
 	  this.features = function () {
 	    var opt = this.options(),
@@ -11681,8 +11912,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Get coordinates associated with this annotation in the map gcs coordinate
 	   * system.
 	   *
-	   * @param {array} coordinates: an optional array of coordinates to set.
-	   * @returns {array} an array of coordinates.
+	   * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
+	   *  to set.
+	   * @returns {geo.geoPosition[]} The current array of coordinates.
 	   */
 	  this._coordinates = function (coordinates) {
 	    if (coordinates && coordinates.length >= 1) {
@@ -11696,12 +11928,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Handle a mouse click on this annotation.  If the event is processed,
-	   * evt.handled should be set to true to prevent further processing.
+	   * evt.handled should be set to `true` to prevent further processing.
 	   *
-	   * @param {geo.event} evt the mouse click event.
-	   * @returns {boolean|string} true to update the annotation, 'done' if the
-	   *    annotation was completed (changed from create to done state), 'remove'
-	   *    if the annotation should be removed, falsy to not update anything.
+	   * @param {geo.event} evt The mouse click event.
+	   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+	   *    the annotation was completed (changed from create to done state),
+	   *    `'remove'` if the annotation should be removed, falsy to not update
+	   *    anything.
 	   */
 	  this.mouseClick = function (evt) {
 	    if (this.state() !== annotationState.create) {
@@ -11720,7 +11953,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Return a list of styles that should be preserved in a geojson
 	   * representation of the annotation.
 	   *
-	   * @return {array} a list of style names to store.
+	   * @returns {string[]} A list of style names to store.
 	   */
 	  this._geojsonStyles = function () {
 	    return [
@@ -11729,12 +11962,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Return the coordinates to be stored in a geojson geometery object.
+	   * Return the coordinates to be stored in a geojson geometry object.
 	   *
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @return {array} an array of flattened coordinates in the ingcs coordinate
-	   *    system.  Undefined if this annotation is incompelte.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {array} An array of flattened coordinates in the interface gcs
+	   *    coordinate system.  `undefined` if this annotation is incomplete.
 	   */
 	  this._geojsonCoordinates = function (gcs) {
 	    var src = this.coordinates(gcs);
@@ -11747,7 +11980,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Return the geometry type that is used to store this annotation in geojson.
 	   *
-	   * @return {string} a geojson geometry type.
+	   * @returns {string} A geojson geometry type.
 	   */
 	  this._geojsonGeometryType = function () {
 	    return 'Point';
@@ -11972,7 +12205,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	geo_event.unzoomselect = 'geo_unzoomselect';
 
-	//DWM::
 	/**
 	 * Triggered when an action is initiated with mouse down.
 	 *
@@ -12088,7 +12320,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	geo_event.transitioncancel = 'geo_transitioncancel';
 
-	//DWM::
 	/**
 	 * Triggered when the parallel projection mode is changes.
 	 *
@@ -12186,7 +12417,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ready: 'geo_screenshot_ready'
 	};
 
-	//DWM::
 	/**
 	 * These events are triggered by the camera when it's internal state is
 	 * mutated.
@@ -12322,6 +12552,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports, __webpack_require__) {
 
 	var proj4 = __webpack_require__(12);
+	var util = __webpack_require__(83);
 
 	/**
 	 * This purpose of this class is to provide a generic interface for computing
@@ -12388,7 +12619,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  /**
-	   * Get/Set the source projection
+	   * Get/Set the source projection.
+	   *
+	   * @param {string} [arg] The new source projection.  If `undefined`, return
+	   *    the current source projection.
+	   * @returns {string|this} The current source projection if it was queried,
+	   *    otherwise the current transform object.
 	   */
 	  this.source = function (arg) {
 	    if (arg === undefined) {
@@ -12400,7 +12636,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/Set the target projection
+	   * Get/Set the target projection.
+	   *
+	   * @param {string} [arg] The new target projection.  If `undefined`, return
+	   *    the current target projection.
+	   * @returns {string|this} The current target projection if it was queried,
+	   *    otherwise the current transform object.
 	   */
 	  this.target = function (arg) {
 	    if (arg === undefined) {
@@ -12412,15 +12653,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Perform a forward transformation (source -> target)
+	   * Perform a forward transformation (source -> target).
 	   * @protected
 	   *
-	   * @param {object}   point      The point coordinates
-	   * @param {number}   point.x    The x-coordinate (i.e. longitude)
-	   * @param {number}   point.y    The y-coordinate (i.e. latitude)
-	   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
-	   *
-	   * @returns {object} A point object in the target coordinates
+	   * @param {geo.geoPosition} point The point in source coordinates.
+	   * @returns {geo.geoPosition} A point object in the target coordinates.
 	   */
 	  this._forward = function (point) {
 	    var pt = m_proj.forward(point);
@@ -12429,15 +12666,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Perform an inverse transformation (target -> source)
+	   * Perform an inverse transformation (target -> source).
 	   * @protected
 	   *
-	   * @param {object}   point     The point coordinates
-	   * @param {number}   point.x   The x-coordinate (i.e. longitude)
-	   * @param {number}   point.y   The y-coordinate (i.e. latitude)
-	   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
-	   *
-	   * @returns {object} A point object in the source coordinates
+	   * @param {geo.geoPosition} point The point in target coordinates.
+	   * @returns {geo.geoPosition} A point object in the source coordinates.
 	   */
 	  this._inverse = function (point) {
 	    var pt = m_proj.inverse(point);
@@ -12446,14 +12679,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Perform a forward transformation (source -> target) in place
+	   * Perform a forward transformation (source -> target) in place.
+	   * @protected
 	   *
-	   * @param {object[]} point      The point coordinates or array of points
-	   * @param {number}   point.x    The x-coordinate (i.e. longitude)
-	   * @param {number}   point.y    The y-coordinate (i.e. latitude)
-	   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
-	   *
-	   * @returns {object} A point object or array in the target coordinates
+	   * @param {geo.geoPosition|geo.geoPosition[]} point The point coordinates
+	   *    or array of points in source coordinates.
+	   * @returns {geo.geoPosition|geo.geoPosition[]} A point object or array in
+	   *    the target coordinates.
 	   */
 	  this.forward = function (point) {
 	    if (Array.isArray(point)) {
@@ -12463,15 +12695,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Perform an inverse transformation (target -> source) in place
+	   * Perform an inverse transformation (target -> source) in place.
 	   * @protected
 	   *
-	   * @param {object[]} point      The point coordinates or array of points
-	   * @param {number}   point.x    The x-coordinate (i.e. longitude)
-	   * @param {number}   point.y    The y-coordinate (i.e. latitude)
-	   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
-	   *
-	   * @returns {object} A point object in the source coordinates
+	   * @param {geo.geoPosition|geo.geoPosition[]} point The point coordinates
+	   *    or array of points in target coordinates.
+	   * @returns {geo.geoPosition|geo.geoPosition[]} A point object or array in
+	   *    the source coordinates.
 	   */
 	  this.inverse = function (point) {
 	    if (Array.isArray(point)) {
@@ -12511,7 +12741,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	transform.defs = proj4.defs;
 
 	/**
-	 * Look up a projection definition from epsg.io
+	 * Look up a projection definition from epsg.io.
 	 * For the moment, we only handle `EPSG` codes.
 	 *
 	 * @param {string} projection A projection alias (e.g. EPSG:4326)
@@ -12519,7 +12749,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	transform.lookup = function (projection) {
 	  var $ = __webpack_require__(1);
-	  var code, defer = new $.Deferred(), parts;
+	  var code, defer = $.Deferred(), parts;
 
 	  if (proj4.defs.hasOwnProperty(projection)) {
 	    return defer.resolve(proj4.defs[projection]);
@@ -12547,18 +12777,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Transform an array of coordinates from one projection into another.  The
 	 * transformation may occur in place (modifying the input coordinate array),
-	 * depending on the input format.  The coordinates can be an object with x, y,
-	 * and (optionally z) or an array of 2 or 3 values, or an array of either of
-	 * those, or a single flat array with 2 or 3 components per coordinate.  Arrays
-	 * are always modified in place.  Individual point objects are not altered; new
-	 * point objects are returned unless no transform is needed.
+	 * depending on the input format.  The coordinates can be an object with x,
+	 * y, and (optionally z) or an array of 2 or 3 values, or an array of either
+	 * of those, or a single flat array with 2 or 3 components per coordinate.
+	 * Arrays are always modified in place.  Individual point objects are not
+	 * altered; new point objects are returned unless no transform is needed.
 	 *
-	 * @param {string}        srcPrj The source projection
-	 * @param {string}        tgtPrj The destination projection
-	 * @param {geoPosition[]} coordinates An array of coordinate objects
-	 * @param {number}        numberOfComponents for flat arrays, either 2 or 3.
-	 *
-	 * @returns {geoPosition[]} The transformed coordinates
+	 * @param {string} srcPrj The source projection.
+	 * @param {string} tgtPrj The destination projection.
+	 * @param {geoPosition|geoPosition[]|number[]} coordinates An array of
+	 *      coordinate objects.  These may be in object or array form, or a flat
+	 *      array.
+	 * @param {number} numberOfComponents For flat arrays, either 2 or 3.
+	 * @returns {geoPosition|geoPosition[]|number[]} The transformed coordinates.
 	 */
 	transform.transformCoordinates = function (
 	        srcPrj, tgtPrj, coordinates, numberOfComponents) {
@@ -12569,14 +12800,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var trans = transform({source: srcPrj, target: tgtPrj}), output;
-	  if (coordinates instanceof Object && 'x' in coordinates && 'y' in coordinates) {
+	  if (util.isObject(coordinates) && 'x' in coordinates && 'y' in coordinates) {
 	    output = trans.forward({x: coordinates.x, y: coordinates.y, z: coordinates.z || 0});
 	    if ('z' in coordinates) {
 	      return output;
 	    }
 	    return {x: output.x, y: output.y};
 	  }
-	  if (coordinates instanceof Array && coordinates.length === 1 && coordinates[0] instanceof Object && 'x' in coordinates[0] && 'y' in coordinates[0]) {
+	  if (Array.isArray(coordinates) && coordinates.length === 1 &&
+	      util.isObject(coordinates[0]) && 'x' in coordinates[0] &&
+	      'y' in coordinates[0]) {
 	    output = trans.forward({x: coordinates[0].x, y: coordinates[0].y, z: coordinates[0].z || 0});
 	    if ('z' in coordinates[0]) {
 	      return [output];
@@ -12593,11 +12826,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * values, or an array of either of those, or a single flat array with 2 or 3
 	 * components per coordinate.  The array is modified in place.
 	 *
-	 * @param {object} trans The transformation object.
-	 * @param {geoPosition[]} coordinates An array of coordinate objects
-	 * @param {number} numberOfComponents for flat arrays, either 2 or 3.
-	 *
-	 * @returns {geoPosition[]} The transformed coordinates
+	 * @param {transform} trans The transformation object.
+	 * @param {geoPosition[]|number[]} coordinates An array of coordinate
+	 *      objects or a flat array.
+	 * @param {number} numberOfComponents For flat arrays, either 2 or 3.
+	 * @returns {geoPosition[]|number[]} The transformed coordinates
 	 */
 	transform.transformCoordinatesArray = function (trans, coordinates, numberOfComponents) {
 	  var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint;
@@ -12609,7 +12842,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  // Helper methods
 	  function handleArrayCoordinates() {
-	    if (coordinates[0] instanceof Array) {
+	    if (Array.isArray(coordinates[0])) {
 	      if (coordinates[0].length === 2) {
 	        xAcc = function (index) {
 	          return coordinates[index][0];
@@ -12730,7 +12963,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
-	  if (coordinates instanceof Array) {
+	  if (Array.isArray(coordinates)) {
 	    output = [];
 	    output.length = coordinates.length;
 	    count = coordinates.length;
@@ -12738,13 +12971,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!coordinates.length) {
 	      return output;
 	    }
-	    if (coordinates[0] instanceof Array ||
-	        coordinates[0] instanceof Object) {
+	    if (Array.isArray(coordinates[0]) || util.isObject(coordinates[0])) {
 	      offset = 1;
 
-	      if (coordinates[0] instanceof Array) {
+	      if (Array.isArray(coordinates[0])) {
 	        handleArrayCoordinates();
-	      } else if (coordinates[0] instanceof Object) {
+	      } else if (util.isObject(coordinates[0])) {
 	        handleObjectCoordinates();
 	      }
 	    } else {
@@ -12762,19 +12994,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	/**
-	 * Apply an affine transformation consisting of a translation
-	 * then a scaling to the given coordinate array.  Note, the
-	 * transformation occurs in place so the input coordinate
-	 * object are mutated.
-	 *
-	 * (Possibly extend to support rotations as well)
+	 * Apply an affine transformation consisting of a translation then a scaling
+	 * to the given coordinate array.  Note, the transformation occurs in place
+	 * so the input coordinate object are mutated.
 	 *
 	 * @param {object} def
-	 * @param {object} def.origin The transformed origin
-	 * @param {object} def.scale The transformed scale factor
-	 * @param {object[]} coords An array of coordinate objects
-	 *
-	 * @returns {object[]} The transformed coordinates
+	 * @param {geo.geoPosition} def.origin The transformed origin
+	 * @param {object} def.scale The transformed scale factor.  This is an object
+	 *  with `x`, `y`, and `z` parameters.
+	 * @param {geo.geoPosition[]} coords An array of coordinate objects.
+	 * @returns {geo.geoPosition[]} The transformed coordinates.
 	 */
 	transform.affineForward = function (def, coords) {
 	  'use strict';
@@ -12788,19 +13017,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	/**
-	 * Apply an inverse affine transformation which is the
-	 * inverse to {@link geo.transform.affineForward}.  Note, the
-	 * transformation occurs in place so the input coordinate
-	 * object are mutated.
-	 *
-	 * (Possibly extend to support rotations as well)
+	 * Apply an inverse affine transformation which is the inverse to {@link
+	 * geo.transform.affineForward}.  Note, the transformation occurs in place so
+	 * the input coordinate object are mutated.
 	 *
 	 * @param {object} def
-	 * @param {object} def.origin The transformed origin
-	 * @param {object} def.scale The transformed scale factor
-	 * @param {object[]} coords An array of coordinate objects
-	 *
-	 * @returns {object[]} The transformed coordinates
+	 * @param {geo.geoPosition} def.origin The transformed origin
+	 * @param {object} def.scale The transformed scale factor.  This is an object
+	 *  with `x`, `y`, and `z` parameters.
+	 * @param {geo.geoPosition[]} coords An array of coordinate objects.
+	 * @returns {geo.geoPosition[]} The transformed coordinates.
 	 */
 	transform.affineInverse = function (def, coords) {
 	  'use strict';
@@ -18485,8 +18711,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_originalRequestAnimationFrame;
 
 	/**
+	 * @typedef {object} geo.util.cssColorConversionRecord
+	 * @property {string} name The name of the color conversion.
+	 * @property {RegEx} regex A regex that, if it matches the color string, will
+	 *      cause the process function to be invoked.
+	 * @property {function} process A function that takes (`color`, `match`) with
+	 *      the original color string and the results of matching the regex using
+	 *      the regex's `exec` function.  It outputs a {@link geo.geoColorObject}
+	 *      color object or the original color string if there is still a parsing
+	 *      failure.
+	 */
+
+	/**
 	 * Takes a variable number of arguments and returns the first numeric value
 	 * it finds.
+	 *
+	 * @param {...*} var_args Any number of arguments.
+	 * @returns {number} The first numeric argument, or `undefined` if there are no
+	 *      numeric arguments.
 	 * @private
 	 */
 	function setNumeric() {
@@ -18507,16 +18749,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ClusterGroup: ClusterGroup,
 
 	  /**
-	   * Returns true if the given point lies in the given polygon.
+	   * Check if a point is inside of a polygon.
 	   * Algorithm description:
 	   *   http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-	   * @param {geo.screenPosition} point The test point
-	   * @param {geo.screenPosition[]} outer The outer boundary of the polygon
-	   * @param {geo.screenPosition[][]} [inner] Inner boundaries (holes)
-	   * @param {Object} [range] If specified, range.min.x, range.min.y,
-	   *   range.max.x, and range.max.y specified the extents of the outer
-	   *   polygon and are used for early detection.
-	   * @returns {boolean} true if the point is inside the polygon.
+	   * The point and polygon must be in the same coordinate system.
+	   *
+	   * @param {geo.point2D} point The test point.
+	   * @param {geo.point2D[]} outer The outer boundary of the polygon.
+	   * @param {Array.<geo.point2D[]>} [inner] A list of inner boundaries
+	   *    (holes).
+	   * @param {object} [range] If specified, this is the extent of the outer
+	   *    polygon and is used for early detection.
+	   * @param {geo.point2D} range.min The minimum value of coordinates in
+	   *    the outer polygon.
+	   * @param {geo.point2D} range.max The maximum value of coordinates in
+	   *    the outer polygon.
+	   * @returns {boolean} `true` if the point is inside or on the border of the
+	   *    polygon.
 	   * @memberof geo.util
 	   */
 	  pointInPolygon: function (point, outer, inner, range) {
@@ -18553,16 +18802,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Return a point in the basis of the triangle.  If the point is located on
-	   * a vertex of the triangle, it will be at vert0: (0, 0), vert1: (1, 0),
-	   * vert2: (0, 1).  If it is within the triangle, its coordinates will be
-	   * 0 <= x <= 1, 0 <= y <= 1, x + y <= 1.
+	   * a vertex of the triangle, it will be at `vert0`: (0, 0), `vert1`:
+	   * (1, 0), `vert2`: (0, 1).  If it is within the triangle, its coordinates
+	   * will be 0 <= x <= 1, 0 <= y <= 1, x + y <= 1.  The point and vertices
+	   * must be in the same coordinate system.
 	   *
-	   * @param {object} point: the point to convert.
-	   * @param {object} vert0: vertex 0 of the triangle
-	   * @param {object} vert1: vertex 1 (x direction) of the triangle
-	   * @param {object} vert2: vertex 2 (y direction) of the triangle
-	   * @returns {object} basisPoint: the point in the triangle basis, or
-	   *    undefined if the triangle is degenerate.
+	   * @param {geo.point2D} point The point to convert.
+	   * @param {geo.point2D} vert0 Vertex 0 of the triangle.
+	   * @param {geo.point2D} vert1 Vertex 1 (x direction) of the triangle.
+	   * @param {geo.point2D} vert2 Vertex 2 (y direction) of the triangle.
+	   * @returns {geo.point2D} The point in the triangle basis, or `undefined`
+	   *    if the triangle is degenerate.
 	   * @memberof geo.util
 	   */
 	  pointTo2DTriangleBasis: function (point, vert0, vert1, vert2) {
@@ -18579,14 +18829,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
-	   * Returns true if the argument is an HTML Image element that is fully
-	   * loaded.
+	   * Check if an object an HTML Image element that is fully loaded.
 	   *
-	   * @param {object} img: an object that might be an HTML Image element.
-	   * @param {boolean} [allowFailedImage]: if true, an image element that has
+	   * @param {object} img an object that might be an HTML Image element.
+	   * @param {boolean} [allowFailedImage] If `true`, an image element that has
 	   *     a source and has failed to load is also considered 'ready' in the
 	   *     sense that it isn't expected to change to a better state.
-	   * @returns {boolean} true if this is an image that is ready.
+	   * @returns {boolean} `true` if this is an image that is ready.
 	   * @memberof geo.util
 	   */
 	  isReadyImage: function (img, allowFailedImage) {
@@ -18599,15 +18848,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
-	   * Returns true if the argument is a function.
+	   * Test if an object is a function.
+	   *
+	   * @param {object} f An object that might be a function.
+	   * @returns {boolean} `true` if the object is a function.
+	   * @memberof geo.util
 	   */
 	  isFunction: function (f) {
 	    return typeof f === 'function';
 	  },
 
 	  /**
-	   * Returns the argument if it is function, otherwise returns a function
-	   * that returns the argument.
+	   * Return a function.  If the supplied object is a function, return it.
+	   * Otherwise, return a function that returns the argument.
+	   *
+	   * @param {object} f An object that might be a function.
+	   * @returns {function} A function.  Either `f` or a function that returns
+	   *    `f`.
+	   * @memberof geo.util
 	   */
 	  ensureFunction: function (f) {
 	    if (util.isFunction(f)) {
@@ -18618,7 +18876,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
-	   * Return a random string of length n || 8.
+	   * Check if a value coerces to a number that is finite, not a NaN, and not
+	   * `null`, `false`, or the empty string.
+	   *
+	   * @param {object} val The value to check.
+	   * @returns {boolean} True if `val` is a non-null, non-false, finite number.
+	   */
+	  isNonNullFinite: function (val) {
+	    return isFinite(val) && val !== null && val !== false && val !== '';
+	  },
+
+	  /**
+	   * Return a random string of length n || 8.  The string consists of
+	   * mixed-case ASCII alphanumerics.
+	   *
+	   * @param {number} [n=8] The length of the string to return.
+	   * @returns {string} A string of random characters.
+	   * @memberof geo.util
 	   */
 	  randomString: function (n) {
 	    var s, i, r;
@@ -18630,86 +18904,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return s;
 	  },
-
-	  /* This is a list of regex and processing functions for color conversions
-	   * to rgb objects.  Each entry contains:
-	   *   name: a name of the color conversion.
-	   *   regex: a regex that, if it matches the color string, will cause the
-	   *      process function to be invoked.
-	   *   process: a function that takes (color, match) with the original color
-	   *      string and the results of matching the regex.  It outputs an rgb
-	   *      color object or the original color string if there is still a
-	   *      parsing failure.
-	   * In general, these conversions are somewhat more forgiving than the css
-	   * specification (see https://drafts.csswg.org/css-color/) in that
-	   * percentages may be mixed with numbers, and that floating point values
-	   * are accepted for all numbers.  Commas are optional.  As per the latest
-	   * draft standard, rgb and rgba are aliases of each other, as are hsl and
-	   * hsla.
-	   * @memberof geo.util
-	   */
-	  cssColorConversions: [{
-	    name: 'rgb',
-	    regex: new RegExp(
-	      '^\\s*rgba?' +
-	      '\\(\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
-	      ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
-	      ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*' +
-	      '(,?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*)?' +
-	      '\\)\\s*$'),
-	    process: function (color, match) {
-	      color = {
-	        r: Math.min(1, Math.max(0, +match[1] / (match[2] ? 100 : 255))),
-	        g: Math.min(1, Math.max(0, +match[3] / (match[4] ? 100 : 255))),
-	        b: Math.min(1, Math.max(0, +match[5] / (match[6] ? 100 : 255)))
-	      };
-	      if (match[7]) {
-	        color.a = Math.min(1, Math.max(0, +match[8] / (match[9] ? 100 : 1)));
-	      }
-	      return color;
-	    }
-	  }, {
-	    name: 'hsl',
-	    regex: new RegExp(
-	      '^\\s*hsla?' +
-	      '\\(\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(deg)?\\s*' +
-	      ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*%\\s*' +
-	      ',?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*%\\s*' +
-	      '(,?\\s*(\\d+\\.?\\d*|\\.\\d?)\\s*(%?)\\s*)?' +
-	      '\\)\\s*$'),
-	    process: function (color, match) {
-	      /* Conversion from https://www.w3.org/TR/2011/REC-css3-color-20110607
-	       */
-	      var hue_to_rgb = function (m1, m2, h) {
-	        h = h - Math.floor(h);
-	        if (h * 6 < 1) {
-	          return m1 + (m2 - m1) * h * 6;
-	        }
-	        if (h * 6 < 3) {
-	          return m2;
-	        }
-	        if (h * 6 < 4) {
-	          return m1 + (m2 - m1) * (2 / 3 - h) * 6;
-	        }
-	        return m1;
-	      };
-
-	      var h = +match[1] / 360,
-	          s = Math.min(1, Math.max(0, +match[3] / 100)),
-	          l = Math.min(1, Math.max(0, +match[4] / 100)),
-	          m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s,
-	          m1 = l * 2 - m2;
-	      color = {
-	        r: hue_to_rgb(m1, m2, h + 1 / 3),
-	        g: hue_to_rgb(m1, m2, h),
-	        b: hue_to_rgb(m1, m2, h - 1 / 3)
-	      };
-	      if (match[5]) {
-	        color.a = Math.min(1, Math.max(0, +match[6] / (match[7] ? 100 : 1)));
-	      }
-	      return color;
-	    }
-	  }],
 
 	  /**
 	   * Convert a color to a standard rgb object.  Allowed inputs:
@@ -18724,21 +18918,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * sure that all parameters are in the range of [0-1], but string inputs
 	   * are so validated.
 	   *
-	   * @param {object|string} color: one of the various input formats.
-	   * @returns {object} an rgb color object, possibly with an 'a' value.  If
-	   *    the input cannot be converted to a valid color, the input value is
-	   *    returned.
+	   * @param {geo.geoColor} color Any valid color input.
+	   * @returns {geo.geoColorObject} An rgb color object, possibly with an 'a'
+	   *    value.  If the input cannot be converted to a valid color, the input
+	   *    value is returned.
 	   * @memberof geo.util
 	   */
 	  convertColor: function (color) {
-	    if (color === undefined || (color.r !== undefined &&
+	    if (color === undefined || color === null || (color.r !== undefined &&
 	        color.g !== undefined && color.b !== undefined)) {
 	      return color;
 	    }
 	    var opacity;
 	    if (typeof color === 'string') {
-	      if (util.cssColors.hasOwnProperty(color)) {
-	        color = util.cssColors[color];
+	      var lowerColor = color.toLowerCase();
+	      if (util.cssColors.hasOwnProperty(lowerColor)) {
+	        color = util.cssColors[lowerColor];
 	      } else if (color.charAt(0) === '#') {
 	        if (color.length === 4 || color.length === 5) {
 	          /* interpret values of the form #rgb as #rrggbb and #rgba as
@@ -18754,13 +18949,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	          color = parseInt(color.slice(1, 7), 16);
 	        }
-	      } else if (color === 'transparent') {
+	      } else if (lowerColor === 'transparent') {
 	        opacity = color = 0;
-	      } else if (color.indexOf('(') >= 0) {
+	      } else if (lowerColor.indexOf('(') >= 0) {
 	        for (var idx = 0; idx < util.cssColorConversions.length; idx += 1) {
-	          var match = util.cssColorConversions[idx].regex.exec(color);
+	          var match = util.cssColorConversions[idx].regex.exec(lowerColor);
 	          if (match) {
-	            return util.cssColorConversions[idx].process(color, match);
+	            return util.cssColorConversions[idx].process(lowerColor, match);
 	          }
 	        }
 	      }
@@ -18772,14 +18967,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	        b: ((color & 0xff)) / 255
 	      };
 	    }
-	    if (opacity !== undefined) {
+	    if (opacity !== undefined && color && color.r !== undefined) {
 	      color.a = opacity;
 	    }
 	    return color;
 	  },
 
 	  /**
+	   * Convert a color (possibly with opacity) and an optional opacity value to
+	   * a color object that always has opacity.  The opacity is guaranteed to be
+	   * within [0-1].  A valid color object is always returned.
+	   *
+	   * @param {geo.geoColor} [color] Any valid color input.  If an invalid value
+	   *    or no value is supplied, the `defaultColor` is used.
+	   * @param {number} [opacity=1] A value from [0-1].  This is multipled with
+	   *    the opacity from `color`.
+	   * @param {geo.geoColorObject} [defaultColor={r: 0, g: 0, b: 0}] The color
+	   *    to use if an invalid color is supplied.
+	   * @returns {geo.geoColorObject} An rgba color object.
+	   * @memberof geo.util
+	   */
+	  convertColorAndOpacity: function (color, opacity, defaultColor) {
+	    color = util.convertColor(color);
+	    if (!color || color.r === undefined || color.g === undefined || color.b === undefined) {
+	      color = util.convertColor(defaultColor || {r: 0, g: 0, b: 0});
+	    }
+	    if (!color || color.r === undefined || color.g === undefined || color.b === undefined) {
+	      color = {r: 0, g: 0, b: 0};
+	    }
+	    color = {
+	      r: isFinite(color.r) && color.r >= 0 ? (color.r <= 1 ? +color.r : 1) : 0,
+	      g: isFinite(color.g) && color.g >= 0 ? (color.g <= 1 ? +color.g : 1) : 0,
+	      b: isFinite(color.b) && color.b >= 0 ? (color.b <= 1 ? +color.b : 1) : 0,
+	      a: util.isNonNullFinite(color.a) && color.a >= 0 && color.a < 1 ? +color.a : 1
+	    };
+	    if (util.isNonNullFinite(opacity) && opacity < 1) {
+	      color.a = opacity <= 0 ? 0 : color.a * opacity;
+	    }
+	    return color;
+	  },
+
+	  /**
 	   * Convert a color to a six or eight digit hex value prefixed with #.
+	   *
+	   * @param {geo.geoColorObject} color The color object to convert.
+	   * @param {boolean} [allowAlpha] If truthy and `color` has a defined `a`
+	   *    value, include the alpha channel in the output.  If `'needed'`, only
+	   *    include the alpha channel if it is set and not 1.
+	   * @returns {string} A color string.
 	   * @memberof geo.util
 	   */
 	  convertColorToHex: function (color, allowAlpha) {
@@ -18791,17 +19026,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	                     (Math.round(rgb.g * 255) << 8) +
 	                      Math.round(rgb.b * 255)).toString(16).slice(1);
 	    }
-	    if (rgb.a !== undefined && allowAlpha) {
+	    if (rgb.a !== undefined && allowAlpha && (rgb.a < 1 || allowAlpha !== 'needed')) {
 	      value += (256 + Math.round(rgb.a * 255)).toString(16).slice(1);
 	    }
 	    return value;
 	  },
+	  /**
+	   * Convert a color to a css rgba() value.
+	   *
+	   * @param {geo.geoColorObject} color The color object to convert.
+	   * @returns {string} A color string.
+	   * @memberof geo.util
+	   */
+	  convertColorToRGBA: function (color) {
+	    var rgb = util.convertColor(color);
+	    if (!rgb) {
+	      rgb = {r: 0, g: 0, b: 0};
+	    }
+	    if (!util.isNonNullFinite(rgb.a) || rgb.a > 1) {
+	      rgb.a = 1;
+	    }
+	    return 'rgba(' + Math.round(rgb.r * 255) + ', ' + Math.round(rgb.g * 255) +
+	           ', ' + Math.round(rgb.b * 255) + ', ' + +((+rgb.a).toFixed(5)) + ')';
+	  },
 
 	  /**
-	   * Normalize a coordinate object into {x: ..., y: ..., z: ... } form.
-	   * Accepts 2-3d arrays,
-	   * latitude -> lat -> y
-	   * longitude -> lon -> lng -> x
+	   * Normalize a coordinate object into {@link geo.geoPosition} form.  The
+	   * input can be a 2 or 3 element array or an object with a variety of
+	   * properties.
+	   *
+	   * @param {object|array} p The point to convert.
+	   * @returns {geo.geoPosition} The point as an object with `x`, `y`, and `z`
+	   *    properties.
 	   * @memberof geo.util
 	   */
 	  normalizeCoordinates: function (p) {
@@ -18838,16 +19094,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
-	   * Radius of the earth in meters, from the equatorial radius of SRID 4326.
-	   * @memberof geo.util
-	   */
-	  radiusEarth: 6378137,
-
-	  /**
 	   * Compare two arrays and return if their contents are equal.
-	   * @param {array} a1 first array to compare
-	   * @param {array} a2 second array to compare
-	   * @returns {boolean} true if the contents of the arrays are equal.
+	   * @param {array} a1 First array to compare.
+	   * @param {array} a2 Second array to compare.
+	   * @returns {boolean} `true` if the contents of the arrays are equal.
 	   * @memberof geo.util
 	   */
 	  compareArrays: function (a1, a2) {
@@ -18857,11 +19107,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
-	   * Create a vec3 that is always an array.  This should only be used if it
+	   * Create a `vec3` that is always an array.  This should only be used if it
 	   * will not be used in a WebGL context.  Plain arrays usually use 64-bit
-	   * float values, whereas vec3 defaults to 32-bit floats.
+	   * float values, whereas `vec3` defaults to 32-bit floats.
 	   *
-	   * @returns {Array} zeroed-out vec3 compatible array.
+	   * @returns {array} Zeroed-out vec3 compatible array.
 	   * @memberof geo.util
 	   */
 	  vec3AsArray: function () {
@@ -18869,11 +19119,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
-	   * Create a mat4 that is always an array.  This should only be used if it
+	   * Create a `mat3` that is always an array.  This should only be used if it
 	   * will not be used in a WebGL context.  Plain arrays usually use 64-bit
-	   * float values, whereas mat4 defaults to 32-bit floats.
+	   * float values, whereas `mat3` defaults to 32-bit floats.
 	   *
-	   * @returns {Array} identity mat4 compatible array.
+	   * @returns {array} Identity `mat3` compatible array.
+	   * @memberof geo.util
+	   */
+	  mat3AsArray: function () {
+	    return [
+	      1, 0, 0,
+	      0, 1, 0,
+	      0, 0, 1
+	    ];
+	  },
+
+	  /**
+	   * Create a `mat4` that is always an array.  This should only be used if it
+	   * will not be used in a WebGL context.  Plain arrays usually use 64-bit
+	   * float values, whereas `mat4` defaults to 32-bit floats.
+	   *
+	   * @returns {array} Identity `mat4` compatible array.
 	   * @memberof geo.util
 	   */
 	  mat4AsArray: function () {
@@ -18890,10 +19156,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * is the correct size, return it.  Otherwise, allocate a new buffer; any
 	   * data in an old buffer is discarded.
 	   *
-	   * @param geom: the geometry to reference and modify.
-	   * @param srcName: the name of the source.
-	   * @param len: the number of elements for the array.
-	   * @returns {Float32Array}
+	   * @param {vgl.geometryData} geom The geometry to reference and modify.
+	   * @param {string} srcName The name of the source.
+	   * @param {number} len The number of elements for the array.
+	   * @returns {Float32Array} A buffer for the named source.
 	   * @memberof geo.util
 	   */
 	  getGeomBuffer: function (geom, srcName, len) {
@@ -18912,7 +19178,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Ensure that the input and modifiers properties of all actions are
 	   * objects, not plain strings.
 	   *
-	   * @param {Array} actions: an array of actions to adjust as needed.
+	   * @param {geo.actionRecord[]} actions An array of actions to adjust as
+	   *    needed.
 	   * @memberof geo.util
 	   */
 	  adjustActions: function (actions) {
@@ -18938,13 +19205,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Add an action to the list of handled actions.
 	   *
-	   * @param {Array} actions: an array of actions to adjust as needed.
-	   * @param {object} action: an object defining the action.  This must have
-	   *    action and event properties, and may have modifiers, name, and owner.
-	   *    Use action, name, and owner to make this entry distinct if it will
+	   * @param {geo.actionRecord[]} actions An array of actions to adjust as
+	   *    needed.
+	   * @param {geo.actionRecord} action An object defining the action.  Use
+	   *    `action`, `name`, and `owner` to make this entry distinct if it will
 	   *    need to be removed later.
-	   * @param {boolean} toEnd: the action is added at the beginning of the
-	   *    actions list unless toEnd is true.  Earlier actions prevent later
+	   * @param {boolean} toEnd The action is added at the beginning of the
+	   *    actions list unless `toEnd` is `true`.  Earlier actions prevent later
 	   *    actions with the similar input and modifiers.
 	   * @memberof geo.util
 	   */
@@ -18959,16 +19226,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Check if an action is in the actions list.  An action matches if the
-	   * action, name, and owner match.  A null or undefined value will match all
-	   * actions.  If using an action object, this is the same as passing
-	   * (action.action, action.name, action.owner).
+	   * `action`, `name`, and `owner` match.  A `null` or `undefined` value will
+	   * match all actions.  If using a {@link geo.actionRecord} object, this is
+	   * the same as passing (`action.action`, `action.name`, `action.owner`).
 	   *
-	   * @param {Array} actions: an array of actions to search.
-	   * @param {object|string} action Either an action object or the name of an
-	   *    action.
-	   * @param {string} name Optional name associated with the action.
-	   * @param {string} owner Optional owner associated with the action.
-	   * @return action the first matching action or null.
+	   * @param {geo.actionRecord[]} actions An array of actions to search.
+	   * @param {geo.actionRecord|string} action Either an action object or the
+	   *    name of an action.
+	   * @param {string} [name] Optional name associated with the action.
+	   * @param {string} [owner] Optional owner associated with the action.
+	   * @returns {geo.actionRecord?} The first matching action or `null`.
 	   * @memberof geo.util
 	   */
 	  hasAction: function (actions, action, name, owner) {
@@ -18988,14 +19255,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
-	   * Remove all matching actions.  Actions are matched as with hasAction.
+	   * Remove all matching actions.  Actions are matched as with `hasAction`.
 	   *
-	   * @param {Array} actions: an array of actions to adjust as needed.
-	   * @param {object|string} action Either an action object or the name of an
-	   *    action.
-	   * @param {string} name Optional name associated with the action.
-	   * @param {string} owner Optional owner associated with the action.
-	   * @return numRemoved the number of actions that were removed.
+	   * @param {geo.actionRecord[]} actions An array of actions to adjust as
+	   *    needed.
+	   * @param {geo.actionRecord|string} action Either an action object or the
+	   *    name of an action.
+	   * @param {string} [name] Optional name associated with the action.
+	   * @param {string} [owner] Optional owner associated with the action.
+	   * @returns {number} The number of actions that were removed.
 	   * @memberof geo.util
 	   */
 	  removeAction: function (actions, action, name, owner) {
@@ -19014,13 +19282,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Determine if the current inputs and modifiers match a known action.
 	   *
-	   * @param {object} inputs: an object where each input that is currently
-	   *    active is truthy.  Common inputs are left, right, middle, wheel.
-	   * @param {object} modifiers: an object where each currently applied
-	   *    modifier is truthy.  Common modifiers are shift, ctrl, alt, meta.
-	   * @param {Array} actions: a list of actions to compare to the inputs and
-	   *    modifiers.  The first action that matches will be returned.
-	   * @returns {object} action A matching action or undefined.
+	   * @param {object} inputs Aan object where each input that is currently
+	   *    active is truthy.  Common inputs are `left`, `right`, `middle`,
+	   *    `wheel`, `pan`, `rotate`.
+	   * @param {object} modifiers An object where each currently applied
+	   *    modifier is truthy.  Common modifiers are `shift`, `ctrl`, `alt`,
+	   *    `meta`.
+	   * @param {geo.actionRecord[]} actions A list of actions to compare to the
+	   *    inputs and modifiers.  The first action that matches will be
+	   *    returned.
+	   * @returns {geo.actionRecord} A matching action or `undefined`.
 	   * @memberof geo.util
 	   */
 	  actionMatch: function (inputs, modifiers, actions) {
@@ -19054,18 +19325,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Return recommended defaults for map parameters and osm or tile layer
 	   * paramaters where the expected intent is to use the map in pixel
-	   * coordinates (upper left is (0, 0), lower right is (width, height).  The
-	   * returned objects can be modified or extended.  For instance,
-	   *   var results = pixelCoordinateParams('#map', 10000, 9000);
-	   *   geo.map($.extend(results.map, {clampZoom: false}));
+	   * coordinates (upper left is (0, 0), lower right is (`width`, `height`).
 	   *
-	   * @param {string} [node] DOM selector for the map container
-	   * @param {number} width width of the whole map contents in pixels
-	   * @param {number} height height of the whole map contents in pixels
-	   * @param {number} tileWidth if an osm or tile layer is going to be used,
-	   *     the width of a tile.
-	   * @param {number} tileHeight if an osm or tile layer is going to be used,
-	   *     the height of a tile.
+	   * @example <caption>The returned objects can be modified or
+	   *    extended.</caption>
+	   * var results = pixelCoordinateParams('#map', 10000, 9000);
+	   * var map = geo.map($.extend(results.map, {clampZoom: false}));
+	   * map.createLayer('osm', results.layer);
+	   *
+	   * @param {string} [node] DOM selector for the map container.
+	   * @param {number} width Width of the whole map contents in pixels.
+	   * @param {number} height Height of the whole map contents in pixels.
+	   * @param {number} [tileWidth] If an osm or tile layer is going to be used,
+	   *    the width of a tile.
+	   * @param {number} [tileHeight] If an osm or tile layer is going to be used,
+	   *    the height of a tile.
+	   * @returns {object} An object with `map` and `layer` properties.  `map` is
+	   *    an object that can be passed to {@link geo.map}, and `layer` is an
+	   *    object that can be passed to `map.createLayer`.
 	   * @memberof geo.util
 	   */
 	  pixelCoordinateParams: function (node, width, height, tileWidth, tileHeight) {
@@ -19130,8 +19407,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Escape any character in a string that has a code point >= 127.
 	   *
-	   * @param {string} text: the string to escape.
-	   * @returns {string}: the escaped string.
+	   * @param {string} text The string to escape.
+	   * @returns {string} The escaped string.
 	   * @memberof geo.util
 	   */
 	  escapeUnicodeHTML: function (text) {
@@ -19148,9 +19425,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Check svg image and html img tags.  If the source is set, load images
 	   * explicitly and convert them to local data:image references.
 	   *
-	   * @param {selector} elem: a jquery selector that may contain images.
-	   * @returns {array}: a list of deferred objects that resolve when images
-	   *      are dereferences.
+	   * @param {jQuery.selector} elem A jQuery selector or element set that may
+	   *    contain images.
+	   * @returns {jQuery.Deferred[]} A list of deferred objects that resolve
+	   *    when images are dereferenced.
 	   * @memberof geo.util
 	   */
 	  dereferenceElements: function (elem) {
@@ -19192,13 +19470,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * images within the element.  If there are other external references, the
 	   * image may not work due to security considerations.
 	   *
-	   * @param {object} elem: either a jquery selector or an html element.  This
-	   *      may contain multiple elements.  The direct parent and grandparent
-	   *      of the element are used for class information.
-	   * @param {number} parents: number of layers up to travel to get class
-	   *      information.
-	   * @returns {deferred}: a jquery deferred object which receives an HTML
-	   *      Image element when resolved.
+	   * @param {jQuery.selector} elem Either a jquery selector or an HTML
+	   *    element.  This may contain multiple elements.  The direct parent and
+	   *    grandparent of the element are used for class information.
+	   * @param {number} [parents] Number of layers up to travel to get class
+	   *    information.
+	   * @returns {jQuery.Deferred} A jquery deferred object which receives an
+	   *    HTML Image element when resolved.
 	   * @memberof geo.util
 	   */
 	  htmlToImage: function (elem, parents) {
@@ -19290,7 +19568,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Report on one or all of the tracked timings.
 	   *
-	   * @param {string} name name to report on, or undefined to report all.
+	   * @param {string} [name] A name to report on, or `undefined` to report all.
+	   * @returns {object} An object with timing information, or an object with
+	   *    properties for all tracked timings, each of which contains timing
+	   *    information.
 	   * @memberof geo.util
 	   */
 	  timeReport: function (name) {
@@ -19313,11 +19594,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Note the start time of a function (or any other section of code).  This
-	   * should be paired with timeFunctionStop, which will collect statistics on
+	   * should be paired with `timeFunctionStop`, which will collect statistics on
 	   * the amount of time spent in a function.
 	   *
-	   * @param {string} name name to use for tracking the timing.
-	   * @param {boolean} reset if true, clear old tracking data.
+	   * @param {string} name Name to use for tracking the timing.
+	   * @param {boolean} reset If `true`, clear old tracking data for this named
+	   *    tracker.
 	   * @memberof geo.util
 	   */
 	  timeFunctionStart: function (name, reset) {
@@ -19331,9 +19613,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Note the stop time of a function (or any other section of code).  This
-	   * should be paired with timeFunctionStart.
+	   * should be paired with `timeFunctionStart`.
 	   *
-	   * @param {string} name name to use for tracking the timing.
+	   * @param {string} name Name to use for tracking the timing.
 	   * @memberof geo.util
 	   */
 	  timeFunctionStop: function (name) {
@@ -19355,23 +19637,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
-	   * Start or stop tracking the time spent in requestAnimationFrame.  If
+	   * Start or stop tracking the time spent in `requestAnimationFrame`.  If
 	   * tracked, the results can be fetched via
-	   * timeFunctionReport('requestAnimationFrame').
+	   * `timeFunctionReport('requestAnimationFrame')`.
 	   *
-	   * @param {boolean} stop falsy to start tracking, truthy to start tracking.
-	   * @param {boolean} reset if true, reset the statistics.
-	   * @param {number} threshold if present, set the threshold used in tracking
-	   *   slow callbacks.
-	   * @param {number} keep if present, set the number of recent frame times
-	   *   to track.
+	   * @param {boolean} [stop] Falsy to start tracking, truthy to start tracking.
+	   * @param {boolean} [reset] If truthy, reset the statistics.
+	   * @param {number} [threshold=15] If present, set the threshold in
+	   *    milliseconds used in tracking slow callbacks.
+	   * @param {number} [keep=200] If present, set the number of recent frame
+	   *    times to track.
 	   * @memberof geo.util
 	   */
 	  timeRequestAnimationFrame: function (stop, reset, threshold, keep) {
 	    if (!m_timingData.requestAnimationFrame || reset) {
 	      m_timingData.requestAnimationFrame = {
-	        count: 0, sum: 0, sum2: 0, max: 0, above_threshold: 0,
-	        recent: [], recentsub: []
+	        count: 0,
+	        sum: 0,
+	        sum2: 0,
+	        max: 0,
+	        above_threshold: 0,
+	        recent: [],
+	        recentsub: []
 	      };
 	    }
 	    if (threshold) {
@@ -19439,6 +19726,46 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
+	   * Test if an item is an object.  This uses typeof not instanceof, since
+	   * instanceof will return false for some things that we expect to be objects.
+	   *
+	   * @param {*} value The item to test.
+	   * @returns {boolean} True if the tested item is an object.
+	   */
+	  isObject: function (value) {
+	    var type = typeof value;
+	    return value !== null && value !== undefined && (type === 'object' || type === 'function');
+	  },
+
+	  ///////////////////////////////////////////////////////////////////////////
+	  /*
+	   * Utility member properties.
+	   */
+	  ///////////////////////////////////////////////////////////////////////////
+
+	  /**
+	   * Radius of the earth in meters, from the equatorial radius of SRID 4326.
+	   * @memberof geo.util
+	   */
+	  radiusEarth: 6378137,
+
+	  /**
+	   * A regular expression string that will parse a number (integer or floating
+	   * point) for CSS properties.
+	   * @memberof geo.util
+	   */
+	  cssNumberRegex: '[+-]?(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?',
+
+	  /**
+	   * A dictionary of conversion factors for angular CSS measurements.
+	   * @memberof geo.util
+	   */
+	  cssAngleUnitsBase: {deg: 360, grad: 400, rad: 2 * Math.PI, turn: 1},
+
+	  /**
+	   * The predefined CSS colors.  See
+	   * {@link https://drafts.csswg.org/css-color}.
+	   *
 	   * @memberof geo.util
 	   */
 	  cssColors: {
@@ -19593,6 +19920,89 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
+	///////////////////////////////////////////////////////////////////////////
+	/*
+	 * Utility member properties that need to refer to util functions and
+	 * properties.
+	 */
+	///////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * A list of regex and processing functions for color conversions to rgb
+	 * objects.  Each entry is a {@link geo.util.cssColorConversionRecord}.  In
+	 * general, these conversions are somewhat more forgiving than the css
+	 * specification (see https://drafts.csswg.org/css-color/) in that
+	 * percentages may be mixed with numbers, and that floating point values are
+	 * accepted for all numbers.  Commas are optional.  As per the latest draft
+	 * standard, `rgb` and `rgba` are aliases of each other, as are `hsl` and
+	 * `hsla`.
+	 * @alias cssColorConversions
+	 * @memberof geo.util
+	 */
+	util.cssColorConversions = [{
+	  name: 'rgb',
+	  regex: new RegExp(
+	    '^\\s*rgba?' +
+	    '\\(\\s*(' + util.cssNumberRegex + ')\\s*(%?)\\s*' +
+	    ',?\\s*(' + util.cssNumberRegex + ')\\s*(%?)\\s*' +
+	    ',?\\s*(' + util.cssNumberRegex + ')\\s*(%?)\\s*' +
+	    '([/,]?\\s*(' + util.cssNumberRegex + ')\\s*(%?)\\s*)?' +
+	    '\\)\\s*$'),
+	  process: function (color, match) {
+	    color = {
+	      r: Math.min(1, Math.max(0, +match[1] / (match[2] ? 100 : 255))),
+	      g: Math.min(1, Math.max(0, +match[3] / (match[4] ? 100 : 255))),
+	      b: Math.min(1, Math.max(0, +match[5] / (match[6] ? 100 : 255)))
+	    };
+	    if (match[7]) {
+	      color.a = Math.min(1, Math.max(0, +match[8] / (match[9] ? 100 : 1)));
+	    }
+	    return color;
+	  }
+	}, {
+	  name: 'hsl',
+	  regex: new RegExp(
+	    '^\\s*hsla?' +
+	    '\\(\\s*(' + util.cssNumberRegex + ')\\s*(deg|grad|rad|turn)?\\s*' +
+	    ',?\\s*(' + util.cssNumberRegex + ')\\s*%\\s*' +
+	    ',?\\s*(' + util.cssNumberRegex + ')\\s*%\\s*' +
+	    '([/,]?\\s*(' + util.cssNumberRegex + ')\\s*(%?)\\s*)?' +
+	    '\\)\\s*$'),
+	  process: function (color, match) {
+	    /* Conversion from https://www.w3.org/TR/2011/REC-css3-color-20110607
+	     */
+	    var hue_to_rgb = function (m1, m2, h) {
+	      h = h - Math.floor(h);
+	      if (h * 6 < 1) {
+	        return m1 + (m2 - m1) * h * 6;
+	      }
+	      if (h * 6 < 3) {
+	        return m2;
+	      }
+	      if (h * 6 < 4) {
+	        return m1 + (m2 - m1) * (2 / 3 - h) * 6;
+	      }
+	      return m1;
+	    };
+
+	    var h = +match[1] / (util.cssAngleUnitsBase[match[2]] || 360),
+	        s = Math.min(1, Math.max(0, +match[3] / 100)),
+	        l = Math.min(1, Math.max(0, +match[4] / 100)),
+	        m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s,
+	        m1 = l * 2 - m2;
+	    color = {
+	      r: hue_to_rgb(m1, m2, h + 1 / 3),
+	      g: hue_to_rgb(m1, m2, h),
+	      b: hue_to_rgb(m1, m2, h - 1 / 3)
+	    };
+	    if (match[5]) {
+	      color.a = Math.min(1, Math.max(0, +match[6] / (match[7] ? 100 : 1)));
+	    }
+	    return color;
+	  }
+	}];
+
+	/* Add additional utilities to the main object. */
 	$.extend(util, throttle, mockVGL);
 
 
@@ -38066,10 +38476,87 @@ return /******/ (function(modules) { // webpackBootstrap
 	var geo_event = __webpack_require__(9);
 
 	/**
-	 * Create a new instance of class feature
+	 * General specification for features.
 	 *
-	 * @class geo.feature
+	 * @typedef {object} geo.feature.spec
+	 * @property {geo.layer} [layer] the parent layer associated with the feature.
+	 * @property {boolean} [selectionAPI=false] If truthy, enable selection events
+	 *      on the feature.  Selection events are those in `geo.event.feature`.
+	 *      They can be bound via a call like
+	 *      <pre><code>
+	 *      feature.geoOn(geo.event.feature.mousemove, function (evt) {
+	 *        // do something with the feature
+	 *      });
+	 *      </code></pre>
+	 *      where the handler is passed a `geo.feature.event` object.
+	 * @property {boolean} [visible=true] If truthy, show the feature.  If falsy,
+	 *      hide the feature and do not allow interaction with it.
+	 * @property {string} [gcs] The interface gcs for this feature.  If `undefined`
+	 *      or `null`, this uses the layer's interface gcs.  This is a string used
+	 *      by {@linkcode geo.transform}.
+	 * @property {number} [bin=0] The bin number is used to determine the order
+	 *      of multiple features on the same layer.  It has no effect except on the
+	 *      vgl renderer.  A negative value hides the feature without stopping
+	 *      interaction with it.  Otherwise, more features with higher bin numbers
+	 *      are drawn above those with lower bin numbers.  If two features have the
+	 *      same bin number, their order relative to one another is indeterminate
+	 *      and may be unstable.
+	 * @property {geo.renderer?} [renderer] A reference to the renderer used for
+	 *      the feature.
+	 * @property {object} [style] An object that contains style values for the
+	 *      feature.
+	 * @property {function|number} [style.opacity=1] The opacity on a scale of 0 to
+	 *      1.
+	 */
+
+	/**
+	 * @typedef {geo.feature.spec} geo.feature.createSpec
+	 * @property {string} type A supported feature type.
+	 * @property {object[]} [data=[]] An array of arbitrary objects used to
+	 *  construct the feature.  These objects (and their associated indices in the
+	 *  array) will be passed back to style and attribute accessors provided by the
+	 *  user.
+	 */
+
+	/**
+	 * @typedef {geo.event} geo.feature.event
+	 * @property {number} index The index of the feature within the data array.
+	 * @property {object} data The data element associated with the indexed
+	 *      feature.
+	 * @property {geo.mouseState} mouse The mouse information during the event.
+	 * @property {object} [extra] Additional information about the feature.  This
+	 *      is sometimes used to identify a subsection of the feature.
+	 * @property {number} [eventID] A monotonically increasing number identifying
+	 *      this feature event loop.  This is provided on
+	 *      `geo.event.feature.mousemove`, `geo.event.feature.mouseclick`,
+	 *      `geo.event.feature.mouseover`, `geo.event.feature.mouseout`,
+	 *      `geo.event.feature.brush`, and `geo.event.feature.brushend`
+	 *      events, since each of those can trigger multiple events for one mouse
+	 *      action (all events triggered by the same mouse action will have the
+	 *      same `eventID`).
+	 * @property {boolean} [top] `true` if this is the top-most feature that the
+	 *      mouse is over.  Only the top-most feature gets
+	 *      `geo.event.feature.mouseon` events, whereas multiple features can get
+	 *      other events.
+	 */
+
+	/**
+	 * @typedef {object} geo.feature.searchResult
+	 * @property {object[]} found A list of elements from the data array that were
+	 *      found by the search.
+	 * @property {number[]} index A list of the indices of the elements that were
+	 *      found by the search.
+	 * @property {object[]} [extra] A list of additional information per found
+	 *      element.  The information is passed to events without change.
+	 */
+
+	/**
+	 * Create a new instance of class feature.
+	 *
+	 * @class
+	 * @alias geo.feature
 	 * @extends geo.sceneObject
+	 * @param {geo.feature.spec} [arg] A feature specification.
 	 * @returns {geo.feature}
 	 */
 	var feature = function (arg) {
@@ -38106,7 +38593,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._subfeatureStyles = {};
 
 	  /**
-	   * Private method to bind mouse handlers on the map element.
+	   * Private method to bind mouse handlers on the map element.  This does
+	   * nothing if the selectionAPI is turned off.  Otherwise, it first unbinds
+	   * any existing handlers and then binds handlers.
 	   */
 	  this._bindMouseHandlers = function () {
 
@@ -38136,36 +38625,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * For binding mouse events, use functions with
-	   * the following call signatures:
+	   * Search for features containing the given point.  This should be defined in
+	   * relevant subclasses.
 	   *
-	   * function handler(arg) {
-	   *   // arg.data - the data object of the feature
-	   *   // arg.index - the index inside the data array of the featue
-	   *   // arg.mouse - mouse information object (see src/core/mapInteractor.js)
-	   * }
-	   *
-	   * i.e.
-	   *
-	   * feature.geoOn(geo.event.feature.mousemove, function (arg) {
-	   *   // do something with the feature marker.
-	   * });
+	   * @param {geo.geoPosition} geo Coordinate in interface gcs.
+	   * @returns {geo.feature.searchResult} An object with a list of features and
+	   *    feature indices that are located at the specified point.
 	   */
-
-	  /**
-	   * Search for features containing the given point.
-	   *
-	   * Returns an object: ::
-	   *
-	   *   {
-	   *     data: [...] // an array of data objects for matching features
-	   *     index: [...] // an array of indices of the matching features
-	   *   }
-	   *
-	   * @argument {Object} coordinate
-	   * @returns {Object}
-	   */
-	  this.pointSearch = function () {
+	  this.pointSearch = function (geo) {
 	    // base class method does nothing
 	    return {
 	      index: [],
@@ -38174,7 +38641,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Returns an array of line indices that are contained in the given box.
+	   * Search for features contained within a rectangilar region.  This should be
+	   * defined in relevant subclasses.
+	   *
+	   * @param {geo.geoPosition} lowerLeft Lower-left corner in gcs coordinates.
+	   * @param {geo.geoPosition} upperRight Upper-right corner in gcs coordinates.
+	   * @param {object} [opts] Additional search options.
+	   * @param {boolean} [opts.partial=false] If truthy, include features that are
+	   *    partially in the box, otherwise only include features that are fully
+	   *    within the region.
+	   * @returns {number[]} A list of features indices that are in the box region.
 	   */
 	  this.boxSearch = function (lowerLeft, upperRight, opts) {
 	    // base class method does nothing
@@ -38182,7 +38658,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Private mousemove handler
+	   * Private mousemove handler.  This uses `pointSearch` to determine which
+	   * features the mouse is over, then fires appropriate events.
+	   *
+	   * @fires geo.event.feature.mouseover
+	   * @fires geo.event.feature.mouseout
+	   * @fires geo.event.feature.mousemove
+	   * @fires geo.event.feature.mouseoff
+	   * @fires geo.event.feature.mouseon
 	   */
 	  this._handleMousemove = function () {
 	    var mouse = m_this.layer().map().interactor().mouse(),
@@ -38276,7 +38759,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Private mouseclick handler
+	   * Private mouseclick handler.  This uses `pointSearch` to determine which
+	   * features the mouse is over, then fires a click event for each such
+	   * feature.
+	   *
+	   * @param {geo.event} evt The event that triggered this handler.
+	   * @fires geo.event.feature.mouseclick
 	   */
 	  this._handleMouseclick = function (evt) {
 	    var mouse = m_this.layer().map().interactor().mouse(),
@@ -38299,7 +38787,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Private brush handler.
+	   * Private brush handler.  This uses `boxSearch` to determine which features
+	   * the brush includes, then fires appropriate events.
+	   *
+	   * @param {geo.brushSelection} brush The current brush selection.
+	   * @fires geo.event.feature.brush
 	   */
 	  this._handleBrush = function (brush) {
 	    var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
@@ -38319,7 +38811,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Private brushend handler.
+	   * Private brushend handler.  This uses `boxSearch` to determine which
+	   * features the brush includes, then fires appropriate events.
+	   *
+	   * @param {geo.brushSelection} brush The current brush selection.
+	   * @fires geo.event.feature.brushend
 	   */
 	  this._handleBrushend = function (brush) {
 	    var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
@@ -38339,7 +38835,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/Set style used by the feature
+	   * Get/Set style used by the feature.
+	   *
+	   * @param {string|object} [arg1] If `undefined`, return the current style
+	   *    object.  If a string and `arg2` is undefined, return the style
+	   *    associated with the specified key.  If a string and `arg2` is defined,
+	   *    set the named style to the specified value.  Otherwise, extend the
+	   *    current style with the values in the specified object.
+	   * @param {*} [arg2] If `arg1` is a string, the new value for that style.
+	   * @returns {object|this} Either the entire style object, the value of a
+	   *    specific style, or the current class instance.
 	   */
 	  this.style = function (arg1, arg2) {
 	    if (arg1 === undefined) {
@@ -38359,11 +38864,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * A uniform getter that always returns a function even for constant styles.
-	   * Maybe extend later to support accessor-like objects.  If undefined input,
-	   * return all the styles as an object.
+	   * This can also return all defined styles as functions in a single object.
 	   *
-	   * @param {string|undefined} key
-	   * @return {function}
+	   * @param {string} [key] If defined, return a function for the named style.
+	   *    Otherwise, return an object with a function for all defined styles.
+	   * @returns {function|object} Either a function for the named style or an
+	   *    object with functions for all defined styles.
 	   */
 	  this.style.get = function (key) {
 	    var out;
@@ -38396,22 +38902,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Set style(s) from array(s).  For each style, the array should have one
 	   * value per data item.  The values are not converted or validated.  Color
-	   * values should be objects with r, g, b values on a scale of [0, 1].  If
-	   * invalidate values are given the behavior is undefined.
+	   * values should be `geo.geoColorObject`s.  If invalid values are given the
+	   * behavior is undefined.
 	   *   For some feature styles, if the first entry of an array is itself an
 	   * array, then each entry of the array is expected to be an array, and values
 	   * are used from these subarrays.  This allows a style to apply, for
 	   * instance, per vertex of a data item rather than per data item.
 	   *
-	   * @param {string|object} keyOrObject: either the name of a single style or
+	   * @param {string|object} keyOrObject Either the name of a single style or
 	   *    an object where the keys are the names of styles and the values are
 	   *    each arrays.
-	   * @param {array} styleArray: if keyOrObject is a string, an array of values
+	   * @param {array} styleArray If keyOrObject is a string, an array of values
 	   *    for the style.  If keyOrObject is an object, this parameter is ignored.
-	   * @param {boolean} refresh: true to redraw the feature when it has been
-	   *    updated.  If an object with styles is passed, the redraw is only done
-	   *    once.
-	   * @returns {object} the feature
+	   * @param {boolean} [refresh=false] `true` to redraw the feature when it has
+	   *    been updated.  If an object with styles is passed, the redraw is only
+	   *    done once.
+	   * @returns {this} The feature instance.
 	   */
 	  this.updateStyleFromArray = function (keyOrObject, styleArray, refresh) {
 	    if (typeof keyOrObject !== 'string') {
@@ -38419,7 +38925,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        m_this.updateStyleFromArray(key, value);
 	      });
 	    } else {
-	      /* colors area lways expected to be objects with r, g, b values, so for
+	      /* colors are always expected to be objects with r, g, b values, so for
 	       * any color, make sure we don't have undefined entries. */
 	      var fallback;
 	      if (keyOrObject.toLowerCase().match(/color$/)) {
@@ -38454,25 +38960,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get layer referenced by the feature
+	   * Get the layer referenced by the feature.
+	   *
+	   * @returns {geo.layer} The layer associated with the feature.
 	   */
 	  this.layer = function () {
 	    return m_layer;
 	  };
 
 	  /**
-	   * Get renderer used by the feature
+	   * Get the renderer used by the feature.
+	   *
+	   * @returns {geo.renderer} The renderer used to render the feature.
 	   */
 	  this.renderer = function () {
 	    return m_renderer;
 	  };
 
 	  /**
-	   * Get/Set projection of the feature
+	   * Get/Set the projection of the feature.
+	   *
+	   * @param {string?} [val] If `undefined`, return the current gcs.  If
+	   *    `null`, use the map's interface gcs.  Otherwise, set a new value for
+	   *    the gcs.
+	   * @returns {string|this} A string used by {@linkcode geo.transform}.  If the
+	   *    map interface gcs is in use, that value will be returned.  If the gcs
+	   *    is set, return the current class instance.
 	   */
 	  this.gcs = function (val) {
 	    if (val === undefined) {
-	      if (m_gcs === undefined && m_renderer) {
+	      if ((m_gcs === undefined || m_gcs === null) && m_renderer) {
 	        return m_renderer.layer().map().ingcs();
 	      }
 	      return m_gcs;
@@ -38484,14 +39001,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Convert from the renderer's input gcs coordinates to display coordinates.
+	   * Convert from the feature's gcs coordinates to display coordinates.
 	   *
-	   * @param {object} c The input coordinate to convert
-	   * @param {object} c.x
-	   * @param {object} c.y
-	   * @param {object} [c.z=0]
-	   * @return {object} Display space coordinates
+	   * @param {geo.geoPosition} c The input coordinate to convert.
+	   * @returns {geo.screenPosition} Display space coordinates.
 	   */
+	  ////////////////////////////////////////////////////////////////////////////
 	  this.featureGcsToDisplay = function (c) {
 	    var map = m_renderer.layer().map();
 	    c = map.gcsToWorld(c, m_this.gcs());
@@ -38503,14 +39018,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/Set visibility of the feature
+	   * Get/Set the visibility of the feature.
 	   *
-	   * @param {boolean|undefined} val: undefined to return the visibility, a
-	   *    boolean to change the visibility.
-	   * @param {boolean} direct: if true, when getting the visibility, disregard
-	   *    the visibility of the parent layer, and when setting, refresh the state
-	   *    regardless of whether it has changed or not.
-	   * @return {boolean|object} either the visibility (if getting) or the feature
+	   * @param {boolean} [val] A boolean to change the visibility, or `undefined`
+	   *    to return the visibility.
+	   * @param {boolean} [direct] If `true`, when getting the visibility,
+	   *    disregard the visibility of the parent layer, and when setting, refresh
+	   *    the state regardless of whether it has changed or not.  Otherwise, the
+	   *    functional visibility is returned, where both the feature and the layer
+	   *    must be visible for a `true` result.
+	   * @returns {boolean|this} Either the visibility (if getting) or the feature
 	   *    (if setting).
 	   */
 	  this.visible = function (val, direct) {
@@ -38542,6 +39059,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get/Set a list of dependent features.  Dependent features have their
 	   * visibility changed at the same time as the feature.
+	   *
+	   * @param {geo.feature[]} [arg] If specified, the new list of dependent
+	   *    features.  Otherwise, return the current list of dependent features.
+	   * @returns {geo.feature[]|this} The current list of dependent features or
+	   *    a reference to `this`.
 	   */
 	  this.dependentFeatures = function (arg) {
 	    if (arg === undefined) {
@@ -38552,9 +39074,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/Set bin of the feature
+	   * Get/Set bin of the feature.  The bin number is used to determine the order
+	   * of multiple features on the same layer.  It has no effect except on the
+	   * vgl renderer.  A negative value hides the feature without stopping
+	   * interaction with it.  Otherwise, more features with higher bin numbers are
+	   * drawn above those with lower bin numbers.  If two features have the same
+	   * bin number, their order relative to one another is indeterminate and may
+	   * be unstable.
 	   *
-	   * Bin number is typically used for sorting the order of rendering
+	   * @param {number} [val] The new bin number.  If `undefined`, return the
+	   *    current bin number.
+	   * @returns {number|this} The current bin number or a reference to `this`.
 	   */
 	  this.bin = function (val) {
 	    if (val === undefined) {
@@ -38567,7 +39097,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/Set timestamp of data change
+	   * Get/Set timestamp of data change.
+	   *
+	   * @param {geo.timestamp} [val] The new data timestamp object or `undefined`
+	   *    to get the current data timestamp object.
+	   * @returns {geo.timestamp|this}
 	   */
 	  this.dataTime = function (val) {
 	    if (val === undefined) {
@@ -38580,7 +39114,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/Set timestamp of last time build happened
+	   * Get/Set timestamp of last time a build happened.
+	   *
+	   * @param {geo.timestamp} [val] The new build timestamp object or `undefined`
+	   *    to get the current build timestamp object.
+	   * @returns {geo.timestamp|this}
 	   */
 	  this.buildTime = function (val) {
 	    if (val === undefined) {
@@ -38593,7 +39131,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/Set timestamp of last time update happened
+	   * Get/Set timestamp of last time an update happened.
+	   *
+	   * @param {geo.timestamp} [val] The new update timestamp object or
+	   *    `undefined` to get the current update timestamp object.
+	   * @returns {geo.timestamp|this}
 	   */
 	  this.updateTime = function (val) {
 	    if (val === undefined) {
@@ -38606,9 +39148,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/Set the data array for the feature.
+	   * Get/Set the data array for the feature.  This is equivalent to getting or
+	   * setting the `data` style, except that setting the data array via this
+	   * method updates the data timestamp, whereas setting it via the style does
+	   * not.
 	   *
-	   * @returns {Array|this}
+	   * @param {array} [data] A new data array or `undefined` to return the
+	   *    existing array.
+	   * @returns {array|this}
 	   */
 	  this.data = function (data) {
 	    if (data === undefined) {
@@ -38624,12 +39171,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get/Set if the selection API is enabled for this feature.
 	   *
-	   * @param {boolean|undefined} val: undefined to return the selectionAPI
-	   *    state, or a boolean to change the state.
-	   * @param {boolean} direct: if true, when getting the selectionAPI state,
+	   * @param {boolean} [arg] `undefined` to return the selectionAPI state, or a
+	   *    boolean to change the state.
+	   * @param {boolean} [direct] If `true`, when getting the selectionAPI state,
 	   *    disregard the state of the parent layer, and when setting, refresh the
 	   *    state regardless of whether it has changed or not.
-	   * @return {boolean|object} either the selectionAPI state (if getting) or the
+	   * @returns {boolean|this} Either the selectionAPI state (if getting) or the
 	   *    feature (if setting).
 	   */
 	  this.selectionAPI = function (arg, direct) {
@@ -38649,9 +39196,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Initialize
+	   * Initialize the class instance.  Derived classes should implement this.
 	   *
-	   * Derived class should implement this
+	   * @param {geo.feature.spec} arg The feature specification.
 	   */
 	  this._init = function (arg) {
 	    if (!m_layer) {
@@ -38664,25 +39211,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Build
+	   * Build.
 	   *
-	   * Derived class should implement this
+	   * Derived classes should implement this.
 	   */
 	  this._build = function () {
 	  };
 
 	  /**
-	   * Update
+	   * Update.
 	   *
-	   * Derived class should implement this
+	   * Derived classes should implement this.
 	   */
 	  this._update = function () {
 	  };
 
 	  /**
-	   * Destroy
+	   * Destroy.  Unbind mouse handlers, clear internal variables, and call the
+	   * parent destroy method.
 	   *
-	   * Derived class should implement this
+	   * Derived classes should implement this.
 	   */
 	  this._exit = function () {
 	    m_this._unbindMouseHandlers();
@@ -38696,32 +39244,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	/**
-	 * The most recent feature event triggered.
+	 * The most recent `geo.feature.event` triggered.
 	 * @type {number}
 	 */
 	feature.eventID = 0;
 
 	/**
-	 * General object specification for feature types.
-	 * @typedef geo.feature.spec
-	 * @type {object}
-	 * @property {string} type A supported feature type.
-	 * @property {object[]} [data=[]] An array of arbitrary objects used to
-	 * construct the feature.  These objects (and their associated
-	 * indices in the array) will be passed back to style and attribute
-	 * accessors provided by the user.  In general the number of
-	 * 'markers' drawn will be equal to the length of this array.
-	 */
-
-	/**
-	 * Create a feature from an object.  The implementation here is
-	 * meant to define the general interface of creating features
-	 * from a javascript object.  See documentation from individual
-	 * feature types for specific details.  In case of an error in
-	 * the arguments this method will return null;
-	 * @param {geo.layer} layer The layer to add the feature to
-	 * @param {geo.feature.spec} [spec={}] The object specification
-	 * @returns {geo.feature|null}
+	 * Create a feature.  This defines a general interface; see individual feature
+	 * types for specific details.
+	 *
+	 * @param {geo.layer} layer The layer to add the feature to.
+	 * @param {geo.feature.spec} spec The feature specification.  At least the
+	 *      `type` must be specified.
+	 * @returns {geo.feature|null} The created feature or `null` for a failure.
 	 */
 	feature.create = function (layer, spec) {
 	  'use strict';
@@ -38736,7 +39271,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return null;
 	  }
 	  var type = spec.type;
-	  var feature = layer.createFeature(type);
+	  var feature = layer.createFeature(type, spec);
 	  if (!feature) {
 	    console.warn('Could not create feature type "' + type + '"');
 	    return null;
@@ -41067,41 +41602,47 @@ return /******/ (function(modules) { // webpackBootstrap
 	var feature = __webpack_require__(207);
 
 	/**
-	 * Create a new instance of class polygonFeature
+	 * Polygon feature specification.
 	 *
-	 * @class geo.polygonFeature
-	 * @extends geo.feature
-	 * @param {Object} arg Options object
-	 * @param {Object|Function} [arg.position] Position of the data.  Default is
+	 * @typedef {geo.feature.spec} geo.polygonFeature.spec
+	 * @param {object|Function} [position] Position of the data.  Default is
 	 *   (data).
-	 * @param {Object|Function} [arg.polygon] Polygons from the data.  Default is
-	 *   (data).  Typically, the data is an array of polygons, each of which is
-	 *   of the form {outer: [(coordinates)], inner: [[(coordinates of first
-	 *   hole)], [(coordinates of second hole)], ...]}.  The inner record is
-	 *   optional.  Alternately, if there are no holes, a polygon can just be an
-	 *   array of coordinates.  Coordinates are in the form {x: (x), y: (y),
-	 *   z: (z)}, with z being optional.  The first and last point of each polygon
-	 *   must be the same.
-	 * @param {Object} [arg.style] Style object with default style options.
-	 * @param {boolean|Function} [arg.style.fill] True to fill polygon.  Defaults
-	 *   to true.
-	 * @param {Object|Function} [arg.style.fillColor] Color to fill each polygon.
+	 * @param {object|Function} [polygon] Polygons from the data.  Default is
+	 *   (data).  Typically, the data is an array of polygons, each of which is of
+	 *   the form {outer: [(coordinates)], inner: [[(coordinates of first hole)],
+	 *   [(coordinates of second hole)], ...]}.  The inner record is optional.
+	 *   Alternately, if there are no holes, a polygon can just be an array of
+	 *   coordinates in the form of geo.geoPosition.  The first and last point of
+	 *   each polygon may be the same.
+	 * @param {object} [style] Style object with default style options.
+	 * @param {boolean|Function} [style.fill] True to fill polygon.  Defaults to
+	 *   true.
+	 * @param {object|Function} [style.fillColor] Color to fill each polygon.  The
+	 *   color can vary by vertex.  Colors can be css names or hex values, or an
+	 *   object with r, g, b on a [0-1] scale.
+	 * @param {number|Function} [style.fillOpacity] Opacity for each polygon.  The
+	 *   opacity can vary by vertex.  Opacity is on a [0-1] scale.
+	 * @param {boolean|Function} [style.stroke] True to stroke polygon.  Defaults
+	 *   to false.
+	 * @param {object|Function} [style.strokeColor] Color to stroke each polygon.
 	 *   The color can vary by vertex.  Colors can be css names or hex values, or
 	 *   an object with r, g, b on a [0-1] scale.
-	 * @param {number|Function} [arg.style.fillOpacity] Opacity for each polygon.
-	 *   The opacity can vary by vertex.  Opacity is on a [0-1] scale.
-	 * @param {boolean|Function} [arg.style.stroke] True to stroke polygon.
-	 *   Defaults to false.
-	 * @param {Object|Function} [arg.style.strokeColor] Color to stroke each
-	 *   polygon.  The color can vary by vertex.  Colors can be css names or hex
-	 *   values, or an object with r, g, b on a [0-1] scale.
-	 * @param {number|Function} [arg.style.strokeOpacity] Opacity for each polygon
+	 * @param {number|Function} [style.strokeOpacity] Opacity for each polygon
 	 *   stroke.  The opacity can vary by vertex.  Opacity is on a [0-1] scale.
-	 * @param {number|Function} [arg.style.strokeWidth] The weight of the polygon
+	 * @param {number|Function} [style.strokeWidth] The weight of the polygon
 	 *   stroke in pixels.  The width can vary by vertex.
-	 * @param {boolean|Function} [arg.style.uniformPolygon] Boolean indicating if
-	 *   each polygon has a uniform style (uniform fill color, fill opacity, stroke
+	 * @param {boolean|Function} [style.uniformPolygon] Boolean indicating if each
+	 *   polygon has a uniform style (uniform fill color, fill opacity, stroke
 	 *   color, and stroke opacity).   Defaults to false.  Can vary by polygon.
+	 */
+
+	/**
+	 * Create a new instance of class polygonFeature.
+	 *
+	 * @class
+	 * @alias geo.polygonFeature
+	 * @extends geo.feature
+	 * @param {geo.polygonFeature.spec} arg
 	 * @returns {geo.polygonFeature}
 	 */
 	var polygonFeature = function (arg) {
@@ -41142,10 +41683,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get/set data.
 	   *
-	   * @memberof geo.polygonFeature
-	   * @param {Object} [data] if specified, use this for the data and return the
+	   * @param {object} [arg] if specified, use this for the data and return the
 	   *    feature.  If not specified, return the current data.
-	   * @returns {geo.polygonFeature|Object}
+	   * @returns {geo.polygonFeature|object}
 	   */
 	  this.data = function (arg) {
 	    var ret = s_data(arg);
@@ -41161,7 +41701,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * the computation in world coordinates, but we will need to work in GCS
 	   * for other projections.  Also compute the extents of the outside of each
 	   * polygon for faster checking if points are in the polygon.
-	   * @memberof geo.polygonFeature
 	   * @private
 	   */
 	  function getCoordinates() {
@@ -41174,7 +41713,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      var outer, inner, range, coord, j, x, y;
 
-	      coord = poly.outer || (poly instanceof Array ? poly : []);
+	      coord = poly.outer || (Array.isArray(poly) ? poly : []);
 	      outer = new Array(coord.length);
 	      for (j = 0; j < coord.length; j += 1) {
 	        outer[j] = posFunc.call(m_this, coord[j], j, d, i);
@@ -41232,10 +41771,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get/set polygon accessor.
 	   *
-	   * @memberof geo.polygonFeature
-	   * @param {Object} [polygon] if specified, use this for the polygon accessor
+	   * @param {object} [val] if specified, use this for the polygon accessor
 	   *    and return the feature.  If not specified, return the current polygon.
-	   * @returns {geo.polygonFeature|Object}
+	   * @returns {object|this} The current polygon or this feature.
 	   */
 	  this.polygon = function (val) {
 	    if (val === undefined) {
@@ -41252,11 +41790,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get/Set position accessor.
 	   *
-	   * @memberof geo.polygonFeature
-	   * @param {Object} [position] if specified, use this for the position
-	   *    accessor and return the feature.  If not specified, return the current
+	   * @param {object} [val] if specified, use this for the position accessor
+	   *    and return the feature.  If not specified, return the current
 	   *    position.
-	   * @returns {geo.polygonFeature|Object}
+	   * @returns {object|this} The current position or this feature.
 	   */
 	  this.position = function (val) {
 	    if (val === undefined) {
@@ -41274,7 +41811,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Point search method for selection api.  Returns markers containing the
 	   * given point.
 	   *
-	   * @memberof geo.polygonFeature
 	   * @argument {object} coordinate
 	   * @returns {object}
 	   */
@@ -41301,6 +41837,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get/Set style used by the feature.  This calls the super function, then
 	   * checks if strokes are required.
+	   *
+	   * @param {string|object} [arg1] If `undefined`, return the current style
+	   *    object.  If a string and `arg2` is undefined, return the style
+	   *    associated with the specified key.  If a string and `arg2` is defined,
+	   *    set the named style to the specified value.  Otherwise, extend the
+	   *    current style with the values in the specified object.
+	   * @param {*} [arg2] If `arg1` is a string, the new value for that style.
+	   * @returns {object|this} Either the entire style object, the value of a
+	   *    specific style, or the current class instance.
 	   */
 	  this.style = function (arg1, arg2) {
 	    var result = s_style.apply(this, arguments);
@@ -41381,7 +41926,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (!polygon) {
 	          continue;
 	        }
-	        loop = polygon.outer || (polygon instanceof Array ? polygon : []);
+	        loop = polygon.outer || (Array.isArray(polygon) ? polygon : []);
 	        lineData.push(m_this._getLoopData(data[i], i, loop));
 	        if (polygon.inner) {
 	          polygon.inner.forEach(function (loop) {
@@ -41399,8 +41944,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	  * Redraw the object.
-	  */
+	   * Redraw the object.
+	   *
+	   * @returns {object} The results of the superclass draw function.
+	   */
 	  this.draw = function () {
 	    var result = s_draw();
 	    if (m_lineFeature) {
@@ -41410,9 +41957,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	  * When the feature is marked as modified, mark our sub-feature as modified,
-	  * too.
-	  */
+	   * When the feature is marked as modified, mark our sub-feature as
+	   * modified, too.
+	   *
+	   * @returns {object} The results of the superclass modified function.
+	   */
 	  this.modified = function () {
 	    var result = s_modified();
 	    if (m_lineFeature) {
@@ -41422,8 +41971,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Destroy
-	   * @memberof geo.polygonFeature
+	   * Destroy.
 	   */
 	  this._exit = function () {
 	    if (m_lineFeature && m_this.layer()) {
@@ -41435,8 +41983,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Initialize
-	   * @memberof geo.polygonFeature
+	   * Initialize.
+	   *
+	   * @param {geo.polygonFeature.spec} arg An object with options for the
+	   *    feature.
 	   */
 	  this._init = function (arg) {
 	    arg = arg || {};
@@ -41505,32 +42055,261 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var featureLayer = __webpack_require__(219);
+	var feature = __webpack_require__(207);
+
+	/**
+	 * Object specification for a text feature.
+	 *
+	 * @typedef {geo.feature.spec} geo.textFeature.spec
+	 * @property {geo.geoPosition[]|function} [position] The position of each data
+	 *      element.  Defaults to the `x`, `y`, and `z` properties of the data
+	 *      element.
+	 * @property {string[]|function} [text] The text of each data element.
+	 *      Defaults to the `text` property of the data element.
+	 * @property {object} [style] The style to apply to each data element.
+	 * @property {boolean|function} [style.visible=true] If falsy, don't show this
+	 *      data element.
+	 * @property {string|function} [style.font] A css font specification.  This
+	 *      is of the form `[style] [variant] [weight] [stretch] size[/line-height]
+	 *      family`.  Individual font styles override this value if a style is
+	 *      specified in each.  See the individual font styles for details.
+	 * @property {string|function} [style.fontStyle='normal'] The font style.  One
+	 *      of `normal`, `italic`, or `oblique`.
+	 * @property {string|function} [style.fontVariant='normal'] The font variant.
+	 *      This can have values such as `small-caps` or `slashed-zero`.
+	 * @property {string|function} [style.fontWeight='normal'] The font weight.
+	 *      This may be a numeric value where 400 is normal and 700 is bold, or a
+	 *      string such as `bold` or `lighter`.
+	 * @property {string|function} [style.fontStretch='normal'] The font stretch,
+	 *      such as `condensed`.
+	 * @property {string|function} [style.fontSize='medium'] The font size.
+	 * @property {string|function} [style.lineHeight='normal'] The font line
+	 *      height.
+	 * @property {string|function} [style.fontFamily] The font family.
+	 * @property {string|function} [style.textAlign='center'] The horizontal text
+	 *      alignment.  One of `start`, `end`, `left`, `right`, or `center`.
+	 * @property {string|function} [style.textBaseline='middle'] The vertical text
+	 *      alignment.  One of `top`, `hanging`, `middle`, `alphabetic`,
+	 *      `ideographic`, or `bottom`.
+	 * @property {geo.geoColor|function} [style.color='black'] Text color.  May
+	 *      include opacity.
+	 * @property {number|function} [style.textOpacity=1] The opacity of the text.
+	 *      If the color includes opacity, this is combined with that value.
+	 * @property {number|function} [style.rotation=0] Text rotation in radians.
+	 * @property {boolean|function} [style.rotateWithMap=false] If truthy, rotate
+	 *      the text when the map rotates.  Otherwise, the text is always in the
+	 *      same orientation.
+	 * @property {number|function} [style.scale=4] The zoom basis value used when
+	 *      `scaleWithMap` is truthy.
+	 * @property {boolean|function} [style.scaleWithMap=false] If truthy, use the
+	 *      `scale` style as the basis of the map zoom value for the font size.
+	 *      The size is scaled from this point.
+	 * @property {geo.screenPosition|function} [style.offset] Offset from the
+	 *      default position for the text.  This is applied before rotation.
+	 * @property {geo.geoColor|function} [style.shadowColor='black'] Text shadow
+	 *      color.  May include opacity.
+	 * @property {geo.screenPosition|function} [style.shadowOffset] Offset for a
+	 *      text shadow.  This is applied before rotation.
+	 * @property {number|null|function} [style.shadowBlur] If not null, add a text
+	 *      shadow with this much blur.
+	 * @property {boolean|function} [style.shadowRotate=false] If truthy, rotate
+	 *      the shadow offset based on the text rotation (the `shadowOffset` is
+	 *      the offset if the text has a 0 rotation).
+	 * @property {geo.geoColor|function} [style.textStrokeColor='transparent'] Text
+	 *      stroke color.  May include opacity.
+	 * @property {geo.geoColor|function} [style.textStrokeWidth=0] Text stroke
+	 *      width in pixels.
+	 */
+
+	/**
+	 * Create a new instance of class textFeature.
+	 *
+	 * @class
+	 * @alias geo.textFeature
+	 * @extends geo.feature
+	 *
+	 * @param {geo.textFeature.spec} [arg] Options for the feature.
+	 * @returns {geo.textFeature} The created feature.
+	 */
+	var textFeature = function (arg) {
+	  'use strict';
+	  if (!(this instanceof textFeature)) {
+	    return new textFeature(arg);
+	  }
+	  arg = arg || {};
+	  feature.call(this, arg);
+
+	  var $ = __webpack_require__(1);
+
+	  /**
+	   * @private
+	   */
+	  var m_this = this,
+	      s_init = this._init;
+
+	  this.featureType = 'text';
+
+	  /**
+	   * Get/Set position.
+	   *
+	   * @param {array|function} [val] If `undefined`, return the current position
+	   *    setting.  Otherwise, modify the current position setting.
+	   * @returns {array|function|this} The current position or this feature.
+	   */
+	  this.position = function (val) {
+	    if (val === undefined) {
+	      return m_this.style('position');
+	    } else if (val !== m_this.style('position')) {
+	      m_this.style('position', val);
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+
+	  /**
+	   * Get/Set text.
+	   *
+	   * @param {array|function} [val] If `undefined`, return the current text
+	   *    setting.  Otherwise, modify the current text setting.
+	   * @returns {array|function|this} The current text or this feature.
+	   */
+	  this.text = function (val) {
+	    if (val === undefined) {
+	      return m_this.style('text');
+	    } else if (val !== m_this.style('text')) {
+	      m_this.style('text', val);
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+
+	  /**
+	   * Initialize.
+	   *
+	   * @param {geo.textFeature.spec} [arg] The feature specification.
+	   */
+	  this._init = function (arg) {
+	    arg = arg || {};
+	    s_init.call(m_this, arg);
+
+	    var style = $.extend(
+	      {},
+	      {
+	        font: 'bold 16px sans-serif',
+	        textAlign: 'center',
+	        textBaseline: 'middle',
+	        color: { r: 0, g: 0, b: 0 },
+	        rotation: 0,  /* in radians */
+	        rotateWithMap: false,
+	        textScaled: false,
+	        position: function (d) { return d; },
+	        text: function (d) { return d.text; }
+	      },
+	      arg.style === undefined ? {} : arg.style
+	    );
+
+	    if (arg.position !== undefined) {
+	      style.position = arg.position;
+	    }
+	    if (arg.text !== undefined) {
+	      style.text = arg.text;
+	    }
+
+	    m_this.style(style);
+	    if (style.position) {
+	      m_this.position(style.position);
+	    }
+	    if (style.text) {
+	      m_this.text(style.text);
+	    }
+	    m_this.dataTime().modified();
+	  };
+
+	  this._init(arg);
+	  return m_this;
+	};
+
+	textFeature.usedStyles = [
+	  'visible', 'font', 'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch',
+	  'fontSize', 'lineHeight', 'fontFamily', 'textAlign', 'textBaseline', 'color',
+	  'textOpacity', 'rotation', 'rotateWithMap', 'textScaled', 'offset',
+	  'shadowColor', 'shadowOffset', 'shadowBlur', 'shadowRotate',
+	  'textStrokeColor', 'textStrokeWidth'
+	];
+
+	/**
+	 * Create a textFeature from an object.
+	 * @see {@link geo.feature.create}
+	 * @param {geo.layer} layer The layer to add the feature to
+	 * @param {geo.textFeature.spec} spec The object specification
+	 * @returns {geo.textFeature|null}
+	 */
+	textFeature.create = function (layer, spec) {
+	  'use strict';
+
+	  spec = spec || {};
+	  spec.type = 'text';
+	  return feature.create(layer, spec);
+	};
+
+	textFeature.capabilities = {
+	  /* core feature name -- support in any manner */
+	  feature: 'text'
+	};
+
+	inherit(textFeature, feature);
+	module.exports = textFeature;
+
+
+/***/ }),
+/* 219 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(8);
+	var featureLayer = __webpack_require__(220);
 	var geo_annotation = __webpack_require__(7);
 	var geo_event = __webpack_require__(9);
 	var registry = __webpack_require__(201);
 	var transform = __webpack_require__(11);
 	var $ = __webpack_require__(1);
-	var Mousetrap = __webpack_require__(220);
+	var Mousetrap = __webpack_require__(221);
+	var textFeature = __webpack_require__(218);
+
+	/**
+	 * @typedef {object} geo.annotationLayer.labelRecord
+	 * @property {string} text The text of the label
+	 * @property {geo.geoPosition} position The position of the label in map gcs
+	 *      coordinates.
+	 * @property {object} [style] A `geo.textFeature` style object.
+	 */
 
 	/**
 	 * Layer to handle direct interactions with different features.  Annotations
 	 * (features) can be created by calling mode(<name of feature>) or cancelled
 	 * with mode(null).
 	 *
-	 * @class geo.annotationLayer
+	 * @class
+	 * @alias geo.annotationLayer
 	 * @extends geo.featureLayer
-	 * @param {object?} options
-	 * @param {number} [options.dblClickTime=300]  The delay in milliseconds that
-	 *    is treated as a double-click when working with annotations.
-	 * @param {number} [options.adjacentPointProximity=5]  The minimum distance in
+	 * @param {object} [args] Layer options.
+	 * @param {number} [args.dblClickTime=300] The delay in milliseconds that is
+	 *    treated as a double-click when working with annotations.
+	 * @param {number} [args.adjacentPointProximity=5] The minimum distance in
 	 *    display coordinates (pixels) between two adjacent points when creating a
-	 *    polygon.  A value of 0 requires an exact match.
-	 * @param {number} [options.finalPointProximity=10]  The maximum distance in
+	 *    polygon or line.  A value of 0 requires an exact match.
+	 * @param {number} [args.continousPointProximity=5] The minimum distance in
+	 *    display coordinates (pixels) between two adjacent points when dragging
+	 *    to create an annotation.  `false` disables continuous drawing mode.
+	 * @param {number} [args.finalPointProximity=10] The maximum distance in
 	 *    display coordinates (pixels) between the starting point and the mouse
 	 *    coordinates to signal closing a polygon.  A value of 0 requires an exact
 	 *    match.  A negative value disables closing a polygon by clicking on the
 	 *    start point.
+	 * @param {boolean} [args.showLabels=true] Truthy to show feature labels that
+	 *    are allowed by the associated feature to be shown.
+	 * @param {object} [args.defaultLabelStyle] Default styles for labels.
 	 * @returns {geo.annotationLayer}
 	 */
 	var annotationLayer = function (args) {
@@ -41540,19 +42319,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  featureLayer.call(this, args);
 
-	  var mapInteractor = __webpack_require__(221);
+	  var mapInteractor = __webpack_require__(222);
 	  var timestamp = __webpack_require__(209);
 	  var util = __webpack_require__(83);
 
 	  var m_this = this,
 	      s_init = this._init,
 	      s_exit = this._exit,
+	      s_draw = this.draw,
 	      s_update = this._update,
 	      m_buildTime = timestamp(),
 	      m_options,
 	      m_mode = null,
 	      m_annotations = [],
-	      m_features = [];
+	      m_features = [],
+	      m_labelFeature,
+	      m_labelLayer;
 
 	  var geojsonStyleProperties = {
 	    'closed': {dataType: 'boolean', keys: ['closed', 'close']},
@@ -41569,6 +42351,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'strokeOpacity': {dataType: 'opacity', keys: ['strokeOpacity', 'stroke-opacity']},
 	    'strokeWidth': {dataType: 'positive', keys: ['strokeWidth', 'stroke-width']}
 	  };
+	  textFeature.usedStyles.forEach(function (key) {
+	    geojsonStyleProperties[key] = {
+	      option: 'labelStyle',
+	      dataType: ['visible', 'rotateWithMap', 'scaleWithMap'].indexOf(key) >= 0 ? 'boolean' : (
+	        ['scale'].indexOf(key) >= 0 ? 'booleanOrNumber' : (
+	        ['rotation'].indexOf(key) >= 0 ? 'angle' : (
+	        ['offset', 'shadowOffset'].indexOf(key) >= 0 ? 'coordinate2' : (
+	        ['shadowBlur, strokeWidth'].indexOf(key) >= 0 ? 'numberOrBlank' :
+	        'text')))),
+	      keys: [
+	        key,
+	        'label' + key.charAt(0).toUpperCase() + key.slice(1),
+	        key.replace(/([A-Z])/g, '-$1').toLowerCase(),
+	        'label-' + key.replace(/([A-Z])/g, '-$1').toLowerCase()]
+	    };
+	  });
 
 	  m_options = $.extend(true, {}, {
 	    dblClickTime: 300,
@@ -41576,14 +42374,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // in pixels; set to continuousPointProximity to false to disable
 	    // continuous drawing modes.
 	    continuousPointProximity: 5,
-	    finalPointProximity: 10  // in pixels, 0 is exact
+	    finalPointProximity: 10,  // in pixels, 0 is exact
+	    showLabels: true
 	  }, args);
 
 	  /**
 	   * Process an action event.  If we are in rectangle-creation mode, this
 	   * creates a rectangle.
 	   *
-	   * @param {geo.event} evt the selection event.
+	   * @param {geo.event} evt The selection event.
 	   */
 	  this._processAction = function (evt) {
 	    var update;
@@ -41598,10 +42397,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Handle updating the current annotation based on an update state.
 	   *
-	   * @param {string|undefined} update: truthy to update.  'done' if the
-	   *    annotation was completed and the mode should return to null.  'remove'
-	   *    to remove the current annotation and set the mode to null.  Falsy to do
-	   *    nothing.
+	   * @param {string|undefined} update Truthy to update.  `'done'` if the
+	   *    annotation was completed and the mode should return to `null`.
+	   *    `'remove'` to remove the current annotation and set the mode to `null`.
+	   *    Falsy to do nothing.
 	   */
 	  this._updateFromEvent = function (update) {
 	    switch (update) {
@@ -41615,7 +42414,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    if (update) {
 	      m_this.modified();
-	      m_this._update();
 	      m_this.draw();
 	    }
 	  };
@@ -41624,14 +42422,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Handle mouse movement.  If there is a current annotation, the movement
 	   * event is sent to it.
 	   *
-	   * @param {geo.event} evt the mouse move event.
+	   * @param {geo.event} evt The mouse move event.
 	   */
 	  this._handleMouseMove = function (evt) {
 	    if (this.mode() && this.currentAnnotation) {
 	      var update = this.currentAnnotation.mouseMove(evt);
 	      if (update) {
 	        m_this.modified();
-	        m_this._update();
 	        m_this.draw();
 	      }
 	    }
@@ -41641,7 +42438,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Handle mouse clicks.  If there is a current annotation, the click event is
 	   * sent to it.
 	   *
-	   * @param {geo.event} evt the mouse click event.
+	   * @param {geo.event} evt The mouse click event.
 	   */
 	  this._handleMouseClick = function (evt) {
 	    if (this.mode() && this.currentAnnotation) {
@@ -41653,13 +42450,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Set or get options.
 	   *
-	   * @param {string|object} arg1 if undefined, return the options object.  If
-	   *    a string, either set or return the option of that name.  If an object,
-	   *    update the options with the object's values.
-	   * @param {object} arg2 if arg1 is a string and this is defined, set the
-	   *    option to this value.
-	   * @returns {object|this} if options are set, return the layer, otherwise
-	   *    return the requested option or the set of options.
+	   * @param {string|object} [arg1] If `undefined`, return the options object.
+	   *    If a string, either set or return the option of that name.  If an
+	   *    object, update the options with the object's values.
+	   * @param {object} [arg2] If `arg1` is a string and this is defined, set
+	   *    the option to this value.
+	   * @returns {object|this} If options are set, return the annotation,
+	   *    otherwise return the requested option or the set of options.
 	   */
 	  this.options = function (arg1, arg2) {
 	    if (arg1 === undefined) {
@@ -41680,14 +42477,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Calculate the display distance for two coordinate in the current map.
 	   *
-	   * @param {object} coord1 the first coordinates.
-	   * @param {string|geo.transform} [gcs1] undefined to use the interface gcs,
-	   *    null to use the map gcs, 'display' if the coordinates are already in
-	   *    display coordinates, or any other transform.
-	   * @param {object} coord2 the second coordinates.
-	   * @param {string|geo.transform} [gcs2] undefined to use the interface gcs,
-	   *    null to use the map gcs, 'display' if the coordinates are already in
-	   *    display coordinates, or any other transform.
+	   * @param {geo.geoPosition|geo.screenPosition} coord1 The first coordinates.
+	   * @param {string|geo.transform|null} gcs1 `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, `'display`' if the coordinates are
+	   *    already in display coordinates, or any other transform.
+	   * @param {geo.geoPosition|geo.screenPosition} coord2 the second coordinates.
+	   * @param {string|geo.transform|null} [gcs2] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, `'display`' if the coordinates are
+	   *    already in display coordinates, or any other transform.
 	   * @returns {number} the Euclidian distance between the two coordinates.
 	   */
 	  this.displayDistance = function (coord1, gcs1, coord2, gcs2) {
@@ -41710,9 +42507,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Add an annotation to the layer.  The annotation could be in any state.
 	   *
-	   * @param {object} annotation the annotation to add.
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform
+	   * @param {geo.annotation} annotation Te annotation to add.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @returns {this} The current layer.
 	   */
 	  this.addAnnotation = function (annotation, gcs) {
 	    var pos = $.inArray(annotation, m_annotations);
@@ -41730,7 +42528,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            gcs, map.gcs(), annotation._coordinates()));
 	      }
 	      this.modified();
-	      this._update();
 	      this.draw();
 	      m_this.geoTrigger(geo_event.annotation.add, {
 	        annotation: annotation
@@ -41742,10 +42539,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Remove an annotation from the layer.
 	   *
-	   * @param {object} annotation the annotation to remove.
-	   * @param {boolean} update if false, don't update the layer after removing
+	   * @param {geo.annoation} annotation The annotation to remove.
+	   * @param {boolean} update If `false`, don't update the layer after removing
 	   *    the annotation.
-	   * @returns {boolean} true if an annotation was removed.
+	   * @returns {boolean} `true` if an annotation was removed.
 	   */
 	  this.removeAnnotation = function (annotation, update) {
 	    var pos = $.inArray(annotation, m_annotations);
@@ -41757,7 +42554,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_annotations.splice(pos, 1);
 	      if (update !== false) {
 	        this.modified();
-	        this._update();
 	        this.draw();
 	      }
 	      m_this.geoTrigger(geo_event.annotation.remove, {
@@ -41770,11 +42566,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Remove all annotations from the layer.
 	   *
-	   * @param {boolean} skipCreating: if true, don't remove annotations that are
-	   *    in the create state.
-	   * @param {boolean} update if false, don't update the layer after removing
-	   *    the annotation.
-	   * @returns {number} the number of annotations that were removed.
+	   * @param {boolean} [skipCreating] If truthy, don't remove annotations that
+	   *    are in the create state.
+	   * @param {boolean} [update] If `false`, don't update the layer after
+	   *    removing the annotation.
+	   * @returns {number} The number of annotations that were removed.
 	   */
 	  this.removeAllAnnotations = function (skipCreating, update) {
 	    var removed = 0, annotation, pos = 0;
@@ -41789,7 +42585,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    if (removed && update !== false) {
 	      this.modified();
-	      this._update();
 	      this.draw();
 	    }
 	    return removed;
@@ -41798,7 +42593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get the list of annotations on the layer.
 	   *
-	   * @returns {array} An array of annotations.
+	   * @returns {geo.annoation[]} An array of annotations.
 	   */
 	  this.annotations = function () {
 	    return m_annotations.slice();
@@ -41807,7 +42602,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Get an annotation by its id.
 	   *
-	   * @returns {geo.annotation} The selected annotation or undefined.
+	   * @param {number} id The annotation ID.
+	   * @returns {geo.annotation} The selected annotation or `undefined` if none
+	   *    matches the id.
 	   */
 	  this.annotationById = function (id) {
 	    if (id !== undefined && id !== null) {
@@ -41822,10 +42619,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get or set the current mode.  The mode is either null for nothing being
+	   * Get or set the current mode.  The mode is either `null` for nothing being
 	   * created, or the name of the type of annotation that is being created.
 	   *
-	   * @param {string|null} arg the new mode or undefined to get the current
+	   * @param {string|null} [arg] The new mode or `undefined` to get the current
 	   *    mode.
 	   * @returns {string|null|this} The current mode or the layer.
 	   */
@@ -41888,23 +42685,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Return the current set of annotations as a geojson object.  Alternately,
 	   * add a set of annotations from a geojson object.
 	   *
-	   * @param {object} geojson: if present, add annotations based on the given
-	   *    geojson object.  If undefined, return the current annotations as
-	   *    geojson.  This may be a JSON string, a javascript object, or a File
-	   *    object.
-	   * @param {boolean} clear: if true, when adding annotations, first remove all
-	   *    existing objects.  If 'update', update existing annotations and remove
-	   *    annotations that no longer exit,  If false, update existing
+	   * @param {string|objectFile} [geojson] If present, add annotations based on
+	   *    the given geojson object.  If `undefined`, return the current
+	   *    annotations as geojson.  This may be a JSON string, a javascript
+	   *    object, or a File object.
+	   * @param {boolean} [clear] If `true`, when adding annotations, first remove
+	   *    all existing objects.  If `'update'`, update existing annotations and
+	   *    remove annotations that no longer exit,  If falsy, update existing
 	   *    annotations and leave unchanged annotations.
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
-	   * @param {boolean} includeCrs: if true, include the coordinate system in the
-	   *    output.
-	   * @return {object|number|undefined} if geojson was undefined, the current
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
+	   * @param {boolean} [includeCrs] If truthy, include the coordinate system in
+	   *    the output.
+	   * @returns {object|number|undefined} If `geojson` was undefined, the current
 	   *    annotations as a javascript object that can be converted to geojson
-	   *    using JSON.stringify.  If geojson is specified, either the number of
-	   *    annotations now present upon success, or undefined if the value in
-	   *    geojson was not able to be parsed.
+	   *    using JSON.stringify.  If `geojson` is specified, either the number of
+	   *    annotations now present upon success, or `undefined` if the value in
+	   *    `geojson` was not able to be parsed.
 	   */
 	  this.geojson = function (geojson, clear, gcs, includeCrs) {
 	    if (geojson !== undefined) {
@@ -41935,7 +42732,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      }
 	      this.modified();
-	      this._update();
 	      this.draw();
 	      return m_annotations.length;
 	    }
@@ -41960,9 +42756,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Convert a feature as parsed by the geojson reader into one or more
 	   * annotations.
 	   *
-	   * @param {geo.feature} feature: the feature to convert.
-	   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
-	   *    null to use the map gcs, or any other transform.
+	   * @param {geo.feature} feature The feature to convert.
+	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+	   *    gcs, `null` to use the map gcs, or any other transform.
 	   */
 	  this._geojsonFeatureToAnnotation = function (feature, gcs) {
 	    var dataList = feature.data(),
@@ -41974,9 +42770,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if ($.inArray(type, annotationList) < 0) {
 	        return;
 	      }
-	      if (!options.style) {
-	        options.style = {};
-	      }
+	      options.style = options.style || {};
+	      options.labelStyle = options.labelStyle || {};
 	      delete options.annotationType;
 	      // the geoJSON reader can only emit line, polygon, and point
 	      switch (feature.featureType) {
@@ -42022,7 +42817,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        $.each(prop.keys, function (idx, altkey) {
 	          if (value === undefined) {
 	            value = m_this.validateAttribute(options[altkey], prop.dataType);
-	            return;
 	          }
 	        });
 	        if (value === undefined) {
@@ -42030,7 +42824,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            feature.style.get(key)(data, data_idx), prop.dataType);
 	        }
 	        if (value !== undefined) {
-	          options.style[key] = value;
+	          options[prop.option || 'style'][key] = value;
 	        }
 	      });
 	      /* Delete property keys we have used */
@@ -42064,43 +42858,90 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Validate a value for an attribute based on a specified data type.  This
-	   * returns a sanitized value or undefined if the value was invalid.  Data
+	   * returns a sanitized value or `undefined` if the value was invalid.  Data
 	   * types include:
-	   *   color: a css string, #rrggbb hex string, #rgb hex string, number, or
-	   *     object with r, g, b properties in the range of [0-1].
-	   *   opacity: a floating point number in the range [0, 1].
-	   *   positive: a floating point number greater than zero.
-	   *   boolean: a string whose lowercase value is 'false', 'off', or 'no', and
-	   *     falsy values are false, all else is true.  null and undefined are
-	   *     still considered invalid values.
-	   *   booleanOrNumber: a string whose lowercase value is 'false', 'off', no',
-	   *     'true', 'on', or 'yes', falsy values that aren't 0, and true are
-	   *     handled as booleans.  Otherwise, a floating point number that isn't
-	   *     NaN or an infinity.
-	   *   number: a floating point number that isn't NaN or an infinity.
-	   *   text: any text string.
-	   * @param {number|string|object|boolean} value: the value to validate.
-	   * @param {string} dataType: the data type for validation.
-	   * @returns {number|string|object|boolean|undefined} the sanitized value or
-	   *    undefined.
+	   * - `color`: a css string, `#rrggbb` hex string, `#rgb` hex string, number,
+	   *   or object with r, g, b properties in the range of [0-1].
+	   * - `opacity`: a floating point number in the range [0, 1].
+	   * - `positive`: a floating point number greater than zero.
+	   * - `boolean`: a string whose lowercase value is `'false'`, `'off'`, or
+	   *   `'no'`, and falsy values are false, all else is true.  `null` and
+	   *   `undefined` are still considered invalid values.
+	   * - `booleanOrNumber`: a string whose lowercase value is `'false'`, `'off'`,
+	   *   `'no'`, `'true'`, `'on'`, or `'yes'`, falsy values that aren't 0, and
+	   *   `true` are handled as booleans.  Otherwise, a floating point number that
+	   *   isn't NaN or an infinity.
+	   * - `coordinate2`: either an object with x and y properties that are
+	   *   numbers, or a string of the form <x>[,]<y> with optional whitespace, or
+	   *   a JSON encoded object with x and y values, or a JSON encoded list of at
+	   *   leasst two numbers.
+	   * - `number`: a floating point number that isn't NaN or an infinity.
+	   * - `angle`: a number that represents radians.  If followed by one of `deg`,
+	   *   `grad`, or `turn`, it is converted to radians.  An empty string is also
+	   *   allowed.
+	   * - `text`: any text string.
+	   * @param {number|string|object|boolean} value The value to validate.
+	   * @param {string} dataType The data type for validation.
+	   * @returns {number|string|object|boolean|undefined} The sanitized value or
+	   *    `undefined`.
 	   */
 	  this.validateAttribute = function (value, dataType) {
+	    var parts;
+
 	    if (value === undefined || value === null) {
 	      return;
 	    }
 	    switch (dataType) {
-	      case 'booleanOrNumber':
-	        if ((!value && value !== 0) || ['true', 'false', 'off', 'on', 'no', 'yes'].indexOf(('' + value).toLowerCase()) >= 0) {
-	          value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
-	        } else {
-	          value = +value;
-	          if (isNaN(value) || !isFinite(value)) {
-	            return;
-	          }
+	      case 'angle':
+	        if (value === '') {
+	          break;
 	        }
+	        parts = /^\s*([-.0-9eE]+)\s*(deg|rad|grad|turn)?\s*$/.exec(('' + value).toLowerCase());
+	        if (!parts || !isFinite(parts[1])) {
+	          return;
+	        }
+	        var factor = (parts[2] === 'grad' ? Math.PI / 200 :
+	            (parts[2] === 'deg' ? Math.PI / 180 :
+	            (parts[2] === 'turn' ? 2 * Math.PI : 1)));
+	        value = +parts[1] * factor;
 	        break;
 	      case 'boolean':
 	        value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
+	        break;
+	      case 'booleanOrNumber':
+	        if ((!value && value !== 0 && value !== '') || ['true', 'false', 'off', 'on', 'no', 'yes'].indexOf(('' + value).toLowerCase()) >= 0) {
+	          value = !!value && ['false', 'no', 'off'].indexOf(('' + value).toLowerCase()) < 0;
+	        } else {
+	          if (!util.isNonNullFinite(value)) {
+	            return;
+	          }
+	          value = +value;
+	        }
+	        break;
+	      case 'coordinate2':
+	        if (value === '') {
+	          break;
+	        }
+	        if (value && util.isNonNullFinite(value.x) && util.isNonNullFinite(value.y)) {
+	          value.x = +value.x;
+	          value.y = +value.y;
+	          break;
+	        }
+	        try { value = JSON.parse(value); } catch (err) { }
+	        if (value && util.isNonNullFinite(value.x) && util.isNonNullFinite(value.y)) {
+	          value.x = +value.x;
+	          value.y = +value.y;
+	          break;
+	        }
+	        if (Array.isArray(value) && util.isNonNullFinite(value[0]) && util.isNonNullFinite(value[1])) {
+	          value = {x: +value[0], y: +value[1]};
+	          break;
+	        }
+	        parts = /^\s*([-.0-9eE]+)(?:\s+|\s*,)\s*([-.0-9eE]+)\s*$/.exec('' + value);
+	        if (!parts || !isFinite(parts[1]) || !isFinite(parts[2])) {
+	          return;
+	        }
+	        value = {x: +parts[1], y: +parts[2]};
 	        break;
 	      case 'color':
 	        value = util.convertColor(value);
@@ -42109,12 +42950,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        break;
 	      case 'number':
-	        value = +value;
-	        if (isNaN(value) || !isFinite(value)) {
+	        if (!util.isNonNullFinite(value)) {
 	          return;
 	        }
+	        value = +value;
+	        break;
+	      case 'numberOrBlank':
+	        if (value === '') {
+	          break;
+	        }
+	        if (!util.isNonNullFinite(value)) {
+	          return;
+	        }
+	        value = +value;
 	        break;
 	      case 'opacity':
+	        if (value === undefined || value === null || value === '') {
+	          return;
+	        }
 	        value = +value;
 	        if (isNaN(value) || value < 0 || value > 1) {
 	          return;
@@ -42122,7 +42975,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        break;
 	      case 'positive':
 	        value = +value;
-	        if (isNaN(value) || !isFinite(value) || value <= 0) {
+	        if (!isFinite(value) || value <= 0) {
 	          return;
 	        }
 	        break;
@@ -42134,10 +42987,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Update layer
+	   * Update layer.
+	   *
+	   * @returns {this} The current layer.
 	   */
-	  this._update = function (request) {
+	  this._update = function () {
 	    if (m_this.getMTime() > m_buildTime.getMTime()) {
+	      var labels = this.options('showLabels') ? [] : null;
 	      /* Interally, we have a set of feature levels (to provide z-index
 	       * support), each of which can have data from multiple annotations.  We
 	       * clear the data on each of these features, then build it up from each
@@ -42152,6 +43008,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 	      $.each(m_annotations, function (annotation_idx, annotation) {
 	        var features = annotation.features();
+	        if (labels) {
+	          var annotationLabel = annotation.labelRecord();
+	          if (annotationLabel) {
+	            labels.push(annotationLabel);
+	          }
+	        }
 	        $.each(features, function (idx, featureLevel) {
 	          if (m_features[idx] === undefined) {
 	            m_features[idx] = {};
@@ -42225,9 +43087,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	          feature.feature.data(feature.data);
 	        });
 	      });
+	      m_this._updateLabels(labels);
 	      m_buildTime.modified();
 	    }
-	    s_update.call(m_this, request);
+	    s_update.call(m_this, arguments);
+	    return this;
+	  };
+
+	  /**
+	   * Show or hide annotation labels.  Create or destroy a child layer or a
+	   * feature as needed.
+	   *
+	   * @param {object[]|null} labels The list of labels to display of `null` for
+	   *    no labels.
+	   * @returns {this} The class instance.
+	   */
+	  this._updateLabels = function (labels) {
+	    if (!labels || !labels.length) {
+	      m_this._removeLabelFeature();
+	      return m_this;
+	    }
+	    if (!m_labelFeature) {
+	      var renderer = registry.rendererForFeatures(['text']);
+	      if (renderer !== m_this.renderer().api()) {
+	        m_labelLayer = registry.createLayer('feature', m_this.map(), {renderer: renderer});
+	        m_this.addChild(m_labelLayer);
+	        m_labelLayer._update();
+	        m_this.geoTrigger(geo_event.layerAdd, {
+	          target: m_this,
+	          layer: m_labelLayer
+	        });
+	      }
+	      var style = {};
+	      textFeature.usedStyles.forEach(function (key) {
+	        style[key] = function (d, i) {
+	          if (d.style && d.style[key] !== undefined) {
+	            return d.style[key];
+	          }
+	          return (m_this.options('defaultLabelStyle') || {})[key];
+	        };
+	      });
+	      m_labelFeature = (m_labelLayer || m_this).createFeature('text', {
+	        style: style,
+	        gcs: m_this.map().gcs(),
+	        position: function (d) {
+	          return d.position;
+	        }
+	      });
+	    }
+	    m_labelFeature.data(labels);
+	    return m_this;
 	  };
 
 	  /**
@@ -42244,7 +43153,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Initialize
+	   * Remove the label feature if it exists.
+	   *
+	   * @returns {this} The current layer.
+	   */
+	  this._removeLabelFeature = function () {
+	    if (m_labelLayer) {
+	      m_labelLayer._exit();
+	      m_this.removeChild(m_labelLayer);
+	      m_this.geoTrigger(geo_event.layerRemove, {
+	        target: m_this,
+	        layer: m_labelLayer
+	      });
+	      m_labelLayer = m_labelFeature = null;
+	    }
+	    if (m_labelFeature) {
+	      m_this.removeFeature(m_labelFeature);
+	      m_labelFeature = null;
+	    }
+	    return m_this;
+	  };
+
+	  /**
+	   * Update if necessary and draw the layer.
+	   *
+	   * @returns {this} The current layer.
+	   */
+	  this.draw = function () {
+	    m_this._update();
+	    s_draw.call(m_this);
+	    return m_this;
+	  };
+
+	  /**
+	   * Initialize.
+	   *
+	   * @returns {this} The current layer.
 	   */
 	  this._init = function () {
 	    // Call super class init
@@ -42265,9 +43209,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Free all resources
+	   * Free all resources.
+	   *
+	   * @returns {this} The current layer.
 	   */
 	  this._exit = function () {
+	    m_this._removeLabelFeature();
 	    // Call super class exit
 	    s_exit.call(m_this);
 	    m_annotations = [];
@@ -42284,7 +43231,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 219 */
+/* 220 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -42585,7 +43532,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 220 */
+/* 221 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
@@ -43635,13 +44582,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 221 */
+/* 222 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var object = __webpack_require__(203);
 	var util = __webpack_require__(83);
-	var Mousetrap = __webpack_require__(220);
+	var Mousetrap = __webpack_require__(221);
 
 	/**
 	 * The mapInteractor class is responsible for handling raw events from the
@@ -43666,7 +44613,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var throttle = __webpack_require__(83).throttle;
 	  var debounce = __webpack_require__(83).debounce;
 	  var actionMatch = __webpack_require__(83).actionMatch;
-	  var quadFeature = __webpack_require__(222);
+	  var quadFeature = __webpack_require__(223);
 
 	  var m_options,
 	      m_this = this,
@@ -44308,8 +45255,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // bind touch events
 	    if ((m_this.hasTouchSupport() || m_options.alwaysTouch) &&
 	        (usedInputs.pan || usedInputs.rotate) &&
-	        __webpack_require__.m[/*require.resolve*/(223)]) { // eslint-disable-line
-	      var Hammer = __webpack_require__(223);
+	        __webpack_require__.m[/*require.resolve*/(224)]) { // eslint-disable-line
+	      var Hammer = __webpack_require__(224);
 	      if (Hammer !== undefined) {
 	        var recog = [],
 	            touchEvents = ['hammer.input'];
@@ -45615,7 +46562,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 222 */
+/* 223 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -46145,13 +47092,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 223 */
+/* 224 */
 /***/ (function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_223__;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_224__;
 
 /***/ }),
-/* 224 */
+/* 225 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -46196,7 +47143,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * @private
 	   */
-	  var d3 = __webpack_require__(225),
+	  var d3 = __webpack_require__(226),
 	      m_this = this,
 	      s_init = this._init,
 	      m_choropleth = $.extend({},
@@ -46460,25 +47407,145 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 225 */
+/* 226 */
 /***/ (function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_225__;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_226__;
 
 /***/ }),
-/* 226 */
+/* 227 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var feature = __webpack_require__(207);
 
 	/**
-	 * Create a new instance of class contourFeature
+	 * Contour feature specification.
 	 *
-	 * @class geo.contourFeature
+	 * @typedef {geo.feature.spec} geo.contourFeature.spec
+	 * @property {object[]} [data=[]] An array of arbitrary objects used to
+	 *  construct the feature.
+	 * @property {object} [style] An object that contains style values for the
+	 *      feature.
+	 * @property {function|number} [style.opacity=1] The opacity on a scale of 0 to
+	 *      1.
+	 * @property {function|geo.geoPosition} [style.position=data] The position of
+	 *      each data element.  This defaults to just using `x`, `y`, and `z`
+	 *      properties of the data element itself.  The position is in the
+	 *      feature's gcs coordinates.
+	 * @property {function|number} [style.value=data.z] The contour value of each
+	 *      data element.  This defaults `z` properties of the data element.  If
+	 *      the value of a grid point is `null` or `undefined`, that point will not
+	 *      be included in the contour display.  Since the values are on a grid, if
+	 *      this point is in the interior of the grid, this can remove up to four
+	 *      squares.
+	 * @property {geo.contourFeature.contourSpec} [contour] The contour
+	 *      specification for the feature.
+	 */
+
+	/**
+	 * Contour specification.
+	 *
+	 * @typedef {object} geo.contourFeature.contourSpec
+	 * @property {function|number} [gridWidth] The number of data columns in the
+	 *      grid.  If this is not specified and `gridHeight` is given, this is the
+	 *      number of data elements divided by `gridHeight`.  If neither
+	 *      `gridWidth` not `gridHeight` are specified,  the square root of the
+	 *      number of data elements is used.  If both are specified, some data
+	 *      could be unused.
+	 * @property {function|number} [gridHeight] The number of data rows in the
+	 *      grid.  If this is not specified and `gridWidth` is given, this is the
+	 *      number of data elements divided by `gridWidth`.  If neither
+	 *      `gridWidth` not `gridHeight` are specified,  the square root of the
+	 *      number of data elements is used.  If both are specified, some data
+	 *      could be unused.
+	 * @property {function|number} [x0] The x coordinate of the 0th point in the
+	 *      `value` array.  If `null` or `undefined`, the coordinate is taken from
+	 *      the `position` style.
+	 * @property {function|number} [y0] The y coordinate of the 0th point in the
+	 *      `value` array.  If `null` or `undefined`, the coordinate is taken from
+	 *      the `position` style.
+	 * @property {function|number} [dx] The distance in the x direction between the
+	 *      0th and 1st point in the `value` array.  This may be positive or
+	 *      negative.  If 0, `null`, or `undefined`, the coordinate is taken from
+	 *      the `position` style.
+	 * @property {function|number} [dy] The distance in the y direction between the
+	 *      0th and `gridWidth`th point in the `value` array.  This may be positive
+	 *      or negative.  If 0, `null`, or `undefined`, the coordinate is taken
+	 *      from the `position` style.
+	 * @property {function|boolean} [wrapLongitude] If truthy and `position` is not
+	 *      used (`x0`, `y0`, `dx`, and `dy` are all set appropriately), assume the
+	 *      x coordinates is longitude and should be adjusted to be within -180 to
+	 *      180.  If the data spans 180 degrees, the points or squares that
+	 *      straddle the meridian will be duplicated to ensure that
+	 *      the map is covered from -180 to 180 as appropriate.  Set this to
+	 *      `false` if using a non-longitude x coordinate.  This is ignored if
+	 *      `position` is used.
+	 * @property {function|number} [min] Minimum contour value.  If unspecified,
+	 *      taken from the computed minimum of the `value` style.
+	 * @property {function|number} [max] Maximum contour value.  If unspecified,
+	 *      taken from the computed maxi,um of the `value` style.
+	 * @property {function|geo.geoColor} [minColor='black'] Color used for any
+	 *      value below the minimum.
+	 * @property {function|number} [minOpacity=0] Opacity used for any value below
+	 *      the minimum.
+	 * @property {function|geo.geoColor} [maxColor='black'] Color used for any
+	 *      value above the maximum.
+	 * @property {function|number} [maxOpacity=0] Opacity used for any value above
+	 *      the maximum.
+	 * @property {function|boolean} [stepped] If falsy but not `undefined`, smooth
+	 *      transitions between colors.
+	 * @property {function|geo.geoColor[]} [colorRange=<color table>] An array of
+	 *      colors used to show the range of values.  The default is a 9-step color
+	 *      table.
+	 * @property {function|number[]} [opacityRange] An array of opacities used to
+	 *      show the range of values.  If unspecified, the opacity is 1.  If this
+	 *      is a shorter list than the `colorRange`, an opacity of 1 is used for
+	 *      the entries near the end of the color range.
+	 * @property {function|number[]} [rangeValues] An array used to map values to
+	 *      the `colorRange`.  By default, values are spaced linearly.  If
+	 *      specified, the entries must be increasing weakly monotonic, and there
+	 *      must be one more entry then the length of `colorRange`.
+	 */
+
+	/**
+	 * Computed contour information.
+	 *
+	 * @typedef {object} geo.contourFeature.contourInfo
+	 * @property {number[]} elements An array of 0-based indices into the values
+	 *    array.  Each set of the three values forms a triangle that should be
+	 *    rendered.  If no contour data can be used, this will be a zero-length
+	 *    array and other properties may not be set.
+	 * @property {number[]} pos An flat array of coordinates for the vertices in
+	 *    the triangular mesh.  The array is in the order x0, y0, z0, x1, y1, z1,
+	 *    x2, ..., and is always three times as long as the number of vertices.
+	 * @property {number[]} value An array of values that have been normalized to a
+	 *    range of [0, steps].  There is one value per vertex.
+	 * @property {number[]} opacity An array of opacities per vertex.
+	 * @property {number} minValue the minimum value used for the contour.  If
+	 *    `rangeValues` was specified, this is the first entry of that array.
+	 * @property {number} maxValue the maximum value used for the contour.  If
+	 *    `rangeValues` was specified, this is the last entry of that array.
+	 * @property {number} factor If linear value scaling is used, this is the
+	 *    number of color values divided by the difference between the maximum and
+	 *    minimum values.  It is ignored if non-linear value scaling is used.
+	 * @property {geo.geoColorObject} minColor The color used for values below
+	 *    minValue.  Includes opacity.
+	 * @property {geo.geoColorObject} maxColor The color used for values above
+	 *    maxValue.  Includes opacity.
+	 * @property {geo.geoColorObject[]} colorMap The specified `colorRange` and
+	 *    `opacityRange` converted into objects that include opacity.
+	 */
+
+	/**
+	 * Create a new instance of class contourFeature.
+	 *
+	 * @class
+	 * @alias geo.contourFeature
 	 * @extends geo.feature
-	 * @returns {geo.contourFeature}
 	 *
+	 * @param {geo.contourFeature.spec} arg
+	 * @returns {geo.contourFeature}
 	 */
 	var contourFeature = function (arg) {
 	  'use strict';
@@ -46497,8 +47564,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  var m_this = this,
 	      m_contour = {},
-	      s_init = this._init,
-	      s_data = this.data;
+	      s_init = this._init;
 
 	  if (arg.contour === undefined) {
 	    m_contour = function (d) {
@@ -46509,39 +47575,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  /**
-	   * Override the parent data method to keep track of changes to the
-	   * internal coordinates.
-	   */
-	  this.data = function (arg) {
-	    var ret = s_data(arg);
-	    return ret;
-	  };
-
-	  /**
-	   * Get/Set contour accessor
+	   * Get/Set contour accessor.
 	   *
-	   * @returns {geo.pointFeature}
+	   * @param {string|geo.contourFeature.contourSpec} [specOrProperty] If
+	   *    `undefined`, return the current contour specification.  If a string is
+	   *    specified, either get or set the named contour property.  If an object
+	   *    is given, set or update the contour specification with the specified
+	   *    parameters.
+	   * @param {object} [value] If `specOrProperty` is a string, set that property
+	   *    to `value`.  If `undefined`, return the current value of the named
+	   *    property.
+	   * @returns {geo.contourFeature.contourSpec|object|this} The current contour
+	   *    specification, the value of a named contour property, or this contour
+	   *    feature.
 	   */
-	  this.contour = function (arg1, arg2) {
-	    if (arg1 === undefined) {
+	  this.contour = function (specOrProperty, value) {
+	    if (specOrProperty === undefined) {
 	      return m_contour;
 	    }
-	    if (typeof arg1 === 'string' && arg2 === undefined) {
-	      return m_contour[arg1];
+	    if (typeof specOrProperty === 'string' && value === undefined) {
+	      return m_contour[specOrProperty];
 	    }
-	    if (arg2 === undefined) {
+	    if (value === undefined) {
 	      var contour = $.extend(
 	        {},
 	        {
 	          gridWidth: function () {
-	            if (arg1.gridHeight) {
-	              return Math.floor(m_this.data().length / arg1.gridHeight);
+	            if (specOrProperty.gridHeight) {
+	              return Math.floor(m_this.data().length / specOrProperty.gridHeight);
 	            }
 	            return Math.floor(Math.sqrt(m_this.data().length));
 	          },
 	          gridHeight: function () {
-	            if (arg1.gridWidth) {
-	              return Math.floor(m_this.data().length / arg1.gridWidth);
+	            if (specOrProperty.gridWidth) {
+	              return Math.floor(m_this.data().length / specOrProperty.gridWidth);
 	            }
 	            return Math.floor(Math.sqrt(m_this.data().length));
 	          },
@@ -46549,7 +47616,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          minOpacity: 0,
 	          maxColor: 'black',
 	          maxOpacity: 0,
-	        /* 9-step based on paraview bwr colortable */
+	          /* 9-step based on paraview bwr colortable */
 	          colorRange: [
 	            {r: 0.07514311, g: 0.468049805, b: 1},
 	            {r: 0.468487184, g: 0.588057293, b: 1},
@@ -46563,11 +47630,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	          ]
 	        },
 	        m_contour,
-	        arg1
+	        specOrProperty
 	      );
 	      m_contour = contour;
 	    } else {
-	      m_contour[arg1] = arg2;
+	      m_contour[specOrProperty] = value;
 	    }
 	    m_this.modified();
 	    return m_this;
@@ -46577,8 +47644,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * A uniform getter that always returns a function even for constant values.
 	   * If undefined input, return all the contour values as an object.
 	   *
-	   * @param {string|undefined} key
-	   * @return {function}
+	   * @param {string|undefined} key The name of the contour key or `undefined`
+	   *    to return an object with all keys as functions.
+	   * @returns {function|object} A function related to the key, or an object
+	   *    with all contour keys, each of which is a function.
 	   */
 	  this.contour.get = function (key) {
 	    if (key === undefined) {
@@ -46594,9 +47663,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get/Set position accessor
+	   * Get/Set position accessor.  This is identical to getting or setting the
+	   * `position` style.
 	   *
-	   * @returns {geo.pointFeature}
+	   * @param {function|array} [val] If specified, set the position style.  If
+	   *    `undefined`, return the current value.
+	   * @returns {function|array|this} Either the position style or this.
 	   */
 	  this.position = function (val) {
 	    if (val === undefined) {
@@ -46614,10 +47686,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * vertices.  Create a set of triangles of indices into the vertex array.
 	   * Create a color and opacity map corresponding to the values.
 	   *
-	   * @returns: an object with pos, value, opacity, elements, minValue,
-	   *           maxValue, minColor, maxColor, colorMap, factor.  If there is no
-	   *           contour data that can be used, only elements is guaranteed to
-	   *           exist, and it will be a zero-length array.
+	   * @returns {geo.contourFeature.contourInfo} An object with the contour
+	   *    information.
 	   */
 	  this.createContours = function () {
 	    var i, i3, j, idx, k, val, numPts, usedPts = 0, usePos, item,
@@ -46815,7 +47885,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Initialize
+	   * Initialize.
+	   *
+	   * @param {geo.contourFeature.spec} arg The contour feature specification.
 	   */
 	  this._init = function (arg) {
 	    s_init.call(m_this, arg);
@@ -46825,7 +47897,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      {
 	        opacity: 1.0,
 	        position: function (d) {
-	          return {x: d.x, y: d.y, z: d.z};
+	          /* We could construct a new object and return
+	           *  {x: d.x, y: d.y, z: d.z};
+	           * but that isn't necessary. */
+	          return d;
 	        },
 	        value: function (d) {
 	          return m_this.position()(d).z;
@@ -46894,23 +47969,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    spacing.  Must be increasing monotonic and one value longer than the length
 	    of colorRange>]
 	})
-
-	Notes:
-	* The position array is only used for position if not all of x0, y0, dx, and dy
-	    are specified (not null or undefined).  If a value array is not specified,
-	    the position array could still be used for the value.
-	* If the value() of a grid point is null or undefined, that point will not be
-	    included in the contour display.  Since the values are on a grid, if this
-	    point is in the interior of the grid, this can remove up to four squares.
-	* Only one of gridWidth and gridHeight needs to be specified.  If both are
-	    specified and gridWidth * gridHeight < data().length, not all the data will
-	    be used.  If neither are specified, floor(sqrt(data().length)) is used for
-	    both.
 	 */
 
 
 /***/ }),
-/* 227 */
+/* 228 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -46958,7 +48021,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 228 */
+/* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
@@ -47057,8 +48120,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return defer;
 	        }
 	      }
-	      var wait = new $.Deferred();
-	      var process = new $.Deferred();
+	      var wait = $.Deferred();
+	      var process = $.Deferred();
 	      wait.then(function () {
 	        $.when(callback.call(defer)).always(process.resolve);
 	      }, process.resolve);
@@ -47187,11 +48250,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 229 */
+/* 230 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var featureLayer = __webpack_require__(219);
+	var featureLayer = __webpack_require__(220);
 	var object = __webpack_require__(203);
 
 	/**
@@ -47287,7 +48350,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 230 */
+/* 231 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -47502,7 +48565,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 231 */
+/* 232 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -47770,11 +48833,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 232 */
+/* 233 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
-	var tile = __webpack_require__(233);
+	var tile = __webpack_require__(234);
 
 	module.exports = (function () {
 	  'use strict';
@@ -47818,8 +48881,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    spec.size = spec.size || {x: 256, y: 256};
 	    this._image = null;
 
-	    // Cache the coordinate scaling
-	    this._cors = spec.crossDomain || 'anonymous';
+	    this._cors = (spec.crossDomain || spec.crossDomain === null) ? spec.crossDomain : 'anonymous';
 
 	    // Call superclass constructor
 	    tile.call(this, spec);
@@ -47837,17 +48899,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    /**
 	     * Initiate the image request.
+	     *
+	     * @returns {this} The current tile class instance.
 	     */
 	    this.fetch = function () {
 	      var defer;
 	      if (!this._image) {
 	        this._image = new Image(this.size.x, this.size.y);
 	        // Only set the crossOrigin parameter if this is going across origins.
-	        if (this._url.indexOf(':') >= 0 &&
+	        if (this._cors && this._url.indexOf(':') >= 0 &&
 	            this._url.indexOf('/') === this._url.indexOf(':') + 1) {
 	          this._image.crossOrigin = this._cors;
 	        }
-	        defer = new $.Deferred();
+	        defer = $.Deferred();
 	        this._image.onload = defer.resolve;
 	        this._image.onerror = defer.reject;
 	        this._image.src = this._url;
@@ -47868,7 +48932,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @returns {this} chainable
 	     */
 	    this.fadeIn = function (duration) {
-	      var promise = this.fetch(), defer = new $.Deferred();
+	      var promise = this.fetch(), defer = $.Deferred();
 	      $(this._image).css('display', 'none');
 	      promise.then(function () {
 	        $(this._image).fadeIn(duration, function () {
@@ -47887,7 +48951,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 233 */
+/* 234 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
@@ -48114,12 +49178,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 234 */
+/* 235 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFileReader = __webpack_require__(201).registerFileReader;
-	var fileReader = __webpack_require__(229);
+	var fileReader = __webpack_require__(230);
 
 	/**
 	* Create a new instance of class jsonReader
@@ -48422,7 +49486,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 235 */
+/* 236 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -48431,7 +49495,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var sceneObject = __webpack_require__(208);
 
 	/**
-	 * Creates a new map object
+	 * Creates a new map object.
 	 *
 	 * @class
 	 * @alias geo.map
@@ -48511,8 +49575,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var util = __webpack_require__(83);
 	  var registry = __webpack_require__(201);
 	  var geo_event = __webpack_require__(9);
-	  var mapInteractor = __webpack_require__(221);
-	  var uiLayer = __webpack_require__(236);
+	  var mapInteractor = __webpack_require__(222);
+	  var uiLayer = __webpack_require__(237);
 
 	  /**
 	   * Private member variables
@@ -48745,7 +49809,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get the camera
+	   * Get the camera.
 	   *
 	   * @returns {geo.camera}
 	   */
@@ -48754,9 +49818,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get map gcs.  This is the coordinate system used in drawing the map.
+	   * Get or set the map gcs.  This is the coordinate system used in drawing the
+	   * map.
 	   *
-	   * @returns {string} A string used by {@linkcode geo.transform}.
+	   * @param {string} [arg] If `undefined`, return the current gcs.  Otherwise,
+	   *    a new value for the gcs.
+	   * @returns {string|this} A string used by {@linkcode geo.transform}.
 	   */
 	  this.gcs = function (arg) {
 	    if (arg === undefined) {
@@ -48776,10 +49843,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Get map interface gcs.  This is the coordinate system used when getting or
-	   * setting map bounds, center, and other values.
+	   * Get or set the map interface gcs.  This is the coordinate system used when
+	   * getting or setting map bounds, center, and other values.
 	   *
-	   * @returns {string} A string used by {@linkcode geo.transform}.
+	   * @param {string} [arg] If `undefined`, returtn the current interface gcs.
+	   *    Otherwise, a new value for the interface gcs.
+	   * @returns {string|this} A string used by {@linkcode geo.transform}.
 	   */
 	  this.ingcs = function (arg) {
 	    if (arg === undefined) {
@@ -49018,7 +50087,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *
 	   * @param {string} layerName The type of layer to add to the map.
 	   * @param {object} arg Parameters for the new layer.
-	   * @return {geo.layer}
+	   * @returns {geo.layer}
 	   * @fires geo.event.layerAdd
 	   */
 	  this.createLayer = function (layerName, arg) {
@@ -49049,7 +50118,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Remove a layer from the map.
 	   *
 	   * @param {geo.layer?} layer Layer to remove from the map.
-	   * @return {geo.layer}
+	   * @returns {geo.layer}
 	   * @fires geo.event.layerRemove
 	   */
 	  this.deleteLayer = function (layer) {
@@ -49104,7 +50173,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.center(oldCenter);
 
 	    m_this.geoTrigger(geo_event.resize, {
-	      type: geo_event.resize,
 	      target: m_this,
 	      width: m_width,
 	      height: m_height
@@ -49141,7 +50209,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {geo.geoPosition} c The input coordinate to convert.
 	   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
 	   *    the interface gcs, `null` to use the map gcs, or any other transform.
-	   * @return {geo.worldPosition} World space coordinates.
+	   * @returns {geo.worldPosition} World space coordinates.
 	   */
 	  this.gcsToWorld = function (c, gcs) {
 	    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
@@ -49165,7 +50233,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {geo.worldPosition} c The input coordinate to convert.
 	   * @param {string|geo.transform|null} [gcs] output gcs.  `undefined` to use
 	   *    the interface gcs, `null` to use the map gcs, or any other transform.
-	   * @return {geo.geoPosition} GCS space coordinates.
+	   * @returns {geo.geoPosition} GCS space coordinates.
 	   */
 	  this.worldToGcs = function (c, gcs) {
 	    if (m_origin.x || m_origin.y || m_origin.z) {
@@ -49190,7 +50258,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {geo.geoPosition} c The input coordinate to convert.
 	   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
 	   *    the interface gcs, `null` to use the map gcs, or any other transform.
-	   * @return {geo.screenPosition} Display space coordinates.
+	   * @returns {geo.screenPosition} Display space coordinates.
 	   */
 	  this.gcsToDisplay = function (c, gcs) {
 	    c = m_this.gcsToWorld(c, gcs);
@@ -49202,7 +50270,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * camera.
 	   *
 	   * @param {geo.worldPosition} c The input coordinate to convert.
-	   * @return {geo.screenPosition} Display space coordinates.
+	   * @returns {geo.screenPosition} Display space coordinates.
 	   */
 	  this.worldToDisplay = function (c) {
 	    return m_camera.worldToDisplay(c);
@@ -49215,7 +50283,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {geo.screenPosition} c The input display coordinate to convert.
 	   * @param {string|geo.transform|null} [gcs] Output gcs.  `undefined` to use
 	   *    the interface gcs, `null` to use the map gcs, or any other transform.
-	   * @return {geo.geoPosition} GCS space coordinates.
+	   * @returns {geo.geoPosition} GCS space coordinates.
 	   */
 	  this.displayToGcs = function (c, gcs) {
 	    c = m_this.displayToWorld(c); // done via camera
@@ -49227,7 +50295,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * camera.
 	   *
 	   * @param {geo.screenPosition} c The input coordinate to convert.
-	   * @return {geo.worldPosition} World space coordinates.
+	   * @returns {geo.worldPosition} World space coordinates.
 	   */
 	  this.displayToWorld = function (c) {
 	    return m_camera.displayToWorld(c);
@@ -49236,6 +50304,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Redraw the map and all its layers.
 	   *
+	   * @returns {this} The map object.
 	   * @fires geo.event.draw
 	   * @fires geo.event.drawEnd
 	   */
@@ -49290,6 +50359,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Initialize the map.
+	   *
+	   * @returns {this} The map object.
 	   */
 	  this._init = function () {
 
@@ -49307,6 +50378,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Update map.  This updates all layers of the map.
+	   *
+	   * @param {object} [request] Optional information about the source of this
+	   *    update request.  This could be an event, for instance.  It is passed
+	   *    to individual layer's `_update` function.
+	   * @returns {this} The map object.
 	   */
 	  this._update = function (request) {
 	    var i, layers = m_this.children();
@@ -49678,7 +50754,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *    gcs, `null` to use the map gcs, or any other transform.  If setting the
 	   *    bounds, they are converted from this gcs to the map projection.  The
 	   *    returned bounds are converted from the map projection to this gcs.
-	   * @return {geo.geoBounds} The actual new map bounds.
+	   * @returns {geo.geoBounds} The actual new map bounds.
 	   */
 	  this.bounds = function (bds, gcs) {
 	    var nav;
@@ -49712,12 +50788,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Get/set the maximum view area of the map.  If the map wraps, this is the
 	   * unwrapped area.
 	   *
-	   * @param {geo.geoBounds} [bds] The map bounds.
+	   * @param {geo.geoBounds} [bounds] The map bounds.
 	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
 	   *    gcs, `null` to use the map gcs, or any other transform.  If setting the
 	   *    bounds, they are converted from this gcs to the map projection.  The
 	   *    returned bounds are converted from the map projection to this gcs.
-	   * @return {geo.geoBounds|this} The map maximum bounds or the map object.
+	   * @returns {geo.geoBounds|this} The map maximum bounds or the map object.
 	   */
 	  this.maxBounds = function (bounds, gcs) {
 	    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
@@ -49766,7 +50842,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {number} rotation Rotation in clockwise radians.
 	   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
 	   *    gcs, `null` to use the map gcs, or any other transform.
-	   * @return {geo.zoomAndCenter}
+	   * @returns {geo.zoomAndCenter}
 	   */
 	  this.zoomAndCenterFromBounds = function (bounds, rotation, gcs) {
 	    var center, zoom;
@@ -49825,7 +50901,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *    `clampBoundsY` is set, allow the bounds to be less clamped.
 	   *    The map's `maxBounds` can be shifted so that they lie no further than
 	   *    the center of the bounds (rather than being forced to be at the edge).
-	   * @return {geo.geoBounds}
+	   * @returns {geo.geoBounds}
 	   */
 	  this.boundsFromZoomAndCenter = function (zoom, center, rotation, gcs,
 	        ignoreDiscreteZoom, ignoreClampBounds) {
@@ -49885,7 +50961,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * zoom levels.
 	   *
 	   * @param {boolean} [discreteZoom] If specified, the new discrete zoom flag.
-	   * @return {boolean|this} The current discrete zoom flag or the map object.
+	   * @returns {boolean|this} The current discrete zoom flag or the map object.
 	   */
 	  this.discreteZoom = function (discreteZoom) {
 	    if (discreteZoom === undefined) {
@@ -50671,7 +51747,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 236 */
+/* 237 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -50748,7 +51824,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 237 */
+/* 238 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
@@ -50756,12 +51832,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var inherit = __webpack_require__(8);
-	  var tileLayer = __webpack_require__(238);
+	  var tileLayer = __webpack_require__(239);
 	  var registry = __webpack_require__(201);
-	  var quadFeature = __webpack_require__(222);
+	  var quadFeature = __webpack_require__(223);
 
 	  /**
-	   * Create a new instance of osmLayer
+	   * Create a new instance of osmLayer.
 	   *
 	   * @class geo.osmLayer
 	   * @extends geo.featureLayer
@@ -50772,7 +51848,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  var osmLayer = function (arg) {
 
-	    var imageTile = __webpack_require__(232);
+	    var imageTile = __webpack_require__(233);
 
 	    if (!(this instanceof osmLayer)) {
 	      return new osmLayer(arg);
@@ -50809,7 +51885,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        scale: this._options.tileScale,
 	        url: this._options.url.call(
 	            this, urlParams.x, urlParams.y, urlParams.level || 0,
-	            this._options.subdomains)
+	            this._options.subdomains),
+	        crossDomain: this._options.crossDomain
 	      });
 	    }.bind(this);
 	  };
@@ -50844,14 +51921,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 238 */
+/* 239 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
 	  'use strict';
 
 	  var inherit = __webpack_require__(8);
-	  var featureLayer = __webpack_require__(219);
+	  var featureLayer = __webpack_require__(220);
 
 	  /**
 	   * Standard modulo operator where the output is in [0, b) for all inputs.
@@ -51028,10 +52105,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var $ = __webpack_require__(1);
 	    var geo_event = __webpack_require__(9);
 	    var transform = __webpack_require__(11);
-	    var tileCache = __webpack_require__(239);
-	    var fetchQueue = __webpack_require__(228);
+	    var tileCache = __webpack_require__(240);
+	    var fetchQueue = __webpack_require__(229);
 	    var adjustLayerForRenderer = __webpack_require__(201).adjustLayerForRenderer;
-	    var Tile = __webpack_require__(233);
+	    var Tile = __webpack_require__(234);
 
 	    options = $.extend(true, {}, this.constructor.defaults, options || {});
 	    if (!options.cacheSize) {
@@ -52403,7 +53480,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 239 */
+/* 240 */
 /***/ (function(module, exports) {
 
 	module.exports = (function () {
@@ -52555,7 +53632,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 240 */
+/* 241 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -52631,7 +53708,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 241 */
+/* 242 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -52800,7 +53877,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        m_srcImage = src;
 	        this._computePixelmap();
 	      } else if (src) {
-	        var defer = new $.Deferred(), prev_onload, prev_onerror;
+	        var defer = $.Deferred(), prev_onload, prev_onerror;
 	        if (src instanceof Image) {
 	          /* we have an unloaded image.  Hook to the load and error callbacks
 	           * so that when it is loaded we can use it. */
@@ -53068,7 +54145,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 242 */
+/* 243 */
 /***/ (function(module, exports) {
 
 	/*
@@ -53139,6 +54216,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	/**
+	 * General represention of a two-dimensional point in any coordinate system.
+	 *
+	 * @typedef geo.point2D
+	 * @type {object}
+	 * @property {number} x Horizontal coordinate.
+	 * @property {number} y Vertical coordinate.
+	 */
+
+	/**
 	 * Represention of a point on the map.  The coordinates are in the map's
 	 * reference system, possibly with an affine transformation.
 	 *
@@ -53186,8 +54272,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @typedef geo.mouseState
 	 * @type {object}
-	 * @property {geo.screenPosition} page Mouse location in pixel space.
-	 * @property {geo.geoPosition} map Mouse location in gcs space.
+	 * @property {geo.screenPosition} page Mouse location in pixel space relative
+	 *      to the entire browser window.
+	 * @property {geo.screenPosition} map Mouse location in pixel space relative to
+	 *      the map DOM node.
+	 * @property {geo.geoPosition} geo Mouse location in interface gcs space.
+	 * @property {geo.geoPosition} mapgcs Mouse location in gcs space.
 	 * @property {geo.mouseButtons} buttons The current state of the mouse buttons.
 	 * @property {geo.modifierKeys} modifiers The current state of all modifier
 	 *      keys.
@@ -53282,9 +54372,59 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *      when significant movement first occurred.
 	 */
 
+	/**
+	 * A color value.  Although opacity can be specified, it is not always used.
+	 * When a string is specified, any of the following forms can be used:
+	 *   - CSS color name
+	 *   - `#rrggbb` The color specified in hexadecmial with each channel on a
+	 *     scale between 0 and 255 (`ff`).  Case insensitive.
+	 *   - `#rrggbbaa` The color and opacity specified in hexadecmial with each
+	 *     channel on a scale between 0 and 255 (`ff`).  Case insensitive.
+	 *   - `#rgb` The color specified in hexadecmial with each channel on a scale
+	 *     between 0 and 15 (`f`).  Case insensitive.
+	 *   - `#rgba` The color and opacity specified in hexadecmial with each channel
+	 *      on a scale between 0 and 15 (`f`).  Case insensitive.
+	 *   - `rgb(R, G, B)`, `rgb(R, G, B, A)`, `rgba(R, G, B)`, `rgba(R, G, B, A)`
+	 *     The color with the values of each color channel specified as numeric
+	 *     values between 0 and 255 or as percent (between 0 and 100) if a percent
+	 *     `%` follows the number.  The alpha (opacity) channel is optional and can
+	 *     either be a number between 0 and 1 or a percent.  White space may appear
+	 *     before and after numbers, and between the number and a percent symbol.
+	 *     Commas are not required.  A slash may be used as a separator before the
+	 *     alpha value instead of a comma.  The numbers conform to the CSS number
+	 *     specification, and can be signed floating-point values, possibly with
+	 *     exponents.
+	 *   - `hsl(H, S, L)`, `hsl(H, S, L, A)`, `hsla(H, S, L)`, `hsla(H, S, L, A)`
+	 *     Hue, saturation, and lightness with optional alpha (opacity).  Hue is a
+	 *     number between 0 and 360 and is interpretted as degrees unless an angle
+	 *     unit is specified.  CSS units of `deg`, `grad`, `rad`, and `turn` are
+	 *     supported.  Saturation and lightness are percentages between 0 and 100
+	 *     and *must* be followed by a percent `%` symbol.  The alpha (opacity)
+	 *     channel is optional and is specified as with `rgba(R, G, B, A)`.
+	 *   - `transparent` Black with 0 opacity.
+	 *
+	 * See {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value} for
+	 * more details on CSS color values.
+	 *
+	 * @typedef geo.geoColor
+	 * @type {geo.geoColorObject|string}
+	 */
+
+	/**
+	 * A color value represented as an object.  Although opacity can be specified,
+	 * it is not always used.
+	 *
+	 * @typedef {object} geo.geoColorObject
+	 * @property {number} r The red intensity on a scale of [0-1].
+	 * @property {number} g The green intensity on a scale of [0-1].
+	 * @property {number} b The blue intensity on a scale of [0-1].
+	 * @property {number} [a] The opacity on a scale of [0-1].  If unspecified and
+	 *      used, it should be treated as 1.
+	 */
+
 
 /***/ }),
-/* 243 */
+/* 244 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -53382,59 +54522,59 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 244 */
+/* 245 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = ("0.12.2");
 
 
 /***/ }),
-/* 245 */
+/* 246 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	module.exports = ("bd5c88ae768f630b1de1f3cb8f1b35c28ad286c4");
+	module.exports = ("a58e8d29261ef59219142cf01a3902718dbf6b95");
 
 
 /***/ }),
-/* 246 */
+/* 247 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var geo_event = __webpack_require__(9);
 	geo_event.d3 = {
-	  rescale: __webpack_require__(247)
+	  rescale: __webpack_require__(248)
 	};
 
 	/**
 	 * @namespace geo.d3
 	 */
 	module.exports = {
-	  graphFeature: __webpack_require__(248),
-	  lineFeature: __webpack_require__(249),
-	  object: __webpack_require__(250),
-	  pathFeature: __webpack_require__(252),
-	  pointFeature: __webpack_require__(253),
-	  quadFeature: __webpack_require__(254),
-	  renderer: __webpack_require__(255),
-	  tileLayer: __webpack_require__(256),
-	  uniqueID: __webpack_require__(251),
-	  vectorFeature: __webpack_require__(257)
+	  graphFeature: __webpack_require__(249),
+	  lineFeature: __webpack_require__(250),
+	  object: __webpack_require__(251),
+	  pathFeature: __webpack_require__(253),
+	  pointFeature: __webpack_require__(254),
+	  quadFeature: __webpack_require__(255),
+	  renderer: __webpack_require__(256),
+	  tileLayer: __webpack_require__(257),
+	  uniqueID: __webpack_require__(252),
+	  vectorFeature: __webpack_require__(258)
 	};
 
 
 /***/ }),
-/* 247 */
+/* 248 */
 /***/ (function(module, exports) {
 
 	module.exports = 'geo_d3_rescale';
 
 
 /***/ }),
-/* 248 */
+/* 249 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
-	var graphFeature = __webpack_require__(230);
+	var graphFeature = __webpack_require__(231);
 
 	/**
 	 * @class geo.d3.graphFeature
@@ -53476,7 +54616,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 249 */
+/* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -53497,8 +54637,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new d3_lineFeature(arg);
 	  }
 
-	  var d3 = __webpack_require__(225);
-	  var object = __webpack_require__(250);
+	  var d3 = __webpack_require__(226);
+	  var object = __webpack_require__(251);
 	  var timestamp = __webpack_require__(209);
 	  var util = __webpack_require__(83);
 
@@ -53621,7 +54761,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 250 */
+/* 251 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -53638,7 +54778,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  var object = __webpack_require__(203);
-	  var uniqueID = __webpack_require__(251);
+	  var uniqueID = __webpack_require__(252);
 
 	  // this is used to extend other geojs classes, so only generate
 	  // a new object when that is not the case... like if this === window
@@ -53688,7 +54828,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 251 */
+/* 252 */
 /***/ (function(module, exports) {
 
 	var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
@@ -53713,12 +54853,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 252 */
+/* 253 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
-	var pathFeature = __webpack_require__(240);
+	var pathFeature = __webpack_require__(241);
 
 	/**
 	 * Create a new instance of class pathFeature
@@ -53735,8 +54875,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var $ = __webpack_require__(1);
-	  var d3 = __webpack_require__(225);
-	  var object = __webpack_require__(250);
+	  var d3 = __webpack_require__(226);
+	  var object = __webpack_require__(251);
 	  var timestamp = __webpack_require__(209);
 
 	  arg = arg || {};
@@ -53840,7 +54980,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 253 */
+/* 254 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -53862,7 +55002,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new d3_pointFeature(arg);
 	  }
 
-	  var d3_object = __webpack_require__(250);
+	  var d3_object = __webpack_require__(251);
 	  var timestamp = __webpack_require__(209);
 
 	  arg = arg || {};
@@ -53957,12 +55097,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 254 */
+/* 255 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
-	var quadFeature = __webpack_require__(222);
+	var quadFeature = __webpack_require__(223);
 
 	/**
 	 * Create a new instance of class quadFeature
@@ -53979,8 +55119,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var $ = __webpack_require__(1);
-	  var d3 = __webpack_require__(225);
-	  var object = __webpack_require__(250);
+	  var d3 = __webpack_require__(226);
+	  var object = __webpack_require__(251);
 
 	  quadFeature.call(this, arg);
 	  object.call(this);
@@ -54194,7 +55334,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 255 */
+/* 256 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -54211,11 +55351,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var d3Renderer = function (arg) {
 	  'use strict';
 
-	  var d3 = __webpack_require__(225);
-	  var object = __webpack_require__(250);
+	  var d3 = __webpack_require__(226);
+	  var object = __webpack_require__(251);
 	  var util = __webpack_require__(83);
 	  var geo_event = __webpack_require__(9);
-	  var d3Rescale = __webpack_require__(247);
+	  var d3Rescale = __webpack_require__(248);
 
 	  if (!(this instanceof d3Renderer)) {
 	    return new d3Renderer(arg);
@@ -54792,10 +55932,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @returns {boolean} true if available.
 	   */
 	  d3Renderer.supported = function () {
-	    if (!__webpack_require__.m[/*require.resolve*/(225)]) {  // eslint-disable-line
+	    if (!__webpack_require__.m[/*require.resolve*/(226)]) {  // eslint-disable-line
 	      return false;
 	    }
-	    var d3 = __webpack_require__(225);
+	    var d3 = __webpack_require__(226);
 	    return d3 !== undefined;
 	  };
 
@@ -54814,7 +55954,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 256 */
+/* 257 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(201).registerLayerAdjustment;
@@ -54909,12 +56049,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 257 */
+/* 258 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
-	var vectorFeature = __webpack_require__(243);
+	var vectorFeature = __webpack_require__(244);
 
 	/**
 	 * Create a new instance of vectorFeature
@@ -54930,9 +56070,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new d3_vectorFeature(arg);
 	  }
 
-	  var object = __webpack_require__(250);
+	  var object = __webpack_require__(251);
 	  var timestamp = __webpack_require__(209);
-	  var d3 = __webpack_require__(225);
+	  var d3 = __webpack_require__(226);
 
 	  arg = arg || {};
 	  vectorFeature.call(this, arg);
@@ -55202,31 +56342,31 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 258 */
+/* 259 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.gl
 	 */
 	module.exports = {
-	  choroplethFeature: __webpack_require__(259),
-	  contourFeature: __webpack_require__(260),
-	  lineFeature: __webpack_require__(262),
-	  pointFeature: __webpack_require__(263),
-	  polygonFeature: __webpack_require__(264),
-	  quadFeature: __webpack_require__(266),
-	  tileLayer: __webpack_require__(267),
+	  choroplethFeature: __webpack_require__(260),
+	  contourFeature: __webpack_require__(261),
+	  lineFeature: __webpack_require__(263),
+	  pointFeature: __webpack_require__(264),
+	  polygonFeature: __webpack_require__(265),
+	  quadFeature: __webpack_require__(267),
+	  tileLayer: __webpack_require__(268),
 	  vglRenderer: __webpack_require__(200)
 	};
 
 
 /***/ }),
-/* 259 */
+/* 260 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
-	var choroplethFeature = __webpack_require__(224);
+	var choroplethFeature = __webpack_require__(225);
 
 	/**
 	 * Create a new instance of choroplethFeature
@@ -55337,12 +56477,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 260 */
+/* 261 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
-	var contourFeature = __webpack_require__(226);
+	var contourFeature = __webpack_require__(227);
 
 	/**
 	 * Create a new instance of contourFeature
@@ -55363,7 +56503,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var vgl = __webpack_require__(86);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
-	  var object = __webpack_require__(261);
+	  var object = __webpack_require__(262);
 
 	  object.call(this);
 
@@ -55625,7 +56765,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 261 */
+/* 262 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
@@ -55666,7 +56806,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 262 */
+/* 263 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -55722,7 +56862,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var vgl = __webpack_require__(86);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
-	  var object = __webpack_require__(261);
+	  var object = __webpack_require__(262);
 
 	  object.call(this);
 
@@ -56387,7 +57527,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 263 */
+/* 264 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -56413,7 +57553,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var vgl = __webpack_require__(86);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
-	  var object = __webpack_require__(261);
+	  var object = __webpack_require__(262);
 
 	  object.call(this);
 
@@ -57004,7 +58144,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 264 */
+/* 265 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -57012,10 +58152,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	var polygonFeature = __webpack_require__(217);
 
 	/**
-	 * Create a new instance of polygonFeature
+	 * Create a new instance of gl.polygonFeature.
 	 *
-	 * @class geo.gl.polygonFeature
+	 * @class
+	 * @alias geo.gl.polygonFeature
 	 * @extends geo.polygonFeature
+	 * @param {geo.polygonFeature.spec} arg
 	 * @returns {geo.gl.polygonFeature}
 	 */
 	var gl_polygonFeature = function (arg) {
@@ -57027,10 +58169,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  polygonFeature.call(this, arg);
 
 	  var vgl = __webpack_require__(86);
-	  var earcut = __webpack_require__(265);
+	  var earcut = __webpack_require__(266);
 	  var transform = __webpack_require__(11);
 	  var util = __webpack_require__(83);
-	  var object = __webpack_require__(261);
+	  var object = __webpack_require__(262);
 
 	  object.call(this);
 
@@ -57098,7 +58240,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Array.map is slower in Chrome that using a loop, so loops are used in
 	   * places that would be conceptually served by maps.
 	   *
-	   * @memberof geo.gl.polygonFeature
 	   * @param {boolean} onlyStyle if true, use the existing geoemtry and just
 	   *    recalculate the style.
 	   */
@@ -57135,7 +58276,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (!polygon) {
 	          return;
 	        }
-	        outer = polygon.outer || (polygon instanceof Array ? polygon : []);
+	        outer = polygon.outer || (Array.isArray(polygon) ? polygon : []);
 
 	        /* expand to an earcut polygon geometry.  We had been using a map call,
 	         * but using loops is much faster in Chrome (4 versus 33 ms for one
@@ -57269,8 +58410,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  /**
-	   * Initialize
-	   * @memberof geo.gl.polygonFeature
+	   * Initialize.
+	   *
+	   * @param {geo.polygonFeature.spec} arg An object with options for the
+	   *    feature.
 	   */
 	  this._init = function (arg) {
 	    var prog = vgl.shaderProgram(),
@@ -57316,9 +58459,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Build
+	   * Build.
 	   *
-	   * @memberof geo.gl.polygonFeature
 	   * @override
 	   */
 	  this._build = function () {
@@ -57332,9 +58474,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Update
+	   * Update.
 	   *
-	   * @memberof geo.gl.polygonFeature
 	   * @override
 	   */
 	  this._update = function (opts) {
@@ -57359,8 +58500,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	   * Destroy
-	   * @memberof geo.gl.polygonFeature
+	   * Destroy.
 	   */
 	  this._exit = function () {
 	    m_this.renderer().contextRenderer().removeActor(m_actor);
@@ -57379,7 +58519,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 265 */
+/* 266 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -58029,12 +59169,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 266 */
+/* 267 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
-	var quadFeature = __webpack_require__(222);
+	var quadFeature = __webpack_require__(223);
 
 	/**
 	 * Create a new instance of class quadFeature
@@ -58053,7 +59193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var vgl = __webpack_require__(86);
-	  var object = __webpack_require__(261);
+	  var object = __webpack_require__(262);
 
 	  object.call(this);
 
@@ -58453,7 +59593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 267 */
+/* 268 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(201).registerLayerAdjustment;
@@ -58557,24 +59697,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 268 */
+/* 269 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.canvas
 	 */
 	module.exports = {
-	  canvasRenderer: __webpack_require__(269),
-	  heatmapFeature: __webpack_require__(270),
-	  lineFeature: __webpack_require__(272),
-	  pixelmapFeature: __webpack_require__(273),
-	  quadFeature: __webpack_require__(274),
-	  tileLayer: __webpack_require__(275)
+	  canvasRenderer: __webpack_require__(270),
+	  heatmapFeature: __webpack_require__(271),
+	  lineFeature: __webpack_require__(273),
+	  pixelmapFeature: __webpack_require__(274),
+	  quadFeature: __webpack_require__(275),
+	  textFeature: __webpack_require__(276),
+	  tileLayer: __webpack_require__(296)
 	};
 
 
 /***/ }),
-/* 269 */
+/* 270 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -58738,12 +59879,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 270 */
+/* 271 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
-	var heatmapFeature = __webpack_require__(231);
+	var heatmapFeature = __webpack_require__(232);
 	var timestamp = __webpack_require__(209);
 
 	/**
@@ -58763,7 +59904,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new canvas_heatmapFeature(arg);
 	  }
 	  heatmapFeature.call(this, arg);
-	  var object = __webpack_require__(271);
+	  var object = __webpack_require__(272);
 
 	  object.call(this);
 
@@ -59212,7 +60353,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 271 */
+/* 272 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -59220,7 +60361,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Canvas specific subclass of object which rerenders when the object is drawn.
-	 * @class geo.canvas.object
+	 * @class
+	 * @alias geo.canvas.object
 	 * @extends geo.sceneObject
 	 */
 
@@ -59237,7 +60379,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  sceneObject.call(this);
 
 	  var m_this = this,
-	      s_draw = this.draw;
+	      s_draw = this.draw,
+	      m_canvasProperties = {};
 
 	  /**
 	   * This must be overridden by any feature that needs to render.
@@ -59246,8 +60389,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
-	  *  Redraw the object.
-	  */
+	   * Check if a property has already been set on a canvas's context.  If so,
+	   * don't set it again.  Some browsers are much slower if the properties are
+	   * set, even if no change is made.
+	   *
+	   * @param {CanvasRenderingContext2D} [context] The canvas context to modify.
+	   *    If `undefined`, clear the internal property buffer.
+	   * @param {string} [key] The property to set on the canvas.
+	   * @param {object} [value] The value for the property.
+	   * @returns {this} The current object.
+	   */
+	  this._canvasProperty = function (context, key, value) {
+	    if (!context || !key) {
+	      m_canvasProperties = {};
+	      return m_this;
+	    }
+	    if (m_canvasProperties[key] !== value) {
+	      m_canvasProperties[key] = value;
+	      context[key] = value;
+	    }
+	    return m_this;
+	  };
+
+	  /**
+	   *  Redraw the object.
+	   *
+	   * @returns {this} The current object.
+	   */
 	  this.draw = function () {
 	    m_this._update();
 	    m_this.renderer()._render();
@@ -59262,9 +60430,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = canvas_object;
 
 
-
 /***/ }),
-/* 272 */
+/* 273 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -59285,7 +60452,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new canvas_lineFeature(arg);
 	  }
 
-	  var object = __webpack_require__(271);
+	  var object = __webpack_require__(272);
 
 	  arg = arg || {};
 	  lineFeature.call(this, arg);
@@ -59380,12 +60547,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 273 */
+/* 274 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
-	var pixelmapFeature = __webpack_require__(241);
+	var pixelmapFeature = __webpack_require__(242);
 
 	/**
 	 * Create a new instance of class pixelmapFeature
@@ -59403,7 +60570,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  pixelmapFeature.call(this, arg);
 
-	  var object = __webpack_require__(271);
+	  var object = __webpack_require__(272);
 	  object.call(this);
 
 	  this._init(arg);
@@ -59418,12 +60585,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 274 */
+/* 275 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
 	var registerFeature = __webpack_require__(201).registerFeature;
-	var quadFeature = __webpack_require__(222);
+	var quadFeature = __webpack_require__(223);
 
 	/**
 	 * Create a new instance of class quadFeature
@@ -59441,7 +60608,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  quadFeature.call(this, arg);
 
-	  var object = __webpack_require__(271);
+	  var object = __webpack_require__(272);
 	  object.call(this);
 
 	  var $ = __webpack_require__(1);
@@ -59574,7 +60741,876 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 275 */
+/* 276 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(8);
+	var registerFeature = __webpack_require__(201).registerFeature;
+	var textFeature = __webpack_require__(218);
+	var util = __webpack_require__(83);
+	var mat3 = __webpack_require__(277);
+	var vec3 = __webpack_require__(138);
+
+	/**
+	 * Create a new instance of class canvas.textFeature.
+	 *
+	 * @class
+	 * @alias geo.canvas.textFeature
+	 * @extends geo.textFeature
+	 * @extends geo.canvas.object
+	 *
+	 * @param {geo.textFeature.spec} [arg] Options for the feature.
+	 * @returns {geo.canvas.textFeature} The created feature.
+	 */
+	var canvas_textFeature = function (arg) {
+	  'use strict';
+	  if (!(this instanceof canvas_textFeature)) {
+	    return new canvas_textFeature(arg);
+	  }
+
+	  var object = __webpack_require__(272);
+
+	  arg = arg || {};
+	  textFeature.call(this, arg);
+	  object.call(this);
+
+	  /**
+	   * @private
+	   */
+	  var m_this = this,
+	      m_defaultFont = 'bold 16px sans-serif',
+	      /* This regexp parses css font specifications into style, variant,
+	       * weight, stretch, size, line height, and family.  It is based on a
+	       * regexp here: https://stackoverflow.com/questions/10135697/regex-to-parse-any-css-font,
+	       * but has been modified to fix some issues and handle font stretch. */
+	      m_cssFontRegExp = new RegExp(
+	        '^\\s*' +
+	        '(?=(?:(?:[-a-z0-9]+\\s+){0,3}(italic|oblique))?)' +
+	        '(?=(?:(?:[-a-z0-9]+\\s+){0,3}(small-caps))?)' +
+	        '(?=(?:(?:[-a-z0-9]+\\s+){0,3}(bold(?:er)?|lighter|[1-9]00))?)' +
+	        '(?=(?:(?:[-a-z0-9]+\\s+){0,3}((?:ultra-|extra-|semi-)?(?:condensed|expanded)))?)' +
+	        '(?:(?:normal|\\1|\\2|\\3|\\4)\\s+){0,4}' +
+	        '((?:xx?-)?(?:small|large)|medium|smaller|larger|[.\\d]+(?:\\%|in|[cem]m|ex|p[ctx]))' +
+	        '(?:/(normal|[.\\d]+(?:\\%|in|[cem]m|ex|p[ctx])))?\\s+' +
+	        '([-,\\"\\sa-z]+?)\\s*$', 'i');
+
+	  /**
+	   * Get the font for a specific data item.  This falls back to the default
+	   * font if the value is unset or doesn't contain sufficient information.
+	   *
+	   * @param {boolean} useSubValues If truthy, check all font styles (such as
+	   *    `fontSize`, `lineHeight`, etc., and override the code `font` style
+	   *    with those values.  If falsy, only use `font`.
+	   * @param {object} d The current data element.
+	   * @param {number} i The index of the current data element.
+	   * @returns {string} The font style.
+	   */
+	  this.getFontFromStyles = function (useSubValues, d, i) {
+	    var font = m_this.style.get('font')(d, i) || m_defaultFont;
+	    if (useSubValues) {
+	      var parts = m_cssFontRegExp.exec(font);
+	      if (parts === null) {
+	        parts = m_cssFontRegExp.exec(m_defaultFont);
+	      }
+	      parts[1] = m_this.style.get('fontStyle')(d, i) || parts[1];
+	      parts[2] = m_this.style.get('fontVariant')(d, i) || parts[2];
+	      parts[3] = m_this.style.get('fontWeight')(d, i) || parts[3];
+	      parts[4] = m_this.style.get('fontStretch')(d, i) || parts[4];
+	      parts[5] = m_this.style.get('fontSize')(d, i) || parts[5] || '16px';
+	      parts[6] = m_this.style.get('lineHeight')(d, i) || parts[6];
+	      parts[7] = m_this.style.get('fontFamily')(d, i) || parts[7] || 'sans-serif';
+	      font = (parts[1] || '') + ' ' + (parts[2] || '') + ' ' +
+	             (parts[3] || '') + ' ' + (parts[4] || '') + ' ' +
+	             (parts[5] || '') + (parts[6] ? '/' + parts[6] : '') + ' ' +
+	             parts[7];
+	      font = font.trim().replace(/\s\s+/g, ' ');
+	    }
+	    return font;
+	  };
+
+	  /**
+	   * Render the data on the canvas.
+	   *
+	   * This does not currently support multiline text or word wrapping, since
+	   * canvas doesn't implement that directly.  To support these, each text item
+	   * would need to be split on line breaks, and have the width of the text
+	   * calculated with context2d.measureText to determine word wrapping.  This
+	   * would also need to calculate the effective line height from the font
+	   * specification.
+	   *
+	   * @protected
+	   * @param {CanvasRenderingContext2D} context2d The canvas context to draw in.
+	   * @param {geo.map} map The parent map object.
+	   */
+	  this._renderOnCanvas = function (context2d, map) {
+	    var data = m_this.data(),
+	        posFunc = m_this.style.get('position'),
+	        textFunc = m_this.style.get('text'),
+	        mapRotation = map.rotation(),
+	        mapZoom = map.zoom(),
+	        fontFromSubValues, text, pos, visible, color, blur, stroke, width,
+	        rotation, rotateWithMap, scale, offset,
+	        transform, lastTransform = util.mat3AsArray();
+
+	    /* If any of the font styles other than `font` have values, then we need to
+	     * construct a single font value from the subvalues.  Otherwise, we can
+	     * skip it. */
+	    fontFromSubValues = [
+	      'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch', 'fontSize',
+	      'lineHeight', 'fontFamily'
+	    ].some(function (key) {
+	      return m_this.style(key) !== null && m_this.style(key) !== undefined;
+	    });
+	    /* Clear the canvas property buffer */
+	    m_this._canvasProperty();
+	    data.forEach(function (d, i) {
+	      visible = m_this.style.get('visible')(d, i);
+	      if (!visible && visible !== undefined) {
+	        return;
+	      }
+	      color = util.convertColorAndOpacity(
+	        m_this.style.get('color')(d, i), m_this.style.get('textOpacity')(d, i));
+	      stroke = util.convertColorAndOpacity(
+	        m_this.style.get('textStrokeColor')(d, i), m_this.style.get('textOpacity')(d, i), {r: 0, g: 0, b: 0, a: 0});
+	      if (color.a === 0 && stroke.a === 0) {
+	        return;
+	      }
+	      m_this._canvasProperty(context2d, 'fillStyle', util.convertColorToRGBA(color));
+	      // TODO: get the position position without transform.  If it is outside
+	      // of the map to an extent that there is no chance of text showing,
+	      // skip further processing.
+	      pos = m_this.featureGcsToDisplay(posFunc(d, i));
+	      text = textFunc(d, i);
+	      m_this._canvasProperty(context2d, 'font', m_this.getFontFromStyles(fontFromSubValues, d, i));
+	      m_this._canvasProperty(context2d, 'textAlign', m_this.style.get('textAlign')(d, i) || 'center');
+	      m_this._canvasProperty(context2d, 'textBaseline', m_this.style.get('textBaseline')(d, i) || 'middle');
+	      /* rotation, scale, and offset */
+	      rotation = m_this.style.get('rotation')(d, i) || 0;
+	      rotateWithMap = m_this.style.get('rotateWithMap')(d, i) && mapRotation;
+	      scale = m_this.style.get('textScaled')(d, i);
+	      scale = util.isNonNullFinite(scale) ? Math.pow(2, mapZoom - scale) : null;
+	      offset = m_this.style.get('offset')(d, i);
+	      transform = util.mat3AsArray();
+	      if (rotation || rotateWithMap || (scale && scale !== 1) || (offset && (offset.x || offset.y))) {
+	        mat3.translate(transform, transform, [pos.x, pos.y]);
+	        if (rotateWithMap && mapRotation) {
+	          mat3.rotate(transform, transform, mapRotation);
+	        }
+	        mat3.translate(transform, transform, [
+	          offset && offset.x ? +offset.x : 0,
+	          offset && offset.y ? +offset.y : 0]);
+	        if (rotation) {
+	          mat3.rotate(transform, transform, rotation);
+	        }
+	        if (scale && scale !== 1) {
+	          mat3.scale(transform, transform, [scale, scale]);
+	        }
+	        mat3.translate(transform, transform, [-pos.x, -pos.y]);
+	      }
+	      if (lastTransform[0] !== transform[0] || lastTransform[1] !== transform[1] ||
+	          lastTransform[3] !== transform[3] || lastTransform[4] !== transform[4] ||
+	          lastTransform[6] !== transform[6] || lastTransform[7] !== transform[7]) {
+	        context2d.setTransform(transform[0], transform[1], transform[3], transform[4], transform[6], transform[7]);
+	        mat3.copy(lastTransform, transform);
+	      }
+	      /* shadow */
+	      color = util.convertColorAndOpacity(
+	        m_this.style.get('shadowColor')(d, i), undefined, {r: 0, g: 0, b: 0, a: 0});
+	      if (color.a) {
+	        offset = m_this.style.get('shadowOffset')(d, i);
+	        blur = m_this.style.get('shadowBlur')(d, i);
+	      }
+	      if (color.a && ((offset && (offset.x || offset.y)) || blur)) {
+	        m_this._canvasProperty(context2d, 'shadowColor', util.convertColorToRGBA(color));
+	        if (offset && (rotation || rotateWithMap) && m_this.style.get('shadowRotate')(d, i)) {
+	          transform = [+offset.x, +offset.y, 0];
+	          vec3.rotateZ(transform, transform, [0, 0, 0],
+	                       rotation + (rotateWithMap ? mapRotation : 0));
+	          offset = {x: transform[0], y: transform[1]};
+	        }
+	        m_this._canvasProperty(context2d, 'shadowOffsetX', offset && offset.x ? +offset.x : 0);
+	        m_this._canvasProperty(context2d, 'shadowOffsetY', offset && offset.y ? +offset.y : 0);
+	        m_this._canvasProperty(context2d, 'shadowBlur', blur || 0);
+	      } else {
+	        m_this._canvasProperty(context2d, 'shadowColor', 'rgba(0,0,0,0)');
+	      }
+	      /* draw the text */
+	      if (stroke.a) {
+	        width = m_this.style.get('textStrokeWidth')(d, i);
+	        if (isFinite(width) && width > 0) {
+	          m_this._canvasProperty(context2d, 'strokeStyle', util.convertColorToRGBA(stroke));
+	          m_this._canvasProperty(context2d, 'lineWidth', width);
+	          context2d.strokeText(text, pos.x, pos.y);
+	          m_this._canvasProperty(context2d, 'shadowColor', 'rgba(0,0,0,0)');
+	        }
+	      }
+	      context2d.fillText(text, pos.x, pos.y);
+	    });
+	    m_this._canvasProperty(context2d, 'globalAlpha', 1);
+	    context2d.setTransform(1, 0, 0, 1, 0, 0);
+	  };
+
+	  return this;
+	};
+
+	inherit(canvas_textFeature, textFeature);
+
+	// Now register it
+	var capabilities = {};
+
+	registerFeature('canvas', 'text', canvas_textFeature, capabilities);
+
+	module.exports = canvas_textFeature;
+
+
+/***/ }),
+/* 277 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	module.exports = {
+	  adjoint: __webpack_require__(278)
+	  , clone: __webpack_require__(279)
+	  , copy: __webpack_require__(280)
+	  , create: __webpack_require__(281)
+	  , determinant: __webpack_require__(282)
+	  , frob: __webpack_require__(283)
+	  , fromMat2: __webpack_require__(284)
+	  , fromMat4: __webpack_require__(285)
+	  , fromQuat: __webpack_require__(286)
+	  , identity: __webpack_require__(287)
+	  , invert: __webpack_require__(288)
+	  , multiply: __webpack_require__(289)
+	  , normalFromMat4: __webpack_require__(290)
+	  , rotate: __webpack_require__(291)
+	  , scale: __webpack_require__(292)
+	  , str: __webpack_require__(293)
+	  , translate: __webpack_require__(294)
+	  , transpose: __webpack_require__(295)
+	}
+
+
+/***/ }),
+/* 278 */
+/***/ (function(module, exports) {
+
+	module.exports = adjoint
+
+	/**
+	 * Calculates the adjugate of a mat3
+	 *
+	 * @alias mat3.adjoint
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the source matrix
+	 * @returns {mat3} out
+	 */
+	function adjoint(out, a) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2]
+	  var a10 = a[3], a11 = a[4], a12 = a[5]
+	  var a20 = a[6], a21 = a[7], a22 = a[8]
+
+	  out[0] = (a11 * a22 - a12 * a21)
+	  out[1] = (a02 * a21 - a01 * a22)
+	  out[2] = (a01 * a12 - a02 * a11)
+	  out[3] = (a12 * a20 - a10 * a22)
+	  out[4] = (a00 * a22 - a02 * a20)
+	  out[5] = (a02 * a10 - a00 * a12)
+	  out[6] = (a10 * a21 - a11 * a20)
+	  out[7] = (a01 * a20 - a00 * a21)
+	  out[8] = (a00 * a11 - a01 * a10)
+
+	  return out
+	}
+
+
+/***/ }),
+/* 279 */
+/***/ (function(module, exports) {
+
+	module.exports = clone
+
+	/**
+	 * Creates a new mat3 initialized with values from an existing matrix
+	 *
+	 * @alias mat3.clone
+	 * @param {mat3} a matrix to clone
+	 * @returns {mat3} a new 3x3 matrix
+	 */
+	function clone(a) {
+	  var out = new Float32Array(9)
+	  out[0] = a[0]
+	  out[1] = a[1]
+	  out[2] = a[2]
+	  out[3] = a[3]
+	  out[4] = a[4]
+	  out[5] = a[5]
+	  out[6] = a[6]
+	  out[7] = a[7]
+	  out[8] = a[8]
+	  return out
+	}
+
+
+/***/ }),
+/* 280 */
+/***/ (function(module, exports) {
+
+	module.exports = copy
+
+	/**
+	 * Copy the values from one mat3 to another
+	 *
+	 * @alias mat3.copy
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the source matrix
+	 * @returns {mat3} out
+	 */
+	function copy(out, a) {
+	  out[0] = a[0]
+	  out[1] = a[1]
+	  out[2] = a[2]
+	  out[3] = a[3]
+	  out[4] = a[4]
+	  out[5] = a[5]
+	  out[6] = a[6]
+	  out[7] = a[7]
+	  out[8] = a[8]
+	  return out
+	}
+
+
+/***/ }),
+/* 281 */
+/***/ (function(module, exports) {
+
+	module.exports = create
+
+	/**
+	 * Creates a new identity mat3
+	 *
+	 * @alias mat3.create
+	 * @returns {mat3} a new 3x3 matrix
+	 */
+	function create() {
+	  var out = new Float32Array(9)
+	  out[0] = 1
+	  out[1] = 0
+	  out[2] = 0
+	  out[3] = 0
+	  out[4] = 1
+	  out[5] = 0
+	  out[6] = 0
+	  out[7] = 0
+	  out[8] = 1
+	  return out
+	}
+
+
+/***/ }),
+/* 282 */
+/***/ (function(module, exports) {
+
+	module.exports = determinant
+
+	/**
+	 * Calculates the determinant of a mat3
+	 *
+	 * @alias mat3.determinant
+	 * @param {mat3} a the source matrix
+	 * @returns {Number} determinant of a
+	 */
+	function determinant(a) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2]
+	  var a10 = a[3], a11 = a[4], a12 = a[5]
+	  var a20 = a[6], a21 = a[7], a22 = a[8]
+
+	  return a00 * (a22 * a11 - a12 * a21)
+	       + a01 * (a12 * a20 - a22 * a10)
+	       + a02 * (a21 * a10 - a11 * a20)
+	}
+
+
+/***/ }),
+/* 283 */
+/***/ (function(module, exports) {
+
+	module.exports = frob
+
+	/**
+	 * Returns Frobenius norm of a mat3
+	 *
+	 * @alias mat3.frob
+	 * @param {mat3} a the matrix to calculate Frobenius norm of
+	 * @returns {Number} Frobenius norm
+	 */
+	function frob(a) {
+	  return Math.sqrt(
+	      a[0]*a[0]
+	    + a[1]*a[1]
+	    + a[2]*a[2]
+	    + a[3]*a[3]
+	    + a[4]*a[4]
+	    + a[5]*a[5]
+	    + a[6]*a[6]
+	    + a[7]*a[7]
+	    + a[8]*a[8]
+	  )
+	}
+
+
+/***/ }),
+/* 284 */
+/***/ (function(module, exports) {
+
+	module.exports = fromMat2d
+
+	/**
+	 * Copies the values from a mat2d into a mat3
+	 *
+	 * @alias mat3.fromMat2d
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat2d} a the matrix to copy
+	 * @returns {mat3} out
+	 **/
+	function fromMat2d(out, a) {
+	  out[0] = a[0]
+	  out[1] = a[1]
+	  out[2] = 0
+
+	  out[3] = a[2]
+	  out[4] = a[3]
+	  out[5] = 0
+
+	  out[6] = a[4]
+	  out[7] = a[5]
+	  out[8] = 1
+
+	  return out
+	}
+
+
+/***/ }),
+/* 285 */
+/***/ (function(module, exports) {
+
+	module.exports = fromMat4
+
+	/**
+	 * Copies the upper-left 3x3 values into the given mat3.
+	 *
+	 * @alias mat3.fromMat4
+	 * @param {mat3} out the receiving 3x3 matrix
+	 * @param {mat4} a   the source 4x4 matrix
+	 * @returns {mat3} out
+	 */
+	function fromMat4(out, a) {
+	  out[0] = a[0]
+	  out[1] = a[1]
+	  out[2] = a[2]
+	  out[3] = a[4]
+	  out[4] = a[5]
+	  out[5] = a[6]
+	  out[6] = a[8]
+	  out[7] = a[9]
+	  out[8] = a[10]
+	  return out
+	}
+
+
+/***/ }),
+/* 286 */
+/***/ (function(module, exports) {
+
+	module.exports = fromQuat
+
+	/**
+	* Calculates a 3x3 matrix from the given quaternion
+	*
+	* @alias mat3.fromQuat
+	* @param {mat3} out mat3 receiving operation result
+	* @param {quat} q Quaternion to create matrix from
+	*
+	* @returns {mat3} out
+	*/
+	function fromQuat(out, q) {
+	  var x = q[0]
+	  var y = q[1]
+	  var z = q[2]
+	  var w = q[3]
+
+	  var x2 = x + x
+	  var y2 = y + y
+	  var z2 = z + z
+
+	  var xx = x * x2
+	  var yx = y * x2
+	  var yy = y * y2
+	  var zx = z * x2
+	  var zy = z * y2
+	  var zz = z * z2
+	  var wx = w * x2
+	  var wy = w * y2
+	  var wz = w * z2
+
+	  out[0] = 1 - yy - zz
+	  out[3] = yx - wz
+	  out[6] = zx + wy
+
+	  out[1] = yx + wz
+	  out[4] = 1 - xx - zz
+	  out[7] = zy - wx
+
+	  out[2] = zx - wy
+	  out[5] = zy + wx
+	  out[8] = 1 - xx - yy
+
+	  return out
+	}
+
+
+/***/ }),
+/* 287 */
+/***/ (function(module, exports) {
+
+	module.exports = identity
+
+	/**
+	 * Set a mat3 to the identity matrix
+	 *
+	 * @alias mat3.identity
+	 * @param {mat3} out the receiving matrix
+	 * @returns {mat3} out
+	 */
+	function identity(out) {
+	  out[0] = 1
+	  out[1] = 0
+	  out[2] = 0
+	  out[3] = 0
+	  out[4] = 1
+	  out[5] = 0
+	  out[6] = 0
+	  out[7] = 0
+	  out[8] = 1
+	  return out
+	}
+
+
+/***/ }),
+/* 288 */
+/***/ (function(module, exports) {
+
+	module.exports = invert
+
+	/**
+	 * Inverts a mat3
+	 *
+	 * @alias mat3.invert
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the source matrix
+	 * @returns {mat3} out
+	 */
+	function invert(out, a) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2]
+	  var a10 = a[3], a11 = a[4], a12 = a[5]
+	  var a20 = a[6], a21 = a[7], a22 = a[8]
+
+	  var b01 = a22 * a11 - a12 * a21
+	  var b11 = -a22 * a10 + a12 * a20
+	  var b21 = a21 * a10 - a11 * a20
+
+	  // Calculate the determinant
+	  var det = a00 * b01 + a01 * b11 + a02 * b21
+
+	  if (!det) return null
+	  det = 1.0 / det
+
+	  out[0] = b01 * det
+	  out[1] = (-a22 * a01 + a02 * a21) * det
+	  out[2] = (a12 * a01 - a02 * a11) * det
+	  out[3] = b11 * det
+	  out[4] = (a22 * a00 - a02 * a20) * det
+	  out[5] = (-a12 * a00 + a02 * a10) * det
+	  out[6] = b21 * det
+	  out[7] = (-a21 * a00 + a01 * a20) * det
+	  out[8] = (a11 * a00 - a01 * a10) * det
+
+	  return out
+	}
+
+
+/***/ }),
+/* 289 */
+/***/ (function(module, exports) {
+
+	module.exports = multiply
+
+	/**
+	 * Multiplies two mat3's
+	 *
+	 * @alias mat3.multiply
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the first operand
+	 * @param {mat3} b the second operand
+	 * @returns {mat3} out
+	 */
+	function multiply(out, a, b) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2]
+	  var a10 = a[3], a11 = a[4], a12 = a[5]
+	  var a20 = a[6], a21 = a[7], a22 = a[8]
+
+	  var b00 = b[0], b01 = b[1], b02 = b[2]
+	  var b10 = b[3], b11 = b[4], b12 = b[5]
+	  var b20 = b[6], b21 = b[7], b22 = b[8]
+
+	  out[0] = b00 * a00 + b01 * a10 + b02 * a20
+	  out[1] = b00 * a01 + b01 * a11 + b02 * a21
+	  out[2] = b00 * a02 + b01 * a12 + b02 * a22
+
+	  out[3] = b10 * a00 + b11 * a10 + b12 * a20
+	  out[4] = b10 * a01 + b11 * a11 + b12 * a21
+	  out[5] = b10 * a02 + b11 * a12 + b12 * a22
+
+	  out[6] = b20 * a00 + b21 * a10 + b22 * a20
+	  out[7] = b20 * a01 + b21 * a11 + b22 * a21
+	  out[8] = b20 * a02 + b21 * a12 + b22 * a22
+
+	  return out
+	}
+
+
+/***/ }),
+/* 290 */
+/***/ (function(module, exports) {
+
+	module.exports = normalFromMat4
+
+	/**
+	* Calculates a 3x3 normal matrix (transpose inverse) from the 4x4 matrix
+	*
+	* @alias mat3.normalFromMat4
+	* @param {mat3} out mat3 receiving operation result
+	* @param {mat4} a Mat4 to derive the normal matrix from
+	*
+	* @returns {mat3} out
+	*/
+	function normalFromMat4(out, a) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3]
+	  var a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7]
+	  var a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11]
+	  var a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15]
+
+	  var b00 = a00 * a11 - a01 * a10
+	  var b01 = a00 * a12 - a02 * a10
+	  var b02 = a00 * a13 - a03 * a10
+	  var b03 = a01 * a12 - a02 * a11
+	  var b04 = a01 * a13 - a03 * a11
+	  var b05 = a02 * a13 - a03 * a12
+	  var b06 = a20 * a31 - a21 * a30
+	  var b07 = a20 * a32 - a22 * a30
+	  var b08 = a20 * a33 - a23 * a30
+	  var b09 = a21 * a32 - a22 * a31
+	  var b10 = a21 * a33 - a23 * a31
+	  var b11 = a22 * a33 - a23 * a32
+
+	  // Calculate the determinant
+	  var det = b00 * b11
+	          - b01 * b10
+	          + b02 * b09
+	          + b03 * b08
+	          - b04 * b07
+	          + b05 * b06
+
+	  if (!det) return null
+	  det = 1.0 / det
+
+	  out[0] = (a11 * b11 - a12 * b10 + a13 * b09) * det
+	  out[1] = (a12 * b08 - a10 * b11 - a13 * b07) * det
+	  out[2] = (a10 * b10 - a11 * b08 + a13 * b06) * det
+
+	  out[3] = (a02 * b10 - a01 * b11 - a03 * b09) * det
+	  out[4] = (a00 * b11 - a02 * b08 + a03 * b07) * det
+	  out[5] = (a01 * b08 - a00 * b10 - a03 * b06) * det
+
+	  out[6] = (a31 * b05 - a32 * b04 + a33 * b03) * det
+	  out[7] = (a32 * b02 - a30 * b05 - a33 * b01) * det
+	  out[8] = (a30 * b04 - a31 * b02 + a33 * b00) * det
+
+	  return out
+	}
+
+
+/***/ }),
+/* 291 */
+/***/ (function(module, exports) {
+
+	module.exports = rotate
+
+	/**
+	 * Rotates a mat3 by the given angle
+	 *
+	 * @alias mat3.rotate
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the matrix to rotate
+	 * @param {Number} rad the angle to rotate the matrix by
+	 * @returns {mat3} out
+	 */
+	function rotate(out, a, rad) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2]
+	  var a10 = a[3], a11 = a[4], a12 = a[5]
+	  var a20 = a[6], a21 = a[7], a22 = a[8]
+
+	  var s = Math.sin(rad)
+	  var c = Math.cos(rad)
+
+	  out[0] = c * a00 + s * a10
+	  out[1] = c * a01 + s * a11
+	  out[2] = c * a02 + s * a12
+
+	  out[3] = c * a10 - s * a00
+	  out[4] = c * a11 - s * a01
+	  out[5] = c * a12 - s * a02
+
+	  out[6] = a20
+	  out[7] = a21
+	  out[8] = a22
+
+	  return out
+	}
+
+
+/***/ }),
+/* 292 */
+/***/ (function(module, exports) {
+
+	module.exports = scale
+
+	/**
+	 * Scales the mat3 by the dimensions in the given vec2
+	 *
+	 * @alias mat3.scale
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the matrix to rotate
+	 * @param {vec2} v the vec2 to scale the matrix by
+	 * @returns {mat3} out
+	 **/
+	function scale(out, a, v) {
+	  var x = v[0]
+	  var y = v[1]
+
+	  out[0] = x * a[0]
+	  out[1] = x * a[1]
+	  out[2] = x * a[2]
+
+	  out[3] = y * a[3]
+	  out[4] = y * a[4]
+	  out[5] = y * a[5]
+
+	  out[6] = a[6]
+	  out[7] = a[7]
+	  out[8] = a[8]
+
+	  return out
+	}
+
+
+/***/ }),
+/* 293 */
+/***/ (function(module, exports) {
+
+	module.exports = str
+
+	/**
+	 * Returns a string representation of a mat3
+	 *
+	 * @alias mat3.str
+	 * @param {mat3} mat matrix to represent as a string
+	 * @returns {String} string representation of the matrix
+	 */
+	function str(a) {
+	  return 'mat3(' + a[0] + ', ' + a[1] + ', ' + a[2] + ', ' +
+	                   a[3] + ', ' + a[4] + ', ' + a[5] + ', ' +
+	                   a[6] + ', ' + a[7] + ', ' + a[8] + ')'
+	}
+
+
+/***/ }),
+/* 294 */
+/***/ (function(module, exports) {
+
+	module.exports = translate
+
+	/**
+	 * Translate a mat3 by the given vector
+	 *
+	 * @alias mat3.translate
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the matrix to translate
+	 * @param {vec2} v vector to translate by
+	 * @returns {mat3} out
+	 */
+	function translate(out, a, v) {
+	  var a00 = a[0], a01 = a[1], a02 = a[2]
+	  var a10 = a[3], a11 = a[4], a12 = a[5]
+	  var a20 = a[6], a21 = a[7], a22 = a[8]
+	  var x = v[0], y = v[1]
+
+	  out[0] = a00
+	  out[1] = a01
+	  out[2] = a02
+
+	  out[3] = a10
+	  out[4] = a11
+	  out[5] = a12
+
+	  out[6] = x * a00 + y * a10 + a20
+	  out[7] = x * a01 + y * a11 + a21
+	  out[8] = x * a02 + y * a12 + a22
+
+	  return out
+	}
+
+
+/***/ }),
+/* 295 */
+/***/ (function(module, exports) {
+
+	module.exports = transpose
+
+	/**
+	 * Transpose the values of a mat3
+	 *
+	 * @alias mat3.transpose
+	 * @param {mat3} out the receiving matrix
+	 * @param {mat3} a the source matrix
+	 * @returns {mat3} out
+	 */
+	function transpose(out, a) {
+	  // If we are transposing ourselves we can skip a few steps but have to cache some values
+	  if (out === a) {
+	    var a01 = a[1], a02 = a[2], a12 = a[5]
+	    out[1] = a[3]
+	    out[2] = a[6]
+	    out[3] = a01
+	    out[5] = a[7]
+	    out[6] = a02
+	    out[7] = a12
+	  } else {
+	    out[0] = a[0]
+	    out[1] = a[3]
+	    out[2] = a[6]
+	    out[3] = a[1]
+	    out[4] = a[4]
+	    out[5] = a[7]
+	    out[6] = a[2]
+	    out[7] = a[5]
+	    out[8] = a[8]
+	  }
+
+	  return out
+	}
+
+
+/***/ }),
+/* 296 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(201).registerLayerAdjustment;
@@ -59674,27 +61710,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 276 */
+/* 297 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.gui
 	 */
 	module.exports = {
-	  domWidget: __webpack_require__(277),
-	  legendWidget: __webpack_require__(279),
-	  sliderWidget: __webpack_require__(281),
-	  svgWidget: __webpack_require__(280),
-	  uiLayer: __webpack_require__(236),
-	  widget: __webpack_require__(278)
+	  domWidget: __webpack_require__(298),
+	  legendWidget: __webpack_require__(300),
+	  sliderWidget: __webpack_require__(302),
+	  svgWidget: __webpack_require__(301),
+	  uiLayer: __webpack_require__(237),
+	  widget: __webpack_require__(299)
 	};
 
 
 /***/ }),
-/* 277 */
+/* 298 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var widget = __webpack_require__(278);
+	var widget = __webpack_require__(299);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(201).registerWidget;
 
@@ -59747,7 +61783,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 278 */
+/* 299 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(8);
@@ -59945,10 +61981,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 279 */
+/* 300 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var svgWidget = __webpack_require__(280);
+	var svgWidget = __webpack_require__(301);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(201).registerWidget;
 
@@ -59966,7 +62002,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  svgWidget.call(this, arg);
 
-	  var d3 = __webpack_require__(225);
+	  var d3 = __webpack_require__(226);
 	  var geo_event = __webpack_require__(9);
 
 	  /** @private */
@@ -60225,10 +62261,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 280 */
+/* 301 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var domWidget = __webpack_require__(277);
+	var domWidget = __webpack_require__(298);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(201).registerWidget;
 
@@ -60256,7 +62292,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  domWidget.call(this, arg);
 
-	  var d3Renderer = __webpack_require__(255);
+	  var d3Renderer = __webpack_require__(256);
 
 	  var m_this = this,
 	      m_renderer = null;
@@ -60312,10 +62348,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 281 */
+/* 302 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var svgWidget = __webpack_require__(280);
+	var svgWidget = __webpack_require__(301);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(201).registerWidget;
 
@@ -60333,7 +62369,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  svgWidget.call(this, arg);
 
-	  var d3 = __webpack_require__(225);
+	  var d3 = __webpack_require__(226);
 	  var geo_event = __webpack_require__(9);
 
 	  var m_this = this,
