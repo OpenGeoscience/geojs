@@ -9,8 +9,8 @@ block mainTutorial
     <!DOCTYPE html>
     <html>
     <head>
-      <script type="text/javascript" src="../../built/geo.min.js"></script>
       <script type="text/javascript" src="../../built/geo.ext.min.js"></script>
+      <script type="text/javascript" src="../../built/geo.min.js"></script>
     </head>
     <body>
       <div id="map"></div>
@@ -19,7 +19,8 @@ block mainTutorial
 
   :markdown-it
     The second script, ``geo.ext.min.js``, is optional.  It adds support
-    for svg elements and touch interaction.
+    for svg elements and touch interaction.  It needs to be added before
+    ``geo.min.js``.
 
     Some CSS will make our map fill the page:
 
