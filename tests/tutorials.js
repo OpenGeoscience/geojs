@@ -58,14 +58,25 @@ describe('tutorials', function () {
               tut$.when.apply(tut$, deferreds).fail(function () {
                 throw new Error('Idle functions were rejected');
               }).then(function () {
+                var subtestDeferreds = [];
                 test.data('tests').forEach(function (testExp) {
-                  var result = targetWindow.eval(testExp);
-                  /* If the result isn't truthy, make sure our expect has a
-                   * description telling which test block and specific test
-                   * failed. */
-                  expect(result).toBeTruthy(test.data('description') + ' -> ' + testExp);
+                  /* The test expression can return a value or a promise.  We
+                   * use jQuery's when to generically get the results in a
+                   * resolution function.  A rejection is a failure. */
+                  var testResult = targetWindow.eval(testExp);
+                  var subtestDefer = tut$.when(testResult).done(function (result) {
+                    /* If the result isn't truthy, make sure our expect has a
+                     * description telling which test block and specific test
+                     * failed. */
+                    expect(result).toBeTruthy(test.data('description') + ' -> ' + testExp);
+                  }).fail(function () {
+                    expect(false).toBeTruthy(test.data('description') + ' promise failed -> ' + testExp);
+                  });
+                  subtestDeferreds.push(subtestDefer);
                 });
-                testDefer.resolve();
+                tut$.when.apply(tut$, subtestDeferreds).then(function () {
+                  testDefer.resolve();
+                });
               });
             };
             /* If we have already run the specific codeblock, don't run it
