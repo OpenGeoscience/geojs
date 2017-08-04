@@ -209,19 +209,36 @@ footer{
         background-color: white;
         text-align: center;
         padding: 25px;
-        height: 120px;
+        min-height: 90px;
         background-color: #333;
-    }
+        position: relative;
 
-    .portfolio-item .portfolio-caption h4 {
-        text-transform: none;
-        margin: 0 0 10px 0;
-    }
+        h4 {
+            a {
+                color: inherit;
+            }
 
-    .portfolio-item .portfolio-caption p {
-        font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-style: italic;
-        font-size: 14px;
-        margin: 0;
+            text-transform: none;
+            margin: 0 0 10px 0;
+        }
+
+        &:hover .description{
+            transform: scaleY(1);
+            transition: transform 200ms ease-in-out; 
+        }
+
+        .description {
+            position: absolute;
+            font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-style: italic;
+            font-size: 14px;
+            left: 0;
+            bottom: 90px;
+            background-color: inherit;
+            padding-top: 10px;
+            transform: scaleY(0);
+            transform-origin: bottom;
+            overflow: hidden;
+        }
     }
 }

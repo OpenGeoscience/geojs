@@ -12,14 +12,14 @@ title: Tutorials
             <div class="row">
             {% for tutorial in site.data.tutorials %}
                 <div class="col-md-4 col-sm-6 portfolio-item">
-                    <a class="portfolio-link" "{{"tutorial"|relative_url}}/{{tutorial.name}}">
+                    <a class="portfolio-link" href="{{"tutorials"|relative_url}}/{{tutorial.name}}">
                         <div class="portfolio-hover">
                         </div>
-                        <img src="{{"tutorial"|relative_url}}/{{tutorial.name}}/thumb.jpg" class="img-responsive" alt="">
+                        <img class="img-responsive" src="{{"tutorials"|relative_url}}/{{tutorial.name}}/thumb.jpg" onerror="var url = '{{"tutorials"|relative_url}}/common/thumb.png'; if (this.src!=url) this.src = url;">
                     </a>
                     <div class="portfolio-caption">
-                        <h4>{{tutorial.title}}</h4>
-                        <p class="text-muted">{{tutorial.description}}</p>
+                        <div class="description text-muted">{{tutorial.description}}</div>
+                        <h4><a class="portfolio-link" href="{{"tutorials"|relative_url}}/{{tutorial.name}}">{{tutorial.title}}</a></h4>
                     </div>
                 </div>
             {% endfor %}

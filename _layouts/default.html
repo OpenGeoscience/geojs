@@ -99,6 +99,7 @@
     <div class="content-wrapper">
         {{content}}
     </div>
+    {% unless layout.no_footer %}
     <footer class="{%if layout.footer-narrow %} narrow{%endif%}">
         <div class="container">
             <div class="row">
@@ -120,7 +121,7 @@
             </div>
         </div>
     </footer>
-
+    {% endunless %}
     <!-- Theme JavaScript -->
     <script src="{{ "js/agency.js" | relative_url }}"></script>
 
