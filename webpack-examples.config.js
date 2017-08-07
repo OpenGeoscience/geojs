@@ -48,7 +48,7 @@ module.exports = {
     bundle: './examples/index.js'
   },
   output: {
-    path: path.join(__dirname, 'dist', 'examples'),
+    path: path.join(__dirname, 'dist', '_examples'),
     publicPath: '/examples',
     filename: '[name].js'
   },

@@ -5,8 +5,8 @@ var docco = require('docco').document;
 var pug = require('pug');
 
 // generate the examples
-fs.ensureDirSync('dist/examples');
-var examples = glob('examples/*/example.json')
+fs.ensureDirSync('dist/_examples');
+glob('examples/*/example.json')
   .map(function (f) {
     // /path/to/example.json
     f = path.resolve(f);
@@ -21,7 +21,7 @@ var examples = glob('examples/*/example.json')
     var main = path.resolve(dir, json.exampleJs[0]);
 
     // the output directory where the example will be compiled
-    var output = path.resolve('dist', 'examples', json.path);
+    var output = path.resolve('dist', '_examples', json.path);
 
     // create, empty, and copy the source directory
     fs.emptyDirSync(output);
@@ -42,31 +42,8 @@ var examples = glob('examples/*/example.json')
     json.docHTML = 'docs/' + path.basename(main).replace(/js$/, 'html');
     json.bundle = '../bundle.js';
 
-    var fn = pug.compileFile(path.relative('.', path.resolve(dir, 'index.pug')), {pretty: true});
+    var fn = pug.compileFile(path.relative('.', path.resolve(dir, 'index.pug')), {pretty: false});
     fs.writeFileSync(path.resolve(output, 'index.html'), fn(json));
     return json;
   });
 
-// copy common files
-fs.copySync('examples/common', 'dist/examples/common');
-
-// create the main example page
-var data = {
-  hideNavbar: false,
-  exampleCss: ['main.css'],
-  exampleJs: ['main.js'],
-  examples: examples,
-  bundle: './bundle.js',
-  about: {hidden: true},
-  title: 'GeoJS'
-};
-
-// copy assets for the main page
-fs.copySync('examples/main.js', 'dist/examples/main.js');
-fs.copySync('examples/main.css', 'dist/examples/main.css');
-
-var fn = pug.compileFile('./examples/index.pug', {pretty: true});
-fs.writeFileSync(
-  path.resolve('dist', 'examples', 'index.html'),
-  fn(data)
-);

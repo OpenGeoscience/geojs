@@ -31,7 +31,7 @@ var Libraries = {
 
 var DataSources = {
   roads: {
-    url: '../../data/roads.json',
+    url: '../data/roads.json',
     success: function (resp) {
       DataSources.roads.data = $.map(resp, function (item) {
         return [item.data];

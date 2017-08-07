@@ -76,14 +76,14 @@ $(function () {
 
   // Load the data
   $.ajax({
-    url: '../../data/oahu.json',
+    url: '../data/oahu.json',
     success: function (data) {
       var contour = makeContour(data, contourLayer);
       contour.draw();
       /* After 10 second, load a denser data set */
       window.setTimeout(function () {
         $.ajax({
-          url: '../../data/oahu-dense.json',
+          url: '../data/oahu-dense.json',
           success: function (data) {
             contourLayer.deleteFeature(contour);
             contour = makeContour(data, contourLayer, contour);
