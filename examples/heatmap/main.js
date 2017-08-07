@@ -121,7 +121,7 @@ $(function () {
    */
   function fetch_data() {
     var dataset = $('#dataset').val(),
-        url = '../data/' + $('#dataset option:selected').attr('url');
+        url = '../../data/' + $('#dataset option:selected').attr('url');
     $.ajax(url, {
       success: function (resp) {
         window.heatmap.datapoints = null;

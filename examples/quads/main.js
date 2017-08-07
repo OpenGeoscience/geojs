@@ -23,7 +23,7 @@ $(function () {
   var quadData = [{
     ll: {x: -108, y: 29},
     ur: {x: -88, y: 49},
-    image: '../data/tilefancy.png'
+    image: '../../data/tilefancy.png'
   }, {
     ll: {x: -88, y: 29},
     ur: {x: -58, y: 49},
@@ -48,25 +48,25 @@ $(function () {
     lr: {x: -33, y: 9},
     ur: {x: -68, y: 9},
     ul: {x: -58, y: 29},
-    image: '../data/tilefancy.png'
+    image: '../../data/tilefancy.png'
   }, {
     ll: {x: -128, y: 29},
     ur: {x: -108, y: 49},
-    image: '../data/nosuchimage.png'
+    image: '../../data/nosuchimage.png'
   }, {
     ul: {x: -128, y: 29},
     ur: {x: -108, y: 29},
     ll: {x: -123, y: 9},
     lr: {x: -98, y: 9},
     previewImage: null,
-    image: '../data/nosuchimage.png'
+    image: '../../data/nosuchimage.png'
   }, {
     ul: {x: -148, y: 29},
     ur: {x: -128, y: 29},
     ll: {x: -148, y: 9},
     lr: {x: -123, y: 9},
     previewImage: previewImage,
-    image: '../data/nosuchimage.png'
+    image: '../../data/nosuchimage.png'
   }, {
     ll: {x: -138, y: 29},
     ur: {x: -128, y: 39},
@@ -124,14 +124,14 @@ $(function () {
       lr: {x: -88, y: 49},
       ur: {x: -108, y: 59},
       ul: {x: -88, y: 59},
-      image: '../data/tilefancy.png'
+      image: '../../data/tilefancy.png'
     });
     quadData.push({
       ll: {x: -88, y: 49},
       ur: {x: -68, y: 49},
       ul: {x: -88, y: 59},
       lr: {x: -68, y: 59},
-      image: '../data/tilefancy.png'
+      image: '../../data/tilefancy.png'
     });
   }
   var previewImage = new Image();
@@ -178,5 +178,5 @@ $(function () {
     quadDebug.quads = quads;
   };
 
-  previewImage.src = '../data/grid.jpg';
+  previewImage.src = '../../data/grid.jpg';
 });
