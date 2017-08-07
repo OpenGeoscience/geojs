@@ -1,0 +1,10 @@
+{
+  "title": "Using a WMS Tile Source",
+  "hideNavbar": true,
+  "tutorialCss": [],
+  "tutorialJs": [],
+  "level": 0,
+  "about": {
+    "text": "Make a map with a custom function for getting tiles from a WMS server.  This also shows how to get tile bounds in different coordinates."
+  }
+}

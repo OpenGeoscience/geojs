@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-meta">  'use strict'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Create a map object with the OpenStreetMaps base layer.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-75.965</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">39.482</span>
+    },
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">4</span>
+  });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Add the osm layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  map.createLayer(
+    <span class="hljs-string">'osm'</span>
+  );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Create a gl feature layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> layer = map.createLayer(
+    <span class="hljs-string">'feature'</span>, {<span class="hljs-attr">features</span>: [<span class="hljs-string">'vector'</span>]}
+  );
+
+  <span class="hljs-keyword">var</span> routes = [
+    [[<span class="hljs-number">-74.0059</span>, <span class="hljs-number">40.7127</span>], [<span class="hljs-number">-118.25</span>, <span class="hljs-number">34.05</span>]],
+    [[<span class="hljs-number">-98</span>, <span class="hljs-number">38.5</span>], [<span class="hljs-number">-87.6847</span>, <span class="hljs-number">41.8369</span>]],
+    [[<span class="hljs-number">-60.0059</span>, <span class="hljs-number">39.7127</span>], [<span class="hljs-number">-58.25</span>, <span class="hljs-number">35.05</span>]],
+    [[<span class="hljs-number">-80</span>, <span class="hljs-number">33.5</span>], [<span class="hljs-number">-27.6847</span>, <span class="hljs-number">25.8369</span>]]
+  ];
+
+  layer.createFeature(<span class="hljs-string">'vector'</span>)
+    .data(routes)
+    .origin(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">cities</span>) </span>{
+      <span class="hljs-keyword">var</span> origin = cities[<span class="hljs-number">0</span>];
+      <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: origin[<span class="hljs-number">0</span>], <span class="hljs-attr">y</span>: origin[<span class="hljs-number">1</span>]};
+    })
+    .delta(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">cities</span>) </span>{
+      <span class="hljs-keyword">var</span> origin = cities[<span class="hljs-number">0</span>];
+      <span class="hljs-keyword">var</span> destination = cities[<span class="hljs-number">1</span>];
+      <span class="hljs-keyword">var</span> dx = destination[<span class="hljs-number">0</span>] - origin[<span class="hljs-number">0</span>];
+      <span class="hljs-keyword">var</span> dy = destination[<span class="hljs-number">1</span>] - origin[<span class="hljs-number">1</span>];
+      <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">x</span>: dx,
+        <span class="hljs-attr">y</span>: dy
+      };
+    })
+    .style({
+      <span class="hljs-attr">strokeColor</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">cities, i</span>) </span>{
+        <span class="hljs-keyword">return</span> i % <span class="hljs-number">2</span> ? <span class="hljs-string">'red'</span> : <span class="hljs-string">'blue'</span>;
+      },
+      <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">2.0</span>,
+      <span class="hljs-attr">originStyle</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">cities, i</span>) </span>{
+        <span class="hljs-keyword">return</span> i % <span class="hljs-number">2</span> ? <span class="hljs-string">'point'</span> : <span class="hljs-string">'none'</span>;
+      },
+      <span class="hljs-attr">endStyle</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">cities, i</span>) </span>{
+        <span class="hljs-keyword">return</span> i % <span class="hljs-number">2</span> ? <span class="hljs-string">'bar'</span> : <span class="hljs-string">'arrow'</span>;
+      }
+    });
+
+  <span class="hljs-keyword">var</span> secondaryRoutes = [
+    [[<span class="hljs-number">-65.0059</span>, <span class="hljs-number">39.7127</span>], [<span class="hljs-number">-100.25</span>, <span class="hljs-number">35.05</span>]],
+    [[<span class="hljs-number">-90</span>, <span class="hljs-number">38.5</span>], [<span class="hljs-number">-87.6847</span>, <span class="hljs-number">25.8369</span>]]
+  ];
+
+  layer.createFeature(<span class="hljs-string">'vector'</span>)
+    .data(secondaryRoutes)
+    .origin(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">cities</span>) </span>{
+      <span class="hljs-keyword">var</span> origin = cities[<span class="hljs-number">0</span>];
+      <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: origin[<span class="hljs-number">0</span>], <span class="hljs-attr">y</span>: origin[<span class="hljs-number">1</span>]};
+    })
+    .delta(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">cities</span>) </span>{
+      <span class="hljs-keyword">var</span> origin = cities[<span class="hljs-number">0</span>];
+      <span class="hljs-keyword">var</span> destination = cities[<span class="hljs-number">1</span>];
+      <span class="hljs-keyword">var</span> dx = destination[<span class="hljs-number">0</span>] - origin[<span class="hljs-number">0</span>];
+      <span class="hljs-keyword">var</span> dy = destination[<span class="hljs-number">1</span>] - origin[<span class="hljs-number">1</span>];
+      <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">x</span>: dx,
+        <span class="hljs-attr">y</span>: dy
+      };
+    })
+    .style({
+      <span class="hljs-attr">strokeColor</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">cities, i</span>) </span>{
+        <span class="hljs-keyword">return</span> i % <span class="hljs-number">2</span> ? <span class="hljs-string">'orange'</span> : <span class="hljs-string">'purple'</span>;
+      },
+      <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">2.0</span>,
+      <span class="hljs-attr">originStyle</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">cities, i</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'bar'</span>;
+      },
+      <span class="hljs-attr">endStyle</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">cities, i</span>) </span>{
+        <span class="hljs-keyword">return</span> i % <span class="hljs-number">2</span> ? <span class="hljs-string">'wedge'</span> : <span class="hljs-string">'arrow'</span>;
+      }
+    });
+
+  <span class="hljs-comment">/* We could draw the two features as we create them.  Instead, this ensures
+   * that all features get drawn. */</span>
+  map.draw();
+});</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

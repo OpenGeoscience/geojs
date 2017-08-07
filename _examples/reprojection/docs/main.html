@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>This example should be tried with different query strings.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+<span class="hljs-keyword">var</span> exampleDebug = {};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Run after the DOM loads</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-meta">  'use strict'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Most map tile servers use EPSG:3857 (Web Mercator).  Using a tile server
+with a different projection works correctly in all renderers.  Using a
+different projection for the tiles and the map can work in the vgl
+renderer, but may have problems as the tile density is not uniform or
+regular.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> gcsTable = {
+    <span class="hljs-string">'EPSG:3857'</span>: <span class="hljs-string">'EPSG:3857'</span>
+  };
+  <span class="hljs-keyword">var</span> gcsBounds = {};
+  <span class="hljs-keyword">var</span> gcsList = [
+    <span class="hljs-string">'EPSG:3857'</span>, <span class="hljs-string">'EPSG:3031'</span>, <span class="hljs-string">'EPSG:3032'</span>, <span class="hljs-string">'EPSG:3033'</span>, <span class="hljs-string">'EPSG:3294'</span>,
+    <span class="hljs-string">'EPSG:3408'</span>, <span class="hljs-string">'EPSG:3409'</span>, <span class="hljs-string">'EPSG:3410'</span>, <span class="hljs-string">'EPSG:3411'</span>, <span class="hljs-string">'EPSG:3412'</span>,
+    <span class="hljs-string">'EPSG:3413'</span>, <span class="hljs-string">'EPSG:3571'</span>, <span class="hljs-string">'EPSG:3572'</span>, <span class="hljs-string">'EPSG:3573'</span>, <span class="hljs-string">'EPSG:3574'</span>,
+    <span class="hljs-string">'EPSG:3575'</span>, <span class="hljs-string">'EPSG:3576'</span>, <span class="hljs-string">'EPSG:3786'</span>, <span class="hljs-string">'EPSG:32661'</span>, <span class="hljs-string">'EPSG:32662'</span>,
+    <span class="hljs-string">'ESRI:53002'</span>, <span class="hljs-string">'ESRI:53003'</span>, <span class="hljs-string">'ESRI:53008'</span>, <span class="hljs-string">'ESRI:53009'</span>, <span class="hljs-string">'ESRI:53021'</span>,
+    <span class="hljs-string">'ESRI:53027'</span>, <span class="hljs-string">'ESRI:54002'</span>, <span class="hljs-string">'ESRI:54003'</span>, <span class="hljs-string">'ESRI:54009'</span>, <span class="hljs-string">'ESRI:54021'</span>,
+    <span class="hljs-string">'ESRI:54026'</span>, <span class="hljs-string">'ESRI:54027'</span>, <span class="hljs-string">'ESRI:102005'</span>, <span class="hljs-string">'ESRI:102010'</span>, <span class="hljs-string">'ESRI:102011'</span>,
+    <span class="hljs-string">'ESRI:102016'</span>, <span class="hljs-string">'ESRI:102017'</span>, <span class="hljs-string">'ESRI:102018'</span>, <span class="hljs-string">'ESRI:102019'</span>,
+    <span class="hljs-string">'ESRI:102020'</span>, <span class="hljs-string">'ESRI:102021'</span>, <span class="hljs-string">'ESRI:102023'</span>, <span class="hljs-string">'ESRI:102026'</span>,
+    <span class="hljs-string">'ESRI:102029'</span>, <span class="hljs-string">'ESRI:102031'</span>, <span class="hljs-string">'ESRI:102032'</span>, <span class="hljs-string">'IAU2000:39914'</span>,
+    <span class="hljs-string">'IAU2000:39918'</span>, <span class="hljs-string">'IAU2000:39920'</span>, <span class="hljs-string">'IAU2000:39962'</span>, <span class="hljs-string">'IAU2000:39972'</span>,
+    <span class="hljs-string">'SR-ORG:7'</span>, <span class="hljs-string">'SR-ORG:22'</span>, <span class="hljs-string">'SR-ORG:4695'</span>, <span class="hljs-string">'SR-ORG:6661'</span>, <span class="hljs-string">'SR-ORG:6842'</span>,
+    <span class="hljs-string">'SR-ORG:6882'</span>, <span class="hljs-string">'SR-ORG:6888'</span>, <span class="hljs-string">'SR-ORG:6890'</span>, <span class="hljs-string">'SR-ORG:6891'</span>,
+    <span class="hljs-string">'SR-ORG:6892'</span>, <span class="hljs-string">'SR-ORG:6893'</span>, <span class="hljs-string">'SR-ORG:6894'</span>, <span class="hljs-string">'SR-ORG:6895'</span>,
+    <span class="hljs-string">'SR-ORG:6896'</span>, <span class="hljs-string">'SR-ORG:6897'</span>, <span class="hljs-string">'SR-ORG:6898'</span>, <span class="hljs-string">'SR-ORG:7250'</span>,
+    <span class="hljs-string">'SR-ORG:8209'</span>, <span class="hljs-string">'SR-ORG:8287'</span>
+  ];
+  <span class="hljs-keyword">var</span> capitals;
+
+  $.when(
+    <span class="hljs-comment">/* Fetch projections */</span>
+    $.ajax({<span class="hljs-attr">url</span>: <span class="hljs-string">'proj.json'</span>}).done(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) </span>{
+      $(<span class="hljs-string">'#map-gcs option'</span>).slice(<span class="hljs-number">1</span>).remove();
+      resp.sort(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">a, b</span>) </span>{
+        <span class="hljs-keyword">var</span> sa = a.name.split(<span class="hljs-string">':'</span>), sb = b.name.split(<span class="hljs-string">':'</span>);
+        <span class="hljs-keyword">if</span> (sa[<span class="hljs-number">0</span>] !== sb[<span class="hljs-number">0</span>]) {
+          <span class="hljs-keyword">return</span> sa[<span class="hljs-number">0</span>] &lt; sb[<span class="hljs-number">0</span>] ? <span class="hljs-number">-1</span> : <span class="hljs-number">1</span>;
+        }
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">parseInt</span>(sb[<span class="hljs-number">1</span>], <span class="hljs-number">10</span>) &gt; <span class="hljs-number">0</span> &amp;&amp; <span class="hljs-built_in">parseInt</span>(sa[<span class="hljs-number">1</span>], <span class="hljs-number">10</span>) &gt; <span class="hljs-number">0</span>) {
+          <span class="hljs-keyword">return</span> <span class="hljs-built_in">parseInt</span>(sa[<span class="hljs-number">1</span>], <span class="hljs-number">10</span>) - <span class="hljs-built_in">parseInt</span>(sb[<span class="hljs-number">1</span>], <span class="hljs-number">10</span>);
+        }
+        <span class="hljs-keyword">return</span> a.name &lt; b.name ? <span class="hljs-number">-1</span> : <span class="hljs-number">1</span>;
+      });
+      $.each(resp, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">idx, proj</span>) </span>{
+        gcsTable[proj.name] = proj.proj4;
+        <span class="hljs-keyword">if</span> (proj.bounds) {
+          gcsBounds[proj.name] = proj.bounds;
+        }
+        <span class="hljs-keyword">var</span> opt = $(<span class="hljs-string">'&lt;option/&gt;'</span>).attr({<span class="hljs-attr">value</span>: proj.name}).text(
+            proj.name + <span class="hljs-string">' - '</span> + proj.desc);
+        $(<span class="hljs-string">'#map-gcs'</span>).append(opt);
+      });
+      <span class="hljs-keyword">var</span> pos = <span class="hljs-number">0</span>;
+      $.each(gcsList, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">idx, proj</span>) </span>{
+        <span class="hljs-keyword">var</span> opt = $(<span class="hljs-string">'#map-gcs option[value="'</span> + proj + <span class="hljs-string">'"]'</span>);
+        <span class="hljs-keyword">if</span> (opt.length) {
+          opt.remove();
+          $(<span class="hljs-string">'#map-gcs option'</span>).eq(pos).before(opt);
+          pos += <span class="hljs-number">1</span>;
+        }
+      });
+      $(<span class="hljs-string">'#map-gcs option'</span>).eq(pos).before($(<span class="hljs-string">'&lt;option/&gt;'</span>).attr(
+          {<span class="hljs-attr">value</span>: <span class="hljs-string">'EPSG:3857'</span>}).text(<span class="hljs-string">'--------'</span>));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>select boxes with thousands of options cause performance issues.  To
+see all of the projection options, disable the following line:</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      $(<span class="hljs-string">'#map-gcs option'</span>).slice(pos).remove();
+    }),
+
+    <span class="hljs-comment">/* Fetch cities */</span>
+    $.ajax({<span class="hljs-attr">url</span>: <span class="hljs-string">'capitals.json'</span>}).done(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) </span>{
+      capitals = resp;
+    })
+
+  ).then(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Parse query parameters into an object for ease of access</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> query = <span class="hljs-built_in">document</span>.location.search.replace(<span class="hljs-regexp">/(^\?)/</span>, <span class="hljs-string">''</span>).split(
+      <span class="hljs-string">'&amp;'</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">n</span>) </span>{
+        n = n.split(<span class="hljs-string">'='</span>);
+        <span class="hljs-keyword">if</span> (n[<span class="hljs-number">0</span>]) {
+          <span class="hljs-keyword">this</span>[<span class="hljs-built_in">decodeURIComponent</span>(n[<span class="hljs-number">0</span>])] = <span class="hljs-built_in">decodeURIComponent</span>(n[<span class="hljs-number">1</span>]);
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+      }.bind({}))[<span class="hljs-number">0</span>];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>hide the controls if requested</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    $(<span class="hljs-string">'#controls'</span>).toggleClass(<span class="hljs-string">'no-controls'</span>, query.controls === <span class="hljs-string">'false'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>populate the controls with the current settings</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    $.each(query, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">key, value</span>) </span>{
+      <span class="hljs-keyword">if</span> (key.indexOf(<span class="hljs-string">'"'</span>) &lt; <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">var</span> ctl = $(<span class="hljs-string">'#controls [param-name="'</span> + key + <span class="hljs-string">'"]'</span>);
+        <span class="hljs-keyword">if</span> (ctl.is(<span class="hljs-string">'[type="checkbox"]'</span>)) {
+          ctl.prop(<span class="hljs-string">'checked'</span>, value === <span class="hljs-string">'true'</span>);
+        } <span class="hljs-keyword">else</span> {
+          ctl.val(value);
+        }
+      }
+    });
+    $(<span class="hljs-string">'#controls'</span>).on(<span class="hljs-string">'change'</span>, change_controls);
+
+    <span class="hljs-keyword">var</span> range = geo.transform.transformCoordinates(
+        <span class="hljs-string">'EPSG:4326'</span>, <span class="hljs-string">'EPSG:3857'</span>, [{<span class="hljs-attr">x</span>: <span class="hljs-number">-180</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>}, {<span class="hljs-attr">x</span>: <span class="hljs-number">180</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>}]);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Set map defaults to use our named node and have a reasonable center and
+zoom level</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> gcs = query.gcs || <span class="hljs-string">'EPSG:3857'</span>;
+    <span class="hljs-keyword">var</span> mapParams = {
+      <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+      <span class="hljs-attr">center</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>},
+      <span class="hljs-attr">zoom</span>: <span class="hljs-number">2</span>,
+      <span class="hljs-attr">gcs</span>: gcsTable[gcs],
+      <span class="hljs-attr">unitsPerPixel</span>: (range[<span class="hljs-number">1</span>].x - range[<span class="hljs-number">0</span>].x) / <span class="hljs-number">256</span>,
+      <span class="hljs-attr">clampBoundsX</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">clampBoundsY</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">clampZoom</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">discreteZoom</span>: <span class="hljs-literal">false</span>
+    };
+    <span class="hljs-keyword">if</span> (gcsBounds[gcs]) {
+      mapParams.maxBounds = gcsBounds[gcs];
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Set the tile layer defaults to use the specified renderer and opacity</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> layerParams = {
+      <span class="hljs-attr">features</span>: [geo.quadFeature.capabilities.imageFull],
+      <span class="hljs-attr">zIndex</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">gcs</span>: <span class="hljs-string">'EPSG:3857'</span>,
+      <span class="hljs-attr">attribution</span>: $(<span class="hljs-string">'#url-list [value="'</span> + $(<span class="hljs-string">'#layer-url'</span>).val() + <span class="hljs-string">'"]'</span>).attr(
+          <span class="hljs-string">'credit'</span>),
+      <span class="hljs-attr">minLevel</span>: <span class="hljs-number">4</span>,
+      <span class="hljs-attr">keepLower</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">wrapX</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">wrapY</span>: <span class="hljs-literal">false</span>
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Allow a custom tile url, including subdomains.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (query.url) {
+      layerParams.url = query.url;
+    } <span class="hljs-keyword">else</span> {
+      layerParams.url = <span class="hljs-string">'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Create a map object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> map = geo.map(mapParams);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Add the tile layer with the specified parameters</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> osmLayer = map.createLayer(<span class="hljs-string">'osm'</span>, layerParams);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>create a tool-tip layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> uiLayer = map.createLayer(<span class="hljs-string">'ui'</span>, {<span class="hljs-attr">zIndex</span>: <span class="hljs-number">2</span>});
+    <span class="hljs-keyword">var</span> tooltip = uiLayer.createWidget(<span class="hljs-string">'dom'</span>, {<span class="hljs-attr">position</span>: {<span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>}});
+    <span class="hljs-keyword">var</span> tooltipElem = $(tooltip.canvas()).attr(<span class="hljs-string">'id'</span>, <span class="hljs-string">'tooltip'</span>).addClass(
+        <span class="hljs-string">'hidden'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Create a layer with cities</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> pointLayer = map.createLayer(<span class="hljs-string">'feature'</span>, {<span class="hljs-attr">renderer</span>: <span class="hljs-string">'vgl'</span>, <span class="hljs-attr">zIndex</span>: <span class="hljs-number">1</span>});
+    <span class="hljs-keyword">var</span> pointFeature = pointLayer
+      .createFeature(<span class="hljs-string">'point'</span>, {
+        <span class="hljs-attr">selectionAPI</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">style</span>: {
+          <span class="hljs-attr">fillColor</span>: <span class="hljs-string">'#8080FF'</span>,
+          <span class="hljs-attr">fillOpacity</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d.opacity ? d.opacity : <span class="hljs-number">0.25</span>; },
+          <span class="hljs-attr">strokeColor</span>: <span class="hljs-string">'black'</span>,
+          <span class="hljs-attr">strokeOpacity</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+            <span class="hljs-keyword">return</span> d.strokeOpacity ? d.strokeOpacity : <span class="hljs-number">0.25</span>;
+          }
+        },
+        <span class="hljs-attr">visible</span>: query.capitals !== <span class="hljs-string">'false'</span>
+      })
+      .data(capitals)
+      .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+        <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: d.longitude, <span class="hljs-attr">y</span>: d.latitude};
+      })
+      .geoOn(geo.event.feature.mouseclick, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
+        pointLayer.map().center({<span class="hljs-attr">x</span>: evt.data.longitude, <span class="hljs-attr">y</span>: evt.data.latitude});
+      })
+      .geoOn(geo.event.feature.mouseover, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
+        evt.data.opacity = <span class="hljs-number">0.5</span>;
+        evt.data.strokeOpacity = <span class="hljs-number">1</span>;
+        <span class="hljs-keyword">this</span>.modified();
+        <span class="hljs-keyword">this</span>.draw();
+        tooltip.position({<span class="hljs-attr">x</span>: evt.data.longitude, <span class="hljs-attr">y</span>: evt.data.latitude});
+        tooltipElem.text(evt.data.city);
+        tooltipElem.removeClass(<span class="hljs-string">'hidden'</span>);
+      })
+      .geoOn(geo.event.feature.mouseout, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
+        evt.data.opacity = <span class="hljs-literal">undefined</span>;
+        evt.data.strokeOpacity = <span class="hljs-literal">undefined</span>;
+        <span class="hljs-keyword">this</span>.modified();
+        <span class="hljs-keyword">this</span>.draw();
+        tooltipElem.addClass(<span class="hljs-string">'hidden'</span>);
+      })
+      .draw();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Make variables available as a global for easier debug</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    exampleDebug.map = map;
+    exampleDebug.mapParams = mapParams;
+    exampleDebug.layerParams = layerParams;
+    exampleDebug.osmLayer = osmLayer;
+    exampleDebug.pointLayer = pointLayer;
+    exampleDebug.pointFeature = pointFeature;
+    exampleDebug.uiLayer = uiLayer;
+    exampleDebug.tooltip = tooltip;
+    exampleDebug.tooltipElem = tooltipElem;
+    exampleDebug.gcsTable = gcsTable;
+    exampleDebug.gcsBounds = gcsBounds;
+    exampleDebug.gcsName = gcs;
+
+    <span class="hljs-comment">/**
+     * Handle changes to our controls.
+     *
+     * @param evt jquery evt that triggered this call.
+     */</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">change_controls</span>(<span class="hljs-params">evt</span>) </span>{
+      <span class="hljs-keyword">var</span> ctl = $(evt.target),
+          param = ctl.attr(<span class="hljs-string">'param-name'</span>),
+          value = ctl.val();
+      <span class="hljs-keyword">if</span> (ctl.is(<span class="hljs-string">'[type="checkbox"]'</span>)) {
+        value = ctl.is(<span class="hljs-string">':checked'</span>) ? <span class="hljs-string">'true'</span> : <span class="hljs-string">'false'</span>;
+      }
+      <span class="hljs-keyword">if</span> (value === <span class="hljs-string">''</span> &amp;&amp; ctl.attr(<span class="hljs-string">'placeholder'</span>)) {
+        value = ctl.attr(<span class="hljs-string">'placeholder'</span>);
+      }
+      <span class="hljs-keyword">if</span> (!param || value === query[param]) {
+        <span class="hljs-keyword">return</span>;
+      }
+      <span class="hljs-keyword">var</span> processedValue = (ctl.is(<span class="hljs-string">'[type="checkbox"]'</span>) ?
+          (value === <span class="hljs-string">'true'</span>) : value);
+      <span class="hljs-keyword">switch</span> (param) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'capitals'</span>:
+          pointFeature.visible(processedValue);
+          pointFeature.draw();
+          <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'gcs'</span>:
+          mapParams.gcs = gcsTable[processedValue] || <span class="hljs-string">'EPSG:3857'</span>;
+          map.gcs(mapParams.gcs);
+          exampleDebug.gcsName = processedValue;
+          osmLayer.clear();
+          pointFeature.modified();
+          map.draw();
+          <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'url'</span>:
+          <span class="hljs-keyword">var</span> url = processedValue;
+          <span class="hljs-keyword">if</span> (layerParams.baseUrl) {
+            <span class="hljs-keyword">delete</span> layerParams.baseUrl;
+          }
+          layerParams[param] = processedValue;
+          osmLayer.url(url);
+          osmLayer.attribution($(<span class="hljs-string">'#url-list [value="'</span> + value + <span class="hljs-string">'"]'</span>).attr(
+              <span class="hljs-string">'credit'</span>));
+          <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">default</span>:
+          <span class="hljs-keyword">if</span> (ctl.is(<span class="hljs-string">'.layerparam'</span>)) {
+            layerParams[param] = processedValue;
+            <span class="hljs-keyword">if</span> (param === <span class="hljs-string">'url'</span> &amp;&amp; layerParams.baseUrl) {
+              <span class="hljs-keyword">delete</span> layerParams.baseUrl;
+            }
+            <span class="hljs-keyword">if</span> (osmLayer[param]) {
+              osmLayer[param](processedValue);
+            }
+          } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (ctl.is(<span class="hljs-string">'.mapparam'</span>)) {
+            mapParams[param] = processedValue;
+            <span class="hljs-keyword">if</span> (map[param]) {
+              map[param](processedValue);
+            }
+          } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span>;
+          }
+          <span class="hljs-keyword">break</span>;
+      }
+      <span class="hljs-keyword">if</span> (ctl.is(<span class="hljs-string">'.layerparam'</span>) &amp;&amp; ctl.attr(<span class="hljs-string">'reload'</span>) === <span class="hljs-string">'true'</span>) {
+        map.deleteLayer(osmLayer);
+        osmLayer = map.createLayer(<span class="hljs-string">'osm'</span>, layerParams);
+        exampleDebug.osmLayer = osmLayer;
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>update the url to reflect the changes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      query[param] = value;
+      <span class="hljs-keyword">if</span> (value === <span class="hljs-string">''</span> || (ctl.attr(<span class="hljs-string">'placeholder'</span>) &amp;&amp;
+          value === ctl.attr(<span class="hljs-string">'placeholder'</span>))) {
+        <span class="hljs-keyword">delete</span> query[param];
+      }
+      <span class="hljs-keyword">var</span> newurl = <span class="hljs-built_in">window</span>.location.protocol + <span class="hljs-string">'//'</span> + <span class="hljs-built_in">window</span>.location.host +
+          <span class="hljs-built_in">window</span>.location.pathname + <span class="hljs-string">'?'</span> + $.param(query);
+      <span class="hljs-built_in">window</span>.history.replaceState(query, <span class="hljs-string">''</span>, newurl);
+    }
+  });
+});</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Run after the DOM loads</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-meta">  'use strict'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>New York, Austin, and San Francisco coordinates</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> coordinates = [
+    {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-74.0059</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">40.7127</span>
+    },
+    {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-97.7500</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">30.2500</span>
+    },
+    {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-122.4167</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">37.7833</span>
+    }
+  ];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Determine if a set of lat/long are in the viewport</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">coordinatesInViewport</span>(<span class="hljs-params">coords, map</span>) </span>{
+    <span class="hljs-keyword">var</span> mapWidth = map.node().width(),
+        mapHeight = map.node().height();
+
+    coords = map.gcsToDisplay(coords);
+
+    <span class="hljs-keyword">return</span> ((coords.x &gt;= <span class="hljs-number">0</span> &amp;&amp; coords.y &gt;= <span class="hljs-number">0</span>) &amp;&amp;
+            (coords.x &lt;= mapWidth &amp;&amp; coords.y &lt;= mapHeight));
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Create a map object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
+    <span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>,
+    <span class="hljs-attr">center</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">-114.1180</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">35.6364</span>
+    },
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">4</span>
+  });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Add the default osm layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  map.createLayer(<span class="hljs-string">'osm'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Plot points for the 3 cities</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> layer = map.createLayer(<span class="hljs-string">'feature'</span>, {<span class="hljs-string">'renderer'</span> : <span class="hljs-string">'d3'</span>});
+
+  layer.createFeature(<span class="hljs-string">'point'</span>)
+    .data(coordinates)
+    .style(<span class="hljs-string">'radius'</span>, <span class="hljs-number">5</span>)
+    .style(<span class="hljs-string">'fillColor'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-string">'red'</span>; })
+    .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d; })
+    .draw();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Create a ui layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> ui = map.createLayer(<span class="hljs-string">'ui'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Create a time series plot widget</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> widget = ui.createWidget(<span class="hljs-string">'dom'</span>, {
+    <span class="hljs-attr">position</span>: {
+      <span class="hljs-attr">left</span>: <span class="hljs-number">20</span>,
+      <span class="hljs-attr">bottom</span>: <span class="hljs-number">20</span>
+    }
+  });
+  <span class="hljs-keyword">var</span> $widget = $(widget.canvas());
+  $widget.attr(<span class="hljs-string">'id'</span>, <span class="hljs-string">'svg-container'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>When the map pans - hide the widget if none of the cities are in the viewport anymore</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  ui.geoOn(geo.event.pan, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; coordinates.length; i += <span class="hljs-number">1</span>) {
+      <span class="hljs-keyword">if</span> (coordinatesInViewport(coordinates[i], map)) {
+        $widget.show();
+        <span class="hljs-keyword">return</span>;
+      }
+    }
+
+    $widget.hide();
+  });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Create a zoom slider widget</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  ui.createWidget(<span class="hljs-string">'slider'</span>, {<span class="hljs-attr">position</span>: {<span class="hljs-attr">left</span>: <span class="hljs-number">40</span>, <span class="hljs-attr">top</span>: <span class="hljs-number">40</span>}});
+});</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+- name: heatmap
+  title: Heatmap Feature
+  description: This example shows how to add a heatmap to a map.
+  
+- name: deepzoom
+  title: Deepzoom tiled image example
+  description: Rendering a tiled image using the Deepzoom protocol.
+
+- name: hurricanes
+  title: Hurricane tracking data
+  description: Explore historic hurricane paths since 1980 on an interactive map.
+
+- name: annotations
+  title: Annotation Layer
+  description: Add annotations, such as marked rectangles, to a map.
+
+- name: choropleth
+  title: Choropleth plot
+  description: Add choropleth features to a map. Choropleths color each region in a set of regions based on a scalar value for each region.
+
+- name: contour
+  title: Contour plot
+  description: Add contour features to a map.  Contours color a region based on an array of scalar values.
+
+- name: geoJSON
+  title: GeoJSON file reader
+  description: Shows how to use geoJSON reader and use properties to adjust the style of the features. You can edit the json file while the features on the map update in response. 
+
+- name: legend
+  title: Feature legends
+  description: This example shows how to create a legend to describe feature styles on a map.
+
+- name: lines
+  title: Line Feature
+  description: This example shows the variations that are available for line features.
+
+- name: pixelmap
+  title: Pixelmap feature
+  description: This example shows how to use a pixelmap feature.  The pixelmap colors areas based on an index derived from an image and some data per index.
+
+- name: polygons
+  title: Polygon features
+  description: This example shows how to add polygons to a map.
+
+- name: quads
+  title: Quad features
+  description: This example shows how to add dynamic quads to a map.
+
+- name: reprojection
+  title: Reproject tiles
+  description: Shows how you can reproject tiles from one projection to another.  The source tiles are in Web Mercator, but can be drawn in many different projections.
+
+- name: sld
+  title: Adding styles to WMS raster layers
+  description: Rendering tiles from a WMS server by customizing the style.
+
+- name: tiles
+  title: Tile layer with controllable options
+  description: This example shows the options on tile layers. The code and query parameters allow even more options to be adjusted.
+
+- name: transitions
+  title: Using animated transitions
+  description: Using animations to transition between points on a map.
+
+- name: widgets
+  title: Map Widgets
+  description: This example shows how the widgets API can be used to place elements on top of the map.
+
+- name: wms
+  title: Rendering tiles from a WMS server
+  description: Rendering tiles from a WMS server by customizing the tile URL of an OSM layer.
+

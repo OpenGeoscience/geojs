@@ -1,0 +1,24 @@
+---
+title: Changing Tile Source
+---
+<!-- include tutorial sources--><!-- Include tutorial specific files--><script type="text/javascript">$(start_tutorial);
+
+</script><!-- Add the default main content element--><div id="maincontent"><div id="tutorial"><h1>Tutorial - Changing Tile Source</h1>
+<p>When a map is created with teh default map tile layer, it defaults to using tiles from <a href="">tile.openstreetmap.org</a>.</p>
+<div class="codeblock" format="javascript" step="1" initial="true" stepname="Step 1" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">var map = geo.map({
+  node: "#map"
+});
+var layer = map.createLayer('osm');</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 1</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run">Run</button><button class="codeblock_reset">Reset</button></div></div><div class="codeblock_test" data-description="map has one osm layer from openstreetmap" data-tests="[&quot;map.layers().length === 1&quot;,&quot;map.layers()[0] instanceof geo.osmLayer&quot;,&quot;layer.url().match(/openstreetmap/)&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>You can use a different tile source by changing the URL used by the tile layer.  You should also set the attribution.</p>
+<div class="codeblock" format="javascript" step="2" parentstep="1" stepname="Step 2" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">layer.url('http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png')
+layer.attribution(
+  'Map tiles by <a href="http://stamen.com">Stamen Design</a>, ' +
+  'under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>.  ' +
+  'Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, ' +
+  'under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.')</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 2</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run">Run</button><button class="codeblock_reset">Reset</button></div></div><div class="codeblock_test" data-description="url is from stamen.com" data-tests="[&quot;layer.url().match(/stamen/)&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>We could have initially created the layer with a different tile server:</p>
+<div class="codeblock" format="javascript" step="3" stepname="Step 1-B" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">var map = geo.map({
+  node: "#map"
+});
+var layer = map.createLayer('osm', {
+  url: 'http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png',
+  attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.'
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 1-B</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run">Run</button><button class="codeblock_reset">Reset</button></div></div><div class="codeblock_test" data-description="map has one osm layer from stamen" data-tests="[&quot;map.layers().length === 1&quot;,&quot;map.layers()[0] instanceof geo.osmLayer&quot;,&quot;layer.url().match(/stamen/)&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div></div><iframe id="workframe"></iframe></div>

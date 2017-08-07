@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Run after the DOM loads</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-meta">  'use strict'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Create a map object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({<span class="hljs-attr">node</span>: <span class="hljs-string">'#map'</span>, <span class="hljs-attr">zoom</span>: <span class="hljs-number">3</span>});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Add and start a clock</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> clock = geo.clock();
+  <span class="hljs-keyword">var</span> omega = <span class="hljs-number">10000</span>;
+
+  clock.object(map);
+  clock.start(<span class="hljs-number">0</span>)
+    .step(<span class="hljs-number">1</span>)
+    .end(omega)
+    .state(<span class="hljs-string">'play'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Add an OSM layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  map.createLayer(<span class="hljs-string">'osm'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Add a feature layer with a D3 renderer.  We could, instead, ask for any
+renderer that supports point features, like so:
+ var features = map.createLayer(‘feature’, {features: [‘point’]});</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> features = map.createLayer(<span class="hljs-string">'feature'</span>, {<span class="hljs-attr">renderer</span>: <span class="hljs-string">'d3'</span>});
+
+  <span class="hljs-keyword">var</span> numberOfFeatures = <span class="hljs-number">200</span>;
+
+  <span class="hljs-keyword">var</span> alpha = <span class="hljs-number">50.0</span>;
+  <span class="hljs-keyword">var</span> beta = <span class="hljs-number">10.0</span>;
+  <span class="hljs-keyword">var</span> gamma = alpha / beta;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Update the features when value of the clock changes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  map.geoOn(geo.event.clock.change, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
+    features.clear();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Create the data for the features</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> currentTime = evt.current.valueOf();
+    <span class="hljs-keyword">var</span> theta = <span class="hljs-number">2.0</span> * <span class="hljs-built_in">Math</span>.PI * currentTime / omega;
+    <span class="hljs-keyword">var</span> positions = [];
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; numberOfFeatures; ++i) {
+      <span class="hljs-keyword">var</span> t = theta + <span class="hljs-number">2.0</span> * <span class="hljs-built_in">Math</span>.PI * i / numberOfFeatures;
+      <span class="hljs-keyword">var</span> x = alpha * <span class="hljs-built_in">Math</span>.cos(t) + beta * <span class="hljs-built_in">Math</span>.cos(gamma * t);
+      <span class="hljs-keyword">var</span> y = alpha * <span class="hljs-built_in">Math</span>.sin(t) + beta * <span class="hljs-built_in">Math</span>.sin(gamma * t);
+
+      positions.push({<span class="hljs-attr">x</span>: x, <span class="hljs-attr">y</span>: y});
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Create and draw the features</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> yellow = {<span class="hljs-attr">r</span>: <span class="hljs-number">255</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">255</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>};
+    <span class="hljs-keyword">var</span> red = {<span class="hljs-attr">r</span>: <span class="hljs-number">255</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>};
+
+    features.createFeature(<span class="hljs-string">'point'</span>)
+      .data(positions)
+      .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+        <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: data.x, <span class="hljs-attr">y</span>: data.y};
+      })
+      .style(<span class="hljs-string">'radius'</span>, <span class="hljs-number">5</span>)
+      .style(<span class="hljs-string">'fillColor'</span>, yellow)
+      .style(<span class="hljs-string">'strokeColor'</span>, red)
+      .style(<span class="hljs-string">'strokeWidth'</span>, <span class="hljs-number">1</span>)
+      .draw();
+  });
+
+});</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
