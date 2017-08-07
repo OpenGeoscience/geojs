@@ -4,13 +4,108 @@ var util = require('./util');
 var Mousetrap = require('mousetrap');
 
 /**
+ * Map Interactor specification.
+ *
+ * @typedef {object} geo.mapInteractor.spec
+ * @property {number} [throttle=30] Mouse events are throttled so that an event
+ *      occurs no more often that this number of milliseconds.
+ * @property {boolean|number} [discreteZoom=false] If `true`, only allow
+ *      discrete (integer) zoom levels and debounce with a 400 ms delay.  If a
+ *      positive number, debounce zoom events with the given delay in
+ *      milliseconds.
+ * @property {geo.actionRecord[]} [actions] The list of available actions.  See
+ *      the code for the full default list.
+ * @property {object} [click] An object specifying if click events should be
+ *      handled.
+ * @property {boolean} [click.enabled=true] Truthy to enable click events.
+ * @property {object} [click.buttons] An object with button names (`left`,
+ *      `right`, `middle`), each of which is a boolean which indicates if that
+ *      button triggers a click event.
+ * @property {number} [click.duration=0] If a positive number, the mouse up
+ *      event must occur within this time in milliseconds of the mouse down
+ *      event for it to be considered a click.
+ * @property {boolean} [click.cancelOnMove=true] If truthy, don't generate
+ *      click events if the mouse moved at all.
+ * @property {object} [keyboard] An object describing which keyboard events are
+ *      handled.
+ * @property {object} [keyboard.actions] An object with different actions that
+ *      are trigger by the keyboard.  Each key is the event that is triggered,
+ *      with the values a list of keys that trigger the event.  See the code
+ *      for the defaults.
+ * @property {object} [keyboard.meta] Keyboard events can generate actions of
+ *      different magnitudes.  This is an object with keys of `0`, `1`, and
+ *      `2`, corresponding to small, medium, and large actions.  Each entry is
+ *      an object with keys of the meta keys that are required to be down or
+ *      up for that scale action to trigger.  If the value of the meta key is
+ *      truthy, it must be down.  If `false`, it must be up.
+ * @property {boolean} [keyboard.focusHighlight=true] If truthy, when the map
+ *      gains focus, a highlight style is shown around it.  This gives an
+ *      indicator that keyboard events will affect the map, but may not be
+ *      visuallly desirabel.
+ * @property {boolean} [alwaysTouch=false] If true, add touch support even if
+ *      the browser doesn't apepar to be touch-aware.
+ * @property {number} [wheelScaleX=1] A scale multiplier for horizontal wheel
+ *      interactions.
+ * @property {number} [wheelScaleY=1] A scale multiplier for vertical wheel
+ *      interactions.
+ * @property {number} [zoomScale=1] This affects how far the mouse must be
+ *      dragged to zoom one level.  Roughly, the mouse must move `zoomScale` *
+ *      120 pixels per level.
+ * @property {number} [rotateWheelScale=0.105] When the mouse wheel is used for
+ *      rotation, this is the number of radians per wheel step.
+ * @property {number} [zoomrotateMinimumRotation=0.087] The minimum angle of
+ *      rotation in radians before a `geo_action.zoomrotate` action will allow
+ *      rotation.  Set to 0 to always include rotation.
+ * @property {number} [zoomrotateReverseRotation=0.698] The minimum angle of
+ *      rotation (in radians) before the `geo_action.zoomrotate` action will
+ *      reverse the rotation direction.  This helps reduce chatter when zooms
+ *      and pans are combined with rotations.
+ * @property {number} [zoomrotateMinimumZoom=0.05] The minimum zoom factor
+ *      change (increasing or desceasing) before the `geo_action.zoomrotate`
+ *      action will allow zoom.  Set to 0 to always include zoom.
+ * @property {number} [zoomrotateMinimumPan=5] The minimum number of pixels
+ *      before the `geo_action.zoomrotate` action will allow panning.  Set to 0
+ *      to always include panning.
+ * @property {number} [touchPanDelay=50] The touch pan delay prevents a touch
+ *      pan event from immediately following a rotate (including zoom) event.
+ *      No touch pan event is processed within this number of milliseconds of a
+ *      non-pan touch event.
+ * @property {object} [momentum] Enable momentum when panning and zooming.
+ * @property {boolean} [momentum.enabled=true] Truthy to allow momentum.
+ * @property {number} [momentum.maxSpeed=2.5] Maximum animation speed.
+ * @property {number} [momentum.minSpeed=0.01] Animations top when they drop
+ *      below this speed.
+ * @property {number} [momentum.stopTime=250] If the mouse hasn't moved in this
+ *      many milliseconds, don't apply momentum.  The movement is a separate
+ *      action from the preceding movement.
+ * @property {number} [momentum.drag=0.01] Drag coefficient; larger values slow
+ *      down faster.
+ * @property {string[]} [momentum.actions] A list of actions on which to apply
+ *      momentum.  Defaults to pan and zoom.
+ * @property {object} [spring] Enable spring clamping to screen edges.
+ * @property {boolean} [spring.enabled=true] Truthy to allow edge spring back.
+ * @property {number} [spring.springConstant=0.00005] Higher values spring back
+ *      faster.
+ * @property {object} [zoomAnimation] Enable zoom animation for both discrete
+ *      and continuous zoom.
+ * @property {boolean} [zoomAnimation.enabled=true] Truthy to allow zoom
+ *      animation.
+ * @property {number} [zoomAnimation.duration=500] The time it takes for the
+ *      final zoom to be reached.
+ * @property {function} [zoomAnimation.ease] The easing function for the zoom.
+ *      The default is `(2 - t) * t`.
+ */
+
+/**
  * The mapInteractor class is responsible for handling raw events from the
  * browser and interpreting them as map navigation interactions.  This class
  * will call the navigation methods on the connected map, which will make
  * modifications to the camera directly.
  *
- * @class geo.mapInteractor
+ * @class
+ * @alias geo.mapInteractor
  * @extends geo.object
+ * @param {geo.mapInterator.spec} args Interactor specification object.
  * @returns {geo.mapInteractor}
  */
 var mapInteractor = function (args) {
@@ -196,9 +291,9 @@ var mapInteractor = function (args) {
         /* if focusHighlight is truthy, then a class is added to the map such
          * that when the map gets focus, it is indicated inside the border of
          * the map -- browsers usually show focus on the outside, which isn't
-         * useful if the map is full window.  It might be desireable to change
+         * useful if the map is full window.  It might be desirable to change
          * this so it is only present if the focus is reached via the keyboard
-         * (which would propably require detecting keyup events). */
+         * (which would probably require detecting keyup events). */
         focusHighlight: true
       },
       /* Set alwaysTouch to false to only add touch support on devices that
@@ -218,7 +313,7 @@ var mapInteractor = function (args) {
        * This helps reduce chatter when zooms and pans are combined with
        * rotations. */
       zoomrotateReverseRotation: 4.0 * Math.PI / 180,
-      /* The minimum zoom factor change (increasing or descreasing) before the
+      /* The minimum zoom factor change (increasing or decreasing) before the
        * geo_action.zoomrotate action will allow zoom.  Set to 0 to always
        * include zoom. */
       zoomrotateMinimumZoom: 0.05,
@@ -261,70 +356,6 @@ var mapInteractor = function (args) {
   if (args && args.keyboard && args.keyboard.actions !== undefined) {
     m_options.keyboard.actions = $.extend(true, {}, args.keyboard.actions);
   }
-
-  /*
-   * options supported:
-   * {
-   *    * throttle mouse events to at most this many milliseconds each (default 30)
-   *   throttle: number
-   *
-   *    * Clamp zoom events to discrete (integer) zoom levels.  If a number is
-   *    * provided then zoom events will be debounced (and accumulated)
-   *    * with the given delay.  The default debounce interval is 400 ms.
-   *   discreteZoom: boolean | number > 0
-   *
-   *    * A list of available actions.  See above
-   *   actions: []
-   *
-   *    * wheel scale factor to change the magnitude of wheel interactions
-   *   wheelScaleX: 1
-   *   wheelScaleY: 1
-   *
-   *    * zoom scale factor to change the magnitude of zoom move interactions
-   *   zoomScale: 1
-   *
-   *    * scale factor to change the magnitude of wheel rotation interactions
-   *   rotateWheelScale: 1
-   *
-   *    * enable momentum when panning
-   *   momentum: {
-   *     enabled: true | false,
-   *     maxSpeed: number, // don't allow animation to pan faster than this
-   *     minSpeed: number, // stop animations if the speed is less than this
-   *     stopTime: number, // if the mouse hasn't moved for this many
-   *                        * milliseconds, don't apply momentum
-   *     drag: number, // drag coefficient
-   *     actions: [geo_action.pan, geo_action.zoom]
-   *                                       * actions on which to apply momentum
-   *   }
-   *
-   *    * enable spring clamping to screen edges to enforce clamping
-   *   spring: {
-   *     enabled: true | false,
-   *     springConstant: number,
-   *   }
-   *
-   *    * enable animation for both discrete and continuous zoom
-   *   zoomAnimation: {
-   *     enabled: true | false,
-   *     duration: number,   * milliseconds
-   *     ease: function      * easing function
-   *   }
-   *
-   *    * enable the "click" event
-   *    * A click will be registered when a mouse down is followed
-   *    * by a mouse up in less than the given number of milliseconds
-   *    * and the standard handler will *not* be called
-   *    * If the duration is <= 0, then clicks will only be canceled by
-   *    * a mousemove.
-   *   click: {
-   *     enabled: true | false,
-   *     buttons: {left: true, right: true, middle: true}
-   *     duration: 0,
-   *     cancelOnMove: true // cancels click if the mouse is moved before release
-   *   }
-   * }
-   */
 
   // default mouse object
   m_mouse = {
@@ -413,9 +444,9 @@ var mapInteractor = function (args) {
    * Process keys that we've captured.  Metakeys determine the magnitude of
    * the action.
    *
-   * @param {string} action: the basic action to take.
-   * @param {object} evt: the event with metakeys.
-   * @param {object} keys: keys used to trigger the event.  keys.simualted is
+   * @param {string} action The basic action to take.
+   * @param {object} evt The event with metakeys.
+   * @param {object} keys Keys used to trigger the event.  `keys.simulated` is
    *    true if artificially triggered.
    */
   this._handleKeys = function (action, evt, keys) {
@@ -527,7 +558,7 @@ var mapInteractor = function (args) {
    * Copied from https://github.com/hammerjs/touchemulator under the MIT
    * license.
    *
-   * @returns {boolean}: true if there is touch support.
+   * @returns {boolean} `true` if there is touch support.
    */
   this.hasTouchSupport = function () {
     return ('ontouchstart' in window) || // touch events
@@ -538,7 +569,7 @@ var mapInteractor = function (args) {
   /**
    * Handle touch events.
    *
-   * @param {object} evt: the touch event.
+   * @param {object} evt The touch event.
    */
   this._handleTouch = function (evt) {
     var endIfBound = false;
@@ -615,20 +646,20 @@ var mapInteractor = function (args) {
 
   /**
    * Connects events to a map.  If the map is not set, then this does nothing.
-   * @returns {geo.mapInteractor}
+   * @returns {this}
    */
   this._connectEvents = function () {
     if (!m_options.map) {
       return m_this;
     }
 
-    // prevent double binding to dom elements
+    // prevent double binding to DOM elements
     m_this._disconnectEvents();
 
     // store the connected element
     $node = $(m_options.map.node());
 
-    // set methods related to asyncronous event handling
+    // set methods related to asynchronous event handling
     m_this._handleMouseWheel = throttled_wheel();
     m_callZoom = debounced_zoom();
 
@@ -712,7 +743,7 @@ var mapInteractor = function (args) {
   /**
    * Disconnects events to a map.  If the map is not set, then this does
    * nothing.
-   * @returns {geo.mapInteractor}
+   * @returns {this}
    */
   this._disconnectEvents = function () {
     if (m_boundKeys) {
@@ -737,10 +768,12 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Sets or gets map for this interactor, adds draw region layer if needed
+   * Sets or gets map for this interactor, adds draw region layer if needed.
    *
-   * @param {geo.map} newMap optional
-   * @returns {geo.interactorStyle|geo.map}
+   * @param {geo.map} [val] Either a new map object for `undefined` to return
+   *    the current map object.
+   * @returns {geo.map|this} Either the current map object or the
+   *    mapInteractor class instance.
    */
   this.map = function (val) {
     if (val !== undefined) {
@@ -754,8 +787,8 @@ var mapInteractor = function (args) {
   /**
    * Gets/sets the options object for the interactor.
    *
-   * @param {object} opts optional
-   * @returns {geo.interactorStyle|object}
+   * @param {geo.mapInteractor.spec} opts Options to set.
+   * @returns {geo.mapInteractor.spec|this}
    */
   this.options = function (opts) {
     if (opts === undefined) {
@@ -769,7 +802,7 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Stores the current mouse position from an event
+   * Stores the current mouse position from an event.
    *
    * @param {jQuery.Event} evt JQuery event with the mouse position.
    */
@@ -802,7 +835,9 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Stores the current mouse button
+   * Stores the current mouse button state in the m_mouse object.
+   *
+   * @param {jQuery.Event} evt The event that trigger the mouse action.
    */
   this._getMouseButton = function (evt) {
     for (var prop in m_mouse.buttons) {
@@ -825,7 +860,10 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Stores the current keyboard modifiers
+   * Stores the current keyboard modifiers from an event in the m_mouse
+   * object.
+   *
+   * @param {jQuery.Event} evt JQuery event with the keyboard modifiers.
    */
   this._getMouseModifiers = function (evt) {
     m_mouse.modifiers.alt = evt.altKey;
@@ -893,10 +931,10 @@ var mapInteractor = function (args) {
   /**
    * Immediately cancel an ongoing action.
    *
-   * @param {string?} action The action type, if null cancel any action
-   * @param {bool} keepQueue If truthy, keep the queue event if an action is
-   *                         canceled.
-   * @returns {bool} If an action was canceled
+   * @param {string?} action The action type, if `null` cancel any action.
+   * @param {boolean} [keepQueue] If truthy, keep the queue event if an action
+   *    is canceled.
+   * @returns {boolean} Set if an action was canceled.
    */
   this.cancel = function (action, keepQueue) {
     var out;
@@ -918,6 +956,10 @@ var mapInteractor = function (args) {
   /**
    * Set the value of whether a click is possible.  Cancel any outstanding
    * timer for this process.
+   *
+   * @param {false|object} value If `false`, there is no chance of a future
+   *    click.  If an object with coordinates and the mouse button state,
+   *    a click is possible if the same button is released nearby.
    */
   this._setClickMaybe = function (value) {
     m_clickMaybe = value;
@@ -928,7 +970,9 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Handle event when a mouse button is pressed
+   * Handle event when a mouse button is pressed.
+   *
+   * @param {jQuery.Event} evt The event that triggered this.
    */
   this._handleMouseDown = function (evt) {
     var action, actionRecord;
@@ -1033,7 +1077,9 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Handle mouse move event
+   * Handle mouse move event.
+   *
+   * @param {jQuery.Event} evt The event that triggered this.
    */
   this._handleMouseMove = function (evt) {
     if (m_paused) {
@@ -1064,7 +1110,7 @@ var mapInteractor = function (args) {
   /**
    * Handle the zoomrotate action.
    *
-   * @param {object} evt: the mouse event that triggered this.
+   * @param {object} evt The mouse event that triggered this.
    */
   this._handleZoomrotate = function (evt) {
     /* Only zoom if we have once exceeded the initial zoom threshold. */
@@ -1134,7 +1180,9 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Handle mouse move event on the document (temporary bindings)
+   * Handle mouse move event on the document (temporary bindings).
+   *
+   * @param {jQuery.Event} evt The event that triggered this.
    */
   this._handleMouseMoveDocument = function (evt) {
     var dx, dy, selectionObj;
@@ -1215,9 +1263,9 @@ var mapInteractor = function (args) {
    * Use interactor options to modify the mouse velocity by momentum
    * or spring equations depending on the current map state.
    * @private
-   * @param {object} v Current velocity in pixels / ms
-   * @param {number} deltaT The time delta
-   * @returns {object} New velocity
+   * @param {object} v Current velocity in pixels / millisecond.
+   * @param {number} deltaT The time delta.
+   * @returns {object} New velocity.
    */
   function modifyVelocity(v, deltaT) {
     deltaT = deltaT <= 0 ? 30 : deltaT;
@@ -1248,9 +1296,9 @@ var mapInteractor = function (args) {
   }
 
   /**
-   * Get the spring force for the current map bounds
+   * Get the spring force for the current map bounds.
    * @private
-   * @returns {object} The spring force
+   * @returns {object} The spring force.
    */
   function springForce() {
     var xplus,  // force to the right
@@ -1293,11 +1341,11 @@ var mapInteractor = function (args) {
    * recenter.
    *
    * @private
-   * @param {string} action Either geo_action.zoomselect or
-   *    geo_action.unzoomselect.
-   * @param {object} lowerLeft the x and y coordinates of the lower left corner
+   * @param {string} action Either `geo_action.zoomselect` or
+   *    `geo_action.unzoomselect`.
+   * @param {object} lowerLeft The x and y coordinates of the lower left corner
    *    of the zoom rectangle.
-   * @param {object} upperRight the x and y coordinates of the upper right
+   * @param {object} upperRight The x and y coordinates of the upper right
    *    corner of the zoom rectangle.
    */
   this._zoomFromSelection = function (action, lowerLeft, upperRight) {
@@ -1355,6 +1403,8 @@ var mapInteractor = function (args) {
   /**
    * Handle event when a mouse button is unpressed on the document.
    * Removes temporary bindings.
+   *
+   * @param {jQuery.Event} evt The event that triggered this.
    */
   this._handleMouseUpDocument = function (evt) {
     var selectionObj, oldAction;
@@ -1395,7 +1445,9 @@ var mapInteractor = function (args) {
       m_this._zoomFromSelection(m_state.action, selectionObj.display.lowerLeft,
                                 selectionObj.display.upperRight);
       m_this.map().geoTrigger(geo_event.actionselection, {
-        state: m_this.state(), mouse: m_this.mouse(), event: evt,
+        state: m_this.state(),
+        mouse: m_this.mouse(),
+        event: evt,
         lowerLeft: selectionObj.display.lowerLeft,
         upperRight: selectionObj.display.upperRight});
     }
@@ -1423,7 +1475,9 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Handle event when a mouse button is unpressed
+   * Handle event when a mouse button is unpressed.
+   *
+   * @param {jQuery.Event} evt The event that triggered this.
    */
   this._handleMouseUp = function (evt) {
     if (m_paused) {
@@ -1442,6 +1496,8 @@ var mapInteractor = function (args) {
    * event that occurs when the time between a mouse down and mouse up
    * is less than the configured duration and (optionally) if no mousemove
    * events were triggered in the interim.
+   *
+   * @param {jQuery.Event} evt The event that triggered this.
    */
   this._handleMouseClick = function (evt) {
 
@@ -1475,7 +1531,9 @@ var mapInteractor = function (args) {
   /**
    * Private wrapper around the map zoom method that is debounced to support
    * discrete zoom interactions.
-   * @param {number} deltaZ The zoom increment
+   *
+   * @returns {function} A function to handle zooms that debounces such
+   *    events.  This function is passed the zoom level and the mouse state.
    */
   function debounced_zoom() {
     var deltaZ = 0, delay = 400, origin, startZoom, targetZoom;
@@ -1575,6 +1633,9 @@ var mapInteractor = function (args) {
    * Attaches wrapped methods for accumulating fast mouse wheel events and
    * throttling map interactions.
    * @private
+   *
+   * @returns {function} A function that takes a jQuery.Event for mouse wheel
+   *    actions.
    */
   function throttled_wheel() {
     var my_queue = {};
@@ -1688,9 +1749,14 @@ var mapInteractor = function (args) {
   /**
    * Start up a spring back action when the map bounds are out of range.
    * Not to be user callable.
-   * @todo Move this and momentum handling to the map class
    * @protected
    *
+   * @param {boolean} initialVelocity Truthy if the mouse's current velocity
+   *    should be used as the initial velocity.  False to assume no initial
+   *    velocity.
+   * @param {object} origAction The original action that started the spring
+   *    back.  If this was a zoom action, the spring back includes zoom;
+   *    otherwise it only includes panning.
    */
   this.springBack = function (initialVelocity, origAction) {
     if (m_state.action === geo_action.momentum) {
@@ -1769,13 +1835,7 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Handle double click event
-   */
-  this._handleDoubleClick = function () {
-  };
-
-  /**
-   * Public method that unbinds all events
+   * Public method that unbinds all events.
    */
   this.destroy = function () {
     m_this._disconnectEvents();
@@ -1786,14 +1846,21 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Get current mouse information
+   * Get current mouse information.
+   *
+   * @returns {object} The current mouse state.
    */
   this.mouse = function () {
     return $.extend(true, {}, m_mouse);
   };
 
   /**
-   * Get/set current keyboard information
+   * Get/set current keyboard information.
+   *
+   * @param {object} [newValue] Either a object with new options for the
+   *    keyboard actions or `undefined` to get the current options.
+   * @returns {object|this} Either the current keyboard options or this
+   *    mapInteractor class instance.
    */
   this.keyboard = function (newValue) {
     if (newValue === undefined) {
@@ -1803,7 +1870,7 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Get the current interactor state
+   * Get the current interactor state.
    *
    * @returns {geo.interactorState}
    */
@@ -1812,12 +1879,12 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Get or set the pause state of the interactor, which
-   * ignores all native mouse and keyboard events.
+   * Get or set the pause state of the interactor, which ignores all native
+   * mouse and keyboard events.
    *
-   * @param {bool} [value] The pause state to set or undefined to return the
-   *                        current state.
-   * @returns {bool|this}
+   * @param {boolean} [value] The pause state to set or undefined to return
+   *    the current state.
+   * @returns {boolean|this} The current pause state or this class instance.
    */
   this.pause = function (value) {
     if (value === undefined) {
@@ -1830,13 +1897,13 @@ var mapInteractor = function (args) {
   /**
    * Add an action to the list of handled actions.
    *
-   * @param {object} action: an object defining the action.  This must have
+   * @param {object} action An object defining the action.  This must have
    *    action and input properties, and may have modifiers, name, and owner.
    *    Use action, name, and owner to make this entry distinct if it will need
    *    to be removed later.
-   * @param {boolean} toEnd: the action is added at the beginning of the
-   *    actions list unless toEnd is true.  Earlier actions prevent later
-   *    actions with the similar input and modifiers.
+   * @param {boolean} [toEnd] The action is added at the beginning of the
+   *    actions list unless truthy.  Earlier actions prevent later actions with
+   *    similar input and modifiers.
    */
   this.addAction = function (action, toEnd) {
     if (!action || !action.action || !action.input) {
@@ -1861,7 +1928,7 @@ var mapInteractor = function (args) {
    *    action.
    * @param {string} name Optional name associated with the action.
    * @param {string} owner Optional owner associated with the action.
-   * @return action the first matching action or null.
+   * @returns {object|null} The first matching action or null.
    */
   this.hasAction = function (action, name, owner) {
     return util.hasAction(m_options.actions, action, name, owner);
@@ -1874,7 +1941,7 @@ var mapInteractor = function (args) {
    *    action.
    * @param {string} name Optional name associated with the action.
    * @param {string} owner Optional owner associated with the action.
-   * @return numRemoved the number of actions that were removed.
+   * @returns {number} The number of actions that were removed.
    */
   this.removeAction = function (action, name, owner) {
     var removed = util.removeAction(
@@ -1888,21 +1955,52 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Simulate a DOM mouse event on connected map.
+   * Simulate a DOM mouse event on connected map.  Not all options are required
+   * for every event type.
    *
-   * The options for creating the events are as follows, not all
-   * options are required for every event type. ::
-   *
-   *   options = {
-   *     page: {x, y} // position on the page
-   *     map: {x, y}  // position on the map (overrides page)
-   *     button: 'left' | 'right' | 'middle'
-   *     modifiers: [ 'alt' | 'ctrl' | 'meta' | 'shift' ]
-   *     wheelDelta: {x, y}
-   *   }
-   *
-   * @param {string} type Event type 'mousemove', 'mousedown', 'mouseup', ...
-   * @param {object} options
+   * @param {string} type Event type `mousemove`, `mousedown`, `mouseup`, etc.
+   *    `keyboard` is treated separately from other types.
+   * @param {object} options Options for the simulated event.
+   * @param {boolean} [options.shift] A boolean if a `keyboard` event has the
+   *    shift key down or explicitly up.
+   * @param {boolean} [options.shiftKey] Alternate name to `shift`.
+   * @param {boolean} [options.ctrl] A boolean if a `keyboard` event has the
+   *    control key down or explicitly up.
+   * @param {boolean} [options.ctrlKey] Alternate name to `ctrl`.
+   * @param {boolean} [options.alt] A boolean if a `keyboard` event has the
+   *    alt key down or explicitly up.
+   * @param {boolean} [options.altKey] Alternate name to `alt`.
+   * @param {boolean} [options.meta] A boolean if a `keyboard` event has the
+   *    meta key down or explicitly up.
+   * @param {boolean} [options.metaKey] Alternate name to `meta`.
+   * @param {string} [options.keys] A Mousetrap-style key sequence string for
+   *    `keyboard` events.
+   * @param {geo.screenPosition} [options.page] The position of the event on
+   *    the window.  Overridden by `map`.
+   * @param {geo.screenPosition} [options.map] The position of the event on the
+   *    map in pixels relative to the map's div.
+   * @param {geo.screenPosition} [options.center] The position of a touch
+   *    event center relative to the window.
+   * @param {string} [button] One of `left`, `middle`, or `right` for mouse
+   *    events.
+   * @param {string} [modifiers] A space-separated list of metakeys that are
+   *    down on mouse events.
+   * @param {geo.screenPosition} [wheelDelta] The amount the wheel moved in
+   *    both directions for wheel events.  One step is often 20 units of
+   *    vement.
+   * @param {number} [wheelMode] The wheel delta mode.  See
+   *    https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent .
+   * @param {boolean} [touch] `truthy` if this is a touch event.
+   * @param {number} [rotation] Touch event rotation in degrees.
+   * @param {number} [scale] Touch event scale.  Initial events should have a
+   *    scale of 1; subsequent events should increase or decrease this to
+   *    simulate spread and pinch actions.
+   * @param {number[]} [pointers] A list of pointer numbers involved in a
+   *    touch event.  Pointers are number from one up, so `[1]` is the first
+   *    touch point, `[1, 2]` are two touch points, and `[2]` is when the first
+   *    point was released but the second is still touching.
+   * @param {string} [pointerType] `mouse` if this is a mouse action rather
+   *    than a touch action.
    * @returns {mapInteractor}
    */
   this.simulateEvent = function (type, options) {
