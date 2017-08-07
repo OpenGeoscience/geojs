@@ -214,12 +214,16 @@ module.exports = function (config) {
       {pattern: 'tests/gl-cases/**/*.js', included: false, served: false, watched: true},
       {pattern: 'tests/example-cases/**/*.js', included: false, served: false, watched: true},
       {pattern: 'dist/data/**/*', included: false},
-      {pattern: 'dist/examples/**/*', included: false}
+      {pattern: 'dist/examples/**/*', included: false},
+      {pattern: 'dist/tutorials/**/*', included: false},
+      {pattern: 'dist/built/**/*', included: false}
     ],
     proxies: {
       '/testdata/': '/base/tests/data/',
       '/data/': '/base/dist/data/',
-      '/examples/': '/base/dist/examples/'
+      '/examples/': '/base/dist/examples/',
+      '/tutorials/': '/base/dist/tutorials/',
+      '/built/': '/base/dist/built/'
     },
     browsers: [
       'PhantomJS'

@@ -1,0 +1,46 @@
+extends ./common/index.pug
+
+mixin thumbnail(ex)
+  .col-md-4
+    .thumbnail
+      a(href=ex.path + "/")
+        img(src=ex.path + "/" + (ex.thumb || "thumb.jpg"), onerror="var url = 'common/thumb.png'; if (this.src!=url) this.src = url;")
+        .caption
+          h3= ex.title
+          if ex.about.text
+            .description
+              p= ex.about.text
+
+block prepend headerButtons
+  ul.nav.navbar-nav.navbar-right
+    li.dropdown
+      a.dropdown-toggle(href="#", data-toggle="dropdown") Resources
+        span.caret
+      ul.dropdown-menu(role="menu")
+        li
+          a(href="https://github.com/OpenGeoscience/geojs") Source
+          a(href="https://github.com/OpenGeoscience/geojs/issues") Bugs
+          a(href="http://opengeoscience.github.io/geojs/apidocs/") Documentation
+          a(href="http://geojs.readthedocs.org/en/latest/") Developers guide
+          a(href="http://my.cdash.org/index.php?project=geojs") Testing
+
+block mainContent
+  .jumbotron
+    .container
+      h1 Welcome to GeoJS
+      p   GeoJS is a javascript library for visualizing geospatial
+        | data in a browser.  Its flexible API provides users with
+        | the ability to combine multiple visualizations drawn
+        | in WebGL, canvas, and SVG into a single dynamic map.
+      p   It is easy to get started with GeoJS.  See the tutorials below.
+
+  .container-fluid
+    - var iTutorial = 0;
+    while iTutorial < tutorials.length
+      .row
+        - var i = 0
+        while i < 3 && iTutorial < tutorials.length
+          if !tutorials[iTutorial].disabled
+            - i += 1
+            +thumbnail(tutorials[iTutorial])
+          - iTutorial += 1

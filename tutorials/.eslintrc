@@ -1,0 +1,8 @@
+{
+  "globals": {
+    "d3": true,
+    "geo": true,
+    "$": true,
+    "CodeMirror": true
+  }
+}
