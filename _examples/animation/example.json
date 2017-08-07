@@ -1,9 +1,0 @@
-{
-  "path": "animation",
-  "title": "Animate Features",
-  "exampleCss": ["main.css"],
-  "exampleJs": ["main.js"],
-  "about": {
-    "text": "This example shows how to animate features by updating styles."
-  }
-}

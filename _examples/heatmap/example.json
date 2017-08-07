@@ -1,9 +1,0 @@
-{
-  "path": "heatmap",
-  "title": "Heatmap Feature",
-  "exampleCss": ["main.css"],
-  "exampleJs": ["main.js"],
-  "about": {
-    "text": "This example shows how to add a heatmap to a map."
-  }
-}
