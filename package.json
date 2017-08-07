@@ -85,8 +85,8 @@
   },
   "scripts": {
     "build": "webpack --config webpack.config.js && webpack --config external.config.js",
-    "build-examples": "webpack --config webpack-examples.config.js",
-    "build-tutorials": "webpack --config webpack-tutorials.config.js",
+    "build-examples": "webpack --config webpack-examples.config.js && npm run build-website",
+    "build-tutorials": "webpack --config webpack-tutorials.config.js && npm run build-website",
     "lint": "eslint --cache .",
     "puglint": "pug-lint src examples",
     "test": "GEOJS_TEST_CASE=tests/test-unit.js karma start karma-cov.conf.js --single-run --browsers PhantomJS",
@@ -102,7 +102,8 @@
     "examples": "webpack-dev-server --config webpack-examples.config.js --host ${HOST-127.0.0.1} --port ${PORT-8082} --content-base dist/",
     "start-test": "node examples/build.js; forever start ./testing/test-runners/server.js",
     "stop-test": "forever stop ./testing/test-runners/server.js",
-    "docs": "jsdoc --pedantic -d dist/apidocs -r src -c jsdoc.conf.json"
+    "docs": "jsdoc --pedantic -d dist/apidocs -r src -c jsdoc.conf.json && npm run build-website",
+    "build-website": "cp -a dist/built/. website/built && cp -a dist/tutorials/. website/_tutorials && cp -a dist/examples/. website/_examples && cp -a dist/apidocs/. website/apidocs && jekyll build -s website/ -d dist/website/"
   },
   "keywords": [
     "map",

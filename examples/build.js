@@ -5,7 +5,7 @@ var docco = require('docco').document;
 var pug = require('pug');
 
 // generate the examples
-fs.ensureDirSync('dist/_examples');
+fs.ensureDirSync('dist/examples');
 glob('examples/*/example.json')
   .map(function (f) {
     // /path/to/example.json
@@ -21,7 +21,7 @@ glob('examples/*/example.json')
     var main = path.resolve(dir, json.exampleJs[0]);
 
     // the output directory where the example will be compiled
-    var output = path.resolve('dist', '_examples', json.path);
+    var output = path.resolve('dist', 'examples', json.path);
 
     // create, empty, and copy the source directory
     fs.emptyDirSync(output);
