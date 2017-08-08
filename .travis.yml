@@ -8,7 +8,8 @@ node_js:
   - 4
 
 addons:
-  firefox: latest
+  # firefox: latest  # version 55.0 has an issue.
+  firefox: 54.0.1
   apt:
     packages:
       # I suspect that not all of these are necessary
