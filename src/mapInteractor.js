@@ -553,7 +553,7 @@ var mapInteractor = function (args) {
         return;
       }
     }
-    var evtType = /^(.*)(start|end|move)$/.exec(evt.type);
+    var evtType = /^(.*)(start|end|move|tap)$/.exec(evt.type);
     if (!evtType || evtType.length !== 3) {
       endIfBound = true;
     }
@@ -602,6 +602,14 @@ var mapInteractor = function (args) {
         m_this._handleMouseUp(evt);
       }
       m_touchHandler.lastEvent = null;
+    }
+    /* tap events are represented as a mouse left button down and up. */
+    if (evtType[2] === 'tap' && !m_state.boundDocumentHandlers) {
+      evt.which = 1;
+      m_touchHandler.lastEventType = null;
+      m_this._handleMouseDown(evt);
+      m_this._handleMouseUp(evt);
+      m_touchHandler.lastEventType = evtType[2];
     }
   };
 
@@ -681,12 +689,17 @@ var mapInteractor = function (args) {
           recog.push([Hammer.Pan, {direction: Hammer.DIRECTION_ALL}]);
           touchEvents = touchEvents.concat(['panstart', 'panend', 'panmove']);
         }
+        /* Always handle tap events.  Reject double taps. */
+        recog.push([Hammer.Tap, {event: 'doubletap', taps: 2}]);
+        recog.push([Hammer.Tap, {event: 'singletap'}, undefined, ['doubletap']]);
+        touchEvents = touchEvents.concat(['singletap']);
         var hammerParams = {recognizers: recog, preventDefault: true};
         m_touchHandler = {
           manager: new Hammer.Manager($node[0], hammerParams),
           touchSupport: m_this.hasTouchSupport(),
           lastTime: 0
         };
+        m_touchHandler.manager.get('doubletap').recognizeWith('singletap');
         touchEvents.forEach(function (touchEvent) {
           m_touchHandler.manager.on(touchEvent, m_this._handleTouch);
         });
@@ -921,6 +934,12 @@ var mapInteractor = function (args) {
     var action, actionRecord;
 
     if (m_paused) {
+      return;
+    }
+    /* In some scenarios, we get both a tap event and then, somewhat later, a
+     * set of mousedown/mouseup events.  Ignore the spurious down/up set if we
+     * just handled a tap. */
+    if (m_touchHandler && m_touchHandler.lastEventType === 'tap' && (new Date()).valueOf() - m_touchHandler.lastTime < 1000) {
       return;
     }
 
