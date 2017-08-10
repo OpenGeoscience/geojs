@@ -1582,25 +1582,25 @@ describe('mapInteractor', function () {
       map.geoOn(geo.event.mousemove, lastmove);
       interactor.simulateEvent(
         'mousemove', {map: {x: 4, y: 5}});
-      expect(lastmap).toEqual({x:4, y: 5});
+      expect(lastmap).toEqual({x: 4, y: 5});
       interactor.simulateEvent(
         'mousedown', {map: {x: 10, y: 10}, button: 'left'});
-      expect(lastmap).toEqual({x:4, y: 5});
+      expect(lastmap).toEqual({x: 4, y: 5});
       interactor.simulateEvent(
         'mouseup.geojs', {map: {x: 10, y: 10}, button: 'left'});
-      expect(lastmap).toEqual({x:4, y: 5});
+      expect(lastmap).toEqual({x: 4, y: 5});
       interactor.simulateEvent(
         'mousemove', {map: {x: 17, y: 27}});
-      expect(lastmap).toEqual({x:17, y: 27});
+      expect(lastmap).toEqual({x: 17, y: 27});
       interactor.simulateEvent(
         'mousedown', {map: {x: 30, y: 30}, button: 'right'});
-      expect(lastmap).toEqual({x:17, y: 27});
+      expect(lastmap).toEqual({x: 17, y: 27});
       interactor.simulateEvent(
         'mouseup.geojs', {map: {x: 30, y: 30}, button: 'right'});
-      expect(lastmap).toEqual({x:17, y: 27});
+      expect(lastmap).toEqual({x: 17, y: 27});
       interactor.simulateEvent(
         'mousemove', {map: {x: 47, y: 57}});
-      expect(lastmap).toEqual({x:47, y: 57});
+      expect(lastmap).toEqual({x: 47, y: 57});
     });
   });
 
@@ -1694,7 +1694,8 @@ describe('mapInteractor', function () {
 
   it('Test touch interactions', function () {
     var map = mockedMap('#mapNode1'),
-        interactor = geo.mapInteractor({map: map});
+        interactor = geo.mapInteractor({map: map}),
+        clickTriggered = 0;
 
     expect(interactor.hasTouchSupport()).toBe(true);
 
@@ -1817,6 +1818,24 @@ describe('mapInteractor', function () {
     interactor.simulateEvent(
       'rotateend', {touch: true, center: {x: 20, y: 20}, scale: 1.3});
     expect(map.info.zoom).toBe(2);
+
+    // test tap
+    map.geoOn(geo.event.mouseclick, function () {
+      clickTriggered += 1;
+    });
+    interactor.simulateEvent(
+      'singletap', {touch: true, center: {x: 20, y: 20}});
+    expect(clickTriggered).toBe(1);
+    // don't get a second click event from a non-tap.
+    interactor.simulateEvent(
+      'mousedown', {map: {x: 20, y: 20}, button: 'left'});
+    interactor.simulateEvent(
+      'mouseup', {map: {x: 20, y: 20}, button: 'left'});
+    expect(clickTriggered).toBe(1);
+    // but another tap will trigger another event
+    interactor.simulateEvent(
+      'singletap', {touch: true, center: {x: 20, y: 20}});
+    expect(clickTriggered).toBe(2);
   });
 });
 describe('Optional Dependencies', function () {
