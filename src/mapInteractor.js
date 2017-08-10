@@ -983,7 +983,8 @@ var mapInteractor = function (args) {
     /* In some scenarios, we get both a tap event and then, somewhat later, a
      * set of mousedown/mouseup events.  Ignore the spurious down/up set if we
      * just handled a tap. */
-    if (m_touchHandler && m_touchHandler.lastEventType === 'tap' && (new Date()).valueOf() - m_touchHandler.lastTime < 1000) {
+    if (m_touchHandler && m_touchHandler.lastEventType === 'tap' &&
+        (new Date()).valueOf() - m_touchHandler.lastTime < 1000) {
       return;
     }
 
