@@ -183,6 +183,25 @@ var legendWidget = function (arg) {
         return d.name;
       });
 
+    var discreteCategories = m_categories.filter(function (category) {
+      return category.type == 'discrete';
+    });
+
+    var dis = m_group
+      .selectAll('g.discrete')
+      .data(discreteCategories)
+      .enter()
+      .append('g')
+      .attr('transform', function (d, i) {
+        return 'translate(0,' + scale.y(i) + ')';
+      });
+
+    dis.append('text')
+      .attr('x', '50px')
+      .attr('y', 0)
+      .attr('dy', '0.3em')
+      .text("abcdef")
+
     m_this.reposition();
 
     return m_this;

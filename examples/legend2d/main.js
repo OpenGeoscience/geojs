@@ -9,13 +9,13 @@ $(function () {
   });
 
   // Add the default osm layer
-  map.createLayer('osm');
+  // map.createLayer('osm');
 
   // Create a ui layer
   var ui = map.createLayer('ui');
 
   // Create a legend widget
-  var legend = ui.createWidget('legend', {
+  var legend = ui.createWidget('legend2d', {
     position: {
       right: 20,
       top: 10
@@ -45,70 +45,39 @@ $(function () {
   //   * fillOpacity: (number) The fill opacity
   legend.categories([
     {
-      name: 'Basic red point',
-      style: {
-        fillColor: 'red',
-        stroke: false
-      },
-      type: 'point'
-    },
-    {
-      name: 'Blue point with black stroke',
-      style: {
-        fillColor: 'blue',
-        stroke: true,
-        strokeColor: 'black'
-      },
-      type: 'point'
-    },
-    {
-      name: 'Point with wide green stroke',
-      style: {
-        fill: false,
-        stroke: true,
-        strokeColor: 'green',
-        strokeWidth: 3.5
-      },
-      type: 'point'
-    },
-    {
-      name: 'Semi-transparent point',
-      style: {
-        fillColor: 'black',
-        fillOpacity: 0.5,
-        strokeColor: 'black'
-      },
-      type: 'point'
-    },
-    {
-      name: 'Line with wide green stroke',
-      style: {
-        strokeColor: 'green',
-        strokeWidth: 5,
-        strokeOpacity: 0.75
-      },
-      type: 'line'
-    },
-    {
-      name: 'Line with thin black stroke',
-      style: {
-        strokeColor: 'black',
-        strokeWidth: 1
-      },
-      type: 'line'
-    },
-    {
-      name: 'Generic label type',
-      style: {
-        strokeColor: 'black',
-        fillColor: 'magenta',
-        fillOpacity: 0.5
+      name: 'test1',
+      type: 'discrete',
+      scale: {
+        type: 'ordinal',
+        domain: ['beijing', 'new york', 'london'],
+        range: ['red', 'green', 'blue']
       }
     },
     {
-      name: 'test1',
+      name: 'test2',
       type: 'discrete',
-      style: {
+      scale: {
+        type: 'quantize',
+        domain: [20000, 120000],
+        range: colorbrewer.YlGnBu["9"]
+      }
+    },
+    {
+      name: 'test3',
+      type: 'continuous',
+      scale: {
+        type: 'pow',
+        domain: [100, 10000],
+        range: ['red', 'blue']
+      }
+    },
+    {
+      name: 'test4',
+      type: 'continuous',
+      scale: {
+        type: 'log',
+        domain: [100, 10000],
+        range: ['purple', 'orange']
       }
     }
   ]);
