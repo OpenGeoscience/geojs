@@ -104,12 +104,6 @@ $(function () {
         fillColor: 'magenta',
         fillOpacity: 0.5
       }
-    },
-    {
-      name: 'test1',
-      type: 'discrete',
-      style: {
-      }
     }
   ]);
 
