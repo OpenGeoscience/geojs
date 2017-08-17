@@ -49,10 +49,18 @@ var legend2dWidget = function (arg) {
         'z-index': 100000,
         'opacity': 0,
       })
+
+    if (arg.categories) {
+      this.categories(arg.categories);
+    }
   }
 
   this.draw = function () {
-    var container = d3.select(m_this.canvas()).append('div');
+    d3.select(m_this.canvas()).selectAll('div.legends').remove();
+
+    var container = d3.select(m_this.canvas())
+      .append('div')
+      .attr('class', 'legends');
 
     var width = 300;
     var margin = 20;
@@ -99,9 +107,7 @@ var legend2dWidget = function (arg) {
   this._drawDiscrete = function (svg, width, category) {
     if (category.scale === 'ordinal') {
       var colorScale = d3.scale.ordinal().domain(category.domain).range(category.colors);
-      m_this._renderDiscreteColors(svg, category.domain, colorScale, width, function (d) {
-        return d;
-      });
+      m_this._renderDiscreteColors(svg, category.domain, colorScale, width, function (d) { return d; });
 
       axisScale = d3.scale.ordinal()
         .domain(category.domain)
@@ -116,8 +122,9 @@ var legend2dWidget = function (arg) {
       var valueScale = d3.scale[category.scale]().domain(category.domain).range(valueRange).nice();
       var colorScale = d3.scale.quantize().domain(valueRange).range(category.colors);
       var steps = range(0, category.colors.length - 1);
+      var precision = Math.max.apply(null, category.domain.map(function (number) { return getPrecision(number) }));
       m_this._renderDiscreteColors(svg, steps, colorScale, width, function (d) {
-        return m_this.popupFormatter(valueScale.invert(d)) + ' - ' + m_this.popupFormatter(valueScale.invert(d + 1));
+        return m_this._popupFormatter(valueScale.invert(d), precision) + ' - ' + m_this._popupFormatter(valueScale.invert(d + 1), precision);
       });
 
       var ticks = steps.slice();
@@ -151,7 +158,7 @@ var legend2dWidget = function (arg) {
       .attr('transform', function (d, i) {
         return 'translate(' + i * width / steps.length + ' ,0)';
       })
-      .on('mouseover', function (d) {
+      .on('mousemove', function (d) {
         m_this._showPopup(getValue(d));
       })
       .on('mouseout', m_this._hidePopup);
@@ -189,6 +196,7 @@ var legend2dWidget = function (arg) {
     }
 
     var randomString = Math.random().toString(36).substring(5);
+    var precision = Math.max.apply(null, category.domain.map(function (number) { return getPrecision(number) }));
 
     var gradient = svg
       .append('defs')
@@ -204,9 +212,9 @@ var legend2dWidget = function (arg) {
       .attr('fill', 'url(#gradient' + randomString + ')')
       .attr('width', width)
       .attr('height', '20px')
-      .on('mouseover', function (d) {
+      .on('mousemove', function (d) {
         var value = axisScale.invert(d3.mouse(this)[0]);
-        var text = m_this.popupFormatter(value);
+        var text = m_this._popupFormatter(value, precision);
         m_this._showPopup(text);
       })
       .on('mouseout', m_this._hidePopup)
@@ -218,9 +226,9 @@ var legend2dWidget = function (arg) {
     this._renderAxis(svg, axis);
   }
 
-  this.popupFormatter = function (number) {
-    number = parseFloat(number.toFixed(6));
-    var precision = getPrecision(number);
+  this._popupFormatter = function (number, precision) {
+    number = parseFloat(number.toFixed(8));
+    var precision = Math.min(precision, getPrecision(number));
     precision = Math.min(precision, Math.max(3, 7 - Math.trunc(number).toString().length))
     return d3.format('.' + precision + 'f')(number);
   }
