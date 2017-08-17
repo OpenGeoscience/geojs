@@ -35,49 +35,49 @@ $(function () {
   
   legend.categories([
     {
-      name: 'ordinal 1',
+      name: 'Discrete Ordinal 1',
       type: 'discrete',
       scale: 'ordinal',
       domain: ['beijing', 'new york', 'london', 'paris'],
       colors: ['red', 'green', 'blue', 'orange']
     },
     {
-      name: 'discrete countinous 1',
+      name: 'Discrete countinous 1',
       type: 'discrete',
       scale: 'linear',
       domain: [100, 1000],
-      colors: colorbrewer.YlGnBu["9"]
+      colors: colorbrewer.YlGnBu['9']
     },
     {
-      name: 'discrete countinous 2',
+      name: 'Discrete countinous 2',
       type: 'discrete',
       scale: 'sqrt',
       domain: [10000, 1000000],
       colors: colorbrewer.PRGn['11']
     },
     {
-      name: 'discrete countinous 3',
+      name: 'Discrete countinous 3',
       type: 'discrete',
       scale: 'linear',
       domain: [0.1, 0.001],
-      colors: colorbrewer.RdBu["8"]
+      colors: colorbrewer.RdBu['8']
     },
     {
-      name: 'continuous continuous 1',
+      name: 'Continuous continuous 1',
       type: 'continuous',
       scale: 'pow',
       domain: [100, 10000],
       colors: ['red', 'blue']
     },
     {
-      name: 'continuous continuous 2',
+      name: 'Continuous continuous 2',
       type: 'continuous',
       scale: 'sqrt',
-      domain: [100, 10000],
+      domain: [100, 1000],
       colors: ['purple', 'orange']
     },
     {
-      name: 'continuous continuous 3',
+      name: 'Continuous continuous 3',
       type: 'continuous',
       scale: 'log',
       domain: [100, 10000],

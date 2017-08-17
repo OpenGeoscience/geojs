@@ -18,7 +18,25 @@ var legend2dWidget = function (arg) {
 
   this._init = function () {
     oldInit();
-    m_this.popup = d3.select(m_this.canvas()).append('div')
+    var canvas = m_this.canvas();
+    d3.select(canvas)
+      .style({
+        'padding': '10px',
+        'border': '1.5px solid black',
+        'border-radius': '3px',
+        'transition': '250ms background linear',
+        'background-color': 'rgba(255, 255, 255, 0.75)'
+      })
+      .on('mouseover', function () {
+        d3.select(this)
+          .style('background-color', 'rgba(255, 255, 255, 1)');
+      })
+      .on('mouseout', function () {
+        d3.select(this)
+          .style('background-color', 'rgba(255, 255, 255, 0.75)');
+      });
+
+    m_this.popup = d3.select(canvas).append('div')
       .style({
         'position': 'absolute',
         'background': 'white',
@@ -36,17 +54,30 @@ var legend2dWidget = function (arg) {
   this.draw = function () {
     var container = d3.select(m_this.canvas()).append('div');
 
-    var width = 700;
-    var margin = 15;
+    var width = 300;
+    var margin = 20;
 
     m_categories.forEach(function (category, index) {
-      var legendSvg = container
+      var legendContainer = container
         .append('div')
+        .style({
+          'margin-bottom': '10px'
+        });
+
+      legendContainer
+        .append('div')
+        .text(category.name)
+        .style({
+          'text-align': 'center'
+        })
+
+      var legendSvg = legendContainer
         .append('svg')
         .attr({
+          'display': 'block',
           'width': width,
-          'height': '50px',
-          'viewBox': -margin + ' 0 ' + width + ' 50'
+          'height': '40px',
+          'viewBox': -margin + ' 0 ' + width + ' 40'
         })
 
       if (category.type === 'discrete') {
@@ -98,7 +129,11 @@ var legend2dWidget = function (arg) {
         .rangePoints([0, width]);
       var axis = d3.svg.axis()
         .scale(axisScale)
-        .tickFormat(d3.format('.2s'));
+        .tickFormat(d3.format('.2s'))
+        .tickValues(function () {
+          var skip = Math.ceil(axisScale.domain().length / 6);
+          return axisScale.domain().filter(function (d, i) { return i % skip === 0; });
+        });
       m_this._renderAxis(svg, axis);
     }
   }
