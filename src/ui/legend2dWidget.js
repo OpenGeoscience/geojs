@@ -14,41 +14,30 @@ var legend2dWidget = function (arg) {
     m_default_canvas = 'div';
   var m_categories = [];
 
-  /**
-   * Initializes DOM Widget.
-   * Sets the canvas for the widget, does parent/child relationship management,
-   * appends it to it's parent and handles any positioning logic.
-   */
+  var oldInit = this._init;
+
   this._init = function () {
-    if (arg.hasOwnProperty('parent')) {
-      arg.parent.addChild(m_this);
-    }
-
-    m_this._createCanvas();
-    m_this._appendChild();
-
-    m_this.canvas().addEventListener('mousedown', function (e) {
-      e.stopPropagation();
-    });
-
-    m_this.reposition();
-  };
-
-  /**
-   * Creates the widget canvas.
-   * This is just a simple DOM element (based on args.el, or defaults to a div)
-   */
-  this._createCanvas = function () {
-    m_this.canvas(document.createElement(arg.el || m_default_canvas));
-  };
+    oldInit();
+    m_this.popup = d3.select(m_this.canvas()).append('div')
+      .style({
+        'position': 'absolute',
+        'background': 'white',
+        'height': '22px',
+        'font-size': '14px',
+        'border': 'solid 1px black',
+        'padding': '0 5px',
+        'pointer-events': 'none',
+        'white-space': 'nowrap',
+        'z-index': 100000,
+        'opacity': 0,
+      })
+  }
 
   this.draw = function () {
-    m_this._init();
     var container = d3.select(m_this.canvas()).append('div');
 
     var width = 700;
     var margin = 15;
-    // this.width = width;
 
     m_categories.forEach(function (category, index) {
       var legendSvg = container
@@ -79,7 +68,9 @@ var legend2dWidget = function (arg) {
   this._drawDiscrete = function (svg, width, category) {
     if (category.scale === 'ordinal') {
       var colorScale = d3.scale.ordinal().domain(category.domain).range(category.colors);
-      m_this._renderDiscreteColors(svg, category.domain, colorScale, width);
+      m_this._renderDiscreteColors(svg, category.domain, colorScale, width, function (d) {
+        return d;
+      });
 
       axisScale = d3.scale.ordinal()
         .domain(category.domain)
@@ -94,8 +85,9 @@ var legend2dWidget = function (arg) {
       var valueScale = d3.scale[category.scale]().domain(category.domain).range(valueRange).nice();
       var colorScale = d3.scale.quantize().domain(valueRange).range(category.colors);
       var steps = range(0, category.colors.length - 1);
-      m_this._renderDiscreteColors(svg, steps, colorScale, width);
-
+      m_this._renderDiscreteColors(svg, steps, colorScale, width, function (d) {
+        return m_this.popupFormatter(valueScale.invert(d)) + ' - ' + m_this.popupFormatter(valueScale.invert(d + 1));
+      });
 
       var ticks = steps.slice();
       ticks.push(category.colors.length);
@@ -106,12 +98,12 @@ var legend2dWidget = function (arg) {
         .rangePoints([0, width]);
       var axis = d3.svg.axis()
         .scale(axisScale)
-        .tickFormat(d3.format(".1s"));
+        .tickFormat(d3.format('.2s'));
       m_this._renderAxis(svg, axis);
     }
   }
 
-  this._renderDiscreteColors = function (svg, steps, colorScale, width) {
+  this._renderDiscreteColors = function (svg, steps, colorScale, width, getValue) {
     svg.selectAll('rect')
       .data(steps)
       .enter()
@@ -123,7 +115,11 @@ var legend2dWidget = function (arg) {
       })
       .attr('transform', function (d, i) {
         return 'translate(' + i * width / steps.length + ' ,0)';
-      });
+      })
+      .on('mouseover', function (d) {
+        m_this._showPopup(getValue(d));
+      })
+      .on('mouseout', m_this._hidePopup);
   }
 
   this._renderAxis = function (svg, axis) {
@@ -172,13 +168,46 @@ var legend2dWidget = function (arg) {
     svg.append('rect')
       .attr('fill', 'url(#gradient' + randomString + ')')
       .attr('width', width)
-      .attr('height', '20px');
+      .attr('height', '20px')
+      .on('mouseover', function (d) {
+        var value = axisScale.invert(d3.mouse(this)[0]);
+        var text = m_this.popupFormatter(value);
+        m_this._showPopup(text);
+      })
+      .on('mouseout', m_this._hidePopup)
 
     var axis = d3.svg.axis()
       .scale(axisScale)
-      .tickFormat(d3.format(".1s"));
+      .ticks(6, '.2s');
 
     this._renderAxis(svg, axis);
+  }
+
+  this.popupFormatter = function (number) {
+    number = parseFloat(number.toFixed(6));
+    var precision = getPrecision(number);
+    precision = Math.min(precision, Math.max(3, 7 - Math.trunc(number).toString().length))
+    return d3.format('.' + precision + 'f')(number);
+  }
+
+  this._showPopup = function (text) {
+    var offset = d3.mouse(m_this.canvas());
+    m_this.popup
+      .text(text)
+      .style({
+        'left': offset[0] + 'px',
+        'top': (offset[1] - 22) + 'px'
+      })
+    m_this.popup
+      .transition()
+      .duration(200)
+      .style('opacity', 1)
+  }
+
+  this._hidePopup = function () {
+    m_this.popup.transition()
+      .duration(500)
+      .style('opacity', 0);
   }
 
   return this;
@@ -190,6 +219,13 @@ function range(start, end) {
     foo.push(i);
   }
   return foo;
+}
+
+function getPrecision(a) {
+  if (!isFinite(a)) return 0;
+  var e = 1, p = 0;
+  while (Math.round(a * e) / e !== a) { e *= 10; p++; }
+  return p;
 }
 
 inherit(legend2dWidget, domWidget);

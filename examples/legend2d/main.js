@@ -32,56 +32,7 @@ $(function () {
   //   * style: (object) The feature style object
   //   * type: (string) The feature type ('point', 'line', 'other')
   //
-  // Points are displayed as circles, lines as lines, and everything else
-  // is displayed as a rounded rectangle.  The style objects have the same
-  // properties as feature styles (fill is ignored for lines):
-  //
-  //   * stroke: (bool) Turn on or off the stroke
-  //   * strokeWidth: (number) The stroke width in pixels
-  //   * strokeColor: (string|object) The stroke color
-  //   * strokeOpacity: (number) The stroke opacity
-  //   * fill: (bool) Turn on or off the fill
-  //   * fillColor: (string|object) The fill color
-  //   * fillOpacity: (number) The fill opacity
-  // legend.categories([
-  //   {
-  //     name: 'test1',
-  //     type: 'discrete',
-  //     scale: {
-  //       type: 'ordinal',
-  //       domain: ['beijing', 'new york', 'london'],
-  //       range: ['red', 'green', 'blue']
-  //     }
-  //   },
-  //   {
-  //     name: 'test2',
-  //     type: 'discrete',
-  //     scale: {
-  //       type: 'quantize',
-  //       domain: [100, 1000],
-  //       range: colorbrewer.YlGnBu["9"]
-  //     }
-  //   },
-  //   {
-  //     name: 'test3',
-  //     type: 'continuous',
-  //     scale: {
-  //       type: 'pow',
-  //       domain: [100, 10000],
-  //       range: ['red', 'blue']
-  //     }
-  //   },
-  //   {
-  //     name: 'test4',
-  //     type: 'continuous',
-  //     scale: {
-  //       type: 'log',
-  //       domain: [100, 10000],
-  //       range: ['purple', 'orange']
-  //     }
-  //   }
-  // ]);
-
+  
   legend.categories([
     {
       name: 'ordinal 1',
@@ -101,14 +52,14 @@ $(function () {
       name: 'discrete countinous 2',
       type: 'discrete',
       scale: 'sqrt',
-      domain: [100, 1000],
-      colors: colorbrewer.PRGn['8']
+      domain: [10000, 1000000],
+      colors: colorbrewer.PRGn['11']
     },
     {
       name: 'discrete countinous 3',
       type: 'discrete',
       scale: 'linear',
-      domain: [0.001, 0.00001],
+      domain: [0.1, 0.001],
       colors: colorbrewer.RdBu["8"]
     },
     {
@@ -124,6 +75,13 @@ $(function () {
       scale: 'sqrt',
       domain: [100, 10000],
       colors: ['purple', 'orange']
+    },
+    {
+      name: 'continuous continuous 3',
+      type: 'continuous',
+      scale: 'log',
+      domain: [100, 10000],
+      colors: ['blue', 'olive']
     }
   ]);
 
