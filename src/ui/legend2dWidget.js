@@ -117,6 +117,26 @@ var legend2dWidget = function (arg) {
       m_this._renderAxis(svg, axis);
 
     }
+    else if (category.scale === 'quantile') {
+      var valueRange = [0, category.colors.length];
+      var steps = range(0, category.colors.length - 1);
+      var valueScale = d3.scale.quantile().domain(category.domain).range(steps);
+      var colorScale = d3.scale.quantize().domain(valueRange).range(category.colors);
+      m_this._renderDiscreteColors(svg, steps, colorScale, width, function (d) {
+        return valueScale.invertExtent(d).join(' - ');
+      });
+
+      var axisDomain = [valueScale.invertExtent(0)[0]];
+      axisDomain = axisDomain.concat(steps.map(function (step) { return valueScale.invertExtent(step)[1] }));
+
+      var ticks = steps.slice();
+      ticks.push(category.colors.length);
+      var axisScale = d3.scale.ordinal()
+        .domain(axisDomain)
+        .rangePoints([0, width]);
+      var axis = createDiscreteContinousAxis(axisScale);
+      m_this._renderAxis(svg, axis);
+    }
     else if (['linear', 'log', 'sqrt', 'pow'].indexOf(category.scale) != -1) {
       var valueRange = [0, category.colors.length];
       var valueScale = d3.scale[category.scale]().domain(category.domain).range(valueRange).nice();
@@ -134,14 +154,18 @@ var legend2dWidget = function (arg) {
           return valueScale.invert(tick);
         }))
         .rangePoints([0, width]);
-      var axis = d3.svg.axis()
+      var axis = createDiscreteContinousAxis(axisScale);
+      m_this._renderAxis(svg, axis);
+    }
+
+    function createDiscreteContinousAxis(axisScale) {
+      return d3.svg.axis()
         .scale(axisScale)
         .tickFormat(d3.format('.2s'))
         .tickValues(function () {
           var skip = Math.ceil(axisScale.domain().length / 6);
           return axisScale.domain().filter(function (d, i) { return i % skip === 0; });
         });
-      m_this._renderAxis(svg, axis);
     }
   }
 
@@ -194,7 +218,6 @@ var legend2dWidget = function (arg) {
     if (category.scale === 'pow' && category.exponent) {
       axisScale.exponent(category.exponent);
     }
-
     var randomString = Math.random().toString(36).substring(5);
     var precision = Math.max.apply(null, category.domain.map(function (number) { return getPrecision(number) }));
 
@@ -249,16 +272,17 @@ var legend2dWidget = function (arg) {
 
   this._hidePopup = function () {
     m_this.popup.transition()
-      .duration(500)
+      .duration(200)
       .style('opacity', 0);
   }
 
   return this;
 };
 
-function range(start, end) {
+function range(start, end, step) {
+  step = step || 1;
   var foo = [];
-  for (var i = start; i <= end; i++) {
+  for (var i = start; i <= end; i += step) {
     foo.push(i);
   }
   return foo;
