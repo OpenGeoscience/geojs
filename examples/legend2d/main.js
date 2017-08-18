@@ -69,7 +69,7 @@ $(function () {
       colors: colorbrewer.RdBu['8']
     },
     {
-      name: 'Continuous Pow',
+      name: 'Continuous pow',
       type: 'continuous',
       scale: 'pow',
       exponent: 1.1,

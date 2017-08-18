@@ -257,14 +257,18 @@ var legend2dWidget = function (arg) {
   }
 
   this._showPopup = function (text) {
+    // The cursor location relative to the container
     var offset = d3.mouse(m_this.canvas());
     m_this.popup
-      .text(text)
+      .text(text);
+    var containerWidth = m_this.canvas().clientWidth;
+    var popupWidth = m_this.popup[0][0].clientWidth;
+    m_this.popup
       .style({
-        'left': offset[0] + 'px',
+        // If the popup will be longer or almost longer than the container
+        'left': offset[0] - (offset[0] + popupWidth - containerWidth > -10 ? popupWidth : 0) + 'px',
         'top': (offset[1] - 22) + 'px'
       })
-    m_this.popup
       .transition()
       .duration(200)
       .style('opacity', 1)
