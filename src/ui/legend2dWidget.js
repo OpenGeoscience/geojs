@@ -1,3 +1,4 @@
+var d3 = require('d3');
 var domWidget = require('./domWidget');
 var inherit = require('../inherit');
 var registerWidget = require('../registry').registerWidget;
@@ -10,8 +11,7 @@ var legend2dWidget = function (arg) {
 
   domWidget.call(this, arg);
 
-  var m_this = this,
-    m_default_canvas = 'div';
+  var m_this = this;
   var m_categories = [];
 
   var oldInit = this._init;
@@ -47,13 +47,13 @@ var legend2dWidget = function (arg) {
         'pointer-events': 'none',
         'white-space': 'nowrap',
         'z-index': 100000,
-        'opacity': 0,
-      })
+        'opacity': 0
+      });
 
     if (arg.categories) {
       this.categories(arg.categories);
     }
-  }
+  };
 
   this.draw = function () {
     d3.select(m_this.canvas()).selectAll('div.legends').remove();
@@ -77,7 +77,7 @@ var legend2dWidget = function (arg) {
         .text(category.name)
         .style({
           'text-align': 'center'
-        })
+        });
 
       var legendSvg = legendContainer
         .append('svg')
@@ -86,75 +86,73 @@ var legend2dWidget = function (arg) {
           'width': width,
           'height': '40px',
           'viewBox': -margin + ' 0 ' + width + ' 40'
-        })
+        });
 
       if (category.type === 'discrete') {
         m_this._drawDiscrete(legendSvg, width - 2 * margin, category);
-      }
-
-      else if (category.type === 'continuous') {
+      } else if (category.type === 'continuous') {
         m_this.drawContinous(legendSvg, width - 2 * margin, category);
       }
     });
 
-  }
+  };
 
   this.categories = function (categories) {
     m_categories = categories;
     this.draw();
-  }
+  };
 
   this._drawDiscrete = function (svg, width, category) {
+    var valueRange, valueScale, colorScale, axisScale, axis, steps, ticks;
     if (category.scale === 'ordinal') {
-      var colorScale = d3.scale.ordinal().domain(category.domain).range(category.colors);
+      colorScale = d3.scale.ordinal().domain(category.domain).range(category.colors);
       m_this._renderDiscreteColors(svg, category.domain, colorScale, width, function (d) { return d; });
 
       axisScale = d3.scale.ordinal()
         .domain(category.domain)
         .rangeRoundBands([0, width]);
-      var axis = d3.svg.axis()
+      axis = d3.svg.axis()
         .scale(axisScale);
       m_this._renderAxis(svg, axis);
 
-    }
-    else if (category.scale === 'quantile') {
-      var valueRange = [0, category.colors.length];
-      var steps = range(0, category.colors.length - 1);
-      var valueScale = d3.scale.quantile().domain(category.domain).range(steps);
-      var colorScale = d3.scale.quantize().domain(valueRange).range(category.colors);
+    } else if (category.scale === 'quantile') {
+      valueRange = [0, category.colors.length];
+      steps = range(0, category.colors.length - 1);
+      valueScale = d3.scale.quantile().domain(category.domain).range(steps);
+      colorScale = d3.scale.quantize().domain(valueRange).range(category.colors);
       m_this._renderDiscreteColors(svg, steps, colorScale, width, function (d) {
         return valueScale.invertExtent(d).join(' - ');
       });
 
       var axisDomain = [valueScale.invertExtent(0)[0]];
-      axisDomain = axisDomain.concat(steps.map(function (step) { return valueScale.invertExtent(step)[1] }));
+      axisDomain = axisDomain.concat(steps.map(function (step) { return valueScale.invertExtent(step)[1]; }));
 
-      var ticks = steps.slice();
+      ticks = steps.slice();
       ticks.push(category.colors.length);
-      var axisScale = d3.scale.ordinal()
+      axisScale = d3.scale.ordinal()
         .domain(axisDomain)
         .rangePoints([0, width]);
-      var axis = createDiscreteContinousAxis(axisScale);
+      axis = createDiscreteContinousAxis(axisScale);
       m_this._renderAxis(svg, axis);
-    }
-    else if (['linear', 'log', 'sqrt', 'pow'].indexOf(category.scale) != -1) {
-      var valueRange = [0, category.colors.length];
-      var valueScale = d3.scale[category.scale]().domain(category.domain).range(valueRange).nice();
-      var colorScale = d3.scale.quantize().domain(valueRange).range(category.colors);
-      var steps = range(0, category.colors.length - 1);
-      var precision = Math.max.apply(null, category.domain.map(function (number) { return getPrecision(number) }));
+
+    } else if (['linear', 'log', 'sqrt', 'pow'].indexOf(category.scale) !== -1) {
+      valueRange = [0, category.colors.length];
+      valueScale = d3.scale[category.scale]().domain(category.domain).range(valueRange).nice();
+      colorScale = d3.scale.quantize().domain(valueRange).range(category.colors);
+      steps = range(0, category.colors.length - 1);
+      var precision = Math.max.apply(null, category.domain.map(function (number) { return getPrecision(number); }));
       m_this._renderDiscreteColors(svg, steps, colorScale, width, function (d) {
         return m_this._popupFormatter(valueScale.invert(d), precision) + ' - ' + m_this._popupFormatter(valueScale.invert(d + 1), precision);
       });
 
-      var ticks = steps.slice();
+      ticks = steps.slice();
       ticks.push(category.colors.length);
-      var axisScale = d3.scale.ordinal()
+      axisScale = d3.scale.ordinal()
         .domain(ticks.map(function (tick) {
           return valueScale.invert(tick);
         }))
         .rangePoints([0, width]);
-      var axis = createDiscreteContinousAxis(axisScale);
+      axis = createDiscreteContinousAxis(axisScale);
       m_this._renderAxis(svg, axis);
     }
 
@@ -167,7 +165,7 @@ var legend2dWidget = function (arg) {
           return axisScale.domain().filter(function (d, i) { return i % skip === 0; });
         });
     }
-  }
+  };
 
   this._renderDiscreteColors = function (svg, steps, colorScale, width, getValue) {
     svg.selectAll('rect')
@@ -186,7 +184,7 @@ var legend2dWidget = function (arg) {
         m_this._showPopup(getValue(d));
       })
       .on('mouseout', m_this._hidePopup);
-  }
+  };
 
   this._renderAxis = function (svg, axis) {
     svg.append('g')
@@ -205,13 +203,14 @@ var legend2dWidget = function (arg) {
             'font-size': '12px'
           });
       });
-  }
+  };
 
   this.drawContinous = function (svg, width, category) {
-    if (['linear', 'log', 'sqrt', 'pow'].indexOf(category.scale) == -1) {
+    var axisScale, axis;
+    if (['linear', 'log', 'sqrt', 'pow'].indexOf(category.scale) === -1) {
       throw new Error('unsupported scale');
     }
-    var axisScale = d3.scale[category.scale]().domain(category.domain).range([0, width]).nice();
+    axisScale = d3.scale[category.scale]().domain(category.domain).range([0, width]).nice();
     if (category.scale === 'log' && category.base) {
       axisScale.base(category.base);
     }
@@ -219,7 +218,7 @@ var legend2dWidget = function (arg) {
       axisScale.exponent(category.exponent);
     }
     var randomString = Math.random().toString(36).substring(5);
-    var precision = Math.max.apply(null, category.domain.map(function (number) { return getPrecision(number) }));
+    var precision = Math.max.apply(null, category.domain.map(function (number) { return getPrecision(number); }));
 
     var gradient = svg
       .append('defs')
@@ -240,21 +239,21 @@ var legend2dWidget = function (arg) {
         var text = m_this._popupFormatter(value, precision);
         m_this._showPopup(text);
       })
-      .on('mouseout', m_this._hidePopup)
+      .on('mouseout', m_this._hidePopup);
 
-    var axis = d3.svg.axis()
+    axis = d3.svg.axis()
       .scale(axisScale)
       .ticks(6, '.2s');
 
     this._renderAxis(svg, axis);
-  }
+  };
 
   this._popupFormatter = function (number, precision) {
     number = parseFloat(number.toFixed(8));
-    var precision = Math.min(precision, getPrecision(number));
-    precision = Math.min(precision, Math.max(3, 7 - Math.trunc(number).toString().length))
+    precision = Math.min(precision, getPrecision(number));
+    precision = Math.min(precision, Math.max(3, 7 - Math.trunc(number).toString().length));
     return d3.format('.' + precision + 'f')(number);
-  }
+  };
 
   this._showPopup = function (text) {
     // The cursor location relative to the container
@@ -271,14 +270,14 @@ var legend2dWidget = function (arg) {
       })
       .transition()
       .duration(200)
-      .style('opacity', 1)
-  }
+      .style('opacity', 1);
+  };
 
   this._hidePopup = function () {
     m_this.popup.transition()
       .duration(200)
       .style('opacity', 0);
-  }
+  };
 
   return this;
 };
