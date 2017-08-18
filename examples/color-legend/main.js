@@ -15,7 +15,7 @@ $(function () {
   var ui = map.createLayer('ui');
 
   // Create a legend widget
-  var legend = ui.createWidget('legend2d', {
+  var legend = ui.createWidget('colorLegend', {
     position: {
       right: 20,
       top: 10

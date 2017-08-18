@@ -3,10 +3,10 @@ var domWidget = require('./domWidget');
 var inherit = require('../inherit');
 var registerWidget = require('../registry').registerWidget;
 
-var legend2dWidget = function (arg) {
+var colorLegendWidget = function (arg) {
   'use strict';
-  if (!(this instanceof legend2dWidget)) {
-    return new legend2dWidget(arg);
+  if (!(this instanceof colorLegendWidget)) {
+    return new colorLegendWidget(arg);
   }
 
   domWidget.call(this, arg);
@@ -21,6 +21,7 @@ var legend2dWidget = function (arg) {
     var canvas = m_this.canvas();
     d3.select(canvas)
       .style({
+        'display': 'none',
         'padding': '10px',
         'border': '1.5px solid black',
         'border-radius': '3px',
@@ -57,6 +58,13 @@ var legend2dWidget = function (arg) {
 
   this.draw = function () {
     d3.select(m_this.canvas()).selectAll('div.legends').remove();
+
+    if (!m_categories.length) {
+      d3.select(m_this.canvas()).style('display', 'none');
+      return;
+    } else {
+      d3.select(m_this.canvas()).style('display', 'block');
+    }
 
     var container = d3.select(m_this.canvas())
       .append('div')
@@ -99,6 +107,18 @@ var legend2dWidget = function (arg) {
 
   this.categories = function (categories) {
     m_categories = categories;
+    this.draw();
+  };
+
+  this.addCategories = function (categories) {
+    m_categories = m_categories.concat(categories);
+    this.draw();
+  };
+
+  this.removeCategories = function (categories) {
+    m_categories = m_categories.filter(function (category) {
+      return categories.indexOf(category) === -1;
+    });
     this.draw();
   };
 
@@ -298,7 +318,7 @@ function getPrecision(a) {
   return p;
 }
 
-inherit(legend2dWidget, domWidget);
+inherit(colorLegendWidget, domWidget);
 
-registerWidget('dom', 'legend2d', legend2dWidget);
-module.exports = legend2dWidget;
+registerWidget('dom', 'colorLegend', colorLegendWidget);
+module.exports = colorLegendWidget;
