@@ -71,7 +71,7 @@ function getScreenImage(name, left, top, width, height) {
     '-crop ' + width + 'x' + height + (left >= 0 ? '+' : '') + left +
     (top >= 0 ? '+' : '') + top + ' +repage ' +
     '\'' + dest.replace(/'/g, "'\\''") + '\'');
-  var xvfbImage = new Buffer(fs.readFileSync(dest)).toString('base64');
+  var xvfbImage = Buffer.from(fs.readFileSync(dest)).toString('base64');
   xvfbImage = 'data:image/png;base64,' + xvfbImage;
   return xvfbImage;
 }
@@ -92,7 +92,7 @@ function compareImage(name, image, threshold, callback) {
   if (!fs.existsSync(src)) {
     src = path.resolve(image_path, name + '.png');
   }
-  var refImage = new Buffer(fs.readFileSync(src)).toString('base64');
+  var refImage = Buffer.from(fs.readFileSync(src)).toString('base64');
   refImage = 'data:image/png;base64,' + refImage;
   resemble(image)
     .compareTo(refImage)
@@ -173,7 +173,7 @@ var notes_middleware = function (config) {
         });
       } else if (request.method === 'GET') {
         var src = path.resolve(image_path, query.name + '.png');
-        var img = new Buffer(fs.readFileSync(src)).toString('base64');
+        var img = Buffer.from(fs.readFileSync(src)).toString('base64');
         img = 'data:image/png;base64,' + img;
         response.writeHead(200);
         return response.end(img);
@@ -193,7 +193,7 @@ var osmtiles_middleware = function (config) {
     /* Serve tiles if they have been proxied */
     if (match && request.method === 'GET') {
       var imagePath = 'dist/data/tiles/' + match[1];
-      var img = new Buffer(fs.readFileSync(imagePath));
+      var img = Buffer.from(fs.readFileSync(imagePath));
       response.setHeader('Content-Type', 'image/png');
       response.setHeader('Content-Length', img.length);
       response.setHeader('Access-Control-Allow-Origin', '*');
@@ -229,8 +229,40 @@ module.exports = function (config) {
       'PhantomJS'
     ],
     customLaunchers: {
-      FirefoxWithProxy: {
+      ChromeHeadlessTouch: {
+        base: 'ChromeHeadless',
+        flags: [
+          '--no-sandbox',  // necessary to run tests in a docker
+          '--no-pings',    // no auditing pings
+          '--touch-events'
+        ]
+      },
+      ChromeFull: {
+        base: 'Chrome',
+        flags: [
+          '--no-sandbox',  // necessary to run tests in a docker
+          '--no-pings',    // no auditing pings
+          '--device-scale-factor=1',
+          '--window-position=0,0',
+          '--start-fullscreen',
+          '--kiosk',
+          '--incognito'
+        ]
+      },
+      ChromeWithProxy: {
+        base: 'ChromeFull',
+        flags: [
+          '--proxy-pac-url=' + config.protocol + '//' + config.hostname + ':' + config.port + '/testdata/proxy-for-tests.pac'
+        ]
+      },
+      FirefoxTouch: {
         base: 'Firefox',
+        prefs: {
+          'dom.w3c_touch_events.enabled': 1
+        }
+      },
+      FirefoxWithProxy: {
+        base: 'FirefoxTouch',
         prefs: {
           'network.proxy.type': 2,
           'network.proxy.autoconfig_url': config.protocol + '//' + config.hostname + ':' + config.port + '/testdata/proxy-for-tests.pac'

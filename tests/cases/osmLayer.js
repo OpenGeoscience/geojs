@@ -109,7 +109,8 @@ describe('geo.core.osmLayer', function () {
       });
       it('report findings', function (done) {
         var timings = geo.util.timeReport('requestAnimationFrame');
-        expect(timings.count).toBeGreaterThan(100);
+        // very minimal test threshold; this is mostly to collect data
+        expect(timings.count).toBeGreaterThan(10);
         timings = $.extend({}, timings);
         delete timings.recentsub;
         submitNote(notekey, timings).then(function () {
@@ -145,10 +146,13 @@ describe('geo.core.osmLayer', function () {
       });
       it('tile function', function () {
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: null, mapOpacity: 0.5, url: function (x, y, z) {
-          lastThis = this;
-          return '/testdata/white.jpg';
-        }});
+        layer = map.createLayer('osm', {
+          renderer: null,
+          mapOpacity: 0.5,
+          url: function (x, y, z) {
+            lastThis = this;
+            return '/testdata/white.jpg';
+          }});
       });
       waitForIt('.geo-tile-container', function () {
         return map.node().find('.geo-tile-container').length > 0;

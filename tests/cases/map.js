@@ -172,18 +172,28 @@ describe('geo.core.map', function () {
       expect(m.ingcs()).toBe('EPSG:4326');
       m.bounds({left: -180, top: 5, right: 180, bottom: -5});
       expect(closeToEqual(m.bounds(), {
-        left: -180, top: 85.05, right: 180, bottom: -85.05,
-        width: 256 * units, height: 256 * units})).toBe(true);
+        left: -180,
+        top: 85.05,
+        right: 180,
+        bottom: -85.05,
+        width: 256 * units,
+        height: 256 * units})).toBe(true);
       expect(closeToEqual(m.bounds(undefined, null), {
-        left: -128 * units, top: 128 * units,
-        right: 128 * units, bottom: -128 * units,
-        width: 256 * units, height: 256 * units})).toBe(true);
+        left: -128 * units,
+        top: 128 * units,
+        right: 128 * units,
+        bottom: -128 * units,
+        width: 256 * units,
+        height: 256 * units})).toBe(true);
       m.ingcs('EPSG:3857');
       expect(m.ingcs()).toBe('EPSG:3857');
       expect(closeToEqual(m.bounds(), {
-        left: -128 * units, top: 128 * units,
-        right: 128 * units, bottom: -128 * units,
-        width: 256 * units, height: 256 * units})).toBe(true);
+        left: -128 * units,
+        top: 128 * units,
+        right: 128 * units,
+        bottom: -128 * units,
+        width: 256 * units,
+        height: 256 * units})).toBe(true);
       // test with a different non-zero center
       m.ingcs('EPSG:4326');
       m.bounds({left: -180, top: 65, right: -45, bottom: 45});
@@ -191,17 +201,22 @@ describe('geo.core.map', function () {
       // compare left, top, right, bottom separately from width and height to
       // use different precisions in the comparison
       expect(closeToEqual({
-        left: bounds.left, top: bounds.top,
-        right: bounds.right, bottom: bounds.bottom
+        left: bounds.left,
+        top: bounds.top,
+        right: bounds.right,
+        bottom: bounds.bottom
       }, {
         left: -180, top: 79.340, right: -45, bottom: 0.906
       })).toBe(true);
       expect(closeToEqual({width: bounds.width, height: bounds.height}, {
         width: 96 * units, height: 96 * units}, -2)).toBe(true);
       expect(closeToEqual(m.bounds(undefined, null), {
-        left: -128 * units, top: 96.6444 * units,
-        right: -32 * units, bottom: 0.6444 * units,
-        width: 96 * units, height: 96 * units}, -2)).toBe(true);
+        left: -128 * units,
+        top: 96.6444 * units,
+        right: -32 * units,
+        bottom: 0.6444 * units,
+        width: 96 * units,
+        height: 96 * units}, -2)).toBe(true);
       m.bounds({left: -180, top: 5, right: 180, bottom: -5});
       // test with different projections
       m.unitsPerPixel(0, 1);
@@ -210,11 +225,19 @@ describe('geo.core.map', function () {
       m.ingcs('+proj=longlat +axis=esu');
       expect(m.ingcs()).toBe('+proj=longlat +axis=esu');
       expect(closeToEqual(m.bounds(), {
-        left: -128, top: -128, right: 128, bottom: 128,
-        width: 256, height: 256})).toBe(true);
+        left: -128,
+        top: -128,
+        right: 128,
+        bottom: 128,
+        width: 256,
+        height: 256})).toBe(true);
       expect(closeToEqual(m.bounds(undefined, null), {
-        left: -128, top: 128, right: 128, bottom: -128,
-        width: 256, height: 256})).toBe(true);
+        left: -128,
+        top: 128,
+        right: 128,
+        bottom: -128,
+        width: 256,
+        height: 256})).toBe(true);
       /* when an invalid transform is set, we shouldn't throw any exceptions,
        * even if the computations become strange. */
 
@@ -636,7 +659,7 @@ describe('geo.core.map', function () {
     it('jpeg', function (done) {
       m.screenshot(null, 'image/jpeg').then(function (result) {
         expect(result.substr(0, 23)).toBe('data:image/jpeg;base64,');
-        expect(result.length).toBeLessThan(ss.basic.length);
+        expect(result).not.toEqual(ss.basic);
         ss.jpeg = result;
         done();
       });

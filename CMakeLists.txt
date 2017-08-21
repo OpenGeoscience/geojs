@@ -6,8 +6,8 @@ include(CTest)
 enable_testing()
 
 set(BUILD_TESTING ON CACHE BOOL "Enable geojs testing")
-set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
-set(FFHEADLESS_TESTS ON CACHE BOOL "Generate headless Firefox unit tests (requires xvfb to be running).")
+set(HEADLESS_TESTS ON CACHE BOOL "Generate headless browser unit tests.")
+set(WEBGLHEADLESS_TESTS ON CACHE BOOL "Generate headless WebGL unit tests (requires xvfb to be running).")
 set(TEST_SAVE_IMAGE "none" CACHE STRING "Save headless test images even if there aren't errors.  Valid options are none, all, or the a comma-separated list of test names.")
 set(ESLINT_TESTS ON CACHE BOOL "Generate eslint style tests for JS source files.")
 
@@ -23,6 +23,11 @@ set(NOTES_PATH "${CMAKE_CURRENT_BINARY_DIR}/build_notes.json")
 
 # set the path where webpack builds the sources
 set(GEOJS_DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dist")
+
+find_program(NPM_EXECUTABLE npm)
+if(NOT NPM_EXECUTABLE)
+  message(FATAL_ERROR "npm is required for many tests")
+endif()
 
 function(add_geojs_test test_name)
   add_test(
@@ -64,26 +69,25 @@ set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "notes-reset")
 add_test(
   NAME "total-coverage"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-  COMMAND npm run combine-coverage
+  COMMAND "${NPM_EXECUTABLE}" run combine-coverage
 )
 set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "notes-reset")
 
-if(PHANTOMJS_TESTS)
-  find_program(NPM_EXECUTABLE npm)
+if(HEADLESS_TESTS)
   add_test(
-    NAME "phantomjs"
+    NAME "headless"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMAND npm run ci
+    COMMAND "${NPM_EXECUTABLE}" run test
   )
-  set_property(TEST "phantomjs" APPEND PROPERTY ENVIRONMENT "CTEST_NOTES_PATH=${CMAKE_CURRENT_BINARY_DIR}/notes")
-  set_property(TEST "phantomjs" APPEND PROPERTY DEPENDS "notes-reset")
-  set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "phantomjs")
-  set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "phantomjs")
+  set_property(TEST "headless" APPEND PROPERTY ENVIRONMENT "CTEST_NOTES_PATH=${CMAKE_CURRENT_BINARY_DIR}/notes")
+  set_property(TEST "headless" APPEND PROPERTY DEPENDS "notes-reset")
+  set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "headless")
+  set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "headless")
 
   add_test(
     NAME "tutorials"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMAND npm run tutorialsci
+    COMMAND "${NPM_EXECUTABLE}" run tutorialsci
   )
   set_property(TEST "tutorials" APPEND PROPERTY DEPENDS "build_tutorials")
   set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "tutorials")
@@ -98,7 +102,7 @@ add_test(NAME get_data_files COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_D
 
 add_custom_command(OUTPUT "${GEOJS_DEPLOY_DIR}/examples/bundle.js"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-  COMMAND npm run build-examples
+  COMMAND "${NPM_EXECUTABLE}" run build-examples
   COMMENT "Build examples"
   VERBATIM
 )
@@ -108,7 +112,7 @@ set_property(TEST "build_examples" APPEND PROPERTY DEPENDS "get_data_files")
 
 add_custom_command(OUTPUT "${GEOJS_DEPLOY_DIR}/tutorials/bundle.js"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-  COMMAND npm run build-tutorials
+  COMMAND "${NPM_EXECUTABLE}" run build-tutorials
   COMMENT "Build tutorials"
   VERBATIM
 )
@@ -116,24 +120,23 @@ add_custom_target(tutorials DEPENDS "${GEOJS_DEPLOY_DIR}/tutorials/bundle.js")
 add_test(NAME build_tutorials COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target tutorials)
 set_property(TEST "build_tutorials" APPEND PROPERTY DEPENDS "get_data_files")
 
-if(FFHEADLESS_TESTS)
-  find_program(NPM_EXECUTABLE npm)
+if(WEBGLHEADLESS_TESTS)
   add_test(
-    NAME "ffheadless"
+    NAME "webglheadless"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMAND npm run ffci
+    COMMAND "${NPM_EXECUTABLE}" run glci
   )
-  set_property(TEST "ffheadless" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
-  set_property(TEST "ffheadless" APPEND PROPERTY ENVIRONMENT "TEST_SAVE_IMAGE=${TEST_SAVE_IMAGE}")
-  set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "ffheadless")
-  set_property(TEST "ffheadless" APPEND PROPERTY DEPENDS "get_data_files")
-  # We use some of the example images in the ffheadless tests
-  set_property(TEST "ffheadless" APPEND PROPERTY DEPENDS "build_examples")
+  set_property(TEST "webglheadless" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
+  set_property(TEST "webglheadless" APPEND PROPERTY ENVIRONMENT "TEST_SAVE_IMAGE=${TEST_SAVE_IMAGE}")
+  set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "webglheadless")
+  set_property(TEST "webglheadless" APPEND PROPERTY DEPENDS "get_data_files")
+  # We use some of the example images in the webglheadless tests
+  set_property(TEST "webglheadless" APPEND PROPERTY DEPENDS "build_examples")
 
   add_test(
     NAME "examplesheadless"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMAND npm run examplesci
+    COMMAND "${NPM_EXECUTABLE}" run examplesci
   )
   set_property(TEST "examplesheadless" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
   set_property(TEST "examplesheadless" APPEND PROPERTY ENVIRONMENT "TEST_SAVE_IMAGE=${TEST_SAVE_IMAGE}")
@@ -151,12 +154,15 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   # Make sure we have the data files.
   COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target data_files
-  # Run the ffheadless test, asking to save all images
-  COMMAND TEST_SAVE_IMAGE=all npm run ffci
+  # Run the webglheadless test, asking to save all images
+  COMMAND TEST_SAVE_IMAGE=all "${NPM_EXECUTABLE}" run glci
   # Build examples to make sure that they are available.
-  COMMAND npm run build-examples
+  COMMAND "${NPM_EXECUTABLE}" run build-examples
   # Run the examplesheadless test, asking to save all images
-  COMMAND TEST_SAVE_IMAGE=all npm run examplesci
+  COMMAND TEST_SAVE_IMAGE=all "${NPM_EXECUTABLE}" run examplesci
+  # If optipng is available, reduce the size of the images
+  # COMMAND bash -c "optipng '${CMAKE_CURRENT_BINARY_DIR}'/images/*.png || true"
+  COMMAND bash -c "find '${CMAKE_CURRENT_BINARY_DIR}'/images -name '*.png' -a -not -name '*-test.png' -a -not -name '*-diff.png' -a -not -name '*-base.png' -a -not -name '*-screen.png' -print0 | xargs -0 -n 1 -P 8 optipng || true"
   # Make a tarball of all of the images
   COMMAND tar -zcvf "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz" --exclude=*-test.png --exclude=*-diff.png --exclude=*-base.png --exclude=*-screen.png -C "${CMAKE_CURRENT_BINARY_DIR}/images" .
   COMMENT "Create baseline images, then tar them into a single file"
@@ -169,11 +175,6 @@ add_test(NAME baseline_images CONFIGURATIONS "baseline_images" COMMAND "${CMAKE_
 set_property(TEST "baseline_images" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
 
 if(${ESLINT_TESTS})
-
-  find_program(NPM_EXECUTABLE npm)
-  if(NOT NPM_EXECUTABLE)
-    message(FATAL_ERROR "npm is required for style checks")
-  endif()
   add_test(
     NAME "eslint"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
