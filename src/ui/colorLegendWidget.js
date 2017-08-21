@@ -132,7 +132,11 @@ var colorLegendWidget = function (arg) {
         .domain(category.domain)
         .rangeRoundBands([0, width]);
       axis = d3.svg.axis()
-        .scale(axisScale);
+        .scale(axisScale)
+        .tickValues(function () {
+          var skip = Math.ceil(axisScale.domain().length / 6);
+          return axisScale.domain().filter(function (d, i) { return i % skip === 0; });
+        });
       m_this._renderAxis(svg, axis);
 
     } else if (category.scale === 'quantile') {
