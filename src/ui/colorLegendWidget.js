@@ -28,16 +28,17 @@ var colorLegendWidget = function (arg) {
         'transition': '250ms background linear',
         'background-color': 'rgba(255, 255, 255, 0.75)'
       })
-      .on('mouseover', function () {
+      .on('mouseenter', function () {
         d3.select(this)
           .style('background-color', 'rgba(255, 255, 255, 1)');
       })
-      .on('mouseout', function () {
+      .on('mouseleave', function () {
         d3.select(this)
           .style('background-color', 'rgba(255, 255, 255, 0.75)');
       });
 
     m_this.popup = d3.select(canvas).append('div')
+      .attr('class', 'color-legend-popup')
       .style({
         'position': 'absolute',
         'background': 'white',
@@ -76,6 +77,7 @@ var colorLegendWidget = function (arg) {
     m_categories.forEach(function (category, index) {
       var legendContainer = container
         .append('div')
+        .attr('class', 'legend')
         .style({
           'margin-bottom': '10px'
         });
@@ -258,7 +260,7 @@ var colorLegendWidget = function (arg) {
       .attr('fill', 'url(#gradient' + randomString + ')')
       .attr('width', width)
       .attr('height', '20px')
-      .on('mousemove', function (d) {
+      .on('mousemove', function () {
         var value = axisScale.invert(d3.mouse(this)[0]);
         var text = m_this._popupFormatter(value, precision);
         m_this._showPopup(text);

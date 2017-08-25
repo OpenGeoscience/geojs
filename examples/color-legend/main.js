@@ -1,3 +1,5 @@
+var colorbrewer = colorbrewer;
+
 // Run after the DOM loads
 $(function () {
   'use strict';
