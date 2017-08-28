@@ -3,6 +3,30 @@ var domWidget = require('./domWidget');
 var inherit = require('../inherit');
 var registerWidget = require('../registry').registerWidget;
 
+/**
+ * @typedef {object} [geo.gui.colorLegendWidget.category]
+ * @property {string} name The text label of the legend.
+ * @property {string} type The type of the legend, either discrete or continuous.
+ * @property {string} scale The scale of the legend. For discrete type,
+ * linear, log, sqrt, pow, ordinal, and quantile is supported.
+ * For continuous type, linear, log, sqrt, and pow is supported.
+ * @property {number[]|string[]} domain Only for ordinal scale legend, string values are acceptable. For ordinal legend, the number in the domain array should be the same number of colors. For quantile scale legend, the domain should be an array of all values. For other scales, the domain needs to be an array of two number for marking the upper bound and lower bound.
+ * @property {string[]} colors The colors of the legend. All valid svg color can be used. For discrete type, multiple values are accepted. For continuous type, an array of two values is supported.
+ */
+
+/**
+ * A UI widget that enables display discrete colors or two-color continuous transition legend.
+ *
+ * @class
+ * @alias geo.gui.colorLegendWidget
+ * @extends geo.gui.domWidget
+ * @param {object} [arg] Widget options.
+ * @param {object} [args.position] Position setting relatively to the map container.
+ * @param {number} [args.position.right] The pixel distance the widget to the right of the map container.
+ * @param {number} [args.position.top] The pixel distance the widget to the top of the map container.
+ * @param {geo.gui.colorLegendWidget.category[]} [args.categories] An array of category definitions for the initial color legends
+ * @returns {geo.gui.colorLegendWidget}
+ */
 var colorLegendWidget = function (arg) {
   'use strict';
   if (!(this instanceof colorLegendWidget)) {
@@ -15,7 +39,7 @@ var colorLegendWidget = function (arg) {
   var m_categories = [];
 
   var oldInit = this._init;
-
+  // get the widget container ready
   this._init = function () {
     oldInit();
     var canvas = m_this.canvas();
@@ -57,7 +81,8 @@ var colorLegendWidget = function (arg) {
     }
   };
 
-  this.draw = function () {
+  // clear the DOM container and create legends
+  this._draw = function () {
     d3.select(m_this.canvas()).selectAll('div.legends').remove();
 
     if (!m_categories.length) {
@@ -101,29 +126,48 @@ var colorLegendWidget = function (arg) {
       if (category.type === 'discrete') {
         m_this._drawDiscrete(legendSvg, width - 2 * margin, category);
       } else if (category.type === 'continuous') {
-        m_this.drawContinous(legendSvg, width - 2 * margin, category);
+        m_this._drawContinous(legendSvg, width - 2 * margin, category);
       }
     });
 
   };
 
+  /**
+   * Set or get categories
+   * @param {geo.gui.colorLegendWidget.category[]} [categories] If `undefined`, return the current legend categories array. If an array is provided, remove current legends and recreate with the new categories.
+   * @returns {geo.gui.colorLegendWidget.category[]}
+   */
   this.categories = function (categories) {
+    if (categories === undefined) {
+      return m_categories;
+    }
     m_categories = categories;
-    this.draw();
+    this._draw();
   };
 
+  /**
+   * Add additional categories
+   *
+   * @param {geo.gui.colorLegendWidget.category[]} categories Append additional legend categories to the end the of the current list of legends.
+   */
   this.addCategories = function (categories) {
     m_categories = m_categories.concat(categories);
-    this.draw();
+    this._draw();
   };
 
+  /**
+   * Remove categories
+   *
+   * @param {geo.gui.colorLegendWidget.category[]} categories If a category object exists in the current legend categories, that category will be removed.
+   */
   this.removeCategories = function (categories) {
     m_categories = m_categories.filter(function (category) {
       return categories.indexOf(category) === -1;
     });
-    this.draw();
+    this._draw();
   };
 
+  // Draw an individual discrete type legend
   this._drawDiscrete = function (svg, width, category) {
     var valueRange, valueScale, colorScale, axisScale, axis, steps, ticks;
     if (category.scale === 'ordinal') {
@@ -158,7 +202,7 @@ var colorLegendWidget = function (arg) {
       axisScale = d3.scale.ordinal()
         .domain(axisDomain)
         .rangePoints([0, width]);
-      axis = createDiscreteContinousAxis(axisScale);
+      axis = createAxis(axisScale);
       m_this._renderAxis(svg, axis);
 
     } else if (['linear', 'log', 'sqrt', 'pow'].indexOf(category.scale) !== -1) {
@@ -178,11 +222,11 @@ var colorLegendWidget = function (arg) {
           return valueScale.invert(tick);
         }))
         .rangePoints([0, width]);
-      axis = createDiscreteContinousAxis(axisScale);
+      axis = createAxis(axisScale);
       m_this._renderAxis(svg, axis);
     }
 
-    function createDiscreteContinousAxis(axisScale) {
+    function createAxis(axisScale) {
       return d3.svg.axis()
         .scale(axisScale)
         .tickFormat(d3.format('.2s'))
@@ -193,6 +237,7 @@ var colorLegendWidget = function (arg) {
     }
   };
 
+  // Actually render colors for discrete type with d3
   this._renderDiscreteColors = function (svg, steps, colorScale, width, getValue) {
     svg.selectAll('rect')
       .data(steps)
@@ -212,26 +257,8 @@ var colorLegendWidget = function (arg) {
       .on('mouseout', m_this._hidePopup);
   };
 
-  this._renderAxis = function (svg, axis) {
-    svg.append('g')
-      .attr('class', 'x axis')
-      .attr('transform', 'translate(0, 20)')
-      .call(function (g) {
-        g.call(axis);
-        g.selectAll('path.domain, line')
-          .style({
-            'fill': 'none',
-            'stroke': 'black',
-            'stroke-width': '0.7'
-          });
-        g.selectAll('text')
-          .style({
-            'font-size': '12px'
-          });
-      });
-  };
-
-  this.drawContinous = function (svg, width, category) {
+  // Draw an individual continous type legend
+  this._drawContinous = function (svg, width, category) {
     var axisScale, axis;
     if (['linear', 'log', 'sqrt', 'pow'].indexOf(category.scale) === -1) {
       throw new Error('unsupported scale');
@@ -274,6 +301,27 @@ var colorLegendWidget = function (arg) {
     this._renderAxis(svg, axis);
   };
 
+  // actually render the axis with d3
+  this._renderAxis = function (svg, axis) {
+    svg.append('g')
+      .attr('class', 'x axis')
+      .attr('transform', 'translate(0, 20)')
+      .call(function (g) {
+        g.call(axis);
+        g.selectAll('path.domain, line')
+          .style({
+            'fill': 'none',
+            'stroke': 'black',
+            'stroke-width': '0.7'
+          });
+        g.selectAll('text')
+          .style({
+            'font-size': '12px'
+          });
+      });
+  };
+
+  // formatter of number that tries to maximize the precision while making the output shorter
   this._popupFormatter = function (number, precision) {
     number = parseFloat(number.toFixed(8));
     precision = Math.min(precision, getPrecision(number));
@@ -281,6 +329,7 @@ var colorLegendWidget = function (arg) {
     return d3.format('.' + precision + 'f')(number);
   };
 
+  // show the popup based on current mouse event
   this._showPopup = function (text) {
     // The cursor location relative to the container
     var offset = d3.mouse(m_this.canvas());
