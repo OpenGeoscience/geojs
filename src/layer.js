@@ -74,12 +74,26 @@ var layer = function (arg) {
    * Get or set the z-index of the layer.  The z-index controls the display
    * order of the layers in much the same way as the CSS z-index property.
    *
-   * @param {number} [zIndex] The new z-index
+   * @param {number} [zIndex] The new z-index, or undefined to return the
+   *    current z-index.
+   * @param {boolean} [allowDuplicate] When setting the z index, if this is
+   *    truthy, allow other layers to have the same z-index.  Otherwise,
+   *    ensure that other layers have distinct z-indices from this one.
    * @returns {number|this}
    */
-  this.zIndex = function (zIndex) {
+  this.zIndex = function (zIndex, allowDuplicate) {
     if (zIndex === undefined) {
       return m_zIndex;
+    }
+    if (!allowDuplicate) {
+      // if any extant layer has the same index, then we move all of those
+      // layers up.  We do this in reverse order since, if two layers above
+      // this one share a z-index, they will resolve to the layer insert order.
+      m_map.children().reverse().forEach(function (child) {
+        if (child.zIndex && child !== this && child.zIndex() === zIndex) {
+          child.zIndex(zIndex + 1);
+        }
+      });
     }
     m_zIndex = zIndex;
     m_node.css('z-index', m_zIndex);
@@ -123,8 +137,8 @@ var layer = function (arg) {
       } else if (i - me <= n) {
         // swap the next n layers
         tmp = m_this.zIndex();
-        m_this.zIndex(order[i].zIndex());
-        order[i].zIndex(tmp);
+        m_this.zIndex(order[i].zIndex(), true);
+        order[i].zIndex(tmp, true);
       } else {
         // all the swaps are done now
         break;
@@ -464,7 +478,13 @@ var layer = function (arg) {
   };
 
   if (arg.zIndex === undefined) {
-    arg.zIndex = m_map.children().length;
+    var maxZ = -1;
+    m_map.children().forEach(function (child) {
+      if (child.zIndex) {
+        maxZ = Math.max(maxZ, child.zIndex());
+      }
+    });
+    arg.zIndex = maxZ + 1;
   }
   m_zIndex = arg.zIndex;
 

@@ -58,7 +58,7 @@ describe('Test the zIndex property of layers', function () {
         l3 = map.createLayer('feature', {zIndex: 0});
 
     expect(getZIndex(l1)).toBe(10);
-    expect(getZIndex(l2)).toBe(1);
+    expect(getZIndex(l2)).toBe(11);
     expect(getZIndex(l3)).toBe(0);
   });
 
@@ -69,7 +69,7 @@ describe('Test the zIndex property of layers', function () {
         l3 = map.createLayer('feature', {zIndex: 0});
 
     expect(l1.zIndex()).toBe(10);
-    expect(l2.zIndex()).toBe(1);
+    expect(l2.zIndex()).toBe(11);
     expect(l3.zIndex()).toBe(0);
 
     l1.zIndex(11);
@@ -231,5 +231,20 @@ describe('Test reordering layers', function () {
     layers[1].moveToBottom();
     expect(layers.map(function (l) { return l.zIndex(); }))
       .toEqual([11, 0, 5, 10, 15, 100]);
+  });
+
+  it('move one layer to the same z-index of an existing layer', function () {
+    var layers = setup();
+
+    layers[1].zIndex(10);
+    expect(layers.map(function (l) { return l.zIndex(); }))
+      .toEqual([11, 10, 0, 5, 12, 15]);
+    // if multiple layers have values that need to be shifted, they should
+    // end up with unique values with later layers above earlier ones.
+    layers[5].zIndex(11, true);
+    layers[4].zIndex(12, true);
+    layers[1].zIndex(11);
+    expect(layers.map(function (l) { return l.zIndex(); }))
+      .toEqual([12, 11, 0, 5, 14, 13]);
   });
 });
