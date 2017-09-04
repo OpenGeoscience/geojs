@@ -8,6 +8,7 @@ describe('color legend', function () {
   var map;
   var container = null;
   var legendWidget = null;
+  var uiLayer = null;
   var allCategories = [
     {
       name: 'Discrete ordinal',
@@ -80,7 +81,8 @@ describe('color legend', function () {
       'clampBoundsX': false,
       'clampBoundsY': false
     });
-    legendWidget = map.createLayer('ui').createWidget('colorLegend', {
+    uiLayer = map.createLayer('ui');
+    legendWidget = uiLayer.createWidget('colorLegend', {
       categories: [allCategories[0]]
     });
     map.draw();
@@ -91,26 +93,55 @@ describe('color legend', function () {
     container.remove();
   });
 
-  it('Create basic color legend widget', function (done) {
+  it('Create basic color legend widget', function () {
     expect($(container).find('.legend').length).toBe(1);
-    done();
   });
 
-  it('set new categories', function (done) {
+  it('Create color legend widget without initial categories', function () {
+    uiLayer.removeChild(legendWidget);
+    legendWidget._exit();
+    legendWidget = uiLayer.createWidget('colorLegend', {
+      categories: []
+    });
+    expect($(container).find('.legend').length).toBe(0);
+  });
+
+  it('Use unsupported scale', function () {
+    expect(function () {
+      legendWidget.categories([{
+        name: '',
+        type: 'discrete',
+        scale: 'curvilinear',
+        domain: [100, 1000],
+        colors: colorbrewer.YlGnBu['9']
+      }]);
+    }).toThrow(new Error('unsupported scale'));
+
+    expect(function () {
+      legendWidget.categories([{
+        name: '',
+        type: 'continuous',
+        scale: 'curvilinear',
+        domain: [100, 1000],
+        colors: colorbrewer.YlGnBu['9']
+      }]);
+    }).toThrow(new Error('unsupported scale'));
+  });
+
+  it('set new categories', function () {
     legendWidget.categories([allCategories[1], allCategories[2]]);
     expect($(container).find('.legend').length).toBe(2);
-    done();
+    expect(legendWidget.categories().length).toBe(2);
   });
 
-  it('add remove categories', function (done) {
+  it('add remove categories', function () {
     legendWidget.addCategories([allCategories[1], allCategories[2]]);
     expect($(container).find('.legend').length).toBe(3);
     legendWidget.removeCategories([allCategories[1], allCategories[2]]);
     expect($(container).find('.legend').length).toBe(1);
-    done();
   });
 
-  it('test different kind of categories', function (done) {
+  it('test different kind of categories', function () {
     legendWidget.categories(allCategories);
     var legends = $(container).find('.legend');
     expect(legends.length).toBe(allCategories.length);
@@ -146,10 +177,9 @@ describe('color legend', function () {
     expect($(legends[7]).find('svg g.tick text').toArray().map(function (text) {
       return $(text).text();
     }).join(', ')).toBe('150, 400, 1.1k, 3.0k, 8.1k');
-    done();
   });
 
-  it('test mouse events', function (done) {
+  it('test mouse events', function () {
     function CreateEvent(eventType, params) {
       params = params || { bubbles: false, cancelable: false };
       var mouseEvent = document.createEvent('MouseEvent');
@@ -174,7 +204,7 @@ describe('color legend', function () {
     var mousemove = CreateEvent('mousemove');
     mousemove.pageX = 115;
     mousemove.pageY = 574;
-    var mouseout = CreateEvent('mousemove');
+    var mouseout = CreateEvent('mouseout');
     var legends = $(container).find('.legend');
     $(legends[0]).find('svg>rect')[0].dispatchEvent(mousemove);
     $(legends[0]).find('svg>rect')[0].dispatchEvent(mouseout);
@@ -182,6 +212,5 @@ describe('color legend', function () {
     $(legends[1]).find('svg>rect')[0].dispatchEvent(mousemove);
     expect($(container).find('.color-legend-popup').text()).toBe('46');
     $(legends[1]).find('svg>rect')[0].dispatchEvent(mouseout);
-    done();
   });
 });

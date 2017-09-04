@@ -2,29 +2,46 @@ var d3 = require('d3');
 var domWidget = require('./domWidget');
 var inherit = require('../inherit');
 var registerWidget = require('../registry').registerWidget;
+var util = require('../util');
+
+require('./colorLegendWidget.styl');
 
 /**
- * @typedef {object} [geo.gui.colorLegendWidget.category]
+ * @typedef {object} geo.gui.colorLegendWidget.category
  * @property {string} name The text label of the legend.
  * @property {string} type The type of the legend, either discrete or continuous.
  * @property {string} scale The scale of the legend. For discrete type,
  * linear, log, sqrt, pow, ordinal, and quantile is supported.
  * For continuous type, linear, log, sqrt, and pow is supported.
- * @property {number[]|string[]} domain Only for ordinal scale legend, string values are acceptable. For ordinal legend, the number in the domain array should be the same number of colors. For quantile scale legend, the domain should be an array of all values. For other scales, the domain needs to be an array of two number for marking the upper bound and lower bound.
- * @property {string[]} colors The colors of the legend. All valid svg color can be used. For discrete type, multiple values are accepted. For continuous type, an array of two values is supported.
+ * @property {number[]|string[]} domain Only for ordinal scale legend, string
+ * values are acceptable. For ordinal legend, the number in the domain array
+ * should be the same number of colors. For quantile scale legend, the domain
+ * should be an array of all values. For other scales, the domain needs to be
+ * an array of two number for marking the upper bound and lower bound.
+ * This domain property will be used with d3 scale object internally.
+ * @property {geo.geoColor[]} colors The colors of the legend.
+ * All valid svg color can be used. For discrete type, multiple values
+ * are accepted. For continuous type, an array of two values is supported.
+ * @property {number} [base] The base of log when log scale is used.
+ * default to 10.
+ * @property {number} [exponent] The exponent of power when power scale is used.
+ * default to 1.
  */
 
 /**
- * A UI widget that enables display discrete colors or two-color continuous transition legend.
+ * A UI widget that enables display discrete colors or two-color continuous
+ *  transition legend.
  *
  * @class
  * @alias geo.gui.colorLegendWidget
  * @extends geo.gui.domWidget
  * @param {object} [arg] Widget options.
- * @param {object} [args.position] Position setting relatively to the map container.
- * @param {number} [args.position.right] The pixel distance the widget to the right of the map container.
- * @param {number} [args.position.top] The pixel distance the widget to the top of the map container.
- * @param {geo.gui.colorLegendWidget.category[]} [args.categories] An array of category definitions for the initial color legends
+ * @param {geo.gui.widget.position} [arg.position] Position setting relatively to the map
+ * container.
+ * @param {geo.gui.colorLegendWidget.category[]} [arg.categories] An array
+ * of category definitions for the initial color legends
+ * @param {number} [arg.width] The pixel width of the wiget in number. Default is 300px.
+ * @param {number} [arg.ticks] The maximum number of ticks on the axis of a legend, default is 6.
  * @returns {geo.gui.colorLegendWidget}
  */
 var colorLegendWidget = function (arg) {
@@ -35,53 +52,29 @@ var colorLegendWidget = function (arg) {
 
   domWidget.call(this, arg);
 
-  var m_this = this;
-  var m_categories = [];
-
-  var oldInit = this._init;
+  var m_this = this,
+      m_categories = [],
+      m_width = arg.width || 300,
+      m_ticks = arg.ticks || 6,
+      s_init = this._init;
   // get the widget container ready
   this._init = function () {
-    oldInit();
+    s_init();
     var canvas = m_this.canvas();
     d3.select(canvas)
-      .style({
-        'display': 'none',
-        'padding': '10px',
-        'border': '1.5px solid black',
-        'border-radius': '3px',
-        'transition': '250ms background linear',
-        'background-color': 'rgba(255, 255, 255, 0.75)'
-      })
-      .on('mouseenter', function () {
-        d3.select(this)
-          .style('background-color', 'rgba(255, 255, 255, 1)');
-      })
-      .on('mouseleave', function () {
-        d3.select(this)
-          .style('background-color', 'rgba(255, 255, 255, 0.75)');
-      });
+      .attr('class', 'color-legend-container');
 
     m_this.popup = d3.select(canvas).append('div')
-      .attr('class', 'color-legend-popup')
-      .style({
-        'position': 'absolute',
-        'background': 'white',
-        'height': '22px',
-        'font-size': '14px',
-        'border': 'solid 1px black',
-        'padding': '0 5px',
-        'pointer-events': 'none',
-        'white-space': 'nowrap',
-        'z-index': 100000,
-        'opacity': 0
-      });
+      .attr('class', 'color-legend-popup');
 
     if (arg.categories) {
       this.categories(arg.categories);
     }
   };
 
-  // clear the DOM container and create legends
+  /**
+   * clear the DOM container and create legends
+   */
   this._draw = function () {
     d3.select(m_this.canvas()).selectAll('div.legends').remove();
 
@@ -96,28 +89,23 @@ var colorLegendWidget = function (arg) {
       .append('div')
       .attr('class', 'legends');
 
-    var width = 300;
+    var width = m_width;
     var margin = 20;
 
     m_categories.forEach(function (category, index) {
       var legendContainer = container
         .append('div')
-        .attr('class', 'legend')
-        .style({
-          'margin-bottom': '10px'
-        });
+        .attr('class', 'legend');
 
       legendContainer
         .append('div')
-        .text(category.name)
-        .style({
-          'text-align': 'center'
-        });
+        .attr('class', 'title')
+        .text(category.name);
 
       var legendSvg = legendContainer
         .append('svg')
         .attr({
-          'display': 'block',
+          'class': 'svg',
           'width': width,
           'height': '40px',
           'viewBox': -margin + ' 0 ' + width + ' 40'
@@ -133,46 +121,73 @@ var colorLegendWidget = function (arg) {
   };
 
   /**
-   * Set or get categories
-   * @param {geo.gui.colorLegendWidget.category[]} [categories] If `undefined`, return the current legend categories array. If an array is provided, remove current legends and recreate with the new categories.
-   * @returns {geo.gui.colorLegendWidget.category[]}
+   * Set or get categories.
+   * @param {geo.gui.colorLegendWidget.category[]} [categories] If `undefined`,
+   * return the current legend categories array. If an array is provided,
+   * remove current legends and recreate with the new categories.
+   * @returns {geo.gui.colorLegendWidget.category[]|this}
+   * The current list of categories or the current class instance.
    */
   this.categories = function (categories) {
     if (categories === undefined) {
       return m_categories;
     }
-    m_categories = categories;
+    m_categories = this._prepareCategories(categories);
     this._draw();
+    return this;
   };
 
   /**
-   * Add additional categories
-   *
-   * @param {geo.gui.colorLegendWidget.category[]} categories Append additional legend categories to the end the of the current list of legends.
+   * Add additional categories.
+   * @param {geo.gui.colorLegendWidget.category[]} categories Append additional
+   * legend categories to the end the of the current list of legends.
+   * @returns {this} The current class instance.
    */
   this.addCategories = function (categories) {
-    m_categories = m_categories.concat(categories);
+    m_categories = m_categories.concat(this._prepareCategories(categories));
     this._draw();
+    return this;
   };
 
   /**
    * Remove categories
    *
-   * @param {geo.gui.colorLegendWidget.category[]} categories If a category object exists in the current legend categories, that category will be removed.
+   * @param {geo.gui.colorLegendWidget.category[]} categories If a category
+   * object exists in the current legend categories, that category will be
+   * removed.
+   * @returns {this} The current class instance.
    */
   this.removeCategories = function (categories) {
     m_categories = m_categories.filter(function (category) {
       return categories.indexOf(category) === -1;
     });
     this._draw();
+    return this;
   };
 
-  // Draw an individual discrete type legend
+  this._prepareCategories = function (categories) {
+    categories.forEach(function (category) {
+      category.color = category.colors.map(function (color) {
+        return util.convertColorToHex(color, true);
+      });
+    });
+    return categories;
+  };
+
+  /**
+   * Draw an individual discrete type legend
+   */
   this._drawDiscrete = function (svg, width, category) {
+    if (['linear', 'log', 'sqrt', 'pow', 'quantile', 'ordinal'].indexOf(category.scale) === -1) {
+      throw new Error('unsupported scale');
+    }
     var valueRange, valueScale, colorScale, axisScale, axis, steps, ticks;
     if (category.scale === 'ordinal') {
-      colorScale = d3.scale.ordinal().domain(category.domain).range(category.colors);
-      m_this._renderDiscreteColors(svg, category.domain, colorScale, width, function (d) { return d; });
+      colorScale = d3.scale.ordinal()
+        .domain(category.domain)
+        .range(category.colors);
+      m_this._renderDiscreteColors(
+        svg, category.domain, colorScale, width, function (d) { return d; });
 
       axisScale = d3.scale.ordinal()
         .domain(category.domain)
@@ -180,14 +195,15 @@ var colorLegendWidget = function (arg) {
       axis = d3.svg.axis()
         .scale(axisScale)
         .tickValues(function () {
-          var skip = Math.ceil(axisScale.domain().length / 6);
-          return axisScale.domain().filter(function (d, i) { return i % skip === 0; });
+          var skip = Math.ceil(axisScale.domain().length / m_ticks);
+          return axisScale.domain()
+            .filter(function (d, i) { return i % skip === 0; });
         });
       m_this._renderAxis(svg, axis);
 
     } else if (category.scale === 'quantile') {
       valueRange = [0, category.colors.length];
-      steps = range(0, category.colors.length - 1);
+      steps = util.range(0, category.colors.length - 1);
       valueScale = d3.scale.quantile().domain(category.domain).range(steps);
       colorScale = d3.scale.quantize().domain(valueRange).range(category.colors);
       m_this._renderDiscreteColors(svg, steps, colorScale, width, function (d) {
@@ -195,7 +211,8 @@ var colorLegendWidget = function (arg) {
       });
 
       var axisDomain = [valueScale.invertExtent(0)[0]];
-      axisDomain = axisDomain.concat(steps.map(function (step) { return valueScale.invertExtent(step)[1]; }));
+      axisDomain = axisDomain.concat(steps.map(
+        function (step) { return valueScale.invertExtent(step)[1]; }));
 
       ticks = steps.slice();
       ticks.push(category.colors.length);
@@ -207,12 +224,15 @@ var colorLegendWidget = function (arg) {
 
     } else if (['linear', 'log', 'sqrt', 'pow'].indexOf(category.scale) !== -1) {
       valueRange = [0, category.colors.length];
-      valueScale = d3.scale[category.scale]().domain(category.domain).range(valueRange).nice();
+      valueScale = d3.scale[category.scale]()
+        .domain(category.domain).range(valueRange).nice();
       colorScale = d3.scale.quantize().domain(valueRange).range(category.colors);
-      steps = range(0, category.colors.length - 1);
-      var precision = Math.max.apply(null, category.domain.map(function (number) { return getPrecision(number); }));
+      steps = util.range(0, category.colors.length - 1);
+      var precision = Math.max.apply(null, category.domain
+        .map(function (number) { return getPrecision(number); }));
       m_this._renderDiscreteColors(svg, steps, colorScale, width, function (d) {
-        return m_this._popupFormatter(valueScale.invert(d), precision) + ' - ' + m_this._popupFormatter(valueScale.invert(d + 1), precision);
+        return m_this._popupFormatter(valueScale.invert(d), precision)
+          + ' - ' + m_this._popupFormatter(valueScale.invert(d + 1), precision);
       });
 
       ticks = steps.slice();
@@ -226,18 +246,23 @@ var colorLegendWidget = function (arg) {
       m_this._renderAxis(svg, axis);
     }
 
+    /**
+     * render the axis based on the axis Scale
+     */
     function createAxis(axisScale) {
       return d3.svg.axis()
         .scale(axisScale)
         .tickFormat(d3.format('.2s'))
         .tickValues(function () {
-          var skip = Math.ceil(axisScale.domain().length / 6);
+          var skip = Math.ceil(axisScale.domain().length / m_ticks);
           return axisScale.domain().filter(function (d, i) { return i % skip === 0; });
         });
     }
   };
 
-  // Actually render colors for discrete type with d3
+  /**
+   * Actually render colors for discrete type with d3
+   */
   this._renderDiscreteColors = function (svg, steps, colorScale, width, getValue) {
     svg.selectAll('rect')
       .data(steps)
@@ -257,7 +282,9 @@ var colorLegendWidget = function (arg) {
       .on('mouseout', m_this._hidePopup);
   };
 
-  // Draw an individual continous type legend
+  /**
+   * Draw an individual continous type legend
+   */
   this._drawContinous = function (svg, width, category) {
     var axisScale, axis;
     if (['linear', 'log', 'sqrt', 'pow'].indexOf(category.scale) === -1) {
@@ -270,8 +297,9 @@ var colorLegendWidget = function (arg) {
     if (category.scale === 'pow' && category.exponent) {
       axisScale.exponent(category.exponent);
     }
-    var randomString = Math.random().toString(36).substring(5);
-    var precision = Math.max.apply(null, category.domain.map(function (number) { return getPrecision(number); }));
+    var randomString = util.randomString(5);
+    var precision = Math.max.apply(null, category.domain
+      .map(function (number) { return getPrecision(number); }));
 
     var gradient = svg
       .append('defs')
@@ -296,32 +324,27 @@ var colorLegendWidget = function (arg) {
 
     axis = d3.svg.axis()
       .scale(axisScale)
-      .ticks(6, '.2s');
+      .ticks(m_ticks, '.2s');
 
     this._renderAxis(svg, axis);
   };
 
-  // actually render the axis with d3
+  /**
+   * actually render the axis with d3.
+   */
   this._renderAxis = function (svg, axis) {
     svg.append('g')
-      .attr('class', 'x axis')
+      .attr('class', 'axis x')
       .attr('transform', 'translate(0, 20)')
       .call(function (g) {
         g.call(axis);
-        g.selectAll('path.domain, line')
-          .style({
-            'fill': 'none',
-            'stroke': 'black',
-            'stroke-width': '0.7'
-          });
-        g.selectAll('text')
-          .style({
-            'font-size': '12px'
-          });
       });
   };
 
-  // formatter of number that tries to maximize the precision while making the output shorter
+  /**
+   * formatter of number that tries to maximize the precision
+   * while making the output shorter.
+   */
   this._popupFormatter = function (number, precision) {
     number = parseFloat(number.toFixed(8));
     precision = Math.min(precision, getPrecision(number));
@@ -329,7 +352,9 @@ var colorLegendWidget = function (arg) {
     return d3.format('.' + precision + 'f')(number);
   };
 
-  // show the popup based on current mouse event
+  /**
+   * show the popup based on current mouse event.
+   */
   this._showPopup = function (text) {
     // The cursor location relative to the container
     var offset = d3.mouse(m_this.canvas());
@@ -340,7 +365,8 @@ var colorLegendWidget = function (arg) {
     m_this.popup
       .style({
         // If the popup will be longer or almost longer than the container
-        'left': offset[0] - (offset[0] + popupWidth - containerWidth > -10 ? popupWidth : 0) + 'px',
+        'left': offset[0] - (offset[0] +
+          popupWidth - containerWidth > -10 ? popupWidth : 0) + 'px',
         'top': (offset[1] - 22) + 'px'
       })
       .transition()
@@ -356,15 +382,6 @@ var colorLegendWidget = function (arg) {
 
   return this;
 };
-
-function range(start, end, step) {
-  step = step || 1;
-  var foo = [];
-  for (var i = start; i <= end; i += step) {
-    foo.push(i);
-  }
-  return foo;
-}
 
 function getPrecision(a) {
   if (!isFinite(a)) return 0;
