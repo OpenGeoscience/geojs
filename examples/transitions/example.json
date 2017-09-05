@@ -1,5 +1,4 @@
 {
-  "path": "transitions",
   "title": "Using animated transitions",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],

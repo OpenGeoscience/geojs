@@ -1,5 +1,4 @@
 {
-  "path": "lines",
   "title": "Line Feature",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],

@@ -1,7 +1,5 @@
 {
-  "path": "contour",
   "title": "Contour plot",
-  "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
   "about": {
     "text": "This example shows how to add contour features to a map.  Contours color a region based on an array of scalar values."

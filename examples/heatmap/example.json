@@ -1,5 +1,4 @@
 {
-  "path": "heatmap",
   "title": "Heatmap Feature",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],

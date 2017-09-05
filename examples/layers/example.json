@@ -1,5 +1,4 @@
 {
-  "path": "layers",
   "title": "Raw layer interface",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],

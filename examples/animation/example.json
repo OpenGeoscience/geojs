@@ -1,5 +1,4 @@
 {
-  "path": "animation",
   "title": "Animate Features",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],

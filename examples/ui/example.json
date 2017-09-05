@@ -1,7 +1,5 @@
 {
-  "path": "ui",
   "title": "User interface widgets",
-  "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
   "about": {
     "text": "A basic map with user interface widgets"

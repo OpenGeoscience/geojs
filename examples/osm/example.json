@@ -1,7 +1,5 @@
 {
-  "path": "osm",
   "title": "Open street map layer",
-  "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
   "about": {
     "text": "Basic map rendering tiles from an OpenStreetMap tile server.  The base url for the tile server is given at initialization to provide a custom appearance."

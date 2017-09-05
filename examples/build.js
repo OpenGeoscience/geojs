@@ -17,6 +17,11 @@ var examples = glob('examples/*/example.json')
     // directory of the example
     var dir = path.dirname(f);
 
+    // by default, assume the path is where the files are located
+    json.path = json.path || path.basename(dir);
+    json.exampleCss = json.exampleCss || [];
+    json.exampleJs = json.exampleJs || [];
+
     // the main js file for the example
     var main = path.resolve(dir, json.exampleJs[0]);
 
@@ -29,20 +34,26 @@ var examples = glob('examples/*/example.json')
 
     // make docco documentation in:
     //   dist/examples/<name>/docs/
-    docco({
-      args: [main],
-      output: path.resolve(output, 'docs'),
-      layout: 'classic'
-    }, function () {
-      // simplify the docco output to reduce the output size by
-      // removing the unnecessary public/ directory
-      fs.removeSync(path.resolve(output, 'docs', 'public'));
-    });
-
+    if (json.exampleJs.length) {
+      docco({
+        args: [main],
+        output: path.resolve(output, 'docs'),
+        layout: 'classic'
+      }, function () {
+        // simplify the docco output to reduce the output size by
+        // removing the unnecessary public/ directory
+        fs.removeSync(path.resolve(output, 'docs', 'public'));
+      });
+    }
     json.docHTML = 'docs/' + path.basename(main).replace(/js$/, 'html');
+
     json.bundle = '../bundle.js';
 
-    var fn = pug.compileFile(path.relative('.', path.resolve(dir, 'index.pug')), {pretty: true});
+    var pugFile = path.relative('.', path.resolve(dir, 'index.pug'));
+    if (!fs.existsSync(path.resolve(dir, 'index.pug'))) {
+      pugFile = path.relative('.', path.resolve(dir, '../common/index.pug'));
+    }
+    var fn = pug.compileFile(pugFile, {pretty: true});
     fs.writeFileSync(path.resolve(output, 'index.html'), fn(json));
     return json;
   });
