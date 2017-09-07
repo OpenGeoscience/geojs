@@ -3,14 +3,16 @@ var sceneObject = require('../sceneObject');
 
 /**
  * @typedef {object} geo.gui.widget.position
- * @property {string|number} top The position to the top of the container.
+ * @property {string|number} [top] The position to the top of the container.
  * A string css position or a number. If a number is used, it will be treated as px value.
- * @property {string|number} right The position to the right of the container.
+ * @property {string|number} [right] The position to the right of the container.
  * Value is used similarly to the top property.
- * @property {string|number} bottom The position to the bottom of the container.
+ * @property {string|number} [bottom] The position to the bottom of the container.
  * Value is used similarly to the top property.
- * @property {string|number} left The position to the left of the container.
+ * @property {string|number} [left] The position to the left of the container.
  * Value is used similarly to the top property.
+ * @property {*} [...] Additional css properties that affect position are
+  allowed.  See the css specification for details.
  */
 
 /**

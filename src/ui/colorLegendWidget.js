@@ -3,6 +3,7 @@ var domWidget = require('./domWidget');
 var inherit = require('../inherit');
 var registerWidget = require('../registry').registerWidget;
 var util = require('../util');
+var uniqueID = require('../d3/uniqueID');
 
 require('./colorLegendWidget.styl');
 
@@ -40,8 +41,8 @@ require('./colorLegendWidget.styl');
  * container.
  * @param {geo.gui.colorLegendWidget.category[]} [arg.categories] An array
  * of category definitions for the initial color legends
- * @param {number} [arg.width] The pixel width of the wiget in number. Default is 300px.
- * @param {number} [arg.ticks] The maximum number of ticks on the axis of a legend, default is 6.
+ * @param {number} [arg.width=300] The width of the widget in pixels.
+ * @param {number} [arg.ticks=6] The maximum number of ticks on the axis of a legend, default is 6.
  * @returns {geo.gui.colorLegendWidget}
  */
 var colorLegendWidget = function (arg) {
@@ -73,7 +74,7 @@ var colorLegendWidget = function (arg) {
   };
 
   /**
-   * clear the DOM container and create legends
+   * Clear the DOM container and create legends.
    */
   this._draw = function () {
     d3.select(m_this.canvas()).selectAll('div.legends').remove();
@@ -150,7 +151,7 @@ var colorLegendWidget = function (arg) {
   };
 
   /**
-   * Remove categories
+   * Remove categories.
    *
    * @param {geo.gui.colorLegendWidget.category[]} categories If a category
    * object exists in the current legend categories, that category will be
@@ -165,6 +166,11 @@ var colorLegendWidget = function (arg) {
     return this;
   };
 
+  /**
+   * This function normalize color input string with the utility function. It modifies the original object.
+   * @param {geo.gui.colorLegendWidget.category[]} categories The categories
+   * @returns {geo.gui.colorLegendWidget.category[]} prepared categories
+   */
   this._prepareCategories = function (categories) {
     categories.forEach(function (category) {
       category.color = category.colors.map(function (color) {
@@ -175,7 +181,10 @@ var colorLegendWidget = function (arg) {
   };
 
   /**
-   * Draw an individual discrete type legend
+   * Draw an individual discrete type legend.
+   * @param {Element} svg svg element that the legend will be drawn
+   * @param {number} width width of the svg element in pixel
+   * @param {geo.gui.colorLegendWidget.category} category The discrete type legend category
    */
   this._drawDiscrete = function (svg, width, category) {
     if (['linear', 'log', 'sqrt', 'pow', 'quantile', 'ordinal'].indexOf(category.scale) === -1) {
@@ -247,7 +256,9 @@ var colorLegendWidget = function (arg) {
     }
 
     /**
-     * render the axis based on the axis Scale
+     * Render the d3 axis object based on the axis d3 Scale.
+     * @param {object} axisScale d3 scale object
+     * @returns {object} d3 axis object
      */
     function createAxis(axisScale) {
       return d3.svg.axis()
@@ -261,7 +272,12 @@ var colorLegendWidget = function (arg) {
   };
 
   /**
-   * Actually render colors for discrete type with d3
+   * Render colors for discrete type with d3.
+   * @param {Element} svg svg element that the legend will be drawn
+   * @param {number[]} steps discrete input scale domain for d3 scale
+   * @param {object} colorScale d3 scale for transform input into color
+   * @param {number} width width of the svg element in pixel
+   * @param {function} getValue function that transforms raw domain into desired discrete range
    */
   this._renderDiscreteColors = function (svg, steps, colorScale, width, getValue) {
     svg.selectAll('rect')
@@ -283,7 +299,10 @@ var colorLegendWidget = function (arg) {
   };
 
   /**
-   * Draw an individual continous type legend
+   * Draw an individual continous type legend.
+   * @param {Element} svg svg element that the legend will be drawn
+   * @param {number} width width of the svg element in pixel
+   * @param {geo.gui.colorLegendWidget.category} category The continuous type legend category
    */
   this._drawContinous = function (svg, width, category) {
     var axisScale, axis;
@@ -297,14 +316,14 @@ var colorLegendWidget = function (arg) {
     if (category.scale === 'pow' && category.exponent) {
       axisScale.exponent(category.exponent);
     }
-    var randomString = util.randomString(5);
+    var id = uniqueID();
     var precision = Math.max.apply(null, category.domain
       .map(function (number) { return getPrecision(number); }));
 
     var gradient = svg
       .append('defs')
       .append('linearGradient')
-      .attr('id', 'gradient' + randomString);
+      .attr('id', 'gradient' + id);
     gradient.append('stop')
       .attr('offset', '0%')
       .attr('stop-color', category.colors[0]);
@@ -312,7 +331,7 @@ var colorLegendWidget = function (arg) {
       .attr('offset', '100%')
       .attr('stop-color', category.colors[1]);
     svg.append('rect')
-      .attr('fill', 'url(#gradient' + randomString + ')')
+      .attr('fill', 'url(#gradient' + id + ')')
       .attr('width', width)
       .attr('height', '20px')
       .on('mousemove', function () {
@@ -330,7 +349,9 @@ var colorLegendWidget = function (arg) {
   };
 
   /**
-   * actually render the axis with d3.
+   * Actually render the axis with d3.
+   * @param {Element} svg svg element that the axis will be drawn
+   * @param {object} axis d3 axis object
    */
   this._renderAxis = function (svg, axis) {
     svg.append('g')
@@ -342,8 +363,11 @@ var colorLegendWidget = function (arg) {
   };
 
   /**
-   * formatter of number that tries to maximize the precision
+   * Formatter of number that tries to maximize the precision
    * while making the output shorter.
+   * @param {number} number to be formatted
+   * @param {precision} precision number of decimal precision will be tried to be kept
+   * @returns {string} formatted string output
    */
   this._popupFormatter = function (number, precision) {
     number = parseFloat(number.toFixed(8));
@@ -353,7 +377,8 @@ var colorLegendWidget = function (arg) {
   };
 
   /**
-   * show the popup based on current mouse event.
+   * Show the popup based on current mouse event.
+   * @param {string} text content to be shown in the popup
    */
   this._showPopup = function (text) {
     // The cursor location relative to the container
