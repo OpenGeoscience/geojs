@@ -1,7 +1,5 @@
 {
-  "path": "polygons",
   "title": "Polygon features",
-  "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
   "about": {
     "text": "This example shows how to add polygons to a map."

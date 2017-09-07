@@ -1,7 +1,5 @@
 {
-  "path": "wms",
   "title": "Rendering tiles from a WMS server",
-  "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
   "about": {
     "text": "Rendering tiles from a WMS server by customizing the tile URL of an OSM layer."

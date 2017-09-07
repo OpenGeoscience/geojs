@@ -1,5 +1,4 @@
 {
-  "path": "widgets",
   "title": "Map Widgets",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js", "chart.js"],

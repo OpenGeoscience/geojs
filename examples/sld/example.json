@@ -1,5 +1,4 @@
 {
-  "path": "sld",
   "title": "Adding styles to WMS raster layers",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],

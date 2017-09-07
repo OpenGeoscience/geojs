@@ -1,5 +1,4 @@
 {
-  "path": "annotations",
   "title": "Annotation Layer",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],

@@ -1,5 +1,4 @@
 {
-  "path": "tiles",
   "title": "Tile layer with controllable options",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
