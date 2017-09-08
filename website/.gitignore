@@ -5,7 +5,7 @@ db.json
 node_modules/
 public/
 .deploy*/
-/source/_examples/**
-/source/_tutorials/**
+/source/examples/**
+/source/tutorials/**
 /source/apidocs/**
 /source/data

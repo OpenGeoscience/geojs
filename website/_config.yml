@@ -12,8 +12,8 @@ timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
-root: /
+url: https://github.com/OpenGeoscience/geojs
+root: /geojs/
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 
@@ -28,6 +28,7 @@ i18n_dir: :lang
 skip_render:
   - "**/*.js"
   - "data/**/*"
+  - "apidocs/**/*"
 
 # Writing
 new_post_name: :title.md # File name of new posts

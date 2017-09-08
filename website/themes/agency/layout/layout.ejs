@@ -1,3 +1,6 @@
+<% var navbar_affixed = navbar_affixed || false; %>
+<% var no_footer = no_footer || false; %>
+<% var narrow_footer = narrow_footer || false; %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -60,7 +63,7 @@
 
 <body id="page-top" class="index">
     <!-- Navigation -->
-    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top<% if (navbar_affix){ %> affix<% } %>">
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top<% if (navbar_affixed){ %> affix<% } %>">
         <div class="container">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
@@ -79,13 +82,13 @@
                     </li>
                     <% var path = page_url(path); %>
                     <li class="<% if(path == '/'){ %> active <% } %>">
-                        <a href="/">Welcome</a>
+                        <a href="<%- page_url("/") %>">Welcome</a>
                     </li>
                     <li class="<% if(path.indexOf('tutorial')!=-1){ %> active <% } %>">
-                        <a href="tutorials">Tutorials</a>
+                        <a href="<%- page_url("tutorials") %>">Tutorials</a>
                     </li>
                     <li class="<% if(path.indexOf('example')!=-1){ %> active <% } %>">
-                        <a href="examples">Examples</a>
+                        <a href="<%- page_url("examples") %>">Examples</a>
                     </li>
                     <li>
                         <a href="https://github.com/OpenGeoscience/geojs">GitHub</a>
@@ -101,7 +104,7 @@
         <%- body %>
     </div>
     <% if (!no_footer){ %>
-    <footer class="<% if (footer-narrow) { %> narrow<% } %>">
+    <footer class="<% if (narrow_footer) { %> narrow<% } %>">
         <div class="container">
             <div class="row">
                 <div class="col-sm-3">

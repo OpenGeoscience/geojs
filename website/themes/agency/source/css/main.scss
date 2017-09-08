@@ -88,7 +88,7 @@ footer{
             overflow: hidden;
 
             &.heatmap {
-                background-image:url("examples/heatmap/thumb.jpg");
+                background-image:url("../examples/heatmap/thumb.jpg");
                     background-size: auto 80px;
                     background-position: 3px 15px;
                     background-repeat: no-repeat;
@@ -96,13 +96,13 @@ footer{
             }
 
             &.contour{
-                background-image:url("examples/contour/thumb.jpg");
+                background-image:url("../examples/contour/thumb.jpg");
                 background-size: auto 110px;
                 background-position: -20px -5px;
             }
 
             &.choropleth {
-                background-image:url("examples/choropleth/thumb.jpg");
+                background-image:url("../examples/choropleth/thumb.jpg");
                 background-size: auto 105px;
                 background-position: -5px 5px;
             }

@@ -103,7 +103,7 @@
     "start-test": "node examples/build.js; forever start ./testing/test-runners/server.js",
     "stop-test": "forever stop ./testing/test-runners/server.js",
     "docs": "jsdoc --pedantic -d dist/apidocs -r src -c jsdoc.conf.json",
-    "build-website": "cp -a dist/built/. website/built && cp -a dist/tutorials/. website/_tutorials && cp -a dist/examples/. website/_examples && cp -a dist/apidocs/. website/apidocs && jekyll build -s website/ -d dist/website/"
+    "build-website": "cp -a dist/built/. website/source/built && cp -a dist/tutorials/. website/source/tutorials && cp -a dist/examples/. website//source/examples && cp -a dist/apidocs/. website/source/apidocs && cd website && npx hexo generate"
   },
   "keywords": [
     "map",
