@@ -1,6 +1,11 @@
-node_modules
-/_site
-/_examples/**
-/_tutorials/**
-/apidocs/**
-/built/**
+.DS_Store
+Thumbs.db
+db.json
+*.log
+node_modules/
+public/
+.deploy*/
+/source/_examples/**
+/source/_tutorials/**
+/source/apidocs/**
+/source/data
