@@ -212,7 +212,7 @@ module.exports = function (config) {
       {pattern: 'tests/data/**/*', included: false},
       {pattern: 'tests/cases/**/*.js', included: false, served: false, watched: true},
       {pattern: 'tests/gl-cases/**/*.js', included: false, served: false, watched: true},
-      {pattern: 'tests/example-cases/**/*.js', included: false, served: false, watched: true},
+      {pattern: 'tests/headed-cases/**/*.js', included: false, served: false, watched: true},
       {pattern: 'dist/data/**/*', included: false},
       {pattern: 'dist/examples/**/*', included: false},
       {pattern: 'dist/tutorials/**/*', included: false},
