@@ -1,7 +1,5 @@
 {
-  "path": "choropleth",
   "title": "Choropleth plot",
-  "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
   "about": {
     "text": "This example shows how to add choropleth features to a map.  Choropleths color each region in a set of regions based on a scalar value for each region."

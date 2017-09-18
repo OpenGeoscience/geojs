@@ -1,5 +1,4 @@
 {
-  "path": "reprojection",
   "title": "Reproject tiles",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],

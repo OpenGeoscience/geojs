@@ -1,7 +1,5 @@
 {
-  "path": "picking",
   "title": "Mouse picking for points and lines",
-  "exampleCss": ["main.css"],
   "exampleJs": ["main.js", "widget.js"],
   "about": {
     "text": "This example demonstrates how to attach handlers to various mouse interactions that allow the users to select features.  Try moving the mouse over the features and clicking."
