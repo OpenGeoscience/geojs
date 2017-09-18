@@ -3,10 +3,12 @@ var registerLayer = require('../registry').registerLayer;
 var layer = require('../layer');
 
 /**
- * Create a new instance of class uiLayer
+ * Create a new instance of class uiLayer.
  *
- * @class geo.gui.uiLayer
+ * @class
+ * @alias geo.gui.uiLayer
  * @extends {geo.layer}
+ * @param {object} [arg] Options for the layer.
  * @returns {geo.gui.uiLayer}
  */
 var uiLayer = function (arg) {
@@ -27,9 +29,12 @@ var uiLayer = function (arg) {
       s_exit = this._exit;
 
   /**
-   * Create a new ui control
+   * Create a new ui control.
    *
-   * @returns {geo.gui.Widget} Will return a new control widget
+   * @param {string} widgetName The name of the widget.
+   * @param {object} arg Options for the widget.
+   * @param {geo.object} [arg.parent] A parent object for the widget.
+   * @returns {geo.gui.widget} The new widget.
    */
   this.createWidget = function (widgetName, arg) {
     var newWidget = createWidget(widgetName, m_this, arg);
@@ -45,7 +50,10 @@ var uiLayer = function (arg) {
   };
 
   /**
-   * Delete a ui control
+   * Delete a ui control.
+   *
+   * @param {geo.gui.widget} widget The widget to remove.
+   * @returns {this}
    */
   this.deleteWidget = function (widget) {
     widget._exit();

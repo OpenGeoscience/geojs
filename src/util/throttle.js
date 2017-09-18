@@ -32,6 +32,8 @@
  * X    X    X    X    X             X    X    X    X    X
  * ```
  *
+ * This is also used to handle debouncing a function.
+ *
  * @alias geo.util.throttle
  * @param {number} delay A zero-or-greater delay in milliseconds. For event
  *    callbacks, values around 100 or 250 (or even higher) are most useful.
@@ -48,16 +50,16 @@
  *    during **each** call to the wrapped function.  Typically, this
  *    this method is used to accumulate values that the callback uses
  *    when it finally executes.
- *
- * @returns {function} The throttled version of `callback`
+ * @param {boolean} [debounce_mode] See the `at_begin` parameter of the
+ *    `geo.util.debounce` function.
+ * @returns {function} The throttled version of `callback`.
  *
  * @example
  * var throttled = geo.util.throttle( delay, [ no_trailing, ] callback );
  * $('selector').bind( 'someevent', throttled );
  * $('selector').unbind( 'someevent', throttled );
  */
-var throttle = function (delay, no_trailing,
-                              callback, accumulator, debounce_mode) {
+var throttle = function (delay, no_trailing, callback, accumulator, debounce_mode) {
   // After wrapper has stopped being called, this timeout ensures that
   // `callback` is executed at the proper times in `throttle` and `end`
   // debounce modes.
@@ -166,6 +168,7 @@ var throttle = function (delay, no_trailing,
  *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
  *   X                                 X
  *
+ * The bulk of the work is handled by the `geo.util.throttle` function.
  *
  * @param {number} delay A zero-or-greater delay in milliseconds. For event
  *    callbacks, values around 100 or 250 (or even higher) are most useful.
@@ -191,7 +194,6 @@ var throttle = function (delay, no_trailing,
  * $('selector').unbind( 'someevent', debounced );
  *
  */
-
 var debounce = function (delay, at_begin, callback, accumulator) {
   if (typeof at_begin !== 'boolean') {
     accumulator = callback;

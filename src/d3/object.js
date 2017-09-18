@@ -4,10 +4,13 @@ var sceneObject = require('../sceneObject');
 /**
  * D3 specific subclass of object which adds an id property for d3 selections
  * on groups of objects by class id.
- * @class geo.d3.object
+ *
+ * @class
+ * @alias geo.d3.object
  * @extends geo.sceneObject
+ * @param {object} arg Options for the object.
+ * @returns {geo.d3.object}
  */
-
 var d3_object = function (arg) {
   'use strict';
 
@@ -31,15 +34,19 @@ var d3_object = function (arg) {
   };
 
   /**
-  *  Returns a d3 selection for the feature elements
-  */
+   * Returns a d3 selection for the feature elements.
+   *
+   * @returns {d3.selector} A d3 selector of the features in this object.
+   */
   this.select = function () {
     return m_this.renderer().select(m_this._d3id());
   };
 
   /**
-  *  Redraw the object.
-  */
+   * Redraw the object.
+   *
+   * @returns {this}
+   */
   this.draw = function () {
     m_this._update();
     s_draw();
@@ -47,8 +54,8 @@ var d3_object = function (arg) {
   };
 
   /**
-  *  Removes the element from the svg and the renderer
-  */
+   * Removes the element from the svg and the renderer.
+   */
   this._exit = function () {
     m_this.renderer()._removeFeature(m_this._d3id());
     s_exit();

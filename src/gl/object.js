@@ -1,9 +1,12 @@
 /**
  * VGL specific subclass of object which rerenders when the object is drawn.
- * @class geo.gl.object
+ *
+ * @class
+ * @alias geo.gl.object
  * @extends geo.sceneObject
+ * @param {object} arg Options for the object.
+ * @returns {geo.gl.object}
  */
-
 var gl_object = function (arg) {
   'use strict';
 
@@ -19,8 +22,10 @@ var gl_object = function (arg) {
       s_draw = this.draw;
 
   /**
-  *  Redraw the object.
-  */
+   * Redraw the object.
+   *
+   * @returns {this}
+   */
   this.draw = function () {
     m_this._update({mayDelay: true});
     m_this.renderer()._render();
@@ -32,4 +37,3 @@ var gl_object = function (arg) {
 };
 
 module.exports = gl_object;
-

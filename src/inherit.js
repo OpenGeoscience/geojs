@@ -3,7 +3,10 @@ function newfunc() {
 }
 
 /**
- * Convenient function to define JS inheritance
+ * Convenient function to define JS inheritance.
+ *
+ * @param {object} C Child class instance.
+ * @param {object} P Parent class instance.
  */
 module.exports = function (C, P) {
   var F = newfunc();

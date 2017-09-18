@@ -310,8 +310,10 @@
     Object.defineProperty(this, 'viewport', {
       get: function () {
         return {
-          width: this._viewport.width, height: this._viewport.height,
-          left: this._viewport.left, top: this._viewport.top
+          width: this._viewport.width,
+          height: this._viewport.height,
+          left: this._viewport.left,
+          top: this._viewport.top
         };
       },
       set: function (viewport) {
@@ -342,8 +344,10 @@
         }
 
         this._viewport = {
-          width: viewport.width, height: viewport.height,
-          left: viewport.left, top: viewport.top
+          width: viewport.width,
+          height: viewport.height,
+          left: viewport.left,
+          top: viewport.top
         };
         this._update();
         this.geoTrigger(geo_event.camera.viewport, {
@@ -356,7 +360,7 @@
     /**
      * Reset the view matrix to its initial (identity) state.
      * @protected
-     * @returns {this} Chainable
+     * @returns {this} Chainable.
      */
     this._resetView = function () {
       mat4.identity(this._view);
@@ -366,38 +370,40 @@
     /**
      * Uses `mat4.translate` to translate the camera by the given vector amount.
      * @protected
-     * @param {vec3|Array} offset The camera translation vector
-     * @returns {this} Chainable
+     * @param {vec3|Array} offset The camera translation vector.
+     * @returns {this} Chainable.
      */
     this._translate = function (offset) {
       mat4.translate(this._view, this._view, offset);
+      return this;
     };
 
     /**
      * Uses `mat4.scale` to scale the camera by the given vector amount.
      * @protected
-     * @param {vec3|Array} scale The scaling vector
-     * @returns {this} Chainable
+     * @param {vec3|Array} scale The scaling vector.
+     * @returns {this} Chainable.
      */
     this._scale = function (scale) {
       mat4.scale(this._view, this._view, scale);
+      return this;
     };
 
     /**
-     * Project a vec4 from world space into clipped space [-1, 1] in place
+     * Project a vec4 from world space into clipped space [-1, 1] in place.
      * @protected
-     * @param {vec4} point The point in world coordinates (mutated)
-     * @returns {vec4} The point in clip space coordinates
+     * @param {vec4} point The point in world coordinates (mutated).
+     * @returns {vec4} The point in clip space coordinates.
      */
     this._worldToClip4 = function (point) {
       return camera.applyTransform(this._transform, point);
     };
 
     /**
-     * Project a vec4 from clipped space into world space in place
+     * Project a vec4 from clipped space into world space in place.
      * @protected
-     * @param {vec4} point The point in clipped coordinates (mutated)
-     * @returns {vec4} The point in world space coordinates
+     * @param {vec4} point The point in clipped coordinates (mutated).
+     * @returns {vec4} The point in world space coordinates.
      */
     this._clipToWorld4 = function (point) {
       return camera.applyTransform(this._inverse, point);
@@ -405,8 +411,8 @@
 
     /**
      * Apply the camera's projection transform to the given point.
-     * @param {vec4} pt a point in clipped coordinates
-     * @returns {vec4} the point in normalized coordinates
+     * @param {vec4} pt a point in clipped coordinates.
+     * @returns {vec4} the point in normalized coordinates.
      */
     this.applyProjection = function (pt) {
       var w;
@@ -424,8 +430,8 @@
 
     /**
      * Unapply the camera's projection transform from the given point.
-     * @param {vec4} pt a point in normalized coordinates
-     * @returns {vec4} the point in clipped coordinates
+     * @param {vec4} pt a point in normalized coordinates.
+     * @returns {vec4} the point in clipped coordinates.
      */
     this.unapplyProjection = function (pt) {
       var w;
@@ -443,8 +449,8 @@
 
     /**
      * Project a vec4 from world space into viewport space.
-     * @param {vec4} point The point in world coordinates (mutated)
-     * @returns {vec4} The point in display coordinates
+     * @param {vec4} point The point in world coordinates (mutated).
+     * @returns {vec4} The point in display coordinates.
      *
      * @note For the moment, this computation assumes the following:
      *   * point[3] > 0
@@ -473,8 +479,8 @@
 
     /**
      * Project a vec4 from display space into world space in place.
-     * @param {vec4} point The point in display coordinates (mutated)
-     * @returns {vec4} The point in world space coordinates
+     * @param {vec4} point The point in display coordinates (mutated).
+     * @returns {vec4} The point in world space coordinates.
      *
      * @note For the moment, this computation assumes the following:
      *   * point[3] > 0
@@ -499,10 +505,10 @@
 
     /**
      * Project a point object from world space into viewport space.
-     * @param {object} point The point in world coordinates
+     * @param {object} point The point in world coordinates.
      * @param {number} point.x
      * @param {number} point.y
-     * @returns {object} The point in display coordinates
+     * @returns {object} The point in display coordinates.
      */
     this.worldToDisplay = function (point) {
       // define some magic numbers:
@@ -516,10 +522,10 @@
 
     /**
      * Project a point object from viewport space into world space.
-     * @param {object} point The point in display coordinates
+     * @param {object} point The point in display coordinates.
      * @param {number} point.x
      * @param {number} point.y
-     * @returns {object} The point in world coordinates
+     * @returns {object} The point in world coordinates.
      */
     this.displayToWorld = function (point) {
       // define some magic numbers:
@@ -537,7 +543,7 @@
      * so the result is cached for public facing methods.
      *
      * @protected
-     * @returns {object} bounds object
+     * @returns {object} bounds object.
      */
     this._getBounds = function () {
       var ul, ur, ll, lr, bds = {};
@@ -571,9 +577,9 @@
      * @param {number} bounds.right
      * @param {number} bounds.bottom
      * @param {number} bounds.top
-     * @param {number?} bounds.near Currently ignored
-     * @param {number?} bounds.far Currently ignored
-     * @return {this} Chainable
+     * @param {number?} bounds.near Currently ignored.
+     * @param {number?} bounds.far Currently ignored.
+     * @returns {this} Chainable.
      */
     this._setBounds = function (bounds) {
       var size = {
@@ -602,8 +608,8 @@
      * @param {object} size
      * @param {number} size.width
      * @param {number} size.height
-     * @param {number} rotation in clockwise radians.  Optional
-     * @return {this} Chainable
+     * @param {number} rotation in clockwise radians.  Optional.
+     * @returns {this} Chainable.
      */
     this._viewFromCenterSizeRotation = function (center, size, rotation) {
       var translate = util.vec3AsArray(),
@@ -649,6 +655,14 @@
 
     /**
      * Public exposure of the viewFromCenterSizeRotation function.
+     * @param {object} center
+     * @param {number} center.x
+     * @param {number} center.y
+     * @param {object} size
+     * @param {number} size.width
+     * @param {number} size.height
+     * @param {number} rotation in clockwise radians.  Optional.
+     * @returns {this} Chainable.
      */
     this.viewFromCenterSizeRotation = function (center, size, rotation) {
       this._viewFromCenterSizeRotation(center, size, rotation);
@@ -663,6 +677,7 @@
      * @param {number} offset.x
      * @param {number} offset.y
      * @param {number} [offset.z=0]
+     * @returns {this} Chainable.
      */
     this.pan = function (offset) {
       if (!offset.x && !offset.y && !offset.z) {
@@ -674,12 +689,14 @@
         offset.z || 0
       ]);
       this._update();
+      return this;
     };
 
     /**
      * Zooms the view matrix by the given amount.
      *
      * @param {number} zoom The zoom scale to apply
+     * @returns {this} Chainable.
      */
     this.zoom = function (zoom) {
       if (zoom === 1) {
@@ -691,6 +708,7 @@
         zoom
       ]);
       this._update();
+      return this;
     };
 
     /**
@@ -698,7 +716,8 @@
      *
      * @param {number} rotation Counter-clockwise rotation angle in radians.
      * @param {object} center Center of rotation in world space coordinates.
-     * @param {vec3} axis acis of rotation.  Defaults to [0, 0, -1]
+     * @param {vec3} [axis=[0, 0, -1]] axis of rotation.
+     * @returns {this} Chainable.
      */
     this._rotate = function (rotation, center, axis) {
       if (!rotation) {
@@ -714,6 +733,7 @@
       mat4.translate(this._view, this._view, center);
       mat4.rotate(this._view, this._view, rotation, axis);
       mat4.translate(this._view, this._view, invcenter);
+      return this;
     };
 
     /**
@@ -750,8 +770,8 @@
 
     /**
      * Represent a glmatrix as a pretty-printed string.
-     * @param {mat4} mat A 4 x 4 matrix
-     * @param {number} prec The number of decimal places
+     * @param {mat4} mat A 4 x 4 matrix.
+     * @param {number} prec The number of decimal places.
      * @returns {string}
      */
     this.ppMatrix = function (mat, prec) {
@@ -774,6 +794,7 @@
 
     /**
      * Pretty print the transform matrix.
+     * @returns {string} A string representation of the matrix.
      */
     this.toString = function () {
       return this.ppMatrix(this._transform);
@@ -781,6 +802,7 @@
 
     /**
      * Return a debugging string of the current camera state.
+     * @returns {string} A string with the camera state.
      */
     this.debug = function () {
       return [
@@ -797,6 +819,7 @@
 
     /**
      * Represent the value of the camera as its transform matrix.
+     * @returns {mat4} The transform matrix.
      */
     this.valueOf = function () {
       return this._transform;
@@ -841,8 +864,8 @@
 
   /**
    * Output a mat4 as a css transform.
-   * @param {mat4} t A matrix transform
-   * @returns {string} A css transform string
+   * @param {mat4} t A matrix transform.
+   * @returns {string} A css transform string.
    */
   camera.css = function (t) {
     return (
@@ -878,12 +901,14 @@
    *
    * applies the css transform:
    *
-   *    translate(b) scale(m) translate(a)
+   *    translate(b) scale(m) translate(a) .
    *
-   * @param {object?} pre Coordinate offset **before** scaling
-   * @param {object?} scale Coordinate scaling
-   * @param {object?} post Coordinate offset **after** scaling
-   * @returns {mat4} The new transform matrix
+   * If a parameter is `null` or `undefined`, that component is skipped.
+   *
+   * @param {object?} pre Coordinate offset **before** scaling.
+   * @param {object?} scale Coordinate scaling.
+   * @param {object?} post Coordinate offset **after** scaling.
+   * @returns {mat4} The new transform matrix.
    */
   camera.affine = function (pre, scale, post) {
     var mat = util.mat4AsArray();

@@ -1711,7 +1711,7 @@ var map = function (arg) {
    *    it is not already scheduled.  `'remove'` to remove the callback (use
    *    this instead of `cancelAnimationFrame`).  Any other truthy value moves
    *    the callback to the end of the list.
-   * @returns {integer} An integer as returned by
+   * @returns {number} An integer as returned by
    *    `window.requestAnimationFrame`.
    */
   this.scheduleAnimationFrame = function (callback, action) {

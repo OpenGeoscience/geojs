@@ -396,10 +396,13 @@ var util = module.exports = {
   },
 
   /**
-   * Create an integer array contains elements from one integer to another integer.
-   * @param {integer} start The start integer
-   * @param {integer} end The end integer
-   * @param {integer} [step] The step, default to 1
+   * Create an integer array contains elements from one integer to another
+   * integer.
+   *
+   * @param {number} start The start integer.
+   * @param {number} end The end integer.
+   * @param {number} [step=1] The step.
+   * @returns {number[]} An array of integers.
    */
   range: function (start, end, step) {
     step = step || 1;
