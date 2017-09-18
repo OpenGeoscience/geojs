@@ -208,8 +208,9 @@ describe('color legend', function () {
     } else {
       result = '319';
     }
+
+    /*global MouseEvent*/
     try {
-      var MouseEvent = MouseEvent || MouseEvent;
       mousemove = new MouseEvent('mousemove', { clientX: 134, clientY: 574 });
     } catch (e) {
       mousemove = CreateEvent('mousemove');
