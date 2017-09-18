@@ -134,14 +134,14 @@ if(WEBGLHEADLESS_TESTS)
   set_property(TEST "webglheadless" APPEND PROPERTY DEPENDS "build_examples")
 
   add_test(
-    NAME "examplesheadless"
+    NAME "headed"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMAND "${NPM_EXECUTABLE}" run examplesci
+    COMMAND "${NPM_EXECUTABLE}" run headedci
   )
-  set_property(TEST "examplesheadless" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
-  set_property(TEST "examplesheadless" APPEND PROPERTY ENVIRONMENT "TEST_SAVE_IMAGE=${TEST_SAVE_IMAGE}")
-  set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "examplesheadless")
-  set_property(TEST "examplesheadless" APPEND PROPERTY DEPENDS "build_examples")
+  set_property(TEST "headed" APPEND PROPERTY ENVIRONMENT "CTEST_IMAGE_PATH=${CMAKE_CURRENT_BINARY_DIR}/images")
+  set_property(TEST "headed" APPEND PROPERTY ENVIRONMENT "TEST_SAVE_IMAGE=${TEST_SAVE_IMAGE}")
+  set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "headed")
+  set_property(TEST "headed" APPEND PROPERTY DEPENDS "build_examples")
 
   configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/baseline_images.py"
@@ -158,8 +158,8 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz"
   COMMAND TEST_SAVE_IMAGE=all "${NPM_EXECUTABLE}" run glci
   # Build examples to make sure that they are available.
   COMMAND "${NPM_EXECUTABLE}" run build-examples
-  # Run the examplesheadless test, asking to save all images
-  COMMAND TEST_SAVE_IMAGE=all "${NPM_EXECUTABLE}" run examplesci
+  # Run the headed test, asking to save all images
+  COMMAND TEST_SAVE_IMAGE=all "${NPM_EXECUTABLE}" run headedci
   # If optipng is available, reduce the size of the images
   # COMMAND bash -c "optipng '${CMAKE_CURRENT_BINARY_DIR}'/images/*.png || true"
   COMMAND bash -c "find '${CMAKE_CURRENT_BINARY_DIR}'/images -name '*.png' -a -not -name '*-test.png' -a -not -name '*-diff.png' -a -not -name '*-base.png' -a -not -name '*-screen.png' -print0 | xargs -0 -n 1 -P 8 optipng || true"
