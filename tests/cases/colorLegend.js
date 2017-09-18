@@ -201,16 +201,29 @@ describe('color legend', function () {
     container[0].dispatchEvent(CreateEvent('mouseleave'));
 
     legendWidget.categories([allCategories[1], allCategories[6]]);
-    var mousemove = CreateEvent('mousemove');
-    mousemove.pageX = 115;
-    mousemove.pageY = 574;
+    var mousemove;
+    var result;
+    if (navigator.userAgent.indexOf('Firefox') > 0) {
+      result = '320';
+    } else {
+      result = '319';
+    }
+    try {
+      var MouseEvent = MouseEvent || MouseEvent;
+      mousemove = new MouseEvent('mousemove', { clientX: 134, clientY: 574 });
+    } catch (e) {
+      mousemove = CreateEvent('mousemove');
+      mousemove.pageX = 134;
+      mousemove.pageY = 574;
+      result = '46';
+    }
     var mouseout = CreateEvent('mouseout');
     var legends = $(container).find('.legend');
     $(legends[0]).find('svg>rect')[0].dispatchEvent(mousemove);
     $(legends[0]).find('svg>rect')[0].dispatchEvent(mouseout);
     expect($(container).find('.color-legend-popup').text()).toBe('100 - 200');
     $(legends[1]).find('svg>rect')[0].dispatchEvent(mousemove);
-    expect($(container).find('.color-legend-popup').text()).toBe('46');
+    expect($(container).find('.color-legend-popup').text()).toBe(result);
     $(legends[1]).find('svg>rect')[0].dispatchEvent(mouseout);
   });
 });
