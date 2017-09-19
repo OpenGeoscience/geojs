@@ -366,7 +366,7 @@ var colorLegendWidget = function (arg) {
    * Formatter of number that tries to maximize the precision
    * while making the output shorter.
    * @param {number} number to be formatted
-   * @param {precision} precision number of decimal precision will be tried to be kept
+   * @param {number} precision maximum number of decimal places that are kept
    * @returns {string} formatted string output
    */
   this._popupFormatter = function (number, precision) {
@@ -399,6 +399,9 @@ var colorLegendWidget = function (arg) {
       .style('opacity', 1);
   };
 
+  /**
+   * Hide the popup.
+   */
   this._hidePopup = function () {
     m_this.popup.transition()
       .duration(200)
@@ -408,10 +411,19 @@ var colorLegendWidget = function (arg) {
   return this;
 };
 
-function getPrecision(a) {
-  if (!isFinite(a)) return 0;
+/**
+ * Get the number of decimals of a number.
+ * @param {number} number the number input
+ * @returns {number} the number of decimal
+ */
+function getPrecision(number) {
+  if (!isFinite(number)) return 0;
   var e = 1, p = 0;
-  while (Math.round(a * e) / e !== a) { e *= 10; p++; }
+  while (Math.round(number * e) / e !== number) {
+    if (!isFinite(number * e)) { return 0; }
+    e *= 10;
+    p++;
+  }
   return p;
 }
 
