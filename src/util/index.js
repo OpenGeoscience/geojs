@@ -396,6 +396,21 @@ var util = module.exports = {
   },
 
   /**
+   * Create an integer array contains elements from one integer to another integer.
+   * @param {integer} start The start integer
+   * @param {integer} end The end integer
+   * @param {integer} [step] The step, default to 1
+   */
+  range: function (start, end, step) {
+    step = step || 1;
+    var results = [];
+    for (var i = start; i <= end; i += step) {
+      results.push(i);
+    }
+    return results;
+  },
+
+  /**
    * Compare two arrays and return if their contents are equal.
    * @param {array} a1 First array to compare.
    * @param {array} a2 Second array to compare.
