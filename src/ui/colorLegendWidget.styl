@@ -1,0 +1,42 @@
+.color-legend-container
+  display none
+  padding 10px
+  border 1.5px solid black
+  border-radius 3px
+  transition 250ms background linear
+  background-color rgba(255, 255, 255, 0.75)
+
+  &:hover
+    background-color rgba(255, 255, 255, 1)
+
+  .legends
+
+    .legend
+      margin-bottom 10px
+
+      .title
+        text-align center
+
+      svg.svg
+        display block
+
+        .axis.x
+          path.domain, line
+            fill none
+            stroke black
+            stroke-width 0.7
+          text
+            font-size 12px
+  
+  .color-legend-popup
+    position absolute
+    background white
+    height 22px
+    font-size 14px
+    border solid 1px black
+    padding 0 5px
+    pointer-events none
+    white-space nowrap
+    z-index 100000
+    opacity 0
+

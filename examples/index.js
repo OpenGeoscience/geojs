@@ -2,9 +2,9 @@ require('../src/vendor');
 window.geo = require('../src/index');
 
 // bootstrap and themes
-// require('bootstrap/dist/css/bootstrap.css');
-// require('bootswatch/flatly/bootstrap.css');
-// require('bootstrap');
+require('bootstrap/dist/css/bootstrap.css');
+require('bootswatch/flatly/bootstrap.css');
+require('bootstrap');
 
 // codemirror and plugins
 require('codemirror/lib/codemirror.css');
@@ -14,7 +14,7 @@ require('codemirror/addon/fold/foldgutter.css');
 // Colorbrewer
 require('colorbrewer');
 
-require('./common/js/jsonlint');
+require('./common/jsonlint');
 require('codemirror');
 require('codemirror/mode/javascript/javascript');
 require('codemirror/addon/lint/lint');
@@ -25,5 +25,5 @@ require('codemirror/addon/fold/foldgutter');
 require('codemirror/addon/edit/matchbrackets');
 
 // common example code
-// require('./common/css/examples.css');
-// require('./common/js/examples');
+//require('./common/examples.css');
+//require('./common/examples');

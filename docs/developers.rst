@@ -81,9 +81,9 @@ will run the headless WebGL tests.  After the data for tests is downloaded,
 the tests can also be run via ``npm run test-webgl``, which assumes that
 ``xvfb-run`` is available.
 
-The headless unit tests that require WebGL or should run in a standard browser 
-should be placed in the ``tests/gl-cases/`` directory.  When tests are run in a
-normal browser via ``npm run start``, the webgl tests are included.
+The headless unit tests that require WebGL should be placed in the
+``tests/gl-cases/`` directory.  When tests are run in a normal browser via
+``npm run start``, the webgl tests are included.
 
 Many of these tests compare against a baseline image.  If a test is changed or
 added, new baselines can be generated and optionally uploaded via the script
@@ -109,9 +109,10 @@ test command or set this parameter in CMake.
     build correctly.  Try running ``ccmake /path/to/geojs`` for a full
     list of configuration options.
 
-Examples should be tested by creating an entry in the ``tests/example-cases/``
-directory.  To run these tests in a normal browser, run 
-``npm run start`` and browse to `<http://localhost:9876/debug.html?test=all>`_.
-Since the browser's direct screen output is used, the browser must be running 
-on the same machine as the ``npm run start`` command.
+Examples and tests that need to run in a standard browser should be tested by
+creating an entry in the ``tests/headed-cases/`` directory.  To run these tests
+in a normal browser, run ``npm run start`` and browse to 
+`<http://localhost:9876/debug.html?test=all>`_.  Since the browser's direct 
+screen output is used, the browser must be running on the same machine as the
+``npm run start`` command.
 

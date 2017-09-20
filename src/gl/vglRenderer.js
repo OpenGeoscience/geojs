@@ -78,12 +78,18 @@ var vglRenderer = function (arg) {
     canvas.addClass('webgl-canvas');
     $(m_this.layer().node().get(0)).append(canvas);
 
-    if (window.contextPreserveDrawingBuffer) {
+    if (window.overrideContextAttributes) {
       var elem = canvas.get(0);
       var getContext = elem.getContext;
       elem.getContext = function (contextType, contextAttributes) {
         contextAttributes = contextAttributes || {};
-        contextAttributes.preserveDrawingBuffer = true;
+        if (window.overrideContextAttributes) {
+          for (var key in window.overrideContextAttributes) {
+            if (window.overrideContextAttributes.hasOwnProperty(key)) {
+              contextAttributes[key] = window.overrideContextAttributes[key];
+            }
+          }
+        }
         return getContext.call(elem, contextType, contextAttributes);
       };
     }

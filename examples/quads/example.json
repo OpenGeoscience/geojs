@@ -1,7 +1,5 @@
 {
-  "path": "quads",
   "title": "Quad features",
-  "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
   "about": {
     "text": "This example shows how to add dynamic quads to a map."

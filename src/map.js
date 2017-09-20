@@ -1541,7 +1541,7 @@ var map = function (arg) {
   /**
    * Get a screen-shot of all or some of the canvas layers of map.  Note that
    * webGL layers are rerendered, even if
-   *   `window.contextPreserveDrawingBuffer = true;`
+   *   `window.overrideContextAttributes.preserveDrawingBuffer = true;`
    * is set before creating the map object.  Chrome, at least, may not keep the
    * drawing buffers if the tab loses focus (and returning focus won't
    * necessarily rerender).
@@ -1615,7 +1615,10 @@ var map = function (arg) {
       layers = [layers];
     }
     // filter to only the included layers
-    layers = layers.filter(function (l) { return m_this.layers().indexOf(l) >= 0; });
+    layers = layers.filter(function (l) {
+      return m_this.layers().indexOf(l) >= 0 &&
+             l.opacity() > 0 && (!l.visible || l.visible());
+    });
     // sort layers by z-index
     layers = layers.sort(
       function (a, b) { return (a.zIndex() - b.zIndex()); }
@@ -1652,9 +1655,6 @@ var map = function (arg) {
     // for each layer, copy to our new canvas.
     layers.forEach(function (layer) {
       var opacity = layer.opacity();
-      if (opacity <= 0) {
-        return;
-      }
       layer.node().children('canvas').each(function () {
         var canvasElem = $(this);
         defer = defer.then(function () {

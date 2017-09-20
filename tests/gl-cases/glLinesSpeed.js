@@ -41,7 +41,8 @@ describe('glLinesSpeed', function () {
       console.log('Load time ' + totaltime + ' ms (average across ' +
                   times.length + ' loads)');
       console.log(times);
-      expect(totaltime).toBeLessThan(2000);
+      // very minimal test threshold
+      expect(totaltime).toBeLessThan(10000);
       /* Test animation time. */
       starttime = new Date().getTime();
       animationFrame();

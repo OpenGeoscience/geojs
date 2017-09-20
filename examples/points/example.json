@@ -1,7 +1,5 @@
 {
-  "path": "points",
   "title": "Point features",
-  "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
   "about": {
     "text": "This example shows how to add styled point features to a map.  It also demonstrates attaching event handlers to add interactivity and combine events from multiple layers.  Notice how GeoJS events propagate through features and layers."

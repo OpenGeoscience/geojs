@@ -47,7 +47,11 @@ function compareImage(name, canvas, threshold, callback) {
  * image test can collect data.
  */
 module.exports.prepareImageTest = function () {
-  window.contextPreserveDrawingBuffer = true;
+  window.overrideContextAttributes = {
+    antialias: true,
+    premultipliedAlpha: true,
+    preserveDrawingBuffer: true
+  };
   $('#map').remove();
   var map = $('<div id="map"/>').css({width: '800px', height: '600px'});
   $('body').prepend(map);
@@ -148,12 +152,19 @@ module.exports.imageTest = function (name, elemSelector, threshold, doneFunc, id
   } else {
     defer = defer.then(function () {
       var innerScreenX = window.mozInnerScreenX !== undefined ?
-            window.mozInnerScreenX :
-            (window.outerWidth - window.innerWidth) / 2 + window.screenX,
+            window.mozInnerScreenX : window.screenX ?
+            (window.outerWidth - window.innerWidth) / 2 + window.screenX : 0,
           innerScreenY = window.mozInnerScreenY !== undefined ?
-            window.mozInnerScreenY :
+            window.mozInnerScreenY : window.screenY ?
             window.outerHeight - window.innerHeight -
-            (window.outerWidth - window.innerWidth) / 2 + window.screenY;
+            (window.outerWidth - window.innerWidth) / 2 + window.screenY :
+            window.outerHeight - window.innerHeight;
+      var win = window;
+      while (win !== win.top && window.mozInnerScreenX === undefined) {
+        innerScreenX += win.parent.document.getElementsByTagName('iframe')[0].offsetLeft;
+        innerScreenY += win.parent.document.getElementsByTagName('iframe')[0].offsetTop;
+        win = win.parent;
+      }
       return {
         screenCoordinates: true,
         left: $(elemSelector).offset().left + innerScreenX,

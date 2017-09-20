@@ -1,5 +1,4 @@
 {
-  "path": "layerEvents",
   "title": "DOM events in layers",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],

@@ -1,6 +1,10 @@
+/* globals utils */
+
 // Run after the DOM loads
 $(function () {
   'use strict';
+
+  var query = utils.getQuery();
 
   // Define a function we will use to generate contours.
   function makeContour(data, layer) {
@@ -10,7 +14,7 @@ $(function () {
     var contour = layer.createFeature('contour')
       .data(data.position || data.values)
       .style({
-        opacity: 0.75
+        opacity: query.opacity ? +query.opacity : 0.75
       })
       .contour({
         gridWidth: data.gridWidth,
@@ -48,6 +52,29 @@ $(function () {
         x0: data.x0, y0: data.y0, dx: data.dx, dy: data.dy
       });
     }
+    switch (query.range) {
+      case 'nonlinear':
+        contour
+        .contour({
+          rangeValues: [0, 25, 50, 75, 100, 125, 250, 500, 750, 2000]
+        });
+        break;
+      case 'iso':
+        contour
+        .contour({
+          rangeValues: [100, 100, 200, 200, 300, 300, 400, 400, 500, 500],
+          opacityRange: [1, 0, 1, 0, 1, 0, 1, 0, 1],
+          minOpacity: 0,
+          maxOpacity: 0
+        });
+        break;
+    }
+    if (query.stepped) {
+      contour
+      .contour({
+        stepped: query.stepped !== 'false'
+      });
+    }
     return contour;
   }
 
@@ -76,21 +103,23 @@ $(function () {
 
   // Load the data
   $.ajax({
-    url: '../../data/oahu.json',
+    url: query.url ? query.url : '../../data/oahu.json',
     success: function (data) {
       var contour = makeContour(data, contourLayer);
       contour.draw();
       /* After 10 second, load a denser data set */
-      window.setTimeout(function () {
-        $.ajax({
-          url: '../../data/oahu-dense.json',
-          success: function (data) {
-            contourLayer.deleteFeature(contour);
-            contour = makeContour(data, contourLayer, contour);
-            contour.draw();
-          }
-        });
-      }, 10000);
+      if (!query.url) {
+        window.setTimeout(function () {
+          $.ajax({
+            url: '../../data/oahu-dense.json',
+            success: function (data) {
+              contourLayer.deleteFeature(contour);
+              contour = makeContour(data, contourLayer, contour);
+              contour.draw();
+            }
+          });
+        }, 10000);
+      }
     }
   });
 });
