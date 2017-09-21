@@ -8,8 +8,12 @@ no_footer: true
 <link rel="stylesheet" href="<%- url_for("css/example.css") %>">
 <script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
 <div class="page example">
-    <script type="text/javascript" src="main.js" charset="UTF-8"></script>
-    <link rel="stylesheet" href="main.css">
+    <% for(js of page.exampleJs) { %>
+        <script type="text/javascript" src="<%- js %>"></script>
+    <% } %>
+    <% for(css of page.exampleCss) { %>
+        <link rel="stylesheet" href="<%- css %>">
+    <% } %>
     <div id="map"></div>
     <%- page.content %>
     <div class="modal fade screenshot-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">

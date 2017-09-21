@@ -1,6 +1,11 @@
 require('../src/vendor');
 window.geo = require('../src/index');
 
+// bootstrap and themes
+require('bootstrap/dist/css/bootstrap.css');
+require('bootswatch/flatly/bootstrap.css');
+require('bootstrap');
+
 // codemirror and plugins
 require('codemirror/lib/codemirror.css');
 require('codemirror/addon/lint/lint.css');

@@ -5,8 +5,8 @@ var docco = require('docco').document;
 var pug = require('pug');
 
 // generate the examples
-fs.ensureDirSync('dist/examples');
-var examples = glob('examples/*/example.json')
+fs.ensureDirSync('website/source/examples');
+glob('examples/*/example.json')
   .map(function (f) {
     // /path/to/example.json
     f = path.resolve(f);
@@ -26,7 +26,7 @@ var examples = glob('examples/*/example.json')
     var main = path.resolve(dir, json.exampleJs[0]);
 
     // the output directory where the example will be compiled
-    var output = path.resolve('dist', 'examples', json.path);
+    var output = path.resolve('website', 'source', 'examples', json.path);
 
     // create, empty, and copy the source directory
     fs.emptyDirSync(output);
@@ -49,35 +49,26 @@ var examples = glob('examples/*/example.json')
 
     json.bundle = '../bundle.js';
 
+    var pugTemplate = '';
     var pugFile = path.relative('.', path.resolve(dir, 'index.pug'));
-    if (!fs.existsSync(path.resolve(dir, 'index.pug'))) {
-      pugFile = path.relative('.', path.resolve(dir, '../common/index.pug'));
+    if (fs.existsSync(path.resolve(dir, 'index.pug'))) {
+      pugTemplate = fs.readFileSync(pugFile, 'utf8');
+      pugTemplate = pugTemplate.replace('extends ../common/index.pug', '');
+      pugTemplate = pugTemplate.replace('block append mainContent', '');
     }
-    var fn = pug.compileFile(pugFile, {pretty: true});
+    pugTemplate = `
+|---
+|layout: example
+|title: ${json.title}
+|about: ${json.about.text}
+|exampleCss: ${JSON.stringify(json.exampleCss)}
+|exampleJs: ${JSON.stringify(json.exampleJs)}
+|---
+|
+div` + pugTemplate;
+
+    var fn = pug.compile(pugTemplate, { pretty: false });
     fs.writeFileSync(path.resolve(output, 'index.html'), fn(json));
     return json;
   });
 
-// copy common files
-fs.copySync('examples/common', 'dist/examples/common');
-
-// create the main example page
-var data = {
-  hideNavbar: false,
-  exampleCss: ['main.css'],
-  exampleJs: ['main.js'],
-  examples: examples,
-  bundle: './bundle.js',
-  about: {hidden: true},
-  title: 'GeoJS'
-};
-
-// copy assets for the main page
-fs.copySync('examples/main.js', 'dist/examples/main.js');
-fs.copySync('examples/main.css', 'dist/examples/main.css');
-
-var fn = pug.compileFile('./examples/index.pug', {pretty: true});
-fs.writeFileSync(
-  path.resolve('dist', 'examples', 'index.html'),
-  fn(data)
-);

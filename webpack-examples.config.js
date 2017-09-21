@@ -3,8 +3,6 @@ var path = require('path');
 var base = require('./webpack.config');
 var external = require('./external.config');
 
-require('./examples/build');
-
 var loaders = base.module.loaders.concat([{
   test: /\.pug$/,
   loader: 'pug'

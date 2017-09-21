@@ -87,8 +87,10 @@
   "scripts": {
     "postinstall": "cd website && npm install",
     "build": "webpack --config webpack.config.js && webpack --config external.config.js",
-    "build-examples": "webpack --config webpack-examples.config.js && npm run build-website",
-    "build-tutorials": "webpack --config webpack-tutorials.config.js && npm run build-website",
+    "build-examples": "node examples/build.js && webpack --config webpack-examples.config.js",
+    "build-website-examples": "node examples/build-website.js && webpack --config webpack-website-examples.config.js",
+    "build-tutorials": "node tutorials/build.js && webpack --config webpack-tutorials.config.js",
+    "build-website-tutorials": "node tutorials/build-website.js && webpack --config webpack-website-tutorials.config.js",
     "lint": "eslint --cache .",
     "puglint": "pug-lint src examples",
     "test": "GEOJS_TEST_CASE=tests/test-unit.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch,FirefoxTouch,PhantomJS",
@@ -108,7 +110,7 @@
     "start-test": "node examples/build.js; forever start ./testing/test-runners/server.js",
     "stop-test": "forever stop ./testing/test-runners/server.js",
     "docs": "jsdoc --pedantic -d dist/apidocs -r src -c jsdoc.conf.json",
-    "build-website": "cp -a dist/built/. website/source/built && cp -a dist/tutorials/. website/source/tutorials && cp -a dist/examples/. website//source/examples && cp -a dist/apidocs/. website/source/apidocs && cd website && npx hexo generate && cd .. && cp -a website/public/. dist/website"
+    "build-website": "cp -a dist/built/. website/source/built && npm run build-website-examples && cp -a dist/apidocs/. website/source/apidocs && cd website && npx hexo generate && cd .. && cp -a website/public/. dist/website"
   },
   "keywords": [
     "map",
