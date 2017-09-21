@@ -1,0 +1,32 @@
+<div class="container page tutorials">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <section>
+                <h2>Tutorials</h2>
+                <p class="text-muted">It is easy to get started with GeoJS.  There is also an extensive API with numerous options for more sophisticated visualizations, too.  See the tutorials below.</p>
+                <p class="text-muted">The <a href="basic">Simple Map tutorial</a> is a good place to begin.  It contains the bare-minimum html, css, and javascript to draw a map.</p>
+            </section>
+            <div class="row">
+            <% for(let tutorial of site.data.tutorials) { %>
+                <div class="col-md-4 col-sm-6 portfolio-item">
+                    <a class="portfolio-link" href="<%- tutorial.name %>">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="<%
+                            if(fileExists(`source/tutorials/${tutorial.name}/thumb.jpg`)){
+                                %><%- `${tutorial.name}/thumb.jpg` %><%
+                            }
+                            else {
+                                %><%- 'common/thumb.png' %><%
+                            } %>">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted"><%- tutorial.description %></div>
+                        <h4><a class="portfolio-link" href="<%- tutorial.name %>"><%- tutorial.title %></a></h4>
+                    </div>
+                </div>
+            <% } %>
+            </div>
+        </div>
+    </div>
+</div>
