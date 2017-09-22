@@ -31,7 +31,7 @@ glob('tutorials/*/tutorial.json')
 
     var pugTemplate = fs.readFileSync(path.relative('.', path.resolve(dir, 'index.pug')), 'utf8');
     pugTemplate = pugTemplate.replace('extends ../common/index.pug', 'extends ../common/index-website.pug');
-    
+
     var fn = pug.compile(pugTemplate, {
       pretty: false,
       filename: path.relative('.', path.resolve(dir, 'index.pug'))
@@ -45,7 +45,7 @@ tutorialCss: ${JSON.stringify(json.tutorialCss)}
 tutorialJs: ${JSON.stringify(json.tutorialJs)}
 ---
 ` + html;
-    fs.writeFileSync(path.resolve(output, 'index.html'),html);
+    fs.writeFileSync(path.resolve(output, 'index.html'), html);
     return json;
   });
 

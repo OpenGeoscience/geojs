@@ -67,7 +67,7 @@ about: ${json.about.text}
 exampleCss: ${JSON.stringify(json.exampleCss)}
 exampleJs: ${JSON.stringify(json.exampleJs)}
 ---
-`+ html;
+` + html;
     fs.writeFileSync(path.resolve(output, 'index.html'), html);
     return json;
   });
