@@ -56,19 +56,19 @@ glob('examples/*/example.json')
       pugTemplate = pugTemplate.replace('extends ../common/index.pug', '');
       pugTemplate = pugTemplate.replace('block append mainContent', '');
     }
-    pugTemplate = `
-|---
-|layout: example
-|title: ${json.title}
-|about: ${json.about.text}
-|exampleCss: ${JSON.stringify(json.exampleCss)}
-|exampleJs: ${JSON.stringify(json.exampleJs)}
-|---
-|
-div` + pugTemplate;
+    pugTemplate = 'div' + pugTemplate;
 
     var fn = pug.compile(pugTemplate, { pretty: false });
-    fs.writeFileSync(path.resolve(output, 'index.html'), fn(json));
+    var html = fn(json);
+    html = `---
+layout: example 
+title: ${json.title}
+about: ${json.about.text}
+exampleCss: ${JSON.stringify(json.exampleCss)}
+exampleJs: ${JSON.stringify(json.exampleJs)}
+---
+`+ html;
+    fs.writeFileSync(path.resolve(output, 'index.html'), html);
     return json;
   });
 

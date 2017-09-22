@@ -110,7 +110,8 @@
     "start-test": "node examples/build.js; forever start ./testing/test-runners/server.js",
     "stop-test": "forever stop ./testing/test-runners/server.js",
     "docs": "jsdoc --pedantic -d dist/apidocs -r src -c jsdoc.conf.json",
-    "build-website": "cp -a dist/built/. website/source/built && npm run build-website-examples && cp -a dist/apidocs/. website/source/apidocs && cd website && npx hexo generate && cd .. && cp -a website/public/. dist/website"
+    "website": "cd website && npx hexo server",
+    "build-website": "npm run build && cp -a dist/built/. website/source/built && npm run build-website-examples && npm run build-website-tutorials && npm run docs && cp -a dist/apidocs/. website/source/apidocs && cd website && npx hexo generate"
   },
   "keywords": [
     "map",

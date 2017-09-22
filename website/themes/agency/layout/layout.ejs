@@ -80,13 +80,13 @@
                         <a href="#page-top"></a>
                     </li>
                     <% var path = page_url(path); %>
-                    <li class="<% if(path == '/'){ %> active <% } %>">
+                    <li class="<% if(path === config.root){ %> active <% } %>">
                         <a href="<%- page_url("/") %>">Welcome</a>
                     </li>
-                    <li class="<% if(path.indexOf('tutorial')!=-1){ %> active <% } %>">
+                    <li class="<% if(path.indexOf('tutorial')!==-1){ %> active <% } %>">
                         <a href="<%- page_url("tutorials") %>">Tutorials</a>
                     </li>
-                    <li class="<% if(path.indexOf('example')!=-1){ %> active <% } %>">
+                    <li class="<% if(path.indexOf('example')!==-1){ %> active <% } %>">
                         <a href="<%- page_url("examples") %>">Examples</a>
                     </li>
                     <li>
