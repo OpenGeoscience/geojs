@@ -223,7 +223,7 @@ var featureLayer = function (arg) {
 
   /**
    * Draw.  If the layer is visible, call the parent class's draw function and
-   * the renderer's _render function.
+   * the renderer's render function.
    *
    * @returns {this}
    */

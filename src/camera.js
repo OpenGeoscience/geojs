@@ -602,10 +602,10 @@
      * the viewport is a different aspect ratio.
      *
      * @protected
-     * @param {object} center
+     * @param {object} center Center of the view in gcs coordinates.
      * @param {number} center.x
      * @param {number} center.y
-     * @param {object} size
+     * @param {object} size Minimum size of the view in gcs units.
      * @param {number} size.width
      * @param {number} size.height
      * @param {number} rotation in clockwise radians.  Optional.
@@ -654,11 +654,15 @@
     };
 
     /**
-     * Public exposure of the viewFromCenterSizeRotation function.
-     * @param {object} center
+     * Sets the view matrix so that the given world center is centered, at
+     * least a certain width and height are visible, and a rotation is applied.
+     * The resulting bounds may be larger in width or height than the values if
+     * the viewport is a different aspect ratio.
+     *
+     * @param {object} center Center of the view in gcs coordinates.
      * @param {number} center.x
      * @param {number} center.y
-     * @param {object} size
+     * @param {object} size Minimum size of the view in gcs units.
      * @param {number} size.width
      * @param {number} size.height
      * @param {number} rotation in clockwise radians.  Optional.
