@@ -454,7 +454,7 @@ var layer = function (arg) {
   };
 
   /**
-   * Clean up resouces.
+   * Clean up resources.
    */
   this._exit = function () {
     m_this.geoOff();
@@ -496,7 +496,7 @@ var layer = function (arg) {
   };
 
   /**
-   * Get or set the current layer opacity.  The opacity is in teh range [0-1].
+   * Get or set the current layer opacity.  The opacity is in the range [0-1].
    *
    * @param {number} [opac] If specified, set the opacity.  Otherwise, return
    *    the opacity.
