@@ -7,8 +7,10 @@ var registry = require('./registry');
  * Layer to draw points, lines, and polygons on the map The polydata layer
  * provide mechanisms to create and draw geometrical shapes such as points,
  * lines, and polygons.
- * @class geo.featureLayer
+ * @class
+ * @alias geo.featureLayer
  * @extends geo.layer
+ * @param {object} arg Options for the new layer.
  * @returns {geo.featureLayer}
  */
 var featureLayer = function (arg) {
@@ -31,11 +33,11 @@ var featureLayer = function (arg) {
       s_draw = this.draw;
 
   /**
-   * Create feature give a name
+   * Create a feature by name.
    *
-   * @param {string} featureName the name of the feature to create
-   * @param {object} arg properties for the new feature
-   * @returns {geo.Feature} Will return a new feature
+   * @param {string} featureName The name of the feature to create.
+   * @param {object} arg Properties for the new feature.
+   * @returns {geo.feature} The created feature.
    */
   this.createFeature = function (featureName, arg) {
 
@@ -51,6 +53,7 @@ var featureLayer = function (arg) {
    * Add a feature to the layer if it is not already present.
    *
    * @param {object} feature the feature to add.
+   * @returns {this}
    */
   this.addFeature = function (feature) {
     /* try to remove the feature first so that we don't have two copies */
@@ -63,9 +66,10 @@ var featureLayer = function (arg) {
   };
 
   /**
-   * Remove feature without destroying it
+   * Remove a feature without destroying it.
    *
-   * @param {object} feature the feature to remove.
+   * @param {geo.feature} feature The feature to remove.
+   * @returns {this}
    */
   this.removeFeature = function (feature) {
     var pos;
@@ -82,9 +86,10 @@ var featureLayer = function (arg) {
   };
 
   /**
-   * Delete feature
+   * Delete feature.
    *
-   * @param {object} feature the feature to delete.
+   * @param {geo.feature} feature The feature to delete.
+   * @returns {this}
    */
   this.deleteFeature = function (feature) {
 
@@ -100,9 +105,13 @@ var featureLayer = function (arg) {
   };
 
   /**
-   * Get/Set drawables
+   * Get/Set drawables.
    *
-   * @returns {Array}
+   * @param {geo.feature[]} val A list of features, or unspecified to return
+   *    the current feature list.  If a list is provided, features are added or
+   *    removed as needed.
+   * @returns {geo.feature[]|this} The current features associated with the
+   *    layer or the current layer.
    */
   this.features = function (val) {
     if (val === undefined) {
@@ -126,7 +135,9 @@ var featureLayer = function (arg) {
   };
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @returns {this}
    */
   this._init = function () {
     if (m_this.initialized()) {
@@ -172,7 +183,10 @@ var featureLayer = function (arg) {
   };
 
   /**
-   * Update layer
+   * Update layer.
+   *
+   * @param {object} request A value to pass to the parent class.
+   * @returns {this}
    */
   this._update = function (request) {
     var i;
@@ -200,7 +214,7 @@ var featureLayer = function (arg) {
   };
 
   /**
-   * Free all resources
+   * Free all resources.
    */
   this._exit = function () {
     m_this.clear();
@@ -208,7 +222,10 @@ var featureLayer = function (arg) {
   };
 
   /**
-   * Draw
+   * Draw.  If the layer is visible, call the parent class's draw function and
+   * the renderer's render function.
+   *
+   * @returns {this}
    */
   this.draw = function () {
     if (m_this.visible()) {
@@ -225,12 +242,11 @@ var featureLayer = function (arg) {
   };
 
   /**
-   * Get/Set visibility of the layer
+   * Get/Set visibility of the layer.
    *
-   * @param {boolean|undefined} val: undefined to return the visibility, a
-   *    boolean to change the visibility.
-   * @return {boolean|object} either the visibility (if getting) or the layer
-   *    (if setting).
+   * @param {boolean} [val] If specified, change the visibility, otherwise
+   *    return it.
+   * @returns {boolean|this} The current visibility or the layer.
    */
   this.visible = function (val) {
     if (val === undefined) {
@@ -253,12 +269,11 @@ var featureLayer = function (arg) {
   };
 
   /**
-   * Get/Set selectionAPI of the layer
+   * Get/Set selectionAPI of the layer.
    *
-   * @param {boolean|undefined} val: undefined to return the selectionAPI
-   *    state, or a boolean to change it.
-   * @return {boolean|object} either the selectionAPI state (if getting) or the
-   *    layer (if setting).
+   * @param {boolean} [val] If specified change the selectionAPI state of the
+   *    layer, otherwise return the current state.
+   * @returns {boolean|this} The selectionAPI state or the current layer.
    */
   this.selectionAPI = function (val) {
     if (val === undefined) {
@@ -278,7 +293,9 @@ var featureLayer = function (arg) {
   };
 
   /**
-   * Clear all features in layer
+   * Clear all features in layer.
+   *
+   * @returns {this}
    */
   this.clear = function () {
     while (m_features.length) {

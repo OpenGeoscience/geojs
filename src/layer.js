@@ -6,9 +6,12 @@ var rendererForFeatures = require('./registry').rendererForFeatures;
 var rendererForAnnotations = require('./registry').rendererForAnnotations;
 
 /**
- * @class geo.layer
+ * Create a new layer.
+ *
+ * @class
+ * @alias geo.layer
  * @extends geo.sceneObject
- * @param {Object?} arg An options argument
+ * @param {object} [arg] Options for the new layer.
  * @param {string} arg.attribution An attribution string to display
  * @param {number} arg.zIndex The z-index to assign to the layer (defaults
  *   to the index of the layer inside the map)
@@ -104,7 +107,7 @@ var layer = function (arg) {
    * Bring the layer above the given number of layers.  This will rotate the
    * current z-indices for this and the next `n` layers.
    *
-   * @param {number} [n=1] The number of positions to move
+   * @param {number} [n=1] The number of positions to move.
    * @returns {this}
    */
   this.moveUp = function (n) {
@@ -151,7 +154,7 @@ var layer = function (arg) {
    * Bring the layer below the given number of layers.  This will rotate the
    * current z-indices for this and the previous `n` layers.
    *
-   * @param {number} [n=1] The number of positions to move
+   * @param {number} [n=1] The number of positions to move.
    * @returns {this}
    */
   this.moveDown = function (n) {
@@ -182,7 +185,7 @@ var layer = function (arg) {
   /**
    * Get whether or not the layer is sticky (navigates with the map).
    *
-   * @returns {Boolean}
+   * @returns {boolean}
    */
   this.sticky = function () {
     return m_sticky;
@@ -193,7 +196,8 @@ var layer = function (arg) {
    * native mouse when the layer is on top.  Non-active layers will never
    * receive native mouse events.
    *
-   * @returns {Boolean|object}
+   * @param {boolean} [arg] If specified, the new `active` value.
+   * @returns {boolean|object}
    */
   this.active = function (arg) {
     if (arg === undefined) {
@@ -207,7 +211,7 @@ var layer = function (arg) {
   };
 
   /**
-   * Get root node of the layer
+   * Get root node of the layer.
    *
    * @returns {div}
    */
@@ -216,9 +220,10 @@ var layer = function (arg) {
   };
 
   /**
-   * Get/Set id of the layer
+   * Get/Set id of the layer.
    *
-   * @returns {String}
+   * @param {string} [val] If specified, the new id of the layer.
+   * @returns {string|this}
    */
   this.id = function (val) {
     if (val === undefined) {
@@ -230,9 +235,10 @@ var layer = function (arg) {
   };
 
   /**
-   * Get/Set name of the layer
+   * Get/Set name of the layer.
    *
-   * @returns {String}
+   * @param {string} [val] If specified, the new name of the layer.
+   * @returns {string|this}
    */
   this.name = function (val) {
     if (val === undefined) {
@@ -244,43 +250,58 @@ var layer = function (arg) {
   };
 
   /**
-   * Get/Set map of the layer
+   * Get the map associated with this layer.
+   *
+   * @returns {geo.map} The map associated with the layer.
    */
   this.map = function () {
     return m_map;
   };
 
   /**
-   * Get renderer for the layer if any
+   * Get renderer for the layer.
+   *
+   * @returns {geo.renderer} The renderer associated with the layer or `null`
+   *    if there is no renderer.
    */
   this.renderer = function () {
     return m_renderer;
   };
 
   /**
-   * Get canvas of the layer
+   * Get canvas of the layer.
    *
+   * @returns {HTMLCanvasElement} The canvas element associated with the
+   *    layer.
    */
   this.canvas = function () {
     return m_canvas;
   };
 
   /**
-   * Return last time data got changed
+   * Return last time data got changed.
+   *
+   * @returns {geo.timestamp} The data time.
    */
   this.dataTime = function () {
     return m_dataTime;
   };
 
   /**
-   * Return the modified time for the last update that did something
+   * Return the modified time for the last update that did something.
+   *
+   * @returns {geo.timestamp} The update time.
    */
   this.updateTime = function () {
     return m_updateTime;
   };
 
   /**
-   * Get/Set if the layer has been initialized
+   * Get/Set if the layer has been initialized.
+   *
+   * @param {boolean} [val] If specified, update the intialized value.
+   *    Otherwise, return it.
+   * @returns {boolean|this} Either the initialized value or this.
    */
   this.initialized = function (val) {
     if (val !== undefined) {
@@ -296,6 +317,9 @@ var layer = function (arg) {
    * to allow direct access the rendering context, but otherwise should
    * not be called directly.  The default implementation is the identity
    * operator.
+   *
+   * @param {geo.geoPosition} input World coordinates.
+   * @returns {geo.geoPosition} Renderer coordinates.
    */
   this.toLocal = function (input) {
     if (m_this._toLocalMatrix) {
@@ -306,6 +330,9 @@ var layer = function (arg) {
 
   /**
    * Transform coordinates from a local coordinate system to world coordinates.
+   *
+   * @param {geo.geoPosition} input Renderer coordinates.
+   * @returns {geo.geoPosition} World coordinates.
    */
   this.fromLocal = function (input) {
     if (m_this._fromLocalMatrix) {
@@ -319,6 +346,7 @@ var layer = function (arg) {
    * layer.  By default, nothing will be displayed.  Note, this content
    * is **not** html escaped, so care should be taken when renderering
    * user provided content.
+   *
    * @param {string?} arg An html fragment
    * @returns {string|this} Chainable as a setter
    */
@@ -332,11 +360,11 @@ var layer = function (arg) {
   };
 
   /**
-   * Get/Set visibility of the layer
+   * Get/Set visibility of the layer.
    *
-   * @param {boolean|undefined} val: undefined to return the visibility, a
-   *    boolean to change the visibility.
-   * @return {boolean|object} either the visibility (if getting) or the layer
+   * @param {boolean} [val] If specified, change the visibility.  Otherwise,
+   *    get it.
+   * @returns {boolean|this} either the visibility (if getting) or the layer
    *    (if setting).
    */
   this.visible = function (val) {
@@ -352,12 +380,11 @@ var layer = function (arg) {
   };
 
   /**
-   * Get/Set selectionAPI of the layer
+   * Get/Set selectionAPI of the layer.
    *
-   * @param {boolean|undefined} val: undefined to return the selectionAPI
-   *    state, or a boolean to change it.
-   * @return {boolean|object} either the selectionAPI state (if getting) or the
-   *    layer (if setting).
+   * @param {boolean} [val] If specified, set the selectionAPI state, otherwise
+   *    return it.
+   * @returns {boolean|this} Either the selectionAPI state or the layer.
    */
   this.selectionAPI = function (val) {
     if (val === undefined) {
@@ -370,11 +397,12 @@ var layer = function (arg) {
   };
 
   /**
-   * Init layer
+   * Init layer.
    *
-   * @param {boolean} noEvents if a subclass of this intends to bind the
+   * @param {boolean} noEvents If a subclass of this intends to bind the
    *    resize, pan, and zoom events itself, set this flag to true to avoid
    *    binding them here.
+   * @returns {this}
    */
   this._init = function (noEvents) {
     if (m_initialized) {
@@ -392,12 +420,10 @@ var layer = function (arg) {
       // canvas
       m_renderer = null;
       m_canvas = m_node;
-    } else if (m_canvas) { // Share context if have valid one
-      m_renderer = createRenderer(m_rendererName, m_this, m_canvas,
-                                      options);
+    } else if (m_canvas) { // Share context if we have valid one
+      m_renderer = createRenderer(m_rendererName, m_this, m_canvas, options);
     } else {
-      m_renderer = createRenderer(m_rendererName, m_this, undefined,
-                                      options);
+      m_renderer = createRenderer(m_rendererName, m_this, undefined, options);
       m_canvas = m_renderer.canvas();
     }
 
@@ -428,7 +454,7 @@ var layer = function (arg) {
   };
 
   /**
-   * Clean up resouces
+   * Clean up resources.
    */
   this._exit = function () {
     m_this.geoOff();
@@ -444,29 +470,37 @@ var layer = function (arg) {
   };
 
   /**
-   * Update layer
+   * Update layer.
+   *
+   * This is a stub that should be subclasses.
    */
   this._update = function () {
   };
 
   /**
    * Return the width of the layer in pixels.
-   * **DEPRECIATED: use map.size instead.
+   *
+   * @returns {number} The width of the parent map in pixels.
    */
   this.width = function () {
     return m_this.map().size().width;
   };
 
   /**
-   * Return the height of the layer in pixels
-   * **DEPRECIATED: use map.size instead.
+   * Return the height of the layer in pixels.
+   *
+   * @returns {number} The height of the parent map in pixels.
    */
   this.height = function () {
     return m_this.map().size().height;
   };
 
   /**
-   * Get or set the current layer opacity.
+   * Get or set the current layer opacity.  The opacity is in the range [0-1].
+   *
+   * @param {number} [opac] If specified, set the opacity.  Otherwise, return
+   *    the opacity.
+   * @returns {number|this} The current opacity or the current layer.
    */
   this.opacity = function (opac) {
     if (opac !== undefined) {
@@ -520,13 +554,12 @@ layer.newLayerId = (function () {
  * General object specification for feature types.
  * @typedef geo.layer.spec
  * @type {object}
- * @property {string} [type='feature'] For feature compatibility
- * with more than one kind of creatable layer
- * @property {object[]} [data=[]] The default data array to
- * apply to each feature if none exists
+ * @property {string} [type='feature'] For feature compatibility with more than
+ *    one kind of creatable layer
+ * @property {object[]} [data=[]] The default data array to apply to each
+ *    feature if none exists
  * @property {string} [renderer='vgl'] The renderer to use
- * @property {geo.feature.spec[]} [features=[]] Features
- * to add to the layer
+ * @property {geo.feature.spec[]} [features=[]] Features to add to the layer.
  */
 
 /**

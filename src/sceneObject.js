@@ -8,6 +8,7 @@ var object = require('./object');
  * @class
  * @alias geo.sceneObject
  * @extends geo.object
+ * @param {object} arg Options for the object.
  * @returns {geo.sceneObject}
  */
 var sceneObject = function (arg) {
@@ -26,7 +27,10 @@ var sceneObject = function (arg) {
       s_onIdle = this.onIdle;
 
   /**
-   *  Override object.addPromise to propagate up the scene tree.
+   * Override object.addPromise to propagate up the scene tree.
+   *
+   * @param {Promise} promise A promise object.
+   * @returns {this}
    */
   this.addPromise = function (promise) {
     if (m_parent) {
@@ -34,10 +38,14 @@ var sceneObject = function (arg) {
     } else {
       s_addPromise(promise);
     }
+    return this;
   };
 
   /**
-   *  Override object.onIdle to propagate up the scene tree.
+   * Override object.onIdle to propagate up the scene tree.
+   *
+   * @param {function} handler A function taking no arguments.
+   * @returns {this}
    */
   this.onIdle = function (handler) {
     if (m_parent) {
@@ -45,11 +53,15 @@ var sceneObject = function (arg) {
     } else {
       s_onIdle(handler);
     }
+    return this;
   };
 
   /**
-   *  Get/set parent of the object
-   *  @param {geo.sceneObject} [parent]
+   * Get/set parent of the object.
+   *
+   * @param {geo.sceneObject} [arg] The new parant or `undefined` to get the
+   *    current parent.
+   * @returns {this|geo.sceneObject}
    */
   this.parent = function (arg) {
     if (arg === undefined) {
@@ -60,7 +72,11 @@ var sceneObject = function (arg) {
   };
 
   /**
-   *  Add a child (or an array of children) to the object
+   * Add a child (or an array of children) to the object.
+   *
+   * @param {geo.object|geo.object[]} child A child object or array of child
+   *    objects.
+   * @returns {this}
    */
   this.addChild = function (child) {
     if (Array.isArray(child)) {
@@ -73,7 +89,11 @@ var sceneObject = function (arg) {
   };
 
   /**
-   *  Remove a child (or array of children) from the object
+   * Remove a child (or array of children) from the object.
+   *
+   * @param {geo.object|geo.object[]} child A child object or array of child
+   *    objects.
+   * @returns {this}
    */
   this.removeChild = function (child) {
     if (Array.isArray(child)) {
@@ -85,15 +105,20 @@ var sceneObject = function (arg) {
   };
 
   /**
-   *  Get an array of child objects
+   * Get an array of the child objects.
+   *
+   * @returns {geo.object[]} A copy of the array of child objects.
    */
   this.children = function () {
     return m_children.slice();
   };
 
   /**
-   *  Force redraw of a scene object, to be implemented by subclasses.
-   *  Base class just calls draw of child objects.
+   * Force redraw of a scene object, to be implemented by subclasses.
+   * Base class just calls draw of child objects.
+   *
+   * @param {object} arg Options to pass to the child draw functions.
+   * @returns {this}
    */
   this.draw = function (arg) {
     m_this.children().forEach(function (child) {
@@ -103,10 +128,12 @@ var sceneObject = function (arg) {
   };
 
   /**
-   *  Trigger an event (or events) on this object and call all handlers.
-   *  @param {String} event the event to trigger
-   *  @param {Object} args arbitrary argument to pass to the handler
-   *  @param {Boolean} childrenOnly if true, only propagate down the tree
+   * Trigger an event (or events) on this object and call all handlers.
+   *
+   * @param {string} event The event to trigger.
+   * @param {object} args Arbitrary argument to pass to the handler.
+   * @param {boolean} [childrenOnly] If truthy, only propagate down the tree.
+   * @returns {this}
    */
   this.geoTrigger = function (event, args, childrenOnly) {
 

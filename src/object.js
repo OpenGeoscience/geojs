@@ -2,7 +2,7 @@ var vgl = require('vgl');
 var inherit = require('./inherit');
 
 /**
- * Create a new instance of class object
+ * Create a new instance of class object.
  *
  * @class
  * @alias geo.object
@@ -21,11 +21,11 @@ var object = function () {
       m_promiseCount = 0;
 
   /**
-   *  Bind a handler that will be called once when all internal promises are
-   *  resolved.
+   * Bind a handler that will be called once when all internal promises are
+   * resolved.
    *
-   *  @param {function} handler A function taking no arguments.
-   *  @returns {this}
+   * @param {function} handler A function taking no arguments.
+   * @returns {this}
    */
   this.onIdle = function (handler) {
     if (m_promiseCount) {
@@ -37,11 +37,11 @@ var object = function () {
   };
 
   /**
-   *  Add a new promise object preventing idle event handlers from being called
-   *  until it is resolved.
+   * Add a new promise object preventing idle event handlers from being called
+   * until it is resolved.
    *
-   *  @param {Promise} promise A promise object.
-   *  @returns {this}
+   * @param {Promise} promise A promise object.
+   * @returns {this}
    */
   this.addPromise = function (promise) {
     // called on any resolution of the promise
@@ -60,13 +60,13 @@ var object = function () {
   };
 
   /**
-   *  Bind an event handler to this object.
+   * Bind an event handler to this object.
    *
-   *  @param {string} event An event from {@link geo.event} or a user-defined
-   *    value.
-   *  @param {function} handler A function that is called when `event` is
-   *    triggered.  The function is passed a {@link geo.event} object.
-   *  @returns {this}
+   * @param {string} event An event from {@link geo.event} or a user-defined
+   *   value.
+   * @param {function} handler A function that is called when `event` is
+   *   triggered.  The function is passed a {@link geo.event} object.
+   * @returns {this}
    */
   this.geoOn = function (event, handler) {
     if (Array.isArray(event)) {
@@ -83,13 +83,13 @@ var object = function () {
   };
 
   /**
-   *  Trigger an event (or events) on this object and call all handlers.
+   * Trigger an event (or events) on this object and call all handlers.
    *
-   *  @param {string|string[]} event An event or list of events from
-   *        {@link geo.event} or defined by the user.
-   *  @param {object} [args] Additional information to add to the
-   *    {@link geo.event} object passed to the handlers.
-   *  @returns {this}
+   * @param {string|string[]} event An event or list of events from
+   *       {@link geo.event} or defined by the user.
+   * @param {object} [args] Additional information to add to the
+   *       {@link geo.event} object passed to the handlers.
+   * @returns {this}
    */
   this.geoTrigger = function (event, args) {
 
@@ -115,15 +115,16 @@ var object = function () {
   };
 
   /**
-   *  Remove handlers from one event or an array of events.  If no event is
-   *  provided all handlers will be removed.
+   * Remove handlers from one event or an array of events.  If no event is
+   * provided all handlers will be removed.
    *
-   *  @param {string|string[]} [event] An event or a list of events from
-   *        {@link geo.event} or defined by the user, or `undefined` to remove
-   *        all events (in which case `arg` is ignored).
-   *  @param {(function|function[])?} [arg] A function or array of functions to
-   *        remove from the events or a falsey value to remove all handlers
-   *        from the events.
+   * @param {string|string[]} [event] An event or a list of events from
+   *       {@link geo.event} or defined by the user, or `undefined` to remove
+   *       all events (in which case `arg` is ignored).
+   * @param {(function|function[])?} [arg] A function or array of functions to
+   *       remove from the events or a falsey value to remove all handlers
+   *       from the events.
+   * @returns {this}
    */
   this.geoOff = function (event, arg) {
     if (event === undefined) {

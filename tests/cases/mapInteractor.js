@@ -555,7 +555,7 @@ describe('mapInteractor', function () {
     expect(map.info.centerArgs.x).toBeCloseTo(-20);
     expect(map.info.centerArgs.y).toBeCloseTo(-40);
 
-    /* If tehre is no movement, nothing should happen */
+    /* If there is no movement, nothing should happen */
     interactor.simulateEvent(
       'mousedown', {map: {x: 20, y: 20}, button: 'left'}
     );
