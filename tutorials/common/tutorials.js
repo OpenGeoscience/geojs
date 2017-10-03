@@ -1,4 +1,6 @@
 var $ = require('jquery');
+var pako = require('pako');
+var utils = require('../../examples/common/utils');
 
 /* Track the last selector used for generating a code block and also a timer so
  * we can avoid rendering the same codeblock if it is actively being edited. */
@@ -156,6 +158,7 @@ function process_block(selector) {
     window.tutorial = targetelem[0].contentWindow;
     window.tutorials = window.tutorials || {};
     window.tutorials[target] = targetelem[0].contentWindow;
+    elem.trigger('geojs-tutorial-run');
   }
 }
 
@@ -188,12 +191,97 @@ function process_block_debounce(selector, debounce) {
 }
 
 /**
+ * Run any default code blocks, then start listening for changes in code
+ * blocks.
+ */
+function run_tutorial() {
+  /* If any of the codeblocks is marked 'default', run them.  Do this in a
+   * timeout so that other start up scripts can run */
+  $('.codeblock[initial="true"]').each(function (idx, elem) {
+    run_block(elem);
+  });
+  /* Whenever a code block changes, run it with its parents */
+  $('.codeblock textarea').bind('input propertychange', function (evt) {
+    run_block(evt.target, true, true);
+  });
+  $('.codeblock .CodeMirror').each(function () {
+    $(this)[0].CodeMirror.on('change', function (elem) {
+      run_block(elem.getWrapperElement(), true, true);
+    });
+  });
+  /* Bind run and reset buttons */
+  $('.codeblock_reset').click(function (evt) {
+    var elem = $('textarea', $(evt.target).closest('.codeblock'));
+    elem.val(elem.attr('defaultvalue'));
+    $('.CodeMirror', $(evt.target).closest('.codeblock'))[0].CodeMirror.setValue(elem.attr('defaultvalue'));
+    run_block(evt.target, true);
+  });
+  $('.codeblock_run').click(function (evt) {
+    run_block(evt.target, undefined, undefined, evt.shiftKey);
+  });
+}
+
+/**
+ * Get query parameters for each step and update them as we start.  Monitor the
+ * code blocks and update the url when they change if appropriate.
+ *
+ * @param {boolean} alwaysKeep If `true`, update the url even if the `keep` url
+ *      parameter is not specified.
+ */
+function start_keeper(alwaysKeep) {
+  var query = utils.getQuery(),
+      keep = query.keep || (alwaysKeep === true);
+
+  $('.codeblock').each(function () {
+    var block = $(this),
+        key = 'src' + (block.attr('step') !== '1' ? block.attr('step') : '');
+    if (query[key]) {
+      try {
+        var src = atob(query[key].replace(/\./g, '/').replace(/-/g, '+').replace(/_/g, '='));
+        src = pako.inflate(src, {to: 'string', raw: true});
+        if ($('.CodeMirror', block).length) {
+          $('.CodeMirror', block)[0].CodeMirror.setValue(src);
+        } else {
+          $('textarea', block).val(src);
+        }
+      } catch (err) { }
+    }
+  });
+  if (keep) {
+    $(document).on('geojs-tutorial-run', '.codeblock', function () {
+      var newQuery = {};
+      if (query.keep && alwaysKeep !== true) {
+        newQuery.keep = query.keep;
+      }
+      $('.codeblock').each(function () {
+        var block = $(this),
+            defaultSrc = $('textarea', block).attr('defaultvalue'),
+            key = 'src' + (block.attr('step') !== '1' ? block.attr('step') : '');
+
+        var src = $('.CodeMirror', block).length ? $('.CodeMirror', block)[0].CodeMirror.getValue() : $('textarea', block).val().trim();
+        if (src !== defaultSrc) {
+          var comp = btoa(pako.deflate(src, {to: 'string', level: 9, raw: true}));
+          /* instead of using regular base64, convert /, +, and = to ., -, and _
+           * so that they don't need to be escaped on the url.  This reduces the
+           * average length of the url by 6 percent. */
+          comp = comp.replace(/\//g, '.').replace(/\+/g, '-').replace(/=/g, '_');
+          newQuery[key] = comp;
+        }
+      });
+      utils.setQuery(newQuery);
+    });
+  }
+}
+
+/**
  * Process code blocks to remove unwanted white space and store default values,
  * set up event handling, and run any initial code blocks.
  *
  * @param {boolean} useCodeMirror If explicitly false, don't use CodeMirror.
+ * @param {boolean} alwaysKeep If `true`, update the url even if the `keep` url
+ *      parameter is not specified.
  */
-function start_tutorial(useCodeMirror) {
+function start_tutorial(useCodeMirror, alwaysKeep) {
   /* clean up whitespace and store a default value for each code block */
   $('.codeblock').each(function () {
     var elem = $('textarea', this),
@@ -225,29 +313,8 @@ function start_tutorial(useCodeMirror) {
   }
   /* Check if iframe srcdoc support is present */
   processBlockInfo.srcdocSupport = !!('srcdoc' in document.createElement('iframe'));
-  /* If any of the codeblocks is marked 'default', run them */
-  $('.codeblock[initial="true"]').each(function (idx, elem) {
-    run_block(elem);
-  });
-  /* Whenever a code block changes, run it with its parents */
-  $('.codeblock textarea').bind('input propertychange', function (evt) {
-    run_block(evt.target, true, true);
-  });
-  $('.codeblock .CodeMirror').each(function () {
-    $(this)[0].CodeMirror.on('change', function (elem) {
-      run_block(elem.getWrapperElement(), true, true);
-    });
-  });
-  /* Bind run and reset buttons */
-  $('.codeblock_reset').click(function (evt) {
-    var elem = $('textarea', $(evt.target).closest('.codeblock'));
-    elem.val(elem.attr('defaultvalue'));
-    $('.CodeMirror', $(evt.target).closest('.codeblock'))[0].CodeMirror.setValue(elem.attr('defaultvalue'));
-    run_block(evt.target, true);
-  });
-  $('.codeblock_run').click(function (evt) {
-    run_block(evt.target, undefined, undefined, evt.shiftKey);
-  });
+  start_keeper(alwaysKeep);
+  run_tutorial();
 }
 
 module.exports = start_tutorial;
