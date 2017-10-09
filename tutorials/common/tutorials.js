@@ -28,6 +28,7 @@ var processBlockInfo = {
     '  height: 100%;\n' +
     '  padding: 0;\n' +
     '  margin: 0;\n' +
+    '  overflow: hidden;\n' +
     '}'
 };
 
@@ -237,7 +238,10 @@ function start_keeper(alwaysKeep) {
         key = 'src' + (block.attr('step') !== '1' ? block.attr('step') : '');
     if (query[key]) {
       try {
-        var src = atob(query[key].replace(/\./g, '/').replace(/-/g, '+').replace(/_/g, '='));
+        /* Strip out white space and pluses, then convert ., -, and _ to /, +,
+         * =.  By removing whitespace, the url is more robust against email
+         * handling.  The others keep things short. */
+        var src = atob(query[key].replace(/(\s|\+)/g, '').replace(/\./g, '/').replace(/-/g, '+').replace(/_/g, '='));
         src = pako.inflate(src, {to: 'string', raw: true});
         if ($('.CodeMirror', block).length) {
           $('.CodeMirror', block)[0].CodeMirror.setValue(src);

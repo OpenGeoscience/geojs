@@ -9,7 +9,9 @@ block mainTutorial
 
   +codeblock('javascript', 1, undefined, true).
     var map = geo.map({
-      node: "#map"
+      node: "#map",
+      center: {x: 4.90, y: 52.37},
+      zoom: 14
     });
     var layer = map.createLayer('osm');
   +codeblock_test('map has one osm layer from openstreetmap', [
