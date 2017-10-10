@@ -79,8 +79,7 @@
                     <li class="hidden">
                         <a href="#page-top"></a>
                     </li>
-                    <% var path = page_url(path); %>
-                    <li class="<% if(path === config.root){ %> active <% } %>">
+                    <li class="<% if(path === "index.html"){ %> active <% } %>">
                         <a href="<%- page_url("/") %>">Welcome</a>
                     </li>
                     <li class="<% if(path.indexOf('tutorial')!==-1){ %> active <% } %>">
