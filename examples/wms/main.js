@@ -37,7 +37,7 @@ $(function () {
       };
 
       // OpenGeo Demo Web Map Service
-      var baseUrl = 'http://demo.boundlessgeo.com/geoserver/ows';
+      var baseUrl = 'https://demo.boundlessgeo.com/geoserver/ows';
       return baseUrl + '?' + $.param(params);
     }
   );

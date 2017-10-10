@@ -1416,16 +1416,23 @@ module.exports = (function () {
       var map = this.map(),
           mapzoom = map.zoom(),
           roundzoom = this._options.tileRounding(mapzoom),
-          unit = map.unitsPerPixel(zoom === undefined ? roundzoom : zoom);
+          unit = map.unitsPerPixel(zoom === undefined ? roundzoom : zoom),
+          gcsPt;
       if (pt === undefined) {
         var size = map.size();
         pt = {x: size.width / 2, y: size.height / 2};
       }
+      /* displayToGcs can fail under certain projections.  If this happens,
+       * just return the origin. */
+      try {
+        gcsPt = map.displayToGcs(pt, this._options.gcs || null);
+      } catch (err) {
+        gcsPt = {x: 0, y: 0};
+      }
       /* Reverse the y coordinate, since we expect the gcs coordinate system
        * to be right-handed and the level coordinate system to be
        * left-handed. */
-      var gcsPt = map.displayToGcs(pt, this._options.gcs || null),
-          lvlPt = {x: gcsPt.x / unit, y: this._topDown() * gcsPt.y / unit};
+      var lvlPt = {x: gcsPt.x / unit, y: this._topDown() * gcsPt.y / unit};
       return lvlPt;
     };
 

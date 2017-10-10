@@ -113,7 +113,7 @@ $(function () {
     var mapParams = {
       node: '#map',
       center: {x: 0, y: 0},
-      zoom: 2,
+      zoom: 2.5,
       gcs: gcsTable[gcs],
       unitsPerPixel: (range[1].x - range[0].x) / 256,
       clampBoundsX: false,

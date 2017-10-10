@@ -46,7 +46,7 @@ $(function () {
     clampBoundsX: false,
     clampBoundsY: false,
     clampZoom: false,
-    zoom: 2
+    zoom: 4
   }));
 
   // Add the osm layer with a custom tile url.

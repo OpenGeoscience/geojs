@@ -355,10 +355,10 @@ $(function () {
   map = geo.map({
     node: '#map',
     center: {
-      x: 0,
-      y: 0
+      x: -50,
+      y: 30
     },
-    zoom: 3
+    zoom: 4
   });
 
   // Add the default osm layer

@@ -20,8 +20,8 @@ $(function () {
   var map = geo.map({
     node: '#map',
     center: {
-      x: -75.965,
-      y: 39.482
+      x: -98.5795,
+      y: 39.8283
     },
     zoom: 4
   });
