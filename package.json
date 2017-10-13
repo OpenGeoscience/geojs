@@ -53,6 +53,7 @@
     "jsdoc-autoprivate": "0.0.1",
     "json-loader": "^0.5.4",
     "jstransformer-markdown-it": "^2.0.0",
+    "js-yaml": "^3.10.0",
     "karma": "^0.13.22",
     "karma-coverage": "^1.0.0",
     "karma-chrome-launcher": "^2.2.0",
@@ -111,7 +112,7 @@
     "stop-test": "forever stop ./testing/test-runners/server.js",
     "docs": "jsdoc --pedantic -d dist/apidocs -r src -c jsdoc.conf.json",
     "website": "cd website && npx hexo server",
-    "build-website": "npm run build && cp -a dist/built/. website/source/built && npm run build-website-examples && npm run build-website-tutorials && npm run docs && cp -a dist/apidocs/. website/source/apidocs && cd website && rm -f db.json && npx hexo generate"
+    "build-website": "npm run build && cp -a dist/built/. website/source/built && npm run build-website-examples && npm run build-website-tutorials && npm run docs && cp -ar dist/data/. website/source/data && cp -ar dist/apidocs/. website/source/apidocs && cd website && rm -f db.json && npx hexo generate"
   },
   "keywords": [
     "map",

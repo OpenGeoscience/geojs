@@ -1,5 +1,5 @@
 {
-  "title": "Adding styles to WMS raster layers",
+  "title": "Styling WMS raster layers",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
   "about": {
