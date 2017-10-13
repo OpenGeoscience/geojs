@@ -1,3 +1,7 @@
+- name: hurricanes
+  title: Hurricane tracking data
+  description: Explore historic hurricane paths since 1980 on an interactive map.
+
 - name: heatmap
   title: Heatmap Feature
   description: This example shows how to add a heatmap to a map.
@@ -5,10 +9,6 @@
 - name: deepzoom
   title: Deepzoom tiled image example
   description: Rendering a tiled image using the Deepzoom protocol.
-
-- name: hurricanes
-  title: Hurricane tracking data
-  description: Explore historic hurricane paths since 1980 on an interactive map.
 
 - name: annotations
   title: Annotation Layer
