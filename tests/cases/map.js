@@ -24,6 +24,69 @@ describe('geo.core.map', function () {
     $(window).off('resize');
   });
 
+  describe('create function', function () {
+    it('basic create', function () {
+      var map;
+      map = create_map();
+      expect(map instanceof geo.map).toBe(true);
+      expect(map.node().attr('id')).toBe('map-create-map');
+      expect(map.gcs()).toBe('EPSG:3857');
+      expect(map.ingcs()).toBe('EPSG:4326');
+      expect(map.zoom()).toBe(4);
+      expect(closeToEqual(map.center(), {x: 0, y: 0, z: 0})).toBe(true);
+      expect(map.rotation()).toBe(0);
+      expect(map.maxBounds().left).toBeLessThan(-179);
+      expect(map.size().width).toBe(500);
+      expect(map.zoomRange().max).toEqual(16);
+      expect(map.zoomRange().origMin).toEqual(0);
+      expect(map.discreteZoom()).toBe(false);
+      expect(map.allowRotation()).toBe(true);
+      expect(map.camera() instanceof geo.camera).toBe(true);
+      expect(map.animationQueue()).toEqual([]);
+      expect(map.autoResize()).toBe(true);
+      expect(map.clampBoundsX()).toBe(false);
+      expect(map.clampBoundsY()).toBe(true);
+      expect(map.clampZoom()).toBe(true);
+    });
+    it('create with options', function () {
+      var map;
+      map = create_map({
+        ingcs: '+proj=longlat +axis=esu',
+        gcs: '+proj=longlat +axis=enu',
+        zoom: 6,
+        maxBounds: {left: 0, top: 0, right: 50000, bottom: 40000},
+        center: {x: 25000, y: 20000},
+        min: 3,
+        max: 9,
+        rotation: 1,
+        discreteZoom: true,
+        allowRotation: function (r) { return r; },
+        autoResize: false,
+        clampBoundsX: true,
+        clampBoundsY: false,
+        clampZoom: false
+      });
+      expect(map instanceof geo.map).toBe(true);
+      expect(map.node().attr('id')).toBe('map-create-map');
+      expect(map.gcs()).toBe('+proj=longlat +axis=enu');
+      expect(map.ingcs()).toBe('+proj=longlat +axis=esu');
+      expect(map.zoom()).toBe(6);
+      expect(closeToEqual(map.center(), {x: 25000, y: 20000, z: 0})).toBe(true);
+      expect(map.rotation()).toBe(1);
+      expect(map.maxBounds().left).toBe(0);
+      expect(map.maxBounds().right).toBe(50000);
+      expect(map.size().width).toBe(500);
+      expect(map.zoomRange().max).toEqual(9);
+      expect(map.zoomRange().origMin).toEqual(3);
+      expect(map.discreteZoom()).toBe(true);
+      expect(typeof map.allowRotation()).toBe('function');
+      expect(map.autoResize()).toBe(false);
+      expect(map.clampBoundsX()).toBe(true);
+      expect(map.clampBoundsY()).toBe(false);
+      expect(map.clampZoom()).toBe(false);
+    });
+  });
+
   describe('Check class accessors', function () {
     it('clampBounds', function () {
       var m = create_map();

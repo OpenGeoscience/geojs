@@ -102,7 +102,7 @@ var map = function (arg) {
       m_ingcs = arg.ingcs === undefined ? 'EPSG:4326' : arg.ingcs,
       m_center = {x: 0, y: 0},
       m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
-      m_rotation = 0,
+      m_rotation = arg.rotation ? arg.rotation : 0,
       m_fileReader = null,
       m_interactor = null,
       m_validZoomRange = {min: 0, max: 16, origMin: 0},
