@@ -13,7 +13,13 @@
                             <a href="<%- example.name %>">
                                 <div class="thumbnail-hover">
                                 </div>
-                                <img src="<%- example.name %>/thumb.jpg">
+                                <img src="<%
+                                    if(fileExists(`source/examples/${example.name}/thumb.jpg`)){
+                                        %><%- `${example.name}/thumb.jpg` %><%
+                                    }
+                                    else {
+                                        %><%- 'common/thumb.jpg' %><%
+                                    } %>">
                             </a>
                         </div>
                         <div class="col-xs-7 word-container">

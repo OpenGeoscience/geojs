@@ -1,30 +1,29 @@
 // overwrites
-
 .jumbotron {
     background-color: inherit;
 }
 
-.navbar-custom .nav li a{
+.navbar-custom .nav li a {
     text-transform: none;
 }
+
 // @media (min-width: 768px) {
 //     .navbar-nav>li>a {
 //         padding: 12px 10px;
 //     }
 // }
-
-p{
+p {
     font-size: 16px;
 }
 
 // default layout
-.navbar-brand img{
+.navbar-brand img {
     height: 2em;
     position: relative;
     top: -0.5em;
 }
 
-.navbar-brand:hover img{
+.navbar-brand:hover img {
     opacity: .8;
 }
 
@@ -39,7 +38,7 @@ p{
     }
 }
 
-footer{
+footer {
     padding: 14px 0;
     border-top: 1px solid #eee;
 
@@ -49,24 +48,24 @@ footer{
 }
 
 // welcome page
-.page.welcome{
-    .header img{
+.page.welcome {
+    .header img {
         width: 80%;
         margin: 0 auto;
         display: block;
     }
 
-    .description{
+    .description {
         text-align: left;
     }
 
-    h1{
+    h1 {
         font-size: 16px;
         color: #999;
         text-transform: uppercase;
     }
 
-    h3{
+    h3 {
         font-size: 20px;
         color: #1B70B5;
     }
@@ -88,33 +87,32 @@ footer{
             overflow: hidden;
 
             &.heatmap {
-                background-image:url("../examples/heatmap/thumb.jpg");
-                    background-size: auto 80px;
-                    background-position: 3px 15px;
-                    background-repeat: no-repeat;
-                    background-color: white;
+                background-image: url("../examples/heatmap/thumb.jpg");
+                background-size: auto 80px;
+                background-position: 3px 15px;
+                background-repeat: no-repeat;
+                background-color: white;
             }
 
-            &.contour{
-                background-image:url("../examples/contour/thumb.jpg");
+            &.contour {
+                background-image: url("../examples/contour/thumb.jpg");
                 background-size: auto 110px;
                 background-position: -20px -5px;
             }
 
             &.choropleth {
-                background-image:url("../examples/choropleth/thumb.jpg");
+                background-image: url("../examples/choropleth/thumb.jpg");
                 background-size: auto 105px;
                 background-position: -5px 5px;
             }
         }
     }
 
-    section.get-started{
-        .fa{
+    section.get-started {
+        .fa {
             width: 1.4em;
         }
     }
-
 }
 
 // examples page
@@ -125,16 +123,32 @@ footer{
     padding-bottom: 25px;
     border-bottom: 1px solid #eee;
 
+    >.row {
+        position: relative;
+        overflow-y: hidden;
+
+        &::after {
+            content: ' ';
+            width: 54.16666%;
+            position: absolute;
+            height: 50px;
+            background: linear-gradient(rgba(255, 0, 0, 0), white);
+            right: 0;
+            bottom: 0;
+        }
+    }
+
     .thumbnail-container {
+        float: left;
         padding-right: 0;
         width: 45.83333%;
 
-        a{
+        a {
             position: relative;
             display: block;
         }
 
-        img{
+        img {
             width: 100%;
             border: 1px solid #b9b9b9;
             border-radius: 2px;
@@ -157,21 +171,23 @@ footer{
     }
 
     .word-container {
+        float: left;
         width: 54.16666%;
         padding-right: 5px;
     }
 
-    h4.title{
+    h4.title {
         font-size: 17px;
     }
 
-    .description{
-        margin-top:20px;
+    .description {
+        height: 0;
+        margin-top: 20px;
     }
 }
 
 // tutorials page
-.page.tutorials{
+.page.tutorials {
     .portfolio-item {
         right: 0;
         margin: 0 0 15px;
@@ -219,9 +235,9 @@ footer{
             margin: 0 0 10px 0;
         }
 
-        &:hover .description{
+        &:hover .description {
             transform: scaleY(1);
-            transition: transform 200ms ease-in-out; 
+            transition: transform 200ms ease-in-out;
         }
 
         .description {

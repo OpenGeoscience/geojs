@@ -46,4 +46,7 @@ exampleJs: ${JSON.stringify(json.exampleJs)}
   fs.writeFileSync(path.resolve(json.output, 'index.html'), html);
 });
 
+// copy common files
+fs.copySync('examples/common', 'website/source/examples/common');
+
 buildUtils.writeYamlList(path.resolve('website', 'source', '_data'), 'examples.yml', examples);
