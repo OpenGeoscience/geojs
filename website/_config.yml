@@ -23,6 +23,7 @@ public_dir: public
 skip_render:
   - "**/*.js"
   - "examples/*/*.json"
+  - "examples/*/docs/main.html"
   - "tutorials/*/*.json"
   - "data/**/*"
   - "apidocs/**/*"
