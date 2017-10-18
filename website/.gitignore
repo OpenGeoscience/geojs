@@ -1,0 +1,13 @@
+.DS_Store
+Thumbs.db
+db.json
+*.log
+node_modules/
+public/
+.deploy*/
+source/_data/**
+source/apidocs/**
+source/built/**
+source/data/**
+source/examples/**
+source/tutorials/**

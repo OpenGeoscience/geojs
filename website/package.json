@@ -1,0 +1,21 @@
+{
+  "name": "hexo-site",
+  "version": "0.0.0",
+  "private": true,
+  "hexo": {
+    "version": "3.3.9"
+  },
+  "dependencies": {
+    "hexo": "^3.3.9",
+    "hexo-fs": "^0.2.2",
+    "hexo-renderer-ejs": "^0.3.0",
+    "hexo-renderer-marked": "^0.3.0",
+    "hexo-renderer-scss": "^1.0.3",
+    "hexo-renderer-stylus": "^0.3.1",
+    "hexo-server": "^0.2.0"
+  },
+  "devDependencies": {
+    "ejs-lint": "^0.3.0",
+    "hexo-cli": "^1.0.3"
+  }
+}

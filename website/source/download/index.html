@@ -1,0 +1,37 @@
+---
+title: Download
+---
+<link href="../css/download.css" rel="stylesheet">
+<div class="page download">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <h3>Download</h3>
+                <h4>Released builds</h4>
+                <p>Each released versions of GeoJS can be found on <a href="https://github.com/OpenGeoscience/geojs/releases">Github</a>.</p>
+                <h4>Use GeoJS from CDN</h4>
+                <p>GeoJS is hosted on <a href="https://cdnjs.com/libraries/geojs">cdnjs</a>. To use GeoJS, include the following in your HTML head:</p>
+{% codeblock lang:html line_number:false %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/geojs/0.12.2/geo.min.js" integrity="sha256-t9oLE+BFJc7iWaTIqMFk+8dYJn5kmfg/FIdKNuAxMII=" crossorigin="anonymous"></script>
+{% endcodeblock %}
+                <p>This will include minified version of GeoJS and its dependencies on your page. The integrity hash will make sure the integrity of the file.</p>
+                <p>The <b>geo.ext.min.js</b> contains d3 and Hammer which are peer dependencies of geojs, include this script if you don't have the libraries available at global scope.</p>
+                <h4>Install from NPM</h4>
+                <div class="row">
+                    <div class="col-sm-3">
+{% codeblock lang:shell line_number:false %}
+npm install geojs
+{% endcodeblock %}
+                    </div>
+                </div>
+                <p>This will install source code and built version GeoJS and it's optional dependencies to node_modules.</p>
+                <h4>Use GeoJS with ES6 import</h4>
+                <p>Once GeoJS is installed with npm, you could include GeoJS using as an ES6 module.</p>
+{% codeblock lang:javascript line_number:false %}
+import geo from 'geojs';
+{% endcodeblock %}
+            <p>Then you could use GeoJS with the variable <code>geo</code> in your script.</p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,35 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <section>
+                <h2>Examples</h2>
+                <p class="text-muted">GeoJS has many features, some of which are shown off in these examples.  Some of the examples are intended to showcase all of the options of a feature, such as the <a href="tile">Tile Layer</a>.  Other examples show how real data can be visualized, such as the <a href="hurricane">Hurricane Tracking Data</a>.  Each example has commented source code.</p>
+            </section>
+            <div class="row">
+                <% for (let example of site.data.examples) { %>
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="<%- example.name %>">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="<%
+                                    if(fileExists(`source/examples/${example.name}/thumb.jpg`)){
+                                        %><%- `${example.name}/thumb.jpg` %><%
+                                    }
+                                    else {
+                                        %><%- 'common/thumb.jpg' %><%
+                                    } %>">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="<%- example.name %>"><h4 class="title"><%- example.title %></h4></a>
+                            <div class="description"><%- example.description %></div>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
