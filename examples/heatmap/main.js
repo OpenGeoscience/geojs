@@ -8,7 +8,7 @@ $(function () {
       x: -98,
       y: 39
     },
-    zoom: 3
+    zoom: 4
   });
   var layer, heatmap, points, datapoints;
 
@@ -156,7 +156,8 @@ $(function () {
     });
   }
 
-  /* Given a set of datapoints, optionally truncate or expand it, then show it
+  /**
+   * Given a set of datapoints, optionally truncate or expand it, then show it
    * as a heatmap.
    *
    * @param {array} datapoints: an array of points to show.
@@ -171,9 +172,10 @@ $(function () {
       rows = rows.slice();
       while (rows.length < maxrows) {
         for (var i = rows.length - 1; i >= 0 && rows.length < maxrows; i -= 1) {
-          rows.push([rows[i][0] + Math.random() * 0.1 - 0.05,
-                     rows[i][1] + Math.random() * 0.1 - 0.05,
-                     rows[i][2] + Math.random() * 0.1 - 0.05]);
+          rows.push([
+            rows[i][0] + Math.random() * 0.1 - 0.05,
+            rows[i][1] + Math.random() * 0.1 - 0.05,
+            rows[i][2] + Math.random() * 0.1 - 0.05]);
         }
       }
     }

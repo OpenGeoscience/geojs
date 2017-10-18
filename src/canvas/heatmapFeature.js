@@ -403,6 +403,9 @@ var canvas_heatmapFeature = function (arg) {
    */
   this._animatePan = function (e) {
 
+    if (!m_heatMapPosition) {
+      return;
+    }
     var map = m_this.layer().map(),
         zoom = map.zoom(),
         scale = Math.pow(2, (zoom - m_heatMapPosition.zoom)),

@@ -1,0 +1,21 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Editor
+    Any changes made will be stored in the URL whenever the code is run.  This can be sent as a link, bookmarked, or otherwise shared.
+
+    You can interact with the code through the javascript console by accessing the top-level variables in the `tutorial` global parameter.
+
+  +codeblock('javascript', 1, undefined, true).
+    var map = geo.map({
+      node: "#map",
+      center: {x: 4.90, y: 52.37},
+      zoom: 14
+    });
+    var layer = map.createLayer('osm');
+  +codeblock_test('map has one osm layer from openstreetmap', [
+      'map.layers().length === 1',
+      'map.layers()[0] instanceof geo.osmLayer',
+      'layer.url().match(/openstreetmap/)'
+      ])

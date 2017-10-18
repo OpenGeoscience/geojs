@@ -2,7 +2,7 @@ var vgl = require('vgl');
 var inherit = require('./inherit');
 
 /**
- * Create a new instance of class timestamp
+ * Create a new instance of class timestamp.
  *
  * @class geo.timestamp
  * @extends vgl.timestamp

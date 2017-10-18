@@ -102,7 +102,7 @@ var map = function (arg) {
       m_ingcs = arg.ingcs === undefined ? 'EPSG:4326' : arg.ingcs,
       m_center = {x: 0, y: 0},
       m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
-      m_rotation = 0,
+      m_rotation = arg.rotation ? arg.rotation : 0,
       m_fileReader = null,
       m_interactor = null,
       m_validZoomRange = {min: 0, max: 16, origMin: 0},
@@ -1711,7 +1711,7 @@ var map = function (arg) {
    *    it is not already scheduled.  `'remove'` to remove the callback (use
    *    this instead of `cancelAnimationFrame`).  Any other truthy value moves
    *    the callback to the end of the list.
-   * @returns {integer} An integer as returned by
+   * @returns {number} An integer as returned by
    *    `window.requestAnimationFrame`.
    */
   this.scheduleAnimationFrame = function (callback, action) {

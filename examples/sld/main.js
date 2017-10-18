@@ -1,4 +1,4 @@
-var colorbrewer = colorbrewer;
+/* global colorbrewer */
 
 var layer = {
   // Default values
@@ -12,40 +12,36 @@ var layer = {
   projection: 'EPSG:3785'
 };
 
+var baseUrl = 'https://demo.boundlessgeo.com/geoserver/ows';
+
 var layerViewer = {
   renderPalettes: function () {
     var paletteArray = Object.keys(colorbrewer);
     utility.populateDropdown('#palette', paletteArray);
   },
   renderWidget: function (layer) {
-
     // Populates the number of colors dropdown
-    $('#color-count')
-      .empty();
+    $('#color-count').empty();
     var numberArray = Object.keys(colorbrewer[layer.palette]);
     utility.populateDropdown('#color-count', numberArray);
-
     // Sets the count
-    $('#color-count')
-      .val(layer.selectedNum);
-
+    $('#color-count').val(layer.selectedNum);
     // Sets the type
-    $('#palette-type')
-      .val(layer.type);
-
+    $('#palette-type').val(layer.type);
     // Sets the min and max values
-    $('#min')
-      .val(layer.min);
-    $('#max')
-      .val(layer.max);
+    $('#min').val(layer.min);
+    $('#max').val(layer.max);
+
+    $('#name').val(layer.name);
+    $('#projection').val(layer.projection);
+    $('#baseurl').val(baseUrl);
   }
 };
 
 var layerController = {
   syncLayer: function (layer) {
     // Sync the model with UI
-    layer.palette = $('#palette')
-      .val();
+    layer.palette = $('#palette').val();
 
     var items = Object.keys(colorbrewer[layer.palette]);
     var maxNumber = parseInt(items[items.length - 1]);
@@ -56,13 +52,14 @@ var layerController = {
       layer.selectedNum = String(maxNumber);
     }
 
-    layer.type = $('#palette-type')
-      .val();
-    layer.min = $('#min')
-      .val();
-    layer.max = $('#max')
-      .val();
+    layer.type = $('#palette-type').val();
+    layer.min = $('#min').val();
+    layer.max = $('#max').val();
     layer.sld = this.generateSld(layer);
+
+    layer.name = $('#name').val();
+    layer.projection = $('#projection').val();
+    baseUrl = $('#baseurl').val();
   },
   generateSld: function (layer) {
     // Orchestrates the sld generation
@@ -81,9 +78,9 @@ $(function () {
   // Create a map object
   var map = geo.map({
     node: '#map',
-    zoom: 8,
+    zoom: 9,
     center: {
-      x: -76.0,
+      x: -77.0,
       y: 39
     }
   });
@@ -103,7 +100,7 @@ $(function () {
   var wms = utility.createWMSLayer(map, layer.sld, layer.projection, layer.name);
 
   // If any of the input boxes changes regenerate sld again
-  $('#palette, #color-count, #min, #max, #palette-type')
+  $('#palette, #color-count, #min, #max, #palette-type, #baseurl, #projection, #name')
     .change(function () {
       layerController.syncLayer(layer);
       layerViewer.renderWidget(layer);
@@ -250,12 +247,9 @@ var utility = {
         'SLD_BODY': sld
       };
       // OpenGeo Demo Web Map Service
-      var baseUrl =
-        'http://demo.boundlessgeo.com/geoserver/ows';
-      return baseUrl + '?' + $.param(params);
+      return baseUrl + (baseUrl.indexOf('?') >= 0 ? '&' : '?') + $.param(params);
     });
 
     return wms;
-
   }
 };

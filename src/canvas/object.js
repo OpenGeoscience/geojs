@@ -6,8 +6,9 @@ var sceneObject = require('../sceneObject');
  * @class
  * @alias geo.canvas.object
  * @extends geo.sceneObject
+ * @param {object} arg Options for the object.
+ * @returns {geo.canvas.object}
  */
-
 var canvas_object = function (arg) {
   'use strict';
 
@@ -54,7 +55,7 @@ var canvas_object = function (arg) {
   };
 
   /**
-   *  Redraw the object.
+   * Redraw the object.
    *
    * @returns {this} The current object.
    */
