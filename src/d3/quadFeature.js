@@ -228,6 +228,7 @@ capabilities[quadFeature.capabilities.imageCrop] = false;
 capabilities[quadFeature.capabilities.imageFixedScale] = false;
 capabilities[quadFeature.capabilities.imageFull] = false;
 capabilities[quadFeature.capabilities.canvas] = false;
+capabilities[quadFeature.capabilities.video] = false;
 
 registerFeature('d3', 'quad', d3_quadFeature, capabilities);
 module.exports = d3_quadFeature;

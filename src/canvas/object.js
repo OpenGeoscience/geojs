@@ -32,6 +32,16 @@ var canvas_object = function (arg) {
   };
 
   /**
+   * If this returns true, the render will be skipped and tried again on the
+   * next animation frame.
+   *
+   * @returns {boolean} Truthy to delay rendering.
+   */
+  this._delayRender = function () {
+    return false;
+  };
+
+  /**
    * Check if a property has already been set on a canvas's context.  If so,
    * don't set it again.  Some browsers are much slower if the properties are
    * set, even if no change is made.

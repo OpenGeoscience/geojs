@@ -111,6 +111,13 @@ var canvasRenderer = function (arg) {
         features = layer.features(),
         i;
 
+    for (i = 0; i < features.length; i += 1) {
+      if (features[i]._delayRender()) {
+        m_this._render();
+        return;
+      }
+    }
+
     // Clear the canvas.
     if (m_clearCanvas) {
       m_this.context2d.setTransform(1, 0, 0, 1, 0, 0);

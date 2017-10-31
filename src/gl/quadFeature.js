@@ -120,7 +120,7 @@ var gl_quadFeature = function (arg) {
     if (m_quads.clrQuads.length) {
       if (!m_clrposbuf || m_clrposbuf.length < m_quads.clrQuads.length * 12 ||
           !m_glBuffers.clrQuadsPosition) {
-        if (m_glBuffers.imgQuadsPosition) {
+        if (m_glBuffers.clrQuadsPosition) {
           context.deleteBuffer(m_glBuffers.clrQuadsPosition);
         }
         m_glBuffers.clrQuadsPosition = context.createBuffer();
@@ -419,6 +419,7 @@ capabilities[quadFeature.capabilities.imageCrop] = true;
 capabilities[quadFeature.capabilities.imageFixedScale] = false;
 capabilities[quadFeature.capabilities.imageFull] = true;
 capabilities[quadFeature.capabilities.canvas] = false;
+capabilities[quadFeature.capabilities.video] = false;
 
 registerFeature('vgl', 'quad', gl_quadFeature, capabilities);
 module.exports = gl_quadFeature;

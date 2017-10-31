@@ -19,6 +19,7 @@ $(function () {
     renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
     features: query.renderer ? undefined : ['quad']
   });
+  var previewImage = new Image();
   var quads = layer.createFeature('quad', {selectionAPI: true});
   var quadData = [{
     ll: {x: -108, y: 29},
@@ -134,7 +135,6 @@ $(function () {
       image: '../../data/tilefancy.png'
     });
   }
-  var previewImage = new Image();
   previewImage.onload = function () {
 
     quads
@@ -158,8 +158,7 @@ $(function () {
         evt.data.opacity = 0.5;
         // we either have to clear the internal cache on the item, or have
         // asked for it not to have been cached to begin with.
-        delete evt.data._cachedQuad;
-        this.modified();
+        this.cacheUpdate(evt.data);
         this.draw();
       })
       .geoOn(geo.event.feature.mouseout, function (evt) {
@@ -167,8 +166,7 @@ $(function () {
           evt.data.orig_opacity = (evt.data.opacity || null);
         }
         evt.data.opacity = evt.data.orig_opacity || undefined;
-        delete evt.data._cachedQuad;
-        this.modified();
+        this.cacheUpdate(evt.data);
         this.draw();
       })
       .draw();
