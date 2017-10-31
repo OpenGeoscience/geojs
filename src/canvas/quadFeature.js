@@ -3,10 +3,10 @@ var registerFeature = require('../registry').registerFeature;
 var quadFeature = require('../quadFeature');
 
 /**
- * Create a new instance of class quadFeature
+ * Create a new instance of class quadFeature.
  *
  * @class geo.canvas.quadFeature
- * @param {Object} arg Options object
+ * @param {geo.quadFeature.spec} arg Options object.
  * @extends geo.quadFeature
  * @returns {geo.canvas.quadFeature}
  */
@@ -30,7 +30,7 @@ var canvas_quadFeature = function (arg) {
       m_quads;
 
   /**
-   * Build this feature
+   * Build this feature.
    */
   this._build = function () {
     if (!m_this.position()) {
@@ -47,19 +47,20 @@ var canvas_quadFeature = function (arg) {
   };
 
   /**
-   * Render all of the color quads using a single mapper.
+   * Render all of the color quads.
    *
-   * @param renderState: the render state used for the render.
+   * @param {CanvasRenderingContext2D} context2d The rendering context.
+   * @param {geo.map} map The current renderer's parent map.
    */
-  this._renderColorQuads = function (renderState) {
-      // ....
-      // Not implemented yet.
+  this._renderColorQuads = function (context2d, map) {
+    // Not implemented yet.
   };
 
   /**
-   * Render all of the image quads using a single mapper.
+   * Render all of the image quads.
    *
-   * @param renderState: the render state used for the render.
+   * @param {CanvasRenderingContext2D} context2d The rendering context.
+   * @param {geo.map} map The current renderer's parent map.
    */
   this._renderImageQuads = function (context2d, map) {
     if (!m_quads.imgQuads.length) {
@@ -98,13 +99,19 @@ var canvas_quadFeature = function (arg) {
     }
   };
 
+  /**
+   * Render all of the quads.
+   *
+   * @param {CanvasRenderingContext2D} context The rendering context.
+   * @param {geo.map} map The current renderer's parent map.
+   */
   this._renderOnCanvas = function (context, map) {
     this._renderImageQuads(context, map);
     this._renderColorQuads(context, map);
   };
 
   /**
-   * Update
+   * Update.
    */
   this._update = function () {
     s_update.call(m_this);
@@ -117,14 +124,14 @@ var canvas_quadFeature = function (arg) {
   };
 
   /**
-   * Initialize
+   * Initialize.
    */
   this._init = function () {
     s_init.call(m_this, arg);
   };
 
   /**
-   * Destroy
+   * Destroy.
    */
   this._exit = function () {
 

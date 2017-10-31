@@ -3,11 +3,12 @@ var registerRenderer = require('../registry').registerRenderer;
 var renderer = require('../renderer');
 
 /**
- * Create a new instance of class canvasRenderer
+ * Create a new instance of class canvasRenderer.
  *
  * @class geo.canvas.renderer
  * @extends geo.renderer
- * @param canvas
+ * @param {object} arg Options for the renderer.  This will typically have
+ *   `layer` and `canvas`.
  * @returns {geo.canvas.canvasRenderer}
  */
 var canvasRenderer = function (arg) {
@@ -26,19 +27,29 @@ var canvasRenderer = function (arg) {
       s_init = this._init,
       s_exit = this._exit;
 
+  /**
+   * Set the clear canvas flag.  If truthy, the canvas is erased at the start
+   * of the render cycle.  If falsy, the old data is kept.
+   *
+   * @param {boolean} arg Truthy to clear the canvas when rendering is started.
+   */
   this.clearCanvas = function (arg) {
     m_clearCanvas = arg;
   };
 
   /**
-   * Get API used by the renderer
+   * Get API used by the renderer.
+   *
+   * @returns {string} 'canvas'.
    */
   this.api = function () {
     return 'canvas';
   };
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @returns {this}
    */
   this._init = function () {
     if (m_this.initialized()) {
@@ -63,7 +74,13 @@ var canvasRenderer = function (arg) {
   };
 
   /**
-   * Handle resize event
+   * Handle resize event.
+   *
+   * @param {number} x Ignored.
+   * @param {number} y Ignored.
+   * @param {number} w New width in pixels.
+   * @param {number} h New height in pixels.
+   * @returns {this}
    */
   this._resize = function (x, y, w, h) {
     m_this.canvas().attr('width', w);
@@ -74,7 +91,9 @@ var canvasRenderer = function (arg) {
   };
 
   /**
-   * Render
+   * Render.
+   *
+   * @returns {this}
    */
   this._render = function () {
     m_this.layer().map().scheduleAnimationFrame(this._renderFrame);
@@ -88,7 +107,9 @@ var canvasRenderer = function (arg) {
     var layer = m_this.layer(),
         map = layer.map(),
         camera = map.camera(),
-        viewport = camera._viewport;
+        viewport = camera._viewport,
+        features = layer.features(),
+        i;
 
     // Clear the canvas.
     if (m_clearCanvas) {
@@ -96,8 +117,7 @@ var canvasRenderer = function (arg) {
       m_this.context2d.clearRect(0, 0, viewport.width, viewport.height);
     }
 
-    var features = layer.features();
-    for (var i = 0; i < features.length; i += 1) {
+    for (i = 0; i < features.length; i += 1) {
       if (features[i].visible()) {
         features[i]._renderOnCanvas(m_this.context2d, map);
       }
@@ -105,7 +125,7 @@ var canvasRenderer = function (arg) {
   };
 
   /**
-   * Exit
+   * Exit.
    */
   this._exit = function () {
     m_this.canvas().remove();
@@ -148,7 +168,7 @@ registerRenderer('canvas', canvasRenderer);
    * If the canvas renderer is not supported, supply the name of a renderer that
    * should be used instead.  This asks for the null renderer.
    *
-   * @returns null for the null renderer.
+   * @returns {null} `null` for the null renderer.
    */
   canvasRenderer.fallback = function () {
     return null;

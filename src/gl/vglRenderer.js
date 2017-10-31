@@ -3,11 +3,13 @@ var registerRenderer = require('../registry').registerRenderer;
 var renderer = require('../renderer');
 
 /**
- * Create a new instance of class vglRenderer
+ * Create a new instance of class vglRenderer.
  *
  * @class geo.gl.vglRenderer
  * @extends geo.renderer
- * @param canvas
+ * @param {object} [arg] Options for the renderer.
+ * @param {geo.layer} [arg.layer] The layer the renderer is associated with.
+ * @param {object} [arg.options] Additional options for the vgl renderer.
  * @returns {geo.gl.vglRenderer}
  */
 var vglRenderer = function (arg) {
@@ -37,35 +39,45 @@ var vglRenderer = function (arg) {
 
   // TODO: Move this API to the base class
   /**
-   * Return width of the renderer
+   * Return width of the renderer.
+   *
+   * @returns {number} The width of the current canvas.
    */
   this.width = function () {
     return m_width;
   };
 
   /**
-   * Return height of the renderer
+   * Return height of the renderer.
+   *
+   * @returns {number} The height of the current canvas.
    */
   this.height = function () {
     return m_height;
   };
 
   /**
-   * Get context specific renderer
+   * Get context specific renderer.
+   *
+   * @returns {object} The vgl context renderer.
    */
   this.contextRenderer = function () {
     return m_contextRenderer;
   };
 
   /**
-   * Get API used by the renderer
+   * Get API used by the renderer.
+   *
+   * @returns {string} `vgl`.
    */
   this.api = function () {
     return 'vgl';
   };
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @returns {this}
    */
   this._init = function () {
     if (m_this.initialized()) {
@@ -112,7 +124,13 @@ var vglRenderer = function (arg) {
   };
 
   /**
-   * Handle resize event
+   * Handle resize event.
+   *
+   * @param {number} x The left coordinate.
+   * @param {number} y The top coordinate.
+   * @param {number} w The width in pixels.
+   * @param {number} h The height in pixels.
+   * @returns {this}
    */
   this._resize = function (x, y, w, h) {
     var renderWindow = m_viewer.renderWindow();
@@ -131,6 +149,8 @@ var vglRenderer = function (arg) {
 
   /**
    * Render.  This actually schedules rendering for the next animation frame.
+   *
+   * @returns {this}
    */
   this._render = function () {
     /* If we are already scheduled to render, don't schedule again.  Rather,
@@ -155,7 +175,7 @@ var vglRenderer = function (arg) {
   };
 
   /**
-   * Exit
+   * Exit.
    */
   this._exit = function () {
     m_this.canvas().remove();
@@ -163,6 +183,9 @@ var vglRenderer = function (arg) {
     s_exit();
   };
 
+  /**
+   * Update the vgl renderer's camera based on the map's camera class.
+   */
   this._updateRendererCamera = function () {
     var renderWindow = m_viewer.renderWindow(),
         map = m_this.layer().map(),
@@ -283,7 +306,7 @@ registerRenderer('vgl', vglRenderer);
         exts = ctx.getSupportedExtensions();
         checkedWebGL = true;
       } catch (e) {
-        console.error('No webGL support');
+        console.warn('No webGL support');
         checkedWebGL = false;
       }
       canvas = undefined;
@@ -297,7 +320,7 @@ registerRenderer('vgl', vglRenderer);
    * If the vgl renderer is not supported, supply the name of a renderer that
    * should be used instead.  This asks for the null renderer.
    *
-   * @returns null for the null renderer.
+   * @returns {null} null for the null renderer.
    */
   vglRenderer.fallback = function () {
     return null;

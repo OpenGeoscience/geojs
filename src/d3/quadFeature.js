@@ -3,10 +3,10 @@ var registerFeature = require('../registry').registerFeature;
 var quadFeature = require('../quadFeature');
 
 /**
- * Create a new instance of class quadFeature
+ * Create a new instance of class quadFeature.
  *
  * @class geo.d3.quadFeature
- * @param {Object} arg Options object
+ * @param {geo.quadFeature.spec} arg Options object.
  * @extends geo.quadFeature
  * @returns {geo.d3.quadFeature}
  */
@@ -30,7 +30,7 @@ var d3_quadFeature = function (arg) {
       m_quads;
 
   /**
-   * Build this feature
+   * Build this feature.
    */
   this._build = function () {
     if (!this.position()) {
@@ -187,7 +187,9 @@ var d3_quadFeature = function (arg) {
   };
 
   /**
-   * Update
+   * Update the feature.
+   *
+   * @returns {this}
    */
   this._update = function () {
     s_update.call(m_this);
@@ -199,14 +201,14 @@ var d3_quadFeature = function (arg) {
   };
 
   /**
-   * Initialize
+   * Initialize.
    */
   this._init = function () {
     s_init.call(m_this, arg);
   };
 
   /**
-   * Destroy
+   * Destroy.
    */
   this._exit = function () {
     s_exit.call(m_this);
