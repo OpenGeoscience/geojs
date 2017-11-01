@@ -191,7 +191,6 @@ var gl_polygonFeature = function (arg) {
     fillOpacity = util.getGeomBuffer(geom, 'fillOpacity', numPts);
     d = d3 = 0;
     color = fillColorVal;
-    opacity = fillOpacityVal;
     fill = fillVal;
     for (k = 0; k < items.length; k += 1) {
       n = items[k].triangles.length;
@@ -200,6 +199,7 @@ var gl_polygonFeature = function (arg) {
       itemIndex = items[k].itemIndex;
       original = items[k].original;
       uniform = uniformPolyFunc(item, itemIndex);
+      opacity = fillOpacityVal;
       if (uniform) {
         if (fillColorVal === undefined) {
           color = fillColorFunc(vertices[0], 0, item, itemIndex);
