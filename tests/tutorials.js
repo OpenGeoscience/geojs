@@ -25,7 +25,13 @@ describe('tutorials', function () {
         var base$, tests;
 
         base$ = $('iframe#map')[0].contentWindow.jQuery;
-        /* Find all codeblock_tests.  We chain them together and end on the it
+        /* If a codeblock test requires html video and the current browser
+         * doesn't support video, skip the test. */
+        if (!$('iframe#map')[0].contentWindow.HTMLVideoElement && base$('.codeblock[htmlvideo]').length) {
+          done();
+          return;
+        }
+        /* Find all codeblock_tests.  We chain them together and end on the
          * function's done callback, so reverse them so that they run in the
          * order written. */
         tests = base$(base$('.codeblock_test').get().reverse());
@@ -36,7 +42,7 @@ describe('tutorials', function () {
               testDefer = $.Deferred();
           testDefer.then(done);
           done = function () {
-            /* When the codeblock's target has runm handle the results */
+            /* When the codeblock's target has run, handle the results */
             var onCodeLoaded = function () {
               var targetWindow = target[0].contentWindow,
                   tut$ = targetWindow.$,

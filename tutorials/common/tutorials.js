@@ -126,11 +126,21 @@ function process_block(selector) {
     pos = html.length;
   }
   if (js) {
-    /* If any code block is marked as needing webgl and the current window's
-     * parent has a geojs element that reports that it doesn't support webgl,
-     * mock webgl.  This is expected to only happen in the automated tests. */
-    if (webgl && window.parent && window.parent !== window && window.parent.geo && !window.parent.geo.gl.vglRenderer.supported()) {
-      js = 'geo.util.mockVGLRenderer();\n' + js;
+    /* If any code block is marked as needing webgl and the current window has
+     * a geojs element that reports that it doesn't support webgl, mock webgl.
+     * This is expected to only happen in the automated tests. */
+    if (webgl && window.parent && window.parent !== window && window.geo && !window.geo.gl.vglRenderer.supported()) {
+      js = 'geo.util.mockVGLRenderer();\n' +
+           js +
+           '\ngeo.util.restoreVGLRenderer();\n';
+    }
+    /* If we are in a test environment, redirect the console to the parent
+     * window to make debugging easier. */
+    if (window.parent && window.parent !== window) {
+      js = 'window.console = window.parent.parent.console;\n' +
+           'window.parent.console = window.parent.parent.console;\n' +
+           'console.log("Testing " + window.parent.document.title);\n' +
+           js;
     }
     html = html.substr(0, pos).replace(/\s+$/, '') + '\n<script type="text/javascript">\n' + js + '</script>\n' + html.substr(pos);
   }

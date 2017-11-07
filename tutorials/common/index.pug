@@ -16,6 +16,12 @@
   target: the ID of the iframe element where the code will be executed.
     Defaults to 'workframe'.  Only one chain of blocks in associated with a
     target may be run at a time.
+
+  You can add additional attributes to the codeblock.  These include:
+
+  webgl: the associated test requires webgl to be present or mocked
+  htmlvideo: HTMLVideoElements are required, so don't test if they aren't
+    available
 mixin codeblock(format, step, parentstep, initial, stepname, target)
   -
     attributes.format = format || attributes.format || 'javascript';
