@@ -113,7 +113,9 @@ var canvasRenderer = function (arg) {
 
     for (i = 0; i < features.length; i += 1) {
       if (features[i]._delayRender()) {
+        // reschedule the render for the next animation frame
         m_this._render();
+        // exit this render loop so it doesn't occur
         return;
       }
     }

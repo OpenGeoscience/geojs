@@ -130,7 +130,8 @@ var canvas_quadFeature = function (arg) {
    * @param {geo.map} map The current renderer's parent map.
    */
   this._renderImageAndVideoQuads = function (context2d, map) {
-    if ((!m_quads.imgQuads || !m_quads.imgQuads.length) && (!m_quads.vidQuads || !m_quads.vidQuads.length)) {
+    if ((!m_quads.imgQuads || !m_quads.imgQuads.length) &&
+        (!m_quads.vidQuads || !m_quads.vidQuads.length)) {
       return;
     }
 
