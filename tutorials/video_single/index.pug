@@ -13,7 +13,7 @@ block mainTutorial
     var params = geo.util.pixelCoordinateParams('#map', videoWidth, videoHeight);
     // by default, the video cannot be zoomed any closer than one video pixel
     // to one display pixel.  We can change this to allow zooming in on the
-    //video.
+    // video.
     params.map.max += 3;  // allow zooming up to 8x
     // create a map with the pixel-space parameters
     var map = geo.map(params.map);
