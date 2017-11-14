@@ -1,4 +1,5 @@
-// Test geo.quadFeature and geo.gl.quadFeature
+// Test geo.quadFeature, geo.canvas.quadFeature, geo.d3.quadFeature, and
+// geo.gl.quadFeature
 
 /* globals Image */
 
@@ -224,6 +225,58 @@ describe('geo.quadFeature', function () {
         expect(pt.index).toEqual([]);
         expect(pt.found.length).toBe(0);
         expect(pt.extra[1]).toBe(undefined);
+      });
+    });
+    describe('cacheQuads and cacheUpdate', function () {
+      it('cacheQuads unspecified', function () {
+        var map, layer, quad, data;
+        map = create_map();
+        layer = map.createLayer('feature', {renderer: null});
+        quad = geo.quadFeature({layer: layer});
+        quad._init();
+        data = [{
+          ll: [-40, 30], ur: [-60, 10], image: preloadImage
+        }, {
+          ll: [-90, 10], ur: [-100, 10], image: preloadImage
+        }, {
+          ll: [-80, 10], lr: [-50, 10], ur: [-70, 30], image: preloadImage
+        }];
+        quad.data(data);
+        quad._generateQuads();
+        expect(data[0]._cachedQuad).not.toBe(undefined);
+        expect(data[1]._cachedQuad).not.toBe(undefined);
+        expect(data[2]._cachedQuad).not.toBe(undefined);
+        quad.cacheUpdate(data[1]);
+        expect(data[0]._cachedQuad).not.toBe(undefined);
+        expect(data[1]._cachedQuad).toBe(undefined);
+        expect(data[2]._cachedQuad).not.toBe(undefined);
+        quad.cacheUpdate(2);
+        expect(data[0]._cachedQuad).not.toBe(undefined);
+        expect(data[1]._cachedQuad).toBe(undefined);
+        expect(data[2]._cachedQuad).toBe(undefined);
+        quad.cacheUpdate();
+        expect(data[0]._cachedQuad).toBe(undefined);
+        expect(data[1]._cachedQuad).toBe(undefined);
+        expect(data[2]._cachedQuad).toBe(undefined);
+      });
+      it('cacheQuads false', function () {
+        var map, layer, quad, data;
+        map = create_map();
+        layer = map.createLayer('feature', {renderer: null});
+        quad = geo.quadFeature({layer: layer});
+        quad._init({cacheQuads: false});
+        data = [{
+          ll: [-40, 30], ur: [-60, 10], image: preloadImage
+        }, {
+          ll: [-90, 10], ur: [-100, 10], image: preloadImage
+        }, {
+          ll: [-80, 10], lr: [-50, 10], ur: [-70, 30], image: preloadImage
+        }];
+        quad.data(data);
+        quad._generateQuads();
+        expect(data[0]._cachedQuad).toBe(undefined);
+        expect(data[1]._cachedQuad).toBe(undefined);
+        expect(data[2]._cachedQuad).toBe(undefined);
       });
     });
   });

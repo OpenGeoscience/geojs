@@ -19,6 +19,7 @@ $(function () {
     renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
     features: query.renderer ? undefined : ['quad']
   });
+  var previewImage = new Image();
   var quads = layer.createFeature('quad', {selectionAPI: true});
   var quadData = [{
     ll: {x: -108, y: 29},
@@ -115,6 +116,23 @@ $(function () {
       quads.draw();
     }, 10000);
   }
+  if (query.video === 'true') {
+    /* You can render videos on a quad.  This is currently only supported on
+     * the canvas renderer. */
+    quadData.push({
+      ul: {x: -128, y: 9},
+      lr: {x: -98, y: -11},
+      video: '../../data/earthquakes-video.webm'
+    });
+    /* Add the same video via a video element and flip it vertically. */
+    var vid = document.createElement('video');
+    vid.src = '../../data/earthquakes-video.webm';
+    quadData.push({
+      ll: {x: -158, y: 9},
+      ur: {x: -128, y: -11},
+      video: vid
+    });
+  }
   if (query.warped === 'true') {
     /* You can specify quads so that the corners are 'twisted' and the quad
      * would be non-convex.  In this case, the quads are each rendered as a
@@ -134,7 +152,6 @@ $(function () {
       image: '../../data/tilefancy.png'
     });
   }
-  var previewImage = new Image();
   previewImage.onload = function () {
 
     quads
@@ -158,17 +175,20 @@ $(function () {
         evt.data.opacity = 0.5;
         // we either have to clear the internal cache on the item, or have
         // asked for it not to have been cached to begin with.
-        delete evt.data._cachedQuad;
-        this.modified();
+        this.cacheUpdate(evt.data);
         this.draw();
+        // if this is a video element, start it playing
+        if (quads.video(evt.data)) {
+          quads.video(evt.data).currentTime = 0;
+          quads.video(evt.data).play();
+        }
       })
       .geoOn(geo.event.feature.mouseout, function (evt) {
         if (evt.data.orig_opacity === undefined) {
           evt.data.orig_opacity = (evt.data.opacity || null);
         }
         evt.data.opacity = evt.data.orig_opacity || undefined;
-        delete evt.data._cachedQuad;
-        this.modified();
+        this.cacheUpdate(evt.data);
         this.draw();
       })
       .draw();

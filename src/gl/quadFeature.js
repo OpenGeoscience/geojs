@@ -3,10 +3,10 @@ var registerFeature = require('../registry').registerFeature;
 var quadFeature = require('../quadFeature');
 
 /**
- * Create a new instance of class quadFeature
+ * Create a new instance of class quadFeature.
  *
  * @class geo.gl.quadFeature
- * @param {Object} arg Options object
+ * @param {geo.quadFeature.spec} arg Options object.
  * @extends geo.quadFeature
  * @returns {geo.gl.quadFeature}
  */
@@ -72,6 +72,8 @@ var gl_quadFeature = function (arg) {
    * the actions from vgl.mapper to some degree.
    *
    * @private
+   * @param {vgl.renderState} renderState An object that contains the context
+   *   used for drawing.
    */
   function setupDrawObjects(renderState) {
     var context = renderState.m_context,
@@ -108,6 +110,8 @@ var gl_quadFeature = function (arg) {
    * the actions from vgl.mapper to some degree.
    *
    * @private
+   * @param {vgl.renderState} renderState An object that contains the context
+   *   used for drawing.
    */
   function setupColorDrawObjects(renderState) {
     var context = renderState.m_context,
@@ -116,7 +120,7 @@ var gl_quadFeature = function (arg) {
     if (m_quads.clrQuads.length) {
       if (!m_clrposbuf || m_clrposbuf.length < m_quads.clrQuads.length * 12 ||
           !m_glBuffers.clrQuadsPosition) {
-        if (m_glBuffers.imgQuadsPosition) {
+        if (m_glBuffers.clrQuadsPosition) {
           context.deleteBuffer(m_glBuffers.clrQuadsPosition);
         }
         m_glBuffers.clrQuadsPosition = context.createBuffer();
@@ -140,7 +144,7 @@ var gl_quadFeature = function (arg) {
   }
 
   /**
-   * Build this feature
+   * Build this feature.
    */
   this._build = function () {
     var mapper, mat, prog, srctex, unicrop, geom;
@@ -262,7 +266,8 @@ var gl_quadFeature = function (arg) {
   /**
    * Render all of the color quads using a single mapper.
    *
-   * @param renderState: the render state used for the render.
+   * @param {vgl.renderState} renderState An object that contains the context
+   *   used for drawing.
    */
   this._renderColorQuads = function (renderState) {
     if (!m_quads.clrQuads.length) {
@@ -308,7 +313,8 @@ var gl_quadFeature = function (arg) {
   /**
    * Render all of the image quads using a single mapper.
    *
-   * @param renderState: the render state used for the render.
+   * @param {vgl.renderState} renderState An object that contains the context
+   *   used for drawing.
    */
   this._renderImageQuads = function (renderState) {
     if (!m_quads.imgQuads.length) {
@@ -358,7 +364,7 @@ var gl_quadFeature = function (arg) {
   };
 
   /**
-   * Update
+   * Update.
    */
   this._update = function () {
     s_update.call(m_this);
@@ -378,14 +384,14 @@ var gl_quadFeature = function (arg) {
   };
 
   /**
-   * Initialize
+   * Initialize.
    */
   this._init = function () {
     s_init.call(m_this, arg);
   };
 
   /**
-   * Destroy
+   * Destroy.
    */
   this._exit = function () {
     if (m_actor_image) {
@@ -413,6 +419,7 @@ capabilities[quadFeature.capabilities.imageCrop] = true;
 capabilities[quadFeature.capabilities.imageFixedScale] = false;
 capabilities[quadFeature.capabilities.imageFull] = true;
 capabilities[quadFeature.capabilities.canvas] = false;
+capabilities[quadFeature.capabilities.video] = false;
 
 registerFeature('vgl', 'quad', gl_quadFeature, capabilities);
 module.exports = gl_quadFeature;

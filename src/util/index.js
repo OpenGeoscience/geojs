@@ -133,7 +133,7 @@ var util = module.exports = {
   /**
    * Check if an object an HTML Image element that is fully loaded.
    *
-   * @param {object} img an object that might be an HTML Image element.
+   * @param {object} img An object that might be an HTML Image element.
    * @param {boolean} [allowFailedImage] If `true`, an image element that has
    *     a source and has failed to load is also considered 'ready' in the
    *     sense that it isn't expected to change to a better state.
@@ -143,6 +143,27 @@ var util = module.exports = {
   isReadyImage: function (img, allowFailedImage) {
     if (img instanceof Image && img.complete && img.src) {
       if ((img.naturalWidth && img.naturalHeight) || allowFailedImage) {
+        return true;
+      }
+    }
+    return false;
+  },
+
+  /**
+   * Check if an object an HTMLVideoElement element that is loaded.
+   *
+   * @param {object} vid An object that might be an HTMLVideoElement.
+   * @param {boolean} [allowFailedVideo] If `true`, an viedo element that has
+   *     a source and has failed to load is also considered 'ready' in the
+   *     sense that it isn't expected to change to a better state.
+   * @returns {boolean} `true` if this is a video that is ready.
+   * @memberof geo.util
+   */
+  isReadyVideo: function (vid, allowFailedVideo) {
+    if (vid instanceof HTMLVideoElement && vid.src &&
+        vid.HAVE_CURRENT_DATA !== undefined) {
+      if ((vid.videoWidth && vid.videoHeight && vid.readyState >= vid.HAVE_CURRENT_DATA) ||
+          (allowFailedVideo && vid.error)) {
         return true;
       }
     }
