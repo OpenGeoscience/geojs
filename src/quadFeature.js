@@ -574,8 +574,8 @@ var quadFeature = function (arg) {
   };
 
   /**
-   * If the data has changed and caching has been used, one or all data items
-   * by clearing their caches and updating the modified flag.
+   * If the data has changed and caching has been used, update one or all data
+   * items by clearing their caches and updating the modified flag.
    *
    * @param {number|object} [indexOrData] If not specified, clear all quad
    *    caches.  If a number, clear that index-numbered entry from the data

@@ -160,8 +160,10 @@ var util = module.exports = {
    * @memberof geo.util
    */
   isReadyVideo: function (vid, allowFailedVideo) {
-    if (vid instanceof HTMLVideoElement && vid.src && vid.HAVE_CURRENT_DATA !== undefined) {
-      if ((vid.videoWidth && vid.videoHeight && vid.readyState >= vid.HAVE_CURRENT_DATA) || (allowFailedVideo && vid.error)) {
+    if (vid instanceof HTMLVideoElement && vid.src &&
+        vid.HAVE_CURRENT_DATA !== undefined) {
+      if ((vid.videoWidth && vid.videoHeight && vid.readyState >= vid.HAVE_CURRENT_DATA) ||
+          (allowFailedVideo && vid.error)) {
         return true;
       }
     }
