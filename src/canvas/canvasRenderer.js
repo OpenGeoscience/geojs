@@ -7,8 +7,10 @@ var renderer = require('../renderer');
  *
  * @class geo.canvas.renderer
  * @extends geo.renderer
- * @param {object} arg Options for the renderer.  This will typically have
- *   `layer` and `canvas`.
+ * @param {object} arg Options for the renderer.
+ * @param {geo.layer} [arg.layer] Layer associated with the renderer.
+ * @param {HTMLElement} [arg.canvas] Canvas element associated with the
+ *   renderer.
  * @returns {geo.canvas.canvasRenderer}
  */
 var canvasRenderer = function (arg) {

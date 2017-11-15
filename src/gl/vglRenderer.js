@@ -7,8 +7,10 @@ var renderer = require('../renderer');
  *
  * @class geo.gl.vglRenderer
  * @extends geo.renderer
- * @param {object} [arg] Options for the renderer.
- * @param {geo.layer} [arg.layer] The layer the renderer is associated with.
+ * @param {object} arg Options for the renderer.
+ * @param {geo.layer} [arg.layer] Layer associated with the renderer.
+ * @param {HTMLElement} [arg.canvas] Canvas element associated with the
+ *   renderer.
  * @param {object} [arg.options] Additional options for the vgl renderer.
  * @returns {geo.gl.vglRenderer}
  */
