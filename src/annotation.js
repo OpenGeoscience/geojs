@@ -45,11 +45,22 @@ var annotation = function (type, args) {
     return new annotation(type, args);
   }
 
-  annotationId += 1;
   var m_options = $.extend({}, {showLabel: true}, args || {}),
-      m_id = annotationId,
-      m_name = m_options.name || (
-        type.charAt(0).toUpperCase() + type.substr(1) + ' ' + annotationId),
+      m_id = m_options.annotationId;
+  delete m_options.annotationId;
+  if (m_id === undefined || (m_options.layer && m_options.layer.annotationById(m_id))) {
+    annotationId += 1;
+    if (m_id !== undefined) {
+      console.warn('Annotation id ' + m_id + ' is in use; using ' + annotationId + ' instead.');
+    }
+    m_id = annotationId;
+  } else {
+    if (m_id > annotationId) {
+      annotationId = m_id;
+    }
+  }
+  var m_name = m_options.name || (
+        type.charAt(0).toUpperCase() + type.substr(1) + ' ' + m_id),
       m_label = m_options.label || null,
       m_description = m_options.description || undefined,
       m_type = type,
@@ -273,7 +284,7 @@ var annotation = function (type, args) {
     }
     if (arg2 === undefined) {
       m_options = $.extend(true, m_options, arg1);
-      /* For style objects, reextend them without recursiion.  This allows
+      /* For style objects, re-extend them without recursion.  This allows
        * setting colors without an opacity field, for instance. */
       ['style', 'editStyle', 'labelStyle'].forEach(function (key) {
         if (arg1[key] !== undefined) {
