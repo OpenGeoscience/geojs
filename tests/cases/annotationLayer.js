@@ -234,6 +234,10 @@ describe('geo.annotationLayer', function () {
       expect(layer.geojson(sampleGeojson)).toBe(5);
       expect(layer.geojson(sampleGeojson, 'update')).toBe(2);
       expect(layer.geojson(sampleGeojson, true)).toBe(2);
+      expect(layer.annotations()[1].id()).not.toBe(1000);
+      sampleGeojson.properties = {annotationId: 1000};
+      expect(layer.geojson(sampleGeojson, true)).toBe(2);
+      expect(layer.annotations()[1].id()).toBe(1000);
     });
     it('validateAttribute', function () {
       expect(layer.validateAttribute(undefined, 'other')).toBe(undefined);

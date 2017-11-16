@@ -420,16 +420,16 @@ var annotationLayer = function (args) {
    *    the given geojson object.  If `undefined`, return the current
    *    annotations as geojson.  This may be a JSON string, a javascript
    *    object, or a File object.
-   * @param {boolean} [clear] If `true`, when adding annotations, first remove
-   *    all existing objects.  If `'update'`, update existing annotations and
-   *    remove annotations that no longer exit,  If falsy, update existing
-   *    annotations and leave unchanged annotations.
+   * @param {boolean|string} [clear] If `true`, when adding annotations, first
+   *    remove all existing objects.  If `'update'`, update existing
+   *    annotations and remove annotations that no longer exist.  If falsy,
+   *    update existing annotations and leave annotations that have not chaged.
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
    * @param {boolean} [includeCrs] If truthy, include the coordinate system in
    *    the output.
    * @returns {object|number|undefined} If `geojson` was undefined, the current
-   *    annotations as a javascript object that can be converted to geojson
+   *    annotations is a javascript object that can be converted to geojson
    *    using JSON.stringify.  If `geojson` is specified, either the number of
    *    annotations now present upon success, or `undefined` if the value in
    *    `geojson` was not able to be parsed.
@@ -493,7 +493,10 @@ var annotationLayer = function (args) {
    */
   this._geojsonFeatureToAnnotation = function (feature, gcs) {
     var dataList = feature.data(),
-        annotationList = registry.listAnnotations();
+        annotationList = registry.listAnnotations(),
+        map = m_this.map();
+    gcs = (gcs === null ? map.gcs() : (
+        gcs === undefined ? map.ingcs() : gcs));
     $.each(dataList, function (data_idx, data) {
       var type = (data.properties || {}).annotationType || feature.featureType,
           options = $.extend({}, data.properties || {}),
@@ -536,8 +539,8 @@ var annotationLayer = function (args) {
       datagcs = ((data.crs && data.crs.type === 'name' && data.crs.properties &&
                   data.crs.properties.type === 'proj4' &&
                   data.crs.properties.name) ? data.crs.properties.name : gcs);
-      if (datagcs !== m_this.map().gcs()) {
-        position = transform.transformCoordinates(datagcs, m_this.map().gcs(), position);
+      if (datagcs !== map.gcs()) {
+        position = transform.transformCoordinates(datagcs, map.gcs(), position);
       }
       options.coordinates = position;
       /* For each style listed in the geojsonStyleProperties object, check if
@@ -566,7 +569,9 @@ var annotationLayer = function (args) {
       });
       if (options.annotationId !== undefined) {
         existing = m_this.annotationById(options.annotationId);
-        delete options.annotationId;
+        if (existing) {
+          delete options.annotationId;
+        }
       }
       if (existing && existing.type() === type && existing.state() === geo_annotation.state.done && existing.options('updated') === false) {
         /* We could change the state of the existing annotation if it differs
