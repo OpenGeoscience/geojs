@@ -3,10 +3,19 @@ var registerRenderer = require('../registry').registerRenderer;
 var renderer = require('../renderer');
 
 /**
- * Create a new instance of class d3Renderer
+ * Create a new instance of class d3Renderer.
  *
  * @class geo.d3.renderer
  * @extends geo.renderer
+ * @param {object} arg Options for the renderer.
+ * @param {geo.layer} [arg.layer] Layer associated with the renderer.
+ * @param {HTMLElement} [arg.canvas] Canvas element associated with the
+ *   renderer.
+ * @param {boolean} [arg.widget=false] Set to `true` if this is a stand-alone
+ *   widget.  If it is not a widget, svg elements are wrapped in a parent
+ *   group.
+ * @param {HTMLElement} [arg.d3Parent] If specified, the parent for any
+ *   rendered objects; otherwise the renderer's layer's main node is used.
  * @returns {geo.d3.d3Renderer}
  */
 var d3Renderer = function (arg) {
@@ -46,6 +55,8 @@ var d3Renderer = function (arg) {
   /**
    * Set attributes to a d3 selection.
    * @private
+   * @param {d3Selector} select The d3 selector with the elements to change.
+   * @param {object} attrs A map of attributes to set on the elements.
    */
   function setAttrs(select, attrs) {
     var key;
@@ -59,6 +70,10 @@ var d3Renderer = function (arg) {
   /**
    * Meta functions for converting from geojs styles to d3.
    * @private
+   * @param {function|object} f The style value or function to convert.
+   * @param {function} [g] An optional function that returns a boolean; if it
+   *    returns false, the style is set to `'none'`.
+   * @returns {function} A function for converting styles.
    */
   this._convertColor = function (f, g) {
     f = util.ensureFunction(f);
@@ -77,6 +92,13 @@ var d3Renderer = function (arg) {
     };
   };
 
+  /**
+   * Return a function for converting a size in pixels to an appropriate
+   * d3 scale.
+   * @private
+   * @param {function|object} f The style value or function to convert.
+   * @returns {function} A function for converting scale.
+   */
   this._convertScale = function (f) {
     f = util.ensureFunction(f);
     return function () {
@@ -85,11 +107,19 @@ var d3Renderer = function (arg) {
   };
 
   /**
-   * Set styles to a d3 selection. Ignores unkown style keys.
+   * Set styles to a d3 selection. Ignores unknown style keys.
    * @private
+   * @param {d3Selector} select The d3 selector with the elements to change.
+   * @param {object} styles Style object associated with a feature.
    */
   function setStyles(select, styles) {
     var key, k, f;
+    /**
+     * Check if the fill parameter is truthy.
+     *
+     * @returns {null|'none'} `null` to fill the element, `'none'` to skip
+     *  filling it.
+     */
     function fillFunc() {
       if (styles.fill.apply(m_this, arguments)) {
         return null;
@@ -97,6 +127,12 @@ var d3Renderer = function (arg) {
         return 'none';
       }
     }
+    /**
+     * Check if the stroke parameter is truthy.
+     *
+     * @returns {null|'none'} `null` to fill the element, `'none'` to skip
+     *  filling it.
+     */
     function strokeFunc() {
       if (styles.stroke.apply(m_this, arguments)) {
         return null;
@@ -152,6 +188,8 @@ var d3Renderer = function (arg) {
    * group within the render instance.
    *
    * @private
+   * @param {string} [parentId] Optional parent ID name.
+   * @returns {d3Selector} Selector with the d3 group.
    */
   function getGroup(parentId) {
     if (parentId) {
@@ -241,6 +279,8 @@ var d3Renderer = function (arg) {
    * Convert from screen pixel coordinates to the local coordinate system
    * in the SVG group element taking into account the transform.
    * @private
+   * @param {geo.screenPosition} pt The coordinates to convert.
+   * @returns {geo.geoPosition} The converted coordinates.
    */
   this.baseToLocal = function (pt) {
     pt = {
@@ -263,6 +303,8 @@ var d3Renderer = function (arg) {
    * Convert from the local coordinate system in the SVG group element
    * to screen pixel coordinates.
    * @private
+   * @param {geo.geoPosition} pt The coordinates to convert.
+   * @returns {geo.screenPosition} The converted coordinates.
    */
   this.localToBase = function (pt) {
     if (m_transform.rotation) {
@@ -282,7 +324,15 @@ var d3Renderer = function (arg) {
   };
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @param {object} arg The options used to create the renderer.
+   * @param {boolean} [arg.widget=false] Set to `true` if this is a stand-alone
+   *   widget.  If it is not a widget, svg elements are wrapped in a parent
+   *   group.
+   * @param {HTMLElement} [arg.d3Parent] If specified, the parent for any
+   *   rendered objects; otherwise the renderer's layer's main node is used.
+   * @returns {this}
    */
   this._init = function (arg) {
     if (!m_this.canvas()) {
@@ -359,10 +409,13 @@ var d3Renderer = function (arg) {
       }
     }
     m_this._setTransform();
+    return m_this;
   };
 
   /**
-   * Get API used by the renderer
+   * Get API used by the renderer.
+   *
+   * @returns {string} 'd3'.
    */
   this.api = function () {
     return 'd3';
@@ -377,13 +430,21 @@ var d3Renderer = function (arg) {
    *
    * This will create a circle element with radius r0 independent of the
    * current zoom level.
+   *
+   * @returns {number} The current scale factor.
    */
   this.scaleFactor = function () {
     return m_scale;
   };
 
   /**
-   * Handle resize event
+   * Handle resize event.
+   *
+   * @param {number} x Ignored.
+   * @param {number} y Ignored.
+   * @param {number} w New width in pixels.
+   * @param {number} h New height in pixels.
+   * @returns {this}
    */
   this._resize = function (x, y, w, h) {
     if (!m_corners) {
@@ -393,16 +454,11 @@ var d3Renderer = function (arg) {
     m_svg.attr('height', h);
     m_this._setTransform();
     m_this.layer().geoTrigger(d3Rescale, { scale: m_scale }, true);
+    return m_this;
   };
 
   /**
-   * Update noop for geo.d3.object api.
-   */
-  this._update = function () {
-  };
-
-  /**
-   * Exit
+   * Exit.
    */
   this._exit = function () {
     m_features = {};
@@ -417,8 +473,9 @@ var d3Renderer = function (arg) {
   };
 
   /**
-   * Get the definitions dom element for the layer
+   * Get the definitions DOM element for the layer.
    * @protected
+   * @returns {HTMLElement} The definitions DOM element.
    */
   this._definitions = function () {
     return m_defs;
@@ -428,25 +485,24 @@ var d3Renderer = function (arg) {
    * Create a new feature element from an object that describes the feature
    * attributes.  To be called from feature classes only.
    *
-   * Input:
-   *  {
-   *    id:         A unique string identifying the feature.
-   *    data:       Array of data objects used in a d3 data method.
-   *    dataIndex:  A function that returns a unique id for each data element.
-   *    defs:       If set, a dictionary with values to render in the defs
-   *                section.  This can contain data, index, append, attributes,
-   *                classes, style, and enter.  enter is a function that is
-   *                called on new elements.
-   *    style:      An object containing element CSS styles.
-   *    attributes: An object containing element attributes.
-   *    classes:    An array of classes to add to the elements.
-   *    append:     The element type as used in d3 append methods.
-   *    onlyRenderNew: a boolean.  If true, features only get attributes and
-   *                styles set when new.  If false, features always have
-   *                attributes and styles updated.
-   *    sortByZ:    a boolean.  If true, sort features by the d.zIndex.
-   *    parentId:   If set, the group ID of the parent element.
-   *  }
+   * @param {object} arg Options for the features.
+   * @param {string} arg.id A unique string identifying the feature.
+   * @param {array} arg.data Array of data objects used in a d3 data method.
+   * @param {function} [aeg.dataIndex] A function that returns a unique id for
+   *    each data element.  This is passed to the data access function.
+   * @param {object} arg.style An object with style values or functions.
+   * @param {object} arg.attributes An object containing element attributes.
+   *    The keys are the attribute names, and the values are either constants
+   *    or functions that get passed a data element and a data index.
+   * @param {string[]} arg.classes An array of classes to add to the elements.
+   * @param {string} arg.append The element type as used in d3 append methods.
+   *    This is something like `'path'`, `'circle'`, or `'line'`.
+   * @param {boolean} [arg.onlyRenderNew] If truthy, features only get
+   *    attributes and styles set when new.  If falsy, features always have
+   *    attributes and styles updated.
+   * @param {boolean} [arg.sortByZ] If truthy, sort features by the `d.zIndex`.
+   * @param {string} [parentId] If set, the group ID of the parent element.
+   * @returns {this}
    */
   this._drawFeatures = function (arg) {
     m_features[arg.id] = {
@@ -465,9 +521,15 @@ var d3Renderer = function (arg) {
   };
 
   /**
-  *  Updates a feature by performing a d3 data join.  If no input id is
-  *  provided then this method will update all features.
-  */
+   * Updates a feature by performing a d3 data join.  If no input id is
+   * provided then this method will update all features.
+   *
+   * @param {string} [id] The id of the feature to update.  `undefined` to
+   *    update all features.
+   * @param {string} [parentId] The parent of the feature(s).  If not
+   *    specified, features are rendered on the next animation frame.
+   * @returns {this}
+   */
   this.__render = function (id, parentId) {
     var key;
     if (id === undefined) {
@@ -484,8 +546,13 @@ var d3Renderer = function (arg) {
       m_renderIds[id] = true;
       m_this.layer().map().scheduleAnimationFrame(m_this._renderFrame);
     }
+    return m_this;
   };
 
+  /**
+   * Render all features that are marked as needing an update.  This should
+   * only be called duration an animation frame.
+   */
   this._renderFrame = function () {
     var id;
     for (id in m_removeIds) {
@@ -502,9 +569,17 @@ var d3Renderer = function (arg) {
     }
   };
 
+  /**
+   * Render a single feature.
+   *
+   * @param {string} id The id of the feature to update.
+   * @param {string} [parentId] The parent of the feature.  This is used to
+   *    select the feature.
+   * @returns {this}
+   */
   this._renderFeature = function (id, parentId) {
     if (!m_features[id]) {
-      return;
+      return m_this;
     }
     var data = m_features[id].data,
         index = m_features[id].index,
@@ -533,15 +608,23 @@ var d3Renderer = function (arg) {
   };
 
   /**
-  *  Returns a d3 selection for the given feature id.
-  */
+   * Returns a d3 selection for the given feature id.
+   *
+   * @param {string} id The id of the feature to select.
+   * @param {string} [parentId] The parent of the feature.  This is used to
+   *    determine the feature's group.
+   * @returns {d3Selector}
+   */
   this.select = function (id, parentId) {
     return getGroup(parentId).selectAll('.' + id);
   };
 
   /**
-  *  Removes a feature from the layer.
-  */
+   * Removes a feature from the layer.
+   *
+   * @param {string} id The id of the feature to remove.
+   * @returns {this}
+   */
   this._removeFeature = function (id) {
     m_removeIds[id] = true;
     m_this.layer().map().scheduleAnimationFrame(m_this._renderFrame);
@@ -553,8 +636,8 @@ var d3Renderer = function (arg) {
   };
 
   /**
-  *  Override draw method to do nothing.
-  */
+   * Override draw method to do nothing.
+   */
   this.draw = function () {
   };
 
@@ -604,7 +687,7 @@ registerRenderer('d3', d3Renderer);
    * If the d3 renderer is not supported, supply the name of a renderer that
    * should be used instead.  This asks for the null renderer.
    *
-   * @returns null for the null renderer.
+   * @returns {null} `null` for the null renderer.
    */
   d3Renderer.fallback = function () {
     return null;
