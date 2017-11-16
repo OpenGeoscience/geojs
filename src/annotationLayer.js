@@ -493,7 +493,10 @@ var annotationLayer = function (args) {
    */
   this._geojsonFeatureToAnnotation = function (feature, gcs) {
     var dataList = feature.data(),
-        annotationList = registry.listAnnotations();
+        annotationList = registry.listAnnotations(),
+        map = m_this.map();
+    gcs = (gcs === null ? map.gcs() : (
+        gcs === undefined ? map.ingcs() : gcs));
     $.each(dataList, function (data_idx, data) {
       var type = (data.properties || {}).annotationType || feature.featureType,
           options = $.extend({}, data.properties || {}),
@@ -536,8 +539,8 @@ var annotationLayer = function (args) {
       datagcs = ((data.crs && data.crs.type === 'name' && data.crs.properties &&
                   data.crs.properties.type === 'proj4' &&
                   data.crs.properties.name) ? data.crs.properties.name : gcs);
-      if (datagcs !== m_this.map().gcs()) {
-        position = transform.transformCoordinates(datagcs, m_this.map().gcs(), position);
+      if (datagcs !== map.gcs()) {
+        position = transform.transformCoordinates(datagcs, map.gcs(), position);
       }
       options.coordinates = position;
       /* For each style listed in the geojsonStyleProperties object, check if
