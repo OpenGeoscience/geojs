@@ -51,17 +51,28 @@ describe('geo.annotation', function () {
       layer = map.createLayer('annotation', {
         annotations: geo.listAnnotations()
       });
-      ann = geo.annotation.annotation('test2', {
+      var params = {
         layer: layer,
         name: 'Annotation',
         state: geo.annotation.state.create
-      });
+      };
+      ann = geo.annotation.annotation('test2', params);
       expect(ann.type()).toBe('test2');
       expect(ann.state()).toBe(geo.annotation.state.create);
       expect(ann.id()).toBeGreaterThan(0);
       expect(ann.name()).toBe('Annotation');
       expect(ann.layer()).toBe(layer);
       expect(ann.coordinates()).toEqual([]);
+
+      // check that reusing an annotationId throws a warning
+      sinon.stub(console, 'warn', function () {});
+      params.annotationId = 10;
+      ann = geo.annotation.annotation('test2', params);
+      layer.addAnnotation(ann);
+      expect(console.warn.calledOnce).toBe(false);
+      geo.annotation.annotation('test2', params);
+      expect(console.warn.calledOnce).toBe(true);
+      console.warn.restore();
     });
     it('_exit', function () {
       var ann = geo.annotation.annotation('test');

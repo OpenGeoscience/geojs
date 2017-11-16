@@ -50,6 +50,9 @@ var annotation = function (type, args) {
   delete m_options.annotationId;
   if (m_id === undefined || (m_options.layer && m_options.layer.annotationById(m_id))) {
     annotationId += 1;
+    if (m_id !== undefined) {
+      console.warn('Annotation id ' + m_id + ' is in use; using ' + annotationId + ' instead.');
+    }
     m_id = annotationId;
   } else {
     if (m_id > annotationId) {
