@@ -17,6 +17,7 @@ tutorials.map(function (json) {
     filename: path.relative('.', path.resolve(json.dir, 'index.pug'))
   });
   var html = fn(json);
+  html = html.replace(/<=/g, '&lt;=').replace(/>=/g, '&gt;=');
   html = `---
 layout: tutorial
 title: ${json.title}
