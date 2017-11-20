@@ -1,7 +1,7 @@
 // Test geo.featureLayer
 
 var geo = require('../test-utils').geo;
-var $ = require('jquery');
+var createMap = require('../test-utils').createMap;
 
 describe('geo.featureLayer', function () {
   'use strict';
@@ -13,20 +13,11 @@ describe('geo.featureLayer', function () {
     console.log.restore();
   });
 
-  function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
-
   describe('create', function () {
     it('create function', function () {
       var map, layer;
 
-      map = create_map();
+      map = createMap();
       layer = geo.featureLayer({map: map});
       expect(layer instanceof geo.featureLayer).toBe(true);
       expect(layer.initialized()).toBe(false);
@@ -39,7 +30,7 @@ describe('geo.featureLayer', function () {
   describe('Check private class methods', function () {
     var map, layer;
     it('_init', function () {
-      map = create_map();
+      map = createMap();
       layer = geo.featureLayer({map: map});
       expect(layer.initialized()).toBe(false);
       layer._init();
@@ -68,7 +59,7 @@ describe('geo.featureLayer', function () {
   describe('Check public class methods', function () {
     var map, layer, feat1, feat2, feat3;
     it('createFeature', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
 
       feat1 = layer.createFeature('point');

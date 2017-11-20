@@ -1,6 +1,6 @@
 var $ = require('jquery');
+var createMap = require('../test-utils').createMap;
 var colorbrewer = require('colorbrewer');
-var geo = require('../test-utils').geo;
 
 describe('color legend', function () {
   'use strict';
@@ -71,26 +71,13 @@ describe('color legend', function () {
   ];
 
   beforeEach(function () {
-    container = $('<div/>')
-      .css({ width: '500px', height: '400px' }).appendTo('body');
-    map = geo.map({
-      'node': container,
-      'center': [0, 0],
-      'zoom': 2,
-      'clampZoom': false,
-      'clampBoundsX': false,
-      'clampBoundsY': false
-    });
+    map = createMap();
+    container = map.node();
     uiLayer = map.createLayer('ui');
     legendWidget = uiLayer.createWidget('colorLegend', {
       categories: [allCategories[0]]
     });
     map.draw();
-  });
-
-  afterEach(function () {
-    map.exit();
-    container.remove();
   });
 
   it('Create basic color legend widget', function () {

@@ -2,8 +2,8 @@
 
 /* global HTMLVideoElement */
 
-var $ = require('jquery');
 var geo = require('../test-utils').geo;
+var createMap = require('../test-utils').createMap;
 var waitForIt = require('../test-utils').waitForIt;
 
 describe('geo.util.isReadyVideo', function () {
@@ -37,19 +37,10 @@ describe('geo.quadFeature video', function () {
 
   var map, layer, quads;
 
-  function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
-
   it('single video quad', function (done) {
     var videoWidth = 640, videoHeight = 360;
     var params = geo.util.pixelCoordinateParams('#map', videoWidth, videoHeight);
-    map = create_map(params.map);
+    map = createMap(params.map);
     layer = map.createLayer('feature', {features: ['quad.video']});
     quads = layer.createFeature('quad');
     quads.data([{
@@ -82,7 +73,7 @@ describe('geo.quadFeature video', function () {
   it('video element', function (done) {
     var video = document.createElement('video');
     video.onloadeddata = function () {
-      map = create_map({});
+      map = createMap({});
       layer = map.createLayer('feature', {features: ['quad.video']});
       quads = layer.createFeature('quad');
       quads.data([{
@@ -100,7 +91,7 @@ describe('geo.quadFeature video', function () {
   });
 
   it('preview colors and bad urls', function (done) {
-    map = create_map({});
+    map = createMap({});
     layer = map.createLayer('feature', {features: ['quad.video']});
     quads = layer.createFeature('quad');
     quads.style({

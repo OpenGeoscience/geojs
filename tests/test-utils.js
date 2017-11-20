@@ -255,9 +255,10 @@ module.exports.advanceDate = function (delta) {
   startDate += delta;
 };
 
-/* Decode query components into a dictionary of values.
+/**
+ * Decode query components into a dictionary of values.
  *
- * @returns {object}: the query parameters as a dictionary.
+ * @returns {object} the query parameters as a dictionary.
  */
 module.exports.getQuery = function () {
   var query = document.location.search.replace(/(^\?)/, '').split(
@@ -269,4 +270,34 @@ module.exports.getQuery = function () {
       return this;
     }.bind({}))[0];
   return query;
+};
+
+/**
+ * Destroy a map for testing.  This removes any existing node called '#map'.
+ * It should be done if the VGL renderer was mocked before it is restored.
+ */
+function destroyMap() {
+  if ($('#map').data('data-geojs-map') && $.isFunction($('#map').data('data-geojs-map').exit)) {
+    $('#map').data('data-geojs-map').exit();
+  }
+  $('#map').remove();
+}
+module.exports.destroyMap = destroyMap;
+
+/**
+ * Create a map for testing.  This removes any existing node called '#map' and
+ * creates a new one.
+ *
+ * @param {object} [opts] Additional options to pass to the map class creator.
+ * @param {object} [css] Additional css to apply to the map node.  Default is
+ *   width: 640px, height: 360px.
+ * @returns {geo.map} the created map.
+ */
+module.exports.createMap = function (opts, css) {
+  destroyMap();
+  var node = $('<div id="map"/>').css($.extend({}, {width: '640px', height: '360px'}, css));
+  $('body').prepend(node);
+  opts = $.extend({}, opts);
+  opts.node = node;
+  return geo.map(opts);
 };

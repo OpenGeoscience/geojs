@@ -286,9 +286,7 @@ var sliderWidget = function (arg) {
       .on('mouseout', mouseOut);
 
     // Update the nub position on zoom
-    m_this.layer().geoOn(geo_event.zoom, function () {
-      m_this._update();
-    });
+    m_this.geoOn(geo_event.zoom, m_this._update);
 
     mouseOut();
     m_this._update();
@@ -302,8 +300,8 @@ var sliderWidget = function (arg) {
    * @private
    */
   this._exit = function () {
+    m_this.geoOff(geo_event.zoom, m_this._update);
     m_group.remove();
-    m_this.layer().geoOff(geo_event.zoom);
     s_exit();
   };
 

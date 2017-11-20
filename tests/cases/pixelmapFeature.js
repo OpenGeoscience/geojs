@@ -3,6 +3,7 @@
 /* globals Image */
 
 var geo = require('../test-utils').geo;
+var createMap = require('../test-utils').createMap;
 var $ = require('jquery');
 var waitForIt = require('../test-utils').waitForIt;
 var logCanvas2D = require('../test-utils').logCanvas2D;
@@ -28,19 +29,10 @@ describe('geo.pixelmapFeature', function () {
     }
   }
 
-  function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
-
   describe('create', function () {
     var map, layer, pixelmap;
     it('create function', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
       pixelmap = geo.pixelmapFeature.create(layer);
       expect(pixelmap instanceof geo.pixelmapFeature).toBe(true);
@@ -56,7 +48,7 @@ describe('geo.pixelmapFeature', function () {
     describe('_init', function () {
       var map, layer, pixelmap;
       it('defaults', function () {
-        map = create_map();
+        map = createMap();
         layer = map.createLayer('feature', {renderer: null});
         pixelmap = geo.pixelmapFeature({layer: layer});
         pixelmap._init();
@@ -79,7 +71,7 @@ describe('geo.pixelmapFeature', function () {
     });
     it('_exit', function () {
       var map, layer, pixelmap;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
       pixelmap = geo.pixelmapFeature({layer: layer});
       pixelmap._init({
@@ -93,7 +85,7 @@ describe('geo.pixelmapFeature', function () {
     });
     it('_preparePixelmap', function () {
       var map, layer, pixelmap;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
       pixelmap = geo.pixelmapFeature({layer: layer});
       pixelmap._init({
@@ -117,7 +109,7 @@ describe('geo.pixelmapFeature', function () {
     it('_computePixelmap', function () {
       var map, layer, pixelmap, prepared = 0;
 
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
       pixelmap = geo.pixelmapFeature({layer: layer});
       pixelmap._init({
@@ -148,7 +140,7 @@ describe('geo.pixelmapFeature', function () {
       var map, layer, pixelmap, buildTime;
 
       it('loading image', function (done) {
-        map = create_map();
+        map = createMap();
         layer = map.createLayer('feature', {renderer: 'canvas'});
         pixelmap = layer.createFeature('pixelmap', {
           position: position,
@@ -201,7 +193,7 @@ describe('geo.pixelmapFeature', function () {
       var map, layer, pixelmap, buildTime, updateTime;
 
       it('loading image', function (done) {
-        map = create_map();
+        map = createMap();
         layer = map.createLayer('feature', {renderer: 'canvas'});
         pixelmap = layer.createFeature('pixelmap', {
           position: position,
@@ -233,7 +225,7 @@ describe('geo.pixelmapFeature', function () {
 
     it('position', function () {
       var pos = {lr: {x: 0, y: 0}, ul: {x: 10, y: 5}};
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
       pixelmap = layer.createFeature('pixelmap', {
         url: testImageSrc
@@ -272,7 +264,7 @@ describe('geo.pixelmapFeature', function () {
       it('basic usage', function () {
         var map, layer, pixelmap, pt;
 
-        map = create_map();
+        map = createMap();
         layer = map.createLayer('feature', {renderer: 'canvas'});
         pixelmap = layer.createFeature('pixelmap', {
           position: position,
@@ -297,7 +289,7 @@ describe('geo.pixelmapFeature', function () {
   describe('geo.canvas.pixelmapFeature', function () {
     var map, layer, pixelmap, buildTime, counts;
     it('basic usage', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
       pixelmap = layer.createFeature('pixelmap', {
         position: position,

@@ -1,35 +1,23 @@
 var geo = require('../test-utils').geo;
+var createMap = require('../test-utils').createMap;
 var $ = require('jquery');
 
 describe('widget api', function () {
   'use strict';
 
-  beforeEach(function () {
-    $('<div id="map-widget-api"/>')
-      .css({width: '500px', height: '400px'}).appendTo('body');
-  });
-
-  afterEach(function () {
-    $('#map-widget-api').remove();
-  });
-
   function makeMap() {
     var map;
 
-    map = geo.map({
-      node: '#map-widget-api',
+    map = createMap({
       center: {
         x: -98.0,
         y: 39.5
       },
       zoom: 5
-    });
-
-    map.createLayer('ui');
-    map.draw();
+    }, {width: '500px', height: '400px'});
 
     var uiLayer = map.createLayer('ui');
-    window.geoWidgets = [];
+    map.draw();
     return {map: map, uiLayer: uiLayer};
   }
 

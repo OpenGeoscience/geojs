@@ -1,12 +1,10 @@
-var geo = require('../test-utils').geo;
-var $ = require('jquery');
+var createMap = require('../test-utils').createMap;
 
 describe('DiscreteZoom and ParallelProjection', function () {
   'use strict';
 
   function makeMap() {
-    var map = geo.map({
-      'node': '#map-discrete-zoom',
+    var map = createMap({
       'center': [0, 0],
       'zoom': 3,
       discreteZoom: true
@@ -14,15 +12,6 @@ describe('DiscreteZoom and ParallelProjection', function () {
     map.draw();
     return map;
   }
-
-  beforeEach(function () {
-    $('<div id="map-discrete-zoom"/>')
-      .css({width: '800px', height: '800px'}).appendTo('body');
-  });
-
-  afterEach(function () {
-    $('#map-discrete-zoom').remove();
-  });
 
   it('Zoom to a non-integer value', function () {
     var map = makeMap();

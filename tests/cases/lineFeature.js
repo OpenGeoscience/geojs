@@ -6,6 +6,8 @@ var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
 var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
 var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 var geo = require('../test-utils').geo;
+var createMap = require('../test-utils').createMap;
+var destroyMap = require('../test-utils').destroyMap;
 var mockVGLRenderer = geo.util.mockVGLRenderer;
 var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 var vgl = require('vgl');
@@ -41,19 +43,10 @@ describe('geo.lineFeature', function () {
     }
   ];
 
-  function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
-
   describe('create', function () {
     it('create function', function () {
       var map, layer, line;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       line = geo.lineFeature.create(layer);
       expect(line instanceof geo.lineFeature).toBe(true);
@@ -64,7 +57,7 @@ describe('geo.lineFeature', function () {
     var map, layer, line;
     var pos = [[[0, 0], [10, 5], [5, 10]]];
     it('position', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       line = geo.lineFeature({layer: layer});
       expect(line.position()('a')).toBe('a');
@@ -78,7 +71,7 @@ describe('geo.lineFeature', function () {
     });
 
     it('line', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       line = geo.lineFeature({layer: layer});
       expect(line.line()('a')).toBe('a');
@@ -95,7 +88,7 @@ describe('geo.lineFeature', function () {
   describe('Public utility methods', function () {
     it('pointSearch', function () {
       var map, layer, line, pt, p, data = testLines;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       line = layer.createFeature('line', {selectionAPI: true});
       line.data(data)
@@ -171,7 +164,7 @@ describe('geo.lineFeature', function () {
     });
     it('boxSearch', function () {
       var map, layer, line, idx, data = testLines;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       line = layer.createFeature('line', {selectionAPI: true});
       line.data(data)
@@ -201,7 +194,7 @@ describe('geo.lineFeature', function () {
     var map, layer, line;
     it('basic usage', function () {
       mockAnimationFrame();
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       line = layer.createFeature('line', {
         line: function (item) {
@@ -244,7 +237,7 @@ describe('geo.lineFeature', function () {
     it('basic usage', function () {
       mockAnimationFrame();
       logCanvas2D();
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
       line = layer.createFeature('line', {
         line: function (item) {
@@ -283,7 +276,7 @@ describe('geo.lineFeature', function () {
     it('basic usage', function () {
 
       mockVGLRenderer();
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'vgl'});
       line = layer.createFeature('line', {
         line: function (item) {
@@ -321,6 +314,7 @@ describe('geo.lineFeature', function () {
       expect(line.actors().length).toBe(0);
       line.data(testLines);
       map.draw();
+      destroyMap();
       restoreVGLRenderer();
     });
   });

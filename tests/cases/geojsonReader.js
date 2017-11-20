@@ -1,15 +1,6 @@
 describe('geojsonReader', function () {
   var geo = require('../test-utils').geo;
-  var $ = require('jquery');
-
-  beforeEach(function () {
-    $('<div id="map-geojson-reader"/>')
-      .css({width: '800px', height: '600px'}).appendTo('body');
-  });
-
-  afterEach(function () {
-    $('#map-geojson-reader').remove();
-  });
+  var createMap = require('../test-utils').createMap;
 
   describe('geojsonReader', function () {
     'use strict';
@@ -20,14 +11,13 @@ describe('geojsonReader', function () {
       var reader;
 
       beforeEach(function () {
-        map = geo.map({node: '#map-geojson-reader', center: [0, 0], zoom: 3});
+        map = createMap({center: [0, 0], zoom: 3});
         layer = map.createLayer('feature', {renderer: 'd3'});
         sinon.stub(layer, 'createFeature');
         reader = geo.createFileReader('jsonReader', {'layer': layer});
       });
       afterEach(function () {
         layer.createFeature.restore();
-        map.exit();
       });
 
       describe('bare geometry', function () {
@@ -277,7 +267,7 @@ describe('geojsonReader', function () {
     });
 
     it('Setup map', function () {
-      map = geo.map({node: '#map-geojson-reader', center: [0, 0], zoom: 3});
+      map = createMap({center: [0, 0], zoom: 3});
       layer = map.createLayer('feature', {renderer: 'd3'});
 
       obj = {

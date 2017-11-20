@@ -1,6 +1,7 @@
 var geo = require('../test-utils').geo;
+var createMap = require('../test-utils').createMap;
 
-describe('zoom slider', function () {
+xdescribe('zoom slider', function () {
   'use strict';
 
   var d3 = require('d3');
@@ -8,23 +9,15 @@ describe('zoom slider', function () {
   var map;
 
   beforeEach(function () {
-    $('<div id="map-zoom-slider"/>')
-      .css({width: '500px', height: '400px'}).appendTo('body');
-    map = geo.map({
-      'node': '#map-zoom-slider',
+    map = createMap({
       'center': [0, 0],
       'zoom': 2,
       'clampZoom': false,
       'clampBoundsX': false,
       'clampBoundsY': false
-    });
+    }, {width: '500px', height: '400px'});
     map.createLayer('ui').createWidget('slider');
     map.draw();
-  });
-
-  afterEach(function () {
-    map.exit();
-    $('#map-zoom-slider').remove();
   });
 
   it('Zoom in button', function (done) {

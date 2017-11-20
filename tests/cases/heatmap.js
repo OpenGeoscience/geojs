@@ -1,16 +1,6 @@
 // Test geo.core.heatmap
 describe('canvas heatmap', function () {
-  var geo = require('../test-utils').geo;
-  var $ = require('jquery');
-
-  beforeEach(function () {
-    $('<div id="map-canvas-heatmap-feature"/>')
-      .css({width: '500px', height: '400px'}).appendTo('body');
-  });
-
-  afterEach(function () {
-    $('#map-canvas-heatmap-feature').remove();
-  });
+  var createMap = require('../test-utils').createMap;
 
   describe('canvas heatmap feature', function () {
     'use strict';
@@ -19,7 +9,7 @@ describe('canvas heatmap', function () {
     var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
     var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
-    var map, width = 800, height = 600, layer, feature1,
+    var map, layer, feature1,
         testData = [[0.6, 42.8584, -70.9301],
                     [0.233, 42.2776, -83.7409],
                     [0.2, 42.2776, -83.7409]];
@@ -33,9 +23,8 @@ describe('canvas heatmap', function () {
 
     it('Setup map', function () {
       mockAnimationFrame();
-      map = geo.map({node: '#map-canvas-heatmap-feature', center: [0, 0], zoom: 3});
+      map = createMap({center: [0, 0], zoom: 3}, {width: '800px', height: '600px'});
       layer = map.createLayer('feature', {'renderer': 'canvas'});
-      map.size({width: width, height: height});
     });
 
     it('Add feature to a layer', function () {
@@ -77,11 +66,12 @@ describe('canvas heatmap', function () {
     });
 
     it('Compute gradient', function () {
-      feature1.style('color', {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
-                               0.25: {r: 0, g: 0, b: 1, a: 0.5},
-                               0.5:  {r: 0, g: 1, b: 1, a: 0.6},
-                               0.75: {r: 1, g: 1, b: 0, a: 0.7},
-                               1:    {r: 1, g: 0, b: 0, a: 0.1}});
+      feature1.style('color', {
+        0:    {r: 0, g: 0, b: 0.0, a: 0.0},
+        0.25: {r: 0, g: 0, b: 1, a: 0.5},
+        0.5:  {r: 0, g: 1, b: 1, a: 0.6},
+        0.75: {r: 1, g: 1, b: 0, a: 0.7},
+        1:    {r: 1, g: 0, b: 0, a: 0.1}});
       feature1._computeGradient();
       expect(layer.node()[0].children[0].getContext('2d')
         .getImageData(1, 0, 1, 1).data.length).toBe(4);
@@ -187,7 +177,7 @@ describe('canvas heatmap', function () {
     var data = [];
 
     it('Setup map', function () {
-      map = geo.map({node: '#map-canvas-heatmap-feature', center: [0, 0], zoom: 3});
+      map = createMap({center: [0, 0], zoom: 3});
       layer = map.createLayer('feature', {'renderer': 'canvas'});
       for (var i = 0; i < 100; i += 1) {
         data.push({a: i % 10, b: i % 9, c: i % 8});
@@ -247,9 +237,11 @@ describe('canvas heatmap', function () {
         })).toBe(heatmap);
         expect(heatmap.position()(data[0])).toEqual({x: 0, y: 0});
         expect(heatmap.position()(data[84])).toEqual({x: 4, y: 3});
-        heatmap = heatmapFeature({layer: layer, position: function (d) {
-          return {x: d.b, y: d.c};
-        }});
+        heatmap = heatmapFeature({
+          layer: layer,
+          position: function (d) {
+            return {x: d.b, y: d.c};
+          }});
         expect(heatmap.position()(data[0])).toEqual({x: 0, y: 0});
         expect(heatmap.position()(data[87])).toEqual({x: 6, y: 7});
       });
@@ -261,20 +253,25 @@ describe('canvas heatmap', function () {
         })).toBe(heatmap);
         expect(heatmap.intensity()(data[0])).toEqual(0);
         expect(heatmap.intensity()(data[67])).toEqual(3);
-        heatmap = heatmapFeature({layer: layer, intensity: function (d) {
-          return d.a;
-        }});
+        heatmap = heatmapFeature({
+          layer: layer,
+          intensity: function (d) {
+            return d.a;
+          }});
         expect(heatmap.intensity()(data[0])).toEqual(0);
         expect(heatmap.intensity()(data[67])).toEqual(7);
       });
     });
     describe('_build', function () {
       it('intensity ranges', function () {
-        var heatmap = heatmapFeature({layer: layer, position: function (d) {
-          return {x: d.a, y: d.b};
-        }, intensity: function (d) {
-          return d.c;
-        }}).data(data);
+        var heatmap = heatmapFeature({
+          layer: layer,
+          position: function (d) {
+            return {x: d.a, y: d.b};
+          },
+          intensity: function (d) {
+            return d.c;
+          }}).data(data);
         heatmap.gcs('EPSG:3857');
         heatmap._build();
         expect(heatmap.minIntensity()).toBe(0);
@@ -286,9 +283,11 @@ describe('canvas heatmap', function () {
         expect(heatmap.maxIntensity()).toBe(2);
       });
       it('gcsPosition', function () {
-        var heatmap = heatmapFeature({layer: layer, position: function (d) {
-          return {x: d.a, y: d.b};
-        }}).data(data);
+        var heatmap = heatmapFeature({
+          layer: layer,
+          position: function (d) {
+            return {x: d.a, y: d.b};
+          }}).data(data);
         heatmap.gcs('EPSG:3857');
         // we have to call build since we didn't attach this to the layer in the
         // normal way

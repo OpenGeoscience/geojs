@@ -1,35 +1,35 @@
-var $ = require('jquery');
-
 describe('Contour Feature', function () {
   'use strict';
 
   var map, layer;
   var geo = require('../test-utils').geo;
+  var createMap = require('../test-utils').createMap;
+  var destroyMap = require('../test-utils').destroyMap;
   var mockVGLRenderer = geo.util.mockVGLRenderer;
   var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 
   beforeEach(function () {
-    $('<div id="map-contour-wrap"/>')
-      .css({width: '500px', height: '300px'}).appendTo('body');
-
     mockVGLRenderer();
-    map = geo.map({
-      'node': '#map-contour-wrap',
+    map = createMap({
       'center': [0, 0],
       'zoom': 3
-    });
+    }, {width: '500px', height: '300px'});
     layer = map.createLayer('feature', {'renderer': 'vgl'});
   });
 
   afterEach(function () {
-    map.exit();
-    $('#map-contour-wrap').remove();
+    destroyMap();
     restoreVGLRenderer();
   });
 
   it('Create a contour', function () {
     var contour1 = {
-      gridWidth: 7, gridHeight: 2, x0: -30, y0: -30, dx: 6, dy: 6,
+      gridWidth: 7,
+      gridHeight: 2,
+      x0: -30,
+      y0: -30,
+      dx: 6,
+      dy: 6,
       values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
     };
     var contour = layer.createFeature('contour').data(
@@ -44,7 +44,12 @@ describe('Contour Feature', function () {
 
   it('Create a contour that will wrap and close', function () {
     var contour1 = {
-      gridWidth: 6, gridHeight: 2, x0: 30, y0: -30, dx: 60, dy: 60,
+      gridWidth: 6,
+      gridHeight: 2,
+      x0: 30,
+      y0: -30,
+      dx: 60,
+      dy: 60,
       values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     };
     var contour = layer.createFeature('contour').data(
@@ -59,7 +64,12 @@ describe('Contour Feature', function () {
 
   it('Create a contour and ask it to not wrap', function () {
     var contour1 = {
-      gridWidth: 6, gridHeight: 2, x0: 30, y0: -30, dx: 60, dy: 60,
+      gridWidth: 6,
+      gridHeight: 2,
+      x0: 30,
+      y0: -30,
+      dx: 60,
+      dy: 60,
       values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
       wrapLongitude: false
     };
@@ -74,7 +84,12 @@ describe('Contour Feature', function () {
 
   it('Create a contour that will wrap but not close', function () {
     var contour1 = {
-      gridWidth: 6, gridHeight: 2, x0: 55, y0: -25, dx: 50, dy: 50,
+      gridWidth: 6,
+      gridHeight: 2,
+      x0: 55,
+      y0: -25,
+      dx: 50,
+      dy: 50,
       values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     };
     var contour = layer.createFeature('contour').data(

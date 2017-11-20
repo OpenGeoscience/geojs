@@ -5,6 +5,8 @@ var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
 var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
 var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 var geo = require('../test-utils').geo;
+var createMap = require('../test-utils').createMap;
+var destroyMap = require('../test-utils').destroyMap;
 var mockVGLRenderer = geo.util.mockVGLRenderer;
 var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 var vgl = require('vgl');
@@ -22,19 +24,10 @@ describe('geo.pointFeature', function () {
     {x: 50, y: 10}, {x: 50, y: 10}, {x: 60, y: 10}
   ];
 
-  function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
-
   describe('create', function () {
     it('create function', function () {
       var map, layer, point;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       point = geo.pointFeature.create(layer);
       expect(point instanceof geo.pointFeature).toBe(true);
@@ -45,7 +38,7 @@ describe('geo.pointFeature', function () {
     var map, layer, point;
     var pos = [[0, 0], [10, 5], [5, 10]];
     it('position', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       point = geo.pointFeature({layer: layer});
       point._init();
@@ -63,7 +56,7 @@ describe('geo.pointFeature', function () {
     });
 
     it('data', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       point = geo.pointFeature({layer: layer});
       point._init();
@@ -74,7 +67,7 @@ describe('geo.pointFeature', function () {
 
     it('clustering', function () {
       var count = 0;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       point = geo.pointFeature({layer: layer});
       point._init();
@@ -100,7 +93,7 @@ describe('geo.pointFeature', function () {
   describe('Public utility methods', function () {
     it('pointSearch', function () {
       var map, layer, point, pt, p, data = testPoints;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       point = layer.createFeature('point', {selectionAPI: true});
       point.data(data)
@@ -152,7 +145,7 @@ describe('geo.pointFeature', function () {
     });
     it('boxSearch', function () {
       var map, layer, point, data = testPoints, idx;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       point = layer.createFeature('point', {selectionAPI: true});
       point.data(data);
@@ -168,7 +161,7 @@ describe('geo.pointFeature', function () {
   describe('Private utility methods', function () {
     it('_clusterData', function () {
       var map, layer, point, data = testPoints, count = 0;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       point = layer.createFeature('point');
       point.data(data);
@@ -190,7 +183,7 @@ describe('geo.pointFeature', function () {
     });
     it('_handleZoom', function () {
       var map, layer, point, data = testPoints;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       point = layer.createFeature('point');
       point.data(data);
@@ -205,7 +198,7 @@ describe('geo.pointFeature', function () {
     });
     it('_updateRangeTree', function () {
       var map, layer, point, data = testPoints.slice();
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       point = layer.createFeature('point');
       point.data(data);
@@ -232,7 +225,7 @@ describe('geo.pointFeature', function () {
     var map, layer, point;
     it('basic usage', function () {
       mockAnimationFrame();
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       point = layer.createFeature('point', {
         style: {
@@ -265,7 +258,7 @@ describe('geo.pointFeature', function () {
     }
     it('basic usage', function () {
       mockVGLRenderer();
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'vgl'});
       point = layer.createFeature('point', {
         style: {
@@ -331,6 +324,7 @@ describe('geo.pointFeature', function () {
       expect(point.actors().length).toBe(0);
       point.data(testPoints);
       map.draw();
+      destroyMap();
       restoreVGLRenderer();
     });
   });

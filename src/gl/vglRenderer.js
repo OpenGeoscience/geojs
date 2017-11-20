@@ -169,19 +169,28 @@ var vglRenderer = function (arg) {
    * This clears the render timer and actually renders.
    */
   this._renderFrame = function () {
-    if (m_updateCamera) {
-      m_updateCamera = false;
-      m_this._updateRendererCamera();
+    if (m_viewer) {
+      if (m_updateCamera) {
+        m_updateCamera = false;
+        m_this._updateRendererCamera();
+      }
+      m_viewer.render();
     }
-    m_viewer.render();
   };
 
   /**
    * Exit.
    */
   this._exit = function () {
+    m_this.layer().map().scheduleAnimationFrame(this._renderFrame, 'remove');
     m_this.canvas().remove();
-    m_viewer.exit();
+    if (m_viewer) {
+      var renderState = new vgl.renderState();
+      renderState.m_renderer = m_viewer;
+      renderState.m_context = m_viewer.renderWindow().context();
+      m_viewer.exit(renderState);
+    }
+    m_viewer = null;
     s_exit();
   };
 

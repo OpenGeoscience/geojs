@@ -1,4 +1,4 @@
-var geo = require('../test-utils').geo;
+var createMap = require('../test-utils').createMap;
 var d3 = require('d3');
 var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
 var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
@@ -11,8 +11,7 @@ describe('d3 vector feature', function () {
 
   it('Create a map with a d3 feature layer', function () {
     mockAnimationFrame();
-    d3.select('body').append('div').attr('id', 'map-d3-vector');
-    map = geo.map({node: '#map-d3-vector',
+    map = createMap({
       center: [0, 0],
       zoom: 3,
       width: 100,
@@ -60,7 +59,7 @@ describe('d3 vector feature', function () {
     .draw();
     stepAnimationFrame();
 
-    vectorLines = d3.select('#map-d3-vector svg').selectAll('line');
+    vectorLines = d3.select('#map').selectAll('line');
     expect(vectorLines.size()).toBe(3);
 
     featureGroup = d3.selectAll('g#' + feature1._d3id());
@@ -84,7 +83,7 @@ describe('d3 vector feature', function () {
     layer.deleteFeature(feature1).draw();
     stepAnimationFrame();
 
-    selection = d3.select('#map-d3-vector svg').selectAll('line');
+    selection = d3.select('#map').selectAll('line');
     expect(selection.size()).toBe(0);
 
     markers = d3.selectAll('markers');
@@ -119,7 +118,7 @@ describe('d3 vector feature', function () {
     .draw();
     stepAnimationFrame();
 
-    vectorLines = d3.select('#map-d3-vector svg').selectAll('line');
+    vectorLines = d3.select('#map').selectAll('line');
     expect(vectorLines.size()).toBe(3);
 
     vectorLines.each(function (v, i) {
@@ -138,9 +137,7 @@ describe('d3 vector feature', function () {
 
   });
 
-  it('Delete the map', function () {
-    map.exit();
-    d3.select('#map-d3-vector').remove();
+  it('Cleanup', function () {
     unmockAnimationFrame();
   });
 });

@@ -394,7 +394,9 @@ var canvas_heatmapFeature = function (arg) {
    * @protected
    */
   this._setTransform = function () {
-    m_this.layer().canvas()[0].style.transform = m_heatMapTransform;
+    if (m_this.layer() && m_this.layer().canvas() && m_this.layer().canvas()[0]) {
+      m_this.layer().canvas()[0].style.transform = m_heatMapTransform;
+    }
   };
 
   /**
