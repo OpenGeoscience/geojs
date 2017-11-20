@@ -4,15 +4,15 @@ var sceneObject = require('../sceneObject');
 /**
  * @typedef {object} geo.gui.widget.position
  * @property {string|number} [top] The position to the top of the container.
- * A string css position or a number. If a number is used, it will be treated as px value.
- * @property {string|number} [right] The position to the right of the container.
- * Value is used similarly to the top property.
- * @property {string|number} [bottom] The position to the bottom of the container.
- * Value is used similarly to the top property.
+ *   A string css position or a number in pixels.
+ * @property {string|number} [right] The position to the right of the
+ *   container.  A string css position or a number in pixels.
+ * @property {string|number} [bottom] The position to the bottom of the
+ *   container.  A string css position or a number in pixels.
  * @property {string|number} [left] The position to the left of the container.
- * Value is used similarly to the top property.
+ * @property {string|number} [top] The position to the top of the container.
  * @property {*} [...] Additional css properties that affect position are
-  allowed.  See the css specification for details.
+ *   allowed.  See the css specification for details.
  */
 
 /**
@@ -32,10 +32,10 @@ var widget = function (arg) {
   if (!(this instanceof widget)) {
     return new widget(arg);
   }
+  arg = arg || {};
   sceneObject.call(this, arg);
 
   var geo_event = require('../event');
-  var createFeature = require('../registry').createFeature;
 
   var m_this = this,
       s_exit = this._exit,
@@ -45,6 +45,8 @@ var widget = function (arg) {
 
   if (arg.parent !== undefined && !(arg.parent instanceof widget)) {
     throw new Error('Parent must be of type geo.gui.widget');
+  } else if (arg.parent) {
+    m_this.parent(arg.parent);
   }
 
   /**
@@ -59,45 +61,22 @@ var widget = function (arg) {
 
   /**
    * Clean up the widget.
-   *
    */
   this._exit = function () {
     m_this.children().forEach(function (child) {
-      m_this._deleteFeature(child);
+      m_this.removeChild(child);
+      child._exit();
     });
 
     m_this.layer().geoOff(geo_event.pan, m_this.repositionEvent);
-    m_this.parentCanvas().removeChild(m_this.canvas());
+    if (m_this.parentCanvas().removeChild && m_this.canvas()) {
+      try {
+        m_this.parentCanvas().removeChild(m_this.canvas());
+      } catch (err) {
+        // fail gracefully if the canvas is not a child of the parentCanvas
+      }
+    }
     s_exit();
-  };
-
-  /**
-   * Create a new feature.
-   *
-   * @param {string} featureName Name of the feature to create.
-   * @param {object} arg Options for the new feature.
-   * @returns {geo.feature} The new feature.
-   */
-  this._createFeature = function (featureName, arg) {
-
-    var newFeature = createFeature(
-      featureName, m_this, m_this.renderer(), arg);
-
-    m_this.addChild(newFeature);
-    m_this.modified();
-    return newFeature;
-  };
-
-  /**
-   * Delete feature.
-   *
-   * @param {geo.feature} feature The feature to delete.
-   * @returns {this}
-   */
-  this._deleteFeature = function (feature) {
-    m_this.removeChild(feature);
-    feature._exit();
-    return m_this;
   };
 
   /**
@@ -106,7 +85,7 @@ var widget = function (arg) {
    * @returns {geo.layer}
    */
   this.layer = function () {
-    return m_layer;
+    return m_layer || (m_this.parent() && m_this.parent().layer());
   };
 
   /**
@@ -133,11 +112,11 @@ var widget = function (arg) {
   };
 
   /**
-   * Appends a child to the widget.
+   * Appends the canvas to the parent canvas.
    * The widget determines how to append itself to a parent, the parent can
    * either be another widget, or the UI Layer.
    */
-  this._appendChild = function () {
+  this._appendCanvasToParent = function () {
     m_this.parentCanvas().appendChild(m_this.canvas());
   };
 
@@ -148,7 +127,7 @@ var widget = function (arg) {
    * @returns {HTMLElement} The canvas of the widget's parent.
    */
   this.parentCanvas = function () {
-    if (m_this.parent === undefined) {
+    if (!m_this.parent()) {
       return m_this.layer().canvas();
     }
     return m_this.parent().canvas();
@@ -199,17 +178,23 @@ var widget = function (arg) {
    */
   this.reposition = function (position) {
     position = position || m_this.position();
-    m_this.canvas().style.position = 'absolute';
+    if (m_this.canvas() && m_this.canvas().style) {
+      m_this.canvas().style.position = 'absolute';
 
-    for (var cssAttr in position) {
-      if (position.hasOwnProperty(cssAttr)) {
-        // if the property is a number, add px to it, otherwise set it to the
-        // specified value.  Setting a property to null clears it.  Setting to
-        // undefined doesn't alter it.
-        if (/^\s*(-|\+)?(\d+(\.\d*)?|\d*\.\d+)([eE](-|\+)?\d+)?\s*$/.test(position[cssAttr])) {
-          m_this.canvas().style[cssAttr] = ('' + position[cssAttr]).trim() + 'px';
-        } else {
-          m_this.canvas().style[cssAttr] = position[cssAttr];
+      for (var cssAttr in position) {
+        if (position.hasOwnProperty(cssAttr)) {
+          // if the property is a number, add px to it, otherwise set it to the
+          // specified value.  Setting a property to null clears it.  Setting to
+          // undefined doesn't alter it.
+          if (/^\s*(-|\+)?(\d+(\.\d*)?|\d*\.\d+)([eE](-|\+)?\d+)?\s*$/.test(position[cssAttr])) {
+            // tris ensures that the number is a float with no more than 3
+            // decimal places (Chrome does this automatically, but doing so
+            // explicitly makes testing more consistent).  It will be an
+            // integer when possible.
+            m_this.canvas().style[cssAttr] = parseFloat(parseFloat(position[cssAttr]).toFixed(3)) + 'px';
+          } else {
+            m_this.canvas().style[cssAttr] = position[cssAttr];
+          }
         }
       }
     }
@@ -227,9 +212,10 @@ var widget = function (arg) {
   };
 
   /**
-   * Report if the widget is completely within the viewport.
+   * Report if the top left of widget (or its current x, y position) is within
+   * the viewport.
    *
-   * @returns {boolean} True if the widget is completely within the viewport.
+   * @returns {boolean} True if the widget is within the viewport.
    */
   this.isInViewport = function () {
     var position = m_this.position();
