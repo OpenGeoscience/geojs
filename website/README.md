@@ -1,3 +1,7 @@
+Setup environment
+=================
+- Run ```npm run setup-website```
+
 Update website
 ==============
 - Run ```npm run build-website``` to build the website, the output will be available under ```website\public```
