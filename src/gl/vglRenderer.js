@@ -179,6 +179,19 @@ var vglRenderer = function (arg) {
   };
 
   /**
+   * Get the GL context for this renderer.
+   *
+   * @returns {WebGLRenderingContext} The current context.  If unavailable,
+   *    falls back to the vgl generic context.
+   */
+  this._glContext = function () {
+    if (m_viewer && m_viewer.renderWindow()) {
+      return m_viewer.renderWindow().context();
+    }
+    return vgl.GL;
+  };
+
+  /**
    * Exit.
    */
   this._exit = function () {
@@ -187,9 +200,14 @@ var vglRenderer = function (arg) {
     if (m_viewer) {
       var renderState = new vgl.renderState();
       renderState.m_renderer = m_viewer;
-      renderState.m_context = m_viewer.renderWindow().context();
+      renderState.m_context = this._glContext();
       m_viewer.exit(renderState);
+      if (this._glContext() !== vgl.GL && this._glContext().getExtension('WEBGL_lose_context') && this._glContext().getExtension('WEBGL_lose_context').loseContext) {
+        this._glContext().getExtension('WEBGL_lose_context').loseContext();
+      }
     }
+    // make sure we clear shaders associated with the generate context, too
+    vgl.clearCachedShaders(vgl.GL);
     m_viewer = null;
     s_exit();
   };
