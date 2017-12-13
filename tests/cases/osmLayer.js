@@ -12,6 +12,8 @@ describe('geo.core.osmLayer', function () {
   var submitNote = require('../test-utils').submitNote;
   // var logCanvas2D = require('../test-utils').logCanvas2D;
   var geo = require('../test-utils').geo;
+  var createMap = require('../test-utils').createMap;
+  var destroyMap = require('../test-utils').destroyMap;
   var mockVGLRenderer = geo.util.mockVGLRenderer;
   var restoreVGLRenderer = geo.util.restoreVGLRenderer;
   var vgl = require('vgl');
@@ -19,21 +21,11 @@ describe('geo.core.osmLayer', function () {
 
   function create_map(opts) {
     mockVGLRenderer();
-    var node = $('<div id="map-osm-layer"/>').css({width: '640px', height: '360px'});
-    $('#map-osm-layer').remove();
-    /* Prepend because we want the map to be the first item so that its
-     * position doesn't change when data is added to the html reporter div. */
-    $('body').prepend(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
+    return createMap(opts);
   }
 
   function destroy_map() {
-    if (map) {
-      map.exit();
-    }
-    $('#map-osm-layer').remove();
+    destroyMap();
     restoreVGLRenderer();
   }
 

@@ -5,38 +5,30 @@ describe('geo.core.map', function () {
 
   var $ = require('jquery');
   var geo = require('../test-utils').geo;
+  var createMap = require('../test-utils').createMap;
   var closeToEqual = require('../test-utils').closeToEqual;
   var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
   var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
   var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
-  function create_map(opts) {
-    var node = $('<div id="map-create-map"/>').css({width: '500px', height: '500px'});
-    $('#map-create-map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
-
   afterEach(function () {
-    $('#map-create-map').remove();
+    $('#map').remove();
     $(window).off('resize');
   });
 
   describe('create function', function () {
     it('basic create', function () {
       var map;
-      map = create_map();
+      map = createMap();
       expect(map instanceof geo.map).toBe(true);
-      expect(map.node().attr('id')).toBe('map-create-map');
+      expect(map.node().attr('id')).toBe('map');
       expect(map.gcs()).toBe('EPSG:3857');
       expect(map.ingcs()).toBe('EPSG:4326');
       expect(map.zoom()).toBe(4);
       expect(closeToEqual(map.center(), {x: 0, y: 0, z: 0})).toBe(true);
       expect(map.rotation()).toBe(0);
       expect(map.maxBounds().left).toBeLessThan(-179);
-      expect(map.size().width).toBe(500);
+      expect(map.size().width).toBe(640);
       expect(map.zoomRange().max).toEqual(16);
       expect(map.zoomRange().origMin).toEqual(0);
       expect(map.discreteZoom()).toBe(false);
@@ -50,7 +42,7 @@ describe('geo.core.map', function () {
     });
     it('create with options', function () {
       var map;
-      map = create_map({
+      map = createMap({
         ingcs: '+proj=longlat +axis=esu',
         gcs: '+proj=longlat +axis=enu',
         zoom: 6,
@@ -67,7 +59,7 @@ describe('geo.core.map', function () {
         clampZoom: false
       });
       expect(map instanceof geo.map).toBe(true);
-      expect(map.node().attr('id')).toBe('map-create-map');
+      expect(map.node().attr('id')).toBe('map');
       expect(map.gcs()).toBe('+proj=longlat +axis=enu');
       expect(map.ingcs()).toBe('+proj=longlat +axis=esu');
       expect(map.zoom()).toBe(6);
@@ -75,7 +67,7 @@ describe('geo.core.map', function () {
       expect(map.rotation()).toBe(1);
       expect(map.maxBounds().left).toBe(0);
       expect(map.maxBounds().right).toBe(50000);
-      expect(map.size().width).toBe(500);
+      expect(map.size().width).toBe(640);
       expect(map.zoomRange().max).toEqual(9);
       expect(map.zoomRange().origMin).toEqual(3);
       expect(map.discreteZoom()).toBe(true);
@@ -89,7 +81,7 @@ describe('geo.core.map', function () {
 
   describe('Check class accessors', function () {
     it('clampBounds', function () {
-      var m = create_map();
+      var m = createMap();
       var axes = {'X': false, 'Y': true};
       $.each(axes, function (axis, defaultSetting) {
         var func = m['clampBounds' + axis];
@@ -103,10 +95,10 @@ describe('geo.core.map', function () {
       });
     });
     it('clampZoom and zoomRange', function () {
-      var m = create_map(), zr;
+      var m = createMap(), zr;
       expect(m.clampZoom()).toBe(true);
       zr = m.zoomRange();
-      expect(zr.min).toBeCloseTo(Math.log2(500 / 256), 2);
+      expect(zr.min).toBeCloseTo(Math.log2(360 / 256), 2);
       expect(zr.origMin).toBe(0);
       expect(zr.max).toBe(16);
       m.clampZoom(false);
@@ -114,7 +106,7 @@ describe('geo.core.map', function () {
       expect(m.zoomRange().min).toBe(0);
       m.clampZoom(true);
       expect(m.clampZoom()).toBe(true);
-      expect(zr.min).toBeCloseTo(Math.log2(500 / 256), 2);
+      expect(zr.min).toBeCloseTo(Math.log2(360 / 256), 2);
       m.zoomRange({min: 1, max: 2});
       zr = m.zoomRange();
       expect(zr.min).toBe(1);
@@ -122,12 +114,12 @@ describe('geo.core.map', function () {
       expect(zr.max).toBe(2);
       m.zoomRange({min: 0});
       zr = m.zoomRange();
-      expect(zr.min).toBeCloseTo(Math.log2(500 / 256), 2);
+      expect(zr.min).toBeCloseTo(Math.log2(360 / 256), 2);
       expect(zr.origMin).toBe(0);
       expect(zr.max).toBe(2);
     });
     it('allowRotation', function () {
-      var m = create_map();
+      var m = createMap();
       expect(m.allowRotation()).toBe(true);
       m.rotation(0);
       expect(m.rotation()).toBe(0);
@@ -159,9 +151,9 @@ describe('geo.core.map', function () {
       expect(m.rotation()).toBeCloseTo(17 * Math.PI / 180);
     });
     it('size and rotatedSize', function () {
-      var m = create_map();
-      expect(m.size()).toEqual({width: 500, height: 500});
-      expect(m.rotatedSize()).toEqual({width: 500, height: 500});
+      var m = createMap();
+      expect(m.size()).toEqual({width: 640, height: 360});
+      expect(m.rotatedSize()).toEqual({width: 640, height: 360});
       m.size({width: 400, height: 300});
       expect(m.size()).toEqual({width: 400, height: 300});
       expect(m.rotatedSize()).toEqual({width: 400, height: 300});
@@ -189,7 +181,7 @@ describe('geo.core.map', function () {
       })).toBe(true);
     });
     it('unitsPerPixel', function () {
-      var m = create_map(), circEarth = 6378137 * Math.PI * 2;
+      var m = createMap(), circEarth = 6378137 * Math.PI * 2;
       m.createLayer('feature', {renderer: 'd3'});
       expect(m.unitsPerPixel()).toBeCloseTo(circEarth / 256);
       expect(m.unitsPerPixel(0)).toBeCloseTo(circEarth / 256);
@@ -204,7 +196,7 @@ describe('geo.core.map', function () {
     });
     it('animationQueue', function () {
       mockAnimationFrame();
-      var m = create_map(), queue = [], queue2 = [],
+      var m = createMap(), queue = [], queue2 = [],
           queue3 = [window.requestAnimationFrame(function () { })];
       expect(m.animationQueue()).toEqual([]);
       expect(m.animationQueue()).not.toBe(queue);
@@ -221,7 +213,7 @@ describe('geo.core.map', function () {
       unmockAnimationFrame();
     });
     it('autoResize', function () {
-      var m = create_map();
+      var m = createMap();
       expect(m.autoResize()).toBe(true);
       expect(m.autoResize(false)).toBe(m);
       expect(m.autoResize()).toBe(false);
@@ -229,8 +221,10 @@ describe('geo.core.map', function () {
       expect(m.autoResize()).toBe(true);
     });
     it('gcs and ingcs', function () {
-      var m = create_map(), units = m.unitsPerPixel(), bounds;
-      var error = console.error;
+      var m = createMap(undefined, {width: '500px', height: '500px'}),
+          units = m.unitsPerPixel(),
+          bounds,
+          error = console.error;
       expect(m.gcs()).toBe('EPSG:3857');
       expect(m.ingcs()).toBe('EPSG:4326');
       m.bounds({left: -180, top: 5, right: 180, bottom: -5});
@@ -316,7 +310,7 @@ describe('geo.core.map', function () {
       console.error = error;
     });
     it('maxBounds', function () {
-      var m = create_map();
+      var m = createMap();
       expect(closeToEqual(m.maxBounds(), {
         left: -180, top: 85.05, right: 180, bottom: -85.05})).toBe(true);
       m.maxBounds({left: -90, right: 20, top: 40, bottom: -60});
@@ -324,7 +318,7 @@ describe('geo.core.map', function () {
         left: -90, right: 20, top: 40, bottom: -60})).toBe(true);
     });
     it('zoom and discreteZoom', function () {
-      var m = create_map();
+      var m = createMap(undefined, {width: '500px', height: '500px'});
       expect(m.zoom()).toBe(4);
       expect(m.discreteZoom()).toBe(false);
       m.zoom(3.5);
@@ -359,7 +353,7 @@ describe('geo.core.map', function () {
       expect(m.zoom()).toBe(2);
     });
     it('rotation', function () {
-      var m = create_map();
+      var m = createMap();
       expect(m.rotation()).toBe(0);
       m.rotation(1);
       expect(m.rotation()).toBe(1);
@@ -376,7 +370,7 @@ describe('geo.core.map', function () {
       expect(m.rotation()).toBeCloseTo(17 - Math.PI * 4);
     });
     it('fileReader', function () {
-      var m = create_map();
+      var m = createMap();
       expect(m.fileReader()).toBe(null);
       var layerCount = m.layers().length;
       expect(m.fileReader('jsonReader')).toBe(m);
@@ -413,21 +407,21 @@ describe('geo.core.map', function () {
     }
 
     it('exit', function () {
-      var m = create_map();
+      var m = createMap();
       m.updateAttribution('Sample');
       expect(count_events(m.node(), 'geo')).toBeGreaterThan(0);
       m.exit();
       expect(count_events(m.node(), 'geo')).toBe(0);
-      expect($('#map-create-map').children().length).toBe(0);
+      expect($('#map').children().length).toBe(0);
     });
     it('pan, clampBoundsX, and clampBoundsY', function () {
-      var m = create_map({
+      var m = createMap({
         unitsPerPixel: 16,
         gcs: '+proj=longlat +axis=enu',
         ingcs: '+proj=longlat +axis=esu',
         maxBounds: {left: -2048, right: 2048, top: -2048, bottom: 2048},
         max: 4
-      });
+      }, {width: '500px', height: '500px'});
       expect(closeToEqual(m.center(), {x: 0, y: 0, z: 0})).toBe(true);
       m.pan({x: -128, y: 0});
       expect(closeToEqual(m.center(), {x: 128, y: 0, z: 0})).toBe(true);
@@ -481,13 +475,13 @@ describe('geo.core.map', function () {
     });
     it('zoomAndCenterFromBounds', function () {
       var zc;
-      var m = create_map({
+      var m = createMap({
         unitsPerPixel: 16,
         gcs: '+proj=longlat +axis=enu',
         ingcs: '+proj=longlat +axis=esu',
         maxBounds: {left: -2048, right: 2048, top: -2048, bottom: 2048},
         max: 4
-      });
+      }, {width: '500px', height: '500px'});
       zc = m.zoomAndCenterFromBounds({
         left: -250, top: -250, right: 250, bottom: 250});
       expect(zc.zoom).toBeCloseTo(4);
@@ -515,7 +509,7 @@ describe('geo.core.map', function () {
     });
     it('transition', function () {
       mockAnimationFrame();
-      var m = create_map(), start, wasCalled;
+      var m = createMap(), start, wasCalled;
       expect(m.transition()).toBe(null);
       start = new Date().getTime();
       m.transition({
@@ -677,8 +671,8 @@ describe('geo.core.map', function () {
       unmockAnimationFrame();
     });
     it('node class and data attribute', function () {
-      var selector = '#map-create-map';
-      var m = create_map();
+      var selector = '#map';
+      var m = createMap();
       expect($(selector).hasClass('geojs-map')).toBe(true);
       expect($(selector).data('data-geojs-map')).toBe(m);
       m.createLayer('feature');
@@ -696,7 +690,7 @@ describe('geo.core.map', function () {
     var ss = {};
 
     it('basic', function (done) {
-      m = create_map({
+      m = createMap({
         width: 64, height: 48, zoom: 2, center: {x: 7.5, y: 7.5}});
       layer1 = m.createLayer('feature', {renderer: 'canvas'});
       l1 = layer1.createFeature('line', {
@@ -849,15 +843,15 @@ describe('geo.core.map', function () {
 
   describe('Internal methods', function () {
     it('resizeSelf', function () {
-      var m = create_map();
-      expect(m.size()).toEqual({width: 500, height: 500});
-      $('#map-create-map').css({width: '400px', height: '400px'});
-      expect(m.size()).toEqual({width: 500, height: 500});
+      var m = createMap();
+      expect(m.size()).toEqual({width: 640, height: 360});
+      $('#map').css({width: '400px', height: '400px'});
+      expect(m.size()).toEqual({width: 640, height: 360});
       $(window).trigger('resize');
       expect(m.size()).toEqual({width: 400, height: 400});
     });
     it('dragover', function () {
-      var m = create_map();
+      var m = createMap();
       var evt = $.Event('dragover');
       evt.originalEvent = new window.Event('dragover');
       evt.originalEvent.dataTransfer = {};
@@ -871,7 +865,7 @@ describe('geo.core.map', function () {
       expect(evt.originalEvent.dataTransfer.dropEffect).toBe('copy');
     });
     it('drop', function () {
-      var m = create_map();
+      var m = createMap();
       m.fileReader('jsonReader', {renderer: 'd3'});
       var evt = $.Event('drop');
       evt.originalEvent = new window.Event('drop');

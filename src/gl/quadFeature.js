@@ -147,7 +147,7 @@ var gl_quadFeature = function (arg) {
    * Build this feature.
    */
   this._build = function () {
-    var mapper, mat, prog, srctex, unicrop, geom;
+    var mapper, mat, prog, srctex, unicrop, geom, context;
 
     if (!m_this.position()) {
       return;
@@ -174,10 +174,11 @@ var gl_quadFeature = function (arg) {
       unicrop = new vgl.uniform(vgl.GL.FLOAT_VEC2, 'crop');
       unicrop.set([1.0, 1.0]);
       prog.addUniform(unicrop);
+      context = m_this.renderer()._glContext();
       prog.addShader(vgl.getCachedShader(
-          vgl.GL.VERTEX_SHADER, vgl.GL, vertexShaderImageSource));
+          vgl.GL.VERTEX_SHADER, context, vertexShaderImageSource));
       prog.addShader(vgl.getCachedShader(
-          vgl.GL.FRAGMENT_SHADER, vgl.GL, fragmentShaderImageSource));
+          vgl.GL.FRAGMENT_SHADER, context, fragmentShaderImageSource));
       mat.addAttribute(prog);
       mat.addAttribute(new vgl.blend());
       /* This is similar to vgl.planeSource */
@@ -214,9 +215,10 @@ var gl_quadFeature = function (arg) {
       prog.addUniform(new vgl.projectionUniform('projectionMatrix'));
       prog.addUniform(new vgl.floatUniform('opacity', 1.0));
       prog.addUniform(new vgl.uniform(vgl.GL.FLOAT_VEC3, 'vertexColor'));
+      context = m_this.renderer()._glContext();
       prog.addShader(vgl.getCachedShader(
-          vgl.GL.VERTEX_SHADER, vgl.GL, vertexShaderColorSource));
-      prog.addShader(vgl.utils.createFragmentShader(vgl.GL));
+          vgl.GL.VERTEX_SHADER, context, vertexShaderColorSource));
+      prog.addShader(vgl.utils.createFragmentShader(context));
       mat.addAttribute(prog);
       mat.addAttribute(new vgl.blend());
       /* This is similar to vgl.planeSource */

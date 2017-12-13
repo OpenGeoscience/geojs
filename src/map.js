@@ -1482,7 +1482,9 @@ var map = function (arg) {
       if (m_discreteZoom) {
         m_this.zoom(Math.round(m_this.zoom()));
       }
-      m_this.interactor().options({discreteZoom: m_discreteZoom});
+      if (m_this.interactor()) {
+        m_this.interactor().options({discreteZoom: m_discreteZoom});
+      }
     }
     return m_this;
   };

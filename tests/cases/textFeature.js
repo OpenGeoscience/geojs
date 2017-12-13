@@ -5,6 +5,7 @@ var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
 var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
 var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 var geo = require('../test-utils').geo;
+var createMap = require('../test-utils').createMap;
 var logCanvas2D = require('../test-utils').logCanvas2D;
 
 describe('geo.textFeature', function () {
@@ -99,19 +100,10 @@ describe('geo.textFeature', function () {
     }
   ];
 
-  function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
-
   describe('create', function () {
     it('create function', function () {
       var map, layer, text;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
       text = geo.textFeature.create(layer);
       expect(text instanceof geo.textFeature).toBe(true);
@@ -121,7 +113,7 @@ describe('geo.textFeature', function () {
   describe('Check private class mathods', function () {
     var map, layer, text;
     it('_init', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       text = geo.textFeature({layer: layer});
       expect(text.style('font')).toBe('bold 16px sans-serif');
@@ -140,7 +132,7 @@ describe('geo.textFeature', function () {
     var map, layer, text;
     var pos = [[[0, 0], [10, 5], [5, 10]]];
     it('position', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       text = geo.textFeature({layer: layer});
       expect(text.position()('a')).toBe('a');
@@ -154,7 +146,7 @@ describe('geo.textFeature', function () {
     });
 
     it('text', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       text = geo.textFeature({layer: layer});
       expect(text.text()({text: 'a'})).toBe('a');
@@ -174,7 +166,7 @@ describe('geo.textFeature', function () {
     it('basic usage', function () {
       mockAnimationFrame();
       logCanvas2D();
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
       geo.textFeature.usedStyles.forEach(function (key) {
         style[key] = function (d, i) {
@@ -195,7 +187,7 @@ describe('geo.textFeature', function () {
       unmockAnimationFrame();
     });
     it('getFontFromStyles', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
       geo.textFeature.usedStyles.forEach(function (key) {
         style[key] = function (d, i) {

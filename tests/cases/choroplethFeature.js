@@ -1,21 +1,13 @@
 // Test geo.choroplethFeature and geo.gl.choroplethFeature
 
-var $ = require('jquery');
 var geo = require('../test-utils').geo;
+var createMap = require('../test-utils').createMap;
+var destroyMap = require('../test-utils').destroyMap;
 var mockVGLRenderer = geo.util.mockVGLRenderer;
 var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 
 describe('geo.choroplethFeature', function () {
   'use strict';
-
-  function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
 
   var mpdata = [{
     'type': 'Feature',
@@ -90,50 +82,51 @@ describe('geo.choroplethFeature', function () {
     }
   }];
 
-  describe('create', function () {
-    it('create function', function () {
-      mockVGLRenderer();
-      var map, layer, choropleth;
-      map = create_map();
-      layer = map.createLayer('feature', {renderer: 'vgl'});
-      choropleth = layer.createFeature('choropleth');
-      expect(choropleth instanceof geo.choroplethFeature).toBe(true);
-      restoreVGLRenderer();
-    });
+  beforeEach(function () {
+    mockVGLRenderer();
+  });
 
-    it('direct creation', function () {
-      mockVGLRenderer();
-      var map, layer, choropleth;
-      map = create_map();
-      layer = map.createLayer('feature', {renderer: 'vgl'});
-      choropleth = geo.choroplethFeature({layer: layer});
-      expect(choropleth instanceof geo.choroplethFeature).toBe(true);
-      restoreVGLRenderer();
-    });
+  afterEach(function () {
+    destroyMap();
+    restoreVGLRenderer();
+  });
 
-    it('multipolygon', function () {
-      mockVGLRenderer();
-      var map, layer, choropleth, scalarData = [
-            {'id': 0, 'value': 10}
-          ];
+  it('create function', function () {
+    var map, layer, choropleth;
+    map = createMap();
+    layer = map.createLayer('feature', {renderer: 'vgl'});
+    choropleth = layer.createFeature('choropleth');
+    expect(choropleth instanceof geo.choroplethFeature).toBe(true);
+  });
 
-      map = create_map();
-      layer = map.createLayer('feature', {renderer: 'vgl'});
+  it('direct creation', function () {
+    var map, layer, choropleth;
+    map = createMap();
+    layer = map.createLayer('feature', {renderer: 'vgl'});
+    choropleth = geo.choroplethFeature({layer: layer});
+    expect(choropleth instanceof geo.choroplethFeature).toBe(true);
+  });
 
-      choropleth = layer.createFeature('choropleth')
-                     .data(mpdata)
-                     .scalar(scalarData);
-      choropleth.choropleth('name', 'multipolygon');
-      expect(choropleth instanceof geo.choroplethFeature).toBe(true);
-      expect(choropleth.choropleth('name')).toBe('multipolygon');
-      expect(choropleth.choropleth.get('accessors')()
-        .scalarValue(scalarData[0])).toBe(10);
-      expect(choropleth.choropleth.get('accessors')()
-        .geoId(mpdata[0])).toBe(0);
-      expect(Object.keys(choropleth.choropleth.get())).toEqual([
-        'colorRange', 'scale', 'accessors', 'scalar',
-        'scalarAggregator', 'name']);
-      restoreVGLRenderer();
-    });
+  it('multipolygon', function () {
+    var map, layer, choropleth, scalarData = [
+          {'id': 0, 'value': 10}
+        ];
+
+    map = createMap();
+    layer = map.createLayer('feature', {renderer: 'vgl'});
+
+    choropleth = layer.createFeature('choropleth')
+                   .data(mpdata)
+                   .scalar(scalarData);
+    choropleth.choropleth('name', 'multipolygon');
+    expect(choropleth instanceof geo.choroplethFeature).toBe(true);
+    expect(choropleth.choropleth('name')).toBe('multipolygon');
+    expect(choropleth.choropleth.get('accessors')()
+      .scalarValue(scalarData[0])).toBe(10);
+    expect(choropleth.choropleth.get('accessors')()
+      .geoId(mpdata[0])).toBe(0);
+    expect(Object.keys(choropleth.choropleth.get())).toEqual([
+      'colorRange', 'scale', 'accessors', 'scalar',
+      'scalarAggregator', 'name']);
   });
 });

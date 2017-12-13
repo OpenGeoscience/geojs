@@ -2,25 +2,11 @@ describe('Test adding and remove attribution via layers', function () {
   'use strict';
 
   var $ = require('jquery');
-  var geo = require('../test-utils').geo;
-
-  beforeEach(function () {
-    $('<div id="map-attribution"/>')
-      .css({width: '500px', height: '400px'}).appendTo('body');
-  });
-
-  afterEach(function () {
-    $('#map-attribution').remove();
-  });
-
-  // Generate a new empty map
-  function createMap() {
-    return geo.map({node: '#map-attribution'});
-  }
+  var createMap = require('../test-utils').createMap;
 
   // Return all attribution nodes
   function getAttribution() {
-    return $('#map-attribution > .geo-attribution > .geo-attribution-layer');
+    return $('#map > .geo-attribution > .geo-attribution-layer');
   }
 
   it('Attribution added via constructor argument', function () {

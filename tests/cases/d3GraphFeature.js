@@ -1,18 +1,8 @@
 describe('d3 graph feature', function () {
-  var geo = require('../test-utils').geo;
-  var $ = require('jquery');
+  var createMap = require('../test-utils').createMap;
   var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
   var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
   var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
-
-  beforeEach(function () {
-    $('<div id="map-d3-graph-feature"/>')
-      .css({width: '500px', height: '400px'}).appendTo('body');
-  });
-
-  afterEach(function () {
-    $('#map-d3-graph-feature').remove();
-  });
 
   describe('d3 graph feature', function () {
     'use strict';
@@ -21,7 +11,7 @@ describe('d3 graph feature', function () {
 
     it('Setup map', function () {
       mockAnimationFrame();
-      map = geo.map({node: '#map-d3-graph-feature', center: [0, 0], zoom: 3});
+      map = createMap({center: [0, 0], zoom: 3});
       layer = map.createLayer('feature', {'renderer': 'd3'});
     });
 

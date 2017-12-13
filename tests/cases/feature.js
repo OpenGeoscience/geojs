@@ -1,7 +1,7 @@
 // Test geo.feature
 
 var geo = require('../test-utils').geo;
-var $ = require('jquery');
+var createMap = require('../test-utils').createMap;
 
 describe('geo.feature', function () {
   'use strict';
@@ -13,19 +13,10 @@ describe('geo.feature', function () {
     console.warn.restore();
   });
 
-  function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
-
   describe('create', function () {
     it('create function', function () {
       var map, layer, feat;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
 
       feat = geo.feature.create();
@@ -60,7 +51,7 @@ describe('geo.feature', function () {
     var map, layer, feat, points = {index: [], found: []}, box = [],
         events = {};
     it('_init', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       expect(function () {
         geo.feature();
@@ -163,7 +154,7 @@ describe('geo.feature', function () {
   describe('Check public class methods', function () {
     var map, layer, feat;
     it('pointSearch', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       feat = geo.feature({layer: layer, renderer: layer.renderer()});
       expect(feat.pointSearch()).toEqual({index: [], found: []});
@@ -251,7 +242,7 @@ describe('geo.feature', function () {
   describe('Check class accessors', function () {
     var map, layer, feat;
     it('style', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       feat = geo.feature({layer: layer, renderer: layer.renderer()});
       expect(feat.style()).toEqual({opacity: 1});

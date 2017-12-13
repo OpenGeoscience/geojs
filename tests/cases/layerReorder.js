@@ -1,34 +1,4 @@
-var geo = require('../test-utils').geo;
-
-// Generate a new empty map
-function createMap() {
-  'use strict';
-
-  var $ = require('jquery');
-  var node = $('<div id=map/>').css({
-    width: '100px',
-    height: '100px'
-  });
-
-  $('#map').remove();
-  $('body').append(node);
-  var map = geo.map({node: '#map', width: 100, height: 100}),
-      cl = map.createLayer;
-  // inject d3 renderer to let this work in phantom
-  map.createLayer = function (type, opts) {
-    opts = opts || {};
-    opts.renderer = 'd3';
-    return cl.call(map, type, opts);
-  };
-  // over-ride map.displayToGcs to work with no base layer
-  map.displayToGcs = function (pt) {
-    return pt;
-  };
-  map.gcsToDisplay = function (pt) {
-    return pt;
-  };
-  return map;
-}
+var createMap = require('../test-utils').createMap;
 
 describe('Test the zIndex property of layers', function () {
   'use strict';

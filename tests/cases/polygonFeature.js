@@ -2,6 +2,8 @@
 
 var $ = require('jquery');
 var geo = require('../test-utils').geo;
+var createMap = require('../test-utils').createMap;
+var destroyMap = require('../test-utils').destroyMap;
 var mockVGLRenderer = geo.util.mockVGLRenderer;
 var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 var vgl = require('vgl');
@@ -58,23 +60,15 @@ describe('geo.polygonFeature', function () {
     }
   };
 
-  function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
-
   describe('create', function () {
     it('create function', function () {
       mockVGLRenderer();
       var map, layer, polygon;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'vgl'});
       polygon = geo.polygonFeature.create(layer);
       expect(polygon instanceof geo.polygonFeature).toBe(true);
+      destroyMap();
       restoreVGLRenderer();
     });
   });
@@ -83,7 +77,7 @@ describe('geo.polygonFeature', function () {
     var map, layer, polygon;
     var pos = [[[0, 0], [10, 5], [5, 10]]];
     it('position', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       polygon = geo.polygonFeature({layer: layer});
       polygon._init();
@@ -99,7 +93,7 @@ describe('geo.polygonFeature', function () {
     });
 
     it('polygon', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       polygon = geo.polygonFeature({layer: layer});
       polygon._init();
@@ -115,7 +109,7 @@ describe('geo.polygonFeature', function () {
     });
 
     it('data', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       polygon = geo.polygonFeature({layer: layer});
       polygon._init();
@@ -130,7 +124,7 @@ describe('geo.polygonFeature', function () {
 
     it('style', function () {
       mockVGLRenderer();
-      map = create_map();
+      map = createMap();
       // we have to use a valid renderer so that the stroke can be enabled.
       layer = map.createLayer('feature', {renderer: 'vgl'});
       polygon = geo.polygonFeature({layer: layer});
@@ -144,6 +138,7 @@ describe('geo.polygonFeature', function () {
       expect(polygon.style().stroke).toBe(false);
       expect(polygon.dependentFeatures()).toEqual([]);
       map.deleteLayer(layer);
+      destroyMap();
       restoreVGLRenderer();
     });
   });
@@ -152,7 +147,7 @@ describe('geo.polygonFeature', function () {
     describe('pointSearch', function () {
       it('basic usage', function () {
         var map, layer, polygon, data, pt;
-        map = create_map();
+        map = createMap();
         layer = map.createLayer('feature', {renderer: null});
         polygon = geo.polygonFeature({layer: layer});
         polygon._init();
@@ -189,7 +184,7 @@ describe('geo.polygonFeature', function () {
       it('arg gets added to style', function () {
         var polygon;
 
-        map = create_map();
+        map = createMap();
         layer = map.createLayer('feature', {renderer: null});
         polygon = geo.polygonFeature({layer: layer});
         /* init is not automatically called on the geo.polygonFeature (it is on
@@ -208,7 +203,7 @@ describe('geo.polygonFeature', function () {
     it('basic usage', function () {
       stylesVisited.splice(0, stylesVisited.length);
       mockVGLRenderer();
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature');
       polygons = layer.createFeature('polygon', {style: testStyle, data: testPolygons});
       buildTime = polygons.buildTime().getMTime();
@@ -282,6 +277,7 @@ describe('geo.polygonFeature', function () {
       polygons.data(testPolygons);
       map.draw();
       expect(buildTime).toEqual(polygons.buildTime().getMTime());
+      destroyMap();
       restoreVGLRenderer();
     });
   });

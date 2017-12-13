@@ -5,6 +5,8 @@
 
 var $ = require('jquery');
 var geo = require('../test-utils').geo;
+var createMap = require('../test-utils').createMap;
+var destroyMap = require('../test-utils').destroyMap;
 var mockVGLRenderer = geo.util.mockVGLRenderer;
 var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 var vgl = require('vgl');
@@ -138,15 +140,6 @@ describe('geo.quadFeature', function () {
     }
   };
 
-  function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
-
   function load_preview_image(done) {
     if (!previewImage.src) {
       previewImage.onload = function () {
@@ -162,10 +155,11 @@ describe('geo.quadFeature', function () {
     it('create function', function () {
       mockVGLRenderer();
       var map, layer, quad;
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'vgl'});
       quad = geo.quadFeature.create(layer);
       expect(quad instanceof geo.quadFeature).toBe(true);
+      destroyMap();
       restoreVGLRenderer();
     });
   });
@@ -175,7 +169,7 @@ describe('geo.quadFeature', function () {
     it('position', function () {
       var pos = {ll: {x: 0, y: 0}, ur: {x: 1, y: 1}}, quad;
 
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: null});
       quad = geo.quadFeature({layer: layer});
       quad._init();
@@ -192,7 +186,7 @@ describe('geo.quadFeature', function () {
     describe('pointSearch', function () {
       it('basic usage', function () {
         var map, layer, quad, data, pt;
-        map = create_map();
+        map = createMap();
         layer = map.createLayer('feature', {renderer: null});
         quad = geo.quadFeature({layer: layer});
         quad._init();
@@ -230,7 +224,7 @@ describe('geo.quadFeature', function () {
     describe('cacheQuads and cacheUpdate', function () {
       it('cacheQuads unspecified', function () {
         var map, layer, quad, data;
-        map = create_map();
+        map = createMap();
         layer = map.createLayer('feature', {renderer: null});
         quad = geo.quadFeature({layer: layer});
         quad._init();
@@ -261,7 +255,7 @@ describe('geo.quadFeature', function () {
       });
       it('cacheQuads false', function () {
         var map, layer, quad, data;
-        map = create_map();
+        map = createMap();
         layer = map.createLayer('feature', {renderer: null});
         quad = geo.quadFeature({layer: layer});
         quad._init({cacheQuads: false});
@@ -285,7 +279,7 @@ describe('geo.quadFeature', function () {
     describe('_object_list methods', function () {
       var map, layer, quad, olist = [];
       it('_objectListStart', function () {
-        map = create_map();
+        map = createMap();
         layer = map.createLayer('feature', {renderer: null});
         quad = geo.quadFeature({layer: layer});
         quad._objectListStart(olist);
@@ -331,7 +325,7 @@ describe('geo.quadFeature', function () {
       it('arg gets added to style', function () {
         var pos = {ll: {x: 0, y: 0}, ur: {x: 1, y: 1}}, quad;
 
-        map = create_map();
+        map = createMap();
         layer = map.createLayer('feature', {renderer: null});
         quad = geo.quadFeature({layer: layer});
         /* init is not automatically called on the geo.quadFeature (it is on
@@ -448,7 +442,7 @@ describe('geo.quadFeature', function () {
 
       it('load preview image', load_preview_image);
       it('overall generation', function () {
-        map = create_map({gcs: 'EPSG:4326'});
+        map = createMap({gcs: 'EPSG:4326'});
         layer = map.createLayer('feature', {renderer: null});
         quad = geo.quadFeature({layer: layer});
         quad._init({style: testStyle});
@@ -516,7 +510,7 @@ describe('geo.quadFeature', function () {
         delete quad._cachedQuad;
       });
       mockVGLRenderer();
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature');
       quads = layer.createFeature('quad', {style: testStyle, data: testQuads});
       buildTime = quads.buildTime().getMTime();
@@ -574,6 +568,7 @@ describe('geo.quadFeature', function () {
       quads.data(testQuads);
       map.draw();
       expect(buildTime).toEqual(quads.buildTime().getMTime());
+      destroyMap();
       restoreVGLRenderer();
     });
   });
@@ -589,7 +584,7 @@ describe('geo.quadFeature', function () {
         delete quad._cachedQuad;
       });
       logCanvas2D();
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
       quads = layer.createFeature('quad', {style: testStyle, data: testQuads});
       buildTime = quads.buildTime().getMTime();
@@ -679,7 +674,7 @@ describe('geo.quadFeature', function () {
       $.each(testQuads, function (idx, quad) {
         delete quad._cachedQuad;
       });
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       quads = layer.createFeature('quad', {style: testStyle, data: testQuads});
       buildTime = quads.buildTime().getMTime();

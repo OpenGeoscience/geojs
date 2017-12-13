@@ -5,6 +5,8 @@ describe('geo.annotation', function () {
 
   var $ = require('jquery');
   var geo = require('../test-utils').geo;
+  var createMap = require('../test-utils').createMap;
+  var destroyMap = require('../test-utils').destroyMap;
   var mockVGLRenderer = geo.util.mockVGLRenderer;
   var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 
@@ -13,17 +15,9 @@ describe('geo.annotation', function () {
   });
 
   afterEach(function () {
+    destroyMap();
     restoreVGLRenderer();
   });
-
-  function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
 
   describe('geo.annotation.annotation', function () {
     var map, layer, stateEvent = 0, lastStateEvent;
@@ -47,7 +41,7 @@ describe('geo.annotation', function () {
       expect(ann.mouseMove()).toBe(undefined);
       expect(ann._coordinates()).toEqual([]);
       expect(ann.geojson()).toBe(undefined);
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('annotation', {
         annotations: geo.listAnnotations()
       });
@@ -328,7 +322,7 @@ describe('geo.annotation', function () {
       expect(actions.length).toBe(0);
     });
     it('processAction', function () {
-      var map = create_map();
+      var map = createMap();
       var layer = map.createLayer('annotation', {
         annotations: ['rectangle']
       });
@@ -379,7 +373,7 @@ describe('geo.annotation', function () {
       expect(geojson.geometry.coordinates[0][2][1]).toBeCloseTo(1);
     });
     it('mouseMove', function () {
-      var map = create_map();
+      var map = createMap();
       var layer = map.createLayer('annotation', {
         annotations: ['rectangle']
       });
@@ -391,7 +385,7 @@ describe('geo.annotation', function () {
       expect(ann.options('corners')).not.toEqual(corners);
     });
     it('mouseClick', function () {
-      var map = create_map();
+      var map = createMap();
       var layer = map.createLayer('annotation', {
         annotations: ['rectangle']
       });
@@ -504,7 +498,7 @@ describe('geo.annotation', function () {
       expect(ann.options('vertices')).not.toEqual(vertices);
     });
     it('mouseClick', function () {
-      var map = create_map();
+      var map = createMap();
       var layer = map.createLayer('annotation', {
         annotations: ['polygon']
       });
@@ -637,7 +631,7 @@ describe('geo.annotation', function () {
       expect(ann.state()).toBe(geo.annotation.state.done);
     });
     it('scaled radius', function () {
-      var map = create_map();
+      var map = createMap();
       var layer = map.createLayer('annotation', {
         annotations: ['point']
       });
@@ -726,7 +720,7 @@ describe('geo.annotation', function () {
       expect(ann.options('vertices')).not.toEqual(vertices);
     });
     it('mouseClick', function () {
-      var map = create_map();
+      var map = createMap();
       var layer = map.createLayer('annotation', {
         annotations: ['line']
       });
@@ -826,7 +820,7 @@ describe('geo.annotation', function () {
       expect(actions.length).toBe(0);
     });
     it('processAction', function () {
-      var map = create_map();
+      var map = createMap();
       var layer = map.createLayer('annotation', {
         annotations: ['line']
       });

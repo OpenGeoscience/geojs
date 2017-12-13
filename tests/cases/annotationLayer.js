@@ -3,37 +3,30 @@
 describe('geo.annotationLayer', function () {
   'use strict';
 
-  var $ = require('jquery');
   var geo = require('../test-utils').geo;
+  var createMap = require('../test-utils').createMap;
+  var destroyMap = require('../test-utils').destroyMap;
   var mockVGLRenderer = geo.util.mockVGLRenderer;
   var restoreVGLRenderer = geo.util.restoreVGLRenderer;
 
-  beforeEach(function () {
+  beforeAll(function () {
     mockVGLRenderer();
   });
 
-  afterEach(function () {
+  afterAll(function () {
+    destroyMap();
     restoreVGLRenderer();
   });
 
-  function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
-    return geo.map(opts);
-  }
-
   it('Test initialization.', function () {
-    var map = create_map();
+    var map = createMap();
     var layer = map.createLayer('annotation', {
       features: ['polygon', 'line', 'point']
     });
     expect(layer instanceof geo.annotationLayer).toBe(true);
   });
   it('Test initialization without interactor.', function () {
-    var map = create_map({interactor: null});
+    var map = createMap({interactor: null});
     var layer = map.createLayer('annotation', {
       features: ['polygon', 'line', 'point']
     });
@@ -43,7 +36,7 @@ describe('geo.annotationLayer', function () {
   describe('Check class accessors', function () {
     var map, layer, modeEvent = 0, lastModeEvent;
     it('options', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('annotation', {
         features: ['polygon', 'line', 'point']
       });
@@ -116,7 +109,7 @@ describe('geo.annotationLayer', function () {
         removeAnnotationEvent = 0, lastRemoveAnnotationEvent,
         poly, rect;
     it('addAnnotation', function () {
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('annotation', {
         features: ['polygon', 'line', 'point']
       });
@@ -334,7 +327,7 @@ describe('geo.annotationLayer', function () {
     it('_update', function () {
       /* Most of update is covered as a side effect of other code.  This tests
        * some edge conditions */
-      map = create_map();
+      map = createMap();
       layer = map.createLayer('annotation', {
         renderer: 'd3'
       });
@@ -675,7 +668,7 @@ describe('geo.annotationLayer', function () {
     });
   });
   it('Test destroy layer.', function () {
-    var map = create_map();
+    var map = createMap();
     var layer = map.createLayer('annotation', {
       features: ['polygon', 'line', 'point']
     });

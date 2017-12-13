@@ -185,7 +185,6 @@ module.exports.restoreVGLRenderer = function () {
     vgl.renderWindow = _renderWindow;
     vglRenderer.supported = _supported;
     delete vgl._mocked;
-    // delete vgl._mockedRenderWindow;
     delete vgl.mockCounts;
   }
 };

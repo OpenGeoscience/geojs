@@ -178,7 +178,7 @@ var sceneObject = function (arg) {
    * Free all resources and destroy the object.
    */
   this._exit = function () {
-    m_this.children = [];
+    m_children = [];
     delete m_this.parent;
     s_exit();
   };
