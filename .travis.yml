@@ -39,6 +39,7 @@ before_install:
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x24"
   - CACHE="${HOME}/cache" CMAKE_VERSION=3.5.0 CMAKE_SHORT_VERSION=3.5 source ./scripts/install_cmake.sh
   - npm prune
+  - npm install -g npm
 
 before_script:
   - export DISPLAY=:99.0
@@ -55,8 +56,8 @@ script:
 after_failure:
   # Upload test results.  First make them smaller with optipng.
   - pip install --user --upgrade girder-client requests[security]
-  - find _build/images -name '*-test.png' | xargs optipng
-  - find _build/images -name '*-test.png' | xargs python scripts/upload_test_images.py
+  - find _build/images -name '*-test.png' -exec optipng {} \+
+  - find _build/images -name '*-test.png' -exec python scripts/upload_test_images.py {} \+
 
 after_success:
   - npm run codecov

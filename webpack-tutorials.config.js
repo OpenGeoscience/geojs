@@ -1,3 +1,5 @@
+const StringReplacePlugin = require('string-replace-webpack-plugin');
+
 var path = require('path');
 
 var base = require('./webpack.config');
@@ -21,11 +23,20 @@ var loaders = base.module.loaders.concat([{
 }, {
   test: require.resolve('codemirror'),
   loader: 'expose?CodeMirror'
+}, {
+  test: /bootstrap.css$/,
+  loader: StringReplacePlugin.replace({
+    replacements: [{
+      pattern: /@import.*fonts.googleapis.com\/css\?family=Lato[^;]*;/g,
+      replacement: () => '@import url(../../typeface-lato/index.css);'
+    }]
+  })
 }]);
 
 loaders = loaders.concat(external.module.loaders);
 
 var plugins = base.exposed_plugins;
+plugins.push(new StringReplacePlugin());
 
 var resolve = {
   extentions: ['.js', '.css', '.pug', ''],
@@ -41,7 +52,7 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, 'dist', 'tutorials'),
-    publicPath: '/tutorials',
+    publicPath: '/tutorials/',
     filename: '[name].js'
   },
   module: {

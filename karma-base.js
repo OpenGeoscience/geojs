@@ -250,8 +250,17 @@ module.exports = function (config) {
         ]
       },
       ChromeWithProxy: {
-        base: 'ChromeFull',
+        // inheriting from ChromeFull ignores the flags in this entry, so we
+        // need to inherit from Chrome
+        base: 'Chrome',
         flags: [
+          '--no-sandbox',  // necessary to run tests in a docker
+          '--no-pings',    // no auditing pings
+          '--device-scale-factor=1',
+          '--window-position=0,0',
+          '--start-fullscreen',
+          '--kiosk',
+          '--incognito',
           '--proxy-pac-url=' + config.protocol + '//' + config.hostname + ':' + config.port + '/testdata/proxy-for-tests.pac'
         ]
       },
