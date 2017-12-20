@@ -1,6 +1,7 @@
 var $ = require('jquery');
 var inherit = require('./inherit');
 var feature = require('./feature');
+var transform = require('./transform');
 
 /**
  * Polygon feature specification.
@@ -212,14 +213,18 @@ var polygonFeature = function (arg) {
    * Point search method for selection api.  Returns markers containing the
    * given point.
    *
-   * @argument {object} coordinate
-   * @returns {object}
+   * @param {geo.geoPosition} coordinate point to search for in map interface
+   *    gcs.
+   * @returns {object} An object with `index`: a list of quad indices, and
+   *    `found`: a list of quads that contain the specified coordinate.
    */
   this.pointSearch = function (coordinate) {
-    var found = [], indices = [], data = m_this.data();
+    var found = [], indices = [], data = m_this.data(),
+        map = m_this.layer().map(),
+        pt = transform.transformCoordinates(map.ingcs(), m_this.gcs(), coordinate);
     m_coordinates.forEach(function (coord, i) {
       var inside = util.pointInPolygon(
-        coordinate,
+        pt,
         coord.outer,
         coord.inner,
         coord.range

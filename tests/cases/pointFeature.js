@@ -142,6 +142,12 @@ describe('geo.pointFeature', function () {
       }).toThrow(new Error('no width'));
       /* Stop throwing the exception */
       point.style('strokeWidth', 2);
+      /* Test with an alternate gcs; pointSearch always uses the map's ingcs */
+      point.gcs(map.gcs());
+      point.data([{x: 2226390, y: 1118890}]);
+      pt = point.pointSearch({x: 20, y: 10});
+      expect(pt.index).toEqual([0]);
+      expect(pt.found.length).toBe(1);
     });
     it('boxSearch', function () {
       var map, layer, point, data = testPoints, idx;

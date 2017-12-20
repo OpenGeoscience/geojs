@@ -518,8 +518,8 @@ var feature = function (arg) {
    */
   this.gcs = function (val) {
     if (val === undefined) {
-      if ((m_gcs === undefined || m_gcs === null) && m_renderer) {
-        return m_renderer.layer().map().ingcs();
+      if ((m_gcs === undefined || m_gcs === null) && m_layer) {
+        return m_layer.map().ingcs();
       }
       return m_gcs;
     } else {
@@ -535,9 +535,8 @@ var feature = function (arg) {
    * @param {geo.geoPosition} c The input coordinate to convert.
    * @returns {geo.screenPosition} Display space coordinates.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.featureGcsToDisplay = function (c) {
-    var map = m_renderer.layer().map();
+    var map = m_layer.map();
     c = map.gcsToWorld(c, m_this.gcs());
     c = map.worldToDisplay(c);
     if (m_renderer.baseToLocal) {
