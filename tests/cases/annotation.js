@@ -257,7 +257,9 @@ describe('geo.annotation', function () {
       ann._coordinates = function () {
         return [{x: 1, y: 2}, {x: 3, y: 5}, {x: 8, y: 11}];
       };
-      expect(ann._labelPosition()).toEqual({x: 4, y: 6});
+      var pos = ann._labelPosition();
+      expect(pos.x).toBeCloseTo(4.447);
+      expect(pos.y).toBeCloseTo(6.539);
     });
     it('labelRecord', function () {
       var ann = geo.annotation.annotation('test', {

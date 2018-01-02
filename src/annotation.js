@@ -131,26 +131,43 @@ var annotation = function (type, args) {
   };
 
   /**
-   * Return the coordinate associated with the label.
+   * Return the coordinate associated with the center of the annotation.
    *
-   * @returns {geo.geoPosition|undefined} The map gcs position for the label,
+   * @returns {geo.geoPosition|undefined} The map gcs position for the center,
    *    or `undefined` if no such position exists.
    */
-  this._labelPosition = function () {
-    var coor = this._coordinates(), position = {x: 0, y: 0}, i;
+  this._centerPosition = function () {
+    var coor = this._coordinates(), position, p0, p1, w, sumw, i;
     if (!coor || !coor.length) {
       return undefined;
     }
     if (coor.length === 1) {
       return coor[0];
     }
+    position = {x: 0, y: 0};
+    sumw = 0;
+    p0 = coor[coor.length - 1];
     for (i = 0; i < coor.length; i += 1) {
-      position.x += coor[i].x;
-      position.y += coor[i].y;
+      p1 = p0;
+      p0 = coor[i];
+      w = Math.sqrt(Math.pow(p1.x - p0.x, 2) + Math.pow(p1.y - p0.y, 2));
+      position.x += (p0.x + p1.x) * w;
+      position.y += (p0.y + p1.y) * w;
+      sumw += 2 * w;
     }
-    position.x /= coor.length;
-    position.y /= coor.length;
-    return position;
+    position.x /= sumw;
+    position.y /= sumw;
+    return sumw ? position : p0;  // return p0 if all points are the same
+  };
+
+  /**
+   * Return the coordinate associated with the label.
+   *
+   * @returns {geo.geoPosition|undefined} The map gcs position for the label,
+   *    or `undefined` if no such position exists.
+   */
+  this._labelPosition = function () {
+    return this._centerPosition();
   };
 
   /**
