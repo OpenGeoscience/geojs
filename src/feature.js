@@ -288,6 +288,16 @@ var feature = function (arg) {
   };
 
   /**
+   * Clear our tracked selected features.
+   *
+   * @returns {this}
+   */
+  this._clearSelectedFeatures = function () {
+    m_selectedFeatures = [];
+    return m_this;
+  };
+
+  /**
    * Private mouseclick handler.  This uses `pointSearch` to determine which
    * features the mouse is over, then fires a click event for each such
    * feature.

@@ -66,16 +66,14 @@
   display: inline-block;
 }
 .entry .entry-name {
-  width: 86%;
+  width: 82%;
+}
+.entry a {
+  width: 6%;
+  text-align: right;
 }
 .entry .entry-edit {
-  width: 7%;
-  text-align: right;
   font-weight: bold;
-}
-.entry .entry-remove {
-  width: 7%;
-  text-align: right;
 }
 .entry-remove-all {
   float: right;

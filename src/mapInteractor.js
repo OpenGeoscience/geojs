@@ -359,14 +359,10 @@ var mapInteractor = function (args) {
 
   // default mouse object
   m_mouse = {
-    page: { // mouse position relative to the page
-      x: 0,
-      y: 0
-    },
-    map: { // mouse position relative to the map
-      x: 0,
-      y: 0
-    },
+    page: {x: 0, y: 0}, // mouse position relative to the page
+    map: {x: 0, y: 0}, // mouse position relative to the map
+    geo: {x: 0, y: 0},  // mouse position in map interface gcs
+    mapgcs: {x: 0, y: 0},  // mouse position in map gcs
     // mouse button status
     buttons: {
       left: false,
@@ -642,6 +638,13 @@ var mapInteractor = function (args) {
       m_this._handleMouseUp(evt);
       m_touchHandler.lastEventType = evtType[2];
     }
+  };
+
+  /**
+   * Retrigger a mouse movement with the current mouse state.
+   */
+  this.retriggerMouseMove = function () {
+    m_this.map().geoTrigger(geo_event.mousemove, m_this.mouse());
   };
 
   /**

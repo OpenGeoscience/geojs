@@ -150,6 +150,22 @@ describe('geo.feature', function () {
       expect(Object.getOwnPropertyNames(events)).toEqual(['brushend']);
       expect(events.brushend.index).toEqual(9);
     });
+    it('_clearSelectedFeatures', function () {
+      points.index = [];
+      events = {};
+      feat._handleMousemove();
+      points.index = [4, 5];
+      events = {};
+      feat._handleMousemove();
+      expect(Object.getOwnPropertyNames(events).sort()).toEqual(['mousemove', 'mouseon', 'mouseover']);
+      // moving again shouldn't report a mouseon or mouseover
+      feat._handleMousemove();
+      expect(Object.getOwnPropertyNames(events).sort()).toEqual(['mousemove', 'mouseon', 'mouseover']);
+      expect(feat._clearSelectedFeatures()).toBe(feat);
+      // moving again should now report a mouseon and mouseover
+      feat._handleMousemove();
+      expect(Object.getOwnPropertyNames(events).sort()).toEqual(['mousemove', 'mouseon', 'mouseover']);
+    });
   });
   describe('Check public class methods', function () {
     var map, layer, feat;

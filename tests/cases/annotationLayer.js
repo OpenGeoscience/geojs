@@ -81,6 +81,15 @@ describe('geo.annotationLayer', function () {
       expect(layer.mode(null)).toBe(layer);
       expect(layer.mode()).toBe(null);
       expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).toBeNull();
+      var rect = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
+      layer.addAnnotation(rect, map.gcs());
+      expect(layer.mode(layer.modes.edit, rect)).toBe(layer);
+      expect(layer.mode()).toBe(layer.modes.edit);
+      expect(layer.mode(null)).toBe(layer);
+      expect(layer.mode()).toBe(null);
+      layer.removeAllAnnotations();
     });
     it('annotations', function () {
       var poly = geo.annotation.polygonAnnotation({
@@ -325,6 +334,7 @@ describe('geo.annotationLayer', function () {
   describe('Private utility functions', function () {
     var map, layer, point, rect, rect2;
     it('_update', function () {
+      sinon.stub(console, 'warn', function () {});
       /* Most of update is covered as a side effect of other code.  This tests
        * some edge conditions */
       map = createMap();
@@ -344,7 +354,15 @@ describe('geo.annotationLayer', function () {
       layer.addAnnotation(point);
       layer.addAnnotation(rect);
       layer.addAnnotation(rect2);
-      expect(layer.features.length).toBe(1);
+      expect(layer.features().length).toBe(1);
+      expect(layer.features()[0].geoIsOn(geo.event.feature.mouseon)).toBe(false);
+      layer.options('clickToEdit', true);
+      layer._update();
+      expect(layer.features()[0].geoIsOn(geo.event.feature.mouseon)).toBe(true);
+      layer.options('clickToEdit', false);
+      layer._update();
+      expect(layer.features()[0].geoIsOn(geo.event.feature.mouseon)).toBe(false);
+      console.warn.restore();
     });
     it('_updateLabels and _removeLabelFeature', function () {
       var numChild, canvasLayer, canvasLine;
@@ -434,6 +452,96 @@ describe('geo.annotationLayer', function () {
         mapgcs: map.displayToGcs({x: 30, y: 20}, null)
       });
       expect(layer.annotations().length).toBe(0);
+      // test with clickToEdit
+      var rect = geo.annotation.rectangleAnnotation({
+            layer: layer,
+            corners: map.displayToGcs([{x: 30, y: 40}, {x: 100, y: 40}, {x: 100, y: 70}, {x: 30, y: 70}], null)}),
+          evt = {
+            buttonsDown: {left: true},
+            time: time,
+            map: {x: 40, y: 50},
+            mapgcs: map.displayToGcs({x: 40, y: 50}, null)
+          };
+      layer.addAnnotation(rect);
+      layer.options('clickToEdit', true);
+      layer.draw();
+      // if no annotation is highlighted, clicking does nothing
+      layer._handleMouseClick(evt);
+      expect(layer.mode()).toBe(null);
+      // if an annotation is highlighted, clicking switches to edit mode
+      rect.state(geo.annotation.state.highlight);
+      layer.modified();
+      layer.draw();
+      layer._handleMouseClick(evt);
+      expect(layer.mode()).toBe(layer.modes.edit);
+      // if an edit handle is selected, clicking passes the event to the
+      // annotation and we stay in annotation mode
+      layer._selectEditHandle({
+        data: layer.features()[layer.features().length - 1].data()[0]
+      }, true);
+      layer._handleMouseClick(evt);
+      expect(layer.mode()).toBe(layer.modes.edit);
+      // if no edit handle is selected, clicking exits edit mode
+      layer._selectEditHandle({
+        data: layer.features()[layer.features().length - 1].data()[0]
+      }, false);
+      layer._handleMouseClick(evt);
+      expect(layer.mode()).toBe(null);
+      layer.options('clickToEdit', false);
+    });
+    it('_handleMouseOn', function () {
+      var rect = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: map.displayToGcs([{x: 30, y: 40}, {x: 100, y: 40}, {x: 100, y: 70}, {x: 30, y: 70}], null)});
+      layer.removeAllAnnotations();
+      layer.addAnnotation(rect);
+      expect(layer._handleMouseOn({})).toBe(undefined);
+      expect(layer.mode()).toBe(null);
+      // if in edit mode and over an edit handle, that handle gets selected
+      layer.mode(layer.modes.edit, rect);
+      layer.draw();
+      expect(layer.features()[layer.features().length - 1].data()[0].selected).not.toBe(true);
+      expect(layer._handleMouseOn({
+        data: layer.features()[layer.features().length - 1].data()[0]
+      })).toBe(undefined);
+      expect(layer.features()[layer.features().length - 1].data()[0].selected).toBe(true);
+      // if we aren't in null mode or clickToEdit is disabled, do nothing
+      layer.mode(null);
+      expect(layer._handleMouseOn({
+        data: {annotation: rect}
+      })).toBe(undefined);
+      expect(rect.state()).toBe(geo.annotation.state.done);
+      // otherwise, highlight the annotation
+      layer.options('clickToEdit', true);
+      expect(layer._handleMouseOn({
+        data: {annotation: rect}
+      })).toBe(undefined);
+      expect(rect.state()).toBe(geo.annotation.state.highlight);
+      layer.options('clickToEdit', false);
+    });
+    it('_handleMouseOff', function () {
+      var rect = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: map.displayToGcs([{x: 30, y: 40}, {x: 100, y: 40}, {x: 100, y: 70}, {x: 30, y: 70}], null)});
+      layer.removeAllAnnotations();
+      layer.addAnnotation(rect);
+      expect(layer._handleMouseOff({})).toBe(undefined);
+      expect(layer.mode()).toBe(null);
+      // if in edit mode and a handle is selected, it is deselected
+      layer.mode(layer.modes.edit, rect);
+      layer.draw();
+      layer.features()[layer.features().length - 1].data()[0].selected = true;
+      expect(layer._handleMouseOff({
+        data: layer.features()[layer.features().length - 1].data()[0]
+      })).toBe(undefined);
+      expect(layer.features()[layer.features().length - 1].data()[0].selected).toBe(false);
+      layer.mode(null);
+      // if not in edit mode and an annotation is highlighted, de-highlight it
+      rect.state(geo.annotation.state.highlight);
+      expect(layer._handleMouseOff({
+        data: {annotation: rect}
+      })).toBe(undefined);
+      expect(rect.state()).toBe(geo.annotation.state.done);
     });
     it('_handleMouseMove', function () {
       layer.removeAllAnnotations();
@@ -495,6 +603,40 @@ describe('geo.annotationLayer', function () {
       expect(layer.annotations().length).toBe(1);
       expect(layer.annotations()[0].type()).toBe('rectangle');
       expect(layer.annotations()[0].state()).toBe(geo.annotation.state.done);
+      // test edit mode
+      layer.mode(layer.modes.edit, layer.annotations()[0]);
+      layer.draw();
+      layer._selectEditHandle({
+        data: layer.features()[layer.features().length - 1].data()[0]
+      }, true);
+      expect(layer.annotations()[0].coordinates()[0].y).toBeCloseTo(14.77);
+      layer._processAction({
+        mouse: {mapgcs: map.displayToGcs({x: 10, y: 33}, null)},
+        state: {
+          actionRecord: {owner: geo.annotation.actionOwner},
+          origin: {mapgcs:  map.displayToGcs({x: 10, y: 20}, null)}
+        }
+      });
+      expect(layer.annotations()[0].coordinates()[0].y).toBeCloseTo(13.67);
+    });
+    it('_selectEditHandle', function () {
+      layer.removeAllAnnotations();
+      rect = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
+      layer.addAnnotation(rect);
+      layer.mode(layer.modes.edit, rect);
+      layer.draw();
+      layer._selectEditHandle({
+        data: layer.features()[layer.features().length - 1].data()[0]
+      }, true);
+      expect(rect._editHandle.handle).toBe(layer.features()[layer.features().length - 1].data()[0]);
+      layer._selectEditHandle({
+        data: layer.features()[layer.features().length - 1].data()[1]
+      }, true);
+      expect(rect._editHandle.handle).toBe(layer.features()[layer.features().length - 1].data()[1]);
+      layer._selectEditHandle({}, true);
+      expect(rect._editHandle.handle).toBe(layer.features()[layer.features().length - 1].data()[1]);
     });
     it('_geojsonFeatureToAnnotation', function () {
       map.deleteLayer(layer);

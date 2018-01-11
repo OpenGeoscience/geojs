@@ -15,7 +15,8 @@ var geo_action = {
   // annotation actions
   annotation_line: 'geo_annotation_line',
   annotation_polygon: 'geo_annotation_polygon',
-  annotation_rectangle: 'geo_annotation_rectangle'
+  annotation_rectangle: 'geo_annotation_rectangle',
+  annotation_edit_handle: 'geo_annotation_edit_handle'
 };
 
 module.exports = geo_action;
