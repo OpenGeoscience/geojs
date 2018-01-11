@@ -199,6 +199,33 @@ describe('geo.object', function () {
       expect(foo.ncalls).toBe(3);
     });
 
+    it('Test a non-function handler', function () {
+      sinon.stub(console, 'warn', function () {});
+      var obj = new geo.object(),
+          evtData = {},
+          handler = new CallCounter(evtData);
+
+      obj.geoOn('event1', undefined);
+      expect(console.warn.calledOnce);
+      obj.geoOn('event1', handler.call);
+      obj.geoTrigger('event1', evtData);
+      expect(handler.ncalls).toBe(1);
+      console.warn.restore();
+    });
+
+    it('Test a handler that has an error', function () {
+      sinon.stub(console, 'warn', function () {});
+      var obj = new geo.object(),
+          evtData = {},
+          handler = new CallCounter(evtData);
+
+      obj.geoOn('event1', function () { throw new Error('fail'); });
+      obj.geoOn('event1', handler.call);
+      obj.geoTrigger('event1', evtData);
+      expect(handler.ncalls).toBe(1);
+      expect(console.warn.calledOnce);
+      console.warn.restore();
+    });
   });
 
 });
