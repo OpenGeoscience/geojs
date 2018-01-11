@@ -702,7 +702,7 @@ var mapInteractor = function (args) {
       m_boundKeys = bound;
     }
     $node.toggleClass('highlight-focus',
-      m_boundKeys && m_boundKeys.length && m_options.keyboard.focusHighlight);
+      !!(m_boundKeys && m_boundKeys.length && m_options.keyboard.focusHighlight));
 
     // bind touch events
     if ((m_this.hasTouchSupport() || m_options.alwaysTouch) &&
@@ -748,7 +748,7 @@ var mapInteractor = function (args) {
   this._disconnectEvents = function () {
     if (m_boundKeys) {
       if (m_keyHandler) {
-        m_boundKeys.every(m_keyHandler.unbind, m_keyHandler);
+        m_keyHandler.unbind(m_boundKeys);
       }
       m_boundKeys = null;
       m_keyHandler = null;
