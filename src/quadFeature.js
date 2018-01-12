@@ -141,8 +141,8 @@ var quadFeature = function (arg) {
    * Point search method for selection api.  Returns markers containing the
    * given point.
    *
-   * @param {object} coordinate Coordinate in input gcs to check if it is
-   *    located in any quad.
+   * @param {geo.geoPosition} coordinate Coordinate in input gcs to check if it
+   *    is located in any quad in map interface gcs.
    * @returns {object} An object with `index`: a list of quad indices, and
    *    `found`: a list of quads that contain the specified coordinate.
    */

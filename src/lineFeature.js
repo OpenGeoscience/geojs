@@ -164,6 +164,8 @@ var lineFeature = function (arg) {
    * corner extensions due to mitering may be outside of the selection area and
    * that variable width lines will have a greater selection region than their
    * visual size at the narrow end.
+   *
+   * @param {geo.geoPosition} p point to search for in map interface gcs.
    */
   this.pointSearch = function (p) {
     var data = m_this.data(), indices = [], found = [];
@@ -177,7 +179,7 @@ var lineFeature = function (arg) {
     var map = m_this.layer().map(),
         scale = map.unitsPerPixel(map.zoom()),
         scale2 = scale * scale,
-        pt = transform.transformCoordinates(m_this.gcs(), map.gcs(), p),
+        pt = transform.transformCoordinates(map.ingcs(), map.gcs(), p),
         i, j, record;
 
     // minimum l2 distance squared from

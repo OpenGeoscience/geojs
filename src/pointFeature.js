@@ -203,6 +203,7 @@ var pointFeature = function (arg) {
    */
   this.pointSearch = function (p) {
     var min, max, data, idx = [], found = [], ifound = [], map, pt,
+        fgcs = m_this.gcs(), // this feature's gcs
         corners,
         stroke = m_this.style.get('stroke'),
         strokeWidth = m_this.style.get('strokeWidth'),
@@ -224,10 +225,10 @@ var pointFeature = function (arg) {
     pt = map.gcsToDisplay(p);
     // check all corners to make sure we handle rotations
     corners = [
-      map.displayToGcs({x: pt.x - m_maxRadius, y: pt.y - m_maxRadius}),
-      map.displayToGcs({x: pt.x + m_maxRadius, y: pt.y - m_maxRadius}),
-      map.displayToGcs({x: pt.x - m_maxRadius, y: pt.y + m_maxRadius}),
-      map.displayToGcs({x: pt.x + m_maxRadius, y: pt.y + m_maxRadius})
+      map.displayToGcs({x: pt.x - m_maxRadius, y: pt.y - m_maxRadius}, fgcs),
+      map.displayToGcs({x: pt.x + m_maxRadius, y: pt.y - m_maxRadius}, fgcs),
+      map.displayToGcs({x: pt.x - m_maxRadius, y: pt.y + m_maxRadius}, fgcs),
+      map.displayToGcs({x: pt.x + m_maxRadius, y: pt.y + m_maxRadius}, fgcs)
     ];
     min = {
       x: Math.min(corners[0].x, corners[1].x, corners[2].x, corners[3].x),
@@ -250,7 +251,7 @@ var pointFeature = function (arg) {
       rad = radius(data[i], i);
       rad += stroke(data[i], i) ? strokeWidth(data[i], i) : 0;
       rad2 = rad * rad;
-      p = map.gcsToDisplay(p);
+      p = map.gcsToDisplay(p, fgcs);
       dx = p.x - pt.x;
       dy = p.y - pt.y;
       if (dx * dx + dy * dy <= rad2) {

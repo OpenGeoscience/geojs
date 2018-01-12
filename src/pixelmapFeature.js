@@ -126,6 +126,9 @@ var pixelmapFeature = function (arg) {
    * If the specified coordinates are in the rendered quad, use the basis
    * information from the quad to determine the pixelmap index value so that it
    * can be included in the found results.
+   *
+   * @param {geo.geoPosition} coordinate point to search for in map interface
+   *    gcs.
    */
   this.pointSearch = function (coordinate) {
     if (m_quadFeature && m_info) {
