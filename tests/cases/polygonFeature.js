@@ -146,9 +146,10 @@ describe('geo.polygonFeature', function () {
   describe('Public utility methods', function () {
     describe('pointSearch', function () {
       it('basic usage', function () {
+        mockVGLRenderer();
         var map, layer, polygon, data, pt;
         map = createMap();
-        layer = map.createLayer('feature', {renderer: null});
+        layer = map.createLayer('feature', {renderer: 'vgl'});
         polygon = geo.polygonFeature({layer: layer});
         polygon._init();
         data = testPolygons;
@@ -174,6 +175,12 @@ describe('geo.polygonFeature', function () {
         pt = polygon.pointSearch({x: 60, y: 13});
         expect(pt.index).toEqual([]);
         expect(pt.found.length).toBe(0);
+
+        // enable stroke and test very close, but outside, of an edge
+        polygon.style({stroke: true, strokeWidth: 20});
+        pt = polygon.pointSearch({x: 5, y: 2.499});
+        expect(pt.index).toEqual([0]);
+        restoreVGLRenderer();
       });
     });
   });
