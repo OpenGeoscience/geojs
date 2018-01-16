@@ -746,6 +746,39 @@ var util = module.exports = {
   },
 
   /**
+   * Return the coordinate associated with the center of the perimeter formed
+   * from a list of points.
+   *
+   * @param {geo.geoPosition[]} coor An array of coordinates.
+   * @returns {geo.geoPosition|undefined} The position for the center, or
+   *    `undefined` if no such position exists.
+   */
+  centerFromPerimeter: function (coor) {
+    var position, p0, p1, w, sumw, i;
+    if (!coor || !coor.length) {
+      return;
+    }
+    if (coor.length === 1) {
+      return {x: coor[0].x, y: coor[0].y};
+    }
+    position = {x: 0, y: 0};
+    sumw = 0;
+    p0 = coor[coor.length - 1];
+    for (i = 0; i < coor.length; i += 1) {
+      p1 = p0;
+      p0 = coor[i];
+      w = Math.sqrt(Math.pow(p1.x - p0.x, 2) + Math.pow(p1.y - p0.y, 2));
+      position.x += (p0.x + p1.x) * w;
+      position.y += (p0.y + p1.y) * w;
+      sumw += 2 * w;
+    }
+    position.x /= sumw;
+    position.y /= sumw;
+    // return a copy of p0 if all points are the same
+    return sumw ? position : {x: p0.x, y: p0.y};
+  },
+
+  /**
    * Escape any character in a string that has a code point >= 127.
    *
    * @param {string} text The string to escape.
