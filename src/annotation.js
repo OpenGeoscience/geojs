@@ -697,6 +697,11 @@ var rectangleAnnotation = function (args) {
           map.displayToGcs({x: evt.upperRight.x, y: evt.upperRight.y}, null),
           map.displayToGcs({x: evt.upperRight.x, y: evt.lowerLeft.y}, null)
         ];
+    /* Don't keep rectangles that have nearly zero area in display pixels */
+    if (layer.displayDistance(corners[0], null, corners[1], null) *
+        layer.displayDistance(corners[0], null, corners[3], null) < 0.01) {
+      return 'remove';
+    }
     m_this.options('corners', corners);
     m_this.state(annotationState.done);
     return 'done';
@@ -854,6 +859,11 @@ var rectangleAnnotation = function (args) {
     evt.handled = true;
     if (corners.length) {
       m_this._setCornersFromMouse(corners, evt);
+      /* Don't keep rectangles that have nearly zero area in display pixels */
+      if (layer.displayDistance(corners[0], null, corners[1], null) *
+          layer.displayDistance(corners[0], null, corners[3], null) < 0.01) {
+        return 'remove';
+      }
       m_this.state(annotationState.done);
       return 'done';
     }
