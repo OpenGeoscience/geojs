@@ -219,7 +219,7 @@ var polygonFeature = function (arg) {
    *    `found`: a list of quads that contain the specified coordinate.
    */
   this.pointSearch = function (coordinate) {
-    var found = [], indices = [], data = m_this.data(),
+    var found = [], indices = [], irecord = {}, data = m_this.data(),
         map = m_this.layer().map(),
         pt = transform.transformCoordinates(map.ingcs(), m_this.gcs(), coordinate);
     m_coordinates.forEach(function (coord, i) {
@@ -231,9 +231,20 @@ var polygonFeature = function (arg) {
       );
       if (inside) {
         indices.push(i);
+        irecord[i] = true;
         found.push(data[i]);
       }
     });
+    if (m_lineFeature) {
+      var lineFound = m_lineFeature.pointSearch(coordinate);
+      lineFound.found.forEach(function (lineData) {
+        if (lineData.length && lineData[0].length === 4 && !irecord[lineData[0][3]]) {
+          indices.push(lineData[0][3]);
+          irecord[lineData[0][3]] = true;
+          found.push(data[lineData[0][3]]);
+        }
+      });
+    }
     return {
       index: indices,
       found: found
