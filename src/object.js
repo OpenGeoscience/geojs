@@ -15,6 +15,8 @@ var object = function () {
     return new object();
   }
 
+  var util = require('./util');
+
   var m_this = this,
       m_eventHandlers = {},
       m_idleHandlers = [],
@@ -75,6 +77,10 @@ var object = function () {
       });
       return m_this;
     }
+    if (!util.isFunction(handler)) {
+      console.warn('Handler for ' + event + ' is not a function', handler, m_this);
+      return m_this;
+    }
     if (!m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event] = [];
     }
@@ -107,7 +113,11 @@ var object = function () {
 
     if (m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event].forEach(function (handler) {
-        handler.call(m_this, args);
+        try {
+          handler.call(m_this, args);
+        } catch (err) {
+          console.warn('Event handler for ' + event + ' threw an error', err);
+        }
       });
     }
 
