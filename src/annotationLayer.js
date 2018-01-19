@@ -30,9 +30,13 @@ var textFeature = require('./textFeature');
  * @param {number} [args.adjacentPointProximity=5] The minimum distance in
  *    display coordinates (pixels) between two adjacent points when creating a
  *    polygon or line.  A value of 0 requires an exact match.
- * @param {number} [args.continousPointProximity=5] The minimum distance in
+ * @param {number} [args.continuousPointProximity=5] The minimum distance in
  *    display coordinates (pixels) between two adjacent points when dragging
  *    to create an annotation.  `false` disables continuous drawing mode.
+ * @param {number} [args.continuousPointColinearity=1.0deg] The minimum
+ *    angle between a series of three points when dragging to not interpret
+ *    them as colinear.  Only applies if `continuousPointProximity` is not
+ *    `false`.
  * @param {number} [args.finalPointProximity=10] The maximum distance in
  *    display coordinates (pixels) between the starting point and the mouse
  *    coordinates to signal closing a polygon.  A value of 0 requires an exact
@@ -105,6 +109,9 @@ var annotationLayer = function (args) {
     // in pixels; set to continuousPointProximity to false to disable
     // continuous drawing modes.
     continuousPointProximity: 5,
+    // in radians, minimum angle between continuous points to interpret them as
+    // being coliner
+    continuousPointColinearity: 1.0 * Math.PI / 180,
     finalPointProximity: 10,  // in pixels, 0 is exact
     showLabels: true
   }, args);

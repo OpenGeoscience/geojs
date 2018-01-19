@@ -1065,8 +1065,8 @@ var polygonAnnotation = function (args) {
             vertices[vertices.length - 2], null, evt.map, 'display') <=
             layer.options('adjacentPointProximity')) {
           skip = true;
-          if (this.lastClick &&
-              evt.time - this.lastClick < layer.options('dblClickTime')) {
+          if (m_this._lastClick &&
+              evt.time - m_this._lastClick < layer.options('dblClickTime')) {
             end = true;
           }
         } else if (vertices.length >= 2 && layer.displayDistance(
@@ -1082,7 +1082,7 @@ var polygonAnnotation = function (args) {
       if (!end && !skip) {
         vertices.push(evt.mapgcs);
       }
-      this.lastClick = evt.time;
+      m_this._lastClick = evt.time;
     }
     if (end) {
       if (vertices.length < 4) {
@@ -1312,8 +1312,8 @@ var lineAnnotation = function (args) {
             vertices[vertices.length - 2], null, evt.map, 'display') <=
             layer.options('adjacentPointProximity')) {
           skip = true;
-          if (this.lastClick &&
-              evt.time - this.lastClick < layer.options('dblClickTime')) {
+          if (m_this._lastClick &&
+              evt.time - m_this._lastClick < layer.options('dblClickTime')) {
             end = true;
           }
         } else if (vertices.length >= 2 && layer.displayDistance(
@@ -1329,7 +1329,8 @@ var lineAnnotation = function (args) {
       if (!end && !skip) {
         vertices.push(evt.mapgcs);
       }
-      this.lastClick = evt.time;
+      m_this._lastClick = evt.time;
+      m_this._lastClickVertexCount = vertices.length;
     }
     if (end) {
       if (vertices.length < 3) {
@@ -1389,6 +1390,7 @@ var lineAnnotation = function (args) {
       return;
     }
     var cpp = layer.options('continuousPointProximity');
+    var cpc = layer.options('continuousPointColinearity');
     if (cpp || cpp === 0) {
       var vertices = this.options('vertices');
       if (!vertices.length) {
@@ -1396,10 +1398,20 @@ var lineAnnotation = function (args) {
         vertices.push(evt.mouse.mapgcs);
         return true;
       }
-      var dist = layer.displayDistance(
-            vertices[vertices.length - 2], null, evt.mouse.map, 'display');
+      var dist = layer.displayDistance(vertices[vertices.length - 2], null, evt.mouse.map, 'display');
       if (dist && dist > cpp) {
-        // we should combine nearly colinear points, but we don't
+        // combine nearly colinear points
+        if (vertices.length >= (m_this._lastClickVertexCount || 1) + 3) {
+          var d01 = layer.displayDistance(vertices[vertices.length - 3], null, vertices[vertices.length - 2], null),
+              d12 = dist,
+              d02 = layer.displayDistance(vertices[vertices.length - 3], null, evt.mouse.map, 'display');
+          if (d01 && d02) {
+            var costheta = (d02 * d02 - d01 * d01 - d12 * d12) / (2 * d01 * d12);
+            if (costheta > Math.cos(cpc)) {
+              vertices.pop();
+            }
+          }
+        }
         vertices[vertices.length - 1] = evt.mouse.mapgcs;
         vertices.push(evt.mouse.mapgcs);
         return true;
