@@ -1471,7 +1471,7 @@ describe('geo.tileLayer', function () {
         expect(Object.keys(l.activeTiles).length).toBe(0);
       });
 
-      it('invalid tile url', function () {
+      it('invalid tile url', function (done) {
         var server = sinon.fakeServer.create();
         var spy = sinon.spy();
         sinon.stub(console, 'warn', function () {});
@@ -1483,11 +1483,14 @@ describe('geo.tileLayer', function () {
         t.catch(spy);
 
         server.respond();
-        expect(console.warn.calledOnce);
-        expect(spy.calledOnce).toBe(true);
-        expect(l.canvas().find('.geo-tile-container').length).toBe(0);
-        server.restore();
-        console.warn.restore();
+        window.setTimeout(function () { // wait for the next time slice
+          expect(console.warn.calledOnce);
+          expect(spy.calledOnce).toBe(true);
+          expect(l.canvas().find('.geo-tile-container').length).toBe(0);
+          server.restore();
+          console.warn.restore();
+          done();
+        }, 0);
       });
 
       it('cropped tile', function () {

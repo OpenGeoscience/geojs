@@ -96,9 +96,9 @@ module.exports = (function () {
       }
       var wait = $.Deferred();
       var process = $.Deferred();
-      wait.then(function () {
+      wait.done(function () {
         $.when(callback.call(defer)).always(process.resolve);
-      }, process.resolve);
+      }).fail(process.resolve);
       defer.__fetchQueue = wait;
       this._addToQueue(defer, atEnd);
       $.when(wait, process).always(function () {

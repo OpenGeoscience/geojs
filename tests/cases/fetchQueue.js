@@ -13,9 +13,9 @@ describe('geo.core.fetchQueue', function () {
     reference += 1;
     item.process = function () {
       item.defer = $.Deferred();
-      item.defer.then(function () {
+      item.defer.done(function () {
         report.push({ref: item.ref, success: true});
-      }, function () {
+      }).fail(function () {
         report.push({ref: item.ref, success: false});
       }).promise(item);
       return item;
@@ -30,7 +30,7 @@ describe('geo.core.fetchQueue', function () {
       reference = 1;
     });
 
-    it('queue is the exepected size', function () {
+    it('queue is the expected size', function (done) {
       var q = geo.fetchQueue({size: 2}), dlist = [];
 
       expect(q.length).toBe(0);
@@ -70,15 +70,21 @@ describe('geo.core.fetchQueue', function () {
       expect(q.processing).toBe(2);
 
       dlist[0].defer.resolve();
-      expect(q.length).toBe(0);
-      expect(q.processing).toBe(2);
+      window.setTimeout(function () { // wait for next time slice
+        expect(q.length).toBe(0);
+        expect(q.processing).toBe(2);
 
-      dlist[3].defer.resolve();
-      expect(q.length).toBe(0);
-      expect(q.processing).toBe(1);
+        dlist[3].defer.resolve();
+        window.setTimeout(function () { // wait for next time slice
+          expect(q.length).toBe(0);
+          expect(q.processing).toBe(1);
+
+          done();
+        }, 0);
+      }, 0);
     });
 
-    it('queue size can be changed', function () {
+    it('queue size can be changed', function (done) {
       var q = geo.fetchQueue({size: 2}), dlist = [];
 
       expect(q.size).toBe(2);
@@ -104,19 +110,26 @@ describe('geo.core.fetchQueue', function () {
       expect(q.processing).toBe(3);
 
       dlist[0].defer.resolve();
-      expect(q.length).toBe(2);
-      expect(q.processing).toBe(2);
+      window.setTimeout(function () { // wait for next time slice
+        expect(q.length).toBe(2);
+        expect(q.processing).toBe(2);
 
-      dlist[1].defer.resolve();
-      expect(q.length).toBe(2);
-      expect(q.processing).toBe(1);
+        dlist[1].defer.resolve();
+        window.setTimeout(function () { // wait for next time slice
+          expect(q.length).toBe(2);
+          expect(q.processing).toBe(1);
 
-      dlist[2].defer.resolve();
-      expect(q.length).toBe(1);
-      expect(q.processing).toBe(1);
+          dlist[2].defer.resolve();
+          window.setTimeout(function () { // wait for next time slice
+            expect(q.length).toBe(1);
+            expect(q.processing).toBe(1);
+            done();
+          }, 0);
+        }, 0);
+      }, 0);
     });
 
-    it('queue removes and skips unneeded items', function () {
+    it('queue removes and skips unneeded items', function (done) {
       var q = geo.fetchQueue({
         size: 2,
         track: 4,
@@ -155,21 +168,28 @@ describe('geo.core.fetchQueue', function () {
         }
       }
 
-      while (q.processing) {
-        for (i = 0; i < dlist.length; i += 1) {
-          if (dlist[i].defer) {
-            dlist[i].defer.resolve();
+      function process() {
+        if (q.processing) {
+          for (i = 0; i < dlist.length; i += 1) {
+            if (dlist[i].defer) {
+              dlist[i].defer.resolve();
+            }
           }
+          window.setTimeout(process, 0);
+          return;
         }
+
+        expect(report.length).toBe(reportOrder.length);
+        for (i = 0; i < report.length; i += 1) {
+          expect(report[i].ref).toBe(reportOrder[i]);
+        }
+        done();
       }
 
-      expect(report.length).toBe(reportOrder.length);
-      for (i = 0; i < report.length; i += 1) {
-        expect(report[i].ref).toBe(reportOrder[i]);
-      }
+      process();
     });
 
-    it('batch ordering', function () {
+    it('batch ordering', function (done) {
       var q = geo.fetchQueue({size: 1}), dlist = [], i;
       var reportOrder = [
         1, 22, 23, 20, 19, 17, 13, 14, 16, 11, 10, 5,
@@ -193,18 +213,25 @@ describe('geo.core.fetchQueue', function () {
         q.add(dlist[i], dlist[i].process, (i % 3) === 2);
       }
 
-      while (q.processing) {
-        for (i = 0; i < dlist.length; i += 1) {
-          if (dlist[i].defer) {
-            dlist[i].defer.resolve();
+      function process() {
+        if (q.processing) {
+          for (i = 0; i < dlist.length; i += 1) {
+            if (dlist[i].defer) {
+              dlist[i].defer.resolve();
+            }
           }
+          window.setTimeout(process, 0);
+          return;
         }
+
+        expect(report.length).toBe(reportOrder.length);
+        for (i = 0; i < report.length; i += 1) {
+          expect(report[i].ref).toBe(reportOrder[i]);
+        }
+        done();
       }
 
-      expect(report.length).toBe(reportOrder.length);
-      for (i = 0; i < report.length; i += 1) {
-        expect(report[i].ref).toBe(reportOrder[i]);
-      }
+      process();
     });
   });
 });

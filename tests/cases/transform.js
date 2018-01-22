@@ -119,7 +119,7 @@ describe('geo.transform', function () {
       expect(p.forward({x: 10, y: -10, z: 0})).toEqual({x: 10, y: -10, z: 0});
     });
 
-    it('lookup', function () {
+    it('lookup', function (done) {
       var spy = sinon.spy(), request;
       geo.transform.lookup('EPSG:5000').then(spy);
 
@@ -147,16 +147,19 @@ describe('geo.transform', function () {
         }]
       }));
 
-      expect(spy.calledOnce).toBe(true);
-      expect(geo.transform.defs.hasOwnProperty('EPSG:5000')).toBe(true);
+      window.setTimeout(function () { // wait for the next time slice
+        expect(spy.calledOnce).toBe(true);
+        expect(geo.transform.defs.hasOwnProperty('EPSG:5000')).toBe(true);
 
-      geo.transform.lookup('EPSG:5000');
-      expect(server.requests.length).toBe(1);
+        geo.transform.lookup('EPSG:5000');
+        expect(server.requests.length).toBe(1);
+        done();
+      }, 0);
     });
 
-    it('invalid projection code', function () {
+    it('invalid projection code', function (done) {
       var spy = sinon.spy(), request;
-      geo.transform.lookup('EPSG:5001').fail(spy);
+      geo.transform.lookup('EPSG:5001').then(spy);
 
       request = server.requests[0];
       request.respond(200, {'Content-Type': 'application/json'}, JSON.stringify({
@@ -165,8 +168,11 @@ describe('geo.transform', function () {
         results: []
       }));
 
-      expect(spy.calledOnce).toBe(true);
-      expect(geo.transform.defs.hasOwnProperty('EPSG:5001')).toBe(false);
+      window.setTimeout(function () { // wait for the next time slice
+        expect(spy.calledOnce).toBe(true);
+        expect(geo.transform.defs.hasOwnProperty('EPSG:5001')).toBe(false);
+        done();
+      }, 0);
     });
 
     it('unknown projection type', function () {
