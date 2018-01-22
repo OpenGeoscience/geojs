@@ -48,7 +48,7 @@
     "istanbul-instrumenter-loader": "^0.2.0",
     "jaguarjs-jsdoc": "^1.0.2",
     "jasmine-core": "^2.4.1",
-    "jquery": "~2.2.1",
+    "jquery": "^3.3",
     "jsdoc": "^3.5",
     "jsdoc-autoprivate": "0.0.1",
     "json-loader": "^0.5.4",
