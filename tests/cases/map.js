@@ -683,7 +683,36 @@ describe('geo.core.map', function () {
       expect(m.layers().length).toBe(0);
       expect(m2.layers().length).toBe(1);
     });
-
+    it('displayToGcs', function () {
+      var m = createMap(), result;
+      expect(closeToEqual(m.displayToGcs({x: 10, y: 20}), {x: -27.25, y: 13.92, z: 0})).toBe(true);
+      expect(closeToEqual(m.displayToGcs({x: 200, y: 100}), {x: -10.55, y: 7.01, z: 0})).toBe(true);
+      expect(closeToEqual(m.displayToGcs({x: 10, y: 20}, 'EPSG:3857'), {x: -3033021, y: 1565430, z: 0}, 0)).toBe(true);
+      expect(closeToEqual(m.displayToGcs({x: 200, y: 100}, 'EPSG:3857'), {x: -1174073, y: 782715, z: 0}, 0)).toBe(true);
+      result = m.displayToGcs([{x: 10, y: 20}, {x: 200, y: 100}]);
+      expect(closeToEqual(result[0], {x: -27.25, y: 13.92, z: 0})).toBe(true);
+      expect(closeToEqual(result[1], {x: -10.55, y: 7.01, z: 0})).toBe(true);
+      result = m.displayToGcs([{x: 10, y: 20}, {x: 200, y: 100}], 'EPSG:3857');
+      expect(closeToEqual(result[0], {x: -3033021, y: 1565430, z: 0}, 0)).toBe(true);
+      expect(closeToEqual(result[1], {x: -1174073, y: 782715, z: 0}, 0)).toBe(true);
+      m.bounds({left: -80, top: 50, right: -40, bottom: 40});
+      expect(closeToEqual(m.displayToGcs({x: 10, y: 20}), {x: -79.38, y: 51.83, z: 0})).toBe(true);
+    });
+    it('gcsToDisplay', function () {
+      var m = createMap(), result;
+      expect(closeToEqual(m.gcsToDisplay({x: -27.25, y: 13.92}), {x: 10, y: 20}, 1)).toBe(true);
+      expect(closeToEqual(m.gcsToDisplay({x: -10.55, y: 7.01}), {x: 200, y: 100}, 1)).toBe(true);
+      expect(closeToEqual(m.gcsToDisplay({x: -3033021, y: 1565430}, 'EPSG:3857'), {x: 10, y: 20})).toBe(true);
+      expect(closeToEqual(m.gcsToDisplay({x: -1174073, y: 782715}, 'EPSG:3857'), {x: 200, y: 100})).toBe(true);
+      result = m.gcsToDisplay([{x: -27.25, y: 13.92}, {x: -10.55, y: 7.01}]);
+      expect(closeToEqual(result[0], {x: 10, y: 20}, 1)).toBe(true);
+      expect(closeToEqual(result[1], {x: 200, y: 100}, 1)).toBe(true);
+      result = m.gcsToDisplay([{x: -3033021, y: 1565430}, {x: -1174073, y: 782715}], 'EPSG:3857');
+      expect(closeToEqual(result[0], {x: 10, y: 20})).toBe(true);
+      expect(closeToEqual(result[1], {x: 200, y: 100})).toBe(true);
+      m.bounds({left: -80, top: 50, right: -40, bottom: 40});
+      expect(closeToEqual(m.gcsToDisplay({x: -79.375, y: 51.83}), {x: 10, y: 20}, 1)).toBe(true);
+    });
   });
   describe('screenshot', function () {
     var m, layer1, layer2, l1, l2;

@@ -715,12 +715,16 @@ var map = function (arg) {
   /**
    * Convert from gcs coordinates to map world coordinates.
    *
-   * @param {geo.geoPosition} c The input coordinate to convert.
+   * @param {geo.geoPosition|geo.geoPosition[]} c The input coordinate to
+   *    convert.
    * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
    *    the interface gcs, `null` to use the map gcs, or any other transform.
-   * @returns {geo.worldPosition} World space coordinates.
+   * @returns {geo.worldPosition|geo.worldPosition[]} World space coordinates.
    */
   this.gcsToWorld = function (c, gcs) {
+    if (Array.isArray(c)) {
+      return c.map(function (pt) { return m_this.gcsToWorld(pt, gcs); });
+    }
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (gcs !== m_gcs) {
       c = transform.transformCoordinates(gcs, m_gcs, c);
@@ -739,12 +743,16 @@ var map = function (arg) {
   /**
    * Convert from map world coordinates to gcs coordinates.
    *
-   * @param {geo.worldPosition} c The input coordinate to convert.
+   * @param {geo.worldPosition|geo.worldPosition[]} c The input coordinate to
+   *    convert.
    * @param {string|geo.transform|null} [gcs] output gcs.  `undefined` to use
    *    the interface gcs, `null` to use the map gcs, or any other transform.
-   * @returns {geo.geoPosition} GCS space coordinates.
+   * @returns {geo.geoPosition|geo.geoPosition[]} GCS space coordinates.
    */
   this.worldToGcs = function (c, gcs) {
+    if (Array.isArray(c)) {
+      return c.map(function (pt) { return m_this.worldToGcs(pt, gcs); });
+    }
     if (m_origin.x || m_origin.y || m_origin.z) {
       c = transform.affineInverse(
         {origin: m_origin},
@@ -764,10 +772,12 @@ var map = function (arg) {
    * Convert from gcs coordinates to display coordinates.  This is identical to
    * calling `gcsToWorld` and then `worldToDisplay`.
    *
-   * @param {geo.geoPosition} c The input coordinate to convert.
+   * @param {geo.geoPosition|geo.geoPosition[]} c The input coordinate to
+   *    convert.
    * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
    *    the interface gcs, `null` to use the map gcs, or any other transform.
-   * @returns {geo.screenPosition} Display space coordinates.
+   * @returns {geo.screenPosition|geo.screenPosition[]} Display space
+   *    coordinates.
    */
   this.gcsToDisplay = function (c, gcs) {
     c = m_this.gcsToWorld(c, gcs);
@@ -778,10 +788,15 @@ var map = function (arg) {
    * Convert from world coordinates to display coordinates using the attached
    * camera.
    *
-   * @param {geo.worldPosition} c The input coordinate to convert.
-   * @returns {geo.screenPosition} Display space coordinates.
+   * @param {geo.worldPosition|geo.worldPosition[]} c The input coordinate to
+   *    convert.
+   * @returns {geo.screenPosition|geo.screenPosition[]} Display space
+   *    coordinates.
    */
   this.worldToDisplay = function (c) {
+    if (Array.isArray(c)) {
+      return c.map(function (pt) { return m_camera.worldToDisplay(pt); });
+    }
     return m_camera.worldToDisplay(c);
   };
 
@@ -789,10 +804,11 @@ var map = function (arg) {
    * Convert from display to gcs coordinates.  This is identical to calling
    * `displayToWorld` and then `worldToGcs`.
    *
-   * @param {geo.screenPosition} c The input display coordinate to convert.
+   * @param {geo.screenPosition|geo.screenPosition[]} c The input display
+   *    coordinate to convert.
    * @param {string|geo.transform|null} [gcs] Output gcs.  `undefined` to use
    *    the interface gcs, `null` to use the map gcs, or any other transform.
-   * @returns {geo.geoPosition} GCS space coordinates.
+   * @returns {geo.geoPosition|geoPosition[]} GCS space coordinates.
    */
   this.displayToGcs = function (c, gcs) {
     c = m_this.displayToWorld(c); // done via camera
@@ -803,10 +819,14 @@ var map = function (arg) {
    * Convert from display coordinates to world coordinates using the attached
    * camera.
    *
-   * @param {geo.screenPosition} c The input coordinate to convert.
-   * @returns {geo.worldPosition} World space coordinates.
+   * @param {geo.screenPosition|geo.screenPosition[]} c The input coordinate to
+   *    convert.
+   * @returns {geo.worldPosition|geo.worldPosition[]} World space coordinates.
    */
   this.displayToWorld = function (c) {
+    if (Array.isArray(c)) {
+      return c.map(function (pt) { return m_camera.displayToWorld(pt); });
+    }
     return m_camera.displayToWorld(c);
   };
 
