@@ -20,7 +20,12 @@ describe('geo.object', function () {
           evtData = {},
           foo = new CallCounter(evtData);
 
+      expect(obj.geoIsOn('testevent')).toBe(false);
       obj.geoOn('testevent', foo.call);
+      expect(obj.geoIsOn('testevent')).toBe(true);
+      expect(obj.geoIsOn(['testevent', 'anotherevent'])).toBe(true);
+      expect(obj.geoIsOn('testevent', 'not foo.call')).toBe(false);
+      expect(obj.geoIsOn('testevent', foo.call)).toBe(true);
       obj.geoTrigger('anotherevent', evtData);
       expect(foo.ncalls).toBe(0);
 
