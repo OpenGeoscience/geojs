@@ -486,4 +486,131 @@ transform.affineInverse = function (def, coords) {
   return coords;
 };
 
+/**
+ * Compute the distance on the surface on a sphere.  The sphere is the major
+ * radius of a specified ellipsoid.  Altitude is ignored.
+ *
+ * @param {geo.geoPosition} pt1 The first point.
+ * @param {geo.geoPosition} pt2 The second point.
+ * @param {string|geo.transform} [gcs] `undefined` to use the same gcs as the
+ *    ellipsoid, otherwise the gcs of the points.
+ * @param {string|geo.transform} [baseGcs='EPSG:4326'] the gcs of the
+ *    ellipsoid.
+ * @param {object} [ellipsoid=proj4.WGS84] An object with at least `a` and one
+ *    of `b`, `f`, or `rf` (1 / `f`) -- this works with  proj4 ellipsoid
+ *    definitions.
+ * @param {number} [maxIterations=100] Maximum number of iterations to use
+ *    to test convergence.
+ * @returns {number} The distance in meters (or whatever units the ellipsoid
+ *    was specified in.
+ */
+transform.sphericalDistance = function (pt1, pt2, gcs, baseGcs, ellipsoid) {
+  baseGcs = baseGcs || 'EPSG:4326';
+  ellipsoid = ellipsoid || proj4.WGS84;
+  gcs = gcs || baseGcs;
+  if (gcs !== baseGcs) {
+    var pts = transform.transformCoordinates(gcs, baseGcs, [pt1, pt2]);
+    pt1 = pts[0];
+    pt2 = pts[1];
+  }
+  // baseGcs must be in degrees or this will be wrong
+  var phi1 = pt1.y * Math.PI / 180,
+      phi2 = pt2.y * Math.PI / 180,
+      lambda = (pt2.x - pt1.x) * Math.PI / 180,
+      sinphi1 = Math.sin(phi1), cosphi1 = Math.cos(phi1),
+      sinphi2 = Math.sin(phi2), cosphi2 = Math.cos(phi2);
+  var sigma = Math.atan2(
+    Math.pow(
+      Math.pow(cosphi2 * Math.sin(lambda), 2) +
+      Math.pow(cosphi1 * sinphi2 - sinphi1 * cosphi2 * Math.cos(lambda), 2), 0.5),
+    sinphi1 * sinphi2 + cosphi1 * cosphi2 * Math.cos(lambda)
+  );
+  return ellipsoid.a * sigma;
+};
+
+/**
+ * Compute the Vincenty distance on the surface on an ellipsoid.  Altitude is
+ * ignored.
+ *
+ * @param {geo.geoPosition} pt1 The first point.
+ * @param {geo.geoPosition} pt2 The second point.
+ * @param {string|geo.transform} [gcs] `undefined` to use the same gcs as the
+ *    ellipsoid, otherwise the gcs of the points.
+ * @param {string|geo.transform} [baseGcs='EPSG:4326'] the gcs of the
+ *    ellipsoid.
+ * @param {object} [ellipsoid=proj4.WGS84] An object with at least `a` and one
+ *    of `b`, `f`, or `rf` (1 / `f`) -- this works with  proj4 ellipsoid
+ *    definitions.
+ * @param {number} [maxIterations=100] Maximum number of iterations to use
+ *    to test convergence.
+ * @returns {object} An object with `distance` in meters (or whatever units the
+ *    ellipsoid was specified in), `alpha1` and `alpha2`, the azimuths at the
+ *    two points in radians.  The result may be `undefined` if the formula
+ *    fails to converge, which can happen near antipodal points.
+ */
+transform.vincentyDistance = function (pt1, pt2, gcs, baseGcs, ellipsoid, maxIterations) {
+  baseGcs = baseGcs || 'EPSG:4326';
+  ellipsoid = ellipsoid || proj4.WGS84;
+  maxIterations = maxIterations || 100;
+  gcs = gcs || baseGcs;
+  if (gcs !== baseGcs) {
+    var pts = transform.transformCoordinates(gcs, baseGcs, [pt1, pt2]);
+    pt1 = pts[0];
+    pt2 = pts[1];
+  }
+  var a = ellipsoid.a,
+      b = ellipsoid.b || ellipsoid.a * (1.0 - (ellipsoid.f || 1.0 / ellipsoid.rf)),
+      f = ellipsoid.f || (ellipsoid.rf ? 1.0 / ellipsoid.rf : 1.0 - b / a),
+      // baseGcs must be in degrees or this will be wrong
+      phi1 = pt1.y * Math.PI / 180,
+      phi2 = pt2.y * Math.PI / 180,
+      L = (((pt2.x - pt1.x) % 360 + 360) % 360) * Math.PI / 180,
+      U1 = Math.atan((1 - f) * Math.tan(phi1)),  // reduced latitude
+      U2 = Math.atan((1 - f) * Math.tan(phi2)),
+      sinU1 = Math.sin(U1), cosU1 = Math.cos(U1),
+      sinU2 = Math.sin(U2), cosU2 = Math.cos(U2),
+      lambda = L, lastLambda = L + Math.PI * 2,
+      sinSigma, cosSigma, sigma, sinAlpha, cos2alpha, cos2sigmasubm, C,
+      u2, A, B, deltaSigma, iter;
+  if (phi1 === phi2 && !L) {
+    return {
+      distance: 0,
+      alpha1: 0,
+      alpha2: 0
+    };
+  }
+  for (iter = maxIterations; iter > 0 && Math.abs(lambda - lastLambda) > 1e-12; iter -= 1) {
+    sinSigma = Math.pow(
+        Math.pow(cosU2 * Math.sin(lambda), 2) +
+        Math.pow(cosU1 * sinU2 - sinU1 * cosU2 * Math.cos(lambda), 2), 0.5);
+    cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * Math.cos(lambda);
+    sigma = Math.atan2(sinSigma, cosSigma);
+    sinAlpha = cosU1 * cosU2 * Math.sin(lambda) / sinSigma;
+    cos2alpha = 1 - Math.pow(sinAlpha, 2);
+    // cos2alpha is zero only when phi1 and phi2 are nearly zero.  In this
+    // case, sinU1 and sinU2 are nearly zero and the the second term can be
+    // dropped
+    cos2sigmasubm = cosSigma - (cos2alpha ? 2 * sinU1 * sinU2 / cos2alpha : 0);
+    C = f / 16 * cos2alpha * (4 + f * (4 - 3 * cos2alpha));
+    lastLambda = lambda;
+    lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma * (
+        cos2sigmasubm + C * cosSigma * (-1 + 2 * Math.pow(cos2sigmasubm, 2))));
+  }
+  if (!iter) { // failure to converge
+    return;
+  }
+  u2 = cos2alpha * (a * a - b * b) / (b * b);
+  A = 1 + u2 / 16384 * (4096 + u2 * (-768 + u2 * (320 - 175 * u2)));
+  B = u2 / 1024 * (256 + u2 * (-128 + u2 * (74 - 47 * u2)));
+  deltaSigma = B * sinSigma * (cos2sigmasubm + B / 4 * (
+    cosSigma * (-1 + 2 * Math.pow(cos2sigmasubm, 2)) -
+    B / 6 * cos2sigmasubm * (-3 + 4 * sinSigma * sinSigma) *
+    (-3 + 4 * Math.pow(cos2sigmasubm, 2))));
+  return {
+    distance: b * A * (sigma - deltaSigma),
+    alpha1: Math.atan2(cosU2 * Math.sin(lambda), cosU1 * sinU2 - sinU1 * cosU2 * Math.cos(lambda)),
+    alpha2: Math.atan2(cosU1 * Math.sin(lambda), -sinU1 * cosU2 + cosU1 * sinU2 * Math.cos(lambda))
+  };
+};
+
 module.exports = transform;
