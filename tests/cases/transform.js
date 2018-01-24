@@ -324,4 +324,91 @@ describe('geo.transform', function () {
       expect(res[1]).toEqual({x: 0, y: -4 / 3, z: 6 / 4});
     });
   });
+
+  describe('vincentyDistance', function () {
+    it('test distance measurement', function () {
+      var result;
+      result = geo.transform.vincentyDistance(
+        {x: -71.0693514, y: 42.3541165},  // Boston
+        {x: -73.9680804, y: 40.7791472}   // New York
+      );
+      expect(result.distance).toBeCloseTo(298396.057);
+      expect(result.alpha1).toBeCloseTo(-2.180);
+      expect(result.alpha2).toBeCloseTo(-2.213);
+      expect(geo.transform.vincentyDistance(
+        {x: -73.9680804, y: 40.7791472},
+        {x: -71.0693514, y: 42.3541165}
+      ).distance).toBeCloseTo(298396.057);
+      result = geo.transform.vincentyDistance(
+        {x: -74, y: 42},
+        {x: -71, y: 42}
+      );
+      expect(result.alpha1).toBeCloseTo(1.553);
+      expect(result.alpha2).toBeCloseTo(1.588);
+      // test equal points
+      expect(geo.transform.vincentyDistance(
+        {x: -71.0693514, y: 42.3541165},
+        {x: -71.0693514, y: 42.3541165}
+      ).distance).toBe(0);
+      // test convergence failure
+      expect(geo.transform.vincentyDistance(
+        {x: 0, y: 0},
+        {x: -179.5, y: 0.5}
+      )).toBe(undefined);
+      expect(geo.transform.vincentyDistance(
+        {x: 0, y: 0},
+        {x: -179.5, y: 0.5},
+        undefined, undefined, undefined, 200
+      ).distance).toBeCloseTo(19936288.579);
+      // test near-equator distances
+      expect(geo.transform.vincentyDistance(
+        {x: 0, y: 1e-7},
+        {x: 90, y: 1e-7}
+      ).distance).toBeCloseTo(geo.util.radiusEarth * Math.PI / 2);
+      // test using a different ellipsoid
+      expect(geo.transform.vincentyDistance(
+        {x: -71.0693514, y: 42.3541165},
+        {x: -73.9680804, y: 40.7791472},
+        'EPSG:4326',
+        '+proj=longlat +ellps=clrk66 +datum=NAD27 +no_defs',
+        {a: 6378206.4, b: 6356583.8}
+      ).distance).toBeCloseTo(298394.412);
+    });
+  });
+
+  describe('sphericalDistance', function () {
+    it('test distance measurement', function () {
+      expect(geo.transform.sphericalDistance(
+        {x: -71.0693514, y: 42.3541165},  // Boston
+        {x: -73.9680804, y: 40.7791472}   // New York
+      )).toBeCloseTo(298342.833);
+      expect(geo.transform.sphericalDistance(
+        {x: -73.9680804, y: 40.7791472},
+        {x: -71.0693514, y: 42.3541165}
+      )).toBeCloseTo(298342.833);
+      // test equal points
+      expect(geo.transform.sphericalDistance(
+        {x: -71.0693514, y: 42.3541165},
+        {x: -71.0693514, y: 42.3541165}
+      )).toBe(0);
+      // test near antipodal points
+      expect(geo.transform.sphericalDistance(
+        {x: 0, y: 0},
+        {x: -179.5, y: 0.5}
+      )).toBeCloseTo(19958794.076);
+      // test near-equator distances
+      expect(geo.transform.sphericalDistance(
+        {x: 0, y: 1e-7},
+        {x: 90, y: 1e-7}
+      )).toBeCloseTo(geo.util.radiusEarth * Math.PI / 2);
+      // test using a different ellipsoid
+      expect(geo.transform.sphericalDistance(
+        {x: -71.0693514, y: 42.3541165},
+        {x: -73.9680804, y: 40.7791472},
+        'EPSG:4326',
+        '+proj=longlat +ellps=clrk66 +datum=NAD27 +no_defs',
+        {a: 6378206.4, b: 6356583.8}
+      )).toBeCloseTo(298340.559);
+    });
+  });
 });
