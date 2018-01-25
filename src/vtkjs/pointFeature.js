@@ -4,10 +4,10 @@ var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
 
 
-var vtkActor = require('vtk.js/Sources/Rendering/Core/Actor');
-var vtkMapper = require('vtk.js/Sources/Rendering/Core/Mapper');
-var vtkSphereSource = require('vtk.js/Sources/Filters/Sources/SphereSource');
-var vtkPlaneSource = require('vtk.js/Sources/Filters/Sources/PlaneSource');
+var vtkActor;// = require('vtk.js/Sources/Rendering/Core/Actor');
+var vtkMapper;// = require('vtk.js/Sources/Rendering/Core/Mapper');
+var vtkSphereSource;// = require('vtk.js/Sources/Filters/Sources/SphereSource');
+var vtkPlaneSource;// = require('vtk.js/Sources/Filters/Sources/PlaneSource');
 
 //////////////////////////////////////////////////////////////////////////////
 /**

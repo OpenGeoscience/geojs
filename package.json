@@ -16,8 +16,6 @@
     "hammerjs": "^2.0.8"
   },
   "devDependencies": {
-<<<<<<< HEAD
-=======
     "babel-core": "^6.0.0",
     "babel-loader": "^6.0.0",
     "babel-plugin-istanbul": "2.0.0",
@@ -25,7 +23,6 @@
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-2": "^6.18.0",
     "blanket": "~1.2",
->>>>>>> Fixed build that works with vtk.js
     "body-parser": "^1.15.0",
     "bootstrap": "^3.3.6",
     "bootswatch": "^3.3.6",

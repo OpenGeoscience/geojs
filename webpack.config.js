@@ -2,7 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 var exec = require('child_process').execSync;
 var sha = '';
-var loaders = require('./node_modules/vtk.js/Utilities/config/webpack.loaders.js');
+// var loaders = require('./node_modules/vtk.js/Utilities/config/dependency.js').webpack.v1.loaders;
 
 if (!exec) {
   console.warn('Node 0.12 or greater is required for detecting the git hash.');
@@ -34,6 +34,7 @@ module.exports = {
   },
   resolve: {
     alias: {
+      vtk: 'vtk.js/dist/vtk.js',
       jquery: 'jquery/dist/jquery',
       proj4: 'proj4/lib',
       vgl: 'vgl/vgl.js',
@@ -44,15 +45,16 @@ module.exports = {
   },
   externals: {
     d3: 'd3',
-    hammerjs: 'Hammer'
+    hammerjs: 'Hammer',
+    vtk: 'vtk.js'
   },
   plugins: [
-    define_plugin,
-    new webpack.optimize.UglifyJsPlugin({
+    define_plugin
+   /* new webpack.optimize.UglifyJsPlugin({
       include: /\.min\.js$/,
       minimize: true,
       comments: /@(license|copyright)/
-    })
+    })*/
   ],
   module: {
     loaders: [{
@@ -68,7 +70,8 @@ module.exports = {
       test: /vgl\.js$/,
       loader: 'expose?vgl!imports?mat4=gl-mat4,vec4=gl-vec4,vec3=gl-vec3,vec2=gl-vec2,$=jquery'
     }
-    ].concat(loaders)
+    ]
+    // .concat(loaders)
   },
 
   // These are plugins that we want to run in Karma as well
