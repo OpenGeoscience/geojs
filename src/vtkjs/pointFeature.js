@@ -1,13 +1,12 @@
-var vtkjs = require('vtk.js');
+var vtk = require('vtk.js');
 var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
 
-
-var vtkActor;// = require('vtk.js/Sources/Rendering/Core/Actor');
-var vtkMapper;// = require('vtk.js/Sources/Rendering/Core/Mapper');
-var vtkSphereSource;// = require('vtk.js/Sources/Filters/Sources/SphereSource');
-var vtkPlaneSource;// = require('vtk.js/Sources/Filters/Sources/PlaneSource');
+var vtkActor = vtk.Rendering.Core.vtkActor;// = require('vtk.js/Sources/Rendering/Core/Actor');
+var vtkMapper = vtk.Rendering.Core.vtkMapper;// = require('vtk.js/Sources/Rendering/Core/Mapper');
+var vtkSphereSource = vtk.Filters.Sources.vtkSphereSource;// = require('vtk.js/Sources/Filters/Sources/SphereSource');
+// var vtkPlaneSource = vtk.Filters.Sources.vtkPlaneSource;// = require('vtk.js/Sources/Filters/Sources/PlaneSource');
 
 //////////////////////////////////////////////////////////////////////////////
 /**

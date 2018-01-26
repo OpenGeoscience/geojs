@@ -1,12 +1,8 @@
 var inherit = require('../inherit');
 var registerRenderer = require('../registry').registerRenderer;
 var renderer = require('../renderer');
-var vtk = require('vtk');
-//var vtkOpenGLRenderWindow;// = require('vtk.js/Sources/Rendering/OpenGL/RenderWindow');
-//var vtkFullScreenRenderWindow;// = require('vtk.js/Sources/Testing/FullScreenRenderWindow');
-//var vtkRenderer;// = require('vtk.js/Sources/Rendering/Core/Renderer');
-//var vtkRenderWindow;// = require('vtk.js/Sources/Rendering/Core/RenderWindow');
-
+var vtk = require('vtk.js');
+var vtkFullScreenRenderWindow = vtk.Rendering.Misc.vtkFullScreenRenderWindow;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -180,8 +176,8 @@ var vtkjsRenderer = function (arg) {
     proj = mat4.translate(util.mat4AsArray(), proj,
                           [0, 0, camera.constructor.bounds.far]);
 
-    m_this.contextRenderer().getActiveCamera().setViewTransformMatrix(view);
-    m_this.contextRenderer().getActiveCamera().setProjectionTransformMatrix(proj);
+    // m_this.contextRenderer().getActiveCamera().setViewTransformMatrix(view);
+    // m_this.contextRenderer().getActiveCamera().setProjectionTransformMatrix(proj);
   };
 
   // Connect to pan event.  This is sufficient, as all zooms and rotations also
