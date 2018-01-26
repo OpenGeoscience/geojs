@@ -56,14 +56,14 @@
     "jaguarjs-jsdoc": "^1.0.2",
     "jasmine-core": "^2.4.1",
     "jquery": "~2.2.1",
+    "js-yaml": "^3.10.0",
     "jsdoc": "^3.5",
     "jsdoc-autoprivate": "0.0.1",
     "json-loader": "^0.5.4",
     "jstransformer-markdown-it": "^2.0.0",
-    "js-yaml": "^3.10.0",
     "karma": "^0.13.22",
-    "karma-coverage": "^1.0.0",
     "karma-chrome-launcher": "^2.2.0",
+    "karma-coverage": "^1.0.0",
     "karma-firefox-launcher": "^1.0.1",
     "karma-jasmine": "^1.0.2",
     "karma-jasmine-html-reporter": "^0.2.0",
@@ -84,8 +84,8 @@
     "pug-loader": "^2.3.0",
     "raw-body": "^2.1.6",
     "sinon": "1.17.3",
-    "string-replace-webpack-plugin": "^0.1.3",
     "string-replace-loader": "1.0.5",
+    "string-replace-webpack-plugin": "^0.1.3",
     "style-loader": "^0.13.1",
     "stylus": "^0.54.5",
     "stylus-loader": "^2.4.0",
@@ -93,7 +93,6 @@
     "typeface-lato": "^0.0.44",
     "url-loader": "^0.5.7",
     "vgl": "0.3.10",
-    "vtk.js": "github:kitware/vtk-js",
     "webpack": "^1.12.14",
     "webpack-dev-server": "^1.14.1",
     "xmlbuilder": "^8.2.2"
@@ -133,5 +132,8 @@
     "webgl",
     "svg"
   ],
-  "main": "geo.js"
+  "main": "geo.js",
+  "dependencies": {
+    "vtk.js": "^5.15.6"
+  }
 }

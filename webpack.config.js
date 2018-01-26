@@ -34,7 +34,6 @@ module.exports = {
   },
   resolve: {
     alias: {
-      vtk: 'vtk.js/dist/vtk.js',
       jquery: 'jquery/dist/jquery',
       proj4: 'proj4/lib',
       vgl: 'vgl/vgl.js',
@@ -46,7 +45,7 @@ module.exports = {
   externals: {
     d3: 'd3',
     hammerjs: 'Hammer',
-    vtk: 'vtk.js'
+    vtkjs: 'vtk.js'
   },
   plugins: [
     define_plugin
