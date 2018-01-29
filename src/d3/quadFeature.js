@@ -17,7 +17,7 @@ var d3_quadFeature = function (arg) {
   }
 
   var $ = require('jquery');
-  var d3 = require('d3');
+  var d3 = require('./d3Renderer').d3;
   var object = require('./object');
 
   quadFeature.call(this, arg);

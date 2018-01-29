@@ -40,7 +40,7 @@ var choroplethFeature = function (arg) {
   /**
    * @private
    */
-  var d3 = require('d3'),
+  var d3 = require('./d3/d3Renderer').d3,
       m_this = this,
       s_init = this._init,
       m_choropleth = $.extend({},

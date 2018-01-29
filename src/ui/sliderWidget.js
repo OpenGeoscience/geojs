@@ -16,7 +16,7 @@ var sliderWidget = function (arg) {
   }
   svgWidget.call(this, arg);
 
-  var d3 = require('d3');
+  var d3 = require('../d3/d3Renderer').d3;
   var geo_event = require('../event');
 
   var m_this = this,
