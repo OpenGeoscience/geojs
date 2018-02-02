@@ -8,8 +8,8 @@ node_js:
   - 4
 
 addons:
-  # firefox: latest  # version 55.0 has an issue.
-  firefox: 54.0.1
+  firefox: latest  # version 55.0 - 57.x have an issue with screenshots.
+  # firefox: 54.0.1
   chrome: stable
   apt:
     packages:
