@@ -134,8 +134,8 @@ var vtkjsRenderer = function (arg) {
     // m_this.layer().map().scheduleAnimationFrame(this._renderFrame, true);
     // return m_this;
 
-    m_this.contextRenderer().resetCamera();
-    renderWindow.render();
+    // m_this.contextRenderer().resetCamera();
+    // renderWindow.render();
     m_this.contextRenderer().resetCamera();
     m_this._updateRendererCamera();
     renderWindow.render();
@@ -176,8 +176,14 @@ var vtkjsRenderer = function (arg) {
     proj = mat4.translate(util.mat4AsArray(), proj,
                           [0, 0, camera.constructor.bounds.far]);
 
-    // m_this.contextRenderer().getActiveCamera().setViewTransformMatrix(view);
-    // m_this.contextRenderer().getActiveCamera().setProjectionTransformMatrix(proj);
+    console.log(`VTKJS: viewMat: ${m_this.contextRenderer().getActiveCamera().getViewMatrix()}`);
+    console.log(`GEOJS: viewMat: ${view}`);
+    console.log(`VTKJS: projMat: ${m_this.contextRenderer().getActiveCamera().getProjectionMatrix()}`);
+    console.log(`GEOJS: projMat: ${proj}`);
+    m_this.contextRenderer().getActiveCamera().computeViewParametersFromPhysicalMatrix(camera.world);
+    m_this.contextRenderer().getActiveCamera().setProjectionMatrix(proj);
+    // camera.view = m_this.contextRenderer().getActiveCamera().getViewMatrix();
+    // camera.projectionMatrix = m_this.contextRenderer().getActiveCamera().getProjectionMatrix();
   };
 
   // Connect to pan event.  This is sufficient, as all zooms and rotations also
