@@ -669,7 +669,7 @@ var rectangleAnnotation = function (args) {
           selectionRectangle: true
         }];
       default:
-        return s_actions.apply(this, arguments);
+        return s_actions.apply(m_this, arguments);
     }
   };
 
@@ -1363,7 +1363,7 @@ var lineAnnotation = function (args) {
           input: 'pan'
         }];
       default:
-        return s_actions.apply(this, arguments);
+        return s_actions.apply(m_this, arguments);
     }
   };
 
