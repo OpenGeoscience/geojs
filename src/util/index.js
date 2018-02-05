@@ -747,7 +747,10 @@ var util = module.exports = {
 
   /**
    * Return the coordinate associated with the center of the perimeter formed
-   * from a list of points.
+   * from a list of points.  This averages all of the vertices in the perimeter
+   * weighted by the line length on either side of each point.  Functionally,
+   * this is the same as the average of all the points of the lines of the
+   * perimeter.
    *
    * @param {geo.geoPosition[]} coor An array of coordinates.
    * @returns {geo.geoPosition|undefined} The position for the center, or
