@@ -18,7 +18,7 @@ var d3_vectorFeature = function (arg) {
 
   var object = require('./object');
   var timestamp = require('../timestamp');
-  var d3 = require('d3');
+  var d3 = require('./d3Renderer').d3;
 
   arg = arg || {};
   vectorFeature.call(this, arg);

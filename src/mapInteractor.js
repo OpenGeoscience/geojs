@@ -703,12 +703,14 @@ var mapInteractor = function (args) {
     }
     $node.toggleClass('highlight-focus',
       !!(m_boundKeys && m_boundKeys.length && m_options.keyboard.focusHighlight));
-
     // bind touch events
     if ((m_this.hasTouchSupport() || m_options.alwaysTouch) &&
-        (usedInputs.pan || usedInputs.rotate) &&
-        __webpack_modules__[require.resolveWeak('hammerjs')]) { // eslint-disable-line
-      var Hammer = require('hammerjs');
+        (usedInputs.pan || usedInputs.rotate)) {
+      // webpack expects optional dependencies to be wrapped in a try-catch
+      var Hammer;
+      try {
+        Hammer = require('hammerjs');
+      } catch (_error) {}
       if (Hammer !== undefined) {
         var recog = [],
             touchEvents = ['hammer.input'];
