@@ -126,10 +126,10 @@ var annotationLayer = function (args) {
     var update;
     if (evt.state && evt.state.actionRecord &&
         evt.state.actionRecord.owner === geo_annotation.actionOwner &&
-        this.currentAnnotation) {
-      update = this.currentAnnotation.processAction(evt);
+        m_this.currentAnnotation) {
+      update = m_this.currentAnnotation.processAction(evt);
     }
-    this._updateFromEvent(update);
+    m_this._updateFromEvent(update);
   };
 
   /**
@@ -163,8 +163,8 @@ var annotationLayer = function (args) {
    * @param {geo.event} evt The mouse move event.
    */
   this._handleMouseMove = function (evt) {
-    if (this.mode() && this.currentAnnotation) {
-      var update = this.currentAnnotation.mouseMove(evt);
+    if (m_this.mode() && m_this.currentAnnotation) {
+      var update = m_this.currentAnnotation.mouseMove(evt);
       if (update) {
         m_this.modified();
         m_this.draw();
@@ -179,9 +179,9 @@ var annotationLayer = function (args) {
    * @param {geo.event} evt The mouse click event.
    */
   this._handleMouseClick = function (evt) {
-    if (this.mode() && this.currentAnnotation) {
-      var update = this.currentAnnotation.mouseClick(evt);
-      this._updateFromEvent(update);
+    if (m_this.mode() && m_this.currentAnnotation) {
+      var update = m_this.currentAnnotation.mouseClick(evt);
+      m_this._updateFromEvent(update);
     }
   };
 
@@ -208,8 +208,8 @@ var annotationLayer = function (args) {
     } else {
       m_options[arg1] = arg2;
     }
-    this.modified();
-    return this;
+    m_this.modified();
+    return m_this;
   };
 
   /**
@@ -217,16 +217,16 @@ var annotationLayer = function (args) {
    *
    * @param {geo.geoPosition|geo.screenPosition} coord1 The first coordinates.
    * @param {string|geo.transform|null} gcs1 `undefined` to use the interface
-   *    gcs, `null` to use the map gcs, `'display`' if the coordinates are
+   *    gcs, `null` to use the map gcs, `'display'` if the coordinates are
    *    already in display coordinates, or any other transform.
    * @param {geo.geoPosition|geo.screenPosition} coord2 the second coordinates.
    * @param {string|geo.transform|null} [gcs2] `undefined` to use the interface
-   *    gcs, `null` to use the map gcs, `'display`' if the coordinates are
+   *    gcs, `null` to use the map gcs, `'display'` if the coordinates are
    *    already in display coordinates, or any other transform.
    * @returns {number} the Euclidian distance between the two coordinates.
    */
   this.displayDistance = function (coord1, gcs1, coord2, gcs2) {
-    var map = this.map();
+    var map = m_this.map();
     if (gcs1 !== 'display') {
       gcs1 = (gcs1 === null ? map.gcs() : (
               gcs1 === undefined ? map.ingcs() : gcs1));
@@ -257,21 +257,21 @@ var annotationLayer = function (args) {
         annotation: annotation
       });
       m_annotations.push(annotation);
-      annotation.layer(this);
-      var map = this.map();
+      annotation.layer(m_this);
+      var map = m_this.map();
       gcs = (gcs === null ? map.gcs() : (
              gcs === undefined ? map.ingcs() : gcs));
       if (gcs !== map.gcs()) {
         annotation._coordinates(transform.transformCoordinates(
             gcs, map.gcs(), annotation._coordinates()));
       }
-      this.modified();
-      this.draw();
+      m_this.modified();
+      m_this.draw();
       m_this.geoTrigger(geo_event.annotation.add, {
         annotation: annotation
       });
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -285,14 +285,14 @@ var annotationLayer = function (args) {
   this.removeAnnotation = function (annotation, update) {
     var pos = $.inArray(annotation, m_annotations);
     if (pos >= 0) {
-      if (annotation === this.currentAnnotation) {
-        this.currentAnnotation = null;
+      if (annotation === m_this.currentAnnotation) {
+        m_this.currentAnnotation = null;
       }
       annotation._exit();
       m_annotations.splice(pos, 1);
       if (update !== false) {
-        this.modified();
-        this.draw();
+        m_this.modified();
+        m_this.draw();
       }
       m_this.geoTrigger(geo_event.annotation.remove, {
         annotation: annotation
@@ -318,12 +318,12 @@ var annotationLayer = function (args) {
         pos += 1;
         continue;
       }
-      this.removeAnnotation(annotation, false);
+      m_this.removeAnnotation(annotation, false);
       removed += 1;
     }
     if (removed && update !== false) {
-      this.modified();
-      this.draw();
+      m_this.modified();
+      m_this.draw();
     }
     return removed;
   };
@@ -357,11 +357,10 @@ var annotationLayer = function (args) {
   };
 
   /**
-   * Get or set the current mode.  The mode is either `null` for nothing being
-   * created, or the name of the type of annotation that is being created.
+   * Get or set the current mode.
    *
-   * @param {string|null} [arg] The new mode or `undefined` to get the current
-   *    mode.
+   * @param {string|null} [arg] `undefined` to get the current mode, `null` to
+   *    stop creating/editing, or the name of the type of annotation to create.
    * @returns {string|null|this} The current mode or the layer.
    */
   this.mode = function (arg) {
@@ -378,13 +377,13 @@ var annotationLayer = function (args) {
       } else {
         Mousetrap(mapNode[0]).unbind('esc');
       }
-      if (this.currentAnnotation) {
-        switch (this.currentAnnotation.state()) {
+      if (m_this.currentAnnotation) {
+        switch (m_this.currentAnnotation.state()) {
           case geo_annotation.state.create:
-            this.removeAnnotation(this.currentAnnotation);
+            m_this.removeAnnotation(m_this.currentAnnotation);
             break;
         }
-        this.currentAnnotation = null;
+        m_this.currentAnnotation = null;
       }
       switch (m_mode) {
         case 'line':
@@ -403,12 +402,12 @@ var annotationLayer = function (args) {
       m_this.map().interactor().removeAction(
         undefined, undefined, geo_annotation.actionOwner);
       if (createAnnotation) {
-        this.currentAnnotation = createAnnotation({
+        m_this.currentAnnotation = createAnnotation({
           state: geo_annotation.state.create,
           layer: this
         });
-        this.addAnnotation(m_this.currentAnnotation, null);
-        actions = this.currentAnnotation.actions(geo_annotation.state.create);
+        m_this.addAnnotation(m_this.currentAnnotation, null);
+        actions = m_this.currentAnnotation.actions(geo_annotation.state.create);
         $.each(actions, function (idx, action) {
           m_this.map().interactor().addAction(action);
         });
@@ -416,7 +415,7 @@ var annotationLayer = function (args) {
       m_this.geoTrigger(geo_event.annotation.mode, {
         mode: m_mode, oldMode: oldMode});
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -443,15 +442,15 @@ var annotationLayer = function (args) {
    */
   this.geojson = function (geojson, clear, gcs, includeCrs) {
     if (geojson !== undefined) {
-      var reader = registry.createFileReader('jsonReader', {layer: this});
+      var reader = registry.createFileReader('jsonReader', {layer: m_this});
       if (!reader.canRead(geojson)) {
         return;
       }
       if (clear === true) {
-        this.removeAllAnnotations(true, false);
+        m_this.removeAllAnnotations(true, false);
       }
       if (clear === 'update') {
-        $.each(this.annotations(), function (idx, annotation) {
+        $.each(m_this.annotations(), function (idx, annotation) {
           annotation.options('updated', false);
         });
       }
@@ -462,15 +461,15 @@ var annotationLayer = function (args) {
         });
       });
       if (clear === 'update') {
-        $.each(this.annotations(), function (idx, annotation) {
+        $.each(m_this.annotations(), function (idx, annotation) {
           if (annotation.options('updated') === false &&
               annotation.state() === geo_annotation.state.done) {
             m_this.removeAnnotation(annotation, false);
           }
         });
       }
-      this.modified();
-      this.draw();
+      m_this.modified();
+      m_this.draw();
       return m_annotations.length;
     }
     geojson = null;
@@ -736,7 +735,7 @@ var annotationLayer = function (args) {
    */
   this._update = function () {
     if (m_this.getMTime() > m_buildTime.getMTime()) {
-      var labels = this.options('showLabels') ? [] : null;
+      var labels = m_this.options('showLabels') ? [] : null;
       /* Interally, we have a set of feature levels (to provide z-index
        * support), each of which can have data from multiple annotations.  We
        * clear the data on each of these features, then build it up from each
@@ -834,7 +833,7 @@ var annotationLayer = function (args) {
       m_buildTime.modified();
     }
     s_update.call(m_this, arguments);
-    return this;
+    return m_this;
   };
 
   /**
