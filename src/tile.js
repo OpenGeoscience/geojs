@@ -73,7 +73,7 @@ module.exports = (function () {
      */
     this.fetch = function () {
       if (!this._fetched) {
-        $.get(this._url).then(function () {
+        $.get(this._url).done(function () {
           this._fetched = true;
         }.bind(this)).promise(this);
       }
@@ -107,7 +107,11 @@ module.exports = (function () {
         this.fetch();
       }
       // Call then on the new promise
-      this.then(onSuccess, onFailure);
+      if (this.done && this.fail) {
+        this.done(onSuccess).fail(onFailure);
+      } else {
+        this.then(onSuccess, onFailure);
+      }
       return this;
     };
 

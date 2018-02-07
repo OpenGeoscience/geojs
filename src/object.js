@@ -57,7 +57,11 @@ var object = function () {
       }
     }
     m_promiseCount += 1;
-    promise.then(onDone, onDone);
+    if (promise.always) {
+      promise.always(onDone);
+    } else {
+      promise.then(onDone, onDone);
+    }
     return m_this;
   };
 

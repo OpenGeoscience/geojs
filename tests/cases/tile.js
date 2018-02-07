@@ -147,7 +147,7 @@ describe('geo.tile', function () {
       });
     });
 
-    it('failure', function () {
+    it('failure', function (done) {
       // create a mocked sinon server instance that always responds with 404.
       var server = sinon.fakeServer.create();
 
@@ -165,8 +165,11 @@ describe('geo.tile', function () {
       });
 
       server.respond();
-      expect(called).toBe(true);
-      server.restore();
+      window.setTimeout(function () { // wait for the next time slice
+        expect(called).toBe(true);
+        server.restore();
+        done();
+      }, 0);
     });
   });
 

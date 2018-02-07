@@ -235,6 +235,9 @@ module.exports.mockDate = function (delta) {
     startDate += mockDelta;
     return new origDate(startDate);
   };
+  geo.mockedDate.now = function () {
+    return startDate;
+  };
 
   window.Date = geo.mockedDate;
 };

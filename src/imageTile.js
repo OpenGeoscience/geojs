@@ -79,7 +79,7 @@ module.exports = (function () {
         this._image.src = this._url;
 
         // attach a promise interface to `this`
-        defer.then(function () {
+        defer.done(function () {
           this._fetched = true;
         }.bind(this)).promise(this);
       }
@@ -96,7 +96,7 @@ module.exports = (function () {
     this.fadeIn = function (duration) {
       var promise = this.fetch(), defer = $.Deferred();
       $(this._image).css('display', 'none');
-      promise.then(function () {
+      promise.done(function () {
         $(this._image).fadeIn(duration, function () {
           defer.resolve();
         });

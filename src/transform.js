@@ -210,7 +210,7 @@ transform.lookup = function (projection) {
 
   return $.ajax({
     url: 'http://epsg.io/?q=' + code + '&format=json'
-  }).then(function (data) {
+  }).done(function (data) {
     var result = (data.results || [])[0];
     if (!result || !result.proj4) {
       return defer.reject(data).promise();
