@@ -16,7 +16,7 @@ var d3_lineFeature = function (arg) {
     return new d3_lineFeature(arg);
   }
 
-  var d3 = require('d3');
+  var d3 = require('./d3Renderer').d3;
   var object = require('./object');
   var timestamp = require('../timestamp');
   var util = require('../util');

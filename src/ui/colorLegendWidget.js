@@ -1,4 +1,4 @@
-var d3 = require('d3');
+var d3 = require('../d3/d3Renderer').d3;
 var domWidget = require('./domWidget');
 var inherit = require('../inherit');
 var registerWidget = require('../registry').registerWidget;

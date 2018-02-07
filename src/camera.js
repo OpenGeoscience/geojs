@@ -517,7 +517,7 @@
       point = this.worldToDisplay4(
         [point.x, point.y, z, w]
       );
-      return {x: point[0], y: point[1], z: point[2]};
+      return {x: point[0], y: point[1]};
     };
 
     /**

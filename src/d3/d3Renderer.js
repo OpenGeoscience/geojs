@@ -21,7 +21,7 @@ var renderer = require('../renderer');
 var d3Renderer = function (arg) {
   'use strict';
 
-  var d3 = require('d3');
+  var d3 = d3Renderer.d3;
   var object = require('./object');
   var util = require('../util');
   var geo_event = require('../event');
@@ -676,11 +676,12 @@ registerRenderer('d3', d3Renderer);
    * @returns {boolean} true if available.
    */
   d3Renderer.supported = function () {
-    if (!__webpack_modules__[require.resolveWeak('d3')]) {  // eslint-disable-line
-      return false;
-    }
-    var d3 = require('d3');
-    return d3 !== undefined;
+    delete d3Renderer.d3;
+    // webpack expects optional dependencies to be wrapped in a try-catch
+    try {
+      d3Renderer.d3 = require('d3');
+    } catch (_error) {}
+    return d3Renderer.d3 !== undefined;
   };
 
   /**
@@ -692,6 +693,8 @@ registerRenderer('d3', d3Renderer);
   d3Renderer.fallback = function () {
     return null;
   };
+
+  d3Renderer.supported();  // cache reference to d3 if it is available
 })();
 
 module.exports = d3Renderer;
