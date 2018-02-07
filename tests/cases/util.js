@@ -32,4 +32,17 @@ describe('geo.util', function () {
     expect(({}) instanceof iframeWindow.Object).toBe(false);
     iframe.remove();
   });
+
+  it('centerFromPerimter', function () {
+    expect(util.centerFromPerimeter()).toBe(undefined);
+    expect(util.centerFromPerimeter([])).toBe(undefined);
+    expect(util.centerFromPerimeter([{x: 1, y: 1}])).toEqual({x: 1, y: 1});
+    expect(util.centerFromPerimeter([{x: 1, y: 1}, {x: 1, y: 1}])).toEqual({x: 1, y: 1});
+    expect(util.centerFromPerimeter([
+        {x: 1, y: 1}, {x: 3, y: 1}, {x: 3, y: 3}, {x: 1, y: 3}
+    ])).toEqual({x: 2, y: 2});
+    expect(util.centerFromPerimeter([
+        {x: 1, y: 1}, {x: 3, y: 1}, {x: 5, y: 1}, {x: 5, y: 3}, {x: 1, y: 3}
+    ])).toEqual({x: 3, y: 2});
+  });
 });

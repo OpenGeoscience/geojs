@@ -257,7 +257,9 @@ describe('geo.annotation', function () {
       ann._coordinates = function () {
         return [{x: 1, y: 2}, {x: 3, y: 5}, {x: 8, y: 11}];
       };
-      expect(ann._labelPosition()).toEqual({x: 4, y: 6});
+      var pos = ann._labelPosition();
+      expect(pos.x).toBeCloseTo(4.447);
+      expect(pos.y).toBeCloseTo(6.539);
     });
     it('labelRecord', function () {
       var ann = geo.annotation.annotation('test', {
@@ -345,6 +347,16 @@ describe('geo.annotation', function () {
       expect(coor[0].y).toBeCloseTo(10.055);
       expect(coor[2].x).toBeCloseTo(-20.215);
       expect(coor[2].y).toBeCloseTo(15.199);
+      // a zero-area rectangle should be asked to be removed.
+      ann = geo.annotation.rectangleAnnotation({layer: layer, corners: corners});
+      ann.state(geo.annotation.state.create);
+      evt = {
+        event: geo.event.actionselection,
+        state: {action: geo.geo_action.annotation_rectangle},
+        lowerLeft: {x: 10, y: 65},
+        upperRight: {x: 90, y: 65}
+      };
+      expect(ann.processAction(evt)).toBe('remove');
     });
     it('_coordinates', function () {
       var ann = geo.annotation.rectangleAnnotation({corners: corners});
@@ -426,6 +438,22 @@ describe('geo.annotation', function () {
       });
       expect(ann.options('corners').length).toBe(4);
       expect(ann.state()).toBe(geo.annotation.state.done);
+      // a zero-area rectangle should be asked to be removed.
+      ann = geo.annotation.rectangleAnnotation({layer: layer});
+      ann.state(geo.annotation.state.create);
+      expect(ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: corners[0],
+        mapgcs: map.displayToGcs(corners[0], null)
+      })).toBe(true);
+      expect(ann.options('corners').length).toBe(4);
+      expect(ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: corners[1],
+        mapgcs: map.displayToGcs(corners[1], null)
+      })).toBe('remove');
     });
   });
 

@@ -304,6 +304,9 @@ module.exports = function (config) {
       },
       resolve: webpack_config.resolve,
       plugins: webpack_config.exposed_plugins
+    },
+    webpackMiddleware: {
+      stats: 'errors-only'
     }
   };
   newConfig.preprocessors[test_case] = ['webpack', 'sourcemap'];
