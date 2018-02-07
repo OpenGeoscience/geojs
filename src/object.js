@@ -89,6 +89,27 @@ var object = function () {
   };
 
   /**
+   * Report if an event handler is bound to this object.
+   *
+   * @param {string|string[]} event An event or list of events to check.
+   * @param {function} [handler] A function that might be bound.  If
+   *   `undefined`, this will report `true` if there is any handler for the
+   *   specified event.
+   * @returns {boolean} true if any of the specified events are bound to the
+   *   specified handler.
+   */
+  this.geoIsOn = function (event, handler) {
+    if (Array.isArray(event)) {
+      return event.some(function (e) {
+        return m_this.geoIsOn(e, handler);
+      });
+    }
+    return (m_eventHandlers[event] || []).some(function (h) {
+      return h === handler || handler === undefined;
+    });
+  };
+
+  /**
    * Trigger an event (or events) on this object and call all handlers.
    *
    * @param {string|string[]} event An event or list of events from
