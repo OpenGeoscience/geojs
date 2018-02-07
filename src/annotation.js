@@ -45,7 +45,8 @@ var annotation = function (type, args) {
     return new annotation(type, args);
   }
 
-  var m_options = $.extend({}, {showLabel: true}, args || {}),
+  var m_this = this,
+      m_options = $.extend({}, {showLabel: true}, args || {}),
       m_id = m_options.annotationId;
   delete m_options.annotationId;
   if (m_id === undefined || (m_options.layer && m_options.layer.annotationById(m_id))) {
@@ -104,10 +105,10 @@ var annotation = function (type, args) {
       arg = ('' + arg).trim();
       if (arg !== m_name) {
         m_name = arg;
-        this.modified();
+        m_this.modified();
       }
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -125,9 +126,9 @@ var annotation = function (type, args) {
     }
     if (arg !== m_label) {
       m_label = arg;
-      this.modified();
+      m_this.modified();
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -137,7 +138,7 @@ var annotation = function (type, args) {
    *    or `undefined` if no such position exists.
    */
   this._labelPosition = function () {
-    return util.centerFromPerimeter(this._coordinates());
+    return util.centerFromPerimeter(m_this._coordinates());
   };
 
   /**
@@ -148,19 +149,19 @@ var annotation = function (type, args) {
    *    `undefined` if it should not be shown.
    */
   this.labelRecord = function () {
-    var show = this.options('showLabel');
+    var show = m_this.options('showLabel');
     if (!show) {
       return;
     }
-    var state = this.state();
+    var state = m_this.state();
     if ((show === true && state === annotationState.create) ||
         (show !== true && show.indexOf(state) < 0)) {
       return;
     }
-    var style = this.options('labelStyle');
+    var style = m_this.options('labelStyle');
     var labelRecord = {
-      text: this.label(),
-      position: this._labelPosition()
+      text: m_this.label(),
+      position: m_this._labelPosition()
     };
     if (!labelRecord.position) {
       return;
@@ -184,9 +185,9 @@ var annotation = function (type, args) {
     }
     if (arg !== m_description) {
       m_description = arg;
-      this.modified();
+      m_this.modified();
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -201,7 +202,7 @@ var annotation = function (type, args) {
       return m_layer;
     }
     m_layer = arg;
-    return this;
+    return m_this;
   };
 
   /**
@@ -218,13 +219,13 @@ var annotation = function (type, args) {
     }
     if (m_state !== arg) {
       m_state = arg;
-      if (this.layer()) {
-        this.layer().geoTrigger(geo_event.annotation.state, {
+      if (m_this.layer()) {
+        m_this.layer().geoTrigger(geo_event.annotation.state, {
           annotation: this
         });
       }
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -284,24 +285,24 @@ var annotation = function (type, args) {
     if (m_options.coordinates) {
       var coor = m_options.coordinates;
       delete m_options.coordinates;
-      this._coordinates(coor);
+      m_this._coordinates(coor);
     }
     if (m_options.name !== undefined) {
       var name = m_options.name;
       delete m_options.name;
-      this.name(name);
+      m_this.name(name);
     }
     if (m_options.label !== undefined) {
       var label = m_options.label;
       delete m_options.label;
-      this.label(label);
+      m_this.label(label);
     }
     if (m_options.description !== undefined) {
       var description = m_options.description;
       delete m_options.description;
-      this.description(description);
+      m_this.description(description);
     }
-    this.modified();
+    m_this.modified();
     return this;
   };
 
@@ -329,8 +330,8 @@ var annotation = function (type, args) {
     } else {
       m_options.style[arg1] = arg2;
     }
-    this.modified();
-    return this;
+    m_this.modified();
+    return m_this;
   };
 
   /**
@@ -357,8 +358,8 @@ var annotation = function (type, args) {
     } else {
       m_options.editStyle[arg1] = arg2;
     }
-    this.modified();
-    return this;
+    m_this.modified();
+    return m_this;
   };
 
   /**
@@ -428,9 +429,9 @@ var annotation = function (type, args) {
    * @returns {geo.geoPosition[]} An array of coordinates.
    */
   this.coordinates = function (gcs) {
-    var coord = this._coordinates() || [];
-    if (this.layer()) {
-      var map = this.layer().map();
+    var coord = m_this._coordinates() || [];
+    if (m_this.layer()) {
+      var map = m_this.layer().map();
       gcs = (gcs === null ? map.gcs() : (
              gcs === undefined ? map.ingcs() : gcs));
       if (gcs !== map.gcs()) {
@@ -447,10 +448,10 @@ var annotation = function (type, args) {
    * @returns {this} The annotation.
    */
   this.modified = function () {
-    if (this.layer()) {
-      this.layer().modified();
+    if (m_this.layer()) {
+      m_this.layer().modified();
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -459,11 +460,11 @@ var annotation = function (type, args) {
    * @returns {this} The annotation.
    */
   this.draw = function () {
-    if (this.layer()) {
-      this.layer()._update();
-      this.layer().draw();
+    if (m_this.layer()) {
+      m_this.layer()._update();
+      m_this.layer().draw();
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -510,11 +511,11 @@ var annotation = function (type, args) {
    *    should not be represented (for instance, while it is being created).
    */
   this.geojson = function (gcs, includeCrs) {
-    var coor = this._geojsonCoordinates(gcs),
-        geotype = this._geojsonGeometryType(),
-        styles = this._geojsonStyles(),
-        objStyle = this.options('style') || {},
-        objLabelStyle = this.options('labelStyle') || {},
+    var coor = m_this._geojsonCoordinates(gcs),
+        geotype = m_this._geojsonGeometryType(),
+        styles = m_this._geojsonStyles(),
+        objStyle = m_this.options('style') || {},
+        objLabelStyle = m_this.options('labelStyle') || {},
         i, key, value;
     if (!coor || !coor.length || !geotype) {
       return;
@@ -527,8 +528,8 @@ var annotation = function (type, args) {
       },
       properties: {
         annotationType: m_type,
-        name: this.name(),
-        annotationId: this.id()
+        name: m_this.name(),
+        annotationId: m_this.id()
       }
     };
     if (m_label) {
@@ -537,8 +538,8 @@ var annotation = function (type, args) {
     if (m_description) {
       obj.properties.description = m_description;
     }
-    if (this.options('showLabel') === false) {
-      obj.properties.showLabel = this.options('showLabel');
+    if (m_this.options('showLabel') === false) {
+      obj.properties.showLabel = m_this.options('showLabel');
     }
     for (i = 0; i < styles.length; i += 1) {
       key = styles[i];
@@ -561,7 +562,7 @@ var annotation = function (type, args) {
       }
     }
     if (includeCrs) {
-      var map = this.layer().map();
+      var map = m_this.layer().map();
       gcs = (gcs === null ? map.gcs() : (
              gcs === undefined ? map.ingcs() : gcs));
       obj.crs = {
@@ -643,6 +644,9 @@ var rectangleAnnotation = function (args) {
   delete args.coordinates;
   annotation.call(this, 'rectangle', args);
 
+  var m_this = this,
+      s_actions = this.actions;
+
   /**
    * Return actions needed for the specified state of this annotation.
    *
@@ -652,7 +656,7 @@ var rectangleAnnotation = function (args) {
    */
   this.actions = function (state) {
     if (!state) {
-      state = this.state();
+      state = m_this.state();
     }
     switch (state) {
       case annotationState.create:
@@ -665,7 +669,7 @@ var rectangleAnnotation = function (args) {
           selectionRectangle: true
         }];
       default:
-        return [];
+        return s_actions.apply(m_this, arguments);
     }
   };
 
@@ -679,21 +683,22 @@ var rectangleAnnotation = function (args) {
    *    anything.
    */
   this.processAction = function (evt) {
-    var layer = this.layer();
-    if (this.state() !== annotationState.create || !layer ||
+    var layer = m_this.layer();
+    if (m_this.state() !== annotationState.create || !layer ||
         evt.event !== geo_event.actionselection ||
         evt.state.action !== geo_action.annotation_rectangle) {
       return;
     }
-    var map = layer.map();
-    this.options('corners', [
-      /* Keep in map gcs, not interface gcs to avoid wrapping issues */
-      map.displayToGcs({x: evt.lowerLeft.x, y: evt.lowerLeft.y}, null),
-      map.displayToGcs({x: evt.lowerLeft.x, y: evt.upperRight.y}, null),
-      map.displayToGcs({x: evt.upperRight.x, y: evt.upperRight.y}, null),
-      map.displayToGcs({x: evt.upperRight.x, y: evt.lowerLeft.y}, null)
-    ]);
-    this.state(annotationState.done);
+    var map = layer.map(),
+        corners = [
+          /* Keep in map gcs, not interface gcs to avoid wrapping issues */
+          map.displayToGcs({x: evt.lowerLeft.x, y: evt.lowerLeft.y}, null),
+          map.displayToGcs({x: evt.lowerLeft.x, y: evt.upperRight.y}, null),
+          map.displayToGcs({x: evt.upperRight.x, y: evt.upperRight.y}, null),
+          map.displayToGcs({x: evt.upperRight.x, y: evt.lowerLeft.y}, null)
+        ];
+    m_this.options('corners', corners);
+    m_this.state(annotationState.done);
     return 'done';
   };
 
@@ -703,8 +708,8 @@ var rectangleAnnotation = function (args) {
    * @returns {array} An array of features.
    */
   this.features = function () {
-    var opt = this.options(),
-        state = this.state(),
+    var opt = m_this.options(),
+        state = m_this.state(),
         features;
     switch (state) {
       case annotationState.create:
@@ -740,11 +745,11 @@ var rectangleAnnotation = function (args) {
    */
   this._coordinates = function (coordinates) {
     if (coordinates && coordinates.length >= 4) {
-      this.options('corners', coordinates.slice(0, 4));
+      m_this.options('corners', coordinates.slice(0, 4));
       /* Should we ensure that the four points form a rectangle in the current
        * projection, though this might not be rectangular in another gcs? */
     }
-    return this.options('corners');
+    return m_this.options('corners');
   };
 
   /**
@@ -756,8 +761,8 @@ var rectangleAnnotation = function (args) {
    *    coordinate system.  `undefined` if this annotation is incomplete.
    */
   this._geojsonCoordinates = function (gcs) {
-    var src = this.coordinates(gcs);
-    if (!src || this.state() === annotationState.create || src.length < 4) {
+    var src = m_this.coordinates(gcs);
+    if (!src || m_this.state() === annotationState.create || src.length < 4) {
       return;
     }
     var coor = [];
@@ -796,7 +801,7 @@ var rectangleAnnotation = function (args) {
    * @param {geo.event} evt The mouse move event.
    */
   this._setCornersFromMouse = function (corners, evt) {
-    var map = this.layer().map(),
+    var map = m_this.layer().map(),
         c0 = map.gcsToDisplay({x: corners[0].x, y: corners[0].y}, null),
         c2 = map.gcsToDisplay(evt.mapgcs, null),
         c1 = {x: c2.x, y: c0.y},
@@ -814,12 +819,12 @@ var rectangleAnnotation = function (args) {
    *    update anything.
    */
   this.mouseMove = function (evt) {
-    if (this.state() !== annotationState.create) {
+    if (m_this.state() !== annotationState.create) {
       return;
     }
-    var corners = this.options('corners');
+    var corners = m_this.options('corners');
     if (corners.length) {
-      this._setCornersFromMouse(corners, evt);
+      m_this._setCornersFromMouse(corners, evt);
       return true;
     }
   };
@@ -835,21 +840,21 @@ var rectangleAnnotation = function (args) {
    *    anything.
    */
   this.mouseClick = function (evt) {
-    var layer = this.layer();
-    if (this.state() !== annotationState.create || !layer) {
+    var layer = m_this.layer();
+    if (m_this.state() !== annotationState.create || !layer) {
       return;
     }
     if (!evt.buttonsDown.left && !evt.buttonsDown.right) {
       return;
     }
-    var corners = this.options('corners');
+    var corners = m_this.options('corners');
     if (evt.buttonsDown.right && !corners.length) {
       return;
     }
     evt.handled = true;
     if (corners.length) {
-      this._setCornersFromMouse(corners, evt);
-      this.state(annotationState.done);
+      m_this._setCornersFromMouse(corners, evt);
+      m_this.state(annotationState.done);
       return 'done';
     }
     if (evt.buttonsDown.left) {
@@ -906,8 +911,6 @@ var polygonAnnotation = function (args) {
     return new polygonAnnotation(args);
   }
 
-  var m_this = this;
-
   args = $.extend(true, {}, {
     style: {
       fill: true,
@@ -946,6 +949,8 @@ var polygonAnnotation = function (args) {
   delete args.coordinates;
   annotation.call(this, 'polygon', args);
 
+  var m_this = this;
+
   /**
    * Get a list of renderable features for this annotation.  When the polygon
    * is done, this is just a single polygon.  During creation this can be a
@@ -954,8 +959,8 @@ var polygonAnnotation = function (args) {
    * @returns {array} An array of features.
    */
   this.features = function () {
-    var opt = this.options(),
-        state = this.state(),
+    var opt = m_this.options(),
+        state = m_this.state(),
         features;
     switch (state) {
       case annotationState.create:
@@ -999,9 +1004,9 @@ var polygonAnnotation = function (args) {
    */
   this._coordinates = function (coordinates) {
     if (coordinates) {
-      this.options('vertices', coordinates);
+      m_this.options('vertices', coordinates);
     }
-    return this.options('vertices');
+    return m_this.options('vertices');
   };
 
   /**
@@ -1012,10 +1017,10 @@ var polygonAnnotation = function (args) {
    *    update anything.
    */
   this.mouseMove = function (evt) {
-    if (this.state() !== annotationState.create) {
+    if (m_this.state() !== annotationState.create) {
       return;
     }
-    var vertices = this.options('vertices');
+    var vertices = m_this.options('vertices');
     if (vertices.length) {
       vertices[vertices.length - 1] = evt.mapgcs;
       return true;
@@ -1033,15 +1038,15 @@ var polygonAnnotation = function (args) {
    *    anything.
    */
   this.mouseClick = function (evt) {
-    var layer = this.layer();
-    if (this.state() !== annotationState.create || !layer) {
+    var layer = m_this.layer();
+    if (m_this.state() !== annotationState.create || !layer) {
       return;
     }
     var end = !!evt.buttonsDown.right, skip;
     if (!evt.buttonsDown.left && !evt.buttonsDown.right) {
       return;
     }
-    var vertices = this.options('vertices');
+    var vertices = m_this.options('vertices');
     if (evt.buttonsDown.right && !vertices.length) {
       return;
     }
@@ -1076,7 +1081,7 @@ var polygonAnnotation = function (args) {
         return 'remove';
       }
       vertices.pop();
-      this.state(annotationState.done);
+      m_this.state(annotationState.done);
       return 'done';
     }
     return (end || !skip);
@@ -1091,8 +1096,8 @@ var polygonAnnotation = function (args) {
    *    coordinate system.  `undefined` if this annotation is incomplete.
    */
   this._geojsonCoordinates = function (gcs) {
-    var src = this.coordinates(gcs);
-    if (!src || src.length < 3 || this.state() === annotationState.create) {
+    var src = m_this.coordinates(gcs);
+    if (!src || src.length < 3 || m_this.state() === annotationState.create) {
       return;
     }
     var coor = [];
@@ -1164,8 +1169,6 @@ var lineAnnotation = function (args) {
     return new lineAnnotation(args);
   }
 
-  var m_this = this;
-
   args = $.extend(true, {}, {
     style: {
       line: function (d) {
@@ -1206,14 +1209,17 @@ var lineAnnotation = function (args) {
   delete args.coordinates;
   annotation.call(this, 'line', args);
 
+  var m_this = this,
+      s_actions = this.actions;
+
   /**
    * Get a list of renderable features for this annotation.
    *
    * @returns {array} An array of features.
    */
   this.features = function () {
-    var opt = this.options(),
-        state = this.state(),
+    var opt = m_this.options(),
+        state = m_this.state(),
         features;
     switch (state) {
       case annotationState.create:
@@ -1246,9 +1252,9 @@ var lineAnnotation = function (args) {
    */
   this._coordinates = function (coordinates) {
     if (coordinates) {
-      this.options('vertices', coordinates);
+      m_this.options('vertices', coordinates);
     }
-    return this.options('vertices');
+    return m_this.options('vertices');
   };
 
   /**
@@ -1259,10 +1265,10 @@ var lineAnnotation = function (args) {
    *    update anything.
    */
   this.mouseMove = function (evt) {
-    if (this.state() !== annotationState.create) {
+    if (m_this.state() !== annotationState.create) {
       return;
     }
-    var vertices = this.options('vertices');
+    var vertices = m_this.options('vertices');
     if (vertices.length) {
       vertices[vertices.length - 1] = evt.mapgcs;
       return true;
@@ -1280,15 +1286,15 @@ var lineAnnotation = function (args) {
    *    anything.
    */
   this.mouseClick = function (evt) {
-    var layer = this.layer();
-    if (this.state() !== annotationState.create || !layer) {
+    var layer = m_this.layer();
+    if (m_this.state() !== annotationState.create || !layer) {
       return;
     }
     var end = !!evt.buttonsDown.right, skip;
     if (!evt.buttonsDown.left && !evt.buttonsDown.right) {
       return;
     }
-    var vertices = this.options('vertices');
+    var vertices = m_this.options('vertices');
     if (evt.buttonsDown.right && !vertices.length) {
       return;
     }
@@ -1324,8 +1330,8 @@ var lineAnnotation = function (args) {
         return 'remove';
       }
       vertices.pop();
-      this.options('style').closed = end === 'close';
-      this.state(annotationState.done);
+      m_this.options('style').closed = end === 'close';
+      m_this.state(annotationState.done);
       return 'done';
     }
     return (end || !skip);
@@ -1340,7 +1346,7 @@ var lineAnnotation = function (args) {
    */
   this.actions = function (state) {
     if (!state) {
-      state = this.state();
+      state = m_this.state();
     }
     switch (state) {
       case annotationState.create:
@@ -1357,7 +1363,7 @@ var lineAnnotation = function (args) {
           input: 'pan'
         }];
       default:
-        return [];
+        return s_actions.apply(m_this, arguments);
     }
   };
 
@@ -1371,15 +1377,15 @@ var lineAnnotation = function (args) {
    *    anything.
    */
   this.processAction = function (evt) {
-    var layer = this.layer();
-    if (this.state() !== annotationState.create || !layer ||
+    var layer = m_this.layer();
+    if (m_this.state() !== annotationState.create || !layer ||
         evt.state.action !== geo_action.annotation_line) {
       return;
     }
     var cpp = layer.options('continuousPointProximity');
     var cpc = layer.options('continuousPointColinearity');
     if (cpp || cpp === 0) {
-      var vertices = this.options('vertices');
+      var vertices = m_this.options('vertices');
       if (!vertices.length) {
         vertices.push(evt.mouse.mapgcs);
         vertices.push(evt.mouse.mapgcs);
@@ -1415,8 +1421,8 @@ var lineAnnotation = function (args) {
    *    coordinate system.  `undefined` if this annotation is incomplete.
    */
   this._geojsonCoordinates = function (gcs) {
-    var src = this.coordinates(gcs);
-    if (!src || src.length < 2 || this.state() === annotationState.create) {
+    var src = m_this.coordinates(gcs);
+    if (!src || src.length < 2 || m_this.state() === annotationState.create) {
       return;
     }
     var coor = [];
@@ -1479,15 +1485,14 @@ registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
  *    zoom level.  If it is `true`, the radius is based on the zoom level at
  *    first instantiation.  Otherwise, if it is a number, the radius is used
  *    at that zoom level.
- * @param {object} [args.editStyle] The style to apply to a line in edit
- *    mode.  This uses styles for lines.
+ * @param {object} [args.editStyle] The style to apply to a point in edit
+ *    mode.
  */
 var pointAnnotation = function (args) {
   'use strict';
   if (!(this instanceof pointAnnotation)) {
     return new pointAnnotation(args);
   }
-  var m_this = this;
 
   args = $.extend(true, {}, {
     style: {
@@ -1506,14 +1511,16 @@ var pointAnnotation = function (args) {
   delete args.coordinates;
   annotation.call(this, 'point', args);
 
+  var m_this = this;
+
   /**
    * Get a list of renderable features for this annotation.
    *
    * @returns {array} An array of features.
    */
   this.features = function () {
-    var opt = this.options(),
-        state = this.state(),
+    var opt = m_this.options(),
+        state = m_this.state(),
         features, style, scaleOnZoom;
     switch (state) {
       case annotationState.create:
@@ -1523,14 +1530,14 @@ var pointAnnotation = function (args) {
         style = opt.style;
         if (opt.style.scaled || opt.style.scaled === 0) {
           if (opt.style.scaled === true) {
-            opt.style.scaled = this.layer().map().zoom();
+            opt.style.scaled = m_this.layer().map().zoom();
           }
           style = $.extend({}, style, {
             radius: function () {
               var radius = opt.style.radius,
                   zoom = m_this.layer().map().zoom();
               if (util.isFunction(radius)) {
-                radius = radius.apply(this, arguments);
+                radius = radius.apply(m_this, arguments);
               }
               radius *= Math.pow(2, zoom - opt.style.scaled);
               return radius;
@@ -1561,12 +1568,12 @@ var pointAnnotation = function (args) {
    */
   this._coordinates = function (coordinates) {
     if (coordinates && coordinates.length >= 1) {
-      this.options('position', coordinates[0]);
+      m_this.options('position', coordinates[0]);
     }
-    if (this.state() === annotationState.create) {
+    if (m_this.state() === annotationState.create) {
       return [];
     }
-    return [this.options('position')];
+    return [m_this.options('position')];
   };
 
   /**
@@ -1580,15 +1587,15 @@ var pointAnnotation = function (args) {
    *    anything.
    */
   this.mouseClick = function (evt) {
-    if (this.state() !== annotationState.create) {
+    if (m_this.state() !== annotationState.create) {
       return;
     }
     if (!evt.buttonsDown.left) {
       return;
     }
     evt.handled = true;
-    this.options('position', evt.mapgcs);
-    this.state(annotationState.done);
+    m_this.options('position', evt.mapgcs);
+    m_this.state(annotationState.done);
     return 'done';
   };
 
@@ -1613,8 +1620,8 @@ var pointAnnotation = function (args) {
    *    coordinate system.  `undefined` if this annotation is incomplete.
    */
   this._geojsonCoordinates = function (gcs) {
-    var src = this.coordinates(gcs);
-    if (!src || this.state() === annotationState.create || src.length < 1 || src[0] === undefined) {
+    var src = m_this.coordinates(gcs);
+    if (!src || m_this.state() === annotationState.create || src.length < 1 || src[0] === undefined) {
       return;
     }
     return [src[0].x, src[0].y];
