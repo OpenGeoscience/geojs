@@ -1,0 +1,56 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Vector point
+    First, let's create our map and add a base map. Also, to make simple, we import our data inline.
+  
+  +codeblock('javascript', 1, undefined, true).
+    var map = geo.map({
+      node: "#map",
+      center: {x: -97.67, y: 31.80},
+      zoom: 4
+    });
+    map.createLayer('osm');
+
+    var cities = {"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[-74.0059413,40.7127837]},"properties":{"name":"New York","population":"8405837"}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-118.2436849,34.0522342]},"properties":{"name":"Los Angeles","population":"3884307"}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-87.6297982,41.8781136]},"properties":{"name":"Chicago","population":"2718782"}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-95.3698028,29.7604267]},"properties":{"name":"Houston","population":"2195914"}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-75.1652215,39.9525839]},"properties":{"name":"Philadelphia","population":"1553165"}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-112.0740373,33.4483771]},"properties":{"name":"Phoenix","population":"1513367"}}]};
+
+  :markdown-it
+    We create a layer first.
+    
+  +codeblock('javascript', 2).
+    var layer = map.createLayer('feature'); 
+
+
+  :markdown-it
+    Then create point feature and set the data.
+
+  +codeblock('javascript', 3).
+    var feature = layer.createFeature('point')
+      .data(cities.features)
+      .position(function (city) {
+          return { x: city['geometry']['coordinates'][0], y: city['geometry']['coordinates'][1] };
+      })
+      .draw();
+
+  :markdown-it
+    We can also use GeoJSON reader to create the point feature.
+
+  +codeblock('javascript', 10, 3, false, 'Step 3-B').
+    var reader = geo.createFileReader('jsonReader', { 'layer': layer });
+    reader.read(cities, function (features) {
+        features[0].draw();
+        // Or we can draw the whole map
+        // map.draw();
+    });
+
+  :markdown-it
+    We could change the style of our point feature.
+
+  +codeblock('javascript', 4, 3).
+    feature.style('fillColor', 'red')
+    .style({
+        'strokeColor': 'black',
+        'strokeWidth': 2
+    })
+    .draw();
