@@ -718,7 +718,7 @@ describe('geo.core.map', function () {
     var m, layer1, layer2, l1, l2;
     var ss = {};
 
-    it('basic', function (done) {
+    it('set up test', function (done) {
       m = createMap({
         width: 64, height: 48, zoom: 2, center: {x: 7.5, y: 7.5}});
       layer1 = m.createLayer('feature', {renderer: 'canvas'});
@@ -734,12 +734,15 @@ describe('geo.core.map', function () {
                [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}]]);
 
       m.draw();
-      window.requestAnimationFrame(function () {
-        m.screenshot().then(function (result) {
-          expect(result.substr(0, 22)).toBe('data:image/png;base64,');
-          ss.basic = result;
-          done();
-        });
+      // make sure that drawing has occurred
+      window.requestAnimationFrame(done);
+    });
+    // all screen shots are in separate it blocks to make them more consistent
+    it('basic', function (done) {
+      m.screenshot().then(function (result) {
+        expect(result.substr(0, 22)).toBe('data:image/png;base64,');
+        ss.basic = result;
+        done();
       });
     });
     it('jpeg', function (done) {
