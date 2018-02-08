@@ -155,7 +155,7 @@ var gl_polygonFeature = function (arg) {
           });
         }
 
-        // tranform to map gcs
+        // transform to map gcs
         geometry.vertices = transform.transformCoordinates(
           target_gcs,
           map_gcs,

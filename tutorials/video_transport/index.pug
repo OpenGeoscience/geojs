@@ -110,9 +110,13 @@ block mainTutorial
       'map.layers()[0].features()[0] instanceof geo.quadFeature'
       ], [
       'waitForLoadAndMap = function (done) {\n' +
-      '  $(video).on("loadeddata", function () {\n' +
+      '  if (video.HAVE_CURRENT_DATA !== undefined && video.readyState >= video.HAVE_CURRENT_DATA) {\n' +
       '    map.onIdle(done);\n' +
-      '  });\n' +
+      '  } else {\n' +
+      '    $(video).on("loadeddata", function () {\n' +
+      '      map.onIdle(done);\n' +
+      '    });\n' +
+      '  }\n' +
       '}'
       ])
 
