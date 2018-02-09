@@ -7,7 +7,7 @@ block mainTutorial
   
   +codeblock('javascript', 1, undefined, true).
     var map = geo.map({
-      node: "#map",
+      node: '#map',
       center: { x: -109, y: 41 },
       zoom: 5
     });
@@ -51,7 +51,7 @@ block mainTutorial
   +codeblock('javascript', 3, 2, false).
     var polulations = (states.features.map(function (state) { return state.properties.population }));
     var domain = [Math.min.apply(null, polulations), Math.max.apply(null, polulations)];
-    var colorRange = ["rgb(237,248,233)", "rgb(186,228,179)", "rgb(116,196,118)", "rgb(35,139,69)"];
+    var colorRange = ['rgb(237,248,233)', 'rgb(186,228,179)', 'rgb(116,196,118)', 'rgb(35,139,69)'];
 
     var scale = d3.scale.quantize().domain(domain).range(colorRange);
 
@@ -79,7 +79,7 @@ block mainTutorial
         };
       }));
 
-    choropleth.choropleth({ colorRange: ["rgb(237,248,233)", "rgb(186,228,179)", "rgb(116,196,118)", "rgb(35,139,69)"] });
+    choropleth.choropleth({ colorRange: ['rgb(237,248,233)', 'rgb(186,228,179)', 'rgb(116,196,118)', 'rgb(35,139,69)'] });
     // get choropleth options and set the geoId accessor
     choropleth.choropleth().accessors.geoId = function (state) { return state.properties.name };
     choropleth.draw();
