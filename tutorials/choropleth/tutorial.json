@@ -6,6 +6,6 @@
   "tutorialCss": [],
   "tutorialJs": [],
   "about": {
-    "text": "Create a choropleth map"
+    "text": "Create a choropleth map, set the colors used, and add a legend."
   }
 }
