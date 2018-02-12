@@ -3,7 +3,7 @@ extends ../common/index.pug
 block mainTutorial
   :markdown-it
     # Tutorial - Choropleth Map
-    First, let's create our map, add a base map, and create a feature layer. Also, to make simple, we import our data inline.
+    First, let's create our map, add a base map, and create a feature layer. Also, to keep it simple, we import our data inline.
   
   +codeblock('javascript', 1, undefined, true).
     var map = geo.map({
@@ -24,8 +24,8 @@ block mainTutorial
     var reader = geo.createFileReader('jsonReader', { 'layer': layer });
     var polygon = null;
     reader.read(states, function (features) {
-        polygon = features[0];
-        polygon.draw();
+      polygon = features[0];
+      polygon.draw();
     });
 
   :markdown-it
@@ -62,7 +62,7 @@ block mainTutorial
         },
         fillOpacity: 1
       })
-      .draw()
+      .draw();
 
   :markdown-it
     Or, we could create our choropleth map with the dedicated choropleth feature, which uses polygon feature internally.

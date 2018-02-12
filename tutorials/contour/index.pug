@@ -16,7 +16,7 @@ block mainTutorial
 
   :markdown-it
     Then load some data. 
-    The data is grid data describing geospatial point elevation, a record of z value -9999 means it's sea level. 
+    The data is grid data describing geospatial point elevation, a record of z value -9999 means there is no land data. 
     Since the data is relatively big, intead of adding inline data, we load asynchronously, and use [promise chain](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) to chain up the following steps.
   +codeblock('javascript', 2, 1).
     var promise = Promise.resolve($.ajax({
@@ -24,7 +24,7 @@ block mainTutorial
     }));
 
   :markdown-it
-    Once the data is loaded. We create the contour feature with default color range. *min: 0* means only showing data with elevation.
+    Once the data is loaded. We create the contour feature with default color range. `min: 0` means only showing data with elevation.
 
   +codeblock('javascript', 3, 2, true).
     var contour = null;

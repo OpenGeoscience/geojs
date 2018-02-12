@@ -2,13 +2,13 @@ extends ../common/index.pug
 
 block mainTutorial
   :markdown-it
-    # Tutorial - Vector point
-    First, let's create our map and add a base map. Also, to make simple, we import our data inline.
+    # Tutorial - Simple point
+    First, let's create our map and add a base map. Also, to keep it simple, we import our data inline.
   
-  +codeblock('javascript', 1, undefined, true).
+  +codeblock('javascript', 1).
     var map = geo.map({
       node: "#map",
-      center: {x: -97.67, y: 31.80},
+      center: { x: -97.67, y: 31.80 },
       zoom: 4
     });
     map.createLayer('osm');
@@ -25,11 +25,14 @@ block mainTutorial
   :markdown-it
     Then create point feature and set the data.
 
-  +codeblock('javascript', 3).
+  +codeblock('javascript', 3, undefined, true).
     var feature = layer.createFeature('point')
       .data(cities.features)
       .position(function (city) {
-          return { x: city['geometry']['coordinates'][0], y: city['geometry']['coordinates'][1] };
+        return {
+          x: city['geometry']['coordinates'][0],
+          y: city['geometry']['coordinates'][1]
+        };
       })
       .draw();
 
@@ -39,9 +42,9 @@ block mainTutorial
   +codeblock('javascript', 10, 3, false, 'Step 3-B').
     var reader = geo.createFileReader('jsonReader', { 'layer': layer });
     reader.read(cities, function (features) {
-        features[0].draw();
-        // Or we can draw the whole map
-        // map.draw();
+      features[0].draw();
+      // Or we can draw the whole map
+      // map.draw();
     });
 
   :markdown-it
@@ -49,8 +52,8 @@ block mainTutorial
 
   +codeblock('javascript', 4, 3).
     feature.style('fillColor', 'red')
-    .style({
+      .style({
         'strokeColor': 'black',
         'strokeWidth': 2
-    })
-    .draw();
+      })
+      .draw();
