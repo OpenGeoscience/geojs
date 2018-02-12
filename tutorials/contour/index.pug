@@ -1,0 +1,81 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Contour Map
+    First, let's create our map and add a base map and a feature layer.
+  
+  +codeblock('javascript', 1).
+    var map = geo.map({
+      node: '#map',
+      center: { x: -157.965, y: 21.482 },
+      zoom: 10
+    });
+    map.createLayer('osm');
+    var layer = map.createLayer('feature');
+
+  :markdown-it
+    Then load some data. 
+    The data is grid data describing geospatial point elevation, a record of z value -9999 means there is no land data. 
+    Since the data is relatively big, intead of adding inline data, we load asynchronously, and use [promise chain](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) to chain up the following steps.
+  +codeblock('javascript', 2, 1).
+    var promise = Promise.resolve($.ajax({
+      url: '../../data/oahu.json'
+    }));
+
+  :markdown-it
+    Once the data is loaded. We create the contour feature with default color range. `min: 0` means only showing data with elevation.
+
+  +codeblock('javascript', 3, 2, true).
+    var contour = null;
+    promise.then(function (data) {
+      contour = layer.createFeature('contour')
+        .data(data.position)
+        .style({
+          opacity: 0.75
+        })
+        .contour({
+          gridWidth: data.gridWidth,
+          gridHeight: data.gridHeight,
+          min: 0
+        })
+        .position(function (d) { return { x: d.x, y: d.y, z: d.z }; })
+        .draw();
+    });
+
+  :markdown-it
+    We could use a non-linear scale.
+
+  +codeblock('javascript', 4, 3).
+    promise.then(function (data) {
+      contour
+        .contour({
+          rangeValues: [0, 25, 50, 75, 100, 125, 250, 500, 750, 2000]
+        })
+        .draw();
+      console.log(contour.contour());
+    });
+
+  :markdown-it
+    Or, we could use an custom color range.
+
+  +codeblock('javascript', 10, 3, false, 'Step 4-B').
+    promise.then(function (data) {
+      contour
+        .contour({
+          colorRange: ['rgb(224,130,20)', 'rgb(253,184,99)', 'rgb(254,224,182)', 'rgb(216,218,235)', 'rgb(178,171,210)', 'rgb(128,115,172)', 'rgb(84,39,136)']
+        })
+        .draw();
+    });
+
+  :markdown-it
+    We can use smooth contours instead of stepped contours.
+
+  +codeblock('javascript', 5, 4).
+    promise.then(function (data) {
+      contour
+        .contour({
+          stepped: false
+        })
+        .draw();
+    });
