@@ -78,6 +78,7 @@ function run_block(selector, notLast, debounce, forceRun) {
  *      process.
  */
 function process_block(selector) {
+  processBlockInfo.lastelem = null;
   var elem = $(selector).closest('.codeblock'),
       target = elem.attr('target'),
       targetelem = $('#' + target),
@@ -134,11 +135,10 @@ function process_block(selector) {
            js +
            '\ngeo.util.restoreVGLRenderer();\n';
     }
-    /* If we are in a test environment, redirect the console to the parent
-     * window to make debugging easier. */
+    /* If we are in a test environment, redirect the tutorial's console to the
+     * test's parent window to make debugging easier. */
     if (window.parent && window.parent !== window) {
       js = 'window.console = window.parent.parent.console;\n' +
-           'window.parent.console = window.parent.parent.console;\n' +
            'console.log("Testing " + window.parent.document.title);\n' +
            js;
     }
@@ -153,6 +153,7 @@ function process_block(selector) {
      * Although (a) is the most compatible, it doesn't allow access to local
      * urls from within the iframe.  (c) solves this, but requires extra work
      * for browsers that don't support srcdoc. */
+    processBlockInfo.lastsrc = html;
     targetelem.attr('srcdoc', html);
     if (!processBlockInfo.srcdocSupport) {
       jsurl = 'javascript: window.frameElement.getAttribute("srcdoc");';
@@ -161,7 +162,6 @@ function process_block(selector) {
       }
       targetelem.attr('src', jsurl);
     }
-    processBlockInfo.lastsrc = html;
     /* Expose the frame's global variables in the 'tutorial' variable.  If
      * there are multiple tutorials (multiple iframes), then this is the last
      * one executed.  All of them will be accessible in the 'tutorials'
@@ -186,7 +186,7 @@ function process_block_debounce(selector, debounce) {
     processBlockInfo.timer = null;
   }
   if (!selector.is(processBlockInfo.lastelem) || !debounce) {
-    if (processBlockInfo.lastelem) {
+    if (processBlockInfo.lastelem && !selector.is(processBlockInfo.lastelem)) {
       process_block(processBlockInfo.lastelem);
     }
     processBlockInfo.lastelem = selector;
@@ -296,6 +296,11 @@ function start_keeper(alwaysKeep) {
  *      parameter is not specified.
  */
 function start_tutorial(useCodeMirror, alwaysKeep) {
+  /* If we are in a test environment, redirect the test's console to the parent
+   * window to make debugging easier. */
+  if (window.parent && window.parent !== window) {
+    window.console = window.parent.console;
+  }
   /* clean up whitespace and store a default value for each code block */
   $('.codeblock').each(function () {
     var elem = $('textarea', this),
@@ -327,6 +332,13 @@ function start_tutorial(useCodeMirror, alwaysKeep) {
   }
   /* Check if iframe srcdoc support is present */
   processBlockInfo.srcdocSupport = !!('srcdoc' in document.createElement('iframe'));
+  /* Chrome 64 introduced a change which removes some srcdoc support, so
+   * mark it as unavailable in Chrome.  It would be nicer to not have user
+   * agent testings, but doing this generically causes problems in Firefox
+   * headless tests. */
+  if (/Chrome\//.test(navigator.userAgent)) {
+    processBlockInfo.srcdocSupport = false;
+  }
   start_keeper(alwaysKeep);
   run_tutorial();
 }

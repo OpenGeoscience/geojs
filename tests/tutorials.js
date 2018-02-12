@@ -18,8 +18,12 @@ describe('tutorials', function () {
     describe('Test ' + tutorialName, function () {
       /* Load the tutorial in the test iframe */
       beforeEach(function (done) {
-        $('#map').one('load', done);
+        sinon.stub(console, 'warn', function () {});
+        $('#map').one('load', function () { window.setTimeout(done, 1); });
         $('#map').attr('src', '/tutorials/' + tutorialName + '/index.html');
+      });
+      afterEach(function () {
+        console.warn.restore();
       });
       it('Run tutorial tests', function (done) {
         var base$, tests;
@@ -53,7 +57,7 @@ describe('tutorials', function () {
                 deferreds.push(defer);
                 var idle = targetWindow.eval(idleFunc);
                 if (!tut$.isFunction(idle)) {
-                  idle = idle.done;
+                  idle = idle.then || idle.done;
                 }
                 idle(function () {
                   defer.resolve();

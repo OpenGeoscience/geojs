@@ -49,6 +49,14 @@ var Helper = function () {
 describe('geo.util.debounce', function () {
   'use strict';
 
+  var clock;
+  beforeEach(function () {
+    clock = sinon.useFakeTimers();
+  });
+  afterEach(function () {
+    clock.restore();
+  });
+
   it('at_begin=false, accumulator=undefined', function (done) {
     var helper = new Helper();
     var wrapped = geo.util.debounce(100, helper.delay);
@@ -90,6 +98,12 @@ describe('geo.util.debounce', function () {
       helper.expect('accum');
       done();
     }, 600);
+    clock.tick(1);   //   1
+    clock.tick(4);   //   5
+    clock.tick(10);  //  15
+    clock.tick(185); // 200
+    clock.tick(50);  // 250
+    clock.tick(350); // 600
   });
 
   it('at_begin=false, accumulator=defined', function (done) {
@@ -133,6 +147,12 @@ describe('geo.util.debounce', function () {
       helper.expect('accum', args);
       done();
     }, 600);
+    clock.tick(1);   //   1
+    clock.tick(4);   //   5
+    clock.tick(10);  //  15
+    clock.tick(185); // 200
+    clock.tick(50);  // 250
+    clock.tick(350); // 600
   });
 
   it('at_begin=true, accumulator=undefined', function (done) {
@@ -176,6 +196,12 @@ describe('geo.util.debounce', function () {
       helper.expect('accum');
       done();
     }, 600);
+    clock.tick(1);   //   1
+    clock.tick(4);   //   5
+    clock.tick(10);  //  15
+    clock.tick(185); // 200
+    clock.tick(50);  // 250
+    clock.tick(350); // 600
   });
 
   it('at_begin=true, accumulator=defined', function (done) {
@@ -219,6 +245,12 @@ describe('geo.util.debounce', function () {
       helper.expect('accum', args);
       done();
     }, 600);
+    clock.tick(1);   //   1
+    clock.tick(4);   //   5
+    clock.tick(10);  //  15
+    clock.tick(185); // 200
+    clock.tick(50);  // 250
+    clock.tick(350); // 600
   });
 });
 
