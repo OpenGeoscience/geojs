@@ -67,3 +67,15 @@ block mainTutorial
         })
         .draw();
     });
+
+  :markdown-it
+    We can use smooth contours instead of stepped contours.
+
+  +codeblock('javascript', 5, 4).
+    promise.then(function (data) {
+      contour
+        .contour({
+          stepped: false
+        })
+        .draw();
+    });
