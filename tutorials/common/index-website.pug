@@ -32,8 +32,8 @@ mixin codeblock(format, step, parentstep, initial, stepname, target)
       .codeblock_step #{attributes.stepname}
       .codeblock_active Active
       .codeblock_inactive Inactive
-      button.codeblock_run Run
-      button.codeblock_reset Reset
+      button.codeblock_run.btn.btn-primary.btn-sm Run
+      button.codeblock_reset.btn.btn-link.btn-sm Reset
 
 //-
   Tests for a the state of a target iframe after the most recent codeblock is

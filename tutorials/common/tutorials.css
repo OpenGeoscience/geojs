@@ -27,8 +27,9 @@ html, body {
 #tutorial {
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 0.5em;
-  background: ivory;
+  padding: 1em;
+  padding-right: 0.5em;
+  background: #f9f9f9;
   resize: horizontal;
   min-width: 10em;
 }
@@ -83,4 +84,3 @@ html, body {
 .codeblock_test {
   display: none;
 }
-
