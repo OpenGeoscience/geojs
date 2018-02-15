@@ -201,7 +201,9 @@ var annotation = function (type, args) {
       maxr2 = Math.max(maxr2, Math.pow(pos.x - dispCenter.x, 2) + Math.pow(pos.y - dispCenter.y, 2));
     }
     r = Math.sqrt(maxr2) + offset;
-    pos = map.displayToGcs({x: dispCenter.x + r * Math.cos(rotation), y: dispCenter.y - r * Math.sin(rotation)}, null);
+    pos = map.displayToGcs({
+      x: dispCenter.x + r * Math.cos(rotation),
+      y: dispCenter.y - r * Math.sin(rotation)}, null);
     return pos;
   };
 
@@ -905,8 +907,12 @@ var annotation = function (type, args) {
           x: handle.resizePosition.x + delta.x,
           y: handle.resizePosition.y + delta.y
         }, null),
-        d01 = Math.pow(Math.pow(p1.y - p0.y, 2) + Math.pow(p1.x - p0.x, 2), 0.5) - handle.handle.style.resizeHandleOffset,
-        d02 = Math.pow(Math.pow(p2.y - p0.y, 2) + Math.pow(p2.x - p0.x, 2), 0.5) - handle.handle.style.resizeHandleOffset,
+        d01 = Math.pow(Math.pow(p1.y - p0.y, 2) +
+                       Math.pow(p1.x - p0.x, 2), 0.5) -
+              handle.handle.style.resizeHandleOffset,
+        d02 = Math.pow(Math.pow(p2.y - p0.y, 2) +
+                       Math.pow(p2.x - p0.x, 2), 0.5) -
+              handle.handle.style.resizeHandleOffset,
         curPts = m_this._coordinates();
     if (d02 && d01) {
       var scale = d02 / d01;
@@ -976,9 +982,13 @@ var annotation = function (type, args) {
       /* if we haven't moved at least aPP from where the vertex started, don't
        * allow it to be merged into another vertex.  This prevents small scale
        * edits from collapsing immediately. */
-    } else if (layer.displayDistance(curPts[index], null, curPts[(index + 1) % curPts.length], null) <= aPP) {
+    } else if (layer.displayDistance(
+        curPts[index], null,
+        curPts[(index + 1) % curPts.length], null) <= aPP) {
       near = (index + 1) % curPts.length;
-    } else if (layer.displayDistance(curPts[index], null, curPts[(index + curPts.length - 1) % curPts.length], null) <= aPP) {
+    } else if (layer.displayDistance(
+        curPts[index], null,
+        curPts[(index + curPts.length - 1) % curPts.length], null) <= aPP) {
       near = (index + curPts.length - 1) % curPts.length;
     }
     atEnd = ((near === 0 && index === curPts.length - 1) ||
