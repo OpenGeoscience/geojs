@@ -128,6 +128,9 @@ var gl_polygonFeature = function (arg) {
           return;
         }
         outer = polygon.outer || (Array.isArray(polygon) ? polygon : []);
+        if (outer.length < 3) {
+          return;
+        }
 
         /* expand to an earcut polygon geometry.  We had been using a map call,
          * but using loops is much faster in Chrome (4 versus 33 ms for one
@@ -144,6 +147,9 @@ var gl_polygonFeature = function (arg) {
 
         if (polygon.inner) {
           polygon.inner.forEach(function (hole) {
+            if (hole.length < 3) {
+              return;
+            }
             original = original.concat(hole);
             geometry.holes.push(d3 / 3);
             for (i = 0; i < hole.length; i += 1, d3 += 3) {

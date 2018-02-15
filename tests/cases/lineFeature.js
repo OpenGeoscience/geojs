@@ -197,6 +197,60 @@ describe('geo.lineFeature', function () {
       idx = line.boxSearch({x: 29, y: 9}, {x: 36, y: 26});
       expect(idx).toEqual([1, 2]);
     });
+
+    describe('rdpSimplifyData', function () {
+      function countLines(data) {
+        var counts = {
+          lines: data.length,
+          vertices: 0
+        };
+        data.forEach(function (line) {
+          if (Array.isArray(line) || !line.coord) {
+            counts.vertices += line.length;
+          } else {
+            counts.vertices += line.coord.length;
+          }
+        });
+        return counts;
+      }
+
+      function lineFunc(item, itemIdx) {
+        return item.coord;
+      }
+
+      it('basic usage', function () {
+        var map, layer, line, counts;
+
+        map = createMap();
+        layer = map.createLayer('feature', {renderer: 'vgl'});
+        line = geo.lineFeature({layer: layer});
+        line._init();
+        line.data(testLines).line(lineFunc);
+        counts = countLines(line.data().map(line.style.get('line')));
+        expect(counts).toEqual({lines: 8, vertices: 23});
+        line.rdpSimplifyData(testLines, undefined, undefined, lineFunc);
+        counts = countLines(line.data().map(line.style.get('line')));
+        expect(counts).toEqual({lines: 8, vertices: 18});
+
+        // use pixel space for ease of picking tolerance values in tests
+        map.gcs('+proj=longlat +axis=enu');
+        map.ingcs('+proj=longlat +axis=esu');
+        line.rdpSimplifyData(testLines, 2, undefined, lineFunc);
+        counts = countLines(line.data().map(line.style.get('line')));
+        expect(counts).toEqual({lines: 8, vertices: 17});
+        line.rdpSimplifyData(testLines, 5, undefined, lineFunc);
+        counts = countLines(line.data().map(line.style.get('line')));
+        expect(counts).toEqual({lines: 8, vertices: 11});
+        line.rdpSimplifyData(testLines, 20, undefined, lineFunc);
+        counts = countLines(line.data().map(line.style.get('line')));
+        expect(counts).toEqual({lines: 8, vertices: 0});
+        line.rdpSimplifyData(testLines, 0.4, function (d) {
+          return {x: d.x * 0.2, y: d.y * 0.2};
+        }, lineFunc);
+        counts = countLines(line.data().map(line.style.get('line')));
+        expect(counts).toEqual({lines: 8, vertices: 17});
+      });
+    });
   });
 
   /* This is a basic integration test of geo.d3.lineFeature. */

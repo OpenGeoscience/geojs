@@ -782,6 +782,202 @@ var util = module.exports = {
   },
 
   /**
+   * Get the square of the Euclidean 2D distance between two points.
+   *
+   * @param {geo.geoPosition} pt1 The first point.
+   * @param {geo.geoPosition} pt2 The second point.
+   * @returns {number} The distance squared.
+   */
+  distance2dSquared: function (pt1, pt2) {
+    var dx = pt1.x - pt2.x,
+        dy = pt1.y - pt2.y;
+    return dx * dx + dy * dy;
+  },
+
+  /**
+   * Get the square of the Euclidean 2D distance between a point and a line
+   * segment.
+   *
+   * @param {geo.geoPosition} pt The point.
+   * @param {geo.geoPosition} line1 One end of the line.
+   * @param {geo.geoPosition} line2 The other end of the line.
+   * @returns {number} The distance squared.
+   */
+  distance2dToLineSquared: function (pt, line1, line2) {
+    var dx = line2.x - line1.x,
+        dy = line2.y - line1.y,
+        // we could get the line length from the distance2dSquared function,
+        // but since we need dx and dy in this function, it is faster to just
+        // compute it here.
+        lengthSquared = dx * dx + dy * dy,
+        t = 0;
+    if (lengthSquared) {
+      t = ((pt.x - line1.x) * dx + (pt.y - line1.y) * dy) / lengthSquared;
+      t = Math.max(0, Math.min(1, t));
+    }
+    return util.distance2dSquared(pt, {
+      x: line1.x + t * dx,
+      y: line1.y + t * dy
+    });
+  },
+
+  /**
+   * Get twice the signed area of a 2d triangle.
+   *
+   * @param {geo.geoPosition} pt1 A vertex.
+   * @param {geo.geoPosition} pt2 A vertex.
+   * @param {geo.geoPosition} pt3 A vertex.
+   * @returns {number} Twice the signed area.
+   */
+  triangleTwiceSignedArea2d: function (pt1, pt2, pt3) {
+    return (pt2.y - pt1.y) * (pt3.x - pt2.x) - (pt2.x - pt1.x) * (pt3.y - pt2.y);
+  },
+
+  /**
+   * Determine if two line segments cross.  They are not considered crossing if
+   * they share a vertex.  They are crossing if either of one segment's
+   * vertices are colinear with the other segment.
+   *
+   * @param {geo.geoPosition} seg1pt1 One endpoint of the first segment.
+   * @param {geo.geoPosition} seg1pt2 The other endpoint of the first segment.
+   * @param {geo.geoPosition} seg2pt1 One endpoint of the second segment.
+   * @param {geo.geoPosition} seg2pt2 The other endpoint of the second segment.
+   * @returns {boolean} True if the segments cross.
+   */
+  crossedLineSegments2d: function (seg1pt1, seg1pt2, seg2pt1, seg2pt2) {
+    /* If the segments don't have any overlap in x or y, they can't cross */
+    if ((seg1pt1.x > seg2pt1.x && seg1pt1.x > seg2pt2.x &&
+         seg1pt2.x > seg2pt1.x && seg1pt2.x > seg2pt2.x) ||
+        (seg1pt1.x < seg2pt1.x && seg1pt1.x < seg2pt2.x &&
+         seg1pt2.x < seg2pt1.x && seg1pt2.x < seg2pt2.x) ||
+        (seg1pt1.y > seg2pt1.y && seg1pt1.y > seg2pt2.y &&
+         seg1pt2.y > seg2pt1.y && seg1pt2.y > seg2pt2.y) ||
+        (seg1pt1.y < seg2pt1.y && seg1pt1.y < seg2pt2.y &&
+         seg1pt2.y < seg2pt1.y && seg1pt2.y < seg2pt2.y)) {
+      return false;
+    }
+    /* If any vertex is in common, it is not considered crossing */
+    if ((seg1pt1.x === seg2pt1.x && seg1pt1.y === seg2pt1.y) ||
+        (seg1pt1.x === seg2pt2.x && seg1pt1.y === seg2pt2.y) ||
+        (seg1pt2.x === seg2pt1.x && seg1pt2.y === seg2pt1.y) ||
+        (seg1pt2.x === seg2pt2.x && seg1pt2.y === seg2pt2.y)) {
+      return false;
+    }
+    /* If the lines cross, the signed area of the triangles formed between one
+     * segment and the other's vertices will have different signs.  By using
+     * > 0, colinear points are crossing. */
+    if (util.triangleTwiceSignedArea2d(seg1pt1, seg1pt2, seg2pt1) *
+        util.triangleTwiceSignedArea2d(seg1pt1, seg1pt2, seg2pt2) > 0 ||
+        util.triangleTwiceSignedArea2d(seg2pt1, seg2pt2, seg1pt1) *
+        util.triangleTwiceSignedArea2d(seg2pt1, seg2pt2, seg1pt2) > 0) {
+      return false;
+    }
+    return true;
+  },
+
+  /**
+   * Check if a line segment crosses any segment from a list of lines.  The
+   * segment is considered crossing it it touches a line segment, unless that
+   * line segment shares a vertex with the segment.
+   *
+   * @param {geo.geoPosition} pt1 One end of the line segment.
+   * @param {geo.geoPosition} pt2 The other end of the line segment.
+   * @param {Array.<geo.geoPosition[]>} lineList A list of open lines.  Each
+   *    line is a list of vertices.  The line segment is checked against each
+   *    segment of each line in this list.
+   * @returns {boolean} True if the segment crosses any line segment.
+   */
+  segmentCrossesLineList2d: function (pt1, pt2, lineList) {
+    var result = lineList.some(function (line) {
+      return line.some(function (linePt, idx) {
+        if (idx) {
+          return util.crossedLineSegments2d(pt1, pt2, line[idx - 1], linePt);
+        }
+      });
+    });
+    return result;
+  },
+
+  /**
+   * Remove vertices from a chain of 2d line segments so that it is simpler but
+   * is close to the original overall shape within some tolerance limit.  This
+   * is the Ramer–Douglas–Peucker algorithm.  The first and last points will
+   * always remain the same for open lines.  For closed lines (polygons), this
+   * picks an point that likely to be significant and then reduces it, possibly
+   * returning a single point.
+   *
+   * @param {geo.geoPosition[]} pts A list of points forming the line or
+   *    polygon.
+   * @param {number} tolerance The maximum variation allowed.  A value of zero
+   *    will only remove perfectly colinear points.
+   * @param {boolean} [closed] If true, this is a polygon rather than an open
+   *    line.  In this case, it is possible to get back a single point.
+   * @param {Array.<geo.geoPosition[]>?} [noCrossLines] A falsy value to allow
+   *    the resultant line to cross itself, an empty array (`[]`) to prevent
+   *    self-crossing, or an array of line segments to prevent self-crossing
+   *    and disallow crossing any line segment in the list.  Each entry in the
+   *    list is an open line (with one segment less than the number of
+   *    vertices).  If self-crossing is prohibited, the resultant point set
+   *    might not be as simplified as it could be.
+   * @returns {geo.geoPosition[]} The new point set.
+   */
+  rdpLineSimplify: function (pts, tolerance, closed, noCrossLines) {
+    if (pts.length <= 2 || tolerance < 0) {
+      return pts;
+    }
+    var i, distSq, maxDistSq = -1, index, toleranceSq = tolerance * tolerance;
+    if (closed) {
+      /* If this is closed, find the point that is furthest from the first
+       * point.  ideally, one would find a point that is guaranteed to be on
+       * the diameter of the convex hull, but doing so is an O(n^2) operation,
+       * whereas this is sufficient and only O(n).  The chosen point is
+       * duplicated at the start and end of the chain. */
+      for (i = 1; i < pts.length; i += 1) {
+        distSq = util.distance2dSquared(pts[0], pts[i]);
+        if (distSq > maxDistSq) {
+          maxDistSq = distSq;
+          index = i;
+        }
+      }
+      /* Points could be on any side of the start point, so if all points are
+       * within 1/2 of the tolerance of the start point, we know all points are
+       * within the tolerance of each other and therefore this polygon or
+       * closed line can be simplified to a point. */
+      if (maxDistSq * 4 <= toleranceSq) {
+        return pts.slice(index, index + 1);
+      }
+      pts = pts.slice(index).concat(pts.slice(0, index + 1));
+      pts = util.rdpLineSimplify(pts, tolerance, false, noCrossLines);
+      /* Removed the duplicated first point */
+      pts.splice(pts.length - 1);
+      return pts;
+    }
+    for (i = 1; i < pts.length - 1; i += 1) {
+      distSq = util.distance2dToLineSquared(pts[i], pts[0], pts[pts.length - 1]);
+      if (distSq > maxDistSq) {
+        maxDistSq = distSq;
+        index = i;
+      }
+    }
+    /* We can collapse this to a single line if it is within the tolerance and
+     * we are either allowed to self-cross or it does not self-cross the rest
+     * of the line. */
+    if (maxDistSq <= toleranceSq && (!noCrossLines || !util.segmentCrossesLineList2d(
+         pts[0], pts[pts.length - 1], noCrossLines))) {
+      return [pts[0], pts[pts.length - 1]];
+    }
+    var left = pts.slice(0, index + 1),
+        right = pts.slice(index),
+        leftSide = util.rdpLineSimplify(
+            left, tolerance, false,
+            noCrossLines ? noCrossLines.concat([right]) : null),
+        rightSide = util.rdpLineSimplify(
+            right, tolerance, false,
+            noCrossLines ? noCrossLines.concat([left]) : null);
+    return leftSide.slice(0, leftSide.length - 1).concat(rightSide);
+  },
+
+  /**
    * Escape any character in a string that has a code point >= 127.
    *
    * @param {string} text The string to escape.
