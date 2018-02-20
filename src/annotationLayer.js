@@ -19,7 +19,8 @@ var textFeature = require('./textFeature');
 /**
  * Layer to handle direct interactions with different features.  Annotations
  * (features) can be created by calling mode(<name of feature>) or cancelled
- * with mode(null).
+ * with mode(null).  There is also an "edit" mode which is used when modifying
+ * an annotation.
  *
  * @class
  * @alias geo.annotationLayer
@@ -44,6 +45,8 @@ var textFeature = require('./textFeature');
  *    start point.
  * @param {boolean} [args.showLabels=true] Truthy to show feature labels that
  *    are allowed by the associated feature to be shown.
+ * @param {boolean} [args.clickToEdit=false] Truthy to allow clicking an
+ *    annotation to place it in edit mode.
  * @param {object} [args.defaultLabelStyle] Default styles for labels.
  * @returns {geo.annotationLayer}
  */
@@ -113,7 +116,8 @@ var annotationLayer = function (args) {
     // being coliner
     continuousPointColinearity: 1.0 * Math.PI / 180,
     finalPointProximity: 10,  // in pixels, 0 is exact
-    showLabels: true
+    showLabels: true,
+    clickToEdit: false
   }, args);
 
   /**
@@ -127,7 +131,14 @@ var annotationLayer = function (args) {
     if (evt.state && evt.state.actionRecord &&
         evt.state.actionRecord.owner === geo_annotation.actionOwner &&
         m_this.currentAnnotation) {
-      update = m_this.currentAnnotation.processAction(evt);
+      switch (m_this.mode()) {
+        case m_this.modes.edit:
+          update = m_this.currentAnnotation.processEditAction(evt);
+          break;
+        default:
+          update = m_this.currentAnnotation.processAction(evt);
+          break;
+      }
     }
     m_this._updateFromEvent(update);
   };
@@ -173,15 +184,117 @@ var annotationLayer = function (args) {
   };
 
   /**
+   * Select or deselect an edit handle.
+   *
+   * @param {geo.event} evt The mouse move event.
+   * @param {boolean} enable Truthy to select the handle, falsy to deselect it.
+   * @returns {this}
+   */
+  this._selectEditHandle = function (evt, enable) {
+    if (!evt.data || !evt.data.editHandle) {
+      return;
+    }
+    $.each(m_features[geo_annotation._editHandleFeatureLevel], function (type, feature) {
+      feature.feature.modified();
+    });
+    m_this.currentAnnotation.selectEditHandle(evt.data, enable);
+    m_this.draw();
+    m_this.map().node().toggleClass('annotation-input', !!enable);
+    m_this.map().interactor().removeAction(
+      undefined, undefined, geo_annotation.actionOwner);
+    if (enable) {
+      var actions = m_this.currentAnnotation.actions(geo_annotation.state.edit);
+      $.each(actions, function (idx, action) {
+        m_this.map().interactor().addAction(action);
+      });
+    }
+    return m_this;
+  };
+
+  /**
+   * Handle mouse on events.  If there is no current annotation and
+   * clickToEdit is enabled, any hovered annotation is highlighted.
+   * event is sent to it.
+   *
+   * @param {geo.event} evt The mouse move event.
+   */
+  this._handleMouseOn = function (evt) {
+    if (!evt.data || !evt.data.annotation) {
+      return;
+    }
+    if (m_this.mode() === m_this.modes.edit && m_this.currentAnnotation) {
+      m_this._selectEditHandle(evt, true);
+      return;
+    }
+    if (m_this.mode() || m_this.currentAnnotation || !m_this.options('clickToEdit')) {
+      return;
+    }
+    evt.data.annotation.state(geo_annotation.state.highlight);
+    m_this.modified();
+    m_this.draw();
+  };
+
+  /**
+   * Handle mouse off events.  If the specific annotation is in the highlight
+   * state, move it back to the done state.
+   *
+   * @param {geo.event} evt The mouse move event.
+   */
+  this._handleMouseOff = function (evt) {
+    if (!evt.data || !evt.data.annotation) {
+      return;
+    }
+    if (m_this.mode() === m_this.modes.edit && evt.data.editHandle && evt.data.selected) {
+      m_this._selectEditHandle(evt, false);
+      return;
+    }
+    if (evt.data.annotation.state() === geo_annotation.state.highlight) {
+      evt.data.annotation.state(geo_annotation.state.done);
+      m_this.modified();
+      m_this.draw();
+    }
+  };
+
+  /**
    * Handle mouse clicks.  If there is a current annotation, the click event is
    * sent to it.
    *
    * @param {geo.event} evt The mouse click event.
    */
   this._handleMouseClick = function (evt) {
-    if (m_this.mode() && m_this.currentAnnotation) {
-      var update = m_this.currentAnnotation.mouseClick(evt);
+    var retrigger = false, update;
+    if (m_this.mode() === m_this.modes.edit) {
+      if (m_this.map().interactor().hasAction(undefined, undefined, geo_annotation.actionOwner)) {
+        update = m_this.currentAnnotation.mouseClickEdit(evt);
+        m_this._updateFromEvent(update);
+        return;
+      }
+      m_this.mode(null);
+      m_this.draw();
+      $.each(m_features, function (idx, featureLevel) {
+        $.each(featureLevel, function (type, feature) {
+          feature.feature._clearSelectedFeatures();
+        });
+      });
+      retrigger = true;
+    } else if (m_this.mode() && m_this.currentAnnotation) {
+      update = m_this.currentAnnotation.mouseClick(evt);
       m_this._updateFromEvent(update);
+      retrigger = !m_this.mode();
+    } else if (!m_this.mode() && !m_this.currentAnnotation && m_this.options('clickToEdit')) {
+      var highlighted = m_this.annotations().filter(function (ann) {
+        return ann.state() === geo_annotation.state.highlight;
+      });
+      if (highlighted.length !== 1) {
+        return;
+      }
+      m_this.mode(m_this.modes.edit, highlighted[0]);
+      m_this.draw();
+      retrigger = true;
+    }
+    if (retrigger) {
+      // retrigger mouse move to ensure the correct events are attached
+      m_this.map().interactor().retriggerMouseMove();
     }
   };
 
@@ -356,22 +469,31 @@ var annotationLayer = function (args) {
     }
   };
 
+  /* A list of special modes */
+  this.modes = {
+    edit: 'edit'
+  };
+
   /**
    * Get or set the current mode.
    *
    * @param {string|null} [arg] `undefined` to get the current mode, `null` to
-   *    stop creating/editing, or the name of the type of annotation to create.
+   *    stop creating/editing, `this.modes.edit` (`'edit'`) plus an annotation
+   *    to switch to edit mode, or the name of the type of annotation to
+   *    create.
+   * @param {geo.annotation} [editAnnotation] If `arg === this.modes.edit`,
+   *    this is the annotation that should be edited.
    * @returns {string|null|this} The current mode or the layer.
    */
-  this.mode = function (arg) {
+  this.mode = function (arg, editAnnotation) {
     if (arg === undefined) {
       return m_mode;
     }
-    if (arg !== m_mode) {
+    if (arg !== m_mode || (arg === m_this.modes.edit && editAnnotation !== m_this.editAnnotation)) {
       var createAnnotation, actions,
           mapNode = m_this.map().node(), oldMode = m_mode;
       m_mode = arg;
-      mapNode.toggleClass('annotation-input', !!m_mode);
+      mapNode.toggleClass('annotation-input', !!(m_mode && m_mode !== m_this.modes.edit));
       if (m_mode) {
         Mousetrap(mapNode[0]).bind('esc', function () { m_this.mode(null); });
       } else {
@@ -382,10 +504,20 @@ var annotationLayer = function (args) {
           case geo_annotation.state.create:
             m_this.removeAnnotation(m_this.currentAnnotation);
             break;
+          case geo_annotation.state.edit:
+            m_this.currentAnnotation.state(geo_annotation.state.done);
+            m_this.modified();
+            m_this.draw();
+            break;
         }
         m_this.currentAnnotation = null;
       }
       switch (m_mode) {
+        case m_this.modes.edit:
+          m_this.currentAnnotation = editAnnotation;
+          m_this.currentAnnotation.state(geo_annotation.state.edit);
+          m_this.modified();
+          break;
         case 'line':
           createAnnotation = geo_annotation.lineAnnotation;
           break;
@@ -414,6 +546,9 @@ var annotationLayer = function (args) {
       }
       m_this.geoTrigger(geo_event.annotation.mode, {
         mode: m_mode, oldMode: oldMode});
+      if (oldMode === m_this.modes.edit) {
+        m_this.modified();
+      }
     }
     return m_this;
   };
@@ -735,7 +870,8 @@ var annotationLayer = function (args) {
    */
   this._update = function () {
     if (m_this.getMTime() > m_buildTime.getMTime()) {
-      var labels = m_this.options('showLabels') ? [] : null;
+      var labels = m_this.options('showLabels') ? [] : null,
+          editable = m_this.options('clickToEdit') || m_this.mode() === m_this.modes.edit;
       /* Interally, we have a set of feature levels (to provide z-index
        * support), each of which can have data from multiple annotations.  We
        * clear the data on each of these features, then build it up from each
@@ -764,7 +900,8 @@ var annotationLayer = function (args) {
             /* Create features as needed */
             if (!m_features[idx][type]) {
               var feature = m_this.createFeature(type, {
-                gcs: m_this.map().gcs()
+                gcs: m_this.map().gcs(),
+                selectionAPI: editable
               });
               if (!feature) {
                 /* We can't create the desired feature, porbably because of the
@@ -777,6 +914,11 @@ var annotationLayer = function (args) {
                 }
                 return;
               }
+              if (editable) {
+                feature.geoOn(geo_event.feature.mouseon, m_this._handleMouseOn);
+                feature.geoOn(geo_event.feature.mouseoff, m_this._handleMouseOff);
+              }
+
               /* Since each annotation can have separate styles, the styles are
                * combined together with a meta-style function.  Any style that
                * could be used should be in this list.  Color styles may be
@@ -814,12 +956,32 @@ var annotationLayer = function (args) {
                 style: style,
                 data: []
               };
+            } else {
+              feature = m_features[idx][type].feature;
+              // update whether we check for selections on existing features
+              if (feature.selectionAPI() !== !!editable) {
+                feature.selectionAPI(editable);
+                if (editable) {
+                  feature.geoOn(geo_event.feature.mouseon, m_this._handleMouseOn);
+                  feature.geoOn(geo_event.feature.mouseoff, m_this._handleMouseOff);
+                } else {
+                  feature.geoOff(geo_event.feature.mouseon, m_this._handleMouseOn);
+                  feature.geoOff(geo_event.feature.mouseoff, m_this._handleMouseOff);
+                }
+              }
             }
             /* Collect the data for each feature */
-            m_features[idx][type].data.push(featureSpec.data || featureSpec);
-            if (featureSpec.scaleOnZoom) {
-              m_features[idx][type].feature.scaleOnZoom = true;
+            var dataEntry = featureSpec.data || featureSpec;
+            if (!Array.isArray(dataEntry)) {
+              dataEntry = [dataEntry];
             }
+            dataEntry.forEach(function (dataElement) {
+              dataElement.annotation = annotation;
+              m_features[idx][type].data.push(dataElement);
+              if (featureSpec.scaleOnZoom) {
+                m_features[idx][type].feature.scaleOnZoom = true;
+              }
+            });
           });
         });
       });
@@ -941,6 +1103,7 @@ var annotationLayer = function (args) {
     }
     m_this.geoOn(geo_event.actionselection, m_this._processAction);
     m_this.geoOn(geo_event.actionmove, m_this._processAction);
+    m_this.geoOn(geo_event.actionup, m_this._processAction);
 
     m_this.geoOn(geo_event.mouseclick, m_this._handleMouseClick);
     m_this.geoOn(geo_event.mousemove, m_this._handleMouseMove);

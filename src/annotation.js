@@ -15,10 +15,44 @@ var annotationId = 0;
 var annotationState = {
   create: 'create',
   done: 'done',
+  highlight: 'highlight',
   edit: 'edit'
 };
 
 var annotationActionOwner = 'annotationAction';
+
+var defaultEditHandleStyle = {
+  fill: true,
+  fillColor: function (d) {
+    return d.selected ? {r: 0, g: 1, b: 1} : {r: 0.3, g: 0.3, b: 0.3};
+  },
+  fillOpacity: function (d) {
+    return d.selected ? 0.5 : 0.25;
+  },
+  radius: function (d) {
+    return d.type === 'edge' || d.type === 'rotate' ? 8 : 10;
+  },
+  scaled: false,
+  stroke: true,
+  strokeColor: {r: 0, g: 0, b: 1},
+  strokeOpacity: 1,
+  strokeWidth: function (d) {
+    return d.type === 'edge' || d.type === 'rotate' ? 2 : 3;
+  },
+  rotateHandleOffset: 24, // should be roughly twice radius + strokeWidth
+  rotateHandleRotation: -Math.PI / 4,
+  resizeHandleOffset: 48, // should be roughly twice radius + strokeWidth + rotateHandleOffset
+  resizeHandleRotation: -Math.PI / 4,
+  // handles may be a function to dynamically generate the results
+  handles: {  // if `false`, the handle won't be created for editing
+    vertex: true,
+    edge: true,
+    center: true,
+    rotate: true,
+    resize: true
+  }
+};
+var editHandleFeatureLevel = 3;
 
 /**
  * Base annotation class.
@@ -142,6 +176,38 @@ var annotation = function (type, args) {
   };
 
   /**
+   * Return the coordinate associated with the rotation handle for the
+   * annotation.
+   *
+   * @param {number} [offset] An additional offset from cetner to apply to the
+   *    handle.
+   * @param {number} [rotation] An additional rotation to apply to the handle.
+   * @returns {geo.geoPosition|undefined} The map gcs position for the handle,
+   *    or `undefined` if no such position exists.
+   */
+  this._rotateHandlePosition = function (offset, rotation) {
+    var map = m_this.layer().map(),
+        coor = m_this._coordinates(),
+        center = util.centerFromPerimeter(m_this._coordinates()),
+        dispCenter = center ? map.gcsToDisplay(center, null) : undefined,
+        i, pos, maxr2 = 0, r;
+    if (!center) {
+      return;
+    }
+    offset = offset || 0;
+    rotation = rotation || 0;
+    for (i = 0; i < coor.length; i += 1) {
+      pos = map.gcsToDisplay(coor[i], null);
+      maxr2 = Math.max(maxr2, Math.pow(pos.x - dispCenter.x, 2) + Math.pow(pos.y - dispCenter.y, 2));
+    }
+    r = Math.sqrt(maxr2) + offset;
+    pos = map.displayToGcs({
+      x: dispCenter.x + r * Math.cos(rotation),
+      y: dispCenter.y - r * Math.sin(rotation)}, null);
+    return pos;
+  };
+
+  /**
    * If the label should be shown, get a record of the label that can be used
    * in a `geo.textFeature`.
    *
@@ -158,7 +224,7 @@ var annotation = function (type, args) {
         (show !== true && show.indexOf(state) < 0)) {
       return;
     }
-    var style = m_this.options('labelStyle');
+    var style = m_this.labelStyle();
     var labelRecord = {
       text: m_this.label(),
       position: m_this._labelPosition()
@@ -235,12 +301,30 @@ var annotation = function (type, args) {
    *    the current state.
    * @returns {geo.actionRecord[]} A list of actions.
    */
-  this.actions = function () {
-    return [];
+  this.actions = function (state) {
+    if (!state) {
+      state = m_this.state();
+    }
+    switch (state) {
+      case annotationState.edit:
+        return [{
+          action: geo_action.annotation_edit_handle,
+          name: 'annotation edit',
+          owner: annotationActionOwner,
+          input: 'left'
+        }, {
+          action: geo_action.annotation_edit_handle,
+          name: 'annotation edit',
+          owner: annotationActionOwner,
+          input: 'pan'
+        }];
+      default:
+        return [];
+    }
   };
 
   /**
-   * Process any actions for this annotation.
+   * Process any non-edit actions for this annotation.
    *
    * @param {geo.event} evt The action event.
    * @returns {boolean|string} `true` to update the annotation, `'done'` if the
@@ -250,6 +334,61 @@ var annotation = function (type, args) {
    */
   this.processAction = function () {
     return undefined;
+  };
+
+  /**
+   * Process any edit actions for this annotation.
+   *
+   * @param {geo.event} evt The action event.
+   * @returns {boolean} `true` to update the annotation, falsy to not update
+   *    anything.
+   */
+  this.processEditAction = function (evt) {
+    if (!evt || !m_this._editHandle || !m_this._editHandle.handle) {
+      return;
+    }
+    switch (m_this._editHandle.handle.type) {
+      case 'vertex':
+        return m_this._processEditActionVertex(evt);
+      case 'edge':
+        return m_this._processEditActionEdge(evt);
+      case 'center':
+        return m_this._processEditActionCenter(evt);
+      case 'rotate':
+        return m_this._processEditActionRotate(evt);
+      case 'resize':
+        return m_this._processEditActionResize(evt);
+    }
+  };
+
+  /**
+   * When an edit handle is selected or deselected (for instance, by moving the
+   * mouse on or off of it), mark if it is selected and record the current
+   * coordinates.
+   *
+   * @param {object} handle The data for the edit handle.
+   * @param {boolean} enable True to enable the handle, false to disable.
+   * @returns {this}
+   */
+  this.selectEditHandle = function (handle, enable) {
+    if (enable && m_this._editHandle && m_this._editHandle.handle &&
+        m_this._editHandle.handle.selected) {
+      m_this._editHandle.handle.selected = false;
+    }
+    handle.selected = enable;
+    var amountRotated = (m_this._editHandle || {}).amountRotated || 0;
+    m_this._editHandle = {
+      handle: handle,
+      startCoordinates: m_this._coordinates().slice(),
+      center: util.centerFromPerimeter(m_this._coordinates()),
+      rotatePosition: m_this._rotateHandlePosition(
+        handle.style.rotateHandleOffset, handle.style.rotateHandleRotation + amountRotated),
+      startAmountRotated: amountRotated,
+      amountRotated: amountRotated,
+      resizePosition: m_this._rotateHandlePosition(
+        handle.style.resizeHandleOffset, handle.style.resizeHandleRotation)
+    };
+    return m_this;
   };
 
   /**
@@ -274,7 +413,9 @@ var annotation = function (type, args) {
       m_options = $.extend(true, m_options, arg1);
       /* For style objects, re-extend them without recursion.  This allows
        * setting colors without an opacity field, for instance. */
-      ['style', 'editStyle', 'labelStyle'].forEach(function (key) {
+      ['style', 'createStyle', 'editStyle', 'editHandleStyle', 'labelStyle',
+        'highlightStyle'
+      ].forEach(function (key) {
         if (arg1[key] !== undefined) {
           $.extend(m_options[key], arg1[key]);
         }
@@ -315,51 +456,70 @@ var annotation = function (type, args) {
    *    set the named style to the specified value.  Otherwise, extend the
    *    current style with the values in the specified object.
    * @param {*} [arg2] If `arg1` is a string, the new value for that style.
+   * @param {string} [styleType='style'] The name of the style type, such as
+   *    `createStyle', `editStyle`, `editHandleStyle`, `labelStyle`, or
+   *    `highlightStyle`.
    * @returns {object|this} Either the entire style object, the value of a
    *    specific style, or the current class instance.
    */
-  this.style = function (arg1, arg2) {
+  this.style = function (arg1, arg2, styleType) {
+    styleType = styleType || 'style';
     if (arg1 === undefined) {
-      return m_options.style;
+      return m_options[styleType];
     }
     if (typeof arg1 === 'string' && arg2 === undefined) {
-      return m_options.style[arg1];
+      return (m_options[styleType] || {})[arg1];
+    }
+    if (m_options[styleType] === undefined) {
+      m_options[styleType] = {};
     }
     if (arg2 === undefined) {
-      m_options.style = $.extend(true, m_options.style, arg1);
+      m_options[styleType] = $.extend(true, m_options[styleType], arg1);
     } else {
-      m_options.style[arg1] = arg2;
+      m_options[styleType][arg1] = arg2;
     }
     m_this.modified();
     return m_this;
   };
 
+  ['createStyle', 'editStyle', 'editHandleStyle', 'labelStyle', 'highlightStyle'
+  ].forEach(function (styleType) {
+    /**
+     * Set or get a specific style type.
+     *
+     * @param {string|object} [arg1] If `undefined`, return the current style
+     *    object.  If a string and `arg2` is undefined, return the style
+     *    associated with the specified key.  If a string and `arg2` is defined,
+     *    set the named style to the specified value.  Otherwise, extend the
+     *    current style with the values in the specified object.
+     * @param {*} [arg2] If `arg1` is a string, the new value for that style.
+     * @returns {object|this} Either the entire style object, the value of a
+     *    specific style, or the current class instance.
+     */
+    m_this[styleType] = function (arg1, arg2) {
+      return m_this.style(arg1, arg2, styleType);
+    };
+  });
+
   /**
-   * Set or get edit style.  These are the styles used in edit and create mode.
-   *
-   * @param {string|object} [arg1] If `undefined`, return the current style
-   *    object.  If a string and `arg2` is undefined, return the style
-   *    associated with the specified key.  If a string and `arg2` is defined,
-   *    set the named style to the specified value.  Otherwise, extend the
-   *    current style with the values in the specified object.
-   * @param {*} [arg2] If `arg1` is a string, the new value for that style.
-   * @returns {object|this} Either the entire style object, the value of a
-   *    specific style, or the current class instance.
+   * Return the style dictionary for a particular state.
+   * @param {string} [state] The state to return styles for.  Defaults to the
+   *    current state.
+   * @returns {object} The style object for the state.  If there is no such
+   *    style defined, the default style is used.
    */
-  this.editStyle = function (arg1, arg2) {
-    if (arg1 === undefined) {
-      return m_options.editStyle;
+  this.styleForState = function (state) {
+    state = state || m_this.state();
+    /* for some states, fall back to the general style if they don't specify a
+     * value explicitly. */
+    if (state === annotationState.edit || state === annotationState.highlight) {
+      return $.extend({}, m_options.style, m_options[state + 'Style']);
     }
-    if (typeof arg1 === 'string' && arg2 === undefined) {
-      return m_options.editStyle[arg1];
+    if (state === annotationState.create) {
+      return $.extend({}, m_options.style, m_options.editStyle,
+                      m_options[state + 'Style']);
     }
-    if (arg2 === undefined) {
-      m_options.editStyle = $.extend(true, m_options.editStyle, arg1);
-    } else {
-      m_options.editStyle[arg1] = arg2;
-    }
-    m_this.modified();
-    return m_this;
+    return m_options[state + 'Style'] || m_options.style || {};
   };
 
   /**
@@ -399,6 +559,21 @@ var annotation = function (type, args) {
   };
 
   /**
+   * Handle a mouse click on this annotation when in edit mode.  If the event
+   * is processed, evt.handled should be set to `true` to prevent further
+   * processing.
+   *
+   * @param {geo.event} evt The mouse click event.
+   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+   *    the annotation was completed (changed from create to done state),
+   *    `'remove'` if the annotation should be removed, falsy to not update
+   *    anything.
+   */
+  this.mouseClickEdit = function (evt) {
+    return undefined;
+  };
+
+  /**
    * Handle a mouse move on this annotation.
    *
    * @param {geo.event} evt The mouse move event.
@@ -410,8 +585,8 @@ var annotation = function (type, args) {
   };
 
   /**
-   * Get coordinates associated with this annotation in the map gcs coordinate
-   * system.
+   * Get or set coordinates associated with this annotation in the map gcs
+   * coordinate system.
    *
    * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
    *  to set.
@@ -515,7 +690,7 @@ var annotation = function (type, args) {
         geotype = m_this._geojsonGeometryType(),
         styles = m_this._geojsonStyles(),
         objStyle = m_this.options('style') || {},
-        objLabelStyle = m_this.options('labelStyle') || {},
+        objLabelStyle = m_this.labelStyle() || {},
         i, key, value;
     if (!coor || !coor.length || !geotype) {
       return;
@@ -575,6 +750,270 @@ var annotation = function (type, args) {
     }
     return obj;
   };
+
+  /**
+   * Add edit handles to the feature list.
+   *
+   * @param {array} features The array of features to modify.
+   * @param {geo.geoPosition[]} vertices An array of vertices in map gcs
+   *    coordinates.
+   * @param {object} [opts] If specified, the keys are the types of the
+   *    handles.  This matches the `editHandleStyle.handle` object.  Any type
+   *    that is set to `false` in either `opts` or `editHandleStyle.handle`
+   *    will prevent those handles from being created.
+   * @param {boolean} [isOpen=false] If true, no edge handle will be created
+   *    between the last and first vertices.
+   */
+  this._addEditHandles = function (features, vertices, opts, isOpen) {
+    var editPoints,
+        style = $.extend({}, defaultEditHandleStyle, m_this.editHandleStyle()),
+        handles = util.ensureFunction(style.handles)() || {},
+        selected = (m_this._editHandle && m_this._editHandle.handle &&
+                    m_this._editHandle.handle.selected ?
+                    m_this._editHandle.handle : undefined);
+    /* opts specify which handles are allowed.  They must be allowed by the
+     * original opts object and by the editHandleStyle.handle object. */
+    opts = $.extend({}, opts);
+    Object.keys(handles).forEach(function (key) {
+      if (handles[key] === false) {
+        opts[key] = false;
+      }
+    });
+    if (!features[editHandleFeatureLevel]) {
+      features[editHandleFeatureLevel] = {point: []};
+    }
+    editPoints = features[editHandleFeatureLevel].point;
+    vertices.forEach(function (pt, idx) {
+      if (opts.vertex !== false) {
+        editPoints.push($.extend({}, pt, {type: 'vertex', index: idx, style: style, editHandle: true}));
+      }
+      if (opts.edge !== false && idx !== vertices.length - 1 && (pt.x !== vertices[idx + 1].x || pt.y !== vertices[idx + 1].y)) {
+        editPoints.push($.extend({
+          x: (pt.x + vertices[idx + 1].x) / 2,
+          y: (pt.y + vertices[idx + 1].y) / 2
+        }, {type: 'edge', index: idx, style: style, editHandle: true}));
+      }
+      if (opts.edge !== false && !isOpen && idx === vertices.length - 1 && (pt.x !== vertices[0].x || pt.y !== vertices[0].y)) {
+        editPoints.push($.extend({
+          x: (pt.x + vertices[0].x) / 2,
+          y: (pt.y + vertices[0].y) / 2
+        }, {type: 'edge', index: idx, style: style, editHandle: true}));
+      }
+    });
+    if (opts.center !== false) {
+      editPoints.push($.extend({}, util.centerFromPerimeter(m_this._coordinates()), {type: 'center', style: style, editHandle: true}));
+    }
+    if (opts.rotate !== false) {
+      editPoints.push($.extend(m_this._rotateHandlePosition(
+        style.rotateHandleOffset,
+        style.rotateHandleRotation + (selected && selected.type === 'rotate' ? m_this._editHandle.amountRotated : 0)
+      ), {type: 'rotate', style: style, editHandle: true}));
+      if (m_this._editHandle && (!selected || selected.type !== 'rotate')) {
+        m_this._editHandle.amountRotated = 0;
+      }
+    }
+    if (opts.resize !== false) {
+      editPoints.push($.extend(m_this._rotateHandlePosition(
+        style.resizeHandleOffset,
+        style.resizeHandleRotation
+      ), {type: 'resize', style: style, editHandle: true}));
+    }
+    if (selected) {
+      editPoints.forEach(function (pt) {
+        if (pt.type === selected.type && pt.index === selected.index) {
+          pt.selected = true;
+        }
+      });
+    }
+  };
+
+  /**
+   * Process the edit center action for a general annotation.
+   *
+   * @param {geo.event} evt The action event.
+   * @returns {boolean|string} `true` to update the annotation, falsy to not
+   *    update anything.
+   */
+  this._processEditActionCenter = function (evt) {
+    var start = m_this._editHandle.startCoordinates,
+        delta = {
+          x: evt.mouse.mapgcs.x - evt.state.origin.mapgcs.x,
+          y: evt.mouse.mapgcs.y - evt.state.origin.mapgcs.y
+        },
+        curPts = m_this._coordinates();
+    var pts = start.map(function (elem) {
+      return {x: elem.x + delta.x, y: elem.y + delta.y};
+    });
+    if (pts[0].x !== curPts[0].x || pts[0].y !== curPts[0].y) {
+      m_this._coordinates(pts);
+      return true;
+    }
+    return false;
+  };
+
+  /**
+   * Process the edit rotate action for a general annotation.
+   *
+   * @param {geo.event} evt The action event.
+   * @returns {boolean|string} `true` to update the annotation, falsy to not
+   *    update anything.
+   */
+  this._processEditActionRotate = function (evt) {
+    var handle = m_this._editHandle,
+        start = handle.startCoordinates,
+        delta = {
+          x: evt.mouse.mapgcs.x - evt.state.origin.mapgcs.x,
+          y: evt.mouse.mapgcs.y - evt.state.origin.mapgcs.y
+        },
+        ang1 = Math.atan2(
+            handle.rotatePosition.y - handle.center.y,
+            handle.rotatePosition.x - handle.center.x),
+        ang2 = Math.atan2(
+            handle.rotatePosition.y + delta.y - handle.center.y,
+            handle.rotatePosition.x + delta.x - handle.center.x),
+        ang = ang2 - ang1,
+        curPts = m_this._coordinates();
+    var pts = start.map(function (elem) {
+      var delta = {x: elem.x - handle.center.x, y: elem.y - handle.center.y};
+      return {
+        x: delta.x * Math.cos(ang) - delta.y * Math.sin(ang) + handle.center.x,
+        y: delta.x * Math.sin(ang) + delta.y * Math.cos(ang) + handle.center.y
+      };
+    });
+    if (pts[0].x !== curPts[0].x || pts[0].y !== curPts[0].y) {
+      m_this._coordinates(pts);
+      handle.amountRotated = handle.startAmountRotated + ang;
+      return true;
+    }
+    return false;
+  };
+
+  /**
+   * Process the edit resize action for a general annotation.
+   *
+   * @param {geo.event} evt The action event.
+   * @returns {boolean|string} `true` to update the annotation, falsy to not
+   *    update anything.
+   */
+  this._processEditActionResize = function (evt) {
+    var handle = m_this._editHandle,
+        start = handle.startCoordinates,
+        delta = {
+          x: evt.mouse.mapgcs.x - evt.state.origin.mapgcs.x,
+          y: evt.mouse.mapgcs.y - evt.state.origin.mapgcs.y
+        },
+        map = m_this.layer().map(),
+        p0 = map.gcsToDisplay(handle.center, null),
+        p1 = map.gcsToDisplay(handle.resizePosition, null),
+        p2 = map.gcsToDisplay({
+          x: handle.resizePosition.x + delta.x,
+          y: handle.resizePosition.y + delta.y
+        }, null),
+        d01 = Math.pow(Math.pow(p1.y - p0.y, 2) +
+                       Math.pow(p1.x - p0.x, 2), 0.5) -
+              handle.handle.style.resizeHandleOffset,
+        d02 = Math.pow(Math.pow(p2.y - p0.y, 2) +
+                       Math.pow(p2.x - p0.x, 2), 0.5) -
+              handle.handle.style.resizeHandleOffset,
+        curPts = m_this._coordinates();
+    if (d02 && d01) {
+      var scale = d02 / d01;
+      var pts = start.map(function (elem) {
+        return {
+          x: (elem.x - handle.center.x) * scale + handle.center.x,
+          y: (elem.y - handle.center.y) * scale + handle.center.y
+        };
+      });
+      if (pts[0].x !== curPts[0].x || pts[0].y !== curPts[0].y) {
+        m_this._coordinates(pts);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  /**
+   * Process the edit edge action for a general annotation.
+   *
+   * @param {geo.event} evt The action event.
+   * @returns {boolean|string} `true` to update the annotation, falsy to not
+   *    update anything.
+   */
+  this._processEditActionEdge = function (evt) {
+    var handle = m_this._editHandle,
+        index = handle.handle.index,
+        curPts = m_this._coordinates();
+    curPts.splice(index + 1, 0, {x: handle.handle.x, y: handle.handle.y});
+    handle.handle.type = 'vertex';
+    handle.handle.index += 1;
+    handle.startCoordinates = curPts.slice();
+    m_this.modified();
+    return true;
+  };
+
+  /**
+   * Process the edit vertex action for a general annotation.
+   *
+   * @param {geo.event} evt The action event.
+   * @param {boolean} [canClose] if True, this annotation has a closed style
+   *    that indicates if the first and last vertices are joined.  If falsy, is
+   *    allowed to be changed to true.
+   * @returns {boolean|string} `true` to update the annotation, `false` to
+   *    prevent closure, any other falsy to not update anything.
+   */
+  this._processEditActionVertex = function (evt, canClose) {
+    var handle = m_this._editHandle,
+        index = handle.handle.index,
+        start = handle.startCoordinates,
+        curPts = m_this._coordinates(),
+        origLen = curPts.length,
+        origPt = curPts[index],
+        delta = {
+          x: evt.mouse.mapgcs.x - evt.state.origin.mapgcs.x,
+          y: evt.mouse.mapgcs.y - evt.state.origin.mapgcs.y
+        },
+        layer = m_this.layer(),
+        aPP = layer.options('adjacentPointProximity'),
+        near, atEnd;
+
+    curPts[index] = {
+      x: start[index].x + delta.x,
+      y: start[index].y + delta.y
+    };
+    if (layer.displayDistance(curPts[index], null, start[index], null) <= aPP) {
+      /* if we haven't moved at least aPP from where the vertex started, don't
+       * allow it to be merged into another vertex.  This prevents small scale
+       * edits from collapsing immediately. */
+    } else if (layer.displayDistance(
+        curPts[index], null,
+        curPts[(index + 1) % curPts.length], null) <= aPP) {
+      near = (index + 1) % curPts.length;
+    } else if (layer.displayDistance(
+        curPts[index], null,
+        curPts[(index + curPts.length - 1) % curPts.length], null) <= aPP) {
+      near = (index + curPts.length - 1) % curPts.length;
+    }
+    atEnd = ((near === 0 && index === curPts.length - 1) ||
+             (near === curPts.length - 1 && index === 0));
+    if (canClose === false && atEnd) {
+      near = undefined;
+    }
+    if (near !== undefined && curPts.length > (canClose || m_this.options('style').closed ? 3 : 2)) {
+      curPts[index] = {x: curPts[near].x, y: curPts[near].y};
+      if (evt.event === geo_event.actionup) {
+        if (canClose && atEnd) {
+          m_this.options('style').closed = true;
+        }
+        curPts.splice(index, 1);
+      }
+    }
+    if (curPts.length === origLen &&
+        curPts[index].x === origPt.x && curPts[index].y === origPt.y) {
+      return false;
+    }
+    m_this._coordinates(curPts);
+    return true;
+  };
 };
 
 /**
@@ -628,16 +1067,15 @@ var rectangleAnnotation = function (args) {
       strokeWidth: 3,
       uniformPolygon: true
     },
-    editStyle: {
-      fill: true,
+    highlightStyle: {
+      fillColor: {r: 0, g: 1, b: 1},
+      fillOpacity: 0.5,
+      strokeWidth: 5
+    },
+    createStyle: {
       fillColor: {r: 0.3, g: 0.3, b: 0.3},
       fillOpacity: 0.25,
-      polygon: function (d) { return d.polygon; },
-      stroke: true,
-      strokeColor: {r: 0, g: 0, b: 1},
-      strokeOpacity: 1,
-      strokeWidth: 3,
-      uniformPolygon: true
+      strokeColor: {r: 0, g: 0, b: 1}
     }
   }, args || {});
   args.corners = args.corners || args.coordinates || [];
@@ -645,7 +1083,8 @@ var rectangleAnnotation = function (args) {
   annotation.call(this, 'rectangle', args);
 
   var m_this = this,
-      s_actions = this.actions;
+      s_actions = this.actions,
+      s_processEditAction = this.processEditAction;
 
   /**
    * Return actions needed for the specified state of this annotation.
@@ -723,7 +1162,7 @@ var rectangleAnnotation = function (args) {
           features = [{
             polygon: {
               polygon: opt.corners,
-              style: opt.editStyle
+              style: m_this.styleForState(state)
             }
           }];
         }
@@ -732,9 +1171,12 @@ var rectangleAnnotation = function (args) {
         features = [{
           polygon: {
             polygon: opt.corners,
-            style: opt.style
+            style: m_this.styleForState(state)
           }
         }];
+        if (state === annotationState.edit) {
+          m_this._addEditHandles(features, opt.corners);
+        }
         break;
     }
     return features;
@@ -876,6 +1318,84 @@ var rectangleAnnotation = function (args) {
     }
   };
 
+  /**
+   * Process any edit actions for this annotation.
+   *
+   * @param {geo.event} evt The action event.
+   * @returns {boolean|string} `true` to update the annotation, falsy to not
+   *    update anything.
+   */
+  this.processEditAction = function (evt) {
+    var start = m_this._editHandle.startCoordinates,
+        delta = {
+          x: evt.mouse.mapgcs.x - evt.state.origin.mapgcs.x,
+          y: evt.mouse.mapgcs.y - evt.state.origin.mapgcs.y
+        },
+        type = m_this._editHandle.handle.type,
+        index = m_this._editHandle.handle.index,
+        ang = [
+          Math.atan2(start[1].y - start[0].y, start[1].x - start[0].x),
+          Math.atan2(start[2].y - start[1].y, start[2].x - start[1].x),
+          Math.atan2(start[3].y - start[2].y, start[3].x - start[2].x),
+          Math.atan2(start[0].y - start[3].y, start[0].x - start[3].x)
+        ],
+        corners, delta1, delta2, ang1, ang2;
+    // an angle can be zero because it is horizontal or undefined.  If opposite
+    // angles are both zero, this is a degenerate rectangle (a line or a point)
+    if (!ang[0] && !ang[1] && !ang[2] && !ang[3]) {
+      ang[1] = Math.PI / 2;
+      ang[2] = Math.PI;
+      ang[3] = -Math.PI / 2;
+    }
+    if (!ang[0] && !ang[2]) {
+      ang[0] = ang[1] - Math.PI / 2;
+      ang[2] = ang[1] + Math.PI / 2;
+    }
+    if (!ang[1] && !ang[3]) {
+      ang[1] = ang[2] - Math.PI / 2;
+      ang[3] = ang[2] + Math.PI / 2;
+    }
+    switch (type) {
+      case 'vertex':
+        corners = start.map(function (elem) {
+          return {x: elem.x, y: elem.y};
+        });
+        ang1 = ang[(index + 1) % 4];
+        delta1 = {
+          x: (delta.x * Math.cos(ang1) + delta.y * Math.sin(ang1)) * Math.cos(ang1),
+          y: (delta.y * Math.sin(ang1) + delta.x * Math.cos(ang1)) * Math.sin(ang1)
+        };
+        ang2 = ang[index];
+        delta2 = {
+          x: (delta.x * Math.cos(ang2) + delta.y * Math.sin(ang2)) * Math.cos(ang2),
+          y: (delta.y * Math.sin(ang2) + delta.x * Math.cos(ang2)) * Math.sin(ang2)
+        };
+        corners[index].x += delta.x;
+        corners[index].y += delta.y;
+        corners[(index + 1) % 4].x += delta1.x;
+        corners[(index + 1) % 4].y += delta1.y;
+        corners[(index + 3) % 4].x += delta2.x;
+        corners[(index + 3) % 4].y += delta2.y;
+        m_this.options('corners', corners);
+        return true;
+      case 'edge':
+        corners = start.map(function (elem) {
+          return {x: elem.x, y: elem.y};
+        });
+        ang1 = ang[(index + 1) % 4];
+        delta = {
+          x: (delta.x * Math.cos(ang1) + delta.y * Math.sin(ang1)) * Math.cos(ang1),
+          y: (delta.y * Math.sin(ang1) + delta.x * Math.cos(ang1)) * Math.sin(ang1)
+        };
+        corners[index].x += delta.x;
+        corners[index].y += delta.y;
+        corners[(index + 1) % 4].x += delta.x;
+        corners[(index + 1) % 4].y += delta.y;
+        m_this.options('corners', corners);
+        return true;
+    }
+    return s_processEditAction.apply(m_this, arguments);
+  };
 };
 inherit(rectangleAnnotation, annotation);
 
@@ -933,9 +1453,13 @@ var polygonAnnotation = function (args) {
       strokeWidth: 3,
       uniformPolygon: true
     },
-    editStyle: {
+    highlightStyle: {
+      fillColor: {r: 0, g: 1, b: 1},
+      fillOpacity: 0.5,
+      strokeWidth: 5
+    },
+    createStyle: {
       closed: false,
-      fill: true,
       fillColor: {r: 0.3, g: 0.3, b: 0.3},
       fillOpacity: 0.25,
       line: function (d) {
@@ -944,15 +1468,11 @@ var polygonAnnotation = function (args) {
         return Array.apply(null, Array(m_this.options('vertices').length)).map(
             function () { return d; });
       },
-      polygon: function (d) { return d.polygon; },
       position: function (d, i) {
         return m_this.options('vertices')[i];
       },
       stroke: false,
-      strokeColor: {r: 0, g: 0, b: 1},
-      strokeOpacity: 1,
-      strokeWidth: 3,
-      uniformPolygon: true
+      strokeColor: {r: 0, g: 0, b: 1}
     }
   }, args || {});
   args.vertices = args.vertices || args.coordinates || [];
@@ -971,6 +1491,7 @@ var polygonAnnotation = function (args) {
   this.features = function () {
     var opt = m_this.options(),
         state = m_this.state(),
+        style = m_this.styleForState(state),
         features;
     switch (state) {
       case annotationState.create:
@@ -979,7 +1500,7 @@ var polygonAnnotation = function (args) {
           features[1] = {
             polygon: {
               polygon: opt.vertices,
-              style: opt.editStyle
+              style: style
             }
           };
         }
@@ -987,7 +1508,7 @@ var polygonAnnotation = function (args) {
           features[2] = {
             line: {
               line: opt.vertices,
-              style: opt.editStyle
+              style: style
             }
           };
         }
@@ -996,9 +1517,12 @@ var polygonAnnotation = function (args) {
         features = [{
           polygon: {
             polygon: opt.vertices,
-            style: opt.style
+            style: style
           }
         }];
+        if (state === annotationState.edit) {
+          m_this._addEditHandles(features, opt.vertices);
+        }
         break;
     }
     return features;
@@ -1197,7 +1721,10 @@ var lineAnnotation = function (args) {
       lineCap: 'butt',
       lineJoin: 'miter'
     },
-    editStyle: {
+    highlightStyle: {
+      strokeWidth: 5
+    },
+    createStyle: {
       line: function (d) {
         /* Return an array that has the same number of items as we have
          * vertices. */
@@ -1220,7 +1747,8 @@ var lineAnnotation = function (args) {
   annotation.call(this, 'line', args);
 
   var m_this = this,
-      s_actions = this.actions;
+      s_actions = this.actions,
+      s_processEditAction = this.processEditAction;
 
   /**
    * Get a list of renderable features for this annotation.
@@ -1236,7 +1764,7 @@ var lineAnnotation = function (args) {
         features = [{
           line: {
             line: opt.vertices,
-            style: opt.editStyle
+            style: m_this.styleForState(state)
           }
         }];
         break;
@@ -1244,9 +1772,12 @@ var lineAnnotation = function (args) {
         features = [{
           line: {
             line: opt.vertices,
-            style: opt.style
+            style: m_this.styleForState(state)
           }
         }];
+        if (state === annotationState.edit) {
+          m_this._addEditHandles(features, opt.vertices, undefined, !m_this.style('closed'));
+        }
         break;
     }
     return features;
@@ -1462,6 +1993,63 @@ var lineAnnotation = function (args) {
       'closed', 'lineCap', 'lineJoin', 'strokeColor', 'strokeOffset',
       'strokeOpacity', 'strokeWidth'];
   };
+
+  /**
+   * Process any edit actions for this annotation.
+   *
+   * @param {geo.event} evt The action event.
+   * @returns {boolean|string} `true` to update the annotation, falsy to not
+   *    update anything.
+   */
+  this.processEditAction = function (evt) {
+    switch (m_this._editHandle.handle.type) {
+      case 'vertex':
+        return m_this._processEditActionVertex(evt, true);
+    }
+    return s_processEditAction.apply(m_this, arguments);
+  };
+
+  /**
+   * Handle a mouse click on this annotation when in edit mode.  If the event
+   * is processed, evt.handled should be set to `true` to prevent further
+   * processing.
+   *
+   * @param {geo.event} evt The mouse click event.
+   * @returns {boolean|string} `true` to update the annotation, `'done'` if
+   *    the annotation was completed (changed from create to done state),
+   *    `'remove'` if the annotation should be removed, falsy to not update
+   *    anything.
+   */
+  this.mouseClickEdit = function (evt) {
+    // if we get a left double click on an edge on a closed line, break the
+    // line at that edge
+    var layer = m_this.layer(),
+        handle = m_this._editHandle,
+        split;
+    // ensure we are in edit mode and this is a left click
+    if (m_this.state() !== annotationState.edit || !layer || !evt.buttonsDown.left) {
+      return;
+    }
+    // ensure this is an edge on a closed line
+    if (!handle || !handle.handle.selected || handle.handle.type !== 'edge' || !m_this.options('style').closed) {
+      return;
+    }
+    evt.handled = true;
+    if (m_this._lastClick && evt.time - m_this._lastClick < layer.options('dblClickTime')) {
+      split = true;
+    }
+    m_this._lastClick = evt.time;
+    if (split) {
+      var index = handle.handle.index,
+          curPts = m_this._coordinates(),
+          pts = curPts.slice(index + 1).concat(curPts.slice(0, index + 1));
+      m_this._coordinates(pts);
+      m_this.options('style').closed = false;
+      handle.handle.index = undefined;
+      return true;
+    }
+  };
+
 };
 inherit(lineAnnotation, annotation);
 
@@ -1515,6 +2103,16 @@ var pointAnnotation = function (args) {
       strokeColor: {r: 0, g: 0, b: 0},
       strokeOpacity: 1,
       strokeWidth: 3
+    },
+    createStyle: {
+      fillColor: {r: 0.3, g: 0.3, b: 0.3},
+      fillOpacity: 0.25,
+      strokeColor: {r: 0, g: 0, b: 1}
+    },
+    highlightStyle: {
+      fillColor: {r: 0, g: 1, b: 1},
+      fillOpacity: 0.5,
+      strokeWidth: 5
     }
   }, args || {});
   args.position = args.position || (args.coordinates ? args.coordinates[0] : undefined);
@@ -1537,7 +2135,7 @@ var pointAnnotation = function (args) {
         features = [];
         break;
       default:
-        style = opt.style;
+        style = m_this.styleForState(state);
         if (opt.style.scaled || opt.style.scaled === 0) {
           if (opt.style.scaled === true) {
             opt.style.scaled = m_this.layer().map().zoom();
@@ -1563,6 +2161,11 @@ var pointAnnotation = function (args) {
             scaleOnZoom: scaleOnZoom
           }
         }];
+        if (state === annotationState.edit) {
+          m_this._addEditHandles(
+            features, [opt.position],
+            {edge: false, center: false, resize: false, rotate: false});
+        }
         break;
     }
     return features;
@@ -1659,5 +2262,6 @@ module.exports = {
   lineAnnotation: lineAnnotation,
   pointAnnotation: pointAnnotation,
   polygonAnnotation: polygonAnnotation,
-  rectangleAnnotation: rectangleAnnotation
+  rectangleAnnotation: rectangleAnnotation,
+  _editHandleFeatureLevel: editHandleFeatureLevel
 };

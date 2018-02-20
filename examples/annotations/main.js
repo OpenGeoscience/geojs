@@ -10,7 +10,7 @@ $(function () {
 
   // get the query parameters and set controls appropriately
   var query = utils.getQuery();
-  $('#clickadd').prop('checked', query.clickadd !== 'false');
+  $('#clickmode').val(query.clickmode || 'edit');
   $('#keepadding').prop('checked', query.keepadding === 'true');
   $('#showLabels').prop('checked', query.labels !== 'false');
   if (query.lastannotation) {
@@ -54,7 +54,8 @@ $(function () {
   layer = map.createLayer('annotation', {
     renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
     annotations: query.renderer ? undefined : geo.listAnnotations(),
-    showLabels: query.labels !== 'false'
+    showLabels: query.labels !== 'false',
+    clickToEdit: !query.clickmode || query.clickmode === 'edit'
   });
   // bind to the mouse click and annotation mode events
   layer.geoOn(geo.event.mouseclick, mouseClickToStart);
@@ -92,7 +93,7 @@ $(function () {
    * @param {geo.event} evt geojs event.
    */
   function mouseClickToStart(evt) {
-    if (evt.handled || query.clickadd === 'false') {
+    if (evt.handled || query.clickmode !== 'add') {
       return;
     }
     if (evt.buttonsDown.left) {
@@ -127,6 +128,10 @@ $(function () {
     switch (param) {
       case 'labels':
         layer.options('showLabels', '' + value !== 'false');
+        layer.draw();
+        break;
+      case 'clickmode':
+        layer.options('clickToEdit', value === 'edit');
         layer.draw();
         break;
     }
@@ -274,6 +279,10 @@ $(function () {
         id = ctl.closest('.entry').attr('annotation-id'),
         annotation = layer.annotationById(id);
     switch (action) {
+      case 'adjust':
+        layer.mode(layer.modes.edit, annotation);
+        layer.draw();
+        break;
       case 'edit':
         show_edit_dialog(id, annotation);
         break;

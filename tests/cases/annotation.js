@@ -19,6 +19,47 @@ describe('geo.annotation', function () {
     restoreVGLRenderer();
   });
 
+  /**
+   * Create an annotation with a set of points based on screen coordinates.
+   * The returned annotation has a property _handles which references the
+   * generated edit handles.
+   *
+   * @param {geo.map} map The map to use.
+   * @param {geo.annotationLayer} layer The annotation layer.
+   * @param {geo.screenPosition[]} pts The vertices of the annotation.
+   * @returns {geo.annotation}
+   */
+  function createEditableAnnotation(map, layer, pts) {
+    var ann = geo.annotation.annotation('test', {layer: layer, style: {}}),
+        features = [];
+    ann._coordinates = function (coor) {
+      return ann.options.call(ann, 'vertices', coor);
+    };
+    ann._coordinates(map.displayToGcs(pts, null));
+    ann._addEditHandles(features, ann._coordinates());
+    ann._handles = features[geo.annotation._editHandleFeatureLevel].point;
+    return ann;
+  }
+
+  /**
+   * Create an event that can be passed to edit handle functions with mouse
+   * movement.  This translates screen coordinates to appropriate mapgcs
+   * values.
+   *
+   * @param {geo.map} map The map to use.
+   * @param {geo.screenPosition} start Where the mouse started its drag.
+   * @param {geo.screenPosition} end Where the mouse is currently located.
+   * @returns {object} an object that can be used as a edit handle event.
+   */
+  function editHandleEvent(map, start, end) {
+    return {
+      mouse: {mapgcs: map.displayToGcs(end, null)},
+      state: {origin: {mapgcs: map.displayToGcs(start, null)}},
+      buttonsDown: {},
+      time: new Date().getTime()
+    };
+  }
+
   describe('geo.annotation.annotation', function () {
     var map, layer, stateEvent = 0, lastStateEvent;
     it('create', function () {
@@ -36,8 +77,11 @@ describe('geo.annotation', function () {
       expect(ann.features()).toEqual([]);
       expect(ann.coordinates()).toEqual([]);
       expect(ann.actions()).toEqual([]);
+      expect(ann.actions(geo.annotation.state.edit).length).toEqual(2);
       expect(ann.processAction()).toBe(undefined);
+      expect(ann.processEditAction()).toBe(undefined);
       expect(ann.mouseClick()).toBe(undefined);
+      expect(ann.mouseClickEdit()).toBe(undefined);
       expect(ann.mouseMove()).toBe(undefined);
       expect(ann._coordinates()).toEqual([]);
       expect(ann.geojson()).toBe(undefined);
@@ -261,6 +305,35 @@ describe('geo.annotation', function () {
       expect(pos.x).toBeCloseTo(4.447);
       expect(pos.y).toBeCloseTo(6.539);
     });
+    it('_rotateHandlePosition', function () {
+      var pos;
+      var ann = geo.annotation.annotation('test', {layer: layer});
+      expect(ann._rotateHandlePosition()).toBe(undefined);
+      ann._coordinates = function () {
+        return [{x: 1, y: 2}];
+      };
+      pos = ann._rotateHandlePosition();
+      expect(pos.x).toBeCloseTo(1);
+      expect(pos.y).toBeCloseTo(2);
+      pos = ann._rotateHandlePosition(10);
+      expect(pos.x).toBeCloseTo(97840, 0);
+      expect(pos.y).toBeCloseTo(2);
+      pos = ann._rotateHandlePosition(10, -Math.PI / 4);
+      expect(pos.x).toBeCloseTo(69184, 0);
+      expect(pos.y).toBeCloseTo(-69181, 0);
+      ann._coordinates = function () {
+        return [{x: 1, y: 2}, {x: 3, y: 5}, {x: 8, y: 11}];
+      };
+      pos = ann._rotateHandlePosition();
+      expect(pos.x).toBeCloseTo(10.15, 2);
+      expect(pos.y).toBeCloseTo(6.54, 2);
+      pos = ann._rotateHandlePosition(10);
+      expect(pos.x).toBeCloseTo(97850, 0);
+      expect(pos.y).toBeCloseTo(6.54, 2);
+      pos = ann._rotateHandlePosition(10, -Math.PI / 4);
+      expect(pos.x).toBeCloseTo(69191, 0);
+      expect(pos.y).toBeCloseTo(-69180, 0);
+    });
     it('labelRecord', function () {
       var ann = geo.annotation.annotation('test', {
         layer: layer,
@@ -280,6 +353,244 @@ describe('geo.annotation', function () {
       ann.options('showLabel', false);
       expect(ann.labelRecord()).toBe(undefined);
     });
+    it('styleForState', function () {
+      var testStyles = {
+        style: {strokeWidth: 1},
+        createStyle: {strokeWidth: 2, fill: false},
+        editStyle: {strokeWidth: 3, strokeOpacity: 0.5},
+        highlightStyle: {strokeWidth: 4, fillOpacity: 0.5}
+      };
+      var ann = geo.annotation.annotation('test', testStyles);
+      expect(ann.styleForState()).toEqual(testStyles.style);
+      expect(ann.styleForState()).toEqual(ann.styleForState(geo.annotation.state.done));
+      expect(ann.styleForState(geo.annotation.state.done)).toEqual(testStyles.style);
+      // create extends edit, so it is special
+      expect(ann.styleForState(geo.annotation.state.create)).toEqual({
+        strokeWidth: 2, fill: false, strokeOpacity: 0.5
+      });
+      expect(ann.styleForState(geo.annotation.state.edit)).toEqual(testStyles.editStyle);
+      expect(ann.styleForState(geo.annotation.state.highlight)).toEqual(testStyles.highlightStyle);
+      ann.state(geo.annotation.state.create);
+      expect(ann.styleForState()).toEqual(ann.styleForState(geo.annotation.state.create));
+    });
+    it('_addEditHandles', function () {
+      var ann = geo.annotation.annotation('test', {layer: layer}),
+          features = [], handles;
+      ann._coordinates = function () {
+        return [{x: 1, y: 2}, {x: 3, y: 5}, {x: 8, y: 11}];
+      };
+      expect(ann._addEditHandles(features, ann._coordinates(), {edge: false, center: false, rotate: false, resize: false})).toBe(undefined);
+      // just vertices
+      handles = features[geo.annotation._editHandleFeatureLevel].point;
+      expect(handles.length).toBe(3);
+      // all handles
+      handles.splice(0, handles.length);
+      ann._addEditHandles(features, ann._coordinates());
+      expect(handles.length).toBe(9);
+      expect(handles.map(function (h) { return h.type; })).toEqual([
+        'vertex', 'edge', 'vertex', 'edge', 'vertex', 'edge', 'center', 'rotate', 'resize']);
+      expect(handles.map(function (h) { return h.index; })).toEqual([
+        0, 0, 1, 1, 2, 2, undefined, undefined, undefined]);
+      expect(handles.map(function (h) { return h.selected; })).toEqual([
+        undefined, undefined, undefined, undefined, undefined, undefined,
+        undefined, undefined, undefined]);
+      // add handles with an edge selected
+      handles.splice(0, handles.length);
+      ann._editHandle = {handle: {selected: true, type: 'edge', index: 1}};
+      ann._addEditHandles(features, ann._coordinates());
+      expect(handles.map(function (h) { return h.selected; })).toEqual([
+        undefined, undefined, undefined, true, undefined, undefined,
+        undefined, undefined, undefined]);
+      // all handles but edges
+      handles.splice(0, handles.length);
+      ann._addEditHandles(features, ann._coordinates(), {edge: false});
+      expect(handles.length).toBe(6);
+      expect(handles.map(function (h) { return h.type; })).toEqual([
+        'vertex', 'vertex', 'vertex', 'center', 'rotate', 'resize']);
+      expect(handles.map(function (h) { return h.index; })).toEqual([
+        0, 1, 2, undefined, undefined, undefined]);
+      // vertices and center
+      handles.splice(0, handles.length);
+      ann._addEditHandles(features, ann._coordinates(), {edge: false, resize: false, rotate: false});
+      expect(handles.length).toBe(4);
+      expect(handles[3].type).toBe('center');
+      // vertices and rotate
+      handles.splice(0, handles.length);
+      ann._addEditHandles(features, ann._coordinates(), {edge: false, center: false, resize: false});
+      expect(handles.length).toBe(4);
+      expect(handles[3].type).toBe('rotate');
+      expect(ann._editHandle.amountRotated).toBe(0);
+      // vertices and resize
+      handles.splice(0, handles.length);
+      ann._addEditHandles(features, ann._coordinates(), {edge: false, center: false, rotate: false});
+      expect(handles.length).toBe(4);
+      expect(handles[3].type).toBe('resize');
+      // style can override
+      ann.editHandleStyle('handles', {vertex: false, rotate: false});
+      handles.splice(0, handles.length);
+      ann._addEditHandles(features, ann._coordinates());
+      expect(handles.length).toBe(5);
+    });
+    it('selectEditHandle', function () {
+      var ann = geo.annotation.annotation('test', {layer: layer}),
+          features = [], handles;
+      ann._coordinates = function () {
+        return [{x: 1, y: 2}, {x: 3, y: 5}, {x: 8, y: 11}];
+      };
+      ann._addEditHandles(features, ann._coordinates());
+      handles = features[geo.annotation._editHandleFeatureLevel].point;
+      expect(ann.selectEditHandle(handles[0], true)).toBe(ann);
+      expect(ann._editHandle.handle).toBe(handles[0]);
+      expect(handles[0].selected).toBe(true);
+      expect(ann.selectEditHandle(handles[0], false)).toBe(ann);
+      expect(handles[0].selected).toBe(false);
+      expect(ann.selectEditHandle(handles[1], true)).toBe(ann);
+      expect(ann.selectEditHandle(handles[2], true)).toBe(ann);
+      expect(handles[1].selected).toBe(false);
+      expect(handles[2].selected).toBe(true);
+    });
+    // processEditAction gets tested as well
+    it('_processEditActionCenter', function () {
+      var pts = [{x: 10, y: 20}, {x: 30, y: 50}, {x: 80, y: 110}],
+          ann = createEditableAnnotation(map, layer, pts),
+          handles = ann._handles,
+          evt, check;
+      expect(ann.selectEditHandle(handles[6], true)).toBe(ann);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 60});
+      expect(ann.processEditAction(evt)).toBe(false);
+      expect(ann._processEditActionCenter(evt)).toBe(false);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 63});
+      expect(ann.processEditAction(evt)).toBe(true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 65});
+      expect(ann._processEditActionCenter(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[1].x).toBeCloseTo(30);
+      expect(check[1].y).toBeCloseTo(55);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 42, y: 68});
+      expect(ann._processEditActionCenter(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[1].x).toBeCloseTo(32);
+      expect(check[1].y).toBeCloseTo(58);
+    });
+    it('_processEditActionRotate', function () {
+      var pts = [{x: 10, y: 20}, {x: 30, y: 50}, {x: 80, y: 110}],
+          ann = createEditableAnnotation(map, layer, pts),
+          handles = ann._handles,
+          evt, check;
+      expect(ann.selectEditHandle(handles[7], true)).toBe(ann);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 60});
+      expect(ann.processEditAction(evt)).toBe(false);
+      expect(ann._processEditActionRotate(evt)).toBe(false);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 63});
+      expect(ann.processEditAction(evt)).toBe(true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 65});
+      expect(ann._processEditActionRotate(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[1].x).toBeCloseTo(30.66);
+      expect(check[1].y).toBeCloseTo(49.41);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 42, y: 68});
+      expect(ann._processEditActionRotate(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[1].x).toBeCloseTo(30.76);
+      expect(check[1].y).toBeCloseTo(49.32);
+    });
+    it('_processEditActionResize', function () {
+      var pts = [{x: 10, y: 20}, {x: 30, y: 50}, {x: 80, y: 110}],
+          ann = createEditableAnnotation(map, layer, pts),
+          handles = ann._handles,
+          evt, check;
+      expect(ann.selectEditHandle(handles[8], true)).toBe(ann);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 60});
+      expect(ann.processEditAction(evt)).toBe(false);
+      expect(ann._processEditActionResize(evt)).toBe(false);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 63});
+      expect(ann.processEditAction(evt)).toBe(true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 65});
+      expect(ann._processEditActionResize(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[1].x).toBeCloseTo(29.09);
+      expect(check[1].y).toBeCloseTo(49.03);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 42, y: 68});
+      expect(ann._processEditActionResize(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[1].x).toBeCloseTo(28.19);
+      expect(check[1].y).toBeCloseTo(48.07);
+    });
+    it('_processEditActionEdge', function () {
+      var pts = [{x: 10, y: 20}, {x: 30, y: 50}, {x: 80, y: 110}],
+          ann = createEditableAnnotation(map, layer, pts),
+          handles = ann._handles,
+          evt;
+      expect(ann.selectEditHandle(handles[3], true)).toBe(ann);
+      expect(ann._editHandle.handle.type).toBe('edge');
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 60});
+      expect(ann._processEditActionEdge(evt)).toBe(true);
+      expect(ann._coordinates().length).toBe(4);
+      expect(ann._editHandle.handle.type).toBe('vertex');
+      ann = createEditableAnnotation(map, layer, pts);
+      handles = ann._handles;
+      expect(ann.selectEditHandle(handles[3], true)).toBe(ann);
+      expect(ann.processEditAction(evt)).toBe(true);
+    });
+    it('_processEditActionVertex', function () {
+      var pts = [{x: 10, y: 20}, {x: 30, y: 50}, {x: 32, y: 50}, {x: 80, y: 110}],
+          ann = createEditableAnnotation(map, layer, pts),
+          handles = ann._handles,
+          evt, check;
+      expect(ann.selectEditHandle(handles[2], true)).toBe(ann);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 60});
+      expect(ann.processEditAction(evt)).toBe(false);
+      expect(ann._processEditActionVertex(evt)).toBe(false);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 41, y: 63});
+      expect(ann.processEditAction(evt)).toBe(true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 41, y: 60});
+      expect(ann._processEditActionVertex(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[1].x).toBeCloseTo(31);
+      expect(check[1].y).toBeCloseTo(50);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 20, y: 31});
+      expect(ann._processEditActionVertex(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check.length).toBe(4);
+      expect(check[1].x).toBeCloseTo(10);
+      expect(check[1].y).toBeCloseTo(20);
+      evt.event = geo.event.actionup;
+      expect(ann._processEditActionVertex(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check.length).toBe(3);
+      // reset to where we started
+      ann = createEditableAnnotation(map, layer, pts);
+      handles = ann._handles;
+      expect(ann.selectEditHandle(handles[6], true)).toBe(ann);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: -30, y: -29});
+      expect(ann._processEditActionVertex(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[3].x).toBeCloseTo(10);
+      expect(check[3].y).toBeCloseTo(20);
+      expect(ann._processEditActionVertex(evt, false)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[3].x).toBeCloseTo(10);
+      expect(check[3].y).toBeCloseTo(21);
+      expect(ann._processEditActionVertex(evt, true)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[3].x).toBeCloseTo(10);
+      expect(check[3].y).toBeCloseTo(20);
+      evt.event = geo.event.actionup;
+      expect(ann._processEditActionVertex(evt, true)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check.length).toBe(3);
+    });
+    it('defaultEditHandleStyle functions', function () {
+      var pts = [{x: 10, y: 20}, {x: 30, y: 50}, {x: 80, y: 110}],
+          ann = createEditableAnnotation(map, layer, pts),
+          handles = ann._handles;
+      ann.selectEditHandle(handles[0], true);
+      expect(handles[0].style.fillColor(handles[0])).not.toEqual(handles[1].style.fillColor(handles[1]));
+      expect(handles[2].style.fillColor(handles[2])).toEqual(handles[1].style.fillColor(handles[1]));
+      expect(handles[0].style.fillOpacity(handles[0])).not.toEqual(handles[1].style.fillOpacity(handles[1]));
+      expect(handles[0].style.radius(handles[0])).not.toEqual(handles[1].style.radius(handles[1]));
+      expect(handles[0].style.strokeWidth(handles[0])).not.toEqual(handles[1].style.strokeWidth(handles[1]));
+    });
   });
 
   describe('geo.annotation.rectangleAnnotation', function () {
@@ -291,13 +602,20 @@ describe('geo.annotation', function () {
       expect(ann.type()).toBe('rectangle');
     });
     it('features', function () {
-      var ann = geo.annotation.rectangleAnnotation({corners: corners});
+      var map = createMap();
+      var layer = map.createLayer('annotation', {
+        annotations: ['rectangle']
+      });
+      var ann = geo.annotation.rectangleAnnotation({layer: layer, corners: corners});
       var features = ann.features();
       expect(features.length).toBe(1);
       expect(features[0].polygon.polygon).toEqual(corners);
       expect(features[0].polygon.style.fillOpacity).toBe(0.25);
       expect(features[0].polygon.style.fillColor.g).toBe(1);
       expect(features[0].polygon.style.polygon({polygon: 'a'})).toBe('a');
+      ann.state(geo.annotation.state.edit);
+      features = ann.features();
+      expect(features.length).toBe(4);
       ann.state(geo.annotation.state.create);
       features = ann.features();
       expect(features.length).toBe(1);
@@ -455,6 +773,119 @@ describe('geo.annotation', function () {
         mapgcs: map.displayToGcs(corners[1], null)
       })).toBe('remove');
     });
+    it('processEditAction', function () {
+      var pts = [{x: 10, y: 15}, {x: 40, y: 15}, {x: 40, y: 25}, {x: 10, y: 25}],
+          pts2 = [{x: 20, y: 15}, {x: 60, y: 45}, {x: 75, y: 65}, {x: 5, y: 35}],
+          pts3 = [{x: 20, y: 15}, {x: 20, y: 15}, {x: 20, y: 15}, {x: 20, y: 15}],
+          pts4 = [{x: 20, y: 15}, {x: 20, y: 15}, {x: 40, y: 25}, {x: 40, y: 25}],
+          pts5 = [{x: 20, y: 15}, {x: 40, y: 25}, {x: 40, y: 25}, {x: 20, y: 15}],
+          map = createMap(),
+          layer = map.createLayer('annotation', {annotations: ['rectangle']}),
+          ann = geo.annotation.rectangleAnnotation({
+            layer: layer,
+            corners: map.displayToGcs(pts, null),
+            state: geo.annotation.state.edit
+          }),
+          features = ann.features(),
+          handles = features[geo.annotation._editHandleFeatureLevel].point,
+          evt, check;
+      // select a vertex
+      ann.selectEditHandle(handles[2], true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 42, y: 65});
+      expect(ann.processEditAction(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[0].x).toBeCloseTo(10);
+      expect(check[0].y).toBeCloseTo(20);
+      expect(check[1].x).toBeCloseTo(42);
+      expect(check[1].y).toBeCloseTo(20);
+      expect(check[2].x).toBeCloseTo(42);
+      expect(check[2].y).toBeCloseTo(25);
+      expect(check[3].x).toBeCloseTo(10);
+      expect(check[3].y).toBeCloseTo(25);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 60});
+      expect(ann.processEditAction(evt)).toBe(true);
+      // select an edge
+      ann.selectEditHandle(handles[3], true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 42, y: 65});
+      expect(ann.processEditAction(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[0].x).toBeCloseTo(10);
+      expect(check[0].y).toBeCloseTo(15);
+      expect(check[1].x).toBeCloseTo(42);
+      expect(check[1].y).toBeCloseTo(15);
+      expect(check[2].x).toBeCloseTo(42);
+      expect(check[2].y).toBeCloseTo(25);
+      expect(check[3].x).toBeCloseTo(10);
+      expect(check[3].y).toBeCloseTo(25);
+      // test with a rotated rectangle
+      ann._coordinates(map.displayToGcs(pts2, null));
+      // select a vertex
+      ann.selectEditHandle(handles[2], true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 46, y: 68});
+      expect(ann.processEditAction(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[0].x).toBeCloseTo(26);
+      expect(check[0].y).toBeCloseTo(23);
+      expect(check[1].x).toBeCloseTo(66);
+      expect(check[1].y).toBeCloseTo(53);
+      expect(check[2].x).toBeCloseTo(82.97);
+      expect(check[2].y).toBeCloseTo(68.41);
+      expect(check[3].x).toBeCloseTo(5);
+      expect(check[3].y).toBeCloseTo(35);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 60});
+      expect(ann.processEditAction(evt)).toBe(true);
+      // select an edge
+      ann.selectEditHandle(handles[3], true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 46, y: 68});
+      expect(ann.processEditAction(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[0].x).toBeCloseTo(20);
+      expect(check[0].y).toBeCloseTo(15);
+      expect(check[1].x).toBeCloseTo(67.97);
+      expect(check[1].y).toBeCloseTo(48.41);
+      expect(check[2].x).toBeCloseTo(82.97);
+      expect(check[2].y).toBeCloseTo(68.41);
+      expect(check[3].x).toBeCloseTo(5);
+      expect(check[3].y).toBeCloseTo(35);
+      // test that super class method is called
+      ann.selectEditHandle(handles[8], true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 63});
+      expect(ann.processEditAction(evt)).toBe(true);
+      // test degenerate rectangles
+      ann._coordinates(map.displayToGcs(pts3, null));
+      ann.selectEditHandle(handles[2], true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 46, y: 68});
+      expect(ann.processEditAction(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[0].x).toBeCloseTo(20);
+      expect(check[0].y).toBeCloseTo(23);
+      expect(check[1].x).toBeCloseTo(26);
+      expect(check[1].y).toBeCloseTo(23);
+      expect(check[2].x).toBeCloseTo(26);
+      expect(check[2].y).toBeCloseTo(15);
+      ann._coordinates(map.displayToGcs(pts4, null));
+      ann.selectEditHandle(handles[2], true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 46, y: 68});
+      expect(ann.processEditAction(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[0].x).toBeCloseTo(28);
+      expect(check[0].y).toBeCloseTo(19);
+      expect(check[1].x).toBeCloseTo(26);
+      expect(check[1].y).toBeCloseTo(23);
+      expect(check[2].x).toBeCloseTo(38);
+      expect(check[2].y).toBeCloseTo(29);
+      ann._coordinates(map.displayToGcs(pts5, null));
+      ann.selectEditHandle(handles[2], true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 46, y: 68});
+      expect(ann.processEditAction(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[0].x).toBeCloseTo(18);
+      expect(check[0].y).toBeCloseTo(19);
+      expect(check[1].x).toBeCloseTo(46);
+      expect(check[1].y).toBeCloseTo(33);
+      expect(check[2].x).toBeCloseTo(48);
+      expect(check[2].y).toBeCloseTo(29);
+    });
   });
 
   describe('geo.annotation.polygonAnnotation', function () {
@@ -466,13 +897,20 @@ describe('geo.annotation', function () {
       expect(ann.type()).toBe('polygon');
     });
     it('features', function () {
-      var ann = geo.annotation.polygonAnnotation({vertices: vertices});
+      var map = createMap();
+      var layer = map.createLayer('annotation', {
+        annotations: ['polygon']
+      });
+      var ann = geo.annotation.polygonAnnotation({layer: layer, vertices: vertices});
       var features = ann.features();
       expect(features.length).toBe(1);
       expect(features[0].polygon.polygon).toEqual(vertices);
       expect(features[0].polygon.style.fillOpacity).toBe(0.25);
       expect(features[0].polygon.style.fillColor.g).toBe(1);
       expect(features[0].polygon.style.polygon({polygon: 'a'})).toBe('a');
+      ann.state(geo.annotation.state.edit);
+      features = ann.features();
+      expect(features.length).toBe(4);
       ann.state(geo.annotation.state.create);
       features = ann.features();
       expect(features.length).toBe(3);
@@ -600,6 +1038,9 @@ describe('geo.annotation', function () {
       expect(features.length).toBe(1);
       expect(features[0].point.x).toEqual(point.x);
       expect(features[0].point.style.radius).toBe(10);
+      ann.state(geo.annotation.state.edit);
+      features = ann.features();
+      expect(features.length).toBe(4);
       ann.state(geo.annotation.state.create);
       features = ann.features();
       expect(features.length).toBe(0);
@@ -693,7 +1134,11 @@ describe('geo.annotation', function () {
       expect(ann.type()).toBe('line');
     });
     it('features', function () {
-      var ann = geo.annotation.lineAnnotation({vertices: vertices});
+      var map = createMap();
+      var layer = map.createLayer('annotation', {
+        annotations: ['line']
+      });
+      var ann = geo.annotation.lineAnnotation({layer: layer, vertices: vertices});
       var features = ann.features();
       expect(features.length).toBe(1);
       expect(features[0].line.line).toEqual(vertices);
@@ -701,6 +1146,9 @@ describe('geo.annotation', function () {
       expect(features[0].line.style.strokeColor.b).toBe(0);
       expect(features[0].line.style.line().length).toBe(vertices.length);
       expect(features[0].line.style.position(0, 1)).toEqual(vertices[1]);
+      ann.state(geo.annotation.state.edit);
+      features = ann.features();
+      expect(features.length).toBe(4);
       ann.state(geo.annotation.state.create);
       features = ann.features();
       expect(features.length).toBe(1);
@@ -902,6 +1350,72 @@ describe('geo.annotation', function () {
       expect(ann.processAction(evt)).toBe(true);
       expect(ann.options('vertices').length).toBe(4);
     });
+    it('processEditAction', function () {
+      var map = createMap(),
+          layer = map.createLayer('annotation', {annotations: ['line']}),
+          ann = geo.annotation.lineAnnotation({
+            layer: layer,
+            vertices: map.displayToGcs(vertices, null),
+            state: geo.annotation.state.edit
+          }),
+          features = ann.features(),
+          handles = features[geo.annotation._editHandleFeatureLevel].point,
+          evt, check;
+      // select a vertex and close the line
+      ann.selectEditHandle(handles[6], true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 51});
+      evt.event = geo.event.actionup;
+      expect(ann.processEditAction(evt)).toBe(true);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check.length).toBe(3);
+      expect(ann.style('closed')).toBe(true);
+      // test that super class method is called
+      features = ann.features();
+      handles = features[geo.annotation._editHandleFeatureLevel].point;
+      ann.selectEditHandle(handles[6], true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 63});
+      expect(ann.processEditAction(evt)).toBe(true);
+    });
+    it('mouseClickEdit', function () {
+      var map = createMap(),
+          layer = map.createLayer('annotation', {annotations: ['line']}),
+          ann = geo.annotation.lineAnnotation({
+            layer: layer,
+            vertices: map.displayToGcs(vertices, null),
+            state: geo.annotation.state.edit,
+            style: {closed: true}
+          }),
+          features = ann.features(),
+          handles = features[geo.annotation._editHandleFeatureLevel].point,
+          evt, check;
+      // select a vertex -- this will do nothing
+      ann.selectEditHandle(handles[2], true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 60});
+      evt.buttonsDown.left = true;
+      expect(ann.mouseClickEdit(evt)).toBe(undefined);
+      expect(ann.mouseClickEdit(evt)).toBe(undefined);
+      // now use
+      ann.selectEditHandle(handles[1], true);
+      evt = editHandleEvent(map, {x: 40, y: 60}, {x: 40, y: 60});
+      // with no button down specified, the event does nothing
+      expect(ann.mouseClickEdit(evt)).toBe(undefined);
+      evt.buttonsDown.left = true;
+      // the first click does nothing
+      expect(ann.mouseClickEdit(evt)).toBe(undefined);
+      evt.time += 20000;
+      // the second click does nothing if there is too much delay
+      expect(ann.mouseClickEdit(evt)).toBe(undefined);
+      // but will split if there is less delay
+      expect(ann.mouseClickEdit(evt)).toBe(true);
+      expect(ann.style('closed')).toBe(false);
+      check = map.gcsToDisplay(ann._coordinates(), null);
+      expect(check[0].x).toBeCloseTo(50);
+      expect(check[0].y).toBeCloseTo(0);
+      // we can't break an already open line
+      ann.selectEditHandle(handles[1], true);
+      expect(ann.mouseClickEdit(evt)).toBe(undefined);
+      expect(ann.mouseClickEdit(evt)).toBe(undefined);
+    });
   });
 
   describe('annotation registry', function () {
@@ -916,14 +1430,21 @@ describe('geo.annotation', function () {
     });
     it('registerAnnotation', function () {
       var func = function () { newshapeCount += 1; return 'newshape return'; };
+      sinon.stub(console, 'warn', function () {});
       expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(false);
       expect(geo.registerAnnotation('newshape', func)).toBe(undefined);
       expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(true);
+      expect(console.warn.calledOnce).toBe(false);
       expect(geo.registerAnnotation('newshape', func).func).toBe(func);
+      expect(console.warn.calledOnce).toBe(true);
       expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(true);
+      console.warn.restore();
     });
     it('createAnnotation', function () {
+      sinon.stub(console, 'warn', function () {});
       expect(geo.createAnnotation('unknown')).toBe(undefined);
+      expect(console.warn.calledOnce).toBe(true);
+      console.warn.restore();
       expect(newshapeCount).toBe(0);
       expect(geo.createAnnotation('newshape')).toBe('newshape return');
       expect(newshapeCount).toBe(1);
@@ -955,11 +1476,15 @@ describe('geo.annotation', function () {
       expect($.inArray('point', features) >= 0).toBe(false);
     });
     it('rendererForAnnotations', function () {
+      sinon.stub(console, 'warn', function () {});
       expect(geo.rendererForAnnotations(['polygon'])).toBe('vgl');
+      expect(console.warn.calledOnce).toBe(false);
       expect(geo.rendererForAnnotations(['point'])).toBe('vgl');
       geo.gl.vglRenderer.supported = function () { return false; };
       expect(geo.rendererForAnnotations(['polygon'])).toBe(false);
+      expect(console.warn.calledOnce).toBe(true);
       expect(geo.rendererForAnnotations(['point'])).toBe('d3');
+      console.warn.restore();
     });
   });
 });
