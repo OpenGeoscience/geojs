@@ -768,7 +768,9 @@ var annotation = function (type, args) {
     var editPoints,
         style = $.extend({}, defaultEditHandleStyle, m_this.editHandleStyle()),
         handles = util.ensureFunction(style.handles)() || {},
-        selected = m_this._editHandle && m_this._editHandle.handle && m_this._editHandle.handle.selected ? m_this._editHandle.handle : undefined;
+        selected = (m_this._editHandle && m_this._editHandle.handle &&
+                    m_this._editHandle.handle.selected ?
+                    m_this._editHandle.handle : undefined);
     /* opts specify which handles are allowed.  They must be allowed by the
      * original opts object and by the editHandleStyle.handle object. */
     opts = $.extend({}, opts);
