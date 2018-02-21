@@ -36,7 +36,7 @@
  *      is used by itself (e.g., 'abc' is the same as 'a,b,c').
  *  unitsPerPixel: set the units per pixel at zoom level 0.
  *  url: url to use for the map files.  Placeholders are allowed.  Default is
- *      http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png .  Other useful
+ *      https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png .  Other useful
  *      urls are are: /data/tilefancy.png
  *      http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png
  *  w: width of a tiled image (at max zoom).  If w and h are specified, a
@@ -122,7 +122,7 @@ $(function () {
   if (query.url) {
     layerParams.url = query.url;
   } else {
-    layerParams.url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    layerParams.url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   }
   if (query.subdomains) {
     if (query.subdomains.indexOf(',') >= 0) {

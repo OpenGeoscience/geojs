@@ -330,7 +330,7 @@ $(function () {
   }
 
   // Create a tile layer
-  osm = map.createLayer('osm');
+  osm = map.createLayer('osm', {url: query.url || undefined});
   set_osm_url(query.showmap);
   // Create a feature layer for the lines
   layer = map.createLayer('feature', layerOptions);

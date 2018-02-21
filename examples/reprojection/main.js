@@ -140,7 +140,7 @@ $(function () {
     if (query.url) {
       layerParams.url = query.url;
     } else {
-      layerParams.url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      layerParams.url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     }
     // Create a map object
     var map = geo.map(mapParams);
