@@ -3,11 +3,11 @@ var registerFeature = require('../registry').registerFeature;
 var lineFeature = require('../lineFeature');
 
 /**
- * Create a new instance of class lineFeature
+ * Create a new instance of class lineFeature.
  *
  * @class geo.canvas.lineFeature
  * @extends geo.lineFeature
- * @extends geo.canvas.object
+ * @param {geo.lineFeature.spec} arg
  * @returns {geo.canvas.lineFeature}
  */
 var canvas_lineFeature = function (arg) {
@@ -29,9 +29,10 @@ var canvas_lineFeature = function (arg) {
 
   /**
    * Render the data on the canvas.
+   *
    * @protected
    * @param {object} context2d the canvas context to draw in.
-   * @param {object} map the parent map object.
+   * @param {geo.map} map the parent map object.
    */
   this._renderOnCanvas = function (context2d, map) {
     var data = m_this.data(),

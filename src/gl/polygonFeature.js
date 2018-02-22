@@ -80,7 +80,7 @@ var gl_polygonFeature = function (arg) {
   }
 
   /**
-   * Create and style the triangles need to render the polygons.
+   * Create and style the triangles needed to render the polygons.
    *
    * There are several optimizations to do less work when possible.  If only
    * styles have changed, the triangulation is not recomputed, nor is the
@@ -315,7 +315,6 @@ var gl_polygonFeature = function (arg) {
    * @override
    */
   this._build = function () {
-
     createGLPolygons(m_this.dataTime().getMTime() < m_this.buildTime().getMTime() && m_geometry);
 
     if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {

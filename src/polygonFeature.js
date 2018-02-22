@@ -19,16 +19,14 @@ var transform = require('./transform');
  * @param {object} [style] Style object with default style options.
  * @param {boolean|Function} [style.fill] True to fill polygon.  Defaults to
  *   true.
- * @param {object|Function} [style.fillColor] Color to fill each polygon.  The
- *   color can vary by vertex.  Colors can be css names or hex values, or an
- *   object with r, g, b on a [0-1] scale.
+ * @param {geo.geoColor|Function} [style.fillColor] Color to fill each polygon.
+ *   The color can vary by vertex.
  * @param {number|Function} [style.fillOpacity] Opacity for each polygon.  The
  *   opacity can vary by vertex.  Opacity is on a [0-1] scale.
  * @param {boolean|Function} [style.stroke] True to stroke polygon.  Defaults
  *   to false.
- * @param {object|Function} [style.strokeColor] Color to stroke each polygon.
- *   The color can vary by vertex.  Colors can be css names or hex values, or
- *   an object with r, g, b on a [0-1] scale.
+ * @param {geo.geoColor|Function} [style.strokeColor] Color to stroke each
+ *   polygon.  The color can vary by vertex.
  * @param {number|Function} [style.strokeOpacity] Opacity for each polygon
  *   stroke.  The opacity can vary by vertex.  Opacity is on a [0-1] scale.
  * @param {number|Function} [style.strokeWidth] The weight of the polygon
@@ -215,8 +213,8 @@ var polygonFeature = function (arg) {
    *
    * @param {geo.geoPosition} coordinate point to search for in map interface
    *    gcs.
-   * @returns {object} An object with `index`: a list of quad indices, and
-   *    `found`: a list of quads that contain the specified coordinate.
+   * @returns {object} An object with `index`: a list of polygon indices, and
+   *    `found`: a list of polygons that contain the specified coordinate.
    */
   this.pointSearch = function (coordinate) {
     var found = [], indices = [], irecord = {}, data = m_this.data(),

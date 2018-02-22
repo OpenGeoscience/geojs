@@ -34,10 +34,11 @@ var flagsDebug = {  // uses 1 bit
 };
 
 /**
- * Create a new instance of lineFeature
+ * Create a new instance of lineFeature.
  *
  * @class geo.gl.lineFeature
  * @extends geo.lineFeature
+ * @param {geo.lineFeature.spec} arg
  * @returns {geo.gl.lineFeature}
  */
 var gl_lineFeature = function (arg) {
@@ -72,6 +73,11 @@ var gl_lineFeature = function (arg) {
       s_init = this._init,
       s_update = this._update;
 
+  /**
+   * Create the vertex shader for lines.
+   *
+   * @returns {vgl.shader}
+   */
   function createVertexShader() {
     var vertexShaderSource = [
           '#ifdef GL_ES',
@@ -244,6 +250,14 @@ var gl_lineFeature = function (arg) {
     return shader;
   }
 
+  /**
+   * Create the fragment shader for lines.
+   *
+   * @param {boolean} [allowDebug] If truthy, include code that can render
+   *    in debug mode.  This is mildly less efficient, even if debugging is
+   *    not turned on.
+   * @returns {vgl.shader}
+   */
   function createFragmentShader(allowDebug) {
     var fragmentShaderSource = [
           '#ifdef GL_ES',
@@ -349,6 +363,9 @@ var gl_lineFeature = function (arg) {
     return shader;
   }
 
+ /**
+   * Create and style the data needed to render the lines.
+   */
   function createGLLines() {
     var data = m_this.data(),
         i, j, k, v, v2, lidx,
@@ -533,12 +550,14 @@ var gl_lineFeature = function (arg) {
   }
 
   /**
-   * Return the arrangement of vertices used for each line segment.
+   * Return the arrangement of vertices used for each line segment.  Each line
+   * is rendered by two triangles.  This reports how the vertices of those
+   * triangles are arranged.  Each entry is a triple: the line-end number, the
+   * vertex use, and the side of the line that the vertex is on.
    *
-   * @returns {Number}
+   * @returns {array[]}
    */
   this.featureVertices = function () {
-    // return [[0, -1], [0, 1], [1, -1], [1, 1], [1, -1], [0, 1]];
     return [[0, 'corner', -1], [0, 'near', 1], [1, 'far', -1],
             [1, 'corner', 1], [1, 'near', -1], [0, 'far', 1]];
   };
@@ -546,14 +565,17 @@ var gl_lineFeature = function (arg) {
   /**
    * Return the number of vertices used for each line segment.
    *
-   * @returns {Number}
+   * @returns {number}
    */
   this.verticesPerFeature = function () {
     return m_this.featureVertices().length;
   };
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @param {geo.lineFeature.spec} arg The feature specification.
+   * @returns {this}
    */
   this._init = function (arg) {
     var prog = vgl.shaderProgram(),
@@ -640,10 +662,11 @@ var gl_lineFeature = function (arg) {
     geom.addSource(flagsData);
     geom.addPrimitive(triangles);
     m_mapper.setGeometryData(geom);
+    return m_this;
   };
 
   /**
-   * Return list of actors
+   * Return list of vgl actorss used for rendering.
    *
    * @returns {vgl.actor[]}
    */
@@ -655,9 +678,9 @@ var gl_lineFeature = function (arg) {
   };
 
   /**
-   * Build
+   * Build.  Create the necessary elements to render lines.
    *
-   * @override
+   * @returns {this}
    */
   this._build = function () {
     createGLLines();
@@ -666,12 +689,13 @@ var gl_lineFeature = function (arg) {
       m_this.renderer().contextRenderer().addActor(m_actor);
     }
     m_this.buildTime().modified();
+    return m_this;
   };
 
   /**
-   * Update
+   * Update.  Rebuild if necessary.
    *
-   * @override
+   * @returns {this}
    */
   this._update = function () {
     s_update.call(m_this);
@@ -687,10 +711,11 @@ var gl_lineFeature = function (arg) {
     m_actor.setVisible(m_this.visible());
     m_actor.material().setBinNumber(m_this.bin());
     m_this.updateTime().modified();
+    return m_this;
   };
 
   /**
-   * Destroy
+   * Destroy.  Free used resources.
    */
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
@@ -704,7 +729,6 @@ var gl_lineFeature = function (arg) {
 
 inherit(gl_lineFeature, lineFeature);
 
-// Now register it
 var capabilities = {};
 capabilities[lineFeature.capabilities.basic] = true;
 capabilities[lineFeature.capabilities.multicolor] = true;
