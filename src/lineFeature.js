@@ -161,10 +161,10 @@ var lineFeature = function (arg) {
         if (!first && closed) {
           first = {p: p, r2: r2};
         }
-        if (closed && last.x !== first.p.x && last.y !== first.p.y) {
-          record.push({u: last, v: first.p, r2: lastr2 > first.r2 ? lastr2 : first.r2});
-        }
       });
+      if (closed && first && (last.x !== first.p.x || last.y !== first.p.y)) {
+        record.push({u: last, v: first.p, r2: lastr2 > first.r2 ? lastr2 : first.r2});
+      }
       m_pointSearchInfo.push(record);
     });
     return m_pointSearchInfo;
