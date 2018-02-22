@@ -326,15 +326,18 @@ var polygonFeature = function (arg) {
       strokeStyle: linePolyStyle(polyStyle.strokeStyle),
       strokeColor: linePolyStyle(polyStyle.strokeColor),
       strokeOffset: linePolyStyle(polyStyle.strokeOffset),
-      strokeOpacity: function (d) {
-        return m_this.style.get('stroke')(d[2], d[3]) ? m_this.style.get('strokeOpacity')(d[0], d[1], d[2], d[3]) : 0;
-      }
+      strokeOpacity: util.isFunction(polyStyle.stroke) || !polyStyle.stroke ?
+        function (d) {
+          return m_this.style.get('stroke')(d[2], d[3]) ? m_this.style.get('strokeOpacity')(d[0], d[1], d[2], d[3]) : 0;
+        } :
+        linePolyStyle(polyStyle.strokeOpacity)
     });
     var data = this.data(),
-        posFunc = this.style.get('position'),
-        polyFunc = this.style.get('polygon');
-    if (data !== m_lineFeature._lastData || posFunc !== m_lineFeature._posFunc) {
-      var lineData = [], i, polygon, loop;
+        posVal = this.style('position');
+    if (data !== m_lineFeature._lastData || posVal !== m_lineFeature._lastPosVal) {
+      var lineData = [], i, polygon, loop,
+          posFunc = this.style.get('position'),
+          polyFunc = this.style.get('polygon');
 
       for (i = 0; i < data.length; i += 1) {
         polygon = polyFunc(data[i], i);
@@ -354,7 +357,7 @@ var polygonFeature = function (arg) {
       });
       m_lineFeature.data(lineData);
       m_lineFeature._lastData = data;
-      m_lineFeature._lastPosFunc = posFunc;
+      m_lineFeature._lastPosVal = posVal;
     }
   };
 

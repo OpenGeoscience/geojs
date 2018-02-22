@@ -70,6 +70,7 @@ var gl_lineFeature = function (arg) {
       m_antialiasingUniform,
       m_flagsUniform,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
+      m_geometry,
       s_init = this._init,
       s_update = this._update;
 
@@ -365,16 +366,17 @@ var gl_lineFeature = function (arg) {
 
  /**
    * Create and style the data needed to render the lines.
+   *
+   * @param {boolean} onlyStyle if true, use the existing geoemtry and just
+   *    recalculate the style.
    */
-  function createGLLines() {
+  function createGLLines(onlyStyle) {
     var data = m_this.data(),
         i, j, k, v, v2, lidx,
         numSegments = 0, len,
-        lineItem, lineItemData,
+        lineItemList, lineItem, lineItemData,
         vert = [{}, {}], v1 = vert[1],
         pos, posIdx3, firstpos, firstPosIdx3,
-        position = [],
-        posFunc = m_this.position(),
         strokeWidthFunc = m_this.style.get('strokeWidth'), strokeWidthVal,
         strokeColorFunc = m_this.style.get('strokeColor'), strokeColorVal,
         strokeOpacityFunc = m_this.style.get('strokeOpacity'), strokeOpacityVal,
@@ -389,13 +391,14 @@ var gl_lineFeature = function (arg) {
         strokeWidthBuf, strokeColorBuf, strokeOpacityBuf,
         dest, dest3,
         geom = m_mapper.geometryData(),
-        closedFunc = m_this.style.get('closed'), closedVal, closed = [];
+        closedFunc = m_this.style.get('closed'), closedVal, closed = [],
+        updateFlags = true;
 
-    closedVal = util.isFunction(m_this.style('closed')) ? undefined : closedFunc();
-    lineCapVal = util.isFunction(m_this.style('lineCap')) ? undefined : lineCapFunc();
-    lineJoinVal = util.isFunction(m_this.style('lineJoin')) ? undefined : lineJoinFunc();
+    closedVal = util.isFunction(m_this.style('closed')) ? undefined : (closedFunc() || false);
+    lineCapVal = util.isFunction(m_this.style('lineCap')) ? undefined : (lineCapFunc() || 'butt');
+    lineJoinVal = util.isFunction(m_this.style('lineJoin')) ? undefined : (lineJoinFunc() || 'miter');
     strokeColorVal = util.isFunction(m_this.style('strokeColor')) ? undefined : strokeColorFunc();
-    strokeOffsetVal = util.isFunction(m_this.style('strokeOffset')) ? undefined : strokeOffsetFunc();
+    strokeOffsetVal = util.isFunction(m_this.style('strokeOffset')) ? undefined : (strokeOffsetFunc() || 0);
     strokeOpacityVal = util.isFunction(m_this.style('strokeOpacity')) ? undefined : strokeOpacityFunc();
     strokeWidthVal = util.isFunction(m_this.style('strokeWidth')) ? undefined : strokeWidthFunc();
 
@@ -407,54 +410,80 @@ var gl_lineFeature = function (arg) {
     }
     m_flagsUniform.set(fixedFlags);
     m_antialiasingUniform.set(antialiasing);
-    for (i = 0; i < data.length; i += 1) {
-      lineItem = m_this.line()(data[i], i);
-      if (lineItem.length < 2) {
-        continue;
-      }
-      numSegments += lineItem.length - 1;
-      for (j = 0; j < lineItem.length; j += 1) {
-        pos = posFunc(lineItem[j], j, lineItem, i);
-        position.push(pos.x);
-        position.push(pos.y);
-        position.push(pos.z || 0.0);
-        if (!j) {
-          firstpos = pos;
+
+    if (!onlyStyle) {
+      var position = [],
+          posFunc = m_this.position();
+      lineItemList = new Array(data.length);
+      for (i = 0; i < data.length; i += 1) {
+        lineItem = m_this.line()(data[i], i);
+        lineItemList[i] = lineItem;
+        if (lineItem.length < 2) {
+          continue;
+        }
+        numSegments += lineItem.length - 1;
+        for (j = 0; j < lineItem.length; j += 1) {
+          pos = posFunc(lineItem[j], j, lineItem, i);
+          position.push(pos.x);
+          position.push(pos.y);
+          position.push(pos.z || 0.0);
+          if (!j) {
+            firstpos = pos;
+          }
+        }
+        if (lineItem.length > 2 && (closedVal === undefined ? closedFunc(data[i], i) : closedVal)) {
+          /* line is closed */
+          if (pos.x !== firstpos.x || pos.y !== firstpos.y ||
+              pos.z !== firstpos.z) {
+            numSegments += 1;
+            closed[i] = 2;  /* first and last points are distinct */
+          } else {
+            closed[i] = 1;  /* first point is repeated as last point */
+          }
         }
       }
-      if (lineItem.length > 2 && (closedVal === undefined ? closedFunc(data[i], i) : closedVal)) {
-        /* line is closed */
-        if (pos.x !== firstpos.x || pos.y !== firstpos.y ||
-            pos.z !== firstpos.z) {
-          numSegments += 1;
-          closed[i] = 2;  /* first and last points are distinct */
-        } else {
-          closed[i] = 1;  /* first point is repeated as last point */
-        }
+
+      position = transform.transformCoordinates(
+        m_this.gcs(), m_this.layer().map().gcs(), position, 3);
+      len = numSegments * order.length;
+      posBuf = util.getGeomBuffer(geom, 'pos', len * 3);
+      prevBuf = util.getGeomBuffer(geom, 'prev', len * 3);
+      nextBuf = util.getGeomBuffer(geom, 'next', len * 3);
+      farBuf = util.getGeomBuffer(geom, 'far', len * 3);
+
+      indicesBuf = geom.primitive(0).indices();
+      if (!(indicesBuf instanceof Uint16Array) || indicesBuf.length !== len) {
+        indicesBuf = new Uint16Array(len);
+        geom.primitive(0).setIndices(indicesBuf);
       }
+      // save some information to be reused when we update only style
+      m_geometry = {
+        numSegments: numSegments,
+        closed: closed,
+        lineItemList: lineItemList,
+        lineCapVal: lineCapVal,
+        lineJoinVal: lineJoinVal,
+        strokeOffsetVal: strokeOffsetVal
+      };
+    } else {
+      numSegments = m_geometry.numSegments;
+      closed = m_geometry.closed;
+      lineItemList = m_geometry.lineItemList;
+      len = numSegments * order.length;
+      updateFlags = (
+        (lineCapVal !== m_geometry.lineCapVal || lineCapVal === undefined) ||
+        (lineJoinVal !== m_geometry.lineJoinVal || lineJoinVal === undefined) ||
+        (strokeOffsetVal !== m_geometry.strokeOffsetVal || strokeOffsetVal === undefined)
+      );
     }
 
-    position = transform.transformCoordinates(
-                 m_this.gcs(), m_this.layer().map().gcs(),
-                 position, 3);
-
-    len = numSegments * order.length;
-    posBuf = util.getGeomBuffer(geom, 'pos', len * 3);
-    prevBuf = util.getGeomBuffer(geom, 'prev', len * 3);
-    nextBuf = util.getGeomBuffer(geom, 'next', len * 3);
-    farBuf = util.getGeomBuffer(geom, 'far', len * 3);
     flagsBuf = util.getGeomBuffer(geom, 'flags', len);
     strokeWidthBuf = util.getGeomBuffer(geom, 'strokeWidth', len);
     strokeColorBuf = util.getGeomBuffer(geom, 'strokeColor', len * 3);
     strokeOpacityBuf = util.getGeomBuffer(geom, 'strokeOpacity', len);
-    indicesBuf = geom.primitive(0).indices();
-    if (!(indicesBuf instanceof Uint16Array) || indicesBuf.length !== len) {
-      indicesBuf = new Uint16Array(len);
-      geom.primitive(0).setIndices(indicesBuf);
-    }
 
     for (i = posIdx3 = dest = dest3 = 0; i < data.length; i += 1) {
-      lineItem = m_this.line()(data[i], i);
+      lineItem = lineItemList[i];
       if (lineItem.length < 2) {
         continue;
       }
@@ -473,66 +502,80 @@ var gl_lineFeature = function (arg) {
           vert[0] = vert[1];
           vert[1] = v1;
         }
-        v1.pos = j === lidx ? posIdx3 : firstPosIdx3;
-        v1.prev = lidx ? posIdx3 - 3 : (closed[i] ?
-            firstPosIdx3 + (lineItem.length - 3 + closed[i]) * 3 : posIdx3);
-        v1.next = j + 1 < lineItem.length ? posIdx3 + 3 : (closed[i] ?
-            (j !== lidx ? firstPosIdx3 + 3 : firstPosIdx3 + 6 - closed[i] * 3) :
-            posIdx3);
+        if (!onlyStyle) {
+          v1.pos = j === lidx ? posIdx3 : firstPosIdx3;
+          v1.prev = lidx ? posIdx3 - 3 : (closed[i] ?
+              firstPosIdx3 + (lineItem.length - 3 + closed[i]) * 3 : posIdx3);
+          v1.next = j + 1 < lineItem.length ? posIdx3 + 3 : (closed[i] ?
+              (j !== lidx ? firstPosIdx3 + 3 : firstPosIdx3 + 6 - closed[i] * 3) :
+              posIdx3);
+        }
         v1.strokeWidth = strokeWidthVal === undefined ? strokeWidthFunc(lineItemData, lidx, lineItem, i) : strokeWidthVal;
         v1.strokeColor = strokeColorVal === undefined ? strokeColorFunc(lineItemData, lidx, lineItem, i) : strokeColorVal;
         v1.strokeOpacity = strokeOpacityVal === undefined ? strokeOpacityFunc(lineItemData, lidx, lineItem, i) : strokeOpacityVal;
-        v1.strokeOffset = (strokeOffsetVal === undefined ? strokeOffsetFunc(lineItemData, lidx, lineItem, i) : strokeOffsetVal) || 0;
-        if (v1.strokeOffset) {
-          /* we use 11 bits to store the offset, and we want to store values
-           * from -1 to 1, so multiply our values by 1023, and use some bit
-           * manipulation to ensure that it is packed properly */
-          v1.posStrokeOffset = Math.round(2048 + 1023 * Math.min(1, Math.max(-1, v1.strokeOffset))) & 0x7FF;
-          v1.negStrokeOffset = Math.round(2048 - 1023 * Math.min(1, Math.max(-1, v1.strokeOffset))) & 0x7FF;
-        } else {
-          v1.posStrokeOffset = v1.negStrokeOffset = 0;
-        }
-        if (!closed[i] && (!j || j === lineItem.length - 1)) {
-          v1.flags = flagsLineCap[lineCapVal === undefined ? lineCapFunc(lineItemData, lidx, lineItem, i) : lineCapVal] || flagsLineCap.butt;
-        } else {
-          v1.flags = flagsLineJoin[lineJoinVal === undefined ? lineJoinFunc(lineItemData, lidx, lineItem, i) : lineJoinVal] || flagsLineJoin.miter;
+        if (updateFlags) {
+          v1.strokeOffset = (strokeOffsetVal === undefined ? strokeOffsetFunc(lineItemData, lidx, lineItem, i) : strokeOffsetVal) || 0;
+          if (v1.strokeOffset) {
+            /* we use 11 bits to store the offset, and we want to store values
+             * from -1 to 1, so multiply our values by 1023, and use some bit
+             * manipulation to ensure that it is packed properly */
+            v1.posStrokeOffset = Math.round(2048 + 1023 * Math.min(1, Math.max(-1, v1.strokeOffset))) & 0x7FF;
+            v1.negStrokeOffset = Math.round(2048 - 1023 * Math.min(1, Math.max(-1, v1.strokeOffset))) & 0x7FF;
+          } else {
+            v1.posStrokeOffset = v1.negStrokeOffset = 0;
+          }
+          if (!closed[i] && (!j || j === lineItem.length - 1)) {
+            v1.flags = flagsLineCap[lineCapVal === undefined ? lineCapFunc(lineItemData, lidx, lineItem, i) : lineCapVal] || flagsLineCap.butt;
+          } else {
+            v1.flags = flagsLineJoin[lineJoinVal === undefined ? lineJoinFunc(lineItemData, lidx, lineItem, i) : lineJoinVal] || flagsLineJoin.miter;
+          }
         }
 
         if (j) {
           for (k = 0; k < order.length; k += 1, dest += 1, dest3 += 3) {
             v = vert[order[k][0]];
             v2 = vert[1 - order[k][0]];
-            posBuf[dest3] = position[v.pos];
-            posBuf[dest3 + 1] = position[v.pos + 1];
-            posBuf[dest3 + 2] = position[v.pos + 2];
+            if (!onlyStyle) {
+              posBuf[dest3] = position[v.pos];
+              posBuf[dest3 + 1] = position[v.pos + 1];
+              posBuf[dest3 + 2] = position[v.pos + 2];
+            }
             if (!order[k][0]) {
-              prevBuf[dest3] = position[v.prev];
-              prevBuf[dest3 + 1] = position[v.prev + 1];
-              prevBuf[dest3 + 2] = position[v.prev + 2];
-              nextBuf[dest3] = position[v.next];
-              nextBuf[dest3 + 1] = position[v.next + 1];
-              nextBuf[dest3 + 2] = position[v.next + 2];
-              farBuf[dest3] = position[v2.next];
-              farBuf[dest3 + 1] = position[v2.next + 1];
-              farBuf[dest3 + 2] = position[v2.next + 2];
-              flagsBuf[dest] = (flagsVertex[order[k][1]] |
-                (v.flags << flagsNearLineShift) |
-                (v2.flags << flagsFarLineShift) |
-                (v.negStrokeOffset << flagsNearOffsetShift));
+              if (!onlyStyle) {
+                prevBuf[dest3] = position[v.prev];
+                prevBuf[dest3 + 1] = position[v.prev + 1];
+                prevBuf[dest3 + 2] = position[v.prev + 2];
+                nextBuf[dest3] = position[v.next];
+                nextBuf[dest3 + 1] = position[v.next + 1];
+                nextBuf[dest3 + 2] = position[v.next + 2];
+                farBuf[dest3] = position[v2.next];
+                farBuf[dest3 + 1] = position[v2.next + 1];
+                farBuf[dest3 + 2] = position[v2.next + 2];
+              }
+              if (updateFlags) {
+                flagsBuf[dest] = (flagsVertex[order[k][1]] |
+                  (v.flags << flagsNearLineShift) |
+                  (v2.flags << flagsFarLineShift) |
+                  (v.negStrokeOffset << flagsNearOffsetShift));
+              }
             } else {
-              prevBuf[dest3] = position[v.next];
-              prevBuf[dest3 + 1] = position[v.next + 1];
-              prevBuf[dest3 + 2] = position[v.next + 2];
-              nextBuf[dest3] = position[v.prev];
-              nextBuf[dest3 + 1] = position[v.prev + 1];
-              nextBuf[dest3 + 2] = position[v.prev + 2];
-              farBuf[dest3] = position[v2.prev];
-              farBuf[dest3 + 1] = position[v2.prev + 1];
-              farBuf[dest3 + 2] = position[v2.prev + 2];
-              flagsBuf[dest] = (flagsVertex[order[k][1]] |
-                (v.flags << flagsNearLineShift) |
-                (v2.flags << flagsFarLineShift) |
-                (v.posStrokeOffset << flagsNearOffsetShift));
+              if (!onlyStyle) {
+                prevBuf[dest3] = position[v.next];
+                prevBuf[dest3 + 1] = position[v.next + 1];
+                prevBuf[dest3 + 2] = position[v.next + 2];
+                nextBuf[dest3] = position[v.prev];
+                nextBuf[dest3 + 1] = position[v.prev + 1];
+                nextBuf[dest3 + 2] = position[v.prev + 2];
+                farBuf[dest3] = position[v2.prev];
+                farBuf[dest3 + 1] = position[v2.prev + 1];
+                farBuf[dest3 + 2] = position[v2.prev + 2];
+              }
+              if (updateFlags) {
+                flagsBuf[dest] = (flagsVertex[order[k][1]] |
+                  (v.flags << flagsNearLineShift) |
+                  (v2.flags << flagsFarLineShift) |
+                  (v.posStrokeOffset << flagsNearOffsetShift));
+              }
             }
             strokeWidthBuf[dest] = v.strokeWidth;
             strokeColorBuf[dest3] = v.strokeColor.r;
@@ -544,9 +587,11 @@ var gl_lineFeature = function (arg) {
       }
     }
 
-    geom.boundsDirty(true);
     m_mapper.modified();
-    m_mapper.boundsDirtyTimestamp().modified();
+    if (!onlyStyle) {
+      geom.boundsDirty(true);
+      m_mapper.boundsDirtyTimestamp().modified();
+    }
   }
 
   /**
@@ -680,10 +725,18 @@ var gl_lineFeature = function (arg) {
   /**
    * Build.  Create the necessary elements to render lines.
    *
+   * There are several optimizations to do less work when possible.  If only
+   * styles have changed, the geometry is not re-transformed.  If styles use
+   * static values (rather than functions), they are only calculated once.  If
+   * styles have not changed that would affect flags (lineCap, lineJoin, and
+   * strokeOffset), the vertex flags are not recomputed -- this helps, as it is
+   * a slow step due to most javascript interpreters not optimizing bit
+   * operations.
+   *
    * @returns {this}
    */
   this._build = function () {
-    createGLLines();
+    createGLLines(m_this.dataTime().getMTime() < m_this.buildTime().getMTime() && m_geometry);
 
     if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
       m_this.renderer().contextRenderer().addActor(m_actor);
