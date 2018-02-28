@@ -3,11 +3,11 @@ var registerFeature = require('../registry').registerFeature;
 var lineFeature = require('../lineFeature');
 
 /**
- * Create a new instance of class lineFeature
+ * Create a new instance of class lineFeature.
  *
  * @class geo.d3.lineFeature
  * @extends geo.lineFeature
- * @extends geo.d3.object
+ * @param {geo.lineFeature.spec} arg
  * @returns {geo.d3.lineFeature}
  */
 var d3_lineFeature = function (arg) {
@@ -35,7 +35,10 @@ var d3_lineFeature = function (arg) {
       s_update = this._update;
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @param {geo.lineFeature.spec} arg The feature specification.
+   * @returns {this}
    */
   this._init = function (arg) {
     s_init.call(m_this, arg);
@@ -43,9 +46,9 @@ var d3_lineFeature = function (arg) {
   };
 
   /**
-   * Build
+   * Build.  Create the necessary elements to render lines.
    *
-   * @override
+   * @returns {this}
    */
   this._build = function () {
     var data = m_this.data() || [],
@@ -109,9 +112,9 @@ var d3_lineFeature = function (arg) {
   };
 
   /**
-   * Update
+   * Update.  Rebuild if necessary.
    *
-   * @override
+   * @returns {this}
    */
   this._update = function () {
     s_update.call(m_this);

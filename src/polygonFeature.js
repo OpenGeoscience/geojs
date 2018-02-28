@@ -19,16 +19,14 @@ var transform = require('./transform');
  * @param {object} [style] Style object with default style options.
  * @param {boolean|Function} [style.fill] True to fill polygon.  Defaults to
  *   true.
- * @param {object|Function} [style.fillColor] Color to fill each polygon.  The
- *   color can vary by vertex.  Colors can be css names or hex values, or an
- *   object with r, g, b on a [0-1] scale.
+ * @param {geo.geoColor|Function} [style.fillColor] Color to fill each polygon.
+ *   The color can vary by vertex.
  * @param {number|Function} [style.fillOpacity] Opacity for each polygon.  The
  *   opacity can vary by vertex.  Opacity is on a [0-1] scale.
  * @param {boolean|Function} [style.stroke] True to stroke polygon.  Defaults
  *   to false.
- * @param {object|Function} [style.strokeColor] Color to stroke each polygon.
- *   The color can vary by vertex.  Colors can be css names or hex values, or
- *   an object with r, g, b on a [0-1] scale.
+ * @param {geo.geoColor|Function} [style.strokeColor] Color to stroke each
+ *   polygon.  The color can vary by vertex.
  * @param {number|Function} [style.strokeOpacity] Opacity for each polygon
  *   stroke.  The opacity can vary by vertex.  Opacity is on a [0-1] scale.
  * @param {number|Function} [style.strokeWidth] The weight of the polygon
@@ -215,8 +213,8 @@ var polygonFeature = function (arg) {
    *
    * @param {geo.geoPosition} coordinate point to search for in map interface
    *    gcs.
-   * @returns {object} An object with `index`: a list of quad indices, and
-   *    `found`: a list of quads that contain the specified coordinate.
+   * @returns {object} An object with `index`: a list of polygon indices, and
+   *    `found`: a list of polygons that contain the specified coordinate.
    */
   this.pointSearch = function (coordinate) {
     var found = [], indices = [], irecord = {}, data = m_this.data(),
@@ -328,15 +326,18 @@ var polygonFeature = function (arg) {
       strokeStyle: linePolyStyle(polyStyle.strokeStyle),
       strokeColor: linePolyStyle(polyStyle.strokeColor),
       strokeOffset: linePolyStyle(polyStyle.strokeOffset),
-      strokeOpacity: function (d) {
-        return m_this.style.get('stroke')(d[2], d[3]) ? m_this.style.get('strokeOpacity')(d[0], d[1], d[2], d[3]) : 0;
-      }
+      strokeOpacity: util.isFunction(polyStyle.stroke) || !polyStyle.stroke ?
+        function (d) {
+          return m_this.style.get('stroke')(d[2], d[3]) ? m_this.style.get('strokeOpacity')(d[0], d[1], d[2], d[3]) : 0;
+        } :
+        linePolyStyle(polyStyle.strokeOpacity)
     });
     var data = this.data(),
-        posFunc = this.style.get('position'),
-        polyFunc = this.style.get('polygon');
-    if (data !== m_lineFeature._lastData || posFunc !== m_lineFeature._posFunc) {
-      var lineData = [], i, polygon, loop;
+        posVal = this.style('position');
+    if (data !== m_lineFeature._lastData || posVal !== m_lineFeature._lastPosVal) {
+      var lineData = [], i, polygon, loop,
+          posFunc = this.style.get('position'),
+          polyFunc = this.style.get('polygon');
 
       for (i = 0; i < data.length; i += 1) {
         polygon = polyFunc(data[i], i);
@@ -344,11 +345,15 @@ var polygonFeature = function (arg) {
           continue;
         }
         loop = polygon.outer || (Array.isArray(polygon) ? polygon : []);
-        lineData.push(m_this._getLoopData(data[i], i, loop));
-        if (polygon.inner) {
-          polygon.inner.forEach(function (loop) {
-            lineData.push(m_this._getLoopData(data[i], i, loop));
-          });
+        if (loop.length >= 2) {
+          lineData.push(m_this._getLoopData(data[i], i, loop));
+          if (polygon.inner) {
+            polygon.inner.forEach(function (loop) {
+              if (loop.length >= 2) {
+                lineData.push(m_this._getLoopData(data[i], i, loop));
+              }
+            });
+          }
         }
       }
       m_lineFeature.position(function (d, i, item, itemIndex) {
@@ -356,7 +361,7 @@ var polygonFeature = function (arg) {
       });
       m_lineFeature.data(lineData);
       m_lineFeature._lastData = data;
-      m_lineFeature._lastPosFunc = posFunc;
+      m_lineFeature._lastPosVal = posVal;
     }
   };
 
