@@ -345,11 +345,15 @@ var polygonFeature = function (arg) {
           continue;
         }
         loop = polygon.outer || (Array.isArray(polygon) ? polygon : []);
-        lineData.push(m_this._getLoopData(data[i], i, loop));
-        if (polygon.inner) {
-          polygon.inner.forEach(function (loop) {
-            lineData.push(m_this._getLoopData(data[i], i, loop));
-          });
+        if (loop.length >= 2) {
+          lineData.push(m_this._getLoopData(data[i], i, loop));
+          if (polygon.inner) {
+            polygon.inner.forEach(function (loop) {
+              if (loop.length >= 2) {
+                lineData.push(m_this._getLoopData(data[i], i, loop));
+              }
+            });
+          }
         }
       }
       m_lineFeature.position(function (d, i, item, itemIndex) {

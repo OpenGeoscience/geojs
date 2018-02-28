@@ -40,6 +40,9 @@ describe('geo.lineFeature', function () {
       coord: [{x: 50, y: 10}, {x: 50, y: 10}]
     }, {
       coord: [{x: 60, y: 10}]
+    }, {
+      coord: [{x: 70, y: 10}, {x: 75, y: 12}, {x: 72, y: 15}, {x: 70, y: 15}],
+      closed: true
     }
   ];
 
@@ -124,6 +127,13 @@ describe('geo.lineFeature', function () {
       expect(pt.found.length).toBe(0);
       pt = line.pointSearch({x: 31, y: 32.5});
       expect(pt.found.length).toBe(1);
+      /* On a closed line, we should find a point between the first and last
+       * point, but not between the first and a point that isn't the second or
+       * last. */
+      pt = line.pointSearch({x: 70, y: 12.5});
+      expect(pt.found.length).toBe(1);
+      pt = line.pointSearch({x: 71, y: 12.5});
+      expect(pt.found.length).toBe(0);
       /* Variable width should match the widest of either end point */
       p = line.featureGcsToDisplay({x: 40, y: 20});
       pt = line.pointSearch(map.displayToGcs({x: p.x, y: p.y + 6.95}));
@@ -218,7 +228,7 @@ describe('geo.lineFeature', function () {
       }).data(testLines);
       line.draw();
       stepAnimationFrame();
-      expect(layer.node().find('path').length).toBe(7);
+      expect(layer.node().find('path').length).toBe(8);
       var paths = layer.node().find('path');
       expect(paths.eq(0).css('stroke-linecap')).toBe('butt');
       expect(paths.eq(1).css('stroke-linecap')).toBe('round');
