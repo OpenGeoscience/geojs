@@ -850,17 +850,26 @@ var mapInteractor = function (args) {
         m_mouse.buttons[prop] = false;
       }
     }
-    if (evt.type !== 'mouseup') {
+    /* If the event buttons are specified, use them in preference to the
+     * evt.which for determining which buttons are down.  buttons is a bitfield
+     * and therefore can represent more than one button at a time. */
+    if (evt.buttons !== undefined) {
+      m_mouse.buttons.left = !!(evt.buttons & 1);
+      m_mouse.buttons.right = !!(evt.buttons & 2);
+      m_mouse.buttons.middle = !!(evt.buttons & 4);
+    } else if (evt.type !== 'mouseup') {
+      /* If we don't evt.buttons, fall back to which, but not on mouseup. */
       switch (evt.which) {
         case 1: m_mouse.buttons.left = true; break;
         case 2: m_mouse.buttons.middle = true; break;
         case 3: m_mouse.buttons.right = true; break;
-        default:
-          if (evt.which) {
-            m_mouse.buttons[evt.which] = true;
-          }
-          break;
       }
+    }
+    /* When handling touch events, evt.which can be a string, in which case
+     * handle a "button" with that name -- a non-integer string will not
+     * evaluate as being between 1 and 3. */
+    if (evt.which && !(evt.which >= 1 && evt.which <= 3)) {
+      m_mouse.buttons[evt.which] = true;
     }
   };
 
@@ -2010,7 +2019,7 @@ var mapInteractor = function (args) {
    * @returns {mapInteractor}
    */
   this.simulateEvent = function (type, options) {
-    var evt, page, offset, which;
+    var evt, page, offset, which, buttons;
 
     if (!m_this.map()) {
       return m_this;
@@ -2044,10 +2053,13 @@ var mapInteractor = function (args) {
 
     if (options.button === 'left') {
       which = 1;
+      buttons = 1;
     } else if (options.button === 'right') {
       which = 3;
+      buttons = 2;
     } else if (options.button === 'middle') {
       which = 2;
+      buttons = 4;
     }
 
     options.modifiers = options.modifiers || [];
@@ -2059,11 +2071,11 @@ var mapInteractor = function (args) {
         pageX: page.x,
         pageY: page.y,
         which: which,
+        buttons: buttons,
         altKey: options.modifiers.indexOf('alt') >= 0,
         ctrlKey: options.modifiers.indexOf('ctrl') >= 0,
         metaKey: options.modifiers.indexOf('meta') >= 0,
         shiftKey: options.modifiers.indexOf('shift') >= 0,
-
         center: options.center,
         rotation: options.touch ? options.rotation || 0 : options.rotation,
         scale: options.touch ? options.scale || 1 : options.scale,
