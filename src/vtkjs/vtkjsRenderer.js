@@ -166,21 +166,22 @@ var vtkjsRenderer = function (arg) {
         rotation = map.rotation() || 0,
         view = camera.view,
         proj = camera.projectionMatrix;
-    if (proj[15]) {
-      /* we want positive z to be closer to the camera, but webGL does the
-       * converse, so reverse the z coordinates. */
-      proj = mat4.scale(util.mat4AsArray(), proj, [1, 1, -1]);
-    }
+    //  if (proj[15]) {
+    /* we want positive z to be closer to the camera, but webGL does the
+     * converse, so reverse the z coordinates. */
+    //    proj = mat4.scale(util.mat4AsArray(), proj, [1, 1, -1]);
+    //  }
     /* A similar kluge as in the base camera class worldToDisplay4.  With this,
      * we can show z values from 0 to 1. */
-    proj = mat4.translate(util.mat4AsArray(), proj,
-                          [0, 0, camera.constructor.bounds.far]);
+    // proj = mat4.translate(util.mat4AsArray(), proj,
+    //                       [0, 0, camera.constructor.bounds.far]);
 
     console.log(`VTKJS: viewMat: ${m_this.contextRenderer().getActiveCamera().getViewMatrix()}`);
     console.log(`GEOJS: viewMat: ${view}`);
     console.log(`VTKJS: projMat: ${m_this.contextRenderer().getActiveCamera().getProjectionMatrix()}`);
     console.log(`GEOJS: projMat: ${proj}`);
-    m_this.contextRenderer().getActiveCamera().computeViewParametersFromPhysicalMatrix(camera.world);
+    // m_this.contextRenderer().getActiveCamera().computeViewParametersFromPhysicalMatrix(view);
+    m_this.contextRenderer().getActiveCamera().setViewMatrix(view);
     m_this.contextRenderer().getActiveCamera().setProjectionMatrix(proj);
     // camera.view = m_this.contextRenderer().getActiveCamera().getViewMatrix();
     // camera.projectionMatrix = m_this.contextRenderer().getActiveCamera().getProjectionMatrix();

@@ -5,7 +5,7 @@ var pointFeature = require('../pointFeature');
 
 var vtkActor = vtk.Rendering.Core.vtkActor;// = require('vtk.js/Sources/Rendering/Core/Actor');
 var vtkMapper = vtk.Rendering.Core.vtkMapper;// = require('vtk.js/Sources/Rendering/Core/Mapper');
-var vtkSphereSource = vtk.Filters.Sources.vtkSphereSource;// = require('vtk.js/Sources/Filters/Sources/SphereSource');
+var vtkConeSource = vtk.Filters.Sources.vtkConeSource;// = require('vtk.js/Sources/Filters/Sources/SphereSource');
 // var vtkPlaneSource = vtk.Filters.Sources.vtkPlaneSource;// = require('vtk.js/Sources/Filters/Sources/PlaneSource');
 
 //////////////////////////////////////////////////////////////////////////////
@@ -89,24 +89,26 @@ var vtkjs_pointFeature = function (arg) {
                   m_this.gcs(), m_this.layer().map().gcs(),
                   position, 3);
 
-    if (!nonzeroZ && m_this.gcs() !== m_this.layer().map().gcs()) {
-      for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
-        position[i3 + 2] = 0;
-      }
-    }
+    // if (!nonzeroZ && m_this.gcs() !== m_this.layer().map().gcs()) {
+    //   for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
+    //     position[i3 + 2] = 0;
+    //   }
+    // }
+    
     /* Some transforms modify the z-coordinate.  If we started with all zero z
      * coordinates, don't modify them.  This could be changed if the
      * z-coordinate space of the gl cube is scaled appropriately. */
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
-      var source = vtkSphereSource.newInstance();
-      source.setCenter(position[i3], position[i3 + 1], position[i3 + 2]);
-      source.setRadius(100000.0);
+      var source = vtkConeSource.newInstance();
+      // source.setCenter(position[i3], position[i3 + 1], position[i3 + 2]);
+      // source.setRadius(100000.0);
       var actor = vtkActor.newInstance();
       var mapper = vtkMapper.newInstance();
       actor.getProperty().setEdgeVisibility(true);
       mapper.setInputConnection(source.getOutputPort());
       actor.setMapper(mapper);
       m_this.renderer().contextRenderer().addActor(actor);
+      m_this.renderer().contextRenderer().setLayer(1);
       m_actors.push(actor);
     }
     m_this.buildTime().modified();
