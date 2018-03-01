@@ -87,7 +87,7 @@ function getScreenImage(name, left, top, width, height) {
  * @param {function} callback: a function to call when complete.
  */
 function compareImage(name, image, threshold, callback) {
-  var resemble = require('node-resemble');
+  var resemble = require('resemblejs');
   var src = path.resolve('dist/data/base-images', name + '.png');
   if (!fs.existsSync(src)) {
     src = path.resolve(image_path, name + '.png');
