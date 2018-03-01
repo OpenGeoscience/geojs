@@ -43,7 +43,12 @@ module.exports = {
   },
   externals: {
     d3: 'd3',
-    hammerjs: 'Hammer'
+    hammerjs: {
+      root: 'Hammer',
+      commonjs: 'hammerjs',
+      commonjs2: 'hammerjs',
+      amd: 'hammerjs'
+    }
   },
   plugins: [
     define_plugin,
