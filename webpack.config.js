@@ -47,7 +47,10 @@ module.exports = {
       root: 'Hammer',
       commonjs: 'hammerjs',
       commonjs2: 'hammerjs',
-      amd: 'hammerjs'
+      amd: 'hammerjs',
+      // Since GeoJS's libraryTarget is "umd", defining this (undocumented) external library type
+      // will allow Webpack to create a better error message if a "hammerjs" import fails
+      umd: 'hammerjs'
     }
   },
   plugins: [
