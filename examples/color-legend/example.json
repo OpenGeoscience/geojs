@@ -4,5 +4,5 @@
   "about": {
     "text": "This example shows how to create a discrete or continous color legends."
   },
-  "disabled": true
+  "disabled": false
 }
