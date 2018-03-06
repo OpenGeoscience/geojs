@@ -29,7 +29,7 @@
 #controls #lines {
   width: 100px;
 }
-#controls #lines-loaded,#controls #lines-shown {
+#controls #lines-loaded,#controls #lines-shown,#controls #simple-lines-shown {
   display: inline-block;
   font-size: 11px;
   padding-left: 5px;
@@ -58,3 +58,7 @@
   font-size: 12px;
   color: black;
 }
+#controls #simplify_tolerance,#controls #resimplify_delay {
+  width: 80px;
+}
+

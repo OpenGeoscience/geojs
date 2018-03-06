@@ -4,6 +4,14 @@
 $(function () {
   'use strict';
 
+  function lineAccessor(data, index) {
+    return data.data;
+  }
+
+  function positionAccessor(data, index) {
+    return {x: data[0], y: data[1]};
+  }
+
   // Get query parameters
   var query = utils.getQuery();
 
@@ -16,7 +24,8 @@ $(function () {
     },
     zoom: 11
   });
-  var osm, mapUrl, layer, lineFeature, lines, rawdata, skipdraw;
+  var osm, mapUrl, layer, lineFeature, lines, rawdata, reduceddata, skipdraw,
+      lastSimplifyZoom, resimplifyTimeout;
 
   // By default, use the best renderer that supports lines.  This can be
   // changed on with the 'renderer' query parameter to force a particular
@@ -80,14 +89,22 @@ $(function () {
           lines = ctlvalue = parseInt(value, 10);
         }
         break;
-      case 'showmap':
-        ctlvalue = value !== 'false';
-        break;
       case 'miterLimit':
         value = value.length ? parseFloat(value) : undefined;
         if (!isNaN(value) && value > 0 && value !== undefined) {
           lineOptions.style[key] = ctlvalue = value;
         }
+        break;
+      case 'resimplify':
+      case 'showmap':
+      case 'simplify':
+        ctlvalue = value !== 'false';
+        break;
+      case 'resimplify_delay':
+        ctlvalue = value.length ? parseInt(value) : undefined;
+        break;
+      case 'simplify_tolerance':
+        ctlvalue = value.length ? parseFloat(value) : undefined;
         break;
     }
     if (ctlvalue !== undefined) {
@@ -124,11 +141,13 @@ $(function () {
    * Given a set of lines, optionally truncate or expand it, then show it as a
    * lineFeature.
    *
-   * @param {array} rawdata: an array of lines to show.  Each entry contains an
+   * @param {array} rawdata An array of lines to show.  Each entry contains an
    *    object that has a 'data' element which is an array of points that form
    *    the line.
+   * @param {boolean} [simplify] If present, use this as the flag to decide if
+   *    lines should be simplified.
    */
-  function show_lines(rawdata) {
+  function show_lines(rawdata, simplify) {
     $('#map').removeClass('ready').attr('segments', '');
     if (!rawdata) {
       return;
@@ -140,9 +159,21 @@ $(function () {
     for (numlines = 0; numlines < rawdata.length && segments < maxsegments; numlines += 1) {
       segments += rawdata[numlines].data.length - 1;
     }
-    var data = rawdata.slice(0, numlines);
-    lineFeature.data(data);
-    lineFeature.draw();
+    reduceddata = rawdata.slice(0, numlines);
+    if (simplify === undefined) {
+      simplify = query.simplify;
+    }
+    if (!simplify || simplify === 'false') {
+      // set the data, and reset the line and position accessors in case we
+      // changed them with the line simplication
+      lineFeature.data(reduceddata)
+        .line(lineAccessor)
+        .position(positionAccessor);
+      lineFeature.draw();
+      $('#simple-lines-shown').text('').attr('title', '');
+    } else {
+      simplify_lines(reduceddata);
+    }
     var text = 'Shown: ' + segments;
     $('#lines-shown').text(text).attr('title', text);
     map.onIdle(function () {
@@ -151,12 +182,73 @@ $(function () {
   }
 
   /**
+   * When the map is zoomed, if resimplifying lines is active, set a timer to
+   * do so after the currently specified delay.
+   *
+   * @param {geo.event} evt geojs event that triggered this call.
+   */
+  function resimplifyOnZoom(evt) {
+    if (resimplifyTimeout) {
+      window.cancelTimeout(resimplifyTimeout);
+      resimplifyTimeout = null;
+    }
+    if (!query.simplify || query.simplify === 'false' ||
+        !query.resimplify || query.resimplify === 'false') {
+      return;
+    }
+    window.setTimeout(function () {
+      resimplifyTimeout = null;
+      if (map.zoom() !== lastSimplifyZoom) {
+        simplify_lines(reduceddata);
+      }
+    }, parseInt(query.resimplify_delay, 10) || 500);
+  }
+
+  /**
+   * Simplify lines based on the current zoom level.
+   *
+   * @param {array} data The data to simplify.
+   * @param {number} [tolerance=query.simplify_tolerance] The tolerance in
+   *    pixels at the current map zoom level.
+   */
+  function simplify_lines(data, tolerance) {
+    if (!data) {
+      return;
+    }
+    lastSimplifyZoom = map.zoom();
+    if (resimplifyTimeout) {
+      window.cancelTimeout(resimplifyTimeout);
+      resimplifyTimeout = null;
+    }
+    tolerance = parseFloat(tolerance !== undefined ? tolerance : query.simplify_tolerance || 0.5);
+    lineFeature.rdpSimplifyData(
+      data,
+      map.unitsPerPixel(map.zoom()) * tolerance,
+      positionAccessor,
+      lineAccessor);
+    lineFeature.draw();
+    var segments = 0,
+        lineFunc = lineFeature.line();
+    lineFeature.data().forEach(function (d, i) {
+      var len = lineFunc(d, i).length;
+      segments += len >= 2 ? len - 1 : 0;
+    });
+    var text = 'Shown: ' + segments;
+    $('#simple-lines-shown').text(text).attr('title', text);
+    text = $('#lines-shown').text();
+    if (text.indexOf('Shown') === 0) {
+      text = 'Used' + text.substr(5);
+      $('#lines-shown').text(text).attr('title', text);
+    }
+  }
+
+  /**
    * For styles that can vary, parse the string and either return a simple
    * string or a function that computes the value.
    *
-   * @param {string} key: the property key.  Used to get a default value if
+   * @param {string} key the property key.  Used to get a default value if
    *    needed.
-   * @param {string} value: the string form of the value.  If this has a { in
+   * @param {string} value the string form of the value.  If this has a { in
    *    it, it is parsed as a JSON dictionary, and expects to be a list of
    *    category names which are used to determine the values.  These values
    *    applied uniformly per line.  Otherwise, if this has a , in it, it is a
@@ -204,7 +296,7 @@ $(function () {
   /**
    * Handle changes to our controls.
    *
-   * @param {object} evt jquery evt that triggered this call.
+   * @param {object} evt jquery event that triggered this call.
    */
   function change_controls(evt) {
     var ctl = $(evt.target),
@@ -257,9 +349,6 @@ $(function () {
         lines = parseInt(value);
         show_lines(rawdata);
         break;
-      case 'showmap':
-        set_osm_url(value);
-        break;
       case 'miterLimit':
         value = value.length ? parseFloat(value) : undefined;
         if (isNaN(value) || value <= 0 || value === undefined) {
@@ -270,6 +359,30 @@ $(function () {
         if (!skipdraw) {
           lineFeature.draw();
         }
+        break;
+      case 'showmap':
+        set_osm_url(value);
+        break;
+      case 'simplify':
+        if (!processedValue) {
+          show_lines(rawdata, false);
+        } else {
+          simplify_lines(reduceddata);
+        }
+        break;
+      case 'simplify_tolerance':
+        processedValue = value.length ? parseFloat(value) : undefined;
+        if (query.simplify) {
+          simplify_lines(reduceddata, processedValue);
+        }
+        break;
+      case 'resimplify':
+        if (processedValue && query.simplify && query.simplify !== 'false' &&
+            map.zoom() !== lastSimplifyZoom) {
+          simplify_lines(reduceddata);
+        }
+        break;
+      case 'resimplify_delay':
         break;
     }
     // Update the url to reflect the changes
@@ -286,7 +399,7 @@ $(function () {
   /**
    * Handle selecting a preset button.
    *
-   * @param {object} evt: jquery event with the triggered button.
+   * @param {object} evt jquery event with the triggered button.
    */
   function select_preset(evt) {
     var update;
@@ -315,7 +428,7 @@ $(function () {
   /**
    * Set the map to either use the original default url or a blank white image.
    *
-   * @param {string} value: 'false' to use a white image, anything else to use
+   * @param {string} value 'false' to use a white image, anything else to use
    *    the original url.
    */
   function set_osm_url(value) {
@@ -341,12 +454,8 @@ $(function () {
       'hidden');
   // Ceate a line feature
   lineFeature = layer.createFeature('line', lineOptions)
-    .line(function (d) {
-      return d.data;
-    })
-    .position(function (d) {
-      return {x: d[0], y: d[1]};
-    })
+    .line(lineAccessor)
+    .position(positionAccessor)
     // add hover events -- use mouseon and mouseoff, since we only show one
     // tootip.  If we showed one tooltip per item we were over, use mouseover
     // and mouseout.
@@ -361,7 +470,8 @@ $(function () {
     })
     .geoOn(geo.event.feature.mouseoff, function (evt) {
       tooltipElem.addClass('hidden');
-    });
+    })
+    .geoOn(geo.event.zoom, resimplifyOnZoom);
 
   // Make some values available in the global context so curious people can
   // play with them.
