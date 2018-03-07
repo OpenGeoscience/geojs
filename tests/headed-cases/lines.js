@@ -15,7 +15,9 @@ describe('lines example', function () {
   it('more lines', function (done) {
     base$ = $('iframe#map')[0].contentWindow.jQuery;
     base$('#lines').val(100000).trigger('change');
-    imageTest.imageTest('exampleLines100k', '#map', 0.0015, done, null, 0, 2, '#map.ready[segments="100000"]');
+    // maximum error is 0.0030 because of a change in Chrome 65.  When new
+    // versions are released, see if this can be moved back to 0.0015
+    imageTest.imageTest('exampleLines100k', '#map', 0.0030, done, null, 0, 2, '#map.ready[segments="100000"]');
   }, 10000);
   it('thin preset', function (done) {
     base$('button.preset').eq(1).trigger('click');
