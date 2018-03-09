@@ -67,6 +67,8 @@ describe('geo.core.map', function () {
       expect(map.rotation()).toBe(1);
       expect(map.maxBounds().left).toBe(0);
       expect(map.maxBounds().right).toBe(50000);
+      expect(map.maxBounds().top).toBe(0);
+      expect(map.maxBounds().bottom).toBe(40000);
       expect(map.size().width).toBe(640);
       expect(map.zoomRange().max).toEqual(9);
       expect(map.zoomRange().origMin).toEqual(3);
@@ -76,6 +78,14 @@ describe('geo.core.map', function () {
       expect(map.clampBoundsX()).toBe(true);
       expect(map.clampBoundsY()).toBe(false);
       expect(map.clampZoom()).toBe(false);
+      // with gcs specified for maxBounds
+      map = createMap({
+        ingcs: '+proj=longlat +axis=esu',
+        gcs: '+proj=longlat +axis=enu',
+        maxBounds: {left: 0, top: 0, right: 50000, bottom: -40000, gcs: '+proj=longlat +axis=enu'}
+      });
+      expect(map.maxBounds().top).toBe(0);
+      expect(map.maxBounds().bottom).toBe(40000);
     });
   });
 

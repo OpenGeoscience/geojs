@@ -28,6 +28,8 @@ var sceneObject = require('./sceneObject');
  * @param {number} [arg.maxBounds.right=20037508] The right bound.
  * @param {number} [arg.maxBounds.bottom=-20037508] The bottom bound.
  * @param {number} [arg.maxBounds.top=20037508] The top bound.
+ * @param {number} [arg.maxBounds.gcs=arg.ingcs] The coordinate system for the
+ *   bounds.
  *
  * @param {number} [arg.zoom=4] Initial zoom.
  * @param {object?} [arg.center] Initial map center.
@@ -128,17 +130,17 @@ var map = function (arg) {
    * [0, width] and [0, height] instead. */
   var mcx = ((m_maxBounds.left || 0) + (m_maxBounds.right || 0)) / 2,
       mcy = ((m_maxBounds.bottom || 0) + (m_maxBounds.top || 0)) / 2;
-  m_maxBounds.left = transform.transformCoordinates(m_ingcs, m_gcs, {
+  m_maxBounds.left = transform.transformCoordinates(m_maxBounds.gcs || m_ingcs, m_gcs, {
     x: m_maxBounds.left !== undefined ? m_maxBounds.left : -180, y: mcy
   }).x;
-  m_maxBounds.right = transform.transformCoordinates(m_ingcs, m_gcs, {
+  m_maxBounds.right = transform.transformCoordinates(m_maxBounds.gcs || m_ingcs, m_gcs, {
     x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: mcy
   }).x;
   m_maxBounds.top = (m_maxBounds.top !== undefined ?
-    transform.transformCoordinates(m_ingcs, m_gcs, {
+    transform.transformCoordinates(m_maxBounds.gcs || m_ingcs, m_gcs, {
       x: mcx, y: m_maxBounds.top}).y : m_maxBounds.right);
   m_maxBounds.bottom = (m_maxBounds.bottom !== undefined ?
-    transform.transformCoordinates(m_ingcs, m_gcs, {
+    transform.transformCoordinates(m_maxBounds.gcs || m_ingcs, m_gcs, {
       x: mcx, y: m_maxBounds.bottom}).y : m_maxBounds.left);
   m_unitsPerPixel = (arg.unitsPerPixel || (
     m_maxBounds.right - m_maxBounds.left) / 256);
