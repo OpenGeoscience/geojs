@@ -1,0 +1,69 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Editor with HTML and CSS
+    Any changes made will be stored in the URL whenever the code is run.  This can be sent as a link, bookmarked, or otherwise shared.
+
+    You can interact with the code through the javascript console by accessing the top-level variables in the `tutorial` global parameter.
+
+  :markdown-it
+    **HTML**
+  +codeblock('html', 1).
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <script type="text/javascript" src="../../built/geo.ext.min.js"></script>
+      <script type="text/javascript" src="../../built/geo.min.js"></script>
+      <!-- Use a specific version of GeoJS by requesting it from a CDN.
+           For instance, remove the local references, above, and
+           uncomment the following:
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/geojs/0.15.1/geo.ext.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/geojs/0.15.1/geo.min.js"></script>
+       -->
+    </head>
+    <body>
+      <div id="map"></div>
+      <div id="info"></div>
+    </body>
+    </html>
+
+  :markdown-it
+    **CSS**
+  +codeblock('css', 2).
+    html,body,#map{
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+    #info {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: rgba(255,255,255,0.75);
+      padding: 2px;
+    }
+
+  :markdown-it
+    **Javascript**
+  +codeblock('javascript', 3, undefined, true).
+    var map = geo.map({
+      node: "#map",
+      center: {x: 0.2, y: 49.5},
+      zoom: 11
+    });
+    var layer = map.createLayer('osm');
+    $('#info').text('GeoJS version: ' + geo.version);
+    map.geoOn(geo.event.mousemove, function (evt) {
+      $('#info').text('x: ' + evt.geo.x.toFixed(6) + ', y: ' + evt.geo.y.toFixed(6));
+    })
+  +codeblock_test('map has one osm layer from openstreetmap', [
+      'map.layers().length === 1',
+      'map.layers()[0] instanceof geo.osmLayer',
+      'layer.url().match(/openstreetmap/)'
+      ])
+  +codeblock_test('map has a non-empty info div', [
+      '$("#info").text()'
+      ])
