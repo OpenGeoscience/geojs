@@ -9,7 +9,8 @@ describe('lines example', function () {
   });
 
   it('basic', function (done) {
-    $('#map').attr('src', '/examples/lines/index.html');
+    // use an http url for the map so we can proxy it for the test
+    $('#map').attr('src', '/examples/lines/index.html?url=http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
     imageTest.imageTest('exampleLines', '#map', 0.0015, done, null, 0, 2, '#map.ready');
   }, 10000);
   it('more lines', function (done) {

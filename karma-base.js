@@ -189,7 +189,7 @@ var notes_middleware = function (config) {
  */
 var osmtiles_middleware = function (config) {
   return function (request, response, next) {
-    var match = request.url.match(/.*http:\/\/[a-c]\.tile.openstreetmap.org\/([0-9]+\/[0-9]+\/[0-9]+.png)$/);
+    var match = request.url.match(/.*https?:\/\/[a-c]\.tile.openstreetmap.org\/([0-9]+\/[0-9]+\/[0-9]+.png)$/);
     /* Serve tiles if they have been proxied */
     if (match && request.method === 'GET') {
       var imagePath = 'dist/data/tiles/' + match[1];
