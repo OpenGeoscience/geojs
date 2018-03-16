@@ -1,0 +1,87 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Map Scale
+    Create a map.  We increase the maximum amount you can zoom.
+
+    Create a UI layer to hold the scale widget.
+
+  +codeblock('javascript', 1).
+    var map = geo.map({
+      node: '#map',
+      center: {x: 5.725, y: 45.175},
+      zoom: 8,
+      max: 20
+    });
+    map.createLayer('osm');
+    var uiLayer = map.createLayer('ui');
+  +codeblock_test('map has two layers', [
+     'map.layers().length === 2',
+     'map.layers()[0] instanceof geo.osmLayer',
+     'map.layers()[1] instanceof geo.gui.uiLayer'
+     ])
+
+  :markdown-it
+    Add a basic scale in the upper-left corner.
+
+    Since the default map uses a Mercator projection, if you zoom very far out
+    and pan, you may notice the scale changing length.  The scale is calculated
+    based on its position on the map within the current display.
+  +codeblock('javascript', 2, 1, true).
+    uiLayer.createWidget('scale', {
+      position: {left: 10, top: 10}
+    });
+  +codeblock_test('map has a scale widget', [
+    'uiLayer.children().length === 1',
+    'uiLayer.children()[0] instanceof geo.gui.scaleWidget',
+    'd3.select(uiLayer.children()[0].canvas()).select("text").html() === "80 km"'
+    ])
+
+  :markdown-it
+    The scale can use U.S. Statute units instead of Système international.
+  +codeblock('javascript', 3, 1, false, 'Step 2-B').
+    uiLayer.createWidget('scale', {
+      position: {left: 10, top: 10},
+      units: 'miles'
+    });
+  +codeblock_test('map has a scale widget', [
+    'd3.select(uiLayer.children()[0].canvas()).select("text").html() === "50 mi"'
+    ])
+
+  :markdown-it
+    Or, you can define a new set of units, such as nautical miles.  You can
+    also change the orientation of the scale.
+  +codeblock('javascript', 4, 1, false, 'Step 2-C').
+    uiLayer.createWidget('scale', {
+      position: {left: 10, top: 10},
+      orientation: 'right',
+      // 1 Nautical Mile = 1852 meters
+      units: [{unit: 'NM', scale: 1852}]
+    });
+  +codeblock_test('map has a scale widget', [
+    'd3.select(uiLayer.children()[0].canvas()).select("text").html() === "30 NM"'
+    ])
+
+  :markdown-it
+    With appropriate placement, you can have two scales that appear as a
+    combined widget.
+  +codeblock('javascript', 5, 1, false, 'Step 2-D').
+    uiLayer.createWidget('scale', {
+      position: {left: 10, bottom: 10},
+    });
+    // The default scale widget height is 20 pixels, and the default
+    // strokeWidthe is 2.  If we offset the scale (20 - 2) pixels
+    // above the previous one, the scale bars will overlap.
+    uiLayer.createWidget('scale', {
+      position: {left: 10, bottom: 28},
+      orientation: 'top',
+      units: 'miles'
+    });
+  +codeblock_test('map has two scale widgets', [
+    'uiLayer.children().length === 2',
+    'uiLayer.children()[0] instanceof geo.gui.scaleWidget',
+    'uiLayer.children()[1] instanceof geo.gui.scaleWidget',
+    'd3.select(uiLayer.children()[0].canvas()).select("text").html() === "80 km"',
+    'd3.select(uiLayer.children()[1].canvas()).select("text").html() === "50 mi"'
+    ])
