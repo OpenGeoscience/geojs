@@ -124,6 +124,18 @@ describe('geo.gui.widget', function () {
       map.pan({x: -5, y: 20});
       expect(closeToEqual(widget.position(), {left: 280.87, top: 165.85, right: null, bottom: null})).toBe(true);
       expect(widget.position(undefined, true)).toEqual({x: -3, y: 3});
+      /* test that position updates the canvas as we expect */
+      var div = document.createElement('div');
+      widget = geo.gui.widget({layer: layer});
+      widget.canvas(div).reposition();
+      expect(div.style.left).toBe('0px');
+      expect(div.style.right).toBe('');
+      widget.position({right: 10, bottom: 20});
+      expect(div.style.left).toBe('');
+      expect(div.style.right).toBe('10px');
+      widget.position({right: '10%', bottom: 20});
+      expect(div.style.left).toBe('');
+      expect(div.style.right).toBe('10%');
     });
     it('reposition and repositionEvent', function () {
       map = createMap();
