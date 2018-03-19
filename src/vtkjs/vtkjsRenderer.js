@@ -176,10 +176,10 @@ var vtkjsRenderer = function (arg) {
     // proj = mat4.translate(util.mat4AsArray(), proj,
     //                       [0, 0, camera.constructor.bounds.far]);
 
-    console.log(`VTKJS: viewMat: ${m_this.contextRenderer().getActiveCamera().getViewMatrix()}`);
-    console.log(`GEOJS: viewMat: ${view}`);
-    console.log(`VTKJS: projMat: ${m_this.contextRenderer().getActiveCamera().getProjectionMatrix()}`);
-    console.log(`GEOJS: projMat: ${proj}`);
+    // console.log(`VTKJS: viewMat: ${m_this.contextRenderer().getActiveCamera().getViewMatrix()}`);
+    // console.log(`GEOJS: viewMat: ${view}`);
+    // console.log(`VTKJS: projMat: ${m_this.contextRenderer().getActiveCamera().getProjectionMatrix()}`);
+    // console.log(`GEOJS: projMat: ${proj}`);
     // m_this.contextRenderer().getActiveCamera().computeViewParametersFromPhysicalMatrix(view);
     m_this.contextRenderer().getActiveCamera().setViewMatrix(view);
     m_this.contextRenderer().getActiveCamera().setProjectionMatrix(proj);

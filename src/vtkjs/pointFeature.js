@@ -5,7 +5,7 @@ var pointFeature = require('../pointFeature');
 
 var vtkActor = vtk.Rendering.Core.vtkActor;// = require('vtk.js/Sources/Rendering/Core/Actor');
 var vtkMapper = vtk.Rendering.Core.vtkMapper;// = require('vtk.js/Sources/Rendering/Core/Mapper');
-var vtkConeSource = vtk.Filters.Sources.vtkConeSource;// = require('vtk.js/Sources/Filters/Sources/SphereSource');
+var vtkSphereSource = vtk.Filters.Sources.vtkSphereSource;// = require('vtk.js/Sources/Filters/Sources/SphereSource');
 // var vtkPlaneSource = vtk.Filters.Sources.vtkPlaneSource;// = require('vtk.js/Sources/Filters/Sources/PlaneSource');
 
 //////////////////////////////////////////////////////////////////////////////
@@ -69,7 +69,9 @@ var vtkjs_pointFeature = function (arg) {
         position = new Array(numPts * 3),
         data = m_this.data(),
         posFunc = m_this.position(),
-        radFunc = m_this.style.get('radius');
+        radFunc = m_this.style.get('radius'),
+        colorFunc = m_this.style.get('fillColor'),
+        opacityFunc = m_this.style.get('fillOpacity');
 
     if (m_actors) {
       m_this.renderer().contextRenderer().removeActor(m_actors);
@@ -85,28 +87,30 @@ var vtkjs_pointFeature = function (arg) {
       position[i3 + 2] = posVal.z || 0;
       nonzeroZ = nonzeroZ || position[i3 + 2];
     }
-    position = transform.transformCoordinates(
-                  m_this.gcs(), m_this.layer().map().gcs(),
-                  position, 3);
+    // position = transform.transformCoordinates(
+    //               m_this.gcs(), m_this.layer().map().gcs(),
+    //               position, 3);
 
     // if (!nonzeroZ && m_this.gcs() !== m_this.layer().map().gcs()) {
     //   for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
     //     position[i3 + 2] = 0;
     //   }
     // }
-    
+  
     /* Some transforms modify the z-coordinate.  If we started with all zero z
      * coordinates, don't modify them.  This could be changed if the
      * z-coordinate space of the gl cube is scaled appropriately. */
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
-      var source = vtkConeSource.newInstance();
-      // source.setCenter(position[i3], position[i3 + 1], position[i3 + 2]);
-      // source.setRadius(100000.0);
+      var source = vtkSphereSource.newInstance();
+      source.setRadius(radFunc());
+      source.setCenter(position[i3], position[i3 + 1], position[i3 + 2]);
+      source.setThetaResolution(20);
       var actor = vtkActor.newInstance();
       var mapper = vtkMapper.newInstance();
-      actor.getProperty().setEdgeVisibility(true);
       mapper.setInputConnection(source.getOutputPort());
       actor.setMapper(mapper);
+      actor.getProperty().setColor(colorFunc()['r'], colorFunc()['g'], colorFunc()['b']);
+      actor.getProperty().setOpacity(opacityFunc(data[i]));
       m_this.renderer().contextRenderer().addActor(actor);
       m_this.renderer().contextRenderer().setLayer(1);
       m_actors.push(actor);
