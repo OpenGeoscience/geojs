@@ -41,6 +41,7 @@ var vtkjsRenderer = function (arg) {
 
   const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({ background: [0.1, 0.5, 0.5] });
   const vtkjsren = fullScreenRenderer.getRenderer();
+  vtkjsren.getActiveCamera().setUserProvidedProjectionMatrix(true);
   const renderWindow = fullScreenRenderer.getRenderWindow();
 
   /// TODO: Move this API to the base class
