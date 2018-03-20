@@ -1039,6 +1039,67 @@ var util = module.exports = {
     return deferList;
   },
 
+  dereferenceCssUrlsRegex: /url\(["']?(http[^)"']+|[^:)"']+)["']?\)/g,
+
+  /**
+   * Check css text.  Any url(http[s]...) references are dereferenced and
+   * stored as local base64 urls.
+   *
+   * @param {string} css The css to parse for urls.
+   * @param {jQuery.selector|DOMElement} styleElem The element that receivs
+   *    the css text after dereferencing or the DOM element that has style
+   *    that will be updated.
+   * @param {jQuery.Deferred} styleDefer A Deferred to resolve once
+   *    dereferencing is complete.
+   * @param {string} [styleKey] If unset, styleElem is a header element.  If
+   *    set, styleElem is a DOM element and the named style will be updated.
+   * @memberof geo.util
+   */
+  dereferenceCssUrls: function (css, styleElem, styleDefer, styleKey) {
+    var deferList = [],
+        results = [];
+
+    css.replace(util.dereferenceCssUrlsRegex, function (match, url) {
+      var idx = deferList.length,
+          defer = $.Deferred(),
+          xhr = new XMLHttpRequest();
+      deferList.push(defer);
+      results.push('');
+      xhr.open('GET', url, true);
+      xhr.responseType = 'arraybuffer';
+      xhr.onload = function () {
+        if (this.status === 200) {
+          var response = new Uint8Array(this.response),
+              data = new Array(response.length),
+              i;
+          for (i = 0; i < response.length; i += 1) {
+            data[i] = String.fromCharCode(response[i]);
+          }
+          data = data.join('');
+          results[idx] = 'url(data:' + xhr.getResponseHeader('content-type') + ';base64,' + btoa(data) + ')';
+          defer.resolve();
+        }
+      };
+      // if this fails, resolve anyway
+      xhr.onerror = defer.resolve;
+      xhr.send();
+      return match;
+    });
+    $.when.apply($, deferList).then(function () {
+      var idx = 0;
+      css = css.replace(util.dereferenceCssUrlsRegex, function (match, url) {
+        idx += 1;
+        return results[idx - 1];
+      });
+      if (styleKey === undefined) {
+        styleElem.text(css);
+      } else {
+        styleElem.style[styleKey] = css;
+      }
+      styleDefer.resolve();
+    });
+  },
+
   /**
    * Convert an html element to an image.  This attempts to localize any
    * images within the element.  If there are other external references, the
@@ -1054,7 +1115,7 @@ var util = module.exports = {
    * @memberof geo.util
    */
   htmlToImage: function (elem, parents) {
-    var defer = $.Deferred(), container;
+    var defer = $.Deferred(), container, deferList = [];
 
     var parent = $(elem);
     elem = $(elem).clone();
@@ -1079,6 +1140,19 @@ var util = module.exports = {
     }
     // canvas elements won't render properly here.
     $('canvas', elem).remove();
+    /* Walk through all of the children of elem and check if any explicitly set
+     * css property needs to be dereferenced. */
+    $('*', elem).addBack().each(function () {
+      var style = this.style;
+      for (var idx = 0; idx < style.length; idx += 1) {
+        var key = this.style[idx];
+        if (this.style[key].match(util.dereferenceCssUrlsRegex)) {
+          var styleDefer = $.Deferred();
+          util.dereferenceCssUrls(this.style[key], this, styleDefer, key);
+          deferList.push(styleDefer);
+        }
+      }
+    });
     container = $('<div xmlns="http://www.w3.org/1999/xhtml">');
     container.css({
       width: parent.width() + 'px',
@@ -1096,21 +1170,20 @@ var util = module.exports = {
       margin: 0
     });
     body.append(elem);
-    var deferList = util.dereferenceElements(elem);
+    deferList = deferList.concat(util.dereferenceElements(elem));
     /* Get styles and links in order, as order matters in css */
     $('style,link[rel="stylesheet"]').each(function () {
-      var styleElem;
+      var styleElem = $('<style type="text/css">'),
+          styleDefer = $.Deferred();
       if ($(this).is('style')) {
-        styleElem = $(this).clone();
+        var css = $(this).text();
+        util.dereferenceCssUrls(css, styleElem, styleDefer);
       } else {
-        var fetch = $.Deferred();
-        styleElem = $('<style type="text/css">');
         $.get($(this).attr('href')).done(function (css) {
-          styleElem.text(css);
-          fetch.resolve();
+          util.dereferenceCssUrls(css, styleElem, styleDefer);
         });
-        deferList.push(fetch);
       }
+      deferList.push(styleDefer);
       $('head', container).append(styleElem);
     });
 

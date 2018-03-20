@@ -304,3 +304,13 @@ module.exports.createMap = function (opts, css) {
   opts.node = node;
   return geo.map(opts);
 };
+
+/**
+ * Return true if the browser is probably PhantomJS.
+ *
+ * @returns {boolean}
+ */
+module.exports.isPhantomJS = function () {
+  // PhantomJS doesn't have Math.log10, but Chrome and Firefox do
+  return !Math.log10;
+};
