@@ -110,7 +110,7 @@ describe('geo.textFeature', function () {
     });
   });
 
-  describe('Check private class mathods', function () {
+  describe('Check private class methods', function () {
     var map, layer, text;
     it('_init', function () {
       map = createMap();

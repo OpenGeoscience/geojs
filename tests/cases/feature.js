@@ -47,7 +47,7 @@ describe('geo.feature', function () {
       expect(feat.renderer()).toBe(null);
     });
   });
-  describe('Check private class mathods', function () {
+  describe('Check private class methods', function () {
     var map, layer, feat, points = {index: [], found: []}, box = [],
         events = {};
     it('_init', function () {
