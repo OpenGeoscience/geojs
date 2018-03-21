@@ -26,9 +26,7 @@ var legendWidget = function (arg) {
       m_group = null,
       m_border = null,
       m_spacing = 20, // distance in pixels between lines
-      m_padding = 12, // padding in pixels inside the border
-      s_createCanvas = this._createCanvas,
-      s_appendChild = this._appendChild;
+      m_padding = 12; // padding in pixels inside the border
 
   /**
    * Get or set the category array associated with
@@ -212,8 +210,8 @@ var legendWidget = function (arg) {
     // adding categories redraws the entire thing by calling _init, see
     // the m_top.remove() line below
     if (!m_top) {
-      s_createCanvas();
-      s_appendChild();
+      m_this._createCanvas();
+      m_this._appendCanvasToParent();
     }
 
     // total size = interior size + 2 * padding + 2 * width of the border

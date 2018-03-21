@@ -223,7 +223,6 @@ var d3Renderer = function (arg) {
 
   /**
    * Set the translation, scale, and zoom for the current view.
-   * @note rotation not yet supported
    * @private
    */
   this._setTransform = function () {

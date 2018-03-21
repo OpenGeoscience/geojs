@@ -21,8 +21,6 @@ var sliderWidget = function (arg) {
 
   var m_this = this,
       s_exit = this._exit,
-      s_createCanvas = this._createCanvas,
-      s_appendChild = this._appendChild,
       m_xscale,
       m_yscale,
       m_plus,
@@ -91,8 +89,8 @@ var sliderWidget = function (arg) {
    * @private
    */
   this._init = function () {
-    s_createCanvas();
-    s_appendChild();
+    m_this._createCanvas();
+    m_this._appendCanvasToParent();
 
     m_this.reposition();
 
