@@ -2,6 +2,7 @@ var inherit = require('./inherit');
 var feature = require('./feature');
 var timestamp = require('./timestamp');
 var transform = require('./transform');
+var util = require('./util');
 
 /**
  * Line feature specification.
@@ -199,33 +200,10 @@ var lineFeature = function (arg) {
         pt = transform.transformCoordinates(map.ingcs(), map.gcs(), p),
         i, j, record;
 
-    // minimum l2 distance squared from
-    // q -> line(u, v)
-    function lineDist2(q, u, v) {
-      var t, vux = v.x - u.x, vuy = v.y - u.y, l2 = vux * vux + vuy * vuy;
-
-      if (l2 < 1) {
-        // u, v are within 1 pixel
-        return dist2(q, u);
-      }
-
-      t = ((q.x - u.x) * vux + (q.y - u.y) * vuy) / l2;
-      if (t < 0) { return dist2(q, u); }
-      if (t > 1) { return dist2(q, v); }
-      return dist2(q, {x: u.x + t * vux, y: u.y + t * vuy});
-    }
-
-    // l2 distance squared from u to v
-    function dist2(u, v) {
-      var dx = u.x - v.x,
-          dy = u.y - v.y;
-      return dx * dx + dy * dy;
-    }
-
     for (i = 0; i < m_pointSearchInfo.length; i += 1) {
       record = m_pointSearchInfo[i];
       for (j = 0; j < record.length; j += 1) {
-        if (lineDist2(pt, record[j].u, record[j].v) <= record[j].r2 * scale2) {
+        if (util.distance2dToLineSquared(pt, record[j].u, record[j].v) <= record[j].r2 * scale2) {
           found.push(data[i]);
           indices.push(i);
           break;
@@ -278,6 +256,62 @@ var lineFeature = function (arg) {
       }
     });
     return idx;
+  };
+
+  /**
+   * Take a set of data, reduce the number of vertices per linen using the
+   * Ramer–Douglas–Peucker algorithm, and use the result as the new data.
+   * This changes the instance's data, the position accessor, and the line
+   * accessor.
+   *
+   * @param {array} data A new data array.
+   * @param {number} [tolerance] The maximum variation allowed in map.gcs
+   *    units.  A value of zero will only remove perfectly colinear points.  If
+   *    not specified, this is set to a half display pixel at the map's current
+   *    zoom level.
+   * @param {function} [posFunc=this.style.get('position')] The function to
+   *    get the position of each vertex.
+   * @param {function} [lineFunc=this.style.get('line')] The function to get
+   *    each line.
+   * @returns {this}
+   */
+  this.rdpSimplifyData = function (data, tolerance, posFunc, lineFunc) {
+    data = data || m_this.data();
+    posFunc = posFunc || m_this.style.get('position');
+    lineFunc = lineFunc || m_this.style.get('line');
+    var map = m_this.layer().map(),
+        mapgcs = map.gcs(),
+        featuregcs = m_this.gcs(),
+        closedFunc = m_this.style.get('closed');
+    if (tolerance === undefined) {
+      tolerance = map.unitsPerPixel(map.zoom()) * 0.5;
+    }
+
+    /* transform the coordinates to the map gcs */
+    data = data.map(function (d, idx) {
+      var lineItem = lineFunc(d, idx),
+          pts = transform.transformCoordinates(featuregcs, mapgcs, lineItem.map(function (ld, lidx) {
+            return posFunc(ld, lidx, d, idx);
+          })),
+          elem = util.rdpLineSimplify(pts, tolerance, closedFunc(d, idx), []);
+      if (elem.length < 2 || (elem.length === 2 && util.distance2dSquared(elem[0], elem[1]) < tolerance * tolerance)) {
+        elem = [];
+      }
+      elem = transform.transformCoordinates(mapgcs, featuregcs, elem);
+      /* Copy element properties, as they might be used by styles */
+      for (var key in d) {
+        if (d.hasOwnProperty(key) && !(Array.isArray(d) && key >= 0 && key < d.length)) {
+          elem[key] = d[key];
+        }
+      }
+      return elem;
+    });
+
+    /* Set the reduced lines as the data and use simple accessors. */
+    m_this.style('position', function (d) { return d; });
+    m_this.style('line', function (d) { return d; });
+    m_this.data(data);
+    return m_this;
   };
 
   /**

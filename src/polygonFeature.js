@@ -90,24 +90,32 @@ var polygonFeature = function (arg) {
   this.data = function (arg) {
     var ret = s_data(arg);
     if (arg !== undefined) {
-      getCoordinates();
+      m_coordinates = getCoordinates();
       this._checkForStroke();
     }
     return ret;
   };
 
   /**
-   * Get the internal coordinates whenever the data changes.  For now, we do
-   * the computation in world coordinates, but we will need to work in GCS
-   * for other projections.  Also compute the extents of the outside of each
-   * polygon for faster checking if points are in the polygon.
+   * Get the internal coordinates whenever the data changes.  Also compute the
+   * extents of the outside of each polygon for faster checking if points are
+   * in the polygon.
+   *
    * @private
+   * @param {object[]} [data=this.data()] The data to process.
+   * @param {function} [posFunc=this.style.get('position')] The function to
+   *    get the position of each vertex.
+   * @param {function} [polyFunc=this.style.get('polygon')] The function to
+   *    get each polygon.
+   * @returns {object[]} An array of polygon positions.  Each has `outer` and
+   *    `inner` if it has any coordinates, or is undefined.
    */
-  function getCoordinates() {
-    var posFunc = m_this.style.get('position'),
-        polyFunc = m_this.style.get('polygon');
-    m_coordinates = m_this.data().map(function (d, i) {
-      var poly = polyFunc(d);
+  function getCoordinates(data, posFunc, polyFunc) {
+    data = data || m_this.data();
+    posFunc = posFunc || m_this.style.get('position');
+    polyFunc = polyFunc || m_this.style.get('polygon');
+    var coordinates = data.map(function (d, i) {
+      var poly = polyFunc(d, i);
       if (!poly) {
         return;
       }
@@ -142,6 +150,7 @@ var polygonFeature = function (arg) {
         range: range
       };
     });
+    return coordinates;
   }
 
   /**
@@ -182,7 +191,7 @@ var polygonFeature = function (arg) {
       m_this.style('polygon', val);
       m_this.dataTime().modified();
       m_this.modified();
-      getCoordinates();
+      m_coordinates = getCoordinates();
     }
     return m_this;
   };
@@ -202,7 +211,7 @@ var polygonFeature = function (arg) {
       m_this.style('position', val);
       m_this.dataTime().modified();
       m_this.modified();
-      getCoordinates();
+      m_coordinates = getCoordinates();
     }
     return m_this;
   };
@@ -390,6 +399,89 @@ var polygonFeature = function (arg) {
       m_lineFeature.modified();
     }
     return result;
+  };
+
+  /**
+   * Take a set of data, reduce the number of vertices per polygon using the
+   * Ramer–Douglas–Peucker algorithm, and use the result as the new data.
+   * This changes the instance's data, the position accessor, and the polygon
+   * accessor.
+   *
+   * @param {array} data A new data array.
+   * @param {number} [tolerance] The maximum variation allowed in map.gcs
+   *    units.  A value of zero will only remove perfectly colinear points.  If
+   *    not specified, this is set to a half display pixel at the map's current
+   *    zoom level.
+   * @param {function} [posFunc=this.style.get('position')] The function to
+   *    get the position of each vertex.
+   * @param {function} [polyFunc=this.style.get('polygon')] The function to
+   *    get each polygon.
+   * @returns {this}
+   */
+  this.rdpSimplifyData = function (data, tolerance, posFunc, polyFunc) {
+    var map = m_this.layer().map(),
+        mapgcs = map.gcs(),
+        featuregcs = m_this.gcs(),
+        coordinates = getCoordinates(data, posFunc, polyFunc);
+    if (tolerance === undefined) {
+      tolerance = map.unitsPerPixel(map.zoom()) * 0.5;
+    }
+
+    /* transform the coordinates to the map gcs */
+    coordinates = coordinates.map(function (poly) {
+      return {
+        outer: transform.transformCoordinates(featuregcs, mapgcs, poly.outer),
+        inner: poly.inner.map(function (hole) {
+          return transform.transformCoordinates(featuregcs, mapgcs, hole);
+        })
+      };
+    });
+    data = data.map(function (d, idx) {
+      var poly = coordinates[idx],
+          elem = {};
+      /* Copy element properties, as they might be used by styles */
+      for (var key in d) {
+        if (d.hasOwnProperty(key) && !(Array.isArray(d) && key >= 0 && key < d.length)) {
+          elem[key] = d[key];
+        }
+      }
+      if (poly && poly.outer.length >= 3) {
+        // discard degenerate holes before anything else
+        elem.inner = poly.inner.filter(function (hole) {
+          return hole.length >= 3;
+        });
+        // simplify the outside of the polygon without letting it cross holes
+        elem.outer = util.rdpLineSimplify(poly.outer, tolerance, true, elem.inner);
+        if (elem.outer.length >= 3) {
+          var allButSelf = elem.inner.slice();
+          // simplify holes without crossing other holes or the outside
+          elem.inner.map(function (hole, idx) {
+            allButSelf[idx] = elem.outer;
+            var result = util.rdpLineSimplify(hole, tolerance, true, allButSelf);
+            allButSelf[idx] = result;
+            return result;
+          }).filter(function (hole) {
+            return hole.length >= 3;
+          });
+          // transform coordinates back to the feature gcs
+          elem.outer = transform.transformCoordinates(mapgcs, featuregcs, elem.outer);
+          elem.inner = elem.inner.map(function (hole) {
+            return transform.transformCoordinates(mapgcs, featuregcs, hole);
+          });
+        } else {
+          elem.outer = elem.inner = [];
+        }
+      } else {
+        elem.outer = [];
+      }
+      return elem;
+    });
+
+    /* Set the reduced polgons as the data and use simple accessors. */
+    m_this.style('position', function (d) { return d; });
+    m_this.style('polygon', function (d) { return d; });
+    m_this.data(data);
+    return m_this;
   };
 
   /**

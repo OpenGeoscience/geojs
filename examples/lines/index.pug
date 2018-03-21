@@ -36,6 +36,15 @@ block append mainContent
     .form-group(title="Show an OSM map underneath the lines.")
       label(for="showmap") Show Map
       input#showmap(type="checkbox", placeholder="true", checked="checked")
+    .form-group(title="Reduce line complexity based on zoom level.")
+      label(for="simplify") Simplify Lines
+      input#simplify(type="checkbox", placeholder="false")
+      input#simplify_tolerance(placeholder="0.5", title="Maximum change in pixels at the current zoom level")
+      span#simple-lines-shown
+    .form-group(title="When simplification is turned on, update it when zooming the map.")
+      label(for="resimplify") Zoom Resimplifies
+      input#resimplify(type="checkbox", placeholder="false")
+      input#resimplify_delay(placeholder="500", title="Delay in milliseconds before resimplifying lines after a change in zoom level")
     .form-group
       .shortlabel Presets
       button.preset(strokeColor='{"residential":"blue","service":"green","other":"black"}', strokeWidth='{"residential":4,"service":1,"other":8}', lineCap='round', showmap='true', title='Properties based on road category') Categories

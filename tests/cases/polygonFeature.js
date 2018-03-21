@@ -34,9 +34,12 @@ describe('geo.polygonFeature', function () {
       outer:
         [{x: 50, y: 8}, {x: 70, y: 8}, {x: 70, y: 12}, {x: 50, y: 12}],
       inner: [
-        [{x: 58, y: 10}, {x: 60, y: 15}, {x: 62, y: 10}, {x: 60, y: 5}]
+        [{x: 58, y: 10}, {x: 60, y: 15}, {x: 62, y: 10}, {x: 60, y: 5}],
+        []  // degenerate hole should be ignored
       ],
       uniformPolygon: true
+    }, {
+      outer: []  // degenerate polygon should be ignored
     }
   ];
   var stylesVisited = [];
@@ -180,6 +183,65 @@ describe('geo.polygonFeature', function () {
         polygon.style({stroke: true, strokeWidth: 20});
         pt = polygon.pointSearch({x: 5, y: 2.499});
         expect(pt.index).toEqual([0]);
+        restoreVGLRenderer();
+      });
+    });
+
+    describe('rdpSimplifyData', function () {
+      function countPolygons(data) {
+        var counts = {
+          polygons: data.length,
+          holes: 0,
+          vertices: 0
+        };
+        data.forEach(function (poly) {
+          if (poly.outer) {
+            counts.vertices += poly.outer.length;
+          } else {
+            counts.vertices += poly.length;
+          }
+          if (poly.inner) {
+            counts.holes += poly.inner.length;
+            poly.inner.forEach(function (hole) {
+              counts.vertices += hole.length;
+            });
+          }
+        });
+        return counts;
+      }
+
+      it('basic usage', function () {
+        mockVGLRenderer();
+        var map, layer, polygon, counts;
+
+        map = createMap();
+        layer = map.createLayer('feature', {renderer: 'vgl'});
+        polygon = geo.polygonFeature({layer: layer});
+        polygon._init();
+        polygon.data(testPolygons);
+        counts = countPolygons(polygon.data().map(polygon.style.get('polygon')));
+        expect(counts).toEqual({polygons: 5, holes: 4, vertices: 27});
+        polygon.rdpSimplifyData(testPolygons);
+        counts = countPolygons(polygon.data().map(polygon.style.get('polygon')));
+        expect(counts).toEqual({polygons: 5, holes: 3, vertices: 27});
+
+        // use pixel space for ease of picking tolerance values in tests
+        map.gcs('+proj=longlat +axis=enu');
+        map.ingcs('+proj=longlat +axis=esu');
+        polygon.rdpSimplifyData(testPolygons, 10);
+        counts = countPolygons(polygon.data().map(polygon.style.get('polygon')));
+        expect(counts).toEqual({polygons: 5, holes: 3, vertices: 24});
+        polygon.rdpSimplifyData(testPolygons, 20);
+        counts = countPolygons(polygon.data().map(polygon.style.get('polygon')));
+        expect(counts).toEqual({polygons: 5, holes: 1, vertices: 8});
+        polygon.rdpSimplifyData(testPolygons, 50);
+        counts = countPolygons(polygon.data().map(polygon.style.get('polygon')));
+        expect(counts).toEqual({polygons: 5, holes: 0, vertices: 0});
+        polygon.rdpSimplifyData(testPolygons, 2, function (d) {
+          return {x: d.x * 0.2, y: d.y * 0.2};
+        });
+        counts = countPolygons(polygon.data().map(polygon.style.get('polygon')));
+        expect(counts).toEqual({polygons: 5, holes: 3, vertices: 24});
         restoreVGLRenderer();
       });
     });
