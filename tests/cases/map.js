@@ -830,7 +830,24 @@ describe('geo.core.map', function () {
       } else {
         done();
       }
-    });
+    }, 10000);
+    it('layer css background', function (done) {
+      // this test won't work in PhantomJS.
+      if (!isPhantomJS()) {
+        geo.jQuery('head').append('<link rel="stylesheet" href="/testdata/test.css" type="text/css"/>');
+        var layer3 = m.createLayer('ui');
+        layer3.node().addClass('image-background');
+        layer3.opacity(0.5);
+        m.screenshot().then(function (result) {
+          expect(result).not.toEqual(ss.basic);
+          expect(result).not.toEqual(ss.nobackground);
+          m.deleteLayer(layer3);
+          done();
+        });
+      } else {
+        done();
+      }
+    }, 10000);
     it('layers in a different order', function (done) {
       m.screenshot([layer2, layer1]).then(function (result) {
         // the order doesn't matter

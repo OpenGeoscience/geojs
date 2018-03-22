@@ -1053,18 +1053,27 @@ var util = module.exports = {
    *    dereferencing is complete.
    * @param {string} [styleKey] If unset, styleElem is a header element.  If
    *    set, styleElem is a DOM element and the named style will be updated.
+   * @param {string} [baseUrl] If present, this is the base for relative urls.
    * @memberof geo.util
    */
-  dereferenceCssUrls: function (css, styleElem, styleDefer, styleKey) {
+  dereferenceCssUrls: function (css, styleElem, styleDefer, styleKey, baseUrl) {
     var deferList = [],
         results = [];
 
+    if (baseUrl) {
+      var match = /(^[^?#]*)\/[^?#/]*([?#]|$)/g.exec(baseUrl);
+      baseUrl = match && match[1] ? match[1] + '/' : null;
+    }
     css.replace(util.dereferenceCssUrlsRegex, function (match, url) {
       var idx = deferList.length,
           defer = $.Deferred(),
           xhr = new XMLHttpRequest();
       deferList.push(defer);
       results.push('');
+
+      if (/^[^/:][^:]*(\/|$)/g.exec(url) && baseUrl) {
+        url = baseUrl + url;
+      }
       xhr.open('GET', url, true);
       xhr.responseType = 'arraybuffer';
       xhr.onload = function () {
@@ -1179,8 +1188,9 @@ var util = module.exports = {
         var css = $(this).text();
         util.dereferenceCssUrls(css, styleElem, styleDefer);
       } else {
-        $.get($(this).attr('href')).done(function (css) {
-          util.dereferenceCssUrls(css, styleElem, styleDefer);
+        var href = $(this).attr('href');
+        $.get(href).done(function (css) {
+          util.dereferenceCssUrls(css, styleElem, styleDefer, undefined, href);
         });
       }
       deferList.push(styleDefer);
