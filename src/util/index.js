@@ -1,4 +1,5 @@
 var $ = require('jquery');
+var proj4 = require('proj4');
 
 var throttle = require('./throttle');
 var mockVGL = require('./mockVGL');
@@ -1320,7 +1321,7 @@ var util = module.exports = {
    * Radius of the earth in meters, from the equatorial radius of SRID 4326.
    * @memberof geo.util
    */
-  radiusEarth: 6378137,
+  radiusEarth: proj4.WGS84.a,
 
   /**
    * A regular expression string that will parse a number (integer or floating
