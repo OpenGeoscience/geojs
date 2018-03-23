@@ -6,6 +6,7 @@ describe('geo.core.map', function () {
   var $ = require('jquery');
   var geo = require('../test-utils').geo;
   var createMap = require('../test-utils').createMap;
+  var isPhantomJS = require('../test-utils').isPhantomJS;
   var closeToEqual = require('../test-utils').closeToEqual;
   var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
   var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
@@ -763,7 +764,7 @@ describe('geo.core.map', function () {
         done();
       });
     });
-    it('jpegi via single parameter', function (done) {
+    it('jpeg via single parameter', function (done) {
       m.screenshot({type: 'image/jpeg'}).then(function (result) {
         expect(result).toEqual(ss.jpeg);
         done();
@@ -815,6 +816,38 @@ describe('geo.core.map', function () {
         done();
       });
     });
+    it('layer background', function (done) {
+      // this test won't work in PhantomJS.
+      if (!isPhantomJS()) {
+        var layer3 = m.createLayer('ui');
+        layer3.node().css('background-image', 'url(/data/tilefancy.png)');
+        m.screenshot().then(function (result) {
+          expect(result).not.toEqual(ss.basic);
+          expect(result).not.toEqual(ss.nobackground);
+          m.deleteLayer(layer3);
+          done();
+        });
+      } else {
+        done();
+      }
+    }, 10000);
+    it('layer css background', function (done) {
+      // this test won't work in PhantomJS.
+      if (!isPhantomJS()) {
+        geo.jQuery('head').append('<link rel="stylesheet" href="/testdata/test.css" type="text/css"/>');
+        var layer3 = m.createLayer('ui');
+        layer3.node().addClass('image-background');
+        layer3.opacity(0.5);
+        m.screenshot().then(function (result) {
+          expect(result).not.toEqual(ss.basic);
+          expect(result).not.toEqual(ss.nobackground);
+          m.deleteLayer(layer3);
+          done();
+        });
+      } else {
+        done();
+      }
+    }, 10000);
     it('layers in a different order', function (done) {
       m.screenshot([layer2, layer1]).then(function (result) {
         // the order doesn't matter

@@ -1688,7 +1688,7 @@ var map = function (arg) {
           drawLayerImageToContext(context, opacity, canvasElem, canvasElem[0]);
         });
       });
-      if (layer.node().children().not('canvas').length) {
+      if (layer.node().children().not('canvas').length || !layer.node().children().length) {
         defer = defer.then(function () {
           return util.htmlToImage(layer.node(), 1).done(function (img) {
             drawLayerImageToContext(context, 1, $([]), img);
