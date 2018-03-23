@@ -14224,6 +14224,133 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return coords;
 	};
 
+	/**
+	 * Compute the distance on the surface on a sphere.  The sphere is the major
+	 * radius of a specified ellipsoid.  Altitude is ignored.
+	 *
+	 * @param {geo.geoPosition} pt1 The first point.
+	 * @param {geo.geoPosition} pt2 The second point.
+	 * @param {string|geo.transform} [gcs] `undefined` to use the same gcs as the
+	 *    ellipsoid, otherwise the gcs of the points.
+	 * @param {string|geo.transform} [baseGcs='EPSG:4326'] the gcs of the
+	 *    ellipsoid.
+	 * @param {object} [ellipsoid=proj4.WGS84] An object with at least `a` and one
+	 *    of `b`, `f`, or `rf` (1 / `f`) -- this works with  proj4 ellipsoid
+	 *    definitions.
+	 * @param {number} [maxIterations=100] Maximum number of iterations to use
+	 *    to test convergence.
+	 * @returns {number} The distance in meters (or whatever units the ellipsoid
+	 *    was specified in.
+	 */
+	transform.sphericalDistance = function (pt1, pt2, gcs, baseGcs, ellipsoid) {
+	  baseGcs = baseGcs || 'EPSG:4326';
+	  ellipsoid = ellipsoid || proj4.WGS84;
+	  gcs = gcs || baseGcs;
+	  if (gcs !== baseGcs) {
+	    var pts = transform.transformCoordinates(gcs, baseGcs, [pt1, pt2]);
+	    pt1 = pts[0];
+	    pt2 = pts[1];
+	  }
+	  // baseGcs must be in degrees or this will be wrong
+	  var phi1 = pt1.y * Math.PI / 180,
+	      phi2 = pt2.y * Math.PI / 180,
+	      lambda = (pt2.x - pt1.x) * Math.PI / 180,
+	      sinphi1 = Math.sin(phi1), cosphi1 = Math.cos(phi1),
+	      sinphi2 = Math.sin(phi2), cosphi2 = Math.cos(phi2);
+	  var sigma = Math.atan2(
+	    Math.pow(
+	      Math.pow(cosphi2 * Math.sin(lambda), 2) +
+	      Math.pow(cosphi1 * sinphi2 - sinphi1 * cosphi2 * Math.cos(lambda), 2), 0.5),
+	    sinphi1 * sinphi2 + cosphi1 * cosphi2 * Math.cos(lambda)
+	  );
+	  return ellipsoid.a * sigma;
+	};
+
+	/**
+	 * Compute the Vincenty distance on the surface on an ellipsoid.  Altitude is
+	 * ignored.
+	 *
+	 * @param {geo.geoPosition} pt1 The first point.
+	 * @param {geo.geoPosition} pt2 The second point.
+	 * @param {string|geo.transform} [gcs] `undefined` to use the same gcs as the
+	 *    ellipsoid, otherwise the gcs of the points.
+	 * @param {string|geo.transform} [baseGcs='EPSG:4326'] the gcs of the
+	 *    ellipsoid.
+	 * @param {object} [ellipsoid=proj4.WGS84] An object with at least `a` and one
+	 *    of `b`, `f`, or `rf` (1 / `f`) -- this works with  proj4 ellipsoid
+	 *    definitions.
+	 * @param {number} [maxIterations=100] Maximum number of iterations to use
+	 *    to test convergence.
+	 * @returns {object} An object with `distance` in meters (or whatever units the
+	 *    ellipsoid was specified in), `alpha1` and `alpha2`, the azimuths at the
+	 *    two points in radians.  The result may be `undefined` if the formula
+	 *    fails to converge, which can happen near antipodal points.
+	 */
+	transform.vincentyDistance = function (pt1, pt2, gcs, baseGcs, ellipsoid, maxIterations) {
+	  baseGcs = baseGcs || 'EPSG:4326';
+	  ellipsoid = ellipsoid || proj4.WGS84;
+	  maxIterations = maxIterations || 100;
+	  gcs = gcs || baseGcs;
+	  if (gcs !== baseGcs) {
+	    var pts = transform.transformCoordinates(gcs, baseGcs, [pt1, pt2]);
+	    pt1 = pts[0];
+	    pt2 = pts[1];
+	  }
+	  var a = ellipsoid.a,
+	      b = ellipsoid.b || ellipsoid.a * (1.0 - (ellipsoid.f || 1.0 / ellipsoid.rf)),
+	      f = ellipsoid.f || (ellipsoid.rf ? 1.0 / ellipsoid.rf : 1.0 - b / a),
+	      // baseGcs must be in degrees or this will be wrong
+	      phi1 = pt1.y * Math.PI / 180,
+	      phi2 = pt2.y * Math.PI / 180,
+	      L = (((pt2.x - pt1.x) % 360 + 360) % 360) * Math.PI / 180,
+	      U1 = Math.atan((1 - f) * Math.tan(phi1)),  // reduced latitude
+	      U2 = Math.atan((1 - f) * Math.tan(phi2)),
+	      sinU1 = Math.sin(U1), cosU1 = Math.cos(U1),
+	      sinU2 = Math.sin(U2), cosU2 = Math.cos(U2),
+	      lambda = L, lastLambda = L + Math.PI * 2,
+	      sinSigma, cosSigma, sigma, sinAlpha, cos2alpha, cos2sigmasubm, C,
+	      u2, A, B, deltaSigma, iter;
+	  if (phi1 === phi2 && !L) {
+	    return {
+	      distance: 0,
+	      alpha1: 0,
+	      alpha2: 0
+	    };
+	  }
+	  for (iter = maxIterations; iter > 0 && Math.abs(lambda - lastLambda) > 1e-12; iter -= 1) {
+	    sinSigma = Math.pow(
+	        Math.pow(cosU2 * Math.sin(lambda), 2) +
+	        Math.pow(cosU1 * sinU2 - sinU1 * cosU2 * Math.cos(lambda), 2), 0.5);
+	    cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * Math.cos(lambda);
+	    sigma = Math.atan2(sinSigma, cosSigma);
+	    sinAlpha = cosU1 * cosU2 * Math.sin(lambda) / sinSigma;
+	    cos2alpha = 1 - Math.pow(sinAlpha, 2);
+	    // cos2alpha is zero only when phi1 and phi2 are nearly zero.  In this
+	    // case, sinU1 and sinU2 are nearly zero and the the second term can be
+	    // dropped
+	    cos2sigmasubm = cosSigma - (cos2alpha ? 2 * sinU1 * sinU2 / cos2alpha : 0);
+	    C = f / 16 * cos2alpha * (4 + f * (4 - 3 * cos2alpha));
+	    lastLambda = lambda;
+	    lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma * (
+	        cos2sigmasubm + C * cosSigma * (-1 + 2 * Math.pow(cos2sigmasubm, 2))));
+	  }
+	  if (!iter) { // failure to converge
+	    return;
+	  }
+	  u2 = cos2alpha * (a * a - b * b) / (b * b);
+	  A = 1 + u2 / 16384 * (4096 + u2 * (-768 + u2 * (320 - 175 * u2)));
+	  B = u2 / 1024 * (256 + u2 * (-128 + u2 * (74 - 47 * u2)));
+	  deltaSigma = B * sinSigma * (cos2sigmasubm + B / 4 * (
+	    cosSigma * (-1 + 2 * Math.pow(cos2sigmasubm, 2)) -
+	    B / 6 * cos2sigmasubm * (-3 + 4 * sinSigma * sinSigma) *
+	    (-3 + 4 * Math.pow(cos2sigmasubm, 2))));
+	  return {
+	    distance: b * A * (sigma - deltaSigma),
+	    alpha1: Math.atan2(cosU2 * Math.sin(lambda), cosU1 * sinU2 - sinU1 * cosU2 * Math.cos(lambda)),
+	    alpha2: Math.atan2(cosU1 * Math.sin(lambda), -sinU1 * cosU2 + cosU1 * sinU2 * Math.cos(lambda))
+	  };
+	};
+
 	module.exports = transform;
 
 
@@ -19882,6 +20009,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
+	var proj4 = __webpack_require__(12);
 
 	var throttle = __webpack_require__(84);
 	var mockVGL = __webpack_require__(85);
@@ -20665,6 +20793,202 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
+	   * Get the square of the Euclidean 2D distance between two points.
+	   *
+	   * @param {geo.geoPosition} pt1 The first point.
+	   * @param {geo.geoPosition} pt2 The second point.
+	   * @returns {number} The distance squared.
+	   */
+	  distance2dSquared: function (pt1, pt2) {
+	    var dx = pt1.x - pt2.x,
+	        dy = pt1.y - pt2.y;
+	    return dx * dx + dy * dy;
+	  },
+
+	  /**
+	   * Get the square of the Euclidean 2D distance between a point and a line
+	   * segment.
+	   *
+	   * @param {geo.geoPosition} pt The point.
+	   * @param {geo.geoPosition} line1 One end of the line.
+	   * @param {geo.geoPosition} line2 The other end of the line.
+	   * @returns {number} The distance squared.
+	   */
+	  distance2dToLineSquared: function (pt, line1, line2) {
+	    var dx = line2.x - line1.x,
+	        dy = line2.y - line1.y,
+	        // we could get the line length from the distance2dSquared function,
+	        // but since we need dx and dy in this function, it is faster to just
+	        // compute it here.
+	        lengthSquared = dx * dx + dy * dy,
+	        t = 0;
+	    if (lengthSquared) {
+	      t = ((pt.x - line1.x) * dx + (pt.y - line1.y) * dy) / lengthSquared;
+	      t = Math.max(0, Math.min(1, t));
+	    }
+	    return util.distance2dSquared(pt, {
+	      x: line1.x + t * dx,
+	      y: line1.y + t * dy
+	    });
+	  },
+
+	  /**
+	   * Get twice the signed area of a 2d triangle.
+	   *
+	   * @param {geo.geoPosition} pt1 A vertex.
+	   * @param {geo.geoPosition} pt2 A vertex.
+	   * @param {geo.geoPosition} pt3 A vertex.
+	   * @returns {number} Twice the signed area.
+	   */
+	  triangleTwiceSignedArea2d: function (pt1, pt2, pt3) {
+	    return (pt2.y - pt1.y) * (pt3.x - pt2.x) - (pt2.x - pt1.x) * (pt3.y - pt2.y);
+	  },
+
+	  /**
+	   * Determine if two line segments cross.  They are not considered crossing if
+	   * they share a vertex.  They are crossing if either of one segment's
+	   * vertices are colinear with the other segment.
+	   *
+	   * @param {geo.geoPosition} seg1pt1 One endpoint of the first segment.
+	   * @param {geo.geoPosition} seg1pt2 The other endpoint of the first segment.
+	   * @param {geo.geoPosition} seg2pt1 One endpoint of the second segment.
+	   * @param {geo.geoPosition} seg2pt2 The other endpoint of the second segment.
+	   * @returns {boolean} True if the segments cross.
+	   */
+	  crossedLineSegments2d: function (seg1pt1, seg1pt2, seg2pt1, seg2pt2) {
+	    /* If the segments don't have any overlap in x or y, they can't cross */
+	    if ((seg1pt1.x > seg2pt1.x && seg1pt1.x > seg2pt2.x &&
+	         seg1pt2.x > seg2pt1.x && seg1pt2.x > seg2pt2.x) ||
+	        (seg1pt1.x < seg2pt1.x && seg1pt1.x < seg2pt2.x &&
+	         seg1pt2.x < seg2pt1.x && seg1pt2.x < seg2pt2.x) ||
+	        (seg1pt1.y > seg2pt1.y && seg1pt1.y > seg2pt2.y &&
+	         seg1pt2.y > seg2pt1.y && seg1pt2.y > seg2pt2.y) ||
+	        (seg1pt1.y < seg2pt1.y && seg1pt1.y < seg2pt2.y &&
+	         seg1pt2.y < seg2pt1.y && seg1pt2.y < seg2pt2.y)) {
+	      return false;
+	    }
+	    /* If any vertex is in common, it is not considered crossing */
+	    if ((seg1pt1.x === seg2pt1.x && seg1pt1.y === seg2pt1.y) ||
+	        (seg1pt1.x === seg2pt2.x && seg1pt1.y === seg2pt2.y) ||
+	        (seg1pt2.x === seg2pt1.x && seg1pt2.y === seg2pt1.y) ||
+	        (seg1pt2.x === seg2pt2.x && seg1pt2.y === seg2pt2.y)) {
+	      return false;
+	    }
+	    /* If the lines cross, the signed area of the triangles formed between one
+	     * segment and the other's vertices will have different signs.  By using
+	     * > 0, colinear points are crossing. */
+	    if (util.triangleTwiceSignedArea2d(seg1pt1, seg1pt2, seg2pt1) *
+	        util.triangleTwiceSignedArea2d(seg1pt1, seg1pt2, seg2pt2) > 0 ||
+	        util.triangleTwiceSignedArea2d(seg2pt1, seg2pt2, seg1pt1) *
+	        util.triangleTwiceSignedArea2d(seg2pt1, seg2pt2, seg1pt2) > 0) {
+	      return false;
+	    }
+	    return true;
+	  },
+
+	  /**
+	   * Check if a line segment crosses any segment from a list of lines.  The
+	   * segment is considered crossing it it touches a line segment, unless that
+	   * line segment shares a vertex with the segment.
+	   *
+	   * @param {geo.geoPosition} pt1 One end of the line segment.
+	   * @param {geo.geoPosition} pt2 The other end of the line segment.
+	   * @param {Array.<geo.geoPosition[]>} lineList A list of open lines.  Each
+	   *    line is a list of vertices.  The line segment is checked against each
+	   *    segment of each line in this list.
+	   * @returns {boolean} True if the segment crosses any line segment.
+	   */
+	  segmentCrossesLineList2d: function (pt1, pt2, lineList) {
+	    var result = lineList.some(function (line) {
+	      return line.some(function (linePt, idx) {
+	        if (idx) {
+	          return util.crossedLineSegments2d(pt1, pt2, line[idx - 1], linePt);
+	        }
+	      });
+	    });
+	    return result;
+	  },
+
+	  /**
+	   * Remove vertices from a chain of 2d line segments so that it is simpler but
+	   * is close to the original overall shape within some tolerance limit.  This
+	   * is the Ramer–Douglas–Peucker algorithm.  The first and last points will
+	   * always remain the same for open lines.  For closed lines (polygons), this
+	   * picks an point that likely to be significant and then reduces it, possibly
+	   * returning a single point.
+	   *
+	   * @param {geo.geoPosition[]} pts A list of points forming the line or
+	   *    polygon.
+	   * @param {number} tolerance The maximum variation allowed.  A value of zero
+	   *    will only remove perfectly colinear points.
+	   * @param {boolean} [closed] If true, this is a polygon rather than an open
+	   *    line.  In this case, it is possible to get back a single point.
+	   * @param {Array.<geo.geoPosition[]>?} [noCrossLines] A falsy value to allow
+	   *    the resultant line to cross itself, an empty array (`[]`) to prevent
+	   *    self-crossing, or an array of line segments to prevent self-crossing
+	   *    and disallow crossing any line segment in the list.  Each entry in the
+	   *    list is an open line (with one segment less than the number of
+	   *    vertices).  If self-crossing is prohibited, the resultant point set
+	   *    might not be as simplified as it could be.
+	   * @returns {geo.geoPosition[]} The new point set.
+	   */
+	  rdpLineSimplify: function (pts, tolerance, closed, noCrossLines) {
+	    if (pts.length <= 2 || tolerance < 0) {
+	      return pts;
+	    }
+	    var i, distSq, maxDistSq = -1, index, toleranceSq = tolerance * tolerance;
+	    if (closed) {
+	      /* If this is closed, find the point that is furthest from the first
+	       * point.  ideally, one would find a point that is guaranteed to be on
+	       * the diameter of the convex hull, but doing so is an O(n^2) operation,
+	       * whereas this is sufficient and only O(n).  The chosen point is
+	       * duplicated at the start and end of the chain. */
+	      for (i = 1; i < pts.length; i += 1) {
+	        distSq = util.distance2dSquared(pts[0], pts[i]);
+	        if (distSq > maxDistSq) {
+	          maxDistSq = distSq;
+	          index = i;
+	        }
+	      }
+	      /* Points could be on any side of the start point, so if all points are
+	       * within 1/2 of the tolerance of the start point, we know all points are
+	       * within the tolerance of each other and therefore this polygon or
+	       * closed line can be simplified to a point. */
+	      if (maxDistSq * 4 <= toleranceSq) {
+	        return pts.slice(index, index + 1);
+	      }
+	      pts = pts.slice(index).concat(pts.slice(0, index + 1));
+	      pts = util.rdpLineSimplify(pts, tolerance, false, noCrossLines);
+	      /* Removed the duplicated first point */
+	      pts.splice(pts.length - 1);
+	      return pts;
+	    }
+	    for (i = 1; i < pts.length - 1; i += 1) {
+	      distSq = util.distance2dToLineSquared(pts[i], pts[0], pts[pts.length - 1]);
+	      if (distSq > maxDistSq) {
+	        maxDistSq = distSq;
+	        index = i;
+	      }
+	    }
+	    /* We can collapse this to a single line if it is within the tolerance and
+	     * we are either allowed to self-cross or it does not self-cross the rest
+	     * of the line. */
+	    if (maxDistSq <= toleranceSq && (!noCrossLines || !util.segmentCrossesLineList2d(
+	         pts[0], pts[pts.length - 1], noCrossLines))) {
+	      return [pts[0], pts[pts.length - 1]];
+	    }
+	    var left = pts.slice(0, index + 1),
+	        right = pts.slice(index),
+	        leftSide = util.rdpLineSimplify(
+	            left, tolerance, false,
+	            noCrossLines ? noCrossLines.concat([right]) : null),
+	        rightSide = util.rdpLineSimplify(
+	            right, tolerance, false,
+	            noCrossLines ? noCrossLines.concat([left]) : null);
+	    return leftSide.slice(0, leftSide.length - 1).concat(rightSide);
+	  },
+
+	  /**
 	   * Escape any character in a string that has a code point >= 127.
 	   *
 	   * @param {string} text The string to escape.
@@ -20725,6 +21049,76 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return deferList;
 	  },
 
+	  dereferenceCssUrlsRegex: /url\(["']?(http[^)"']+|[^:)"']+)["']?\)/g,
+
+	  /**
+	   * Check css text.  Any url(http[s]...) references are dereferenced and
+	   * stored as local base64 urls.
+	   *
+	   * @param {string} css The css to parse for urls.
+	   * @param {jQuery.selector|DOMElement} styleElem The element that receivs
+	   *    the css text after dereferencing or the DOM element that has style
+	   *    that will be updated.
+	   * @param {jQuery.Deferred} styleDefer A Deferred to resolve once
+	   *    dereferencing is complete.
+	   * @param {string} [styleKey] If unset, styleElem is a header element.  If
+	   *    set, styleElem is a DOM element and the named style will be updated.
+	   * @param {string} [baseUrl] If present, this is the base for relative urls.
+	   * @memberof geo.util
+	   */
+	  dereferenceCssUrls: function (css, styleElem, styleDefer, styleKey, baseUrl) {
+	    var deferList = [],
+	        results = [];
+
+	    if (baseUrl) {
+	      var match = /(^[^?#]*)\/[^?#/]*([?#]|$)/g.exec(baseUrl);
+	      baseUrl = match && match[1] ? match[1] + '/' : null;
+	    }
+	    css.replace(util.dereferenceCssUrlsRegex, function (match, url) {
+	      var idx = deferList.length,
+	          defer = $.Deferred(),
+	          xhr = new XMLHttpRequest();
+	      deferList.push(defer);
+	      results.push('');
+
+	      if (/^[^/:][^:]*(\/|$)/g.exec(url) && baseUrl) {
+	        url = baseUrl + url;
+	      }
+	      xhr.open('GET', url, true);
+	      xhr.responseType = 'arraybuffer';
+	      xhr.onload = function () {
+	        if (this.status === 200) {
+	          var response = new Uint8Array(this.response),
+	              data = new Array(response.length),
+	              i;
+	          for (i = 0; i < response.length; i += 1) {
+	            data[i] = String.fromCharCode(response[i]);
+	          }
+	          data = data.join('');
+	          results[idx] = 'url(data:' + xhr.getResponseHeader('content-type') + ';base64,' + btoa(data) + ')';
+	          defer.resolve();
+	        }
+	      };
+	      // if this fails, resolve anyway
+	      xhr.onerror = defer.resolve;
+	      xhr.send();
+	      return match;
+	    });
+	    $.when.apply($, deferList).then(function () {
+	      var idx = 0;
+	      css = css.replace(util.dereferenceCssUrlsRegex, function (match, url) {
+	        idx += 1;
+	        return results[idx - 1];
+	      });
+	      if (styleKey === undefined) {
+	        styleElem.text(css);
+	      } else {
+	        styleElem.style[styleKey] = css;
+	      }
+	      styleDefer.resolve();
+	    });
+	  },
+
 	  /**
 	   * Convert an html element to an image.  This attempts to localize any
 	   * images within the element.  If there are other external references, the
@@ -20740,7 +21134,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @memberof geo.util
 	   */
 	  htmlToImage: function (elem, parents) {
-	    var defer = $.Deferred(), container;
+	    var defer = $.Deferred(), container, deferList = [];
 
 	    var parent = $(elem);
 	    elem = $(elem).clone();
@@ -20765,6 +21159,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    // canvas elements won't render properly here.
 	    $('canvas', elem).remove();
+	    /* Walk through all of the children of elem and check if any explicitly set
+	     * css property needs to be dereferenced. */
+	    $('*', elem).addBack().each(function () {
+	      var style = this.style;
+	      for (var idx = 0; idx < style.length; idx += 1) {
+	        var key = this.style[idx];
+	        if (this.style[key].match(util.dereferenceCssUrlsRegex)) {
+	          var styleDefer = $.Deferred();
+	          util.dereferenceCssUrls(this.style[key], this, styleDefer, key);
+	          deferList.push(styleDefer);
+	        }
+	      }
+	    });
 	    container = $('<div xmlns="http://www.w3.org/1999/xhtml">');
 	    container.css({
 	      width: parent.width() + 'px',
@@ -20782,21 +21189,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      margin: 0
 	    });
 	    body.append(elem);
-	    var deferList = util.dereferenceElements(elem);
+	    deferList = deferList.concat(util.dereferenceElements(elem));
 	    /* Get styles and links in order, as order matters in css */
 	    $('style,link[rel="stylesheet"]').each(function () {
-	      var styleElem;
+	      var styleElem = $('<style type="text/css">'),
+	          styleDefer = $.Deferred();
 	      if ($(this).is('style')) {
-	        styleElem = $(this).clone();
+	        var css = $(this).text();
+	        util.dereferenceCssUrls(css, styleElem, styleDefer);
 	      } else {
-	        var fetch = $.Deferred();
-	        styleElem = $('<style type="text/css">');
-	        $.get($(this).attr('href')).done(function (css) {
-	          styleElem.text(css);
-	          fetch.resolve();
+	        var href = $(this).attr('href');
+	        $.get(href).done(function (css) {
+	          util.dereferenceCssUrls(css, styleElem, styleDefer, undefined, href);
 	        });
-	        deferList.push(fetch);
 	      }
+	      deferList.push(styleDefer);
 	      $('head', container).append(styleElem);
 	    });
 
@@ -21007,7 +21414,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Radius of the earth in meters, from the equatorial radius of SRID 4326.
 	   * @memberof geo.util
 	   */
-	  radiusEarth: 6378137,
+	  radiusEarth: proj4.WGS84.a,
 
 	  /**
 	   * A regular expression string that will parse a number (integer or floating
@@ -39582,6 +39989,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var feature = __webpack_require__(207);
 	var timestamp = __webpack_require__(209);
 	var transform = __webpack_require__(11);
+	var util = __webpack_require__(83);
 
 	/**
 	 * Line feature specification.
@@ -39779,33 +40187,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        pt = transform.transformCoordinates(map.ingcs(), map.gcs(), p),
 	        i, j, record;
 
-	    // minimum l2 distance squared from
-	    // q -> line(u, v)
-	    function lineDist2(q, u, v) {
-	      var t, vux = v.x - u.x, vuy = v.y - u.y, l2 = vux * vux + vuy * vuy;
-
-	      if (l2 < 1) {
-	        // u, v are within 1 pixel
-	        return dist2(q, u);
-	      }
-
-	      t = ((q.x - u.x) * vux + (q.y - u.y) * vuy) / l2;
-	      if (t < 0) { return dist2(q, u); }
-	      if (t > 1) { return dist2(q, v); }
-	      return dist2(q, {x: u.x + t * vux, y: u.y + t * vuy});
-	    }
-
-	    // l2 distance squared from u to v
-	    function dist2(u, v) {
-	      var dx = u.x - v.x,
-	          dy = u.y - v.y;
-	      return dx * dx + dy * dy;
-	    }
-
 	    for (i = 0; i < m_pointSearchInfo.length; i += 1) {
 	      record = m_pointSearchInfo[i];
 	      for (j = 0; j < record.length; j += 1) {
-	        if (lineDist2(pt, record[j].u, record[j].v) <= record[j].r2 * scale2) {
+	        if (util.distance2dToLineSquared(pt, record[j].u, record[j].v) <= record[j].r2 * scale2) {
 	          found.push(data[i]);
 	          indices.push(i);
 	          break;
@@ -39858,6 +40243,62 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    });
 	    return idx;
+	  };
+
+	  /**
+	   * Take a set of data, reduce the number of vertices per linen using the
+	   * Ramer–Douglas–Peucker algorithm, and use the result as the new data.
+	   * This changes the instance's data, the position accessor, and the line
+	   * accessor.
+	   *
+	   * @param {array} data A new data array.
+	   * @param {number} [tolerance] The maximum variation allowed in map.gcs
+	   *    units.  A value of zero will only remove perfectly colinear points.  If
+	   *    not specified, this is set to a half display pixel at the map's current
+	   *    zoom level.
+	   * @param {function} [posFunc=this.style.get('position')] The function to
+	   *    get the position of each vertex.
+	   * @param {function} [lineFunc=this.style.get('line')] The function to get
+	   *    each line.
+	   * @returns {this}
+	   */
+	  this.rdpSimplifyData = function (data, tolerance, posFunc, lineFunc) {
+	    data = data || m_this.data();
+	    posFunc = posFunc || m_this.style.get('position');
+	    lineFunc = lineFunc || m_this.style.get('line');
+	    var map = m_this.layer().map(),
+	        mapgcs = map.gcs(),
+	        featuregcs = m_this.gcs(),
+	        closedFunc = m_this.style.get('closed');
+	    if (tolerance === undefined) {
+	      tolerance = map.unitsPerPixel(map.zoom()) * 0.5;
+	    }
+
+	    /* transform the coordinates to the map gcs */
+	    data = data.map(function (d, idx) {
+	      var lineItem = lineFunc(d, idx),
+	          pts = transform.transformCoordinates(featuregcs, mapgcs, lineItem.map(function (ld, lidx) {
+	            return posFunc(ld, lidx, d, idx);
+	          })),
+	          elem = util.rdpLineSimplify(pts, tolerance, closedFunc(d, idx), []);
+	      if (elem.length < 2 || (elem.length === 2 && util.distance2dSquared(elem[0], elem[1]) < tolerance * tolerance)) {
+	        elem = [];
+	      }
+	      elem = transform.transformCoordinates(mapgcs, featuregcs, elem);
+	      /* Copy element properties, as they might be used by styles */
+	      for (var key in d) {
+	        if (d.hasOwnProperty(key) && !(Array.isArray(d) && key >= 0 && key < d.length)) {
+	          elem[key] = d[key];
+	        }
+	      }
+	      return elem;
+	    });
+
+	    /* Set the reduced lines as the data and use simple accessors. */
+	    m_this.style('position', function (d) { return d; });
+	    m_this.style('line', function (d) { return d; });
+	    m_this.data(data);
+	    return m_this;
 	  };
 
 	  /**
@@ -43277,24 +43718,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.data = function (arg) {
 	    var ret = s_data(arg);
 	    if (arg !== undefined) {
-	      getCoordinates();
+	      m_coordinates = getCoordinates();
 	      this._checkForStroke();
 	    }
 	    return ret;
 	  };
 
 	  /**
-	   * Get the internal coordinates whenever the data changes.  For now, we do
-	   * the computation in world coordinates, but we will need to work in GCS
-	   * for other projections.  Also compute the extents of the outside of each
-	   * polygon for faster checking if points are in the polygon.
+	   * Get the internal coordinates whenever the data changes.  Also compute the
+	   * extents of the outside of each polygon for faster checking if points are
+	   * in the polygon.
+	   *
 	   * @private
+	   * @param {object[]} [data=this.data()] The data to process.
+	   * @param {function} [posFunc=this.style.get('position')] The function to
+	   *    get the position of each vertex.
+	   * @param {function} [polyFunc=this.style.get('polygon')] The function to
+	   *    get each polygon.
+	   * @returns {object[]} An array of polygon positions.  Each has `outer` and
+	   *    `inner` if it has any coordinates, or is undefined.
 	   */
-	  function getCoordinates() {
-	    var posFunc = m_this.style.get('position'),
-	        polyFunc = m_this.style.get('polygon');
-	    m_coordinates = m_this.data().map(function (d, i) {
-	      var poly = polyFunc(d);
+	  function getCoordinates(data, posFunc, polyFunc) {
+	    data = data || m_this.data();
+	    posFunc = posFunc || m_this.style.get('position');
+	    polyFunc = polyFunc || m_this.style.get('polygon');
+	    var coordinates = data.map(function (d, i) {
+	      var poly = polyFunc(d, i);
 	      if (!poly) {
 	        return;
 	      }
@@ -43329,6 +43778,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        range: range
 	      };
 	    });
+	    return coordinates;
 	  }
 
 	  /**
@@ -43369,7 +43819,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_this.style('polygon', val);
 	      m_this.dataTime().modified();
 	      m_this.modified();
-	      getCoordinates();
+	      m_coordinates = getCoordinates();
 	    }
 	    return m_this;
 	  };
@@ -43389,7 +43839,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_this.style('position', val);
 	      m_this.dataTime().modified();
 	      m_this.modified();
-	      getCoordinates();
+	      m_coordinates = getCoordinates();
 	    }
 	    return m_this;
 	  };
@@ -43577,6 +44027,89 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_lineFeature.modified();
 	    }
 	    return result;
+	  };
+
+	  /**
+	   * Take a set of data, reduce the number of vertices per polygon using the
+	   * Ramer–Douglas–Peucker algorithm, and use the result as the new data.
+	   * This changes the instance's data, the position accessor, and the polygon
+	   * accessor.
+	   *
+	   * @param {array} data A new data array.
+	   * @param {number} [tolerance] The maximum variation allowed in map.gcs
+	   *    units.  A value of zero will only remove perfectly colinear points.  If
+	   *    not specified, this is set to a half display pixel at the map's current
+	   *    zoom level.
+	   * @param {function} [posFunc=this.style.get('position')] The function to
+	   *    get the position of each vertex.
+	   * @param {function} [polyFunc=this.style.get('polygon')] The function to
+	   *    get each polygon.
+	   * @returns {this}
+	   */
+	  this.rdpSimplifyData = function (data, tolerance, posFunc, polyFunc) {
+	    var map = m_this.layer().map(),
+	        mapgcs = map.gcs(),
+	        featuregcs = m_this.gcs(),
+	        coordinates = getCoordinates(data, posFunc, polyFunc);
+	    if (tolerance === undefined) {
+	      tolerance = map.unitsPerPixel(map.zoom()) * 0.5;
+	    }
+
+	    /* transform the coordinates to the map gcs */
+	    coordinates = coordinates.map(function (poly) {
+	      return {
+	        outer: transform.transformCoordinates(featuregcs, mapgcs, poly.outer),
+	        inner: poly.inner.map(function (hole) {
+	          return transform.transformCoordinates(featuregcs, mapgcs, hole);
+	        })
+	      };
+	    });
+	    data = data.map(function (d, idx) {
+	      var poly = coordinates[idx],
+	          elem = {};
+	      /* Copy element properties, as they might be used by styles */
+	      for (var key in d) {
+	        if (d.hasOwnProperty(key) && !(Array.isArray(d) && key >= 0 && key < d.length)) {
+	          elem[key] = d[key];
+	        }
+	      }
+	      if (poly && poly.outer.length >= 3) {
+	        // discard degenerate holes before anything else
+	        elem.inner = poly.inner.filter(function (hole) {
+	          return hole.length >= 3;
+	        });
+	        // simplify the outside of the polygon without letting it cross holes
+	        elem.outer = util.rdpLineSimplify(poly.outer, tolerance, true, elem.inner);
+	        if (elem.outer.length >= 3) {
+	          var allButSelf = elem.inner.slice();
+	          // simplify holes without crossing other holes or the outside
+	          elem.inner.map(function (hole, idx) {
+	            allButSelf[idx] = elem.outer;
+	            var result = util.rdpLineSimplify(hole, tolerance, true, allButSelf);
+	            allButSelf[idx] = result;
+	            return result;
+	          }).filter(function (hole) {
+	            return hole.length >= 3;
+	          });
+	          // transform coordinates back to the feature gcs
+	          elem.outer = transform.transformCoordinates(mapgcs, featuregcs, elem.outer);
+	          elem.inner = elem.inner.map(function (hole) {
+	            return transform.transformCoordinates(mapgcs, featuregcs, hole);
+	          });
+	        } else {
+	          elem.outer = elem.inner = [];
+	        }
+	      } else {
+	        elem.outer = [];
+	      }
+	      return elem;
+	    });
+
+	    /* Set the reduced polgons as the data and use simple accessors. */
+	    m_this.style('position', function (d) { return d; });
+	    m_this.style('polygon', function (d) { return d; });
+	    m_this.data(data);
+	    return m_this;
 	  };
 
 	  /**
@@ -49217,7 +49750,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 224 */
 /***/ (function(module, exports) {
 
-	if(typeof __WEBPACK_EXTERNAL_MODULE_224__ === 'undefined') {var e = new Error("Cannot find module \"undefined\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
+	if(typeof __WEBPACK_EXTERNAL_MODULE_224__ === 'undefined') {var e = new Error("Cannot find module \"hammerjs\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
 	module.exports = __WEBPACK_EXTERNAL_MODULE_224__;
 
 /***/ }),
@@ -49758,7 +50291,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Set the translation, scale, and zoom for the current view.
-	   * @note rotation not yet supported
 	   * @private
 	   */
 	  this._setTransform = function () {
@@ -52477,6 +53009,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} [arg.maxBounds.right=20037508] The right bound.
 	 * @param {number} [arg.maxBounds.bottom=-20037508] The bottom bound.
 	 * @param {number} [arg.maxBounds.top=20037508] The top bound.
+	 * @param {number} [arg.maxBounds.gcs=arg.ingcs] The coordinate system for the
+	 *   bounds.
 	 *
 	 * @param {number} [arg.zoom=4] Initial zoom.
 	 * @param {object?} [arg.center] Initial map center.
@@ -52577,17 +53111,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * [0, width] and [0, height] instead. */
 	  var mcx = ((m_maxBounds.left || 0) + (m_maxBounds.right || 0)) / 2,
 	      mcy = ((m_maxBounds.bottom || 0) + (m_maxBounds.top || 0)) / 2;
-	  m_maxBounds.left = transform.transformCoordinates(m_ingcs, m_gcs, {
+	  m_maxBounds.left = transform.transformCoordinates(m_maxBounds.gcs || m_ingcs, m_gcs, {
 	    x: m_maxBounds.left !== undefined ? m_maxBounds.left : -180, y: mcy
 	  }).x;
-	  m_maxBounds.right = transform.transformCoordinates(m_ingcs, m_gcs, {
+	  m_maxBounds.right = transform.transformCoordinates(m_maxBounds.gcs || m_ingcs, m_gcs, {
 	    x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: mcy
 	  }).x;
 	  m_maxBounds.top = (m_maxBounds.top !== undefined ?
-	    transform.transformCoordinates(m_ingcs, m_gcs, {
+	    transform.transformCoordinates(m_maxBounds.gcs || m_ingcs, m_gcs, {
 	      x: mcx, y: m_maxBounds.top}).y : m_maxBounds.right);
 	  m_maxBounds.bottom = (m_maxBounds.bottom !== undefined ?
-	    transform.transformCoordinates(m_ingcs, m_gcs, {
+	    transform.transformCoordinates(m_maxBounds.gcs || m_ingcs, m_gcs, {
 	      x: mcx, y: m_maxBounds.bottom}).y : m_maxBounds.left);
 	  m_unitsPerPixel = (arg.unitsPerPixel || (
 	    m_maxBounds.right - m_maxBounds.left) / 256);
@@ -54135,7 +54669,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          drawLayerImageToContext(context, opacity, canvasElem, canvasElem[0]);
 	        });
 	      });
-	      if (layer.node().children().not('canvas').length) {
+	      if (layer.node().children().not('canvas').length || !layer.node().children().length) {
 	        defer = defer.then(function () {
 	          return util.htmlToImage(layer.node(), 1).done(function (img) {
 	            drawLayerImageToContext(context, 1, $([]), img);
@@ -54894,7 +55428,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    wrapX: true,
 	    wrapY: false,
-	    url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+	    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 	    attribution: 'Tile data &copy; <a href="http://osm.org/copyright">' +
 	      'OpenStreetMap</a> contributors'
 	  });
@@ -57553,14 +58087,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 249 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	module.exports = ("0.15.1");
+	module.exports = ("0.15.2");
 
 
 /***/ }),
 /* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	module.exports = ("4617718854f3f1956bc8d7e8fe707882903451ff");
+	module.exports = ("baf4b5ef1148b014a10fc5a942ade3a972018b3b");
 
 
 /***/ }),
@@ -60673,6 +61207,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return;
 	        }
 	        outer = polygon.outer || (Array.isArray(polygon) ? polygon : []);
+	        if (outer.length < 3) {
+	          return;
+	        }
 
 	        /* expand to an earcut polygon geometry.  We had been using a map call,
 	         * but using loops is much faster in Chrome (4 versus 33 ms for one
@@ -60689,6 +61226,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (polygon.inner) {
 	          polygon.inner.forEach(function (hole) {
+	            if (hole.length < 3) {
+	              return;
+	            }
 	            original = original.concat(hole);
 	            geometry.holes.push(d3 / 3);
 	            for (i = 0; i < hole.length; i += 1, d3 += 3) {
@@ -64277,13 +64817,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @namespace geo.gui
 	 */
 	module.exports = {
-	  domWidget: __webpack_require__(298),
-	  legendWidget: __webpack_require__(300),
-	  colorLegendWidget: __webpack_require__(302),
-	  sliderWidget: __webpack_require__(305),
-	  svgWidget: __webpack_require__(301),
+	  colorLegendWidget: __webpack_require__(298),
+	  domWidget: __webpack_require__(299),
+	  legendWidget: __webpack_require__(303),
+	  scaleWidget: __webpack_require__(305),
+	  sliderWidget: __webpack_require__(308),
+	  svgWidget: __webpack_require__(304),
 	  uiLayer: __webpack_require__(241),
-	  widget: __webpack_require__(299)
+	  widget: __webpack_require__(300)
 	};
 
 
@@ -64291,690 +64832,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 298 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var widget = __webpack_require__(299);
-	var inherit = __webpack_require__(8);
-	var registerWidget = __webpack_require__(201).registerWidget;
-
-	var domWidget = function (arg) {
-	  'use strict';
-	  if (!(this instanceof domWidget)) {
-	    return new domWidget(arg);
-	  }
-
-	  widget.call(this, arg);
-
-	  var m_this = this,
-	      m_default_canvas = 'div';
-
-	  /**
-	   * Initializes DOM Widget.
-	   * Sets the canvas for the widget, does parent/child relationship management,
-	   * appends it to it's parent and handles any positioning logic.
-	   */
-	  this._init = function () {
-	    if (arg.hasOwnProperty('parent')) {
-	      arg.parent.addChild(m_this);
-	    }
-
-	    m_this._createCanvas();
-	    m_this._appendChild();
-
-	    m_this.canvas().addEventListener('mousedown', function (e) {
-	      e.stopPropagation();
-	    });
-
-	    m_this.reposition();
-	  };
-
-	  /**
-	   * Creates the widget canvas.
-	   * This is just a simple DOM element (based on args.el, or defaults to a div)
-	   */
-	  this._createCanvas = function () {
-	    m_this.canvas(document.createElement(arg.el || m_default_canvas));
-	  };
-
-	  return this;
-	};
-
-	inherit(domWidget, widget);
-
-	registerWidget('dom', 'dom', domWidget);
-	module.exports = domWidget;
-
-
-/***/ }),
-/* 299 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	var inherit = __webpack_require__(8);
-	var sceneObject = __webpack_require__(208);
-
-	/**
-	 * @typedef {object} geo.gui.widget.position
-	 * @property {string|number} [top] The position to the top of the container.
-	 * A string css position or a number. If a number is used, it will be treated as px value.
-	 * @property {string|number} [right] The position to the right of the container.
-	 * Value is used similarly to the top property.
-	 * @property {string|number} [bottom] The position to the bottom of the container.
-	 * Value is used similarly to the top property.
-	 * @property {string|number} [left] The position to the left of the container.
-	 * Value is used similarly to the top property.
-	 * @property {*} [...] Additional css properties that affect position are
-	  allowed.  See the css specification for details.
-	 */
-
-	/**
-	 * Create a new instance of class widget.
-	 *
-	 * @class
-	 * @alias geo.gui.widget
-	 * @param {object} [arg] Options for the widget.
-	 * @param {geo.layer} [arg.layer] Layer associated with the widget.
-	 * @param {geo.gui.widget.position} [arg.position] Location of the widget.
-	 * @param {geo.gui.widget} [arg.parent] Optional parent widget.
-	 * @extends {geo.sceneObject}
-	 * @returns {geo.gui.widget}
-	 */
-	var widget = function (arg) {
-	  'use strict';
-	  if (!(this instanceof widget)) {
-	    return new widget(arg);
-	  }
-	  sceneObject.call(this, arg);
-
-	  var geo_event = __webpack_require__(9);
-	  var createFeature = __webpack_require__(201).createFeature;
-
-	  var m_this = this,
-	      s_exit = this._exit,
-	      m_layer = arg.layer,
-	      m_canvas = null,
-	      m_position = arg.position === undefined ? { left: 0, top: 0 } : arg.position;
-
-	  if (arg.parent !== undefined && !(arg.parent instanceof widget)) {
-	    throw new Error('Parent must be of type geo.gui.widget');
-	  }
-
-	  /**
-	   * Initialize the widget.
-	   *
-	   * @returns {this}
-	   */
-	  this._init = function () {
-	    m_this.modified();
-	    return m_this;
-	  };
-
-	  /**
-	   * Clean up the widget.
-	   *
-	   */
-	  this._exit = function () {
-	    m_this.children().forEach(function (child) {
-	      m_this._deleteFeature(child);
-	    });
-
-	    m_this.layer().geoOff(geo_event.pan, m_this.repositionEvent);
-	    m_this.parentCanvas().removeChild(m_this.canvas());
-	    s_exit();
-	  };
-
-	  /**
-	   * Create a new feature.
-	   *
-	   * @param {string} featureName Name of the feature to create.
-	   * @param {object} arg Options for the new feature.
-	   * @returns {geo.feature} The new feature.
-	   */
-	  this._createFeature = function (featureName, arg) {
-
-	    var newFeature = createFeature(
-	      featureName, m_this, m_this.renderer(), arg);
-
-	    m_this.addChild(newFeature);
-	    m_this.modified();
-	    return newFeature;
-	  };
-
-	  /**
-	   * Delete feature.
-	   *
-	   * @param {geo.feature} feature The feature to delete.
-	   * @returns {this}
-	   */
-	  this._deleteFeature = function (feature) {
-	    m_this.removeChild(feature);
-	    feature._exit();
-	    return m_this;
-	  };
-
-	  /**
-	   * Return the layer associated with this widget.
-	   *
-	   * @returns {geo.layer}
-	   */
-	  this.layer = function () {
-	    return m_layer;
-	  };
-
-	  /**
-	   * Create the canvas this widget will operate on.
-	   */
-	  this._createCanvas = function () {
-	    throw new Error('Must be defined in derived classes');
-	  };
-
-	  /**
-	   * Get/Set the canvas for the widget.
-	   *
-	   * @param {HTMLElement} [val] If specified, set the canvas, otherwise get
-	   *    the canvas.
-	   * @returns {HTMLElement|this} If getting the canvas, return the current
-	   *    value; otherwise, return this widget.
-	   */
-	  this.canvas = function (val) {
-	    if (val === undefined) {
-	      return m_canvas;
-	    }
-	    m_canvas = val;
-	    return m_this;
-	  };
-
-	  /**
-	   * Appends a child to the widget.
-	   * The widget determines how to append itself to a parent, the parent can
-	   * either be another widget, or the UI Layer.
-	   */
-	  this._appendChild = function () {
-	    m_this.parentCanvas().appendChild(m_this.canvas());
-	  };
-
-	  /**
-	   * Get the parent canvas (top level widgets define their layer as their
-	   * parent canvas).
-	   *
-	   * @returns {HTMLElement} The canvas of the widget's parent.
-	   */
-	  this.parentCanvas = function () {
-	    if (m_this.parent === undefined) {
-	      return m_this.layer().canvas();
-	    }
-	    return m_this.parent().canvas();
-	  };
-
-	  /**
-	   * Get or set the CSS positioning that a widget should be placed at.
-	   *
-	   * @param {geo.gui.widget.position} [pos] If unspecified, return the current
-	   *    position.  Otherwise, set the current position.
-	   * @param {boolean} [actualValue] If getting the position, if this is truthy,
-	   *    always return the stored value, not a value adjusted for display.
-	   * @returns {geo.gui.widget.position|this} Either the position or the widget
-	   *    instance.  If this is the position and `actualValue` is falsy,
-	   *    positions that specify an explicit `x` and `y` parameter will be
-	   *    converted to a value that can be used by the display css.
-	   */
-	  this.position = function (pos, actualValue) {
-	    if (pos !== undefined) {
-	      this.layer().geoOff(geo_event.pan, m_this.repositionEvent);
-	      m_position = pos;
-	      if (m_position.hasOwnProperty('x') && m_position.hasOwnProperty('y')) {
-	        this.layer().geoOn(geo_event.pan, m_this.repositionEvent);
-	      }
-	      this.reposition();
-	      return this;
-	    }
-	    if (m_position.hasOwnProperty('x') && m_position.hasOwnProperty('y') && !actualValue) {
-	      var position = m_this.layer().map().gcsToDisplay(m_position);
-
-	      return {
-	        left: position.x,
-	        top: position.y,
-	        right: null,
-	        bottom: null
-	      };
-	    }
-
-	    return m_position;
-	  };
-
-	  /**
-	   * Repositions a widget.
-	   *
-	   * @param {geo.gui.widget.position} [position] The new position for the
-	   *    widget.  `undefined` uses the stored position value.
-	   * @returns {this}
-	   */
-	  this.reposition = function (position) {
-	    position = position || m_this.position();
-	    m_this.canvas().style.position = 'absolute';
-
-	    for (var cssAttr in position) {
-	      if (position.hasOwnProperty(cssAttr)) {
-	        // if the property is a number, add px to it, otherwise set it to the
-	        // specified value.  Setting a property to null clears it.  Setting to
-	        // undefined doesn't alter it.
-	        if (/^\s*(-|\+)?(\d+(\.\d*)?|\d*\.\d+)([eE](-|\+)?\d+)?\s*$/.test(position[cssAttr])) {
-	          m_this.canvas().style[cssAttr] = ('' + position[cssAttr]).trim() + 'px';
-	        } else {
-	          m_this.canvas().style[cssAttr] = position[cssAttr];
-	        }
-	      }
-	    }
-	    return m_this;
-	  };
-
-	  /**
-	   * If the position is based on map coordinates, this gets called when the
-	   * map is panned to resposition the widget.
-	   *
-	   * @returns {this}
-	   */
-	  this.repositionEvent = function () {
-	    return m_this.reposition();
-	  };
-
-	  /**
-	   * Report if the widget is completely within the viewport.
-	   *
-	   * @returns {boolean} True if the widget is completely within the viewport.
-	   */
-	  this.isInViewport = function () {
-	    var position = m_this.position();
-	    var layer = m_this.layer();
-
-	    return ((position.left >= 0 && position.top >= 0) &&
-	            (position.left <= layer.width() && position.top <= layer.height()));
-	  };
-
-	  if (m_position.hasOwnProperty('x') && m_position.hasOwnProperty('y')) {
-	    this.layer().geoOn(geo_event.pan, m_this.repositionEvent);
-	  }
-	};
-	inherit(widget, sceneObject);
-	module.exports = widget;
-
-
-/***/ }),
-/* 300 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	var svgWidget = __webpack_require__(301);
-	var inherit = __webpack_require__(8);
-	var registerWidget = __webpack_require__(201).registerWidget;
-
-	/**
-	 * Create a new instance of class legendWidget
-	 *
-	 * @class geo.gui.legendWidget
-	 * @extends geo.gui.svgWidget
-	 * @returns {geo.gui.legendWidget}
-	 */
-	var legendWidget = function (arg) {
-	  'use strict';
-	  if (!(this instanceof legendWidget)) {
-	    return new legendWidget(arg);
-	  }
-	  svgWidget.call(this, arg);
-
-	  var d3 = __webpack_require__(226).d3;
-	  var geo_event = __webpack_require__(9);
-
-	  /** @private */
-	  var m_this = this,
-	      m_categories = [],
-	      m_top = null,
-	      m_group = null,
-	      m_border = null,
-	      m_spacing = 20, // distance in pixels between lines
-	      m_padding = 12, // padding in pixels inside the border
-	      s_createCanvas = this._createCanvas,
-	      s_appendChild = this._appendChild;
-
-	  /**
-	   * Get or set the category array associated with
-	   * the legend.  Each element of this array is
-	   * an object: ::
-	   *     {
-	   *         name: string,
-	   *         style: object,
-	   *         type: 'point' | 'line' | ...
-	   *     }
-	   *
-	   * The style property can contain the following feature styles:
-	   *     * fill: bool
-	   *     * fillColor: object | string
-	   *     * fillOpacity: number
-	   *     * stroke: bool
-	   *     * strokeColor: object | string
-	   *     * strokeWidth: number
-	   *     * strokeOpacity: number
-	   *
-	   * The type controls how the element is displayed, point as a circle,
-	   * line as a line segment.  Any other value will display as a rounded
-	   * rectangle.
-	   *
-	   * @param {object[]?} categories The categories to display
-	   */
-	  this.categories = function (arg) {
-	    if (arg === undefined) {
-	      return m_categories.slice();
-	    }
-	    m_categories = arg.slice().map(function (d) {
-	      if (d.type === 'line') {
-	        d.style.fill = false;
-	        d.style.stroke = true;
-	      }
-	      return d;
-	    });
-	    m_this.draw();
-	    return m_this;
-	  };
-
-	  /**
-	   * Get the widget's size
-	   * @return {{width: number, height: number}} The size in pixels
-	   */
-	  this.size = function () {
-	    var width = 1, height;
-	    var test = d3.select(m_this.canvas()).append('text')
-	          .style('opacity', 1e-6);
-
-	    m_categories.forEach(function (d) {
-	      test.text(d.name);
-	      width = Math.max(width, test.node().getBBox().width);
-	    });
-	    test.remove();
-
-	    height = m_spacing * (m_categories.length + 1);
-	    return {
-	      width: width + 50,
-	      height: height
-	    };
-	  };
-
-	  /**
-	   * Redraw the legend
-	   */
-	  this.draw = function () {
-
-	    m_this._init();
-	    function applyColor(selection) {
-	      selection.style('fill', function (d) {
-	        if (d.style.fill || d.style.fill === undefined) {
-	          return d.style.fillColor;
-	        } else {
-	          return 'none';
-	        }
-	      })
-	        .style('fill-opacity', function (d) {
-	          if (d.style.fillOpacity === undefined) {
-	            return 1;
-	          }
-	          return d.style.fillOpacity;
-	        })
-	        .style('stroke', function (d) {
-	          if (d.style.stroke || d.style.stroke === undefined) {
-	            return d.style.strokeColor;
-	          } else {
-	            return 'none';
-	          }
-	        })
-	        .style('stroke-opacity', function (d) {
-	          if (d.style.strokeOpacity === undefined) {
-	            return 1;
-	          }
-	          return d.style.strokeOpacity;
-	        })
-	        .style('stroke-width', function (d) {
-	          if (d.style.strokeWidth === undefined) {
-	            return 1.5;
-	          }
-	          return d.style.strokeWidth;
-	        });
-	    }
-
-	    m_border.attr('height', m_this.size().height + 2 * m_padding)
-	      .style('display', null);
-
-	    var scale = m_this._scale();
-
-	    var labels = m_group.selectAll('g.geo-label')
-	          .data(m_categories, function (d) { return d.name; });
-
-	    var g = labels.enter().append('g')
-	          .attr('class', 'geo-label')
-	          .attr('transform', function (d, i) {
-	            return 'translate(0,' + scale.y(i) + ')';
-	          });
-
-	    applyColor(g.filter(function (d) {
-	      return d.type !== 'point' && d.type !== 'line';
-	    }).append('rect')
-	               .attr('x', 0)
-	               .attr('y', -6)
-	               .attr('rx', 5)
-	               .attr('ry', 5)
-	               .attr('width', 40)
-	               .attr('height', 12)
-	              );
-
-	    applyColor(g.filter(function (d) {
-	      return d.type === 'point';
-	    }).append('circle')
-	               .attr('cx', 20)
-	               .attr('cy', 0)
-	               .attr('r', 6)
-	              );
-
-	    applyColor(g.filter(function (d) {
-	      return d.type === 'line';
-	    }).append('line')
-	               .attr('x1', 0)
-	               .attr('y1', 0)
-	               .attr('x2', 40)
-	               .attr('y2', 0)
-	              );
-
-	    g.append('text')
-	      .attr('x', '50px')
-	      .attr('y', 0)
-	      .attr('dy', '0.3em')
-	      .text(function (d) {
-	        return d.name;
-	      });
-
-	    m_this.reposition();
-
-	    return m_this;
-	  };
-
-	  /**
-	   * Get scales for the x and y axis for the current size.
-	   * @private
-	   */
-	  this._scale = function () {
-	    return {
-	      x: d3.scale.linear()
-	        .domain([0, 1])
-	        .range([0, m_this.size().width]),
-	      y: d3.scale.linear()
-	        .domain([0, m_categories.length - 1])
-	        .range([m_padding / 2, m_this.size().height - m_padding / 2])
-	    };
-	  };
-
-	  /**
-	   * Private initialization.  Creates the widget's DOM container and internal
-	   * variables.
-	   * @private
-	   */
-	  this._init = function () {
-	    // adding categories redraws the entire thing by calling _init, see
-	    // the m_top.remove() line below
-	    if (!m_top) {
-	      s_createCanvas();
-	      s_appendChild();
-	    }
-
-	    // total size = interior size + 2 * padding + 2 * width of the border
-	    var w = m_this.size().width + 2 * m_padding + 4,
-	        h = m_this.size().height + 2 * m_padding + 4;
-
-	    // @todo - removing after creating to maintain the appendChild structure
-	    if (m_top) {
-	      m_top.remove();
-	    }
-
-	    d3.select(m_this.canvas()).attr('width', w).attr('height', h);
-
-	    m_top = d3.select(m_this.canvas()).append('g');
-	    m_group = m_top
-	      .append('g')
-	      .attr('transform', 'translate(' + [m_padding + 2, m_padding + 2] + ')');
-	    m_border = m_group.append('rect')
-	      .attr('x', -m_padding)
-	      .attr('y', -m_padding)
-	      .attr('width', w - 4)
-	      .attr('height', h - 4)
-	      .attr('rx', 3)
-	      .attr('ry', 3)
-	      .style({
-	        'stroke': 'black',
-	        'stroke-width': '1.5px',
-	        'fill': 'white',
-	        'fill-opacity': 0.75,
-	        'display': 'none'
-	      });
-	    m_group.on('mousedown', function () {
-	      d3.event.stopPropagation();
-	    });
-	    m_group.on('mouseover', function () {
-	      m_border.transition()
-	        .duration(250)
-	        .style('fill-opacity', 1);
-	    });
-	    m_group.on('mouseout', function () {
-	      m_border.transition()
-	        .duration(250)
-	        .style('fill-opacity', 0.75);
-	    });
-
-	    m_this.reposition();
-	  };
-
-	  this.geoOn(geo_event.resize, function () {
-	    m_this.draw();
-	  });
-
-	};
-
-	inherit(legendWidget, svgWidget);
-
-	registerWidget('dom', 'legend', legendWidget);
-	module.exports = legendWidget;
-
-
-/***/ }),
-/* 301 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	var domWidget = __webpack_require__(298);
-	var inherit = __webpack_require__(8);
-	var registerWidget = __webpack_require__(201).registerWidget;
-
-	/**
-	 * Create a new instance of class geo.gui.svgWidget
-	 *
-	 * Due to the nature of d3 creating DOM elements as it inserts them, calls to appendChild
-	 * don't appear in this widget.
-	 *
-	 * The canvas of an svgWidget always refers to the actual svg element.
-	 * The parentCanvas can refer to another widgets svg element, dom element, or the
-	 * UI layers dom element.
-	 * See {@link geo.gui.widget#parentCanvas}.
-	 *
-	 * @class geo.gui.svgWidget
-	 * @extends geo.gui.domWidget
-	 * @returns {geo.gui.svgWidget}
-	 *
-	 */
-	var svgWidget = function (arg) {
-	  'use strict';
-	  if (!(this instanceof svgWidget)) {
-	    return new svgWidget(arg);
-	  }
-
-	  domWidget.call(this, arg);
-
-	  var d3Renderer = __webpack_require__(226);
-
-	  var m_this = this,
-	      m_renderer = null;
-
-	  this._init = function (arg) {
-	    var d3Parent;
-	    if (arg.hasOwnProperty('parent')) {
-	      arg.parent.addChild(m_this);
-
-	      // Tell the renderer there is an SVG element as a parent
-	      d3Parent = arg.parent.canvas();
-	    }
-
-	    m_this._createCanvas(d3Parent);
-
-	    m_this.canvas().addEventListener('mousedown', function (e) {
-	      e.stopPropagation();
-	    });
-
-	    m_this.reposition();
-	  };
-
-	  /**
-	   * Creates the canvas for the svg widget.
-	   * This directly uses the {@link geo.d3.d3Renderer} as a helper to do all of the heavy
-	   * lifting.
-	   */
-	  this._createCanvas = function (d3Parent) {
-	    var rendererOpts = {
-	      layer: m_this.layer(),
-	      widget: true
-	    };
-
-	    if (d3Parent) {
-	      rendererOpts.d3Parent = d3Parent;
-	    }
-
-	    m_renderer = d3Renderer(rendererOpts);
-
-	    // svg widgets manage their own sizes, so make the resize handler a no-op
-	    m_renderer._resize = function () {};
-
-	    m_this.canvas(m_renderer.canvas()[0][0]);
-	  };
-
-	  return this;
-	};
-
-	inherit(svgWidget, domWidget);
-
-	registerWidget('dom', 'svg', svgWidget);
-	module.exports = svgWidget;
-
-
-/***/ }),
-/* 302 */
-/***/ (function(module, exports, __webpack_require__) {
-
 	var d3 = __webpack_require__(226).d3;
-	var domWidget = __webpack_require__(298);
+	var domWidget = __webpack_require__(299);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(201).registerWidget;
 	var util = __webpack_require__(83);
 	var uniqueID = __webpack_require__(228);
 
-	__webpack_require__(303);
+	__webpack_require__(301);
 
 	/**
 	 * @typedef {object} geo.gui.colorLegendWidget.category
@@ -65403,13 +65268,328 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 303 */
+/* 299 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var widget = __webpack_require__(300);
+	var inherit = __webpack_require__(8);
+	var registerWidget = __webpack_require__(201).registerWidget;
+
+	/**
+	 * Create a new instance of class domWidget.
+	 *
+	 * @class
+	 * @alias geo.gui.domWidget
+	 * @extends geo.gui.widget
+	 * @param {object} arg
+	 * @param {geo.widget} [parent] A parent widget for this widget.
+	 * @param {string} [el='div'] The type of DOM element to create.
+	 * @returns {geo.domWidget}
+	 */
+	var domWidget = function (arg) {
+	  'use strict';
+	  if (!(this instanceof domWidget)) {
+	    return new domWidget(arg);
+	  }
+
+	  widget.call(this, arg);
+
+	  var m_this = this,
+	      m_default_canvas = 'div';
+
+	  /**
+	   * Initializes DOM Widget.
+	   * Sets the canvas for the widget, does parent/child relationship management,
+	   * appends it to it's parent and handles any positioning logic.
+	   *
+	   * @returns {this}
+	   */
+	  this._init = function () {
+	    if (arg.hasOwnProperty('parent')) {
+	      arg.parent.addChild(m_this);
+	    }
+
+	    m_this._createCanvas();
+	    m_this._appendCanvasToParent();
+
+	    m_this.canvas().addEventListener('mousedown', function (e) {
+	      e.stopPropagation();
+	    });
+
+	    m_this.reposition();
+	    return m_this;
+	  };
+
+	  /**
+	   * Creates the widget canvas.  This is a DOM element (`arg.el` or a div).
+	   */
+	  this._createCanvas = function () {
+	    m_this.canvas(document.createElement(arg.el || m_default_canvas));
+	  };
+
+	  return this;
+	};
+
+	inherit(domWidget, widget);
+
+	registerWidget('dom', 'dom', domWidget);
+	module.exports = domWidget;
+
+
+/***/ }),
+/* 300 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(8);
+	var sceneObject = __webpack_require__(208);
+	var $ = __webpack_require__(1);
+
+	/**
+	 * @typedef {object} geo.gui.widget.position
+	 * @property {string|number} [top] The position to the top of the container.
+	 *   A string css position or a number in pixels.
+	 * @property {string|number} [right] The position to the right of the
+	 *   container.  A string css position or a number in pixels.
+	 * @property {string|number} [bottom] The position to the bottom of the
+	 *   container.  A string css position or a number in pixels.
+	 * @property {string|number} [left] The position to the left of the container.
+	 * @property {string|number} [top] The position to the top of the container.
+	 * @property {*} [...] Additional css properties that affect position are
+	 *   allowed.  See the css specification for details.
+	 */
+
+	/**
+	 * Create a new instance of class widget.
+	 *
+	 * @class
+	 * @alias geo.gui.widget
+	 * @param {object} [arg] Options for the widget.
+	 * @param {geo.layer} [arg.layer] Layer associated with the widget.
+	 * @param {geo.gui.widget.position} [arg.position] Location of the widget.
+	 * @param {geo.gui.widget} [arg.parent] Optional parent widget.
+	 * @extends {geo.sceneObject}
+	 * @returns {geo.gui.widget}
+	 */
+	var widget = function (arg) {
+	  'use strict';
+	  if (!(this instanceof widget)) {
+	    return new widget(arg);
+	  }
+	  arg = arg || {};
+	  sceneObject.call(this, arg);
+
+	  var geo_event = __webpack_require__(9);
+
+	  var m_this = this,
+	      s_exit = this._exit,
+	      m_layer = arg.layer,
+	      m_canvas = null,
+	      m_position = arg.position === undefined ? { left: 0, top: 0 } : arg.position;
+
+	  if (arg.parent !== undefined && !(arg.parent instanceof widget)) {
+	    throw new Error('Parent must be of type geo.gui.widget');
+	  } else if (arg.parent) {
+	    m_this.parent(arg.parent);
+	  }
+
+	  /**
+	   * Initialize the widget.
+	   *
+	   * @returns {this}
+	   */
+	  this._init = function () {
+	    m_this.modified();
+	    return m_this;
+	  };
+
+	  /**
+	   * Clean up the widget.
+	   */
+	  this._exit = function () {
+	    m_this.children().forEach(function (child) {
+	      m_this.removeChild(child);
+	      child._exit();
+	    });
+
+	    m_this.layer().geoOff(geo_event.pan, m_this.repositionEvent);
+	    if (m_this.parentCanvas().removeChild && m_this.canvas()) {
+	      try {
+	        m_this.parentCanvas().removeChild(m_this.canvas());
+	      } catch (err) {
+	        // fail gracefully if the canvas is not a child of the parentCanvas
+	      }
+	    }
+	    s_exit();
+	  };
+
+	  /**
+	   * Return the layer associated with this widget.
+	   *
+	   * @returns {geo.layer}
+	   */
+	  this.layer = function () {
+	    return m_layer || (m_this.parent() && m_this.parent().layer());
+	  };
+
+	  /**
+	   * Create the canvas this widget will operate on.
+	   */
+	  this._createCanvas = function () {
+	    throw new Error('Must be defined in derived classes');
+	  };
+
+	  /**
+	   * Get/Set the canvas for the widget.
+	   *
+	   * @param {HTMLElement} [val] If specified, set the canvas, otherwise get
+	   *    the canvas.
+	   * @returns {HTMLElement|this} If getting the canvas, return the current
+	   *    value; otherwise, return this widget.
+	   */
+	  this.canvas = function (val) {
+	    if (val === undefined) {
+	      return m_canvas;
+	    }
+	    m_canvas = val;
+	    return m_this;
+	  };
+
+	  /**
+	   * Appends the canvas to the parent canvas.
+	   * The widget determines how to append itself to a parent, the parent can
+	   * either be another widget, or the UI Layer.
+	   */
+	  this._appendCanvasToParent = function () {
+	    m_this.parentCanvas().appendChild(m_this.canvas());
+	  };
+
+	  /**
+	   * Get the parent canvas (top level widgets define their layer as their
+	   * parent canvas).
+	   *
+	   * @returns {HTMLElement} The canvas of the widget's parent.
+	   */
+	  this.parentCanvas = function () {
+	    if (!m_this.parent()) {
+	      return m_this.layer().canvas();
+	    }
+	    return m_this.parent().canvas();
+	  };
+
+	  /**
+	   * Get or set the CSS positioning that a widget should be placed at.
+	   *
+	   * @param {geo.gui.widget.position} [pos] If unspecified, return the current
+	   *    position.  Otherwise, set the current position.
+	   * @param {boolean} [actualValue] If getting the position, if this is truthy,
+	   *    always return the stored value, not a value adjusted for display.
+	   * @returns {geo.gui.widget.position|this} Either the position or the widget
+	   *    instance.  If this is the position and `actualValue` is falsy,
+	   *    positions that specify an explicit `x` and `y` parameter will be
+	   *    converted to a value that can be used by the display css.
+	   */
+	  this.position = function (pos, actualValue) {
+	    if (pos !== undefined) {
+	      this.layer().geoOff(geo_event.pan, m_this.repositionEvent);
+	      var clearPosition = {};
+	      for (var attr in m_position) {
+	        if (m_position.hasOwnProperty(attr)) {
+	          clearPosition[attr] = null;
+	        }
+	      }
+	      m_position = pos;
+	      if (m_position.hasOwnProperty('x') && m_position.hasOwnProperty('y')) {
+	        this.layer().geoOn(geo_event.pan, m_this.repositionEvent);
+	      }
+	      this.reposition($.extend(clearPosition, m_this.position()));
+	      return this;
+	    }
+	    if (m_position.hasOwnProperty('x') && m_position.hasOwnProperty('y') && !actualValue) {
+	      var position = m_this.layer().map().gcsToDisplay(m_position);
+
+	      return {
+	        left: position.x,
+	        top: position.y,
+	        right: null,
+	        bottom: null
+	      };
+	    }
+
+	    return m_position;
+	  };
+
+	  /**
+	   * Repositions a widget.
+	   *
+	   * @param {geo.gui.widget.position} [position] The new position for the
+	   *    widget.  `undefined` uses the stored position value.
+	   * @returns {this}
+	   */
+	  this.reposition = function (position) {
+	    position = position || m_this.position();
+	    if (m_this.canvas() && m_this.canvas().style) {
+	      m_this.canvas().style.position = 'absolute';
+
+	      for (var cssAttr in position) {
+	        if (position.hasOwnProperty(cssAttr)) {
+	          // if the property is a number, add px to it, otherwise set it to the
+	          // specified value.  Setting a property to null clears it.  Setting to
+	          // undefined doesn't alter it.
+	          if (/^\s*(-|\+)?(\d+(\.\d*)?|\d*\.\d+)([eE](-|\+)?\d+)?\s*$/.test(position[cssAttr])) {
+	            // tris ensures that the number is a float with no more than 3
+	            // decimal places (Chrome does this automatically, but doing so
+	            // explicitly makes testing more consistent).  It will be an
+	            // integer when possible.
+	            m_this.canvas().style[cssAttr] = parseFloat(parseFloat(position[cssAttr]).toFixed(3)) + 'px';
+	          } else {
+	            m_this.canvas().style[cssAttr] = position[cssAttr];
+	          }
+	        }
+	      }
+	    }
+	    return m_this;
+	  };
+
+	  /**
+	   * If the position is based on map coordinates, this gets called when the
+	   * map is panned to resposition the widget.
+	   *
+	   * @returns {this}
+	   */
+	  this.repositionEvent = function () {
+	    return m_this.reposition();
+	  };
+
+	  /**
+	   * Report if the top left of widget (or its current x, y position) is within
+	   * the viewport.
+	   *
+	   * @returns {boolean} True if the widget is within the viewport.
+	   */
+	  this.isInViewport = function () {
+	    var position = m_this.position();
+	    var layer = m_this.layer();
+
+	    return ((position.left >= 0 && position.top >= 0) &&
+	            (position.left <= layer.width() && position.top <= layer.height()));
+	  };
+
+	  if (m_position.hasOwnProperty('x') && m_position.hasOwnProperty('y')) {
+	    this.layer().geoOn(geo_event.pan, m_this.repositionEvent);
+	  }
+	};
+	inherit(widget, sceneObject);
+	module.exports = widget;
+
+
+/***/ }),
+/* 301 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(304);
+	var content = __webpack_require__(302);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
 	var update = __webpack_require__(6)(content, {});
@@ -65429,7 +65609,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ }),
-/* 304 */
+/* 302 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	exports = module.exports = __webpack_require__(5)();
@@ -65443,10 +65623,795 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
+/* 303 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var svgWidget = __webpack_require__(304);
+	var inherit = __webpack_require__(8);
+	var registerWidget = __webpack_require__(201).registerWidget;
+
+	/**
+	 * Create a new instance of class legendWidget
+	 *
+	 * @class geo.gui.legendWidget
+	 * @extends geo.gui.svgWidget
+	 * @returns {geo.gui.legendWidget}
+	 */
+	var legendWidget = function (arg) {
+	  'use strict';
+	  if (!(this instanceof legendWidget)) {
+	    return new legendWidget(arg);
+	  }
+	  svgWidget.call(this, arg);
+
+	  var d3 = __webpack_require__(226).d3;
+	  var geo_event = __webpack_require__(9);
+
+	  /** @private */
+	  var m_this = this,
+	      m_categories = [],
+	      m_top = null,
+	      m_group = null,
+	      m_border = null,
+	      m_spacing = 20, // distance in pixels between lines
+	      m_padding = 12; // padding in pixels inside the border
+
+	  /**
+	   * Get or set the category array associated with
+	   * the legend.  Each element of this array is
+	   * an object: ::
+	   *     {
+	   *         name: string,
+	   *         style: object,
+	   *         type: 'point' | 'line' | ...
+	   *     }
+	   *
+	   * The style property can contain the following feature styles:
+	   *     * fill: bool
+	   *     * fillColor: object | string
+	   *     * fillOpacity: number
+	   *     * stroke: bool
+	   *     * strokeColor: object | string
+	   *     * strokeWidth: number
+	   *     * strokeOpacity: number
+	   *
+	   * The type controls how the element is displayed, point as a circle,
+	   * line as a line segment.  Any other value will display as a rounded
+	   * rectangle.
+	   *
+	   * @param {object[]?} categories The categories to display
+	   */
+	  this.categories = function (arg) {
+	    if (arg === undefined) {
+	      return m_categories.slice();
+	    }
+	    m_categories = arg.slice().map(function (d) {
+	      if (d.type === 'line') {
+	        d.style.fill = false;
+	        d.style.stroke = true;
+	      }
+	      return d;
+	    });
+	    m_this.draw();
+	    return m_this;
+	  };
+
+	  /**
+	   * Get the widget's size
+	   * @return {{width: number, height: number}} The size in pixels
+	   */
+	  this.size = function () {
+	    var width = 1, height;
+	    var test = d3.select(m_this.canvas()).append('text')
+	          .style('opacity', 1e-6);
+
+	    m_categories.forEach(function (d) {
+	      test.text(d.name);
+	      width = Math.max(width, test.node().getBBox().width);
+	    });
+	    test.remove();
+
+	    height = m_spacing * (m_categories.length + 1);
+	    return {
+	      width: width + 50,
+	      height: height
+	    };
+	  };
+
+	  /**
+	   * Redraw the legend
+	   */
+	  this.draw = function () {
+
+	    m_this._init();
+	    function applyColor(selection) {
+	      selection.style('fill', function (d) {
+	        if (d.style.fill || d.style.fill === undefined) {
+	          return d.style.fillColor;
+	        } else {
+	          return 'none';
+	        }
+	      })
+	        .style('fill-opacity', function (d) {
+	          if (d.style.fillOpacity === undefined) {
+	            return 1;
+	          }
+	          return d.style.fillOpacity;
+	        })
+	        .style('stroke', function (d) {
+	          if (d.style.stroke || d.style.stroke === undefined) {
+	            return d.style.strokeColor;
+	          } else {
+	            return 'none';
+	          }
+	        })
+	        .style('stroke-opacity', function (d) {
+	          if (d.style.strokeOpacity === undefined) {
+	            return 1;
+	          }
+	          return d.style.strokeOpacity;
+	        })
+	        .style('stroke-width', function (d) {
+	          if (d.style.strokeWidth === undefined) {
+	            return 1.5;
+	          }
+	          return d.style.strokeWidth;
+	        });
+	    }
+
+	    m_border.attr('height', m_this.size().height + 2 * m_padding)
+	      .style('display', null);
+
+	    var scale = m_this._scale();
+
+	    var labels = m_group.selectAll('g.geo-label')
+	          .data(m_categories, function (d) { return d.name; });
+
+	    var g = labels.enter().append('g')
+	          .attr('class', 'geo-label')
+	          .attr('transform', function (d, i) {
+	            return 'translate(0,' + scale.y(i) + ')';
+	          });
+
+	    applyColor(g.filter(function (d) {
+	      return d.type !== 'point' && d.type !== 'line';
+	    }).append('rect')
+	               .attr('x', 0)
+	               .attr('y', -6)
+	               .attr('rx', 5)
+	               .attr('ry', 5)
+	               .attr('width', 40)
+	               .attr('height', 12)
+	              );
+
+	    applyColor(g.filter(function (d) {
+	      return d.type === 'point';
+	    }).append('circle')
+	               .attr('cx', 20)
+	               .attr('cy', 0)
+	               .attr('r', 6)
+	              );
+
+	    applyColor(g.filter(function (d) {
+	      return d.type === 'line';
+	    }).append('line')
+	               .attr('x1', 0)
+	               .attr('y1', 0)
+	               .attr('x2', 40)
+	               .attr('y2', 0)
+	              );
+
+	    g.append('text')
+	      .attr('x', '50px')
+	      .attr('y', 0)
+	      .attr('dy', '0.3em')
+	      .text(function (d) {
+	        return d.name;
+	      });
+
+	    m_this.reposition();
+
+	    return m_this;
+	  };
+
+	  /**
+	   * Get scales for the x and y axis for the current size.
+	   * @private
+	   */
+	  this._scale = function () {
+	    return {
+	      x: d3.scale.linear()
+	        .domain([0, 1])
+	        .range([0, m_this.size().width]),
+	      y: d3.scale.linear()
+	        .domain([0, m_categories.length - 1])
+	        .range([m_padding / 2, m_this.size().height - m_padding / 2])
+	    };
+	  };
+
+	  /**
+	   * Private initialization.  Creates the widget's DOM container and internal
+	   * variables.
+	   * @private
+	   */
+	  this._init = function () {
+	    // adding categories redraws the entire thing by calling _init, see
+	    // the m_top.remove() line below
+	    if (!m_top) {
+	      m_this._createCanvas();
+	      m_this._appendCanvasToParent();
+	    }
+
+	    // total size = interior size + 2 * padding + 2 * width of the border
+	    var w = m_this.size().width + 2 * m_padding + 4,
+	        h = m_this.size().height + 2 * m_padding + 4;
+
+	    // @todo - removing after creating to maintain the appendChild structure
+	    if (m_top) {
+	      m_top.remove();
+	    }
+
+	    d3.select(m_this.canvas()).attr('width', w).attr('height', h);
+
+	    m_top = d3.select(m_this.canvas()).append('g');
+	    m_group = m_top
+	      .append('g')
+	      .attr('transform', 'translate(' + [m_padding + 2, m_padding + 2] + ')');
+	    m_border = m_group.append('rect')
+	      .attr('x', -m_padding)
+	      .attr('y', -m_padding)
+	      .attr('width', w - 4)
+	      .attr('height', h - 4)
+	      .attr('rx', 3)
+	      .attr('ry', 3)
+	      .style({
+	        'stroke': 'black',
+	        'stroke-width': '1.5px',
+	        'fill': 'white',
+	        'fill-opacity': 0.75,
+	        'display': 'none'
+	      });
+	    m_group.on('mousedown', function () {
+	      d3.event.stopPropagation();
+	    });
+	    m_group.on('mouseover', function () {
+	      m_border.transition()
+	        .duration(250)
+	        .style('fill-opacity', 1);
+	    });
+	    m_group.on('mouseout', function () {
+	      m_border.transition()
+	        .duration(250)
+	        .style('fill-opacity', 0.75);
+	    });
+
+	    m_this.reposition();
+	  };
+
+	  this.geoOn(geo_event.resize, function () {
+	    m_this.draw();
+	  });
+
+	};
+
+	inherit(legendWidget, svgWidget);
+
+	registerWidget('dom', 'legend', legendWidget);
+	module.exports = legendWidget;
+
+
+/***/ }),
+/* 304 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var widget = __webpack_require__(300);
+	var inherit = __webpack_require__(8);
+	var registerWidget = __webpack_require__(201).registerWidget;
+
+	/**
+	 * Create a new instance of class geo.gui.svgWidget.
+	 *
+	 * Due to the nature of d3 creating DOM elements as it inserts them, calls to
+	 * appendChild don't appear in this widget.
+	 *
+	 * The canvas of an svgWidget always refers to the actual svg element.
+	 * The parentCanvas can refer to another widget's svg element, dom element, or
+	 * the UI layer's dom element.
+	 * See {@link geo.gui.widget#parentCanvas}.
+	 *
+	 * @class
+	 * @alias geo.gui.svgWidget
+	 * @extends geo.gui.widget
+	 * @param {object} arg
+	 * @param {geo.widget} [parent] A parent widget for this widget.
+	 * @returns {geo.gui.svgWidget}
+	 */
+	var svgWidget = function (arg) {
+	  'use strict';
+	  if (!(this instanceof svgWidget)) {
+	    return new svgWidget(arg);
+	  }
+
+	  widget.call(this, arg);
+
+	  var d3Renderer = __webpack_require__(226);
+
+	  var m_this = this,
+	      s_exit = this._exit,
+	      m_renderer = null;
+
+	  /**
+	   * Initializes SVG Widget.
+	   *
+	   * @returns {this}
+	   */
+	  this._init = function () {
+	    var d3Parent;
+	    if (arg.hasOwnProperty('parent')) {
+	      arg.parent.addChild(m_this);
+
+	      // Tell the renderer there is an SVG element as a parent
+	      d3Parent = arg.parent.canvas();
+	    }
+
+	    m_this._createCanvas(d3Parent);
+
+	    m_this.canvas().addEventListener('mousedown', function (e) {
+	      e.stopPropagation();
+	    });
+
+	    m_this.reposition();
+	    return m_this;
+	  };
+
+	  /**
+	   * Clean up the widget.
+	   */
+	  this._exit = function () {
+	    if (m_renderer) {
+	      m_renderer._exit();
+	    }
+	    s_exit();
+	  };
+
+	  /**
+	   * Creates the canvas for the svg widget.
+	   * This directly uses the {@link geo.d3.d3Renderer} as a helper to do all of
+	   * the heavy lifting.
+	   *
+	   * @param {d3Selector} d3Parent The canvas's parent element.
+	   */
+	  this._createCanvas = function (d3Parent) {
+	    var rendererOpts = {
+	      layer: m_this.layer(),
+	      widget: true
+	    };
+
+	    if (d3Parent) {
+	      rendererOpts.d3Parent = d3Parent;
+	    }
+
+	    m_renderer = d3Renderer(rendererOpts);
+
+	    // svg widgets manage their own sizes, so make the resize handler a no-op
+	    m_renderer._resize = function () {};
+
+	    m_this.canvas(m_renderer.canvas()[0][0]);
+	  };
+
+	  return this;
+	};
+
+	inherit(svgWidget, widget);
+
+	registerWidget('dom', 'svg', svgWidget);
+	module.exports = svgWidget;
+
+
+/***/ }),
 /* 305 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var svgWidget = __webpack_require__(301);
+	var $ = __webpack_require__(1);
+	var inherit = __webpack_require__(8);
+	var svgWidget = __webpack_require__(304);
+	var registerWidget = __webpack_require__(201).registerWidget;
+
+	__webpack_require__(306);
+
+	/**
+	 * Scale widget specification.
+	 *
+	 * @typedef {object} geo.gui.scaleWidget.spec
+	 * @param {number} [scale=1] A scale applied to the map gcs units to convert to
+	 *   the scale units.
+	 * @param {number} [maxWidth=200] The maximum width of the scale in pixels.
+	 *   For horizontal scales (orientation is `top` or `bottom`) this is the
+	 *   maximum length of the scale bar.  For vertical scales, this is the width
+	 *   available for the scale text.
+	 * @param {number} [maxHeight] The maximum height of the scale in pixels.
+	 *   For vertical scales (orientation is `left` or `right`) this is the
+	 *   maximum length of the scale bar.  For horizontal scales, this is the
+	 *   height available for the scale text.  Default is 200 for vertical scales,
+	 *   20 for horizontal scales.
+	 * @param {string} [orientation='bottom'] One of `left`, `right`, `top`, or
+	 *   `bottom`.  The scale text is placed in that location relative to the scale
+	 *   bar.
+	 * @param {number} [strokeWidth=2] The width of the ticks and scale bar in
+	 *   pixels.
+	 * @param {number} [tickLength=10] The length of the end ticks in pixels.
+	 * @param {string|geo.gui.scaleWidget.unit[]} [units='si'] One of either 'si'
+	 *   or 'miles' or an array of units in ascending order.  See the `UnitsTable`
+	 *   for examples.
+	 * @param {Function} [distance] The function used to compute the length of the
+	 *   scale bar.  This defaults to `transform.sphericalDistance` for all maps
+	 *   except those with a gcs of `'+proj=longlat +axis=enu'`, where
+	 *   `math.sqrt(util.distance2dSquared(pt1, pt2))` is used instead.
+	 */
+
+	/**
+	 * Scale widget unit specification.
+	 *
+	 * @typedef {object} geo.gui.scaleWidget.unit
+	 * @param {string} unit Display name for the unit.
+	 * @param {number} scale Scale for 1 unit in the current system.
+	 * @param {number} [minimum=1] Minimum value where this applies after scaling.
+	 *   This can be used to handle singular and plural words (e.g., `[{units:
+	 *   'meter', scale: 1}, {units: 'meters', scale: 1, minimum: 1.5}]`)
+	 * @param {number} [basis=10] The basis for the multiples value.
+	 * @param {object[]} [multiples] A list of objects in ascending value order that
+	 *   determine what round values are displayed.
+	 * @param {number} multiples.multiple The value that is selected for display.
+	 * @param {number} multiples.digit The number of significant digits in
+	 *   `mutliple`.
+	 */
+
+	/**
+	 * Create a new instance of class geo.gui.scaleWidget.
+	 *
+	 * @class
+	 * @alias geo.gui.scaleWidget
+	 * @extends {geo.gui.svgWidget}
+	 * @param {geo.gui.scaleWidget.spec} arg
+	 * @returns {geo.gui.scaleWidget}
+	 */
+	var scaleWidget = function (arg) {
+	  'use strict';
+	  if (!(this instanceof scaleWidget)) {
+	    return new scaleWidget(arg);
+	  }
+	  svgWidget.call(this, arg);
+
+	  var geo_event = __webpack_require__(9);
+	  var transform = __webpack_require__(11);
+	  var util = __webpack_require__(83);
+	  var d3 = __webpack_require__(226).d3;
+
+	  var m_this = this,
+	      s_exit = this._exit,
+	      m_options = $.extend({}, {
+	        scale: 1,
+	        maxWidth: 200,
+	        maxHeight: arg.orientation === 'left' || arg.orientation === 'right' ? 200 : 20,
+	        orientation: 'bottom',
+	        strokeWidth: 2,
+	        tickLength: 10,
+	        units: 'si',
+	        distance: function (pt1, pt2, gcs) {
+	          if (gcs === '+proj=longlat +axis=enu') {
+	            return Math.sqrt(util.distance2dSquared(pt1, pt2));
+	          }
+	          /* We can use either the spherical distance or the Vincenty distance
+	           * here in much the same way.
+	          return transform.vincentyDistance(pt1, pt2, gcs).distance;
+	           */
+	          return transform.sphericalDistance(pt1, pt2, gcs);
+	        }
+	      }, arg);
+
+	  /**
+	   * Initialize the scale widget.
+	   *
+	   * @returns {this}
+	   */
+	  this._init = function () {
+	    m_this._createCanvas();
+	    m_this._appendCanvasToParent();
+	    m_this.reposition();
+
+	    d3.select(m_this.canvas()).attr({
+	      width: m_options.maxWidth,
+	      height: m_options.maxHeight
+	    });
+	    // Update the scale on pan
+	    m_this.geoOn(geo_event.pan, m_this._update);
+	    m_this._render();
+	    return m_this;
+	  };
+
+	  /**
+	   * Clean up after the widget.
+	   */
+	  this._exit = function () {
+	    m_this.geoOff(geo_event.pan, m_this._update);
+	    s_exit();
+	  };
+
+	  /**
+	   * Return true if the scale is vertically oriented.
+	   *
+	   * @returns {boolean} `true` if the scale is vertical, `false` if horizontal.
+	   */
+	  this._vertical = function () {
+	    return m_options.orientation === 'left' || m_options.orientation === 'right';
+	  };
+
+	  /**
+	   * Given a maximum value, return a value that is no larger than it but at a
+	   * round number of a set of units.
+	   *
+	   * @param {number} maxValue The maximum value to return.  The returned value
+	   *    will never be smaller than 3/5 of this value.
+	   * @param {number} pixels A number that is scaled by the ratio of the
+	   *    returned value to `maxValue`.
+	   * @param {string|geo.gui.scaleWidget.unit[]} [units] The units to use.  If
+	   *    not specified, the instance's option units value is used.
+	   * @returns {object} An object with `html`, `value`, and `pixels` values
+	   *    representing the calculated value.
+	   */
+	  this._scaleValue = function (maxValue, pixels, units) {
+	    units = (scaleWidget.unitsTable[units] || units ||
+	             scaleWidget.unitsTable[m_options.units] || m_options.units);
+	    var multiples = [
+	      {multiple: 1, digits: 1},
+	      {multiple: 1.5, digits: 2},
+	      {multiple: 2, digits: 1},
+	      {multiple: 3, digits: 1},
+	      {multiple: 5, digits: 1},
+	      {multiple: 8, digits: 1}];
+	    var unit = units[0],
+	        multiple, power, value;
+	    units.forEach(function (unitEntry) {
+	      if (maxValue >= unitEntry.scale * (unitEntry.minimum || 1)) {
+	        unit = unitEntry;
+	      }
+	    });
+	    power = Math.floor(Math.log(maxValue / unit.scale) / Math.log(unit.basis || 10));
+	    multiples = unit.multiples || multiples;
+	    multiples.forEach(function (mul) {
+	      var mulValue = unit.scale * mul.multiple * Math.pow(10, power);
+	      if (mulValue <= maxValue) {
+	        multiple = mul;
+	        value = mulValue;
+	      }
+	    });
+	    return {
+	      html: (multiple.multiple * Math.pow(10, power)).toFixed(
+	        Math.max(0, -power + multiple.digits - 1)) + ' ' + unit.unit,
+	      value: value,
+	      pixels: value / maxValue * pixels,
+	      power: power,
+	      multiple: multiple,
+	      unitRecord: unit,
+	      originalValue: maxValue,
+	      originalPixels: pixels
+	    };
+	  };
+
+	  /**
+	   * Create and draw the scale based on the current display distance at the
+	   * location of the scale.
+	   */
+	  this._render = function () {
+	    var svg = d3.select(m_this.canvas()),
+	        map = m_this.layer().map(),
+	        width = m_options.maxWidth,
+	        height = m_options.maxHeight,
+	        sw = m_options.strokeWidth,
+	        sw2 = sw * 0.5,
+	        tl = m_options.tickLength,
+	        vert = m_this._vertical(),
+	        pixels, pt1, pt2, dist, value, pts;
+
+	    pixels = (vert ? m_options.maxHeight : m_options.maxWidth) - sw;
+	    /* Calculate the distance that the maximum length scale bar can occupy at
+	     * the location that the scale bar will be drawn. */
+	    // svg.attr({width: width, height: height});
+	    pt1 = $(svg[0][0]).offset();
+	    pt1 = {
+	      x: pt1.left + (m_options.orientation === 'left' ? width - sw2 : sw2),
+	      y: pt1.top + (m_options.orientation === 'top' ? height - sw2 : sw2)
+	    };
+	    pt2 = {x: pt1.x + (vert ? 0 : pixels), y: pt1.y + (vert ? pixels : 0)};
+	    dist = m_options.distance(map.displayToGcs(pt1, null), map.displayToGcs(pt2, null), map.gcs()) * m_options.scale;
+	    if (dist <= 0 || !isFinite(dist)) {
+	      console.warn('The distance calculated for the scale is invalid: ' + dist);
+	      return;
+	    }
+	    value = m_this._scaleValue(dist, pixels);
+	    if (vert) {
+	      height = value.pixels + sw;
+	    } else {
+	      width = value.pixels + sw;
+	    }
+	    svg.attr({width: width, height: height});
+	    if (svg.select('polyline').empty()) {
+	      svg.append('polyline').classed('geojs-scale-widget-bar', true).attr({
+	        fill: 'none',
+	        'stroke-width': sw
+	      });
+	    }
+	    if (svg.select('text').empty()) {
+	      svg.append('text').classed('geojs-scale-widget-text', true);
+	    }
+	    switch (m_options.orientation) {
+	      case 'bottom':
+	        pts = [[sw2, tl], [sw2, sw2], [width - sw2, sw2], [width - sw2, tl]];
+	        svg.select('text').attr({
+	          x: width / 2,
+	          y: sw * 2,
+	          'text-anchor': 'middle',
+	          'alignment-baseline': 'hanging'
+	        });
+	        break;
+	      case 'top':
+	        pts = [[sw2, height - tl], [sw2, height - sw2], [width - sw2, height - sw2], [width - sw2, height - tl]];
+	        svg.select('text').attr({
+	          x: width / 2,
+	          y: height - sw * 2,
+	          'text-anchor': 'middle',
+	          'alignment-baseline': 'baseline'
+	        });
+	        break;
+	      case 'left':
+	        pts = [[width - tl, sw2], [width - sw2, sw2], [width - sw2, height - sw2], [width - tl, height - sw2]];
+	        svg.select('text').attr({
+	          x: width - sw * 2,
+	          y: height / 2,
+	          'text-anchor': 'end',
+	          'alignment-baseline': 'middle'
+	        });
+	        break;
+	      case 'right':
+	        pts = [[tl, sw2], [sw2, sw2], [sw2, height - sw2], [tl, height - sw2]];
+	        svg.select('text').attr({
+	          x: sw * 2,
+	          y: height / 2,
+	          'text-anchor': 'start',
+	          'alignment-baseline': 'middle'
+	        });
+	        break;
+	    }
+	    svg.select('polyline').attr('points', pts.map(function (pt) { return pt.join(','); }).join(' '));
+	    svg.select('text').html(value.html);
+	  };
+
+	  /**
+	   * Update the widget upon panning.
+	   */
+	  this._update = function () {
+	    this._render();
+	  };
+
+	  /**
+	   * Set or get options.
+	   *
+	   * @param {string|object} [arg1] If `undefined`, return the options object.
+	   *    If a string, either set or return the option of that name.  If an
+	   *    object, update the options with the object's values.
+	   * @param {object} [arg2] If `arg1` is a string and this is defined, set
+	   *    the option to this value.
+	   * @returns {object|this} If options are set, return the annotation,
+	   *    otherwise return the requested option or the set of options.
+	   */
+	  this.options = function (arg1, arg2) {
+	    if (arg1 === undefined) {
+	      var result = $.extend({}, m_options);
+	      result.position = m_this.position(undefined, true);
+	      return result;
+	    }
+	    if (typeof arg1 === 'string' && arg2 === undefined) {
+	      return arg1 === 'position' ? m_this.position(undefined, true) : m_options[arg1];
+	    }
+	    if (arg2 === undefined) {
+	      m_options = $.extend(true, m_options, arg1);
+	    } else {
+	      m_options[arg1] = arg2;
+	    }
+	    if (arg1.position || arg1 === 'position') {
+	      m_this.position(arg1.position || arg2);
+	    }
+	    m_this._render();
+	    return m_this;
+	  };
+	};
+
+	inherit(scaleWidget, svgWidget);
+
+	/* The unitsTable has predefined unit sets.  Each entry is an array that must
+	 * be in ascending order. */
+	scaleWidget.unitsTable = {
+	  si: [
+	    {unit: 'nm', scale: 1e-9},
+	    {unit: '&mu;m', scale: 1e-6},
+	    {unit: 'mm', scale: 0.001},
+	    {unit: 'm', scale: 1},
+	    {unit: 'km', scale: 1000}
+	  ],
+	  miles: [
+	    {unit: 'in', scale: 0.0254}, // applies to < 1 in
+	    {
+	      /* By specifying inches a second time, the first entry will apply to
+	       * values less than 1 inch, and those will be rounded by powers of 10
+	       * using the default rules.  This entry will round values differently,
+	       * so one will see 1, 1.5, 2, 3, 6, 9 rather than the default which would
+	       * be 1, 1.5, 2, 3, 5, 8, 10. */
+	      unit: 'in',
+	      scale: 0.0254,
+	      basis: 12,
+	      multiples: [
+	        {multiple: 1, digits: 1},
+	        {multiple: 1.5, digits: 2},
+	        {multiple: 2, digits: 1},
+	        {multiple: 3, digits: 1},
+	        {multiple: 6, digits: 1},
+	        {multiple: 9, digits: 1}
+	      ]
+	    },
+	    {unit: 'ft', scale: 0.3048},
+	    {unit: 'mi', scale: 1609.344}
+	  ]
+	};
+
+	registerWidget('dom', 'scale', scaleWidget);
+	module.exports = scaleWidget;
+
+
+/***/ }),
+/* 306 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(307);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(6)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!../../node_modules/css-loader/index.js!../../node_modules/stylus-loader/index.js!./scaleWidget.styl", function() {
+				var newContent = require("!!../../node_modules/css-loader/index.js!../../node_modules/stylus-loader/index.js!./scaleWidget.styl");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ }),
+/* 307 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(5)();
+	// imports
+
+
+	// module
+	exports.push([module.id, ".geojs-scale-widget-bar{stroke:#000}.geojs-scale-widget-text{font-weight:700;font-size:16px;font-family:serif}", ""]);
+
+	// exports
+
+
+/***/ }),
+/* 308 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var svgWidget = __webpack_require__(304);
 	var inherit = __webpack_require__(8);
 	var registerWidget = __webpack_require__(201).registerWidget;
 
@@ -65469,8 +66434,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var m_this = this,
 	      s_exit = this._exit,
-	      s_createCanvas = this._createCanvas,
-	      s_appendChild = this._appendChild,
 	      m_xscale,
 	      m_yscale,
 	      m_plus,
@@ -65539,8 +66502,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @private
 	   */
 	  this._init = function () {
-	    s_createCanvas();
-	    s_appendChild();
+	    m_this._createCanvas();
+	    m_this._appendCanvasToParent();
 
 	    m_this.reposition();
 
