@@ -937,6 +937,8 @@ var map = function (arg) {
       m_this.interactor().destroy();
       m_this.interactor(null);
     }
+    // if the animation queue was shared, this clears it
+    m_animationQueue = [];
     m_this.node().data('data-geojs-map', null);
     m_this.node().off('.geo');
     /* make sure the map node has nothing left in it */
