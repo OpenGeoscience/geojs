@@ -151,6 +151,10 @@ describe('geo.annotation', function () {
       expect(ann.layer()).toBe(layer);
     });
     it('state', function () {
+      map = createMap();
+      layer = map.createLayer('annotation', {
+        annotations: geo.listAnnotations()
+      });
       var ann = geo.annotation.annotation('test', {layer: layer});
       map.geoOn(geo.event.annotation.state, function (evt) {
         stateEvent += 1;
