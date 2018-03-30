@@ -179,7 +179,7 @@ var sceneObject = function (arg) {
    */
   this._exit = function () {
     m_children = [];
-    delete m_this.parent;
+    m_parent = null;
     s_exit();
   };
 

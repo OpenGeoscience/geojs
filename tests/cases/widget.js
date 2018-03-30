@@ -249,4 +249,26 @@ describe('widget api', function () {
     domWidget._exit();
     expect($(o.uiLayer.canvas()).children().length).toBe(widgetCount - 1);
   });
+  it('widgets on two layers should both be clickable', function () {
+    var o = makeMap(),
+        offset = o.map.node().offset(),
+        uiLayer2 = o.map.createLayer('ui'),
+        clickCount = 0, clickCount2 = 0,
+        widget = o.uiLayer.createWidget('dom', {
+          position: {top: 0, left: 0, width: '20px', height: '20px'}
+        }),
+        widget2 = uiLayer2.createWidget('dom', {
+          position: {top: 0, left: 30, width: '20px', height: '20px'}
+        });
+    $(widget.canvas()).on('click', function () {
+      clickCount += 1;
+    });
+    $(widget2.canvas()).on('click', function () {
+      clickCount2 += 1;
+    });
+    document.elementFromPoint(offset.left + 10, offset.top + 10).click();
+    document.elementFromPoint(offset.left + 40, offset.top + 10).click();
+    expect(clickCount).toBe(1);
+    expect(clickCount2).toBe(1);
+  });
 });
