@@ -424,6 +424,12 @@ describe('geo.core.map', function () {
       m.exit();
       expect(count_events(m.node(), 'geo')).toBe(0);
       expect($('#map').children().length).toBe(0);
+
+      m = createMap();
+      m.scheduleAnimationFrame(function () { });
+      expect(m.animationQueue().length).toBeGreaterThan(0);
+      m.exit();
+      expect(m.animationQueue().length).toBe(0);
     });
     it('pan, clampBoundsX, and clampBoundsY', function () {
       var m = createMap({
@@ -816,9 +822,9 @@ describe('geo.core.map', function () {
         done();
       });
     });
-    it('layer background', function (done) {
+    if (!isPhantomJS()) {
       // this test won't work in PhantomJS.
-      if (!isPhantomJS()) {
+      it('layer background', function (done) {
         var layer3 = m.createLayer('ui');
         layer3.node().css('background-image', 'url(/data/tilefancy.png)');
         m.screenshot().then(function (result) {
@@ -827,13 +833,11 @@ describe('geo.core.map', function () {
           m.deleteLayer(layer3);
           done();
         });
-      } else {
-        done();
-      }
-    }, 10000);
-    it('layer css background', function (done) {
+      }, 10000);
+    }
+    if (!isPhantomJS()) {
       // this test won't work in PhantomJS.
-      if (!isPhantomJS()) {
+      it('layer css background', function (done) {
         geo.jQuery('head').append('<link rel="stylesheet" href="/testdata/test.css" type="text/css"/>');
         var layer3 = m.createLayer('ui');
         layer3.node().addClass('image-background');
@@ -844,10 +848,8 @@ describe('geo.core.map', function () {
           m.deleteLayer(layer3);
           done();
         });
-      } else {
-        done();
-      }
-    }, 10000);
+      }, 10000);
+    }
     it('layers in a different order', function (done) {
       m.screenshot([layer2, layer1]).then(function (result) {
         // the order doesn't matter
