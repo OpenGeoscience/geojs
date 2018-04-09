@@ -254,6 +254,12 @@ describe('geo.feature', function () {
       feat.updateStyleFromArray('radius', [11, 12, 13, 14], true);
       expect(count).toBe(1);
     });
+    it('mouseOverOrderHighestIndex', function () {
+      var evt = {over: {index: [3, 4, 2], found: []}, feature: feat};
+      expect(feat.mouseOverOrderHighestIndex(evt)).toBe(undefined);
+      expect(evt.over.index).toEqual([2, 3, 4]);
+      expect(evt.over.found.length).toBe(3);
+    });
   });
   describe('Check class accessors', function () {
     var map, layer, feat;
