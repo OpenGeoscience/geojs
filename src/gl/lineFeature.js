@@ -372,7 +372,7 @@ var gl_lineFeature = function (arg) {
    */
   function createGLLines(onlyStyle) {
     var data = m_this.data(),
-        i, j, k, v, v2, lidx,
+        d, i, j, k, v, v2, lidx,
         numSegments = 0, len,
         lineItemList, lineItem, lineItemData,
         vert = [{}, {}], v1 = vert[1],
@@ -416,14 +416,15 @@ var gl_lineFeature = function (arg) {
           posFunc = m_this.position();
       lineItemList = new Array(data.length);
       for (i = 0; i < data.length; i += 1) {
-        lineItem = m_this.line()(data[i], i);
+        d = data[i];
+        lineItem = m_this.line()(d, i);
         lineItemList[i] = lineItem;
         if (lineItem.length < 2) {
           continue;
         }
         numSegments += lineItem.length - 1;
         for (j = 0; j < lineItem.length; j += 1) {
-          pos = posFunc(lineItem[j], j, lineItem, i);
+          pos = posFunc(lineItem[j], j, d, i);
           position.push(pos.x);
           position.push(pos.y);
           position.push(pos.z || 0.0);
@@ -431,7 +432,7 @@ var gl_lineFeature = function (arg) {
             firstpos = pos;
           }
         }
-        if (lineItem.length > 2 && (closedVal === undefined ? closedFunc(data[i], i) : closedVal)) {
+        if (lineItem.length > 2 && (closedVal === undefined ? closedFunc(d, i) : closedVal)) {
           /* line is closed */
           if (pos.x !== firstpos.x || pos.y !== firstpos.y ||
               pos.z !== firstpos.z) {
@@ -487,6 +488,7 @@ var gl_lineFeature = function (arg) {
       if (lineItem.length < 2) {
         continue;
       }
+      d = data[i];
       firstPosIdx3 = posIdx3;
       for (j = 0; j < lineItem.length + (closed[i] === 2 ? 1 : 0); j += 1, posIdx3 += 3) {
         lidx = j;
@@ -510,11 +512,11 @@ var gl_lineFeature = function (arg) {
               (j !== lidx ? firstPosIdx3 + 3 : firstPosIdx3 + 6 - closed[i] * 3) :
               posIdx3);
         }
-        v1.strokeWidth = strokeWidthVal === undefined ? strokeWidthFunc(lineItemData, lidx, lineItem, i) : strokeWidthVal;
-        v1.strokeColor = strokeColorVal === undefined ? strokeColorFunc(lineItemData, lidx, lineItem, i) : strokeColorVal;
-        v1.strokeOpacity = strokeOpacityVal === undefined ? strokeOpacityFunc(lineItemData, lidx, lineItem, i) : strokeOpacityVal;
+        v1.strokeWidth = strokeWidthVal === undefined ? strokeWidthFunc(lineItemData, lidx, d, i) : strokeWidthVal;
+        v1.strokeColor = strokeColorVal === undefined ? strokeColorFunc(lineItemData, lidx, d, i) : strokeColorVal;
+        v1.strokeOpacity = strokeOpacityVal === undefined ? strokeOpacityFunc(lineItemData, lidx, d, i) : strokeOpacityVal;
         if (updateFlags) {
-          v1.strokeOffset = (strokeOffsetVal === undefined ? strokeOffsetFunc(lineItemData, lidx, lineItem, i) : strokeOffsetVal) || 0;
+          v1.strokeOffset = (strokeOffsetVal === undefined ? strokeOffsetFunc(lineItemData, lidx, d, i) : strokeOffsetVal) || 0;
           if (v1.strokeOffset) {
             /* we use 11 bits to store the offset, and we want to store values
              * from -1 to 1, so multiply our values by 1023, and use some bit
@@ -525,9 +527,9 @@ var gl_lineFeature = function (arg) {
             v1.posStrokeOffset = v1.negStrokeOffset = 0;
           }
           if (!closed[i] && (!j || j === lineItem.length - 1)) {
-            v1.flags = flagsLineCap[lineCapVal === undefined ? lineCapFunc(lineItemData, lidx, lineItem, i) : lineCapVal] || flagsLineCap.butt;
+            v1.flags = flagsLineCap[lineCapVal === undefined ? lineCapFunc(lineItemData, lidx, d, i) : lineCapVal] || flagsLineCap.butt;
           } else {
-            v1.flags = flagsLineJoin[lineJoinVal === undefined ? lineJoinFunc(lineItemData, lidx, lineItem, i) : lineJoinVal] || flagsLineJoin.miter;
+            v1.flags = flagsLineJoin[lineJoinVal === undefined ? lineJoinFunc(lineItemData, lidx, d, i) : lineJoinVal] || flagsLineJoin.miter;
           }
         }
 
