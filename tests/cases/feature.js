@@ -90,6 +90,11 @@ describe('geo.feature', function () {
       feat.geoOn(geo.event.feature.brushend, function (evt) { events.brushend = evt; });
       map.interactor().simulateEvent('mousemove', {map: {x: 20, y: 20}});
       expect(events.mouseover.index).toBe(1);
+      points.index = [1, 2];
+      map.interactor().simulateEvent('mousedown', {map: {x: 20, y: 20}, button: 'left'});
+      map.interactor().simulateEvent('mouseup', {map: {x: 20, y: 20}, button: 'left'});
+      expect(events.mouseclick.index).toBe(2);
+      expect(events.mouseclick.top).toBe(true);
     });
     it('_unbindMouseHandlers', function () {
       feat._unbindMouseHandlers();

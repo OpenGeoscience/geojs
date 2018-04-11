@@ -211,7 +211,7 @@ var feature = function (arg) {
 
     // if we are over more than one item, trigger an event that is allowed to
     // reorder the values in evt.over.index.  Event handlers don't have to
-    // maintain evt.over.data.  Handlers should not modify evt.over.extra or
+    // maintain evt.over.found.  Handlers should not modify evt.over.extra or
     // evt.previous.
     if (over.index.length > 1) {
       m_this.geoTrigger(geo_event.feature.mouseover_order, {
@@ -326,6 +326,16 @@ var feature = function (arg) {
         over = m_this.pointSearch(mouse.geo),
         extra = over.extra || {};
 
+    // if we are over more than one item, trigger an event that is allowed to
+    // reorder the values in evt.over.index.  Event handlers don't have to
+    // maintain evt.over.found.  Handlers should not modify evt.over.extra.
+    if (over.index.length > 1) {
+      m_this.geoTrigger(geo_event.feature.mouseclick_order, {
+        feature: this,
+        mouse: mouse,
+        over: over
+      });
+    }
     mouse.buttonsDown = evt.buttonsDown;
     feature.eventID += 1;
     over.index.forEach(function (i, idx) {

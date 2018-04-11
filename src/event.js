@@ -324,10 +324,10 @@ geo_event.feature = {
    */
   mouseover:  'geo_feature_mouseover',
   /**
-   * The event contains the `feature`, the `previous` record of data elements
-   * that were under the mouse, and `over`, the new record of data elements that
-   * are unrder the mouse.
-   * @event geo.event.feature.mouseover.order
+   * The event contains the `feature`, the `mouse` record, the `previous`
+   * record of data elements that were under the mouse, and `over`, the new
+   * record of data elements that are unrder the mouse.
+   * @event geo.event.feature.mouseover_order
   */
   mouseover_order: 'geo_feature_mouseover_order',
   /**
@@ -350,6 +350,12 @@ geo_event.feature = {
    * @event geo.event.feature.mouseclick
    */
   mouseclick: 'geo_feature_mouseclick',
+  /**
+   * The event contains the `feature`, the `mouse` record, and `over`, the
+   * record of data elements that are unrder the mouse.
+   * @event geo.event.feature.mouseclick_order
+  */
+  mouseclick_order: 'geo_feature_mouseclick_order',
   /**
    * The event is the feature version of {@link geo.event.brushend}.
    * @event geo.event.feature.brushend
