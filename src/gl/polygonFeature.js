@@ -38,6 +38,7 @@ var gl_polygonFeature = function (arg) {
       m_geometry,
       s_init = this._init,
       s_update = this._update,
+      m_builtOnce,
       m_updateAnimFrameRef;
 
   function createVertexShader() {
@@ -325,6 +326,7 @@ var gl_polygonFeature = function (arg) {
 
     if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
       m_this.renderer().contextRenderer().addActor(m_actor);
+      m_builtOnce = true;
     }
     m_this.buildTime().modified();
   };
@@ -332,10 +334,12 @@ var gl_polygonFeature = function (arg) {
   /**
    * Update.
    *
-   * @override
+   * @param {object} [opts] Update options.
+   * @param {boolean} [opts.mayDelay] If truthy, wait until the next animation
+   *    frame for the update.
    */
   this._update = function (opts) {
-    if (opts && opts.mayDelay) {
+    if (opts && opts.mayDelay && m_builtOnce) {
       m_updateAnimFrameRef = m_this.layer().map().scheduleAnimationFrame(m_this._update);
       return;
     }
