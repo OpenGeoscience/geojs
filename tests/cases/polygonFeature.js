@@ -147,44 +147,106 @@ describe('geo.polygonFeature', function () {
   });
 
   describe('Public utility methods', function () {
-    describe('pointSearch', function () {
-      it('basic usage', function () {
-        mockVGLRenderer();
-        var map, layer, polygon, data, pt;
-        map = createMap();
-        layer = map.createLayer('feature', {renderer: 'vgl'});
-        polygon = geo.polygonFeature({layer: layer});
-        polygon._init();
-        data = testPolygons;
-        polygon.data(data);
-        pt = polygon.pointSearch({x: 5, y: 5});
-        expect(pt.index).toEqual([0]);
-        expect(pt.found.length).toBe(1);
-        expect(pt.found[0][0]).toEqual(data[0][0]);
-        pt = polygon.pointSearch({x: 21, y: 10});
-        expect(pt.index).toEqual([1]);
-        expect(pt.found.length).toBe(1);
-        pt = polygon.pointSearch({x: 30, y: 10});
-        expect(pt.index).toEqual([]);
-        expect(pt.found.length).toBe(0);
-        pt = polygon.pointSearch({x: 51, y: 10});
-        expect(pt.index).toEqual([2, 3]);
-        expect(pt.found.length).toBe(2);
-        pt = polygon.pointSearch({x: 57, y: 10});
-        expect(pt.index).toEqual([3]);
-        expect(pt.found.length).toBe(1);
-        /* If the inner hole extends past the outside, it doesn't make that
-         * point in the polygon */
-        pt = polygon.pointSearch({x: 60, y: 13});
-        expect(pt.index).toEqual([]);
-        expect(pt.found.length).toBe(0);
+    it('pointSearch', function () {
+      mockVGLRenderer();
+      var map, layer, polygon, data, pt;
+      map = createMap();
+      layer = map.createLayer('feature', {renderer: 'vgl'});
+      polygon = geo.polygonFeature({layer: layer});
+      polygon._init();
+      data = testPolygons;
+      polygon.data(data);
+      pt = polygon.pointSearch({x: 5, y: 5});
+      expect(pt.index).toEqual([0]);
+      expect(pt.found.length).toBe(1);
+      expect(pt.found[0][0]).toEqual(data[0][0]);
+      pt = polygon.pointSearch({x: 21, y: 10});
+      expect(pt.index).toEqual([1]);
+      expect(pt.found.length).toBe(1);
+      pt = polygon.pointSearch({x: 30, y: 10});
+      expect(pt.index).toEqual([]);
+      expect(pt.found.length).toBe(0);
+      pt = polygon.pointSearch({x: 51, y: 10});
+      expect(pt.index).toEqual([2, 3]);
+      expect(pt.found.length).toBe(2);
+      pt = polygon.pointSearch({x: 57, y: 10});
+      expect(pt.index).toEqual([3]);
+      expect(pt.found.length).toBe(1);
+      /* If the inner hole extends past the outside, it doesn't make that
+       * point in the polygon */
+      pt = polygon.pointSearch({x: 60, y: 13});
+      expect(pt.index).toEqual([]);
+      expect(pt.found.length).toBe(0);
 
-        // enable stroke and test very close, but outside, of an edge
-        polygon.style({stroke: true, strokeWidth: 20});
-        pt = polygon.pointSearch({x: 5, y: 2.499});
-        expect(pt.index).toEqual([0]);
-        restoreVGLRenderer();
+      // enable stroke and test very close, but outside, of an edge
+      polygon.style({stroke: true, strokeWidth: 20});
+      pt = polygon.pointSearch({x: 5, y: 2.499});
+      expect(pt.index).toEqual([0]);
+      restoreVGLRenderer();
+    });
+
+    it('polygonCoordinates', function () {
+      mockVGLRenderer();
+      var map, layer, polygon;
+      map = createMap();
+      layer = map.createLayer('feature', {renderer: 'vgl'});
+      polygon = geo.polygonFeature({layer: layer});
+      polygon._init();
+      polygon.data(testPolygons);
+      var result = polygon.polygonCoordinates();
+      expect(result.length).toEqual(testPolygons.length);
+      expect(result[0].outer.length).toBe(3);
+      expect(result[0].inner.length).toBe(0);
+      expect(result[1].outer.length).toBe(4);
+      expect(result[1].inner.length).toBe(1);
+      expect(result[1].inner[0].length).toBe(4);
+      restoreVGLRenderer();
+    });
+
+    it('mouseOverOrderClosestBorder', function () {
+      mockVGLRenderer();
+      var map, layer, polygon, data;
+      map = createMap();
+      layer = map.createLayer('feature', {renderer: 'vgl'});
+      polygon = geo.polygonFeature({layer: layer});
+      polygon._init();
+      // define some overlapping polygons for testing
+      data = [{
+        outer: [[29, 20], [35, 20], [32, 25]]
+      }, {
+        outer: [[29, 22], [35, 22], [32, 27]],
+        inner: [[[30, 22.6], [34, 22.6], [32, 26]]]
+      }, {
+        outer: [[22, 30], [27, 32], [24, 35], [22, 35]]
+      }, {
+        outer: [[20, 30], [25, 32], [22, 35], [20, 35]]
+      }];
+      polygon.data(data).position(function (vertex) {
+        return {x: vertex[0], y: vertex[1]};
       });
+
+      var evt = {
+        over: {index: [2, 3], found: []},
+        feature: polygon,
+        mouse: {geo: {x: 22.7, y: 34}}
+      };
+      expect(polygon.mouseOverOrderClosestBorder(evt)).toBe(undefined);
+      expect(evt.over.index).toEqual([2, 3]);
+      evt.mouse.geo = {x: 22.2, y: 34};
+      polygon.mouseOverOrderClosestBorder(evt);
+      expect(evt.over.index).toEqual([3, 2]);
+      evt.over.index = [0, 1];
+      evt.mouse.geo = {x: 32, y: 22.2};
+      polygon.mouseOverOrderClosestBorder(evt);
+      expect(evt.over.index).toEqual([0, 1]);
+      evt.mouse.geo = {x: 30.5, y: 22.2};
+      polygon.mouseOverOrderClosestBorder(evt);
+      expect(evt.over.index).toEqual([1, 0]);
+      evt.mouse.geo = {x: 30.7, y: 22.5};
+      polygon.mouseOverOrderClosestBorder(evt);
+      expect(evt.over.index).toEqual([0, 1]);
+
+      restoreVGLRenderer();
     });
 
     describe('rdpSimplifyData', function () {

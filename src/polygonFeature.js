@@ -154,6 +154,16 @@ var polygonFeature = function (arg) {
   }
 
   /**
+   * Get the set of normalized polygon coordinates.
+   *
+   * @returns {object[]} An array of polygon positions.  Each has `outer` and
+   *    `inner` if it has any coordinates, or is undefined.
+   */
+  this.polygonCoordinates = function () {
+    return m_coordinates;
+  };
+
+  /**
    * Get the style for the stroke of the polygon.  Since polygons can have
    * holes, the number of stroke lines may not be the same as the number of
    * polygons.  If the style for a stroke is a function, this calls the
@@ -482,6 +492,51 @@ var polygonFeature = function (arg) {
     m_this.style('polygon', function (d) { return d; });
     m_this.data(data);
     return m_this;
+  };
+
+  /**
+   * If the selectionAPI is on, then setting
+   * `this.geoOn(geo.event.feature.mouseover_order, this.mouseOverOrderClosestBorder)`
+   * will make it so that the mouseon events prefer the polygon with the
+   * closet border, including hole edges.
+   *
+   * @param {geo.event} evt The event; this should be triggered from
+   *    `geo.event.feature.mouseover_order`.
+   */
+  this.mouseOverOrderClosestBorder = function (evt) {
+    var data = evt.feature.data(),
+        map = evt.feature.layer().map(),
+        pt = transform.transformCoordinates(map.ingcs(), evt.feature.gcs(), evt.mouse.geo),
+        coor = evt.feature.polygonCoordinates(),
+        dist = {};
+    evt.over.index.forEach(function (di, idx) {
+      var poly = coor[di], mindist;
+      poly.outer.forEach(function (line1, pidx) {
+        var line2 = poly.outer[(pidx + 1) % poly.outer.length];
+        var dist = util.distance2dToLineSquared(pt, line1, line2);
+        if (mindist === undefined || dist < mindist) {
+          mindist = dist;
+        }
+      });
+      poly.inner.forEach(function (inner) {
+        inner.forEach(function (line1, pidx) {
+          var line2 = inner[(pidx + 1) % inner.length];
+          var dist = util.distance2dToLineSquared(pt, line1, line2);
+          if (mindist === undefined || dist < mindist) {
+            mindist = dist;
+          }
+        });
+      });
+      dist[di] = mindist;
+    });
+    evt.over.index.sort(function (i1, i2) {
+      return dist[i1] - dist[i2];
+    }).reverse();
+    // this isn't necessary, but ensures that other event handlers have
+    // consistent information
+    evt.over.index.forEach(function (di, idx) {
+      evt.over.found[idx] = data[di];
+    });
   };
 
   /**

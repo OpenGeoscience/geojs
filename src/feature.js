@@ -206,7 +206,22 @@ var feature = function (arg) {
     if (!m_selectedFeatures.length && !over.index.length) {
       return;
     }
+
     extra = over.extra || {};
+
+    // if we are over more than one item, trigger an event that is allowed to
+    // reorder the values in evt.over.index.  Event handlers don't have to
+    // maintain evt.over.found.  Handlers should not modify evt.over.extra or
+    // evt.previous.
+    if (over.index.length > 1) {
+      m_this.geoTrigger(geo_event.feature.mouseover_order, {
+        feature: this,
+        mouse: mouse,
+        previous: m_selectedFeatures,
+        over: over
+      });
+    }
+
     // Get the index of the element that was previously on top
     if (m_selectedFeatures.length) {
       lastTop = m_selectedFeatures[m_selectedFeatures.length - 1];
@@ -311,6 +326,16 @@ var feature = function (arg) {
         over = m_this.pointSearch(mouse.geo),
         extra = over.extra || {};
 
+    // if we are over more than one item, trigger an event that is allowed to
+    // reorder the values in evt.over.index.  Event handlers don't have to
+    // maintain evt.over.found.  Handlers should not modify evt.over.extra.
+    if (over.index.length > 1) {
+      m_this.geoTrigger(geo_event.feature.mouseclick_order, {
+        feature: this,
+        mouse: mouse,
+        over: over
+      });
+    }
     mouse.buttonsDown = evt.buttonsDown;
     feature.eventID += 1;
     over.index.forEach(function (i, idx) {
@@ -731,6 +756,25 @@ var feature = function (arg) {
       this._bindMouseHandlers();
     }
     return this;
+  };
+
+  /**
+   * If the selectionAPI is on, then setting
+   * `this.geoOn(geo.event.feature.mouseover_order, this.mouseOverOrderHighestIndex)`
+   * will make it so that the mouseon events prefer the highest index feature.
+   *
+   * @param {geo.event} evt The event; this should be triggered from
+   *    `geo.event.feature.mouseover_order`.
+   */
+  this.mouseOverOrderHighestIndex = function (evt) {
+    // sort the found indices.  The last one is the one "on top".
+    evt.over.index.sort();
+    // this isn't necessary, but ensures that other event handlers have
+    // consistent information
+    var data = evt.feature.data();
+    evt.over.index.forEach(function (di, idx) {
+      evt.over.found[idx] = data[di];
+    });
   };
 
   /**

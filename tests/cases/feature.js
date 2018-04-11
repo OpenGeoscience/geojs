@@ -90,6 +90,11 @@ describe('geo.feature', function () {
       feat.geoOn(geo.event.feature.brushend, function (evt) { events.brushend = evt; });
       map.interactor().simulateEvent('mousemove', {map: {x: 20, y: 20}});
       expect(events.mouseover.index).toBe(1);
+      points.index = [1, 2];
+      map.interactor().simulateEvent('mousedown', {map: {x: 20, y: 20}, button: 'left'});
+      map.interactor().simulateEvent('mouseup', {map: {x: 20, y: 20}, button: 'left'});
+      expect(events.mouseclick.index).toBe(2);
+      expect(events.mouseclick.top).toBe(true);
     });
     it('_unbindMouseHandlers', function () {
       feat._unbindMouseHandlers();
@@ -253,6 +258,12 @@ describe('geo.feature', function () {
       feat.visible(false);
       feat.updateStyleFromArray('radius', [11, 12, 13, 14], true);
       expect(count).toBe(1);
+    });
+    it('mouseOverOrderHighestIndex', function () {
+      var evt = {over: {index: [3, 4, 2], found: []}, feature: feat};
+      expect(feat.mouseOverOrderHighestIndex(evt)).toBe(undefined);
+      expect(evt.over.index).toEqual([2, 3, 4]);
+      expect(evt.over.found.length).toBe(3);
     });
   });
   describe('Check class accessors', function () {
