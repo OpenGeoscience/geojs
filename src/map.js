@@ -1711,7 +1711,14 @@ var map = function (arg) {
     defer = defer.then(function () {
       var canvas = result;
       if (type !== 'canvas') {
-        result = result.toDataURL(type, encoderOptions);
+        try {
+          result = result.toDataURL(type, encoderOptions);
+        } catch (err) {
+          console.warn('Failed to convert screenshot to output', err);
+          var failure = $.Deferred();
+          failure.reject();
+          return failure;
+        }
       }
       m_this.geoTrigger(geo_event.screenshot.ready, {
         canvas: canvas,

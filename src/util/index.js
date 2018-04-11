@@ -8,10 +8,16 @@ var ClusterGroup = require('./clustering.js');
 
 var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
+var svgForeignObject = '<svg xmlns="http://www.w3.org/2000/svg">' +
+  '<foreignObject width="100%" height="100%">' +
+  '</foreignObject>' +
+  '</svg>';
+
 var m_timingData = {},
     m_timingKeepRecent = 200,
     m_threshold = 15,
-    m_originalRequestAnimationFrame;
+    m_originalRequestAnimationFrame,
+    m_htmlToImageSupport;
 
 /**
  * @typedef {object} geo.util.cssColorConversionRecord
@@ -1060,6 +1066,12 @@ var util = module.exports = {
     var deferList = [],
         results = [];
 
+    /* Remove comments to avoid dereferencing commented out sections.
+     * To match across lines, use [^\0] rather than . */
+    css = css.replace(/\/\*[^\0]*?\*\//g, '');
+    /* reduce whitespace to make the css shorter */
+    css = css.replace(/\r/g, '\n').replace(/\s+\n/g, '\n')
+             .replace(/\n\s+/g, '\n').replace(/\n\n+/g, '\n');
     if (baseUrl) {
       var match = /(^[^?#]*)\/[^?#/]*([?#]|$)/g.exec(baseUrl);
       baseUrl = match && match[1] ? match[1] + '/' : null;
@@ -1110,6 +1122,49 @@ var util = module.exports = {
   },
 
   /**
+   * Check if the current browser supports covnerting html to an image via an
+   * svg foreignObject and canvas.  If this has not been checked before, it
+   * returns a Deferred that resolves to a boolean (never rejects).  If the
+   * check has been done before, it returns a boolean.
+   *
+   * @returns {boolean|jQuery.Deferred}
+   */
+  htmlToImageSupported: function () {
+    if (m_htmlToImageSupport === undefined) {
+      var defer = $.Deferred();
+      var svg = $(svgForeignObject);
+      svg.attr({
+        width: '10px',
+        height: '10px',
+        'text-rendering': 'optimizeLegibility'
+      });
+      $('foreignObject', svg).append('<div/>');
+      var img = new Image();
+      img.onload = img.onerror = function () {
+        var canvas = document.createElement('canvas');
+        canvas.width = 10;
+        canvas.height = 10;
+        var context = canvas.getContext('2d');
+        context.drawImage(img, 0, 0);
+        try {
+          canvas.toDataURL();
+          m_htmlToImageSupport = true;
+        } catch (err) {
+          console.warn(
+              'This browser does not support converting HTML to an image via ' +
+              'SVG foreignObject.  Some functionality will be limited.', err);
+          m_htmlToImageSupport = false;
+        }
+        defer.resolve(m_htmlToImageSupport);
+      };
+      img.src = 'data:image/svg+xml;base64,' + btoa(util.escapeUnicodeHTML(
+          new XMLSerializer().serializeToString(svg[0])));
+      return defer;
+    }
+    return m_htmlToImageSupport;
+  },
+
+  /**
    * Convert an html element to an image.  This attempts to localize any
    * images within the element.  If there are other external references, the
    * image may not work due to security considerations.
@@ -1124,7 +1179,9 @@ var util = module.exports = {
    * @memberof geo.util
    */
   htmlToImage: function (elem, parents) {
-    var defer = $.Deferred(), container, deferList = [];
+    var defer = $.Deferred(),
+        deferList = [util.htmlToImageSupported()],
+        container;
 
     var parent = $(elem);
     elem = $(elem).clone();
@@ -1191,6 +1248,10 @@ var util = module.exports = {
         var href = $(this).attr('href');
         $.get(href).done(function (css) {
           util.dereferenceCssUrls(css, styleElem, styleDefer, undefined, href);
+        }).fail(function (xhr, status, err) {
+          console.warn('Failed to dereference ' + href, status, err);
+          styleElem.remove();
+          styleDefer.resolve();
         });
       }
       deferList.push(styleDefer);
@@ -1198,26 +1259,32 @@ var util = module.exports = {
     });
 
     $.when.apply($, deferList).then(function () {
-      var svg = $('<svg xmlns="http://www.w3.org/2000/svg">' +
-                  '<foreignObject width="100%" height="100%">' +
-                  '</foreignObject></svg>');
+      var svg = $(svgForeignObject);
       svg.attr({
         width: parent.width() + 'px',
         height: parent.height() + 'px',
+        // Adding this via the attr call works in Firefox headless, whereas if
+        // it is part of the svgForeignObject string, it does not.
         'text-rendering': 'optimizeLegibility'
       });
       $('foreignObject', svg).append(container);
 
       var img = new Image();
-      img.onload = function () {
+      if (!util.htmlToImageSupported()) {
         defer.resolve(img);
-      };
-      img.onerror = function () {
-        defer.reject();
-      };
-      img.src = 'data:image/svg+xml;base64,' +
-          btoa(util.escapeUnicodeHTML(
-              new XMLSerializer().serializeToString(svg[0])));
+      } else {
+        img.onload = function () {
+          defer.resolve(img);
+        };
+        img.onerror = function () {
+          console.warn('Failed to render html to image');
+          defer.reject();
+        };
+        // Firefox requires the HTML to be base64 encoded.  Chrome doesn't, but
+        // doing so does no harm.
+        img.src = 'data:image/svg+xml;base64,' + btoa(util.escapeUnicodeHTML(
+            new XMLSerializer().serializeToString(svg[0])));
+      }
     });
     return defer;
   },
