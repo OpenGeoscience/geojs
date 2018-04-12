@@ -10598,7 +10598,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	// module
-	exports.push([module.id, ".geojs-map{position:relative;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.geojs-map .geo-attribution{position:absolute;right:0;bottom:0;padding-right:5px;cursor:auto;font:11px/1.5 Helvetica Neue,Arial,Helvetica,sans-serif;z-index:1001;background:hsla(0,0%,100%,.7);clear:both;display:block;pointer-events:auto}.geojs-map .geo-attribution .geo-attribution-layer{padding-left:5px}.geojs-map .canvas-canvas{display:block;-webkit-transform-origin:0 0;transform-origin:0 0}.geojs-map .webgl-canvas{display:block}.geojs-map .geojs-layer{position:absolute;width:100%;height:100%;pointer-events:none}.geojs-map .geojs-layer.active{pointer-events:auto}.geojs-map .geo-tile-layer{-webkit-transform-origin:0 0;transform-origin:0 0;line-height:0;font-size:0}.geojs-map.annotation-input{cursor:crosshair}.geojs-map.highlight-focus:after{content:\"\";display:block;position:absolute;box-sizing:border-box;left:0;top:0;right:0;bottom:0;border:3px solid Highlight;opacity:1;-ms-filter:none;filter:none;transition:opacity 0s;visibility:hidden}.geojs-map.highlight-focus:focus:after{visibility:visible;transition:opacity 2.5s ease-in;opacity:0;-ms-filter:\"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)\";filter:alpha(opacity=0)}.geo-tile-container{position:absolute}.geo-tile-container.crop{overflow:hidden}", ""]);
+	exports.push([module.id, ".geojs-map{position:relative;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.geojs-map .geo-attribution{position:absolute;right:0;bottom:0;padding-right:5px;cursor:auto;font:11px/1.5 Helvetica Neue,Arial,Helvetica,sans-serif;z-index:1001;background:hsla(0,0%,100%,.7);clear:both;display:block;pointer-events:auto}.geojs-map .geo-attribution .geo-attribution-layer{padding-left:5px}.geojs-map .canvas-canvas{display:block;-webkit-transform-origin:0 0;transform-origin:0 0}.geojs-map .webgl-canvas{display:block}.geojs-map .geojs-layer{position:absolute;width:100%;height:100%;pointer-events:none}.geojs-map .geojs-layer.active>*{pointer-events:auto}.geojs-map .geo-tile-layer{-webkit-transform-origin:0 0;transform-origin:0 0;line-height:0;font-size:0}.geojs-map.annotation-input{cursor:crosshair}.geojs-map.highlight-focus:after{content:\"\";display:block;position:absolute;box-sizing:border-box;left:0;top:0;right:0;bottom:0;border:3px solid Highlight;opacity:1;-ms-filter:none;filter:none;transition:opacity 0s;visibility:hidden}.geojs-map.highlight-focus:focus:after{visibility:visible;transition:opacity 2.5s ease-in;opacity:0;-ms-filter:\"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)\";filter:alpha(opacity=0)}.geo-tile-container{position:absolute}.geo-tile-container.crop{overflow:hidden}", ""]);
 
 	// exports
 
@@ -13536,6 +13536,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  mouseover:  'geo_feature_mouseover',
 	  /**
+	   * The event contains the `feature`, the `mouse` record, the `previous`
+	   * record of data elements that were under the mouse, and `over`, the new
+	   * record of data elements that are unrder the mouse.
+	   * @event geo.event.feature.mouseover_order
+	  */
+	  mouseover_order: 'geo_feature_mouseover_order',
+	  /**
 	   * The event is the feature version of {@link geo.event.mouseout}.
 	   * @event geo.event.feature.mouseout
 	   */
@@ -13555,6 +13562,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @event geo.event.feature.mouseclick
 	   */
 	  mouseclick: 'geo_feature_mouseclick',
+	  /**
+	   * The event contains the `feature`, the `mouse` record, and `over`, the
+	   * record of data elements that are unrder the mouse.
+	   * @event geo.event.feature.mouseclick_order
+	  */
+	  mouseclick_order: 'geo_feature_mouseclick_order',
 	  /**
 	   * The event is the feature version of {@link geo.event.brushend}.
 	   * @event geo.event.feature.brushend
@@ -20018,10 +20031,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
+	var svgForeignObject = '<svg xmlns="http://www.w3.org/2000/svg">' +
+	  '<foreignObject width="100%" height="100%">' +
+	  '</foreignObject>' +
+	  '</svg>';
+
 	var m_timingData = {},
 	    m_timingKeepRecent = 200,
 	    m_threshold = 15,
-	    m_originalRequestAnimationFrame;
+	    m_originalRequestAnimationFrame,
+	    m_htmlToImageSupport;
 
 	/**
 	 * @typedef {object} geo.util.cssColorConversionRecord
@@ -21070,6 +21089,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var deferList = [],
 	        results = [];
 
+	    /* Remove comments to avoid dereferencing commented out sections.
+	     * To match across lines, use [^\0] rather than . */
+	    css = css.replace(/\/\*[^\0]*?\*\//g, '');
+	    /* reduce whitespace to make the css shorter */
+	    css = css.replace(/\r/g, '\n').replace(/\s+\n/g, '\n')
+	             .replace(/\n\s+/g, '\n').replace(/\n\n+/g, '\n');
 	    if (baseUrl) {
 	      var match = /(^[^?#]*)\/[^?#/]*([?#]|$)/g.exec(baseUrl);
 	      baseUrl = match && match[1] ? match[1] + '/' : null;
@@ -21120,6 +21145,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
+	   * Check if the current browser supports covnerting html to an image via an
+	   * svg foreignObject and canvas.  If this has not been checked before, it
+	   * returns a Deferred that resolves to a boolean (never rejects).  If the
+	   * check has been done before, it returns a boolean.
+	   *
+	   * @returns {boolean|jQuery.Deferred}
+	   */
+	  htmlToImageSupported: function () {
+	    if (m_htmlToImageSupport === undefined) {
+	      var defer = $.Deferred();
+	      var svg = $(svgForeignObject);
+	      svg.attr({
+	        width: '10px',
+	        height: '10px',
+	        'text-rendering': 'optimizeLegibility'
+	      });
+	      $('foreignObject', svg).append('<div/>');
+	      var img = new Image();
+	      img.onload = img.onerror = function () {
+	        var canvas = document.createElement('canvas');
+	        canvas.width = 10;
+	        canvas.height = 10;
+	        var context = canvas.getContext('2d');
+	        context.drawImage(img, 0, 0);
+	        try {
+	          canvas.toDataURL();
+	          m_htmlToImageSupport = true;
+	        } catch (err) {
+	          console.warn(
+	              'This browser does not support converting HTML to an image via ' +
+	              'SVG foreignObject.  Some functionality will be limited.', err);
+	          m_htmlToImageSupport = false;
+	        }
+	        defer.resolve(m_htmlToImageSupport);
+	      };
+	      img.src = 'data:image/svg+xml;base64,' + btoa(util.escapeUnicodeHTML(
+	          new XMLSerializer().serializeToString(svg[0])));
+	      return defer;
+	    }
+	    return m_htmlToImageSupport;
+	  },
+
+	  /**
 	   * Convert an html element to an image.  This attempts to localize any
 	   * images within the element.  If there are other external references, the
 	   * image may not work due to security considerations.
@@ -21134,7 +21202,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @memberof geo.util
 	   */
 	  htmlToImage: function (elem, parents) {
-	    var defer = $.Deferred(), container, deferList = [];
+	    var defer = $.Deferred(),
+	        deferList = [util.htmlToImageSupported()],
+	        container;
 
 	    var parent = $(elem);
 	    elem = $(elem).clone();
@@ -21201,6 +21271,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var href = $(this).attr('href');
 	        $.get(href).done(function (css) {
 	          util.dereferenceCssUrls(css, styleElem, styleDefer, undefined, href);
+	        }).fail(function (xhr, status, err) {
+	          console.warn('Failed to dereference ' + href, status, err);
+	          styleElem.remove();
+	          styleDefer.resolve();
 	        });
 	      }
 	      deferList.push(styleDefer);
@@ -21208,26 +21282,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    $.when.apply($, deferList).then(function () {
-	      var svg = $('<svg xmlns="http://www.w3.org/2000/svg">' +
-	                  '<foreignObject width="100%" height="100%">' +
-	                  '</foreignObject></svg>');
+	      var svg = $(svgForeignObject);
 	      svg.attr({
 	        width: parent.width() + 'px',
 	        height: parent.height() + 'px',
+	        // Adding this via the attr call works in Firefox headless, whereas if
+	        // it is part of the svgForeignObject string, it does not.
 	        'text-rendering': 'optimizeLegibility'
 	      });
 	      $('foreignObject', svg).append(container);
 
 	      var img = new Image();
-	      img.onload = function () {
+	      if (!util.htmlToImageSupported()) {
 	        defer.resolve(img);
-	      };
-	      img.onerror = function () {
-	        defer.reject();
-	      };
-	      img.src = 'data:image/svg+xml;base64,' +
-	          btoa(util.escapeUnicodeHTML(
-	              new XMLSerializer().serializeToString(svg[0])));
+	      } else {
+	        img.onload = function () {
+	          defer.resolve(img);
+	        };
+	        img.onerror = function () {
+	          console.warn('Failed to render html to image');
+	          defer.reject();
+	        };
+	        // Firefox requires the HTML to be base64 encoded.  Chrome doesn't, but
+	        // doing so does no harm.
+	        img.src = 'data:image/svg+xml;base64,' + btoa(util.escapeUnicodeHTML(
+	            new XMLSerializer().serializeToString(svg[0])));
+	      }
 	    });
 	    return defer;
 	  },
@@ -40587,7 +40667,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!m_selectedFeatures.length && !over.index.length) {
 	      return;
 	    }
+
 	    extra = over.extra || {};
+
+	    // if we are over more than one item, trigger an event that is allowed to
+	    // reorder the values in evt.over.index.  Event handlers don't have to
+	    // maintain evt.over.found.  Handlers should not modify evt.over.extra or
+	    // evt.previous.
+	    if (over.index.length > 1) {
+	      m_this.geoTrigger(geo_event.feature.mouseover_order, {
+	        feature: this,
+	        mouse: mouse,
+	        previous: m_selectedFeatures,
+	        over: over
+	      });
+	    }
+
 	    // Get the index of the element that was previously on top
 	    if (m_selectedFeatures.length) {
 	      lastTop = m_selectedFeatures[m_selectedFeatures.length - 1];
@@ -40692,6 +40787,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        over = m_this.pointSearch(mouse.geo),
 	        extra = over.extra || {};
 
+	    // if we are over more than one item, trigger an event that is allowed to
+	    // reorder the values in evt.over.index.  Event handlers don't have to
+	    // maintain evt.over.found.  Handlers should not modify evt.over.extra.
+	    if (over.index.length > 1) {
+	      m_this.geoTrigger(geo_event.feature.mouseclick_order, {
+	        feature: this,
+	        mouse: mouse,
+	        over: over
+	      });
+	    }
 	    mouse.buttonsDown = evt.buttonsDown;
 	    feature.eventID += 1;
 	    over.index.forEach(function (i, idx) {
@@ -41115,6 +41220,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  /**
+	   * If the selectionAPI is on, then setting
+	   * `this.geoOn(geo.event.feature.mouseover_order, this.mouseOverOrderHighestIndex)`
+	   * will make it so that the mouseon events prefer the highest index feature.
+	   *
+	   * @param {geo.event} evt The event; this should be triggered from
+	   *    `geo.event.feature.mouseover_order`.
+	   */
+	  this.mouseOverOrderHighestIndex = function (evt) {
+	    // sort the found indices.  The last one is the one "on top".
+	    evt.over.index.sort();
+	    // this isn't necessary, but ensures that other event handlers have
+	    // consistent information
+	    var data = evt.feature.data();
+	    evt.over.index.forEach(function (di, idx) {
+	      evt.over.found[idx] = data[di];
+	    });
+	  };
+
+	  /**
 	   * Initialize the class instance.  Derived classes should implement this.
 	   *
 	   * @param {geo.feature.spec} arg The feature specification.
@@ -41389,7 +41513,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  this._exit = function () {
 	    m_children = [];
-	    delete m_this.parent;
+	    m_parent = null;
 	    s_exit();
 	  };
 
@@ -43782,6 +43906,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  /**
+	   * Get the set of normalized polygon coordinates.
+	   *
+	   * @returns {object[]} An array of polygon positions.  Each has `outer` and
+	   *    `inner` if it has any coordinates, or is undefined.
+	   */
+	  this.polygonCoordinates = function () {
+	    return m_coordinates;
+	  };
+
+	  /**
 	   * Get the style for the stroke of the polygon.  Since polygons can have
 	   * holes, the number of stroke lines may not be the same as the number of
 	   * polygons.  If the style for a stroke is a function, this calls the
@@ -44110,6 +44244,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_this.style('polygon', function (d) { return d; });
 	    m_this.data(data);
 	    return m_this;
+	  };
+
+	  /**
+	   * If the selectionAPI is on, then setting
+	   * `this.geoOn(geo.event.feature.mouseover_order, this.mouseOverOrderClosestBorder)`
+	   * will make it so that the mouseon events prefer the polygon with the
+	   * closet border, including hole edges.
+	   *
+	   * @param {geo.event} evt The event; this should be triggered from
+	   *    `geo.event.feature.mouseover_order`.
+	   */
+	  this.mouseOverOrderClosestBorder = function (evt) {
+	    var data = evt.feature.data(),
+	        map = evt.feature.layer().map(),
+	        pt = transform.transformCoordinates(map.ingcs(), evt.feature.gcs(), evt.mouse.geo),
+	        coor = evt.feature.polygonCoordinates(),
+	        dist = {};
+	    evt.over.index.forEach(function (di, idx) {
+	      var poly = coor[di], mindist;
+	      poly.outer.forEach(function (line1, pidx) {
+	        var line2 = poly.outer[(pidx + 1) % poly.outer.length];
+	        var dist = util.distance2dToLineSquared(pt, line1, line2);
+	        if (mindist === undefined || dist < mindist) {
+	          mindist = dist;
+	        }
+	      });
+	      poly.inner.forEach(function (inner) {
+	        inner.forEach(function (line1, pidx) {
+	          var line2 = inner[(pidx + 1) % inner.length];
+	          var dist = util.distance2dToLineSquared(pt, line1, line2);
+	          if (mindist === undefined || dist < mindist) {
+	            mindist = dist;
+	          }
+	        });
+	      });
+	      dist[di] = mindist;
+	    });
+	    evt.over.index.sort(function (i1, i2) {
+	      return dist[i1] - dist[i2];
+	    }).reverse();
+	    // this isn't necessary, but ensures that other event handlers have
+	    // consistent information
+	    evt.over.index.forEach(function (di, idx) {
+	      evt.over.found[idx] = data[di];
+	    });
 	  };
 
 	  /**
@@ -53918,6 +54097,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_this.interactor().destroy();
 	      m_this.interactor(null);
 	    }
+	    // if the animation queue was shared, this clears it
+	    m_animationQueue = [];
 	    m_this.node().data('data-geojs-map', null);
 	    m_this.node().off('.geo');
 	    /* make sure the map node has nothing left in it */
@@ -54690,7 +54871,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    defer = defer.then(function () {
 	      var canvas = result;
 	      if (type !== 'canvas') {
-	        result = result.toDataURL(type, encoderOptions);
+	        try {
+	          result = result.toDataURL(type, encoderOptions);
+	        } catch (err) {
+	          console.warn('Failed to convert screenshot to output', err);
+	          var failure = $.Deferred();
+	          failure.reject();
+	          return failure;
+	        }
 	      }
 	      m_this.geoTrigger(geo_event.screenshot.ready, {
 	        canvas: canvas,
@@ -58087,14 +58275,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 249 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	module.exports = ("0.15.2");
+	module.exports = ("0.16.0");
 
 
 /***/ }),
 /* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	module.exports = ("baf4b5ef1148b014a10fc5a942ade3a972018b3b");
+	module.exports = ("644aa5f8e129f78eb97c81b3e4838c5bc33637c2");
 
 
 /***/ }),
@@ -60036,7 +60224,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  function createGLLines(onlyStyle) {
 	    var data = m_this.data(),
-	        i, j, k, v, v2, lidx,
+	        d, i, j, k, v, v2, lidx,
 	        numSegments = 0, len,
 	        lineItemList, lineItem, lineItemData,
 	        vert = [{}, {}], v1 = vert[1],
@@ -60080,14 +60268,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	          posFunc = m_this.position();
 	      lineItemList = new Array(data.length);
 	      for (i = 0; i < data.length; i += 1) {
-	        lineItem = m_this.line()(data[i], i);
+	        d = data[i];
+	        lineItem = m_this.line()(d, i);
 	        lineItemList[i] = lineItem;
 	        if (lineItem.length < 2) {
 	          continue;
 	        }
 	        numSegments += lineItem.length - 1;
 	        for (j = 0; j < lineItem.length; j += 1) {
-	          pos = posFunc(lineItem[j], j, lineItem, i);
+	          pos = posFunc(lineItem[j], j, d, i);
 	          position.push(pos.x);
 	          position.push(pos.y);
 	          position.push(pos.z || 0.0);
@@ -60095,7 +60284,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            firstpos = pos;
 	          }
 	        }
-	        if (lineItem.length > 2 && (closedVal === undefined ? closedFunc(data[i], i) : closedVal)) {
+	        if (lineItem.length > 2 && (closedVal === undefined ? closedFunc(d, i) : closedVal)) {
 	          /* line is closed */
 	          if (pos.x !== firstpos.x || pos.y !== firstpos.y ||
 	              pos.z !== firstpos.z) {
@@ -60151,6 +60340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (lineItem.length < 2) {
 	        continue;
 	      }
+	      d = data[i];
 	      firstPosIdx3 = posIdx3;
 	      for (j = 0; j < lineItem.length + (closed[i] === 2 ? 1 : 0); j += 1, posIdx3 += 3) {
 	        lidx = j;
@@ -60174,11 +60364,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	              (j !== lidx ? firstPosIdx3 + 3 : firstPosIdx3 + 6 - closed[i] * 3) :
 	              posIdx3);
 	        }
-	        v1.strokeWidth = strokeWidthVal === undefined ? strokeWidthFunc(lineItemData, lidx, lineItem, i) : strokeWidthVal;
-	        v1.strokeColor = strokeColorVal === undefined ? strokeColorFunc(lineItemData, lidx, lineItem, i) : strokeColorVal;
-	        v1.strokeOpacity = strokeOpacityVal === undefined ? strokeOpacityFunc(lineItemData, lidx, lineItem, i) : strokeOpacityVal;
+	        v1.strokeWidth = strokeWidthVal === undefined ? strokeWidthFunc(lineItemData, lidx, d, i) : strokeWidthVal;
+	        v1.strokeColor = strokeColorVal === undefined ? strokeColorFunc(lineItemData, lidx, d, i) : strokeColorVal;
+	        v1.strokeOpacity = strokeOpacityVal === undefined ? strokeOpacityFunc(lineItemData, lidx, d, i) : strokeOpacityVal;
 	        if (updateFlags) {
-	          v1.strokeOffset = (strokeOffsetVal === undefined ? strokeOffsetFunc(lineItemData, lidx, lineItem, i) : strokeOffsetVal) || 0;
+	          v1.strokeOffset = (strokeOffsetVal === undefined ? strokeOffsetFunc(lineItemData, lidx, d, i) : strokeOffsetVal) || 0;
 	          if (v1.strokeOffset) {
 	            /* we use 11 bits to store the offset, and we want to store values
 	             * from -1 to 1, so multiply our values by 1023, and use some bit
@@ -60189,9 +60379,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            v1.posStrokeOffset = v1.negStrokeOffset = 0;
 	          }
 	          if (!closed[i] && (!j || j === lineItem.length - 1)) {
-	            v1.flags = flagsLineCap[lineCapVal === undefined ? lineCapFunc(lineItemData, lidx, lineItem, i) : lineCapVal] || flagsLineCap.butt;
+	            v1.flags = flagsLineCap[lineCapVal === undefined ? lineCapFunc(lineItemData, lidx, d, i) : lineCapVal] || flagsLineCap.butt;
 	          } else {
-	            v1.flags = flagsLineJoin[lineJoinVal === undefined ? lineJoinFunc(lineItemData, lidx, lineItem, i) : lineJoinVal] || flagsLineJoin.miter;
+	            v1.flags = flagsLineJoin[lineJoinVal === undefined ? lineJoinFunc(lineItemData, lidx, d, i) : lineJoinVal] || flagsLineJoin.miter;
 	          }
 	        }
 
@@ -61117,6 +61307,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_geometry,
 	      s_init = this._init,
 	      s_update = this._update,
+	      m_builtOnce,
 	      m_updateAnimFrameRef;
 
 	  function createVertexShader() {
@@ -61404,6 +61595,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
 	      m_this.renderer().contextRenderer().addActor(m_actor);
+	      m_builtOnce = true;
 	    }
 	    m_this.buildTime().modified();
 	  };
@@ -61411,10 +61603,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Update.
 	   *
-	   * @override
+	   * @param {object} [opts] Update options.
+	   * @param {boolean} [opts.mayDelay] If truthy, wait until the next animation
+	   *    frame for the update.
 	   */
 	  this._update = function (opts) {
-	    if (opts && opts.mayDelay) {
+	    if (opts && opts.mayDelay && m_builtOnce) {
 	      m_updateAnimFrameRef = m_this.layer().map().scheduleAnimationFrame(m_this._update);
 	      return;
 	    }
