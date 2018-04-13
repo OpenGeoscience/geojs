@@ -229,6 +229,10 @@ footer {
         h4 {
             a {
                 color: inherit;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+                font-size: 16px;
             }
 
             text-transform: none;

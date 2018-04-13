@@ -6,7 +6,7 @@
     "version": "3.4.4"
   },
   "dependencies": {
-    "hexo": "^3.3.9",
+    "hexo": "^3.4.4",
     "hexo-fs": "^0.2.2",
     "hexo-renderer-ejs": "^0.3.0",
     "hexo-renderer-marked": "^0.3.2",
