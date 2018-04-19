@@ -92,6 +92,13 @@ $(function () {
       base: Math.E,
       domain: [100, 10000],
       colors: ['blue', 'olive']
+    },
+    {
+      name: 'Continuous multicolor',
+      type: 'continuous',
+      scale: 'linear',
+      domain: [100, 1000],
+      colors: ['red', 'blue', 'green', 'orange']
     }
   ]);
 

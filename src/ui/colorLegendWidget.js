@@ -327,9 +327,14 @@ var colorLegendWidget = function (arg) {
     gradient.append('stop')
       .attr('offset', '0%')
       .attr('stop-color', category.colors[0]);
+    for (var i = 1; i < category.colors.length - 1; i++) {
+      gradient.append('stop')
+        .attr('offset', (100 / (category.colors.length - 1) * i).toFixed(6) + '%')
+        .attr('stop-color', category.colors[i]);
+    }
     gradient.append('stop')
       .attr('offset', '100%')
-      .attr('stop-color', category.colors[1]);
+      .attr('stop-color', category.colors[category.colors.length - 1]);
     svg.append('rect')
       .attr('fill', 'url(#gradient' + id + ')')
       .attr('width', width)

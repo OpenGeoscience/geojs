@@ -67,6 +67,13 @@ describe('color legend', function () {
       base: Math.E,
       domain: [100, 10000],
       colors: ['blue', 'olive']
+    },
+    {
+      name: 'Continuous multicolor',
+      type: 'continuous',
+      scale: 'pow',
+      domain: [100, 1000],
+      colors: ['red', 'blue', 'green', 'orange']
     }
   ];
 
@@ -164,6 +171,10 @@ describe('color legend', function () {
     expect($(legends[7]).find('svg g.tick text').toArray().map(function (text) {
       return $(text).text();
     }).join(', ')).toBe('150, 400, 1.1k, 3.0k, 8.1k');
+
+    expect($(legends[8]).find('svg>defs stop').length).toBe(4);
+    expect($(legends[8]).find('svg>defs stop:nth-child(2)').attr('offset')).toBe('33.333333%');
+    expect($(legends[8]).find('svg>defs stop:nth-child(3)').attr('offset')).toBe('66.666667%');
   });
 
   it('test mouse events', function () {
