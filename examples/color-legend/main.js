@@ -68,7 +68,8 @@ $(function () {
       type: 'discrete',
       scale: 'linear',
       domain: [0.1, 0.001],
-      colors: colorbrewer.RdBu['8']
+      colors: colorbrewer.RdBu['8'],
+      endAxisLabelOnly: true
     },
     {
       name: 'Continuous pow',
@@ -99,6 +100,14 @@ $(function () {
       scale: 'linear',
       domain: [100, 1000],
       colors: ['red', 'blue', 'green', 'orange']
+    },
+    {
+      name: 'Continuous piecewise function',
+      type: 'continuous',
+      scale: 'sqrt',
+      domain: [1000, 2000, 4000, 8000],
+      colors: ['blue', 'orange', 'red', 'black'],
+      endAxisLabelOnly: true
     }
   ]);
 
