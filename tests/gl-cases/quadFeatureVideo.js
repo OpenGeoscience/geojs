@@ -56,6 +56,8 @@ describe('geo.quadFeature video', function () {
       // test playing
       expect(quads.video(0).currentTime).toBe(0);
       expect(quads.video(0).paused).toBe(true);
+      // Chome 66 added a policy that only allows autoplaying muted videos.
+      quads.video(0).muted = true;
       quads.video(0).play();
       expect(quads.video(0).paused).toBe(false);
       done();
