@@ -43,7 +43,8 @@ describe('color legend', function () {
       type: 'discrete',
       scale: 'linear',
       domain: [0.1, 0.001],
-      colors: colorbrewer.RdBu['8']
+      colors: colorbrewer.RdBu['8'],
+      endAxisLabelOnly: true
     },
     {
       name: 'Continuous pow',
@@ -67,6 +68,21 @@ describe('color legend', function () {
       base: Math.E,
       domain: [100, 10000],
       colors: ['blue', 'olive']
+    },
+    {
+      name: 'Continuous multicolor',
+      type: 'continuous',
+      scale: 'linear',
+      domain: [100, 1000],
+      colors: ['red', 'blue', 'green', 'orange']
+    },
+    {
+      name: 'Continuous piecewise function',
+      type: 'continuous',
+      scale: 'sqrt',
+      domain: [1000, 2000, 4000, 8000],
+      colors: ['blue', 'orange', 'red', 'black'],
+      endAxisLabelOnly: true
     }
   ];
 
@@ -150,6 +166,7 @@ describe('color legend', function () {
     expect($(legends[4]).find('svg>rect').length).toBe(8);
     expect($(legends[4]).find('svg>rect:first').attr('fill')).toBe(allCategories[4].colors[0]);
     expect($(legends[4]).find('svg g.tick:last text').text()).toBe('0.0');
+    expect($(legends[4]).find('svg g.tick').length).toBe(2);
 
     expect($(legends[5]).find('svg>rect').length).toBe(1);
     expect($(legends[5]).find('svg>rect:first').attr('fill').indexOf('url')).not.toBe(-1);
@@ -164,6 +181,12 @@ describe('color legend', function () {
     expect($(legends[7]).find('svg g.tick text').toArray().map(function (text) {
       return $(text).text();
     }).join(', ')).toBe('150, 400, 1.1k, 3.0k, 8.1k');
+
+    expect($(legends[8]).find('svg>defs stop').length).toBe(4);
+    expect($(legends[8]).find('svg>defs stop:nth-child(2)').attr('offset')).toBe('33.333333%');
+    expect($(legends[8]).find('svg>defs stop:nth-child(3)').attr('offset')).toBe('66.666667%');
+
+    expect($(legends[9]).find('svg g.tick').length).toBe(2);
   });
 
   it('test mouse events', function () {

@@ -27,6 +27,9 @@ require('./colorLegendWidget.styl');
  * default to 10.
  * @property {number} [exponent] The exponent of power when power scale is used.
  * default to 1.
+ * @property {boolean} [endAxisLabelOnly] Only show left most and right most
+ * axis label
+ * default to null.
  */
 
 /**
@@ -204,12 +207,10 @@ var colorLegendWidget = function (arg) {
       axis = d3.svg.axis()
         .scale(axisScale)
         .tickValues(function () {
-          var skip = Math.ceil(axisScale.domain().length / m_ticks);
-          return axisScale.domain()
+          var skip = Math.ceil(category.domain.length / m_ticks);
+          return category.domain
             .filter(function (d, i) { return i % skip === 0; });
         });
-      m_this._renderAxis(svg, axis);
-
     } else if (category.scale === 'quantile') {
       valueRange = [0, category.colors.length];
       steps = util.range(0, category.colors.length - 1);
@@ -223,14 +224,10 @@ var colorLegendWidget = function (arg) {
       axisDomain = axisDomain.concat(steps.map(
         function (step) { return valueScale.invertExtent(step)[1]; }));
 
-      ticks = steps.slice();
-      ticks.push(category.colors.length);
       axisScale = d3.scale.ordinal()
         .domain(axisDomain)
         .rangePoints([0, width]);
       axis = createAxis(axisScale);
-      m_this._renderAxis(svg, axis);
-
     } else if (['linear', 'log', 'sqrt', 'pow'].indexOf(category.scale) !== -1) {
       valueRange = [0, category.colors.length];
       valueScale = d3.scale[category.scale]()
@@ -252,8 +249,11 @@ var colorLegendWidget = function (arg) {
         }))
         .rangePoints([0, width]);
       axis = createAxis(axisScale);
-      m_this._renderAxis(svg, axis);
     }
+    if (category.endAxisLabelOnly) {
+      axis.tickValues([axisScale.domain()[0], axisScale.domain()[axisScale.domain().length - 1]]);
+    }
+    m_this._renderAxis(svg, axis);
 
     /**
      * Render the d3 axis object based on the axis d3 Scale.
@@ -305,11 +305,16 @@ var colorLegendWidget = function (arg) {
    * @param {geo.gui.colorLegendWidget.category} category The continuous type legend category
    */
   this._drawContinous = function (svg, width, category) {
-    var axisScale, axis;
+    var axisScale, axis, i;
     if (['linear', 'log', 'sqrt', 'pow'].indexOf(category.scale) === -1) {
       throw new Error('unsupported scale');
     }
-    axisScale = d3.scale[category.scale]().domain(category.domain).range([0, width]).nice();
+    var range = [0];
+    for (i = 1; i < category.domain.length - 1; i++) {
+      range.push((width / (category.domain.length - 1) * i));
+    }
+    range.push(width);
+    axisScale = d3.scale[category.scale]().domain(category.domain).range(range).nice();
     if (category.scale === 'log' && category.base) {
       axisScale.base(category.base);
     }
@@ -327,9 +332,14 @@ var colorLegendWidget = function (arg) {
     gradient.append('stop')
       .attr('offset', '0%')
       .attr('stop-color', category.colors[0]);
+    for (i = 1; i < category.colors.length - 1; i++) {
+      gradient.append('stop')
+        .attr('offset', (100 / (category.colors.length - 1) * i).toFixed(6) + '%')
+        .attr('stop-color', category.colors[i]);
+    }
     gradient.append('stop')
       .attr('offset', '100%')
-      .attr('stop-color', category.colors[1]);
+      .attr('stop-color', category.colors[category.colors.length - 1]);
     svg.append('rect')
       .attr('fill', 'url(#gradient' + id + ')')
       .attr('width', width)
@@ -344,7 +354,9 @@ var colorLegendWidget = function (arg) {
     axis = d3.svg.axis()
       .scale(axisScale)
       .ticks(m_ticks, '.2s');
-
+    if (category.endAxisLabelOnly) {
+      axis.tickValues([category.domain[0], category.domain[category.domain.length - 1]]);
+    }
     this._renderAxis(svg, axis);
   };
 
