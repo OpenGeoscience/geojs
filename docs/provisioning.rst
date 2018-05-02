@@ -15,7 +15,7 @@ onward.  They assume a basic installation, as, for instance, from the
 
 Add nodejs to the sources so it can be installed ::
 
-    wget -qO- https://deb.nodesource.com/setup_4.x | sudo bash -
+    wget -qO- https://deb.nodesource.com/setup_6.x | sudo bash -
 
 Install required packages (you may want to also include cmake-curses-gui for
 convenience in configuring CMake options) ::
