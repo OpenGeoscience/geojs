@@ -45,7 +45,7 @@ var plugins = base.exposed_plugins;
 plugins.push(new StringReplacePlugin());
 
 var resolve = {
-  extentions: ['.js', '.css', '.pug', ''],
+  extensions: ['.js', '.css', '.pug', ''],
   alias: base.resolve.alias
 };
 
