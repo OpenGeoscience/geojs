@@ -24,7 +24,7 @@
     "codemirror": "^5.15.2",
     "colorbrewer": "^1.0.0",
     "css-loader": "^0.28.11",
-    "docco": "^0.8.0",
+    "docco": "^0.7.0",
     "earcut": "^2.1.1",
     "eslint": "^2.10.2",
     "eslint-config-semistandard": "^6.0.2",
