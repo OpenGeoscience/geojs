@@ -4,6 +4,10 @@ html, body {
   color: black;
 }
 
+.jumbotron p {
+  font-weight: normal;
+}
+
 .navbar {
   margin: 0;
 }
