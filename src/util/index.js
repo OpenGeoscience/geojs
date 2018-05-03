@@ -1098,8 +1098,9 @@ var util = module.exports = {
           }
           data = data.join('');
           results[idx] = 'url(data:' + xhr.getResponseHeader('content-type') + ';base64,' + btoa(data) + ')';
-          defer.resolve();
         }
+        // resolve regardless of what response we get
+        defer.resolve();
       };
       // if this fails, resolve anyway
       xhr.onerror = defer.resolve;

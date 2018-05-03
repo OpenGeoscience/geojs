@@ -73,6 +73,13 @@ add_test(
 )
 set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "notes-reset")
 
+add_custom_target(
+  data_files
+  ALL
+  DEPENDS ${Girder_DOWNLOAD_FILES}
+)
+add_test(NAME get_data_files COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target data_files)
+
 if(HEADLESS_TESTS)
   add_test(
     NAME "headless"
@@ -81,6 +88,7 @@ if(HEADLESS_TESTS)
   )
   set_property(TEST "headless" APPEND PROPERTY ENVIRONMENT "CTEST_NOTES_PATH=${CMAKE_CURRENT_BINARY_DIR}/notes")
   set_property(TEST "headless" APPEND PROPERTY DEPENDS "notes-reset")
+  set_property(TEST "headless" APPEND PROPERTY DEPENDS "get_data_files")
   set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "headless")
   set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "headless")
 
@@ -92,13 +100,6 @@ if(HEADLESS_TESTS)
   set_property(TEST "tutorials" APPEND PROPERTY DEPENDS "build_tutorials")
   set_property(TEST "total-coverage" APPEND PROPERTY DEPENDS "tutorials")
 endif()
-
-add_custom_target(
-  data_files
-  ALL
-  DEPENDS ${Girder_DOWNLOAD_FILES}
-)
-add_test(NAME get_data_files COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target data_files)
 
 add_custom_command(OUTPUT "${GEOJS_DEPLOY_DIR}/examples/bundle.js"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"

@@ -5,7 +5,7 @@ sudo: required
 dist: trusty
 
 node_js:
-  - 4
+  - 6
 
 addons:
   firefox: latest  # version 55.0 - 57.x have an issue with screenshots.
