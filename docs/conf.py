@@ -26,7 +26,7 @@ from glob import glob
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 basepath = os.path.dirname(os.path.abspath(__file__))
 toppath = os.path.join(basepath, '..')
-for fname in glob(os.path.join(toppath, 'testing', 'test-runners', '*.py*')):
+for fname in glob(os.path.join(toppath, 'tests', 'runners', '*.py*')):
     basename = os.path.split(fname)[-1].replace('.in', '')
     with open(fname, 'r') as f:
         with open(os.path.join(basepath, basename), 'w') as g:

@@ -41,7 +41,7 @@ function(add_geojs_test test_name)
   set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "${test_name}")
 endfunction()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs_test_runner.py.in
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/runners/geojs_test_runner.py.in
                ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
 )
 
@@ -163,7 +163,7 @@ if(WEBGLHEADLESS_TESTS)
   set_property(TEST "headed" APPEND PROPERTY DEPENDS "build_examples")
 
   configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/baseline_images.py"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/runners/baseline_images.py"
     "${CMAKE_CURRENT_BINARY_DIR}/test/baseline_images.py"
     COPYONLY
   )
