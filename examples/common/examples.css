@@ -9,6 +9,10 @@ html, body {
   user-select: none;
 }
 
+.jumbotron p {
+  font-weight: normal;
+}
+
 .navbar {
   margin: 0;
 }
