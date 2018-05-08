@@ -109,9 +109,16 @@ var gl_lineFeature = function (arg) {
           'const float PI = 3.14159265358979323846264;',
 
           'vec4 viewCoord(vec3 c) {',
-          '  vec4 result = projectionMatrix * modelViewMatrix * vec4(c.xyz, 1);',
+          '  vec4 result = projectionMatrix * modelViewMatrix * vec4(c.xyz, 1.0);',
           '  if (result.w != 0.0)  result = result / result.w;',
           '  return result;',
+          '}',
+
+          'float atan2(float y, float x) {',
+          '  if (x > 0.0)  return atan(y / x);',
+          '  if (x < 0.0 && y >= 0.0)  return atan(y / x) + PI;',
+          '  if (x < 0.0)  return atan(y / x) - PI;',
+          '  return sign(y) * 0.5 * PI;',
           '}',
 
           'void main(void)',
@@ -119,7 +126,7 @@ var gl_lineFeature = function (arg) {
           /* If any vertex has been deliberately set to a negative opacity,
            * skip doing computations on it. */
           '  if (strokeOpacity < 0.0) {',
-          '    gl_Position = vec4(2, 2, 0, 1);',
+          '    gl_Position = vec4(2.0, 2.0, 0.0, 1.0);',
           '    return;',
           '  }',
           /* convert coordinates.  We have four values, since we need to
@@ -133,10 +140,10 @@ var gl_lineFeature = function (arg) {
           // calculate line segment vector and angle
           '  vec2 deltaCB = C.xy - B.xy;',
           '  if (deltaCB == vec2(0.0, 0.0)) {',
-          '    gl_Position = vec4(2, 2, 0, 1);',
+          '    gl_Position = vec4(2.0, 2.0, 0.0, 1.0);',
           '    return;',
           '  }',
-          '  float angleCB = atan(deltaCB.y / aspect, deltaCB.x);',
+          '  float angleCB = atan2(deltaCB.y, deltaCB.x * aspect);',
           // values we need to pass along
           '  strokeColorVar = vec4(strokeColor, strokeOpacity);',
           // extract values from our flags field
@@ -169,14 +176,14 @@ var gl_lineFeature = function (arg) {
           // offset, then the functional join angle is not simply half the
           // angle between the two lines, but rather half the angle of the
           // inside edge of the the two lines.
-          '  float cosABC, sinABC, cosBCD, sinBCD;',  // of half angles
+          '  float cosABC = 1.0, sinABC = 0.0, cosBCD = 1.0, sinBCD = 0.0;',  // of half angles
           // handle near end
           '  if (nearMode >= 4) {',
-          '    float angleBA = atan((B.y - A.y) / aspect, B.x - A.x);',
+          '    float angleBA = atan2(B.y - A.y, (B.x - A.x) * aspect);',
           '    if (A.xy == B.xy)  angleBA = angleCB;',
           '    float angleABC = angleCB - angleBA;',
           // ensure angle is in the range [-PI, PI], then take the half angle
-          '    angleABC = (mod(angleABC + PI, 2.0 * PI) - PI) / 2.0;',
+          '    angleABC = (mod(angleABC + 3.0 * PI, 2.0 * PI) - PI) / 2.0;',
           '    cosABC = cos(angleABC);  sinABC = sin(angleABC);',
           // if this angle is close to flat, pass-through the join
           '    if (nearMode >= 4 && cosABC > 0.999999) {',
@@ -184,7 +191,7 @@ var gl_lineFeature = function (arg) {
           '    }',
           // miter, miter-clip
           '    if (nearMode == 4 || nearMode == 7) {',
-          '      if (cosABC == 0.0 || 1.0 / cosABC > miterLimit) {',
+          '      if (cosABC < 0.000001 || 1.0 / cosABC > miterLimit) {',
           '        if (nearMode == 4) {',
           '          nearMode = 5;',
           '        } else {',
@@ -205,11 +212,11 @@ var gl_lineFeature = function (arg) {
 
           // handle far end
           '  if (farMode >= 4) {',
-          '    float angleDC = atan((D.y - C.y) / aspect, D.x - C.x);',
+          '    float angleDC = atan2(D.y - C.y, (D.x - C.x) * aspect);',
           '    if (D.xy == C.xy)  angleDC = angleCB;',
           '    float angleBCD = angleDC - angleCB;',
           // ensure angle is in the range [-PI, PI], then take the half angle
-          '    angleBCD = (mod(angleBCD + PI, 2.0 * PI) - PI) / 2.0;',
+          '    angleBCD = (mod(angleBCD + 3.0 * PI, 2.0 * PI) - PI) / 2.0;',
           '    cosBCD = cos(angleBCD);  sinBCD = sin(angleBCD);',
           // if this angle is close to flat, pass-through the join
           '    if (farMode >= 4 && cosBCD > 0.999999) {',
@@ -217,7 +224,7 @@ var gl_lineFeature = function (arg) {
           '    }',
           // miter, miter-clip
           '    if (farMode == 4 || farMode == 7) {',
-          '      if (cosBCD == 0.0 || 1.0 / cosBCD > miterLimit) {',
+          '      if (cosBCD < 0.000001 || 1.0 / cosBCD > miterLimit) {',
           '        if (farMode == 4)  farMode = 5;',
           '      } else {',
           '        farMode = 4;',
@@ -231,7 +238,7 @@ var gl_lineFeature = function (arg) {
           '  gl_Position = vec4(',
           '    B.x + (xOffset * cos(angleCB) - yOffset * sin(angleCB)) * pixelWidth,',
           '    B.y + (xOffset * sin(angleCB) + yOffset * cos(angleCB)) * pixelWidth * aspect,',
-          '    B.z, 1);',
+          '    B.z, 1.0);',
           // store other values needed to determine which pixels to plot.
           '  float lineLength = length(vec2(deltaCB.x, deltaCB.y / aspect)) / pixelWidth;',
 
@@ -262,7 +269,11 @@ var gl_lineFeature = function (arg) {
   function createFragmentShader(allowDebug) {
     var fragmentShaderSource = [
           '#ifdef GL_ES',
-          '  precision highp float;',
+          '  #ifdef GL_FRAGMENT_PRECISION_HIGH',
+          '    precision highp float;',
+          '  #else',
+          '    precision mediump float;',
+          '  #endif',
           '#endif',
           'varying vec4 strokeColorVar;',
           'varying vec4 subpos;',
@@ -275,8 +286,8 @@ var gl_lineFeature = function (arg) {
           '  vec4 color = strokeColorVar;',
           allowDebug ? '  bool debug = bool(mod(fixedFlags, 2.0));' : '',
           '  float opacity = 1.0;',
-          '  int nearMode = int(info.x);',
-          '  int farMode = int(info.y);',
+          '  int nearMode = int(floor(info.x + 0.5));',
+          '  int farMode = int(floor(info.y + 0.5));',
           '  float cosABC = angles.x;',
           '  float sinABC = angles.y;',
           '  float cosBCD = angles.z;',

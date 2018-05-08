@@ -140,9 +140,7 @@ describe('glLines', function () {
 
     myMap.draw();
 
-    // maximum error is 0.0030 because of a change in Chrome 65.  When new
-    // versions are released, see if this can be moved back to 0.0015
-    imageTest.imageTest('glLinesOpts', null, 0.0030, done, myMap.onIdle, 0, 2);
+    imageTest.imageTest('glLinesOpts', null, 0.0015, done, myMap.onIdle, 0, 2);
 
   }, 10000);
 });
