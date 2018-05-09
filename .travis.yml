@@ -5,7 +5,7 @@ sudo: required
 dist: trusty
 
 node_js:
-  - 6
+  - 8
 
 addons:
   firefox: latest  # version 55.0 - 57.x have an issue with screenshots.
@@ -38,8 +38,9 @@ before_install:
   # Start xvfb with a specific resolution and pixel depth
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x24"
   - CACHE="${HOME}/cache" CMAKE_VERSION=3.5.0 CMAKE_SHORT_VERSION=3.5 source ./scripts/install_cmake.sh
+  - npm install -g npm@latest
+  - npm install -g node-pre-gyp
   - npm prune
-  - npm install -g npm
 
 before_script:
   - export DISPLAY=:99.0
