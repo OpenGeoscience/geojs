@@ -9,18 +9,16 @@ var feature = require('./feature');
  *  construct the feature.
  * @property {object} [style] An object that contains style values for the
  *      feature.
- * @property {function|number} [style.opacity=1] The opacity on a scale of 0 to
+ * @property {number|function} [style.opacity=1] The opacity on a scale of 0 to
  *      1.
- * @property {function|geo.geoPosition} [style.position=data] The position of
+ * @property {geo.geoPosition|function} [style.position=data] The position of
  *      each data element.  This defaults to just using `x`, `y`, and `z`
  *      properties of the data element itself.  The position is in the
  *      feature's gcs coordinates.
- * @property {function|number} [style.value=data.z] The contour value of each
- *      data element.  This defaults `z` properties of the data element.  If
- *      the value of a grid point is `null` or `undefined`, that point will not
- *      be included in the contour display.  Since the values are on a grid, if
- *      this point is in the interior of the grid, this can remove up to four
- *      squares.
+ * @property {number|function} [style.value=data.z] The value of each data
+ *      element.  This defaults `z` properties of the data element.  If the
+ *      value of a grid point is `null` or `undefined`, that point and elements
+ *      that use that point won't be included in the results.
  * @property {geo.contourFeature.contourSpec} [contour] The contour
  *      specification for the feature.
  */
@@ -252,9 +250,9 @@ var contourFeature = function (arg) {
         {r: 1, g: 0.472800903, b: 0.404551679},
         {r: 0.916482116, g: 0.236630659, b: 0.209939162}
       ]
-    }, arg.contour || {}));
+    }, arg.mesh || {}, arg.contour || {}));
 
-    if (arg.contour) {
+    if (arg.mesh || arg.contour) {
       m_this.dataTime().modified();
     }
   };

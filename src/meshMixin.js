@@ -6,13 +6,13 @@
  * @typedef {object} geo.meshMixin.meshSpec
  * @property {number[]|array.<number[]>} [elements] If specified, a list of
  *      indices into the data array that form elements.  If this is an array of
- *      arrays, each subarray must be the same length and must have either 3
- *      values for triangular elements or 4 values for square elements.  If
- *      this is a single array, the data indices are of all elements are packed
- *      one after another and the `elementPacking` property is used to
- *      determine element shape.  If this `null` or `undefined`, a rectangular
- *      grid of squares is used based on `gridWidth` and `gridHeight` or an
- *      implicit version of those parameters.
+ *      arrays, each subarray must have at least either 3 values for triangular
+ *      elements or 4 values for square elements.  If this is a single array,
+ *      the data indices are of all elements are packed one after another and
+ *      the `elementPacking` property is used to determine element shape.  If
+ *      this `null` or `undefined`, a rectangular grid of squares is used based
+ *      on `gridWidth` and `gridHeight` or an implicit version of those
+ *      parameters.
  * @property {string} [elementPacking='auto'] If `elements` is provided as a
  *      single array, this determines the shape of the elements.  It is one of
  *      `auto`, `triangle`, or `square`.  `triangle` uses triplets of values to
@@ -45,9 +45,9 @@
  *      `gridWidth`th data point.  This may be positive or negative.  If 0,
  *      `null`, or `undefined`, the coordinate is taken from the `position`
  *      style.  Ignored if `elements` is used.
- * @property {boolean} [wrapLongitude] If truthy and `position` is not used
- *      (`elements` is not used and `x0`, `y0`, `dx`, and `dy` are all set
- *      appropriately), assume the x coordinates is longitude and should be
+ * @property {boolean} [wrapLongitude=true] If truthy and `position` is not
+ *      used (`elements` is not used and `x0`, `y0`, `dx`, and `dy` are all set
+ *      appropriately), assume the x coordinates are longitude and should be
  *      adjusted to be within -180 to 180.  If the data spans 180 degrees, the
  *      points or squares that straddle the meridian will be duplicated to
  *      ensure that the map is covered from -180 to 180 as appropriate.  Set
@@ -134,7 +134,7 @@ var meshMixin = function (arg) {
    *
    * @param {string|undefined} key The name of the mesh key or `undefined` to
    *    return an object with all keys as functions.
-   * @returns {function|object} A function related to the key, or an object
+   * @returns {object|function} A function related to the key, or an object
    *    with all mesh keys, each of which is a function.
    */
   this.mesh.get = function (key) {
@@ -154,9 +154,9 @@ var meshMixin = function (arg) {
    * Get/Set position accessor.  This is identical to getting or setting the
    * `position` style.
    *
-   * @param {function|array} [val] If specified, set the position style.  If
+   * @param {array|function} [val] If specified, set the position style.  If
    *    `undefined`, return the current value.
-   * @returns {function|array|this} Either the position style or this.
+   * @returns {array|function|this} Either the position style or this.
    */
   this.position = function (val) {
     if (val === undefined) {
@@ -275,11 +275,12 @@ var meshMixin = function (arg) {
       }
     } else {
       /* use defined elements */
-      if (elementPacking === 'square' ||
-          (elementPacking !== 'triangle' && !(elements.length % 4) && (elements.length % 3)) ||
-          (Array.isArray(elements[0]) && elements[0].length === 4)) {
+      var hasSubArray = elements.length && Array.isArray(elements[0]);
+      if (elementPacking === 'square' || (elementPacking !== 'triangle' &&
+          ((!hasSubArray && !(elements.length % 4) && (elements.length % 3)) ||
+          (hasSubArray && elements[0].length === 4)))) {
         result.shape = 'square';
-        if (Array.isArray(elements[0])) {
+        if (hasSubArray) {
           for (i = 0; i < elements.length; i += 1) {
             result.elements.push(elements[i][0]);
             result.elements.push(elements[i][1]);
@@ -300,14 +301,14 @@ var meshMixin = function (arg) {
         }
       } else {
         result.shape = 'triangle';
-        if (Array.isArray(elements[0])) {
+        if (hasSubArray) {
           for (i = 0; i < elements.length; i += 1) {
             result.elements.push(elements[i][0]);
             result.elements.push(elements[i][1]);
             result.elements.push(elements[i][2]);
           }
         } else {
-          result.elements = elements.slice();
+          result.elements = elements.slice(0, elements.length - (elements.length % 3));
         }
       }
       result.index = new Array(data.length);
