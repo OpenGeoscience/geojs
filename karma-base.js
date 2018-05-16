@@ -321,7 +321,7 @@ module.exports = function (config) {
         }, FirefoxPrefs)
       }
     },
-    browserNoActivityTimeout: 30000,
+    browserNoActivityTimeout: 300000,
     reporters: [
       'spec',  // we had used the 'progress' reporter in the past.
       'kjhtml'

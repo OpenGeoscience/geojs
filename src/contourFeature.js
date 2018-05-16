@@ -117,11 +117,12 @@ var contourFeature = function (arg) {
   this._createContours = function () {
     var contour = m_this.contour,
         valueFunc = m_this.style.get('value'),
+        usedFunc = m_this.style('used') !== undefined ?
+          m_this.style.get('used') :
+          function (d, i) { return util.isNonNullFinite(valueFunc(d, i)); },
         minmax, val, range, i, k;
     var result = this._createMesh({
-      used: function (d, i) {
-        return util.isNonNullFinite(valueFunc(d, i));
-      },
+      used: usedFunc,
       opacity: m_this.style.get('opacity'),
       value: valueFunc
     });
