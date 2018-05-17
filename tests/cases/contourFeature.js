@@ -26,6 +26,9 @@ describe('Contour Feature', function () {
     it('direct create', function () {
       var contour = geo.contourFeature({layer: layer});
       expect(contour instanceof geo.contourFeature).toBe(true);
+      expect(contour instanceof geo.meshFeature).toBe(true);
+      var mesh = geo.meshFeature({layer: layer});
+      expect(mesh instanceof geo.meshFeature).toBe(true);
     });
   });
 

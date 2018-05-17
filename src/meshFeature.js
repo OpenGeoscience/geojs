@@ -1,9 +1,12 @@
+var inherit = require('./inherit');
+var feature = require('./feature');
+
 /**
  * A mesh formed by a set of triangular or square elements or a
  * squarely-connected grid that is of rectangular extent.  The gird can be
  * regularly spaced or have arbitrary position coordinates for each node.
  *
- * @typedef {object} geo.meshMixin.meshSpec
+ * @typedef {object} geo.meshFeature.meshSpec
  * @property {number[]|array.<number[]>} [elements] If specified, a list of
  *      indices into the data array that form elements.  If this is an array of
  *      arrays, each subarray must have at least either 3 values for triangular
@@ -53,10 +56,11 @@
  *      ensure that the map is covered from -180 to 180 as appropriate.  Set
  *      this to `false` if using a non-longitude x coordinate.
  */
+
 /**
  * A set of triangular elements and their associated positions for a mesh.
  *
- * @typedef {object} geo.meshMixin.meshInfo
+ * @typedef {object} geo.meshFeature.meshInfo
  * @property {string} shape One of `'triangle'` or `'square'`.  If `square`,
  *      each pair of elements is one square.  These elements have vertices v00,
  *      v01, v02, v10, v11, v12.  The square is formed via v00-v01-v10-v11-v00.
@@ -73,24 +77,44 @@
  * @property {number} verticesPerElement 3 for triangles, 6 for squares.
  */
 
-var meshMixin = function (arg) {
+/**
+ * Create a new instance of class meshFeature.  This should be the parent of a
+ * more useable feature class.
+ *
+ * @class
+ * @alias geo.meshFeature
+ * @extends geo.feature
+ *
+ * @param {geo.meshFeature.spec} arg
+ * @returns {this}
+ */
+var meshFeature = function (arg) {
+  'use strict';
+  if (!(this instanceof meshFeature)) {
+    return new meshFeature(arg);
+  }
+
   var $ = require('jquery');
   var util = require('./util');
 
+  arg = arg || {};
+  feature.call(this, arg);
+
   var m_this = this,
+      s_init = this._init,
       m_mesh = {};
 
   /**
    * Get/Set mesh accessor.
    *
-   * @param {string|geo.meshObject.meshSpecc} [specOrProperty] If `undefined`,
+   * @param {string|geo.meshFeature.meshSpec} [specOrProperty] If `undefined`,
    *    return the current mesh specification.  If a string is specified,
    *    either get or set the named mesh property.  If an object is given, set
    *    or update the specification with the specified parameters.
    * @param {object} [value] If `specOrProperty` is a string, set that property
    *    to `value`.  If `undefined`, return the current value of the named
    *    property.
-   * @returns {geo.meshObject.meshSpec|object|this} The current mesh
+   * @returns {geo.meshFeature.meshSpec|object|this} The current mesh
    *    specification, the value of a named mesh property, or this mesh object.
    */
   this.mesh = function (specOrProperty, value) {
@@ -182,7 +206,7 @@ var meshMixin = function (arg) {
    *    (data[idx], idx).  If a key is named `used`, then if its function
    *    returns a falsy value for a data point, the vertex associated with that
    *    data point is removed from the resultant mesh.
-   * @returns {geo.meshMixin.meshInfo} An object with the mesh information.
+   * @returns {geo.meshFeature.meshInfo} An object with the mesh information.
    */
   this.createMesh = function (vertexValueFuncs) {
     vertexValueFuncs = vertexValueFuncs || {};
@@ -388,19 +412,32 @@ var meshMixin = function (arg) {
     return result;
   };
 
-  /* Initialize from arguments */
-  arg = arg || {};
-  var style = $.extend({}, {
-    position: function (d) {
-      /* We could construct a new object and return
-       *  {x: d.x, y: d.y, z: d.z};
-       * but that isn't necessary. */
-      return d;
-    }
-  }, arg.style || {});
+  /**
+   * Initialize.
+   *
+   * @param {geo.meshFeature.spec} arg The mesh feature specification.
+   */
+  this._init = function (arg) {
+    s_init.call(m_this, arg);
 
-  this.mesh(arg.mesh || {});
-  this.style(style);
+    /* Initialize from arguments */
+    arg = arg || {};
+    var style = $.extend({}, {
+      position: function (d) {
+        /* We could construct a new object and return
+         *  {x: d.x, y: d.y, z: d.z};
+         * but that isn't necessary. */
+        return d;
+      }
+    }, arg.style || {});
+
+    this.mesh(arg.mesh || {});
+    this.style(style);
+  };
+
+  return this;
 };
 
-module.exports = meshMixin;
+inherit(meshFeature, feature);
+
+module.exports = meshFeature;

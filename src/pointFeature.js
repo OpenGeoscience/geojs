@@ -352,9 +352,7 @@ var pointFeature = function (arg) {
 /**
  * Object specification for a point feature.
  *
- * @extends geo.feature.spec // need to make a jsdoc plugin for this to work
- * @typedef geo.pointFeature.spec
- * @type {object}
+ * @typedef {geo.feature.spec} geo.pointFeature.spec
  */
 
 /**

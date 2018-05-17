@@ -1,56 +1,56 @@
 var inherit = require('./inherit');
-var feature = require('./feature');
+var meshFeature = require('./meshFeature');
 
 /**
  * Contour feature specification.
  *
  * @typedef {geo.feature.spec} geo.contourFeature.spec
  * @property {object[]} [data=[]] An array of arbitrary objects used to
- *  construct the feature.
+ *    construct the feature.
  * @property {object} [style] An object that contains style values for the
- *      feature.
+ *    feature.
  * @property {number|function} [style.opacity=1] The opacity on a scale of 0 to
- *      1.
+ *    1.
  * @property {geo.geoPosition|function} [style.position=data] The position of
- *      each data element.  This defaults to just using `x`, `y`, and `z`
- *      properties of the data element itself.  The position is in the
- *      feature's gcs coordinates.
+ *    each data element.  This defaults to just using `x`, `y`, and `z`
+ *    properties of the data element itself.  The position is in the feature's
+ *    gcs coordinates.
  * @property {number|function} [style.value=data.z] The value of each data
- *      element.  This defaults `z` properties of the data element.  If the
- *      value of a grid point is `null` or `undefined`, that point and elements
- *      that use that point won't be included in the results.
+ *    element.  This defaults `z` properties of the data element.  If the value
+ *    of a grid point is `null` or `undefined`, that point and elements that
+ *    use that point won't be included in the results.
  * @property {geo.contourFeature.contourSpec} [contour] The contour
- *      specification for the feature.
+ *    specification for the feature.
  */
 
 /**
  * Contour specification.
  *
- * @typedef {geo.meshMixin.meshSpec} geo.contourFeature.contourSpec
+ * @typedef {geo.meshFeature.meshSpec} geo.contourFeature.contourSpec
  * @property {number} [min] Minimum contour value.  If unspecified, taken from
- *      the computed minimum of the `value` style.
+ *    the computed minimum of the `value` style.
  * @property {number} [max] Maximum contour value.  If unspecified, taken from
- *      the computed maximum of the `value` style.
+ *    the computed maximum of the `value` style.
  * @property {geo.geoColor} [minColor='black'] Color used for any value below
- *      the minimum.
+ *    the minimum.
  * @property {number} [minOpacity=0] Opacity used for any value below the
- *      minimum.
+ *    minimum.
  * @property {geo.geoColor} [maxColor='black'] Color used for any value above
- *      the maximum.
+ *    the maximum.
  * @property {number} [maxOpacity=0] Opacity used for any value above the
- *      maximum.
+ *    maximum.
  * @property {boolean} [stepped] If falsy but not `undefined`, smooth
- *      transitions between colors.
+ *    transitions between colors.
  * @property {geo.geoColor[]} [colorRange=<color table>] An array of colors
- *      used to show the range of values.  The default is a 9-step color table.
+ *    used to show the range of values.  The default is a 9-step color table.
  * @property {number[]} [opacityRange] An array of opacities used to show the
- *      range of values.  If unspecified, the opacity is 1.  If this is a
- *      shorter list than the `colorRange`, an opacity of 1 is used for the
- *      entries near the end of the color range.
+ *    range of values.  If unspecified, the opacity is 1.  If this is a shorter
+ *    list than the `colorRange`, an opacity of 1 is used for the entries near
+ *    the end of the color range.
  * @property {number[]} [rangeValues] An array used to map values to the
- *      `colorRange`.  By default, values are spaced linearly.  If specified,
- *      the entries must be increasing weakly monotonic, and there must be one
- *      more entry then the length of `colorRange`.
+ *    `colorRange`.  By default, values are spaced linearly.  If specified, the
+ *    entries must be increasing weakly monotonic, and there must be one more
+ *    entry then the length of `colorRange`.
  */
 
 /**
@@ -87,7 +87,9 @@ var feature = require('./feature');
  *
  * @class
  * @alias geo.contourFeature
- * @extends geo.feature
+ * @extends geo.meshFeature
+ *
+ * @borrows geo.contourFeature#mesh as geo.contourFeature#contour
  *
  * @param {geo.contourFeature.spec} arg
  * @returns {geo.contourFeature}
@@ -102,7 +104,7 @@ var contourFeature = function (arg) {
   var util = require('./util');
 
   arg = arg || {};
-  feature.call(this, arg);
+  meshFeature.call(this, arg);
 
   /**
    * @private
@@ -205,6 +207,8 @@ var contourFeature = function (arg) {
     return result;
   };
 
+  this.contour = m_this.mesh;
+
   /**
    * Initialize.
    *
@@ -212,13 +216,6 @@ var contourFeature = function (arg) {
    */
   this._init = function (arg) {
     s_init.call(m_this, arg);
-
-    /* Mixin the mesh properties and functions. */
-    var meshMixin = require('./meshMixin');
-    meshMixin.call(m_this, arg);
-    /* Define contour the same as mesh; this keeps compatibility with older
-     * forms and makes the named function more intuitive. */
-    this.contour = this.mesh;
 
     var defaultStyle = $.extend(
       {},
@@ -261,7 +258,7 @@ var contourFeature = function (arg) {
   return this;
 };
 
-inherit(contourFeature, feature);
+inherit(contourFeature, meshFeature);
 module.exports = contourFeature;
 
 /* Example:

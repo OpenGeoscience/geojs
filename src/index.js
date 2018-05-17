@@ -58,7 +58,7 @@ module.exports = $.extend({
   lineFeature: require('./lineFeature'),
   map: require('./map'),
   mapInteractor: require('./mapInteractor'),
-  meshMixin: require('./meshMixin'),
+  meshFeature: require('./meshFeature'),
   object: require('./object'),
   osmLayer: require('./osmLayer'),
   pathFeature: require('./pathFeature'),
