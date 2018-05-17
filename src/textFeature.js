@@ -43,11 +43,8 @@ var feature = require('./feature');
  * @property {boolean|function} [style.rotateWithMap=false] If truthy, rotate
  *      the text when the map rotates.  Otherwise, the text is always in the
  *      same orientation.
- * @property {number|function} [style.scale=4] The zoom basis value used when
- *      `scaleWithMap` is truthy.
- * @property {boolean|function} [style.scaleWithMap=false] If truthy, use the
- *      `scale` style as the basis of the map zoom value for the font size.
- *      The size is scaled from this point.
+ * @property {number|function} [style.textScaled] If defined, the text is
+ *      scaled when the map zoomes and this is the basis zoom for the fontSize.
  * @property {geo.screenPosition|function} [style.offset] Offset from the
  *      default position for the text.  This is applied before rotation.
  * @property {geo.geoColor|function} [style.shadowColor='black'] Text shadow
