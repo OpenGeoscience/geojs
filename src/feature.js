@@ -34,7 +34,7 @@ var geo_event = require('./event');
  *      the feature.
  * @property {object} [style] An object that contains style values for the
  *      feature.
- * @property {function|number} [style.opacity=1] The opacity on a scale of 0 to
+ * @property {number|function} [style.opacity=1] The opacity on a scale of 0 to
  *      1.
  */
 

@@ -194,7 +194,7 @@ var widget = function (arg) {
           // specified value.  Setting a property to null clears it.  Setting to
           // undefined doesn't alter it.
           if (/^\s*(-|\+)?(\d+(\.\d*)?|\d*\.\d+)([eE](-|\+)?\d+)?\s*$/.test(position[cssAttr])) {
-            // tris ensures that the number is a float with no more than 3
+            // this ensures that the number is a float with no more than 3
             // decimal places (Chrome does this automatically, but doing so
             // explicitly makes testing more consistent).  It will be an
             // integer when possible.
