@@ -9,29 +9,29 @@ require('./scaleWidget.styl');
  * Scale widget specification.
  *
  * @typedef {object} geo.gui.scaleWidget.spec
- * @param {number} [scale=1] A scale applied to the map gcs units to convert to
- *   the scale units.
- * @param {number} [maxWidth=200] The maximum width of the scale in pixels.
+ * @property {number} [scale=1] A scale applied to the map gcs units to convert
+ *   to the scale units.
+ * @property {number} [maxWidth=200] The maximum width of the scale in pixels.
  *   For horizontal scales (orientation is `top` or `bottom`) this is the
  *   maximum length of the scale bar.  For vertical scales, this is the width
  *   available for the scale text.
- * @param {number} [maxHeight] The maximum height of the scale in pixels.
+ * @property {number} [maxHeight] The maximum height of the scale in pixels.
  *   For vertical scales (orientation is `left` or `right`) this is the
  *   maximum length of the scale bar.  For horizontal scales, this is the
  *   height available for the scale text.  Default is 200 for vertical scales,
  *   20 for horizontal scales.
- * @param {string} [orientation='bottom'] One of `left`, `right`, `top`, or
+ * @property {string} [orientation='bottom'] One of `left`, `right`, `top`, or
  *   `bottom`.  The scale text is placed in that location relative to the scale
  *   bar.
- * @param {number} [strokeWidth=2] The width of the ticks and scale bar in
+ * @property {number} [strokeWidth=2] The width of the ticks and scale bar in
  *   pixels.
- * @param {number} [tickLength=10] The length of the end ticks in pixels.
- * @param {string|geo.gui.scaleWidget.unit[]} [units='si'] One of either 'si'
- *   or 'miles' or an array of units in ascending order.  See the `UnitsTable`
- *   for examples.
- * @param {Function} [distance] The function used to compute the length of the
- *   scale bar.  This defaults to `transform.sphericalDistance` for all maps
- *   except those with a gcs of `'+proj=longlat +axis=enu'`, where
+ * @property {number} [tickLength=10] The length of the end ticks in pixels.
+ * @property {string|geo.gui.scaleWidget.unit[]} [units='si'] One of either
+ *   `'si'` or `'miles'` or an array of units in ascending order.  See the
+ *   `UnitsTable` for examples.
+ * @property {function} [distance] The function used to compute the length of
+ *   the scale bar.  This defaults to `transform.sphericalDistance` for all
+ *   maps except those with a gcs of `'+proj=longlat +axis=enu'`, where
  *   `math.sqrt(util.distance2dSquared(pt1, pt2))` is used instead.
  */
 
@@ -39,16 +39,16 @@ require('./scaleWidget.styl');
  * Scale widget unit specification.
  *
  * @typedef {object} geo.gui.scaleWidget.unit
- * @param {string} unit Display name for the unit.
- * @param {number} scale Scale for 1 unit in the current system.
- * @param {number} [minimum=1] Minimum value where this applies after scaling.
- *   This can be used to handle singular and plural words (e.g., `[{units:
- *   'meter', scale: 1}, {units: 'meters', scale: 1, minimum: 1.5}]`)
- * @param {number} [basis=10] The basis for the multiples value.
- * @param {object[]} [multiples] A list of objects in ascending value order that
- *   determine what round values are displayed.
- * @param {number} multiples.multiple The value that is selected for display.
- * @param {number} multiples.digit The number of significant digits in
+ * @property {string} unit Display name for the unit.
+ * @property {number} scale Scale for 1 unit in the current system.
+ * @property {number} [minimum=1] Minimum value where this applies after
+ *   scaling.  This can be used to handle singular and plural words (e.g.,
+ *   `[{units: 'meter', scale: 1}, {units: 'meters', scale: 1, minimum: 1.5}]`)
+ * @property {number} [basis=10] The basis for the multiples value.
+ * @property {object[]} [multiples] A list of objects in ascending value order
+ *   that determine what round values are displayed.
+ * @property {number} multiples.multiple The value that is selected for display.
+ * @property {number} multiples.digit The number of significant digits in
  *   `mutliple`.
  */
 

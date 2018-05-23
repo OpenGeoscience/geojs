@@ -6,30 +6,30 @@ var feature = require('./feature');
  * Quad feature specification.
  *
  * @typedef {geo.feature.spec} geo.quadFeature.spec
- * @param {geo.geoColor|Function} [color] Color for quads without images.
- *   Default is white ({r: 1, g: 1, b: 1}).
- * @param {number|Function} [opacity=1] Opacity for the quads.
- * @param {number|Function} [depth=0] Default z-coordinate for positions that
- *   don't explicitly specify one.
- * @param {boolean|Function} [drawOnAsyncResourceLoaded=true] Redraw quads
+ * @property {geo.geoColor|function} [color] Color for quads without images.
+ *   Default is white (`{r: 1, g: 1, b: 1}`).
+ * @property {number|function} [opacity=1] Opacity for the quads.
+ * @property {number|function} [depth=0] Default z-coordinate for positions
+ *   that don't explicitly specify one.
+ * @property {boolean|function} [drawOnAsyncResourceLoaded=true] Redraw quads
  *   when images or videos are loaded after initial render.
- * @param {Image|string|Function} [image] Image for each data item.  If
+ * @property {Image|string|function} [image] Image for each data item.  If
  *   falsy and `video` is also falsy, the quad is a solid color.  Default is
  *   (data).image.
- * @param {HTMLVideoElement|string|Function} [video] Video for each data item.
- *   If falsy and `image` is also falsy, the quad is a solid color.  Default is
- *   (data).video.
- * @param {boolean|Function} [delayRenderWhenSeeking=true] If any video has a
+ * @property {HTMLVideoElement|string|function} [video] Video for each data
+ *   item.  If falsy and `image` is also falsy, the quad is a solid color.
+ *   Default is (data).video.
+ * @property {boolean|function} [delayRenderWhenSeeking=true] If any video has a
  *   truthy value and is seeking, delaying rendering the entire feature.  This
  *   prevents blinking when seeking a playing video, but may cause stuttering
  *   when there are multiple videos.
- * @param {geo.geoColor|Function} [previewColor=null] If specified, a color to
- *   show on image and video quads while waiting for the image or video to
+ * @property {geo.geoColor|function} [previewColor=null] If specified, a color
+ *   to show on image and video quads while waiting for the image or video to
  *   load.
- * @param {Image|string|Function} [previewImage=null] If specified, an image to
- *   show on image quads while waiting for the quad-specific image to load.
+ * @property {Image|string|function} [previewImage=null] If specified, an image
+ *   to show on image quads while waiting for the quad-specific image to load.
  *   This will only be shown if it (the preview image) is already loaded.
- * @param {object|Function} [position] Position of the quad.  Default is
+ * @property {object|function} [position] Position of the quad.  Default is
  *   (data).  The position is an object which specifies the corners of the
  *   quad: ll, lr, ur, ul.  At least two opposite corners must be specified.
  *   The corners do not have to physically correspond to the order specified,
@@ -41,11 +41,11 @@ var feature = require('./feature');
  *   triangles: (ll, lr, ul) and (ur, ul, lr).  Nothing special is done for
  *   quads that are not convex or quads that have substantially different
  *   transformations for those two triangles.
- * @param {boolean} [cacheQuads=true] If truthy, a set of internal information
- *   is stored on each data item in the _cachedQuad attribute.  If this is
- *   falsy, the data item is not altered.  If the data (positions, opacity,
- *   etc.) of individual quads will change, set this to `false` or call
- *   `cacheUpdate` on the data item or for all data.
+ * @property {boolean} [cacheQuads=true] If truthy, a set of internal
+ *   information is stored on each data item in the _cachedQuad attribute.  If
+ *   this is falsy, the data item is not altered.  If the data (positions,
+ *   opacity, etc.) of individual quads will change, set this to `false` or
+ *   call `cacheUpdate` on the data item or for all data.
  */
 
 /**

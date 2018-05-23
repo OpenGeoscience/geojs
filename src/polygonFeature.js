@@ -7,33 +7,31 @@ var transform = require('./transform');
  * Polygon feature specification.
  *
  * @typedef {geo.feature.spec} geo.polygonFeature.spec
- * @param {object|Function} [position] Position of the data.  Default is
+ * @property {object|function} [position] Position of the data.  Default is
  *   (data).
- * @param {object|Function} [polygon] Polygons from the data.  Default is
+ * @property {object|function} [polygon] Polygons from the data.  Default is
  *   (data).  Typically, the data is an array of polygons, each of which is of
  *   the form {outer: [(coordinates)], inner: [[(coordinates of first hole)],
  *   [(coordinates of second hole)], ...]}.  The inner record is optional.
  *   Alternately, if there are no holes, a polygon can just be an array of
  *   coordinates in the form of geo.geoPosition.  The first and last point of
  *   each polygon may be the same.
- * @param {object} [style] Style object with default style options.
- * @param {boolean|Function} [style.fill] True to fill polygon.  Defaults to
- *   true.
- * @param {geo.geoColor|Function} [style.fillColor] Color to fill each polygon.
- *   The color can vary by vertex.
- * @param {number|Function} [style.fillOpacity] Opacity for each polygon.  The
- *   opacity can vary by vertex.  Opacity is on a [0-1] scale.
- * @param {boolean|Function} [style.stroke] True to stroke polygon.  Defaults
- *   to false.
- * @param {geo.geoColor|Function} [style.strokeColor] Color to stroke each
+ * @property {object} [style] Style object with default style options.
+ * @property {boolean|function} [style.fill=true] True to fill polygon.
+ * @property {geo.geoColor|function} [style.fillColor] Color to fill each
  *   polygon.  The color can vary by vertex.
- * @param {number|Function} [style.strokeOpacity] Opacity for each polygon
+ * @property {number|function} [style.fillOpacity] Opacity for each polygon.
+ *   The opacity can vary by vertex.  Opacity is on a [0-1] scale.
+ * @property {boolean|function} [style.stroke=false] True to stroke polygon.
+ * @property {geo.geoColor|function} [style.strokeColor] Color to stroke each
+ *   polygon.  The color can vary by vertex.
+ * @property {number|function} [style.strokeOpacity] Opacity for each polygon
  *   stroke.  The opacity can vary by vertex.  Opacity is on a [0-1] scale.
- * @param {number|Function} [style.strokeWidth] The weight of the polygon
+ * @property {number|function} [style.strokeWidth] The weight of the polygon
  *   stroke in pixels.  The width can vary by vertex.
- * @param {boolean|Function} [style.uniformPolygon] Boolean indicating if each
- *   polygon has a uniform style (uniform fill color, fill opacity, stroke
- *   color, and stroke opacity).   Defaults to false.  Can vary by polygon.
+ * @property {boolean|function} [style.uniformPolygon=false] Boolean indicating
+ *   if each polygon has a uniform style (uniform fill color, fill opacity,
+ *   stroke color, and stroke opacity).  Can vary by polygon.
  */
 
 /**
