@@ -47,7 +47,8 @@ var util = require('./util');
 /**
  * Create a new instance of class lineFeature.
  *
- * @class geo.lineFeature
+ * @class
+ * @alias geo.lineFeature
  * @extends geo.feature
  * @param {geo.lineFeature.spec} arg
  * @returns {geo.lineFeature}
@@ -82,11 +83,13 @@ var lineFeature = function (arg) {
   };
 
   /**
-   * Get/set lineaccessor.
+   * Get/set line accessor.
    *
-   * @param {object} [val] if specified, use this for the line accessor
-   *    and return the feature.  If not specified, return the current line.
-   * @returns {object|this} The current line or this feature.
+   * @param {object|function} [val] If specified, use this for the line
+   *    accessor and return the feature.  If not specified, return the current
+   *    line.  If a function, this is passed `(dataElement, dataIndex)` and
+   *    returns an array of vertex elements.
+   * @returns {object|function|this} The current line or this feature.
    */
   this.line = function (val) {
     if (val === undefined) {
@@ -102,10 +105,11 @@ var lineFeature = function (arg) {
   /**
    * Get/Set position accessor.
    *
-   * @param {object} [val] if specified, use this for the position accessor
-   *    and return the feature.  If not specified, return the current
-   *    position.
-   * @returns {object|this} The current position or this feature.
+   * @param {object|function} [val] If specified, use this for the position
+   *    accessor and return the feature.  If not specified, return the current
+   *    position.  If a function, this is called with `(vertexElement,
+   *    vertexIndex, dataElement, dataIndex)`.
+   * @returns {object|function|this} The current position or this feature.
    */
   this.position = function (val) {
     if (val === undefined) {

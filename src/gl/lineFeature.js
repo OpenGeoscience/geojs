@@ -36,7 +36,8 @@ var flagsDebug = {  // uses 1 bit
 /**
  * Create a new instance of lineFeature.
  *
- * @class geo.gl.lineFeature
+ * @class
+ * @alias geo.gl.lineFeature
  * @extends geo.lineFeature
  * @param {geo.lineFeature.spec} arg
  * @returns {geo.gl.lineFeature}
