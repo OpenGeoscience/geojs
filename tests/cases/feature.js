@@ -33,7 +33,7 @@ describe('geo.feature', function () {
 
       feat = geo.feature.create(layer, {type: 'no_feature'});
       expect(feat).toBeNull();
-      expect(console.warn.calledOnce).toBe(true);
+      expect(console.warn.called).toBe(true);
       expect(console.warn.calledWith(
         'Could not create feature type "no_feature"')).toBe(true);
       console.warn.reset();
