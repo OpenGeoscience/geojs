@@ -6,7 +6,8 @@ var pointFeature = require('../pointFeature');
 /**
  * Create a new instance of pointFeature
  *
- * @class geo.gl.pointFeature
+ * @class
+ * @alias geo.gl.pointFeature
  * @extends geo.pointFeature
  * @returns {geo.gl.pointFeature}
  */

@@ -5,7 +5,8 @@ var quadFeature = require('../quadFeature');
 /**
  * Create a new instance of class quadFeature.
  *
- * @class geo.d3.quadFeature
+ * @class
+ * @alias geo.d3.quadFeature
  * @param {geo.quadFeature.spec} arg Options object.
  * @extends geo.quadFeature
  * @returns {geo.d3.quadFeature}

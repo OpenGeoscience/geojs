@@ -4,7 +4,8 @@ var object = require('./object');
 /**
  * Create a new instance of class renderer.
  *
- * @class geo.renderer
+ * @class
+ * @alias geo.renderer
  * @extends geo.object
  * @param {object} arg Options for the renderer.
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.

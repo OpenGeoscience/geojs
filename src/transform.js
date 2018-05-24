@@ -16,7 +16,8 @@ var util = require('./util');
  * z values that are ignored in current mapping context, but will in the
  * future perform more general 3D transformations.
  *
- * @class geo.transform
+ * @class
+ * @alias geo.transform
  * @param {object} options Constructor options
  * @param {string} options.source A proj4 string for the source projection
  * @param {string} options.target A proj4 string for the target projection
