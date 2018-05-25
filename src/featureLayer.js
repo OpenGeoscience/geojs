@@ -45,6 +45,8 @@ var featureLayer = function (arg) {
       featureName, m_this, m_this.renderer(), arg);
     if (newFeature) {
       this.addFeature(newFeature);
+    } else {
+      console.warn('Layer renderer (' + m_this.rendererName() + ') does not support feature type "' + featureName + '"');
     }
     return newFeature;
   };
