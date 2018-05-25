@@ -323,9 +323,11 @@ module.exports = function (config) {
     },
     browserNoActivityTimeout: 30000,
     reporters: [
-      'progress',
+      'spec',  // we had used the 'progress' reporter in the past.
       'kjhtml'
     ],
+    // We could suppress passing results
+    // specReporter = {suppressPassed: true, suppressSkipped: true},
     middleware: [
       'notes',
       'osmtiles'
