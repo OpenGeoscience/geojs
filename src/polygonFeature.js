@@ -183,11 +183,12 @@ var polygonFeature = function (arg) {
   /**
    * Get/set polygon accessor.
    *
-   * @param {object|function} [val] If specified, use this for the polygon
-   *    accessor and return the feature.  If not specified, return the current
-   *    polygon.  If a function, this is passed `(dataElement, dataIndex)` and
-   *    returns a `geo.polygon`.
-   * @returns {object|function|this} The current polygon or this feature.
+   * @param {object|function} [val] If not specified, return the current
+   *    polygon accessor.  If specified, use this for the polygon accessor and
+   *    return `this`.  If a function is given, the function is passed
+   *    `(dataElement, dataIndex)` and returns a `geo.polygon`.
+   * @returns {object|function|this} The current polygon accessor or this
+   *    feature.
    */
   this.polygon = function (val) {
     if (val === undefined) {
@@ -204,10 +205,10 @@ var polygonFeature = function (arg) {
   /**
    * Get/Set position accessor.
    *
-   * @param {object} [val] If specified, use this for the position accessor
-   *    and return the feature.  If not specified, return the current
-   *    position.  If a function, this is called with `(vertexElement,
-   *    vertexIndex, dataElement, dataIndex)`.
+   * @param {object|function} [val] If not specified, return the current
+   *    position accessor.  If specified, use this for the position accessor
+   *    and return `this`.  If a function is given, this is called with
+   *    `(vertexElement, vertexIndex, dataElement, dataIndex)`.
    * @returns {object|this} The current position or this feature.
    */
   this.position = function (val) {
