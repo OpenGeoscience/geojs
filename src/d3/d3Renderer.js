@@ -5,7 +5,8 @@ var renderer = require('../renderer');
 /**
  * Create a new instance of class d3Renderer.
  *
- * @class geo.d3.renderer
+ * @class
+ * @alias geo.d3.renderer
  * @extends geo.renderer
  * @param {object} arg Options for the renderer.
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.

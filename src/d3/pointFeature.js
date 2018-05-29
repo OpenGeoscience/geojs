@@ -6,7 +6,8 @@ var pointFeature = require('../pointFeature');
  *
  * Create a new instance of pointFeature
  *
- * @class geo.d3.pointFeature
+ * @class
+ * @alias geo.d3.pointFeature
  * @extends geo.pointFeature
  * @extends geo.d3.object
  * @returns {geo.d3.pointFeature}

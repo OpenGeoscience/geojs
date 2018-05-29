@@ -6,7 +6,8 @@ var util = require('../util');
 /**
  * Create a new instance of class quadFeature.
  *
- * @class geo.canvas.quadFeature
+ * @class
+ * @alias geo.canvas.quadFeature
  * @param {geo.quadFeature.spec} arg Options object.
  * @extends geo.quadFeature
  * @returns {geo.canvas.quadFeature}

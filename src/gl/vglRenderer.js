@@ -5,7 +5,8 @@ var renderer = require('../renderer');
 /**
  * Create a new instance of class vglRenderer.
  *
- * @class geo.gl.vglRenderer
+ * @class
+ * @alias geo.gl.vglRenderer
  * @extends geo.renderer
  * @param {object} arg Options for the renderer.
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.
