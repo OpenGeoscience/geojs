@@ -216,15 +216,16 @@ var jsonReader = function (arg) {
   this.read = function (file, done, progress) {
 
     function _done(object) {
-      var features, allFeatures = [], points, lines, polygons;
+      var features, allFeatures = [], points, lines, polygons, feature;
 
       features = m_this._featureArray(object);
 
       // process points
       points = features.filter(function (f) { return f.geometry.type === 'Point'; });
       if (points.length) {
-        allFeatures.push(
-          m_this.layer().createFeature('point')
+        feature = m_this.layer().createFeature('point');
+        if (feature) {
+          feature
             .data(points)
             .position(function (d) {
               return m_this._position(d.geometry.coordinates);
@@ -238,15 +239,17 @@ var jsonReader = function (arg) {
               strokeWidth: m_this._style('strokeWidth', 1),
               strokeOpacity: m_this._style('strokeOpacity', 1),
               radius: m_this._style('radius', 8)
-            })
-        );
+            });
+          allFeatures.push(feature);
+        }
       }
 
       // process lines
       lines = features.filter(function (f) { return f.geometry.type === 'LineString'; });
       if (lines.length) {
-        allFeatures.push(
-          m_this.layer().createFeature('line')
+        feature = m_this.layer().createFeature('line');
+        if (feature) {
+          feature
             .data(lines)
             .line(function (d) {
               return d.geometry.coordinates;
@@ -260,15 +263,17 @@ var jsonReader = function (arg) {
               lineCap: m_this._style('lineCap', 'butt', lines),
               lineJoin: m_this._style('lineCap', 'miter', lines),
               closed: m_this._style('closed', false, lines)
-            })
-        );
+            });
+          allFeatures.push(feature);
+        }
       }
 
       // process polygons
       polygons = features.filter(function (f) { return f.geometry.type === 'Polygon'; });
       if (polygons.length) {
-        allFeatures.push(
-          m_this.layer().createFeature('polygon')
+        feature = m_this.layer().createFeature('polygon');
+        if (feature) {
+          feature
             .data(polygons)
             .polygon(function (d, i) {
               return {
@@ -285,8 +290,9 @@ var jsonReader = function (arg) {
               strokeColor: m_this._style('strokeColor', '#999999', polygons, convertColor),
               strokeWidth: m_this._style('strokeWidth', 2, polygons),
               strokeOpacity: m_this._style('strokeOpacity', 1, polygons)
-            })
-        );
+            });
+          allFeatures.push(feature);
+        }
       }
       if (done) {
         done(allFeatures);

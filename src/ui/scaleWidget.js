@@ -237,7 +237,7 @@ var scaleWidget = function (arg) {
           x: width / 2,
           y: sw * 2,
           'text-anchor': 'middle',
-          'alignment-baseline': 'hanging'
+          'dominant-baseline': 'hanging'
         });
         break;
       case 'top':
@@ -246,7 +246,7 @@ var scaleWidget = function (arg) {
           x: width / 2,
           y: height - sw * 2,
           'text-anchor': 'middle',
-          'alignment-baseline': 'baseline'
+          'dominant-baseline': 'alphabetic'
         });
         break;
       case 'left':
@@ -255,7 +255,7 @@ var scaleWidget = function (arg) {
           x: width - sw * 2,
           y: height / 2,
           'text-anchor': 'end',
-          'alignment-baseline': 'middle'
+          'dominant-baseline': 'middle'
         });
         break;
       case 'right':
@@ -264,7 +264,7 @@ var scaleWidget = function (arg) {
           x: sw * 2,
           y: height / 2,
           'text-anchor': 'start',
-          'alignment-baseline': 'middle'
+          'dominant-baseline': 'middle'
         });
         break;
     }
