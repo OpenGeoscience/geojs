@@ -271,3 +271,27 @@
  * @property {number} [a] The opacity on a scale of [0-1].  If unspecified and
  *      used, it should be treated as 1.
  */
+
+/**
+ * Polygon as a flat array.  An array of vertices.  The polygon has no holes.
+ * The first and last point of may be the same.
+ *
+ * @typedef {geo.geoPosition[]} geo.polygonFlat
+ */
+
+/**
+ * Polygon as a object.  The polygon may have holes.
+ *
+ * @typedef {object} geo.polygonObject
+ * @property {geo.geoPosition[]} outer An array of vertices defining the
+ *   outside of the polygon.  The first and last point of may be the same.
+ * @property {Array.<geo.geoPosition[]>} [inner] An array of holes, each of
+ *   which is an array of vertices.  The first and last point of may be the
+ *  same.
+ */
+
+/**
+ * Polygon.
+ *
+ * @typedef {geo.polygonFlat|geo.polygonObject} geo.polygon
+ */

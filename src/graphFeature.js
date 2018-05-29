@@ -4,7 +4,8 @@ var feature = require('./feature');
 /**
  * Create a new instance of class graphFeature
  *
- * @class geo.graphFeature
+ * @class
+ * @alias geo.graphFeature
  * @extends geo.feature
  * @returns {geo.graphFeature}
  */

@@ -5,7 +5,8 @@ var vectorFeature = require('../vectorFeature');
 /**
  * Create a new instance of vectorFeature
  *
- * @class geo.d3.vectorFeature
+ * @class
+ * @alias geo.d3.vectorFeature
  * @extends geo.vectorFeature
  * @extends geo.d3.object
  * @returns {geo.d3.vectorFeature}

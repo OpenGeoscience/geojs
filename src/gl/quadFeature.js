@@ -5,7 +5,8 @@ var quadFeature = require('../quadFeature');
 /**
  * Create a new instance of class quadFeature.
  *
- * @class geo.gl.quadFeature
+ * @class
+ * @alias geo.gl.quadFeature
  * @param {geo.quadFeature.spec} arg Options object.
  * @extends geo.quadFeature
  * @returns {geo.gl.quadFeature}

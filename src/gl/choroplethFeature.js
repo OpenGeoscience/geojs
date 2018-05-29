@@ -5,7 +5,8 @@ var choroplethFeature = require('../choroplethFeature');
 /**
  * Create a new instance of choroplethFeature
  *
- * @class geo.gl.choroplethFeature
+ * @class
+ * @alias geo.gl.choroplethFeature
  * @extends geo.choroplethFeature
  * @returns {geo.gl.choroplethFeature}
  */

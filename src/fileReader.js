@@ -5,7 +5,8 @@ var object = require('./object');
 /**
  * Create a new instance of class fileReader
  *
- * @class geo.fileReader
+ * @class
+ * @alias geo.fileReader
  * @extends geo.object
  * @returns {geo.fileReader}
  */

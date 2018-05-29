@@ -9,13 +9,8 @@ var transform = require('./transform');
  * @typedef {geo.feature.spec} geo.polygonFeature.spec
  * @property {object|function} [position] Position of the data.  Default is
  *   (data).
- * @property {object|function} [polygon] Polygons from the data.  Default is
- *   (data).  Typically, the data is an array of polygons, each of which is of
- *   the form {outer: [(coordinates)], inner: [[(coordinates of first hole)],
- *   [(coordinates of second hole)], ...]}.  The inner record is optional.
- *   Alternately, if there are no holes, a polygon can just be an array of
- *   coordinates in the form of geo.geoPosition.  The first and last point of
- *   each polygon may be the same.
+ * @property {geo.polygon|function} [polygon] Polygons from the data.  Default
+ *   (data).
  * @property {object} [style] Style object with default style options.
  * @property {boolean|function} [style.fill=true] True to fill polygon.
  * @property {geo.geoColor|function} [style.fillColor] Color to fill each
@@ -105,8 +100,8 @@ var polygonFeature = function (arg) {
    *    get the position of each vertex.
    * @param {function} [polyFunc=this.style.get('polygon')] The function to
    *    get each polygon.
-   * @returns {object[]} An array of polygon positions.  Each has `outer` and
-   *    `inner` if it has any coordinates, or is undefined.
+   * @returns {geo.polygonObject[]} An array of polygon positions.  Each has
+   *    `outer` and `inner` if it has any coordinates, or is `undefined`.
    */
   function getCoordinates(data, posFunc, polyFunc) {
     data = data || m_this.data();
@@ -154,8 +149,8 @@ var polygonFeature = function (arg) {
   /**
    * Get the set of normalized polygon coordinates.
    *
-   * @returns {object[]} An array of polygon positions.  Each has `outer` and
-   *    `inner` if it has any coordinates, or is undefined.
+   * @returns {geo.polygonObject[]} An array of polygon positions.  Each has
+   *    `outer` and `inner` if it has any coordinates, or is `undefined`.
    */
   this.polygonCoordinates = function () {
     return m_coordinates;
@@ -188,9 +183,12 @@ var polygonFeature = function (arg) {
   /**
    * Get/set polygon accessor.
    *
-   * @param {object} [val] if specified, use this for the polygon accessor
-   *    and return the feature.  If not specified, return the current polygon.
-   * @returns {object|this} The current polygon or this feature.
+   * @param {object|function} [val] If not specified, return the current
+   *    polygon accessor.  If specified, use this for the polygon accessor and
+   *    return `this`.  If a function is given, the function is passed
+   *    `(dataElement, dataIndex)` and returns a `geo.polygon`.
+   * @returns {object|function|this} The current polygon accessor or this
+   *    feature.
    */
   this.polygon = function (val) {
     if (val === undefined) {
@@ -207,9 +205,10 @@ var polygonFeature = function (arg) {
   /**
    * Get/Set position accessor.
    *
-   * @param {object} [val] if specified, use this for the position accessor
-   *    and return the feature.  If not specified, return the current
-   *    position.
+   * @param {object|function} [val] If not specified, return the current
+   *    position accessor.  If specified, use this for the position accessor
+   *    and return `this`.  If a function is given, this is called with
+   *    `(vertexElement, vertexIndex, dataElement, dataIndex)`.
    * @returns {object|this} The current position or this feature.
    */
   this.position = function (val) {
