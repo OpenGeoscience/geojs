@@ -3,7 +3,8 @@ var registerFeature = require('../registry').registerFeature;
 var graphFeature = require('../graphFeature');
 
 /**
- * @class geo.d3.graphFeature
+ * @class
+ * @alias geo.d3.graphFeature
  * @extends geo.graphFeature
  */
 var d3_graphFeature = function (arg) {

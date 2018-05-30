@@ -5,7 +5,8 @@ var feature = require('./feature');
 /**
  * Create a new instance of class pathFeature
  *
- * @class geo.pathFeature
+ * @class
+ * @alias geo.pathFeature
  * @extends geo.feature
  * @returns {geo.pathFeature}
  */

@@ -5,7 +5,8 @@ var pathFeature = require('../pathFeature');
 /**
  * Create a new instance of class pathFeature
  *
- * @class geo.d3.pathFeature
+ * @class
+ * @alias geo.d3.pathFeature
  * @extends geo.pathFeature
  * @extends geo.d3.object
  * @returns {geo.d3.pathFeature}

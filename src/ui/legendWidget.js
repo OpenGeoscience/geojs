@@ -5,7 +5,8 @@ var registerWidget = require('../registry').registerWidget;
 /**
  * Create a new instance of class legendWidget
  *
- * @class geo.gui.legendWidget
+ * @class
+ * @alias geo.gui.legendWidget
  * @extends geo.gui.svgWidget
  * @returns {geo.gui.legendWidget}
  */

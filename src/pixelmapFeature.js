@@ -7,7 +7,8 @@ var util = require('./util');
 /**
  * Create a new instance of class imagemapFeature
  *
- * @class geo.pixelmapFeature
+ * @class
+ * @alias geo.pixelmapFeature
  * @param {Object} arg Options object
  * @extends geo.feature
  * @param {Object|Function|HTMLImageElement} [url] URL of a pixel map or an
