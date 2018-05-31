@@ -129,8 +129,7 @@ var contourFeature = function (arg) {
         minValue, maxValue, val, range, i, k;
     var result = this.createMesh({
       used: function (d, i) {
-        var val = valueFunc(d, i);
-        return !isNaN(val) && val !== null;
+        return util.isNonNullFinite(valueFunc(d, i));
       },
       opacity: m_this.style.get('opacity'),
       value: valueFunc
