@@ -99,11 +99,13 @@ var canvas_textFeature = function (arg) {
   this._renderOnCanvas = function (context2d, map) {
     var data = m_this.data(),
         posFunc = m_this.style.get('position'),
+        renderedZone = m_this.style.get('renderedZone')(data),
         textFunc = m_this.style.get('text'),
         mapRotation = map.rotation(),
         mapZoom = map.zoom(),
-        fontFromSubValues, text, pos, visible, color, blur, stroke, width,
-        rotation, rotateWithMap, scale, offset,
+        mapSize = map.size(),
+        fontFromSubValues, text, posArray, pos, visible, color, blur, stroke,
+        width, rotation, rotateWithMap, scale, offset,
         transform, lastTransform = util.mat3AsArray();
 
     /* If any of the font styles other than `font` have values, then we need to
@@ -117,7 +119,17 @@ var canvas_textFeature = function (arg) {
     });
     /* Clear the canvas property buffer */
     m_this._canvasProperty();
+    posArray = m_this.featureGcsToDisplay(data.map(posFunc));
     data.forEach(function (d, i) {
+      /* If the position is far enough outside of the map viewport, don't
+       * render it, even if the offset of size would be sufficient to make it
+       * appear in the viewport. */
+      pos = posArray[i];
+      if (renderedZone > 0 && (
+          pos.x < -renderedZone || pos.x > mapSize.width + renderedZone ||
+          pos.y < -renderedZone || pos.y > mapSize.height + renderedZone)) {
+        return;
+      }
       visible = m_this.style.get('visible')(d, i);
       if (!visible && visible !== undefined) {
         return;
@@ -130,10 +142,6 @@ var canvas_textFeature = function (arg) {
         return;
       }
       m_this._canvasProperty(context2d, 'fillStyle', util.convertColorToRGBA(color));
-      // TODO: get the position position without transform.  If it is outside
-      // of the map to an extent that there is no chance of text showing,
-      // skip further processing.
-      pos = m_this.featureGcsToDisplay(posFunc(d, i));
       text = textFunc(d, i);
       m_this._canvasProperty(context2d, 'font', m_this.getFontFromStyles(fontFromSubValues, d, i));
       m_this._canvasProperty(context2d, 'textAlign', m_this.style.get('textAlign')(d, i) || 'center');
