@@ -220,8 +220,8 @@ var contourFeature = function (arg) {
       {},
       {
         opacity: 1.0,
-        value: function (d) {
-          return m_this.position()(d).z;
+        value: function (d, i) {
+          return m_this.position()(d, i).z;
         }
       },
       arg.style === undefined ? {} : arg.style

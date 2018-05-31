@@ -4,7 +4,8 @@ var feature = require('./feature');
 /**
  * A mesh formed by a set of triangular or square elements or a
  * squarely-connected grid that is of rectangular extent.  The gird can be
- * regularly spaced or have arbitrary position coordinates for each node.
+ * regularly spaced or have arbitrary position coordinates for each node.  All
+ * of these properties can be functions, which get passed `data`.
  *
  * @typedef {object} geo.meshFeature.meshSpec
  * @property {number[]|array.<number[]>} [elements] If specified, a list of
@@ -58,7 +59,7 @@ var feature = require('./feature');
  */
 
 /**
- * A set of triangular elements and their associated positions for a mesh.
+ * A set of elements and their associated positions for a mesh.
  *
  * @typedef {object} geo.meshFeature.meshInfo
  * @property {string} shape One of `'triangle'` or `'square'`.  If `square`,
@@ -213,15 +214,15 @@ var meshFeature = function (arg) {
     var i, i3, j, k, idx, numPts, usedPts, usePos, item, key,
         data = m_this.data(),
         posFunc = m_this.position(), posVal,
-        elements = m_this.mesh.get('elements')(),
-        elementPacking = m_this.mesh.get('elementPacking')(),
-        gridW = m_this.mesh.get('gridWidth')(),
-        gridH = m_this.mesh.get('gridHeight')(),
-        wrapLongitude = m_this.mesh.get('wrapLongitude')(),
-        x0 = m_this.mesh.get('x0')(),
-        y0 = m_this.mesh.get('y0')(),
-        dx = m_this.mesh.get('dx')(),
-        dy = m_this.mesh.get('dy')(),
+        elements = m_this.mesh.get('elements')(data),
+        elementPacking = m_this.mesh.get('elementPacking')(data),
+        gridW = m_this.mesh.get('gridWidth')(data),
+        gridH = m_this.mesh.get('gridHeight')(data),
+        wrapLongitude = m_this.mesh.get('wrapLongitude')(data),
+        x0 = m_this.mesh.get('x0')(data),
+        y0 = m_this.mesh.get('y0')(data),
+        dx = m_this.mesh.get('dx')(data),
+        dy = m_this.mesh.get('dy')(data),
         calcX, skipColumn, x, origI, /* used for wrapping */
         gridWorig = gridW,  /* can be different when wrapping */
         result = {
