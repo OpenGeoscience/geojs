@@ -7,33 +7,26 @@ var transform = require('./transform');
  * Polygon feature specification.
  *
  * @typedef {geo.feature.spec} geo.polygonFeature.spec
- * @param {object|Function} [position] Position of the data.  Default is
+ * @property {object|function} [position] Position of the data.  Default is
  *   (data).
- * @param {object|Function} [polygon] Polygons from the data.  Default is
- *   (data).  Typically, the data is an array of polygons, each of which is of
- *   the form {outer: [(coordinates)], inner: [[(coordinates of first hole)],
- *   [(coordinates of second hole)], ...]}.  The inner record is optional.
- *   Alternately, if there are no holes, a polygon can just be an array of
- *   coordinates in the form of geo.geoPosition.  The first and last point of
- *   each polygon may be the same.
- * @param {object} [style] Style object with default style options.
- * @param {boolean|Function} [style.fill] True to fill polygon.  Defaults to
- *   true.
- * @param {geo.geoColor|Function} [style.fillColor] Color to fill each polygon.
- *   The color can vary by vertex.
- * @param {number|Function} [style.fillOpacity] Opacity for each polygon.  The
- *   opacity can vary by vertex.  Opacity is on a [0-1] scale.
- * @param {boolean|Function} [style.stroke] True to stroke polygon.  Defaults
- *   to false.
- * @param {geo.geoColor|Function} [style.strokeColor] Color to stroke each
+ * @property {geo.polygon|function} [polygon] Polygons from the data.  Default
+ *   (data).
+ * @property {object} [style] Style object with default style options.
+ * @property {boolean|function} [style.fill=true] True to fill polygon.
+ * @property {geo.geoColor|function} [style.fillColor] Color to fill each
  *   polygon.  The color can vary by vertex.
- * @param {number|Function} [style.strokeOpacity] Opacity for each polygon
+ * @property {number|function} [style.fillOpacity] Opacity for each polygon.
+ *   The opacity can vary by vertex.  Opacity is on a [0-1] scale.
+ * @property {boolean|function} [style.stroke=false] True to stroke polygon.
+ * @property {geo.geoColor|function} [style.strokeColor] Color to stroke each
+ *   polygon.  The color can vary by vertex.
+ * @property {number|function} [style.strokeOpacity] Opacity for each polygon
  *   stroke.  The opacity can vary by vertex.  Opacity is on a [0-1] scale.
- * @param {number|Function} [style.strokeWidth] The weight of the polygon
+ * @property {number|function} [style.strokeWidth] The weight of the polygon
  *   stroke in pixels.  The width can vary by vertex.
- * @param {boolean|Function} [style.uniformPolygon] Boolean indicating if each
- *   polygon has a uniform style (uniform fill color, fill opacity, stroke
- *   color, and stroke opacity).   Defaults to false.  Can vary by polygon.
+ * @property {boolean|function} [style.uniformPolygon=false] Boolean indicating
+ *   if each polygon has a uniform style (uniform fill color, fill opacity,
+ *   stroke color, and stroke opacity).  Can vary by polygon.
  */
 
 /**
@@ -107,8 +100,8 @@ var polygonFeature = function (arg) {
    *    get the position of each vertex.
    * @param {function} [polyFunc=this.style.get('polygon')] The function to
    *    get each polygon.
-   * @returns {object[]} An array of polygon positions.  Each has `outer` and
-   *    `inner` if it has any coordinates, or is undefined.
+   * @returns {geo.polygonObject[]} An array of polygon positions.  Each has
+   *    `outer` and `inner` if it has any coordinates, or is `undefined`.
    */
   function getCoordinates(data, posFunc, polyFunc) {
     data = data || m_this.data();
@@ -156,8 +149,8 @@ var polygonFeature = function (arg) {
   /**
    * Get the set of normalized polygon coordinates.
    *
-   * @returns {object[]} An array of polygon positions.  Each has `outer` and
-   *    `inner` if it has any coordinates, or is undefined.
+   * @returns {geo.polygonObject[]} An array of polygon positions.  Each has
+   *    `outer` and `inner` if it has any coordinates, or is `undefined`.
    */
   this.polygonCoordinates = function () {
     return m_coordinates;
@@ -190,9 +183,12 @@ var polygonFeature = function (arg) {
   /**
    * Get/set polygon accessor.
    *
-   * @param {object} [val] if specified, use this for the polygon accessor
-   *    and return the feature.  If not specified, return the current polygon.
-   * @returns {object|this} The current polygon or this feature.
+   * @param {object|function} [val] If not specified, return the current
+   *    polygon accessor.  If specified, use this for the polygon accessor and
+   *    return `this`.  If a function is given, the function is passed
+   *    `(dataElement, dataIndex)` and returns a `geo.polygon`.
+   * @returns {object|function|this} The current polygon accessor or this
+   *    feature.
    */
   this.polygon = function (val) {
     if (val === undefined) {
@@ -209,9 +205,10 @@ var polygonFeature = function (arg) {
   /**
    * Get/Set position accessor.
    *
-   * @param {object} [val] if specified, use this for the position accessor
-   *    and return the feature.  If not specified, return the current
-   *    position.
+   * @param {object|function} [val] If not specified, return the current
+   *    position accessor.  If specified, use this for the position accessor
+   *    and return `this`.  If a function is given, this is called with
+   *    `(vertexElement, vertexIndex, dataElement, dataIndex)`.
    * @returns {object|this} The current position or this feature.
    */
   this.position = function (val) {

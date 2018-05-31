@@ -5,7 +5,8 @@ var contourFeature = require('../contourFeature');
 /**
  * Create a new instance of contourFeature.
  *
- * @class geo.gl.contourFeature
+ * @class
+ * @alias geo.gl.contourFeature
  * @extends geo.contourFeature
  * @param {geo.contourFeature.spec} arg
  * @returns {geo.gl.contourFeature}

@@ -5,7 +5,8 @@ var renderer = require('../renderer');
 /**
  * Create a new instance of class vglRenderer.
  *
- * @class geo.gl.vglRenderer
+ * @class
+ * @alias geo.gl.vglRenderer
  * @extends geo.renderer
  * @param {object} arg Options for the renderer.
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.
@@ -137,15 +138,18 @@ var vglRenderer = function (arg) {
   this._resize = function (x, y, w, h) {
     var renderWindow = m_viewer.renderWindow();
 
-    m_width = w;
-    m_height = h;
-    m_this.canvas().attr('width', w);
-    m_this.canvas().attr('height', h);
-    renderWindow.positionAndResize(x, y, w, h);
+    if (x !== renderWindow.windowPosition[0] ||
+        y !== renderWindow.windowPosition[1] ||
+        w !== m_width || h !== m_height) {
+      m_width = w;
+      m_height = h;
+      m_this.canvas().attr('width', w);
+      m_this.canvas().attr('height', h);
+      renderWindow.positionAndResize(x, y, w, h);
 
-    m_updateCamera = true;
-    m_this._render();
-
+      m_updateCamera = true;
+      m_this._render();
+    }
     return m_this;
   };
 

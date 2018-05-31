@@ -18,7 +18,7 @@ function subdir_name(b) {
     /* Use thes test case and as part of the name so that different tests end
      * up in different coverage directories.  Get the last element of the path
      * without the extension from the test case for this purpose. */
-    var parts = /^(.+\/)*(([^\/]+)\.[^\/.]*|[^\/.]+)$/.exec(process.env.GEOJS_TEST_CASE);
+    var parts = /^(.+\/)*(([^/]+)\.[^/.]*|[^/.]+)$/.exec(process.env.GEOJS_TEST_CASE);
     if (parts) {
       subdir += '_' + (parts[3] || parts[2]);
     }
@@ -29,7 +29,9 @@ function subdir_name(b) {
 module.exports = function (config) {
   var karma_config = require('./karma-base')(config);
 
-  karma_config.reporters = ['progress', 'coverage'];
+  karma_config.reporters = ['spec', 'coverage'];
+  /* Suppress listing passing and skipped tests when getting coverage. */
+  karma_config.specReporter = {suppressPassed: true, suppressSkipped: true};
   karma_config.coverageReporter = {
     reporters: [
       {type: 'html', dir: 'dist/coverage/', subdir: subdir_name},

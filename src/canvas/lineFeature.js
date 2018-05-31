@@ -5,7 +5,8 @@ var lineFeature = require('../lineFeature');
 /**
  * Create a new instance of class lineFeature.
  *
- * @class geo.canvas.lineFeature
+ * @class
+ * @alias geo.canvas.lineFeature
  * @extends geo.lineFeature
  * @param {geo.lineFeature.spec} arg
  * @returns {geo.canvas.lineFeature}

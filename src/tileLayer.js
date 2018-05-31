@@ -127,7 +127,7 @@ module.exports = (function () {
    *    uses more memory but results in smoother transitions.
    * @param {boolean}   [options.wrapX=true]    Wrap in the x-direction
    * @param {boolean}   [options.wrapY=false]   Wrap in the y-direction
-   * @param {function|string} [options.url=null]
+   * @param {string|function} [options.url=null]
    *   A function taking the current tile indices and returning a URL or jquery
    *   ajax config to be passed to the {geo.tile} constructor.
    *   Example:

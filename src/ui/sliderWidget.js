@@ -5,7 +5,8 @@ var registerWidget = require('../registry').registerWidget;
 /**
  * Create a new instance of class sliderWidget
  *
- * @class geo.gui.sliderWidget
+ * @class
+ * @alias geo.gui.sliderWidget
  * @extends {geo.gui.svgWidget}
  * @returns {geo.gui.sliderWidget}
  */

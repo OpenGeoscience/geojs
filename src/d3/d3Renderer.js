@@ -5,7 +5,8 @@ var renderer = require('../renderer');
 /**
  * Create a new instance of class d3Renderer.
  *
- * @class geo.d3.renderer
+ * @class
+ * @alias geo.d3.renderer
  * @extends geo.renderer
  * @param {object} arg Options for the renderer.
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.
@@ -70,7 +71,7 @@ var d3Renderer = function (arg) {
   /**
    * Meta functions for converting from geojs styles to d3.
    * @private
-   * @param {function|object} f The style value or function to convert.
+   * @param {object|function} f The style value or function to convert.
    * @param {function} [g] An optional function that returns a boolean; if it
    *    returns false, the style is set to `'none'`.
    * @returns {function} A function for converting styles.
@@ -96,7 +97,7 @@ var d3Renderer = function (arg) {
    * Return a function for converting a size in pixels to an appropriate
    * d3 scale.
    * @private
-   * @param {function|object} f The style value or function to convert.
+   * @param {object|function} f The style value or function to convert.
    * @returns {function} A function for converting scale.
    */
   this._convertScale = function (f) {

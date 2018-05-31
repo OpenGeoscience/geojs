@@ -34,7 +34,7 @@ var geo_event = require('./event');
  *      the feature.
  * @property {object} [style] An object that contains style values for the
  *      feature.
- * @property {function|number} [style.opacity=1] The opacity on a scale of 0 to
+ * @property {number|function} [style.opacity=1] The opacity on a scale of 0 to
  *      1.
  */
 
@@ -399,7 +399,11 @@ var feature = function (arg) {
   };
 
   /**
-   * Get/Set style used by the feature.
+   * Get/Set style used by the feature.  Styles can be constant values or
+   * functions.  If a function, the style is typically called with parameters
+   * such as `(dataElement, dataIndex)` or, if the specific style of a feature
+   * has a subfeature style, with `(subfeatureElement, subfeatureIndex,
+   * dataElement, dataIndex)`.
    *
    * @param {string|object} [arg1] If `undefined`, return the current style
    *    object.  If a string and `arg2` is undefined, return the style

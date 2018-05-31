@@ -5,7 +5,8 @@ var pixelmapFeature = require('../pixelmapFeature');
 /**
  * Create a new instance of class pixelmapFeature
  *
- * @class geo.canvas.pixelmapFeature
+ * @class
+ * @alias geo.canvas.pixelmapFeature
  * @param {Object} arg Options object
  * @extends geo.pixelmapFeature
  * @returns {canvas_pixelmapFeature}

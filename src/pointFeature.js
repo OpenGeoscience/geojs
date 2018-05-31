@@ -4,7 +4,8 @@ var feature = require('./feature');
 /**
  * Create a new instance of class pointFeature
  *
- * @class geo.pointFeature
+ * @class
+ * @alias geo.pointFeature
  * @param {object} arg Options object
  * @param {boolean} arg.clustering Enable point clustering
  * @extends geo.feature

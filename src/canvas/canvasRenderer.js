@@ -5,7 +5,8 @@ var renderer = require('../renderer');
 /**
  * Create a new instance of class canvasRenderer.
  *
- * @class geo.canvas.renderer
+ * @class
+ * @alias geo.canvas.renderer
  * @extends geo.renderer
  * @param {object} arg Options for the renderer.
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.
@@ -85,10 +86,13 @@ var canvasRenderer = function (arg) {
    * @returns {this}
    */
   this._resize = function (x, y, w, h) {
-    m_this.canvas().attr('width', w);
-    m_this.canvas().attr('height', h);
-    m_this._render();
-
+    var canvas = m_this.canvas();
+    if (parseInt(canvas.attr('width'), 10) !== w ||
+        parseInt(canvas.attr('height'), 10) !== h) {
+      canvas.attr('width', w);
+      canvas.attr('height', h);
+      m_this._render();
+    }
     return m_this;
   };
 

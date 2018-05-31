@@ -6,7 +6,9 @@
                 "Number": "number",
                 "String": "string",
                 "Boolean": "boolean",
-                "bool": "boolean"
+                "bool": "boolean",
+                "Function": "function",
+                "func": "function"
             },
             "prefer": {
                 "return": "returns"

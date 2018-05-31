@@ -5,7 +5,8 @@ var registerRenderer = require('./registry').registerRenderer;
 /**
  * Create a new instance of class domRenderer.
  *
- * @class geo.domRenderer
+ * @class
+ * @alias geo.domRenderer
  * @extends geo.renderer
  * @param {object} arg Options for the renderer.
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.

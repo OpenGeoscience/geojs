@@ -4,7 +4,8 @@ var feature = require('./feature');
 /**
  * Create a new instance of class choroplethFeature
  *
- * @class geo.choroplethFeature
+ * @class
+ * @alias geo.choroplethFeature
  * @param {Object} arg Options object
  * @extends geo.feature
  * @param {Array} [colorRange] Color lookup table for
