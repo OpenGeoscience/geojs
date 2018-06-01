@@ -459,4 +459,15 @@ util.rendererForAnnotations = function (annotationList) {
   return util.rendererForFeatures(util.featuresForAnnotations(annotationList));
 };
 
+/* Expose the various registries so that the can be examined to see what
+ * things are registered. */
+util.registries = {
+  annotations: annotations,
+  features: features,
+  featureCapabilities: featureCapabilities,
+  fileReaders: fileReaders,
+  layers: layers,
+  renderers: renderers
+};
+
 module.exports = util;

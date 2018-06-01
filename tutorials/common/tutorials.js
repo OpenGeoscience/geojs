@@ -192,8 +192,8 @@ function process_block_debounce(selector, debounce) {
     processBlockInfo.lastelem = selector;
     if (!debounce) {
       process_block(selector);
+      return;
     }
-    return;
   }
   processBlockInfo.timer = window.setTimeout(function () {
     process_block(processBlockInfo.lastelem);
