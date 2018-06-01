@@ -24,7 +24,8 @@ var meshFeature = require('./meshFeature');
  */
 
 /**
- * Contour specification.
+ * Contour specification.  All of these properties can be functions, which get
+ * passed the `geo.meshFeature.meshInfo` object.
  *
  * @typedef {geo.meshFeature.meshSpec} geo.contourFeature.contourSpec
  * @property {number} [min] Minimum contour value.  If unspecified, taken from
@@ -56,14 +57,7 @@ var meshFeature = require('./meshFeature');
 /**
  * Computed contour information.
  *
- * @typedef {object} geo.contourFeature.contourInfo
- * @property {number[]} elements An array of 0-based indices into the values
- *    array.  Each set of the three values forms a triangle that should be
- *    rendered.  If no contour data can be used, this will be a zero-length
- *    array and other properties may not be set.
- * @property {number[]} pos An flat array of coordinates for the vertices in
- *    the triangular mesh.  The array is in the order x0, y0, z0, x1, y1, z1,
- *    x2, ..., and is always three times as long as the number of vertices.
+ * @typedef {geo.meshFeature.meshInfo} geo.contourFeature.contourInfo
  * @property {number[]} value An array of values that have been normalized to a
  *    range of [0, steps].  There is one value per vertex.
  * @property {number[]} opacity An array of opacities per vertex.
@@ -123,10 +117,7 @@ var contourFeature = function (arg) {
   this._createContours = function () {
     var contour = m_this.contour,
         valueFunc = m_this.style.get('value'),
-        stepped = contour.get('stepped')(),
-        opacityRange = contour.get('opacityRange')(),
-        rangeValues = contour.get('rangeValues')(),
-        minValue, maxValue, val, range, i, k;
+        minmax, val, range, i, k;
     var result = this._createMesh({
       used: function (d, i) {
         return util.isNonNullFinite(valueFunc(d, i));
@@ -137,34 +128,25 @@ var contourFeature = function (arg) {
     if (!result.numVertices || !result.numElements) {
       return result;
     }
+    var stepped = contour.get('stepped')(result),
+        opacityRange = contour.get('opacityRange')(result),
+        rangeValues = contour.get('rangeValues')(result);
     result.stepped = stepped === undefined || stepped ? true : false;
     /* Create the min/max colors and the color array */
     result.colorMap = [];
-    result.minColor = $.extend({a: contour.get('minOpacity')() || 0},
-        util.convertColor(contour.get('minColor')()));
-    result.maxColor = $.extend({a: contour.get('maxOpacity')() || 0},
-        util.convertColor(contour.get('maxColor')()));
-    contour.get('colorRange')().forEach(function (clr, idx) {
+    result.minColor = $.extend({a: contour.get('minOpacity')(result) || 0},
+        util.convertColor(contour.get('minColor')(result)));
+    result.maxColor = $.extend({a: contour.get('maxOpacity')(result) || 0},
+        util.convertColor(contour.get('maxColor')(result)));
+    contour.get('colorRange')(result).forEach(function (clr, idx) {
       result.colorMap.push($.extend({
         a: opacityRange && opacityRange[idx] !== undefined ? opacityRange[idx] : 1
       }, util.convertColor(clr)));
     });
     /* Get min and max values */
-    result.minValue = contour.get('min')();
-    result.maxValue = contour.get('max')();
-    if (!$.isNumeric(result.minValue) || !$.isNumeric(result.maxValue)) {
-      minValue = maxValue = result.value[0];
-      for (i = 1; i < result.numVertices; i += 1) {
-        minValue = Math.min(minValue, result.value[i]);
-        maxValue = Math.max(maxValue, result.value[i]);
-      }
-      if (!$.isNumeric(result.minValue)) {
-        result.minValue = minValue;
-      }
-      if (!$.isNumeric(result.maxValue)) {
-        result.maxValue = maxValue;
-      }
-    }
+    minmax = util.getMinMaxValues(result.value, contour.get('min')(result), contour.get('max')(result));
+    result.minValue = minmax.min;
+    result.maxValue = minmax.max;
     if (!rangeValues || rangeValues.length !== result.colorMap.length + 1) {
       rangeValues = null;
     }

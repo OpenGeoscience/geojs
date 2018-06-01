@@ -985,6 +985,42 @@ var util = module.exports = {
   },
 
   /**
+   * Given an array, return the minimum and maximum values within the array.
+   * If a numeric value is specified for one or the other, return that instead.
+   *
+   * @param {number[]} values An array of numeric values.
+   * @param {number} [min] If specified, use this instead of calculating the
+   *    minimum.
+   * @param {number} [max] If specified, use this instead of calculating the
+   *    maximum.
+   * @param {boolean} [limit=false] If truthy, if `min` is specified, the
+   *    returned `min` will be the larger of the specified value and the
+   *    computed value, and if `max` is specified, the returned value will
+   *    be the smaller of the specified value and the computed value.
+   * @returns {object} An object with `min` and `max`, both numbers.  If the
+   *    array is empty, `undefined` may be returned for the `min` and `max`.
+   */
+  getMinMaxValues: function (values, min, max, limit) {
+    if (values.length && (limit || !$.isNumeric(min) || !$.isNumeric(max))) {
+      var minValue = values[0],
+          maxValue = values[0],
+          value, i;
+      for (i = values.length - 1; i > 0; i -= 1) {
+        value = values[i];
+        if (value < minValue) { minValue = value; }
+        if (value > maxValue) { maxValue = value; }
+      }
+      if (!$.isNumeric(min) || (limit && minValue > min)) {
+        min = minValue;
+      }
+      if (!$.isNumeric(max) || (limit && maxValue < max)) {
+        max = maxValue;
+      }
+    }
+    return {min: min, max: max};
+  },
+
+  /**
    * Escape any character in a string that has a code point >= 127.
    *
    * @param {string} text The string to escape.
