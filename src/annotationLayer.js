@@ -1012,8 +1012,8 @@ var annotationLayer = function (args) {
       return m_this;
     }
     if (!m_labelFeature) {
-      var renderer = registry.rendererForFeatures(['text']);
-      if (renderer !== m_this.renderer().api()) {
+      if (!(registry.registries.features[m_this.rendererName()] || {}).text) {
+        var renderer = registry.rendererForFeatures(['text']);
         m_labelLayer = registry.createLayer('feature', m_this.map(), {renderer: renderer});
         m_this.addChild(m_labelLayer);
         m_labelLayer._update();
