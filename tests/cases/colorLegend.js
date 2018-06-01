@@ -193,7 +193,10 @@ describe('color legend', function () {
     function CreateEvent(eventType, params) {
       params = params || { bubbles: false, cancelable: false };
       var mouseEvent = document.createEvent('MouseEvent');
-      mouseEvent.initMouseEvent(eventType, params.bubbles, params.cancelable, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+      mouseEvent.initMouseEvent(
+        eventType, params.bubbles, params.cancelable, window, 0,
+        params.x || 0, params.y || 0, params.x || 0, params.y || 0,
+        false, false, false, false, 0, null);
       return mouseEvent;
     }
 
@@ -211,30 +214,19 @@ describe('color legend', function () {
     container[0].dispatchEvent(CreateEvent('mouseleave'));
 
     legendWidget.categories([allCategories[1], allCategories[6]]);
-    var mousemove;
-    var result;
-    if (navigator.userAgent.indexOf('Firefox') > 0) {
-      result = '320';
-    } else {
-      result = '319';
-    }
+    var x = Math.floor($('.legends', container).offset().left) + 115,
+        y = Math.floor($('.legends', container).offset().top) + 555;
 
-    /*global MouseEvent*/
-    try {
-      mousemove = new MouseEvent('mousemove', { clientX: 134, clientY: 574 });
-    } catch (e) {
-      mousemove = CreateEvent('mousemove');
-      mousemove.pageX = 134;
-      mousemove.pageY = 574;
-      result = '46';
-    }
     var mouseout = CreateEvent('mouseout');
+    var mousemove = CreateEvent('mousemove', {x: x, y: y});
     var legends = $(container).find('.legend');
     $(legends[0]).find('svg>rect')[0].dispatchEvent(mousemove);
     $(legends[0]).find('svg>rect')[0].dispatchEvent(mouseout);
     expect($(container).find('.color-legend-popup').text()).toBe('100 - 200');
     $(legends[1]).find('svg>rect')[0].dispatchEvent(mousemove);
-    expect($(container).find('.color-legend-popup').text()).toBe(result);
+    // because some browsers use sub-pixel alignment, allow for a little bit of
+    // slop in this test.
+    expect(Math.abs($(container).find('.color-legend-popup').text() - 320)).toBeLessThan(2);
     $(legends[1]).find('svg>rect')[0].dispatchEvent(mouseout);
   });
 });
