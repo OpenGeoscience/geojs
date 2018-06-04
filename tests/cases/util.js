@@ -124,4 +124,16 @@ describe('geo.util', function () {
     expect(util.getMinMaxValues(values, 200, 300, true)).toEqual({min: 200, max: 300});
     expect(util.getMinMaxValues(values, 100, 400, true)).toEqual({min: 181, max: 303});
   });
+
+  it('wrapAngle', function () {
+    expect(util.wrapAngle(0)).toBe(0);
+    expect(util.wrapAngle(2)).toBe(2);
+    expect(util.wrapAngle(4)).toBe(4 - Math.PI * 2);
+    expect(util.wrapAngle(7)).toBe(7 - Math.PI * 2);
+    expect(util.wrapAngle(17)).toBe(17 - Math.PI * 6);
+    expect(util.wrapAngle(-2)).toBe(-2);
+    expect(util.wrapAngle(-4)).toBe(-4 + Math.PI * 2);
+    expect(util.wrapAngle(-7)).toBe(-7 + Math.PI * 2);
+    expect(util.wrapAngle(-17)).toBe(-17 + Math.PI * 6);
+  });
 });
