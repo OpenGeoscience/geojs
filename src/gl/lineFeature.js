@@ -398,6 +398,7 @@ var gl_lineFeature = function (arg) {
         miterLimit = m_this.style.get('miterLimit')(data),
         antialiasing = m_this.style.get('antialiasing')(data) || 0,
         order = m_this.featureVertices(),
+        orderLen = order.length,
         posBuf, prevBuf, nextBuf, farBuf, flagsBuf, indicesBuf,
         fixedFlags = (flagsDebug[m_this.style.get('debug')(data) ? 'debug' : 'normal'] || 0),
         strokeWidthBuf, strokeColorBuf, strokeOpacityBuf,
@@ -458,7 +459,7 @@ var gl_lineFeature = function (arg) {
 
       position = transform.transformCoordinates(
         m_this.gcs(), m_this.layer().map().gcs(), position, 3);
-      len = numSegments * order.length;
+      len = numSegments * orderLen;
       posBuf = util.getGeomBuffer(geom, 'pos', len * 3);
       prevBuf = util.getGeomBuffer(geom, 'prev', len * 3);
       nextBuf = util.getGeomBuffer(geom, 'next', len * 3);
@@ -482,7 +483,7 @@ var gl_lineFeature = function (arg) {
       numSegments = m_geometry.numSegments;
       closed = m_geometry.closed;
       lineItemList = m_geometry.lineItemList;
-      len = numSegments * order.length;
+      len = numSegments * orderLen;
       updateFlags = (
         (lineCapVal !== m_geometry.lineCapVal || lineCapVal === undefined) ||
         (lineJoinVal !== m_geometry.lineJoinVal || lineJoinVal === undefined) ||
@@ -548,7 +549,7 @@ var gl_lineFeature = function (arg) {
         if (j) {
           /* zero out the z position.  This can be changed if we handle it in
            * the shader. */
-          for (k = 0; k < order.length; k += 1, dest += 1, dest3 += 3) {
+          for (k = 0; k < orderLen; k += 1, dest += 1, dest3 += 3) {
             v = vert[order[k][0]];
             v2 = vert[1 - order[k][0]];
             if (!onlyStyle) {
