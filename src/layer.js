@@ -12,9 +12,35 @@ var rendererForAnnotations = require('./registry').rendererForAnnotations;
  * @alias geo.layer
  * @extends geo.sceneObject
  * @param {object} [arg] Options for the new layer.
- * @param {string} arg.attribution An attribution string to display
- * @param {number} arg.zIndex The z-index to assign to the layer (defaults
- *   to the index of the layer inside the map)
+ * @param {number} [arg.id] The id of the layer.  Defaults to a increasing
+ *   sequence.
+ * @param {geo.map} [arg.map=null] Parent map of the layer.
+ * @param {string|geo.renderer} [arg.renderer] Renderer to associate with the
+ *   layer.  If not specified, either `arg.annotations` or `arg.features` can
+ *   be used to determine the renderer.
+ * @param {string[]|object} [arg.annotations] A list of annotations that will
+ *   be used on this layer, used to select a renderer.  Instead of a list, if
+ *   this is an object, the keys are the annotation names, and the values are
+ *   each a list of modes that will be used with that annotation.  See
+ *   `featuresForAnnotations` more details.  This is ignored if `arg.renderer`
+ *   is specified.
+ * @param {string[]} [arg.features] A list of features that will be used on
+ *   this layer, used to select a renderer.  Features are the basic feature
+ *   names (e.g., `'quad'`), or the feature name followed by a required
+ *   capability (e.g., `'quad.image'`).  This is ignored if `arg.renderer` or
+ *   `arg.annotations` is specified.
+ * @param {boolean} [arg.active=true] Truthy if the layer has the `active` css
+ *   class and may receive native mouse events.
+ * @param {string} [arg.attribution] An attribution string to display.
+ * @param {number} [arg.opacity=1] The layer opacity on a scale of [0-1].
+ * @param {string} [arg.name=''] A name for the layer for user convenience.
+ * @param {boolean} [arg.selectionAPI=true] Truthy if the layer can generate
+ *   selection and other interaction events.
+ * @param {boolean} [arg.sticky=true] Truthy if the layer should navigate with
+ *   the map.
+ * @param {boolean} [arg.visible=true] Truthy if the layer is visible.
+ * @param {number} [arg.zIndex] The z-index to assign to the layer (defaults
+ *   to the index of the layer inside the map).
  * @returns {geo.layer}
  */
 var layer = function (arg) {
@@ -39,7 +65,7 @@ var layer = function (arg) {
   var m_this = this,
       s_exit = this._exit,
       m_id = arg.id === undefined ? layer.newLayerId() : arg.id,
-      m_name = '',
+      m_name = arg.name === undefined ? '' : arg.name,
       m_map = arg.map === undefined ? null : arg.map,
       m_node = null,
       m_canvas = null,

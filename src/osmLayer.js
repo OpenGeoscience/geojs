@@ -8,14 +8,17 @@ module.exports = (function () {
   var quadFeature = require('./quadFeature');
 
   /**
-   * Create a new instance of osmLayer.
+   * Create a new instance of osmLayer.  This is a `geo.tileLayer` with an
+   * OSM url and attribution defaults and with the tiles centered on the
+   * origin.
    *
-   * @class geo.osmLayer
-   * @extends geo.featureLayer
+   * @class
+   * @alias geo.osmLayer
+   * @extends geo.tileLayer
    *
-   * @param {object} arg - arg can contain following keys: baseUrl,
-   *        imageFormat (such as png or jpeg), and displayLast
-   *        (to decide whether or not render tiles from last zoom level).
+   * @param {object} arg
+   * @param {number} [arg.mapOpacity] If specified, and `arg.opacity` is not
+   *    specified, use this as the layer opacity.
    */
   var osmLayer = function (arg) {
 
@@ -34,13 +37,14 @@ module.exports = (function () {
 
     /**
      * Returns an instantiated imageTile object with the given indices.  This
-     * method always returns a new tile object.  Use `_getTileCached`
-     * to use the caching layer.
-     * @param {object} index The tile index
+     * method always returns a new tile object.  Use `_getTileCached` to use
+     * the caching layer.
+     *
+     * @param {object} index The tile index.
      * @param {number} index.x
      * @param {number} index.y
      * @param {number} index.level
-     * @param {object} source The tile index used for constructing the url
+     * @param {object} source The tile index used for constructing the url.
      * @param {number} source.x
      * @param {number} source.y
      * @param {number} source.level
@@ -66,17 +70,10 @@ module.exports = (function () {
    * This object contains the default options used to initialize the osmLayer.
    */
   osmLayer.defaults = $.extend({}, tileLayer.defaults, {
-    minLevel: 0,
-    maxLevel: 18,
-    tileOverlap: 0,
-    tileWidth: 256,
-    tileHeight: 256,
     tileOffset : function (level) {
       var s = Math.pow(2, level - 1) * 256;
       return {x: s, y: s};
     },
-    wrapX: true,
-    wrapY: false,
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: 'Tile data &copy; <a href="http://osm.org/copyright">' +
       'OpenStreetMap</a> contributors'

@@ -14,22 +14,24 @@ module.exports = (function () {
    * subclasses may define additional rendering steps to produce the images
    * before passing them off to the handlers.
    *
-   * @class geo.imageTile
-   * @param {object} spec The tile specification object
+   * @class
+   * @alias geo.imageTile
+   * @extends geo.tile
+   * @param {object} spec The tile specification.
    *
-   * @param {object} spec.index The global position of the tile
-   * @param {number} spec.index.x The x-coordinate (usually the column number)
-   * @param {number} spec.index.y The y-coordinate (usually the row number)
-   * @param {number} spec.index.level The zoom level
+   * @param {object} spec.index The global position of the tile.
+   * @param {number} spec.index.x The x-coordinate (usually the column number).
+   * @param {number} spec.index.y The y-coordinate (usually the row number).
+   * @param {number} spec.index.level The zoom level.
    *
-   * @param {object?} spec.size The size of each tile
-   * @param {number} [spec.size.x=256] Width in pixels
-   * @param {number} [spec.size.y=256] Height in pixels
+   * @param {object?} spec.size The size of each tile.
+   * @param {number} [spec.size.x=256] Width in pixels.
+   * @param {number} [spec.size.y=256] Height in pixels.
    *
-   * @param {string} spec.url A url to the image
-   * @param {string} [spec.crossDomain='anonymous'] Image CORS attribute
+   * @param {string} spec.url A url to the image.
+   * @param {string} [spec.crossDomain='anonymous'] Image CORS attribute.
    *
-   * @param {object} spec.overlap The size of overlap with neighboring tiles
+   * @param {object} spec.overlap The size of overlap with neighboring tiles.
    * @param {number} [spec.overlap.x=0]
    * @param {number} [spec.overlap.y=0]
    */
@@ -53,6 +55,7 @@ module.exports = (function () {
      * tile.  Note, this method does not gaurantee that the
      * image data is available.  Use the promise interface
      * to add asyncronous handlers.
+     *
      * @returns {Image}
      */
     Object.defineProperty(this, 'image', {
@@ -62,7 +65,7 @@ module.exports = (function () {
     /**
      * Initiate the image request.
      *
-     * @returns {this} The current tile class instance.
+     * @returns {this}
      */
     this.fetch = function () {
       var defer;
@@ -87,14 +90,16 @@ module.exports = (function () {
     };
 
     /**
-     * Set the opacity of the tile to 0 and gradually fade in
-     * over the given number of milliseconds.  This will also
-     * resolve the embedded promise interface.
-     * @param {number} duration the duration of the animation in ms
-     * @returns {this} chainable
+     * Set the opacity of the tile to 0 and gradually fade in over the given
+     * number of milliseconds.  This will also resolve the embedded promise
+     * interface.
+     *
+     * @param {number} duration The duration of the animation in ms.
+     * @returns {this}
      */
     this.fadeIn = function (duration) {
-      var promise = this.fetch(), defer = $.Deferred();
+      var promise = this.fetch(),
+          defer = $.Deferred();
       $(this._image).css('display', 'none');
       promise.done(function () {
         $(this._image).fadeIn(duration, function () {

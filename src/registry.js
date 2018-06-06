@@ -109,7 +109,7 @@ util.checkRenderer = function (name, noFallback) {
  * features.  If not, display a warning.  This picks the first renderer that
  * supports all of the listed features.
  *
- * @param {array|undefined} featureList A list of features that will be used
+ * @param {string[]|undefined} featureList A list of features that will be used
  *      with this renderer.  Features are the basic feature names (e.g.,
  *      `'quad'`), or the feature name followed by a required capability (e.g.,
  *      `'quad.image'`).  If more than one feature or more than one capability
@@ -273,7 +273,7 @@ util.adjustLayerForRenderer = function (name, layer) {
  * @param {string} name Name of the layer to register.  If the name already
  *      exists, the class creation function is replaced.
  * @param {function} func Class creation function.
- * @param {array} [defaultFeatures] An optional list of feature capabailities
+ * @param {string[]} [defaultFeatures] An optional list of feature capabilities
  *      that are required to use this layer.
  */
 util.registerLayer = function (name, func, defaultFeatures) {
@@ -399,7 +399,7 @@ util.createAnnotation = function (name, options) {
 /**
  * Get a list of registered annotation types.
  *
- * @returns {array} A list of registered annotations.
+ * @returns {string[]} A list of registered annotations.
  */
 util.listAnnotations = function () {
   return Object.keys(annotations);
@@ -408,14 +408,14 @@ util.listAnnotations = function () {
 /**
  * Get a list of required features for a set of annotations.
  *
- * @param {array|object|undefined} annotationList A list of annotations that
+ * @param {string[]|object|undefined} annotationList A list of annotations that
  *   will be used.  Instead of a list, if this is an object, the keys are the
  *   annotation names, and the values are each a list of modes that will be
  *   used with that annotation.  For example, ['polygon', 'rectangle'] lists
  *   features required to show those annotations in any mode,  whereas
  *   {polygon: [annotationState.done], rectangle: [annotationState.done]} only
  *   lists features that are needed to show the completed annotations.
- * @returns {array} a list of features needed for the specified annotations.
+ * @returns {string[]} a list of features needed for the specified annotations.
  *   There may be duplicates in the list.
  */
 util.featuresForAnnotations = function (annotationList) {
@@ -447,7 +447,7 @@ util.featuresForAnnotations = function (annotationList) {
  * annotations.  If not, display a warning.  This generates a list of required
  * features, then picks the first renderer that supports all of these features.
  *
- * @param {array|object|undefined} annotationList A list of annotations that
+ * @param {string[]|object|undefined} annotationList A list of annotations that
  *   will be used with this renderer.  Instead of a list, if this is an object,
  *   the keys are the annotation names, and the values are each a list of modes
  *   that will be used with that annotation.  See featuresForAnnotations for
