@@ -42,6 +42,7 @@ var vtkjsRenderer = function (arg) {
   const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({ background: [0.1, 0.5, 0.5] });
   const vtkjsren = fullScreenRenderer.getRenderer();
   vtkjsren.getActiveCamera().setUserProvidedProjectionMatrix(true);
+  vtkjsren.getActiveCamera().setUserProvidedViewMatrix(true);
   const renderWindow = fullScreenRenderer.getRenderWindow();
 
   /// TODO: Move this API to the base class
@@ -135,9 +136,8 @@ var vtkjsRenderer = function (arg) {
     // m_this.layer().map().scheduleAnimationFrame(this._renderFrame, true);
     // return m_this;
 
-    // m_this.contextRenderer().resetCamera();
-    // renderWindow.render();
     m_this.contextRenderer().resetCamera();
+    // renderWindow.render();
     m_this._updateRendererCamera();
     renderWindow.render();
   };
@@ -182,8 +182,18 @@ var vtkjsRenderer = function (arg) {
     // console.log(`VTKJS: projMat: ${m_this.contextRenderer().getActiveCamera().getProjectionMatrix()}`);
     // console.log(`GEOJS: projMat: ${proj}`);
     // m_this.contextRenderer().getActiveCamera().computeViewParametersFromPhysicalMatrix(view);
-    m_this.contextRenderer().getActiveCamera().setViewMatrix(view);
-    m_this.contextRenderer().getActiveCamera().setProjectionMatrix(proj);
+    const viewmat = mat4.create();
+    mat4.copy(viewmat, view);
+    // viewmat[0] = 1;
+    // viewmat[5] = 1;
+    // mat4.transpose(viewmat, viewmat);
+    const projmat = mat4.create();
+    mat4.copy(projmat, proj);
+    m_this.contextRenderer().getActiveCamera().setClippingRange(camera.constructor.bounds.near,
+                                                                camera.constructor.bounds.far);
+    m_this.contextRenderer().getActiveCamera().setViewMatrix(viewmat);
+    m_this.contextRenderer().getActiveCamera().setProjectionMatrix(projmat);
+    // console.log('VTK: ', m_this.contextRenderer().getActiveCamera().getViewMatrix());
     // camera.view = m_this.contextRenderer().getActiveCamera().getViewMatrix();
     // camera.projectionMatrix = m_this.contextRenderer().getActiveCamera().getProjectionMatrix();
   };

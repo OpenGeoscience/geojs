@@ -64,7 +64,8 @@ var vtkjs_pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     var i, j, i3, posVal, posFunc,
-        radius, radiusVal, nonzeroZ,
+        radius, radiusVal,
+        // nonzeroZ,
         numPts = m_this.data().length,
         position = new Array(numPts * 3),
         data = m_this.data(),
@@ -84,8 +85,10 @@ var vtkjs_pointFeature = function (arg) {
       posVal = posFunc(data[i]);
       position[i3] = posVal.x;
       position[i3 + 1] = posVal.y;
+     // position[i3 + 2] = 0.0;
       position[i3 + 2] = posVal.z || 0;
-      nonzeroZ = nonzeroZ || position[i3 + 2];
+      // console.log('Point positions: ', position);
+      // nonzeroZ = nonzeroZ || position[i3 + 2];
     }
     // position = transform.transformCoordinates(
     //               m_this.gcs(), m_this.layer().map().gcs(),
@@ -104,7 +107,7 @@ var vtkjs_pointFeature = function (arg) {
       var source = vtkSphereSource.newInstance();
       source.setRadius(radFunc());
       source.setCenter(position[i3], position[i3 + 1], position[i3 + 2]);
-      source.setThetaResolution(20);
+      source.setThetaResolution(30);
       var actor = vtkActor.newInstance();
       var mapper = vtkMapper.newInstance();
       mapper.setInputConnection(source.getOutputPort());
@@ -136,6 +139,11 @@ var vtkjs_pointFeature = function (arg) {
         m_this.updateTime().getMTime() < m_this.getMTime()) {
       m_this._build();
     }
+    // if (m_actors) {
+    //   m_actors.forEach(function(actor) {
+    //     actor.getMapper().update();
+    //   });
+    // }
 
     m_this.updateTime().modified();
   };
