@@ -114,7 +114,7 @@ $(function () {
       node: '#map',
       center: {x: 0, y: 0},
       zoom: 2.5,
-      gcs: gcsTable[gcs],
+      gcs: gcsTable[gcs] || gcs,
       unitsPerPixel: (range[1].x - range[0].x) / 256,
       clampBoundsX: false,
       clampBoundsY: false,
@@ -131,7 +131,7 @@ $(function () {
       gcs: 'EPSG:3857',
       attribution: $('#url-list [value="' + $('#layer-url').val() + '"]').attr(
           'credit'),
-      minLevel: 4,
+      minLevel: query.minLevel ? parseInt(query.minLevel, 10) : 4,
       keepLower: true,
       wrapX: false,
       wrapY: false
