@@ -41,8 +41,6 @@ var vtkjsRenderer = function (arg) {
 
   const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({ background: [0.1, 0.5, 0.5] });
   const vtkjsren = fullScreenRenderer.getRenderer();
-  vtkjsren.getActiveCamera().setUserProvidedProjectionMatrix(true);
-  vtkjsren.getActiveCamera().setUserProvidedViewMatrix(true);
   const renderWindow = fullScreenRenderer.getRenderWindow();
 
   /// TODO: Move this API to the base class
@@ -136,8 +134,6 @@ var vtkjsRenderer = function (arg) {
     // m_this.layer().map().scheduleAnimationFrame(this._renderFrame, true);
     // return m_this;
 
-    m_this.contextRenderer().resetCamera();
-    // renderWindow.render();
     m_this._updateRendererCamera();
     renderWindow.render();
   };
@@ -189,8 +185,8 @@ var vtkjsRenderer = function (arg) {
     // mat4.transpose(viewmat, viewmat);
     const projmat = mat4.create();
     mat4.copy(projmat, proj);
-    m_this.contextRenderer().getActiveCamera().setClippingRange(camera.constructor.bounds.near,
-                                                                camera.constructor.bounds.far);
+    //m_this.contextRenderer().getActiveCamera().setClippingRange(camera.constructor.bounds.near,
+    //                                                            camera.constructor.bounds.far);
     m_this.contextRenderer().getActiveCamera().setViewMatrix(viewmat);
     m_this.contextRenderer().getActiveCamera().setProjectionMatrix(projmat);
     // console.log('VTK: ', m_this.contextRenderer().getActiveCamera().getViewMatrix());

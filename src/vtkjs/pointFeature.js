@@ -114,6 +114,7 @@ var vtkjs_pointFeature = function (arg) {
       actor.setMapper(mapper);
       actor.getProperty().setColor(colorFunc()['r'], colorFunc()['g'], colorFunc()['b']);
       actor.getProperty().setOpacity(opacityFunc(data[i]));
+      actor.getProperty().setAmbient(1.0);
       m_this.renderer().contextRenderer().addActor(actor);
       m_this.renderer().contextRenderer().setLayer(1);
       m_actors.push(actor);
