@@ -61,7 +61,7 @@ describe('geo.annotation', function () {
   }
 
   describe('geo.annotation.annotation', function () {
-    var map, layer, stateEvent = 0, lastStateEvent;
+    var map, layer, stateEvent = 0, lastStateEvent, coordinatesEvent = 0;
     it('create', function () {
       var ann = geo.annotation.annotation('test');
       expect(ann instanceof geo.annotation.annotation);
@@ -201,6 +201,20 @@ describe('geo.annotation', function () {
       ann.options('coordinates', testval);
       expect(ann.options().coordinates).toBe(undefined);
       expect(ann._coordinates()).toBe(testval);
+      coordinatesEvent = 0;
+      layer.geoOn(geo.event.annotation.coordinates, function (evt) {
+        coordinatesEvent += 1;
+      });
+      ann._coordinates([]);
+      expect(coordinatesEvent).toBe(0);
+      ann.options('vertices', [{x: 1, y: 1}]);
+      expect(coordinatesEvent).toBe(1);
+      ann.options({vertices: [{x: 2, y: 1}]});
+      expect(coordinatesEvent).toBe(2);
+      ann.options('other', 'test');
+      expect(coordinatesEvent).toBe(2);
+      ann.options({other: 'test2'});
+      expect(coordinatesEvent).toBe(2);
     });
     it('style and editStyle', function () {
       var ann = geo.annotation.annotation('test', {

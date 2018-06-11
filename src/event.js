@@ -473,6 +473,15 @@ geo_event.annotation.add_before = 'geo_annotation_add_before';
 geo_event.annotation.update = 'geo_annotation_update';
 
 /**
+ * Triggered when an annotation's coordinates have been updated.
+ *
+ * @event geo.event.annotation.coordinates
+ * @type {object}
+ * @property {geo.annotation} annotation The annotation that was altered.
+ */
+geo_event.annotation.coordinates = 'geo_annotation_coordinates';
+
+/**
  * Triggered when an annotation has been removed.
  *
  * @event geo.event.annotation.remove

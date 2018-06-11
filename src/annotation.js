@@ -21,6 +21,14 @@ var annotationState = {
 
 var annotationActionOwner = 'annotationAction';
 
+/**
+ * These styles are applied to edit handles, and can be overridden by
+ * individual annotations.
+ *
+ * @alias geo.annotation.defaultEditHandleStyle
+ * @type {object}
+ * @default
+ */
 var defaultEditHandleStyle = {
   fill: true,
   fillColor: function (d) {
@@ -278,6 +286,7 @@ var annotation = function (type, args) {
    *    otherwise change it.  This should be one of the
    *    `geo.annotation.state` values.
    * @returns {this|string} The current state or this annotation.
+   * @fires geo.event.annotation.state
    */
   this.state = function (arg) {
     if (arg === undefined) {
@@ -401,6 +410,7 @@ var annotation = function (type, args) {
    *    the option to this value.
    * @returns {object|this} If options are set, return the annotation,
    *    otherwise return the requested option or the set of options.
+   * @fires geo.event.annotation.coordinates
    */
   this.options = function (arg1, arg2) {
     if (arg1 === undefined) {
@@ -409,7 +419,9 @@ var annotation = function (type, args) {
     if (typeof arg1 === 'string' && arg2 === undefined) {
       return m_options[arg1];
     }
+    var coordinatesSet;
     if (arg2 === undefined) {
+      coordinatesSet = arg1[m_this._coordinateOption] !== undefined;
       m_options = $.extend(true, m_options, arg1);
       /* For style objects, re-extend them without recursion.  This allows
        * setting colors without an opacity field, for instance. */
@@ -421,6 +433,7 @@ var annotation = function (type, args) {
         }
       });
     } else {
+      coordinatesSet = arg1 === m_this._coordinateOption;
       m_options[arg1] = arg2;
     }
     if (m_options.coordinates) {
@@ -444,6 +457,11 @@ var annotation = function (type, args) {
       m_this.description(description);
     }
     m_this.modified();
+    if (coordinatesSet && m_this.layer()) {
+      m_this.layer().geoTrigger(geo_event.annotation.coordinates, {
+        annotation: this
+      });
+    }
     return this;
   };
 
@@ -595,6 +613,8 @@ var annotation = function (type, args) {
   this._coordinates = function (coordinates) {
     return [];
   };
+
+  this._coordinateOption = 'vertices';
 
   /**
    * Get coordinates associated with this annotation.
@@ -1183,8 +1203,8 @@ var rectangleAnnotation = function (args) {
   };
 
   /**
-   * Get coordinates associated with this annotation in the map gcs coordinate
-   * system.
+   * Get and optionally set coordinates associated with this annotation in the
+   * map gcs coordinate system.
    *
    * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
    *  to set.
@@ -1198,6 +1218,8 @@ var rectangleAnnotation = function (args) {
     }
     return m_this.options('corners');
   };
+
+  this._coordinateOption = 'corners';
 
   /**
    * Return the coordinates to be stored in a geojson geometry object.
@@ -1529,8 +1551,8 @@ var polygonAnnotation = function (args) {
   };
 
   /**
-   * Get coordinates associated with this annotation in the map gcs coordinate
-   * system.
+   * Get and optionally set coordinates associated with this annotation in the
+   * map gcs coordinate system.
    *
    * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
    *  to set.
@@ -1784,8 +1806,8 @@ var lineAnnotation = function (args) {
   };
 
   /**
-   * Get coordinates associated with this annotation in the map gcs coordinate
-   * system.
+   * Get and optionally set coordinates associated with this annotation in the
+   * map gcs coordinate system.
    *
    * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
    *  to set.
@@ -2172,8 +2194,8 @@ var pointAnnotation = function (args) {
   };
 
   /**
-   * Get coordinates associated with this annotation in the map gcs coordinate
-   * system.
+   * Get and optionally set coordinates associated with this annotation in the
+   * map gcs coordinate system.
    *
    * @param {geo.geoPosition[]} [coordinates] An optional array of coordinates
    *  to set.
@@ -2188,6 +2210,8 @@ var pointAnnotation = function (args) {
     }
     return [m_this.options('position')];
   };
+
+  this._coordinateOption = 'position';
 
   /**
    * Handle a mouse click on this annotation.  If the event is processed,
@@ -2263,5 +2287,6 @@ module.exports = {
   pointAnnotation: pointAnnotation,
   polygonAnnotation: polygonAnnotation,
   rectangleAnnotation: rectangleAnnotation,
-  _editHandleFeatureLevel: editHandleFeatureLevel
+  _editHandleFeatureLevel: editHandleFeatureLevel,
+  defaultEditHandleStyle: defaultEditHandleStyle
 };
