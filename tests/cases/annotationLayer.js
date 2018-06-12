@@ -332,7 +332,7 @@ describe('geo.annotationLayer', function () {
     });
   });
   describe('Private utility functions', function () {
-    var map, layer, point, rect, rect2;
+    var map, layer, point, rect, rect2, editActionEvent = 0;
     it('_update', function () {
       sinon.stub(console, 'warn', function () {});
       /* Most of update is covered as a side effect of other code.  This tests
@@ -610,14 +610,19 @@ describe('geo.annotationLayer', function () {
         data: layer.features()[layer.features().length - 1].data()[0]
       }, true);
       expect(layer.annotations()[0].coordinates()[0].y).toBeCloseTo(14.77);
+      map.geoOn(geo.event.annotation.edit_action, function (evt) {
+        editActionEvent += 1;
+      });
       layer._processAction({
         mouse: {mapgcs: map.displayToGcs({x: 10, y: 33}, null)},
         state: {
           actionRecord: {owner: geo.annotation.actionOwner},
           origin: {mapgcs:  map.displayToGcs({x: 10, y: 20}, null)}
-        }
+        },
+        event: geo.event.actionup
       });
       expect(layer.annotations()[0].coordinates()[0].y).toBeCloseTo(13.67);
+      expect(editActionEvent).toBe(1);
     });
     it('_selectEditHandle', function () {
       layer.removeAllAnnotations();

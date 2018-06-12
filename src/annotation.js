@@ -378,6 +378,7 @@ var annotation = function (type, args) {
    * @param {object} handle The data for the edit handle.
    * @param {boolean} enable True to enable the handle, false to disable.
    * @returns {this}
+   * @fires geo.event.annotation.select_edit_handle
    */
   this.selectEditHandle = function (handle, enable) {
     if (enable && m_this._editHandle && m_this._editHandle.handle &&
@@ -397,6 +398,13 @@ var annotation = function (type, args) {
       resizePosition: m_this._rotateHandlePosition(
         handle.style.resizeHandleOffset, handle.style.resizeHandleRotation)
     };
+    if (m_this.layer()) {
+      m_this.layer().geoTrigger(geo_event.annotation.select_edit_handle, {
+        annotation: m_this,
+        handle: m_this._editHandle,
+        enable: enable
+      });
+    }
     return m_this;
   };
 
@@ -459,7 +467,7 @@ var annotation = function (type, args) {
     m_this.modified();
     if (coordinatesSet && m_this.layer()) {
       m_this.layer().geoTrigger(geo_event.annotation.coordinates, {
-        annotation: this
+        annotation: m_this
       });
     }
     return this;
