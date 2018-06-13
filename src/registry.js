@@ -15,6 +15,7 @@ var util = {};
 /**
  * Register a new file reader type.
  *
+ * @alias geo.registerFileReader
  * @param {string} name Name of the reader to register.  If the name already
  *      exists, the class creation function is replaced.
  * @param {function} func Class creation function.
@@ -26,6 +27,7 @@ util.registerFileReader = function (name, func) {
 /**
  * Create a new file reader.
  *
+ * @alias geo.createFileReader
  * @param {string} name Name of the reader to create.
  * @param {object} opts Options for the new reader.
  * @returns {geo.fileReader|null} The new reader or null if no such name is
@@ -41,6 +43,7 @@ util.createFileReader = function (name, opts) {
 /**
  * Register a new renderer type.
  *
+ * @alias geo.registerRenderer
  * @param {string} name Name of the renderer to register.  If the name already
  *      exists, the class creation function is replaced.
  * @param {function} func Class creation function.
@@ -52,6 +55,7 @@ util.registerRenderer = function (name, func) {
 /**
  * Create new instance of the renderer.
  *
+ * @alias geo.createRenderer
  * @param {string} name Name of the renderer to create.
  * @param {geo.layer} layer The layer associated with the renderer.
  * @param {HTMLCanvasElement} [canvas] A canvas object to share between
@@ -77,6 +81,7 @@ util.createRenderer = function (name, layer, canvas, options) {
  * features, and, if the renderer is unavailable, this would choose a fallback
  * that would support those features.
  *
+ * @alias geo.checkRenderer
  * @param {string|null} name Name of the desired renderer.
  * @param {boolean} noFallback If truthy, don't recommend a fallback.
  * @returns {string|null|false} The name of the renderer that should be used
@@ -109,6 +114,7 @@ util.checkRenderer = function (name, noFallback) {
  * features.  If not, display a warning.  This picks the first renderer that
  * supports all of the listed features.
  *
+ * @alias geo.rendererForFeatures
  * @param {string[]|undefined} featureList A list of features that will be used
  *      with this renderer.  Features are the basic feature names (e.g.,
  *      `'quad'`), or the feature name followed by a required capability (e.g.,
@@ -166,6 +172,7 @@ util.rendererForFeatures = function (featureList) {
 /**
  * Register a new feature type.
  *
+ * @alias geo.registerFeature
  * @param {string} category The feature category -- this is the renderer name.
  * @param {string} name The feature name.
  * @param {function} func A function to call to create the feature.
@@ -198,6 +205,7 @@ util.registerFeature = function (category, name, func, capabilities) {
 /**
  * Create new instance of a feature.
  *
+ * @alias geo.createFeature
  * @param {string} name Name of the feature to create.
  * @param {geo.layer} layer The layer associated with the feature.
  * @param {geo.renderer} renderer The renderer associated with the feature.
@@ -229,6 +237,7 @@ util.createFeature = function (name, layer, renderer, arg) {
  * layers when they are created as a method to mixin specific changes,
  * usually based on the renderer used for that layer.
  *
+ * @alias geo.registerLayerAdjustment
  * @param {string} category The category for the adjustment; this is commonly
  *      the renderer name.
  * @param {string} name The name of the adjustement.
@@ -253,6 +262,7 @@ util.registerLayerAdjustment = function (category, name, func) {
  * If a layer needs to be adjusted based on the renderer, call the function
  * that adjusts it.
  *
+ * @alias geo.adjustLayerForRenderer
  * @param {string} name Name of the layer.
  * @param {object} layer Instantiated layer object.
  */
@@ -270,6 +280,7 @@ util.adjustLayerForRenderer = function (name, layer) {
 /**
  * Register a new layer type.
  *
+ * @alias geo.registerLayer
  * @param {string} name Name of the layer to register.  If the name already
  *      exists, the class creation function is replaced.
  * @param {function} func Class creation function.
@@ -284,6 +295,7 @@ util.registerLayer = function (name, func, defaultFeatures) {
 /**
  * Create new instance of the layer.
  *
+ * @alias geo.createLayer
  * @param {string} name Name of the layer to create.
  * @param {geo.map} map The map class instance that owns the layer.
  * @param {object} arg Options for the new layer.
@@ -314,6 +326,7 @@ util.createLayer = function (name, map, arg) {
 /**
  * Register a new widget type.
  *
+ * @alias geo.registerWidget
  * @param {string} category A category for this widget.  This is usually
  *      `'dom'`.
  * @param {string} name The name of the widget to register.
@@ -337,6 +350,7 @@ util.registerWidget = function (category, name, func) {
 /**
  * Create new instance of a dom widget.
  *
+ * @alias geo.createWidget
  * @param {string} name Name of the widget to create.
  * @param {geo.layer} layer The layer associated with the widget.
  * @param {object} arg Options for the new widget.
@@ -361,6 +375,7 @@ util.createWidget = function (name, layer, arg) {
 /**
  * Register a new annotation type.
  *
+ * @alias geo.registerAnnotation
  * @param {string} name The annotation name.
  * @param {function} func A function to call to create the annotation.
  * @param {object|undefined} features A map of features that are used by this
@@ -383,6 +398,7 @@ util.registerAnnotation = function (name, func, features) {
 /**
  * Create an annotation based on a registered type.
  *
+ * @alias geo.createAnnotation
  * @param {string} name The annotation name
  * @param {object} options The options for the annotation.
  * @returns {object} the new annotation.
@@ -399,6 +415,7 @@ util.createAnnotation = function (name, options) {
 /**
  * Get a list of registered annotation types.
  *
+ * @alias geo.listAnnotations
  * @returns {string[]} A list of registered annotations.
  */
 util.listAnnotations = function () {
@@ -408,6 +425,7 @@ util.listAnnotations = function () {
 /**
  * Get a list of required features for a set of annotations.
  *
+ * @alias geo.featuresForAnnotations
  * @param {string[]|object|undefined} annotationList A list of annotations that
  *   will be used.  Instead of a list, if this is an object, the keys are the
  *   annotation names, and the values are each a list of modes that will be
@@ -447,6 +465,7 @@ util.featuresForAnnotations = function (annotationList) {
  * annotations.  If not, display a warning.  This generates a list of required
  * features, then picks the first renderer that supports all of these features.
  *
+ * @alias geo.rendererForAnnotations
  * @param {string[]|object|undefined} annotationList A list of annotations that
  *   will be used with this renderer.  Instead of a list, if this is an object,
  *   the keys are the annotation names, and the values are each a list of modes
@@ -459,8 +478,12 @@ util.rendererForAnnotations = function (annotationList) {
   return util.rendererForFeatures(util.featuresForAnnotations(annotationList));
 };
 
-/* Expose the various registries so that the can be examined to see what
- * things are registered. */
+/**
+ * Expose the various registries so that the can be examined to see what
+ * things are registered.
+ *
+ * @namespace geo.registries
+ */
 util.registries = {
   annotations: annotations,
   features: features,
