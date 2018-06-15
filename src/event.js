@@ -473,6 +473,41 @@ geo_event.annotation.add_before = 'geo_annotation_add_before';
 geo_event.annotation.update = 'geo_annotation_update';
 
 /**
+ * Triggered when an annotation's coordinates have been updated.
+ *
+ * @event geo.event.annotation.coordinates
+ * @type {object}
+ * @property {geo.annotation} annotation The annotation that was altered.
+ */
+geo_event.annotation.coordinates = 'geo_annotation_coordinates';
+
+/**
+ * Triggered when an annotation's edit handle is selected or released.
+ *
+ * @event geo.event.annotation.select_edit_handle
+ * @type {object}
+ * @property {geo.annotation} annotation The annotation that has an edit handle
+ *   selected or unselected.
+ * @property {object} handle Information on the edit handle.
+ * @property {boolean} enable Truthy if the handle was enabled, falsy if
+ *   disabled.
+ */
+geo_event.annotation.select_edit_handle = 'geo_annotation_select_edit_handle';
+
+/**
+ * Triggered when an action is performed on an annotation's edit handle.
+ *
+ * @event geo.event.annotation.edit_action
+ * @type {object}
+ * @property {geo.annotation} annotation The annotation that has an edit handle
+ *   selected or unselected.
+ * @property {object} handle Information on the edit handle.
+ * @property {boolean} action The edit action, typically one of
+ *  `geo.event.actiondown`, `geo.event.actionmove`, `geo.event.actionup`.
+ */
+geo_event.annotation.edit_action = 'geo_annotation_edit_action';
+
+/**
  * Triggered when an annotation has been removed.
  *
  * @event geo.event.annotation.remove

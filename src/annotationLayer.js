@@ -49,6 +49,10 @@ var textFeature = require('./textFeature');
  *    annotation to place it in edit mode.
  * @param {object} [args.defaultLabelStyle] Default styles for labels.
  * @returns {geo.annotationLayer}
+ * @fires geo.event.annotation.state
+ * @fires geo.event.annotation.coordinates
+ * @fires geo.event.annotation.edit_action
+ * @fires geo.event.annotation.select_edit_handle
  */
 var annotationLayer = function (args) {
   'use strict';
@@ -125,6 +129,7 @@ var annotationLayer = function (args) {
    * creates a rectangle.
    *
    * @param {geo.event} evt The selection event.
+   * @fires geo.event.annotation.edit_action
    */
   this._processAction = function (evt) {
     var update;
@@ -134,6 +139,20 @@ var annotationLayer = function (args) {
       switch (m_this.mode()) {
         case m_this.modes.edit:
           update = m_this.currentAnnotation.processEditAction(evt);
+          if (m_this.currentAnnotation &&
+              m_this.currentAnnotation._editHandle &&
+              m_this.currentAnnotation._editHandle.handle) {
+            m_this.geoTrigger(geo_event.annotation.edit_action, {
+              annotation: m_this.currentAnnotation,
+              handle: m_this.currentAnnotation._editHandle ? m_this.currentAnnotation._editHandle.handle : undefined,
+              action: evt.event
+            });
+            if (evt.event === geo_event.actionup) {
+              m_this._selectEditHandle({
+                data: m_this.currentAnnotation._editHandle.handle},
+                m_this.currentAnnotation._editHandle.handle.selected);
+            }
+          }
           break;
         default:
           update = m_this.currentAnnotation.processAction(evt);
@@ -655,13 +674,16 @@ var annotationLayer = function (args) {
           if (!position || position.length < 2) {
             return;
           }
+          // make a copy of the position array to avoid mutating the original.
+          position = position.slice();
           break;
         case 'polygon':
           position = feature.polygon()(data, data_idx);
           if (!position || !position.outer || position.outer.length < 3) {
             return;
           }
-          position = position.outer;
+          // make a copy of the position array to avoid mutating the original.
+          position = position.outer.slice();
           if (position[position.length - 1][0] === position[0][0] &&
               position[position.length - 1][1] === position[0][1]) {
             position.splice(position.length - 1, 1);
