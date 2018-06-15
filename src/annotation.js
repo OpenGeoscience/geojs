@@ -68,7 +68,7 @@ var editHandleFeatureLevel = 3;
  * @class
  * @alias geo.annotation
  * @param {string} type The type of annotation.  These should be registered
- *    with utils.registerAnnotation and can be listed with same function.
+ *    with geo.registerAnnotation and can be listed with geo.listAnnotations.
  * @param {object?} [args] Individual annotations have additional options.
  * @param {string} [args.name] A name for the annotation.  This defaults to
  *    the type with a unique ID suffixed to it.
