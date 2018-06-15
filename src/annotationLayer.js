@@ -499,7 +499,8 @@ var annotationLayer = function (args) {
    * @param {string|null} [arg] `undefined` to get the current mode, `null` to
    *    stop creating/editing, `this.modes.edit` (`'edit'`) plus an annotation
    *    to switch to edit mode, or the name of the type of annotation to
-   *    create.
+   *    create.  Available annotations can listed via
+   *    {@link geo.listAnnotations}.
    * @param {geo.annotation} [editAnnotation] If `arg === this.modes.edit`,
    *    this is the annotation that should be edited.
    * @returns {string|null|this} The current mode or the layer.
