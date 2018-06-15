@@ -12,12 +12,13 @@ module.exports = (function () {
    * tile images, thie number of concurrent requests should be 6 * (number of
    * subdomains serving tiles).
    *
-   * @class geo.fetchQueue
+   * @class
+   * @alias geo.fetchQueue
    *
-   * @param {Object?} [options] A configuration object for the queue
-   * @param {Number} [options.size=6] The maximum number of concurrent deferred
+   * @param {object} [options] A configuration object for the queue.
+   * @param {number} [options.size=6] The maximum number of concurrent deferred
    *    objects.
-   * @param {Number} [options.track=600] The number of objects that are tracked
+   * @param {number} [options.track=600] The number of objects that are tracked
    *    that trigger checking if any of them have been abandoned.  The fetch
    *    queue can grow to the greater of this size and the number of items that
    *    are still needed.  Setting this to a low number will increase
@@ -55,6 +56,7 @@ module.exports = (function () {
 
     /**
      * Get the current queue size.
+     * @returns {number} The queue size.
      */
     Object.defineProperty(this, 'length', {
       get: function () { return this._queue.length; }
@@ -62,6 +64,7 @@ module.exports = (function () {
 
     /**
      * Get the current number of processing items.
+     * @returns {number} The number of processing items.
      */
     Object.defineProperty(this, 'processing', {
       get: function () { return this._processing; }
@@ -69,6 +72,8 @@ module.exports = (function () {
 
     /**
      * Remove all items from the queue.
+     *
+     * @returns {this}
      */
     this.clear = function () {
       this._queue = [];
@@ -78,12 +83,15 @@ module.exports = (function () {
 
     /**
      * Add a Deferred object to the queue.
-     * @param {Deferred} defer Deferred object to add to the queue.
-     * @param {function} callback a function to call when the item's turn is
+     *
+     * @param {jQuery.Deferred} defer Deferred object to add to the queue.
+     * @param {function} callback A function to call when the item's turn is
      *  granted.
-     * @param {boolean} atEnd if false, add the item to the front of the queue
+     * @param {boolean} atEnd If falsy, add the item to the front of the queue
      *  if batching is turned off or at the end of the current batch if it is
-     *  turned on.  If true, always add the item to the end of the queue.
+     *  turned on.  If truthy, always add the item to the end of the queue.
+     * @returns {jQuery.Deferred} The deferred object that was passed to the
+     *  function.
      */
     this.add = function (defer, callback, atEnd) {
       if (defer.__fetchQueue) {
@@ -114,10 +122,11 @@ module.exports = (function () {
     /**
      * Add an item to the queue.  If batches are being used, add it at after
      * other items in the same batch.
-     * @param {Deferred} defer Deferred object to add to the queue.
-     * @param {boolean} atEnd if false, add the item to the front of the queue
+     *
+     * @param {jQuery.Deferred} defer Deferred object to add to the queue.
+     * @param {boolean} atEnd If falsy, add the item to the front of the queue
      *  if batching is turned off or at the end of the current batch if it is
-     *  turned on.  If true, always add the item to the end of the queue.
+     *  turned on.  If truthy, always add the item to the end of the queue.
      */
     this._addToQueue = function (defer, atEnd) {
       defer.__fetchQueue._batch = this._batch;
@@ -137,7 +146,8 @@ module.exports = (function () {
 
     /**
      * Get the position of a deferred object in the queue.
-     * @param {Deferred} defer Deferred object to get the position of.
+     *
+     * @param {jQuery.Deferred} defer Deferred object to get the position of.
      * @returns {number} -1 if not in the queue, or the position in the queue.
      */
     this.get = function (defer) {
@@ -146,8 +156,9 @@ module.exports = (function () {
 
     /**
      * Remove a Deferred object from the queue.
-     * @param {Deferred} defer Deferred object to add to the queue.
-     * @returns {bool} true if the object was removed
+     *
+     * @param {jQuery.Deferred} defer Deferred object to add to the queue.
+     * @returns {boolean} `true` if the object was removed.
      */
     this.remove = function (defer) {
       var pos = $.inArray(defer, this._queue);
@@ -160,10 +171,11 @@ module.exports = (function () {
 
     /**
      * Start a new batch or clear using batches.
-     * @param {boolean} start true to start a new batch, false to turn off
-     *                        using batches.  Undefined to return the current
-     *                        state of batches.
-     * @return {Number|boolean|Object} the current batch state or this object.
+     *
+     * @param {boolean} start Truthy too start a new batch, falsy to turn off
+     *   using batches.  `undefined` to return the current state of batches.
+     * @returns {number|boolean|this} `false` if batches are turned off, the
+     *   batch number if turned on, or `this` if setting the batch.
      */
     this.batch = function (start) {
       if (start === undefined) {
@@ -179,8 +191,8 @@ module.exports = (function () {
     };
 
     /**
-     * Check if any items are queued and if there if there are not too many
-     * deferred objects being processed.  If so, process more items.
+     * Check if any items are queued and if the processing allotment is not
+     * full.  If so, process more items.
      */
     this.next_item = function () {
       if (m_this._innextitem) {
