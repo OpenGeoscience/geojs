@@ -674,6 +674,8 @@ describe('geo.annotationLayer', function () {
         }
       };
       expect(layer.geojson(lineString)).toBe(1);
+      // expect that the original coordinates are still in place
+      expect(lineString.geometry.coordinates[1][0]).toBe(-73.79);
       lineString.properties.annotationType = 'polygon';
       expect(layer.geojson(lineString)).toBe(2);
       var sample = {
@@ -729,6 +731,8 @@ describe('geo.annotationLayer', function () {
         }]
       };
       expect(layer.geojson(sample)).toBe(5);
+      // expect that the original coordinates are still in place
+      expect(sample.features[1].geometry.coordinates[0][6][0]).toBe(-118.915853);
       var badpoly = {
         type: 'Feature',
         geometry: {

@@ -674,13 +674,16 @@ var annotationLayer = function (args) {
           if (!position || position.length < 2) {
             return;
           }
+          // make a copy of the position array to avoid mutating the original.
+          position = position.slice();
           break;
         case 'polygon':
           position = feature.polygon()(data, data_idx);
           if (!position || !position.outer || position.outer.length < 3) {
             return;
           }
-          position = position.outer;
+          // make a copy of the position array to avoid mutating the original.
+          position = position.outer.slice();
           if (position[position.length - 1][0] === position[0][0] &&
               position[position.length - 1][1] === position[0][1]) {
             position.splice(position.length - 1, 1);
