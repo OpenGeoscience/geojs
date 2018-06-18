@@ -131,11 +131,8 @@ var vtkjsRenderer = function (arg) {
      * readding the animation frame request, but this doesn't work for if the
      * reschedule occurs during another animation frame callback (it then waits
      * until a subsequent frame). */
-    // m_this.layer().map().scheduleAnimationFrame(this._renderFrame, true);
-    // return m_this;
-
-    m_this._updateRendererCamera();
-    renderWindow.render();
+    m_this.layer().map().scheduleAnimationFrame(this._renderFrame, true);
+    return m_this;
   };
 
   /**
