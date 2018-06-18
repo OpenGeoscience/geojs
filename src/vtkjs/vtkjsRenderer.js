@@ -23,23 +23,16 @@ var vtkjsRenderer = function (arg) {
   arg = arg || {};
   renderer.call(this, arg);
 
-  var $ = require('jquery');
-  var vgl = require('vgl');
   var mat4 = require('gl-mat4');
-  var util = require('../util');
   var geo_event = require('../event');
 
   var m_this = this,
-      m_contextRenderer = null,
-      m_viewer = null,
       m_width = 0,
       m_height = 0,
-      m_lastZoom,
-      m_updateCamera = false,
-      s_init = this._init,
-      s_exit = this._exit;
+      s_init = this._init;
 
-  const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({ background: [0.1, 0.5, 0.5] });
+  const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
+    background: [0.1, 0.5, 0.5] });
   const vtkjsren = fullScreenRenderer.getRenderer();
   const renderWindow = fullScreenRenderer.getRenderWindow();
 
@@ -105,15 +98,6 @@ var vtkjsRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._resize = function (x, y, w, h) {
-    // var renderWindow = m_viewer.renderWindow();
-
-    // m_width = w;
-    // m_height = h;
-    // m_this.canvas().attr('width', w);
-    // m_this.canvas().attr('height', h);
-    // renderWindow.positionAndResize(x, y, w, h);
-
-    // m_updateCamera = true;
     m_this._render();
 
     return m_this;
@@ -149,46 +133,20 @@ var vtkjsRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    // m_this.canvas().remove();
-    // m_viewer.exit();
-    // s_exit();
+    // DO NOTHING
   };
 
   this._updateRendererCamera = function () {
     var map = m_this.layer().map(),
         camera = map.camera(),
-        rotation = map.rotation() || 0,
         view = camera.view,
         proj = camera.projectionMatrix;
-    //  if (proj[15]) {
-    /* we want positive z to be closer to the camera, but webGL does the
-     * converse, so reverse the z coordinates. */
-    //    proj = mat4.scale(util.mat4AsArray(), proj, [1, 1, -1]);
-    //  }
-    /* A similar kluge as in the base camera class worldToDisplay4.  With this,
-     * we can show z values from 0 to 1. */
-    // proj = mat4.translate(util.mat4AsArray(), proj,
-    //                       [0, 0, camera.constructor.bounds.far]);
-
-    // console.log(`VTKJS: viewMat: ${m_this.contextRenderer().getActiveCamera().getViewMatrix()}`);
-    // console.log(`GEOJS: viewMat: ${view}`);
-    // console.log(`VTKJS: projMat: ${m_this.contextRenderer().getActiveCamera().getProjectionMatrix()}`);
-    // console.log(`GEOJS: projMat: ${proj}`);
-    // m_this.contextRenderer().getActiveCamera().computeViewParametersFromPhysicalMatrix(view);
     const viewmat = mat4.create();
     mat4.copy(viewmat, view);
-    // viewmat[0] = 1;
-    // viewmat[5] = 1;
-    // mat4.transpose(viewmat, viewmat);
     const projmat = mat4.create();
     mat4.copy(projmat, proj);
-    //m_this.contextRenderer().getActiveCamera().setClippingRange(camera.constructor.bounds.near,
-    //                                                            camera.constructor.bounds.far);
     m_this.contextRenderer().getActiveCamera().setViewMatrix(viewmat);
     m_this.contextRenderer().getActiveCamera().setProjectionMatrix(projmat);
-    // console.log('VTK: ', m_this.contextRenderer().getActiveCamera().getViewMatrix());
-    // camera.view = m_this.contextRenderer().getActiveCamera().getViewMatrix();
-    // camera.projectionMatrix = m_this.contextRenderer().getActiveCamera().getProjectionMatrix();
   };
 
   // Connect to pan event.  This is sufficient, as all zooms and rotations also

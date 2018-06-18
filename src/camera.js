@@ -619,7 +619,6 @@
       // reset view to the identity
       this._resetView();
 
-      console.log('center', center, 'size', size, 'rotation', rotation);
       w = Math.abs(size.width);
       h = Math.abs(size.height);
       c_ar = w / h;
@@ -637,15 +636,11 @@
         scale[1] = 2 / h;
       }
 
-      console.log('Before scale', this._view);
       scale[2] = 1;
       this._scale(scale);
-      console.log('After scale', this._view);
 
-      console.log('Before rotation', this._view);
       if (rotation) {
         this._rotate(rotation);
-      console.log('After rotation', this._view);
       }
 
       // translate to the new center.
@@ -653,9 +648,7 @@
       translate[1] = -center.y;
       translate[2] = 0;
 
-      console.log('Before Translation', this._view);
       this._translate(translate);
-      console.log('After Translation', this._view);
 
       return this;
     };

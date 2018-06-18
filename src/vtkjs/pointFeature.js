@@ -3,10 +3,9 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
 
-var vtkActor = vtk.Rendering.Core.vtkActor;// = require('vtk.js/Sources/Rendering/Core/Actor');
-var vtkMapper = vtk.Rendering.Core.vtkMapper;// = require('vtk.js/Sources/Rendering/Core/Mapper');
-var vtkSphereSource = vtk.Filters.Sources.vtkSphereSource;// = require('vtk.js/Sources/Filters/Sources/SphereSource');
-// var vtkPlaneSource = vtk.Filters.Sources.vtkPlaneSource;// = require('vtk.js/Sources/Filters/Sources/PlaneSource');
+var vtkActor = vtk.Rendering.Core.vtkActor;
+var vtkMapper = vtk.Rendering.Core.vtkMapper;
+var vtkSphereSource = vtk.Filters.Sources.vtkSphereSource;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -26,7 +25,6 @@ var vtkjs_pointFeature = function (arg) {
   pointFeature.call(this, arg);
 
   var transform = require('../transform');
-  var util = require('../util');
   var object = require('../object');
 
   object.call(this);
@@ -39,13 +37,7 @@ var vtkjs_pointFeature = function (arg) {
   var m_this = this,
       s_exit = this._exit,
       m_actors = [],
-      m_pixelWidthUniform = null,
-      m_aspectUniform = null,
-      m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
-      m_primitiveShape = 'sprite', // arg can change this, below
-      s_init = this._init,
       s_update = this._update;
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -63,8 +55,7 @@ var vtkjs_pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var i, j, i3, posVal, posFunc,
-        radius, radiusVal,
+    var i, i3, posVal,
         nonzeroZ,
         numPts = m_this.data().length,
         position = new Array(numPts * 3),
@@ -80,8 +71,7 @@ var vtkjs_pointFeature = function (arg) {
 
      /* It is more efficient to do a transform on a single array rather than on
      * an array of arrays or an array of objects. */
-    for (i = i3 = 0; i < numPts; i += 1, i3 += 3)
-    {
+    for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
       posVal = posFunc(data[i]);
       position[i3] = posVal.x;
       position[i3 + 1] = posVal.y;
@@ -97,7 +87,7 @@ var vtkjs_pointFeature = function (arg) {
         position[i3 + 2] = 0;
       }
     }
-  
+
     /* Some transforms modify the z-coordinate.  If we started with all zero z
      * coordinates, don't modify them.  This could be changed if the
      * z-coordinate space of the gl cube is scaled appropriately. */
@@ -119,8 +109,7 @@ var vtkjs_pointFeature = function (arg) {
     }
     m_this.buildTime().modified();
 
-
-    console.debug("built vtkjs point feature");
+    console.debug('built vtkjs point feature');
   };
 
   ////////////////////////////////////////////////////////////////////////////
