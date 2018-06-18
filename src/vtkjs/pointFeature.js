@@ -65,7 +65,7 @@ var vtkjs_pointFeature = function (arg) {
   this._build = function () {
     var i, j, i3, posVal, posFunc,
         radius, radiusVal,
-        // nonzeroZ,
+        nonzeroZ,
         numPts = m_this.data().length,
         position = new Array(numPts * 3),
         data = m_this.data(),
@@ -85,20 +85,18 @@ var vtkjs_pointFeature = function (arg) {
       posVal = posFunc(data[i]);
       position[i3] = posVal.x;
       position[i3 + 1] = posVal.y;
-     // position[i3 + 2] = 0.0;
       position[i3 + 2] = posVal.z || 0;
-      // console.log('Point positions: ', position);
-      // nonzeroZ = nonzeroZ || position[i3 + 2];
+      nonzeroZ = nonzeroZ || position[i3 + 2];
     }
-    // position = transform.transformCoordinates(
-    //               m_this.gcs(), m_this.layer().map().gcs(),
-    //               position, 3);
+    position = transform.transformCoordinates(
+                  m_this.gcs(), m_this.layer().map().gcs(),
+                  position, 3);
 
-    // if (!nonzeroZ && m_this.gcs() !== m_this.layer().map().gcs()) {
-    //   for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
-    //     position[i3 + 2] = 0;
-    //   }
-    // }
+    if (!nonzeroZ && m_this.gcs() !== m_this.layer().map().gcs()) {
+      for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
+        position[i3 + 2] = 0;
+      }
+    }
   
     /* Some transforms modify the z-coordinate.  If we started with all zero z
      * coordinates, don't modify them.  This could be changed if the
@@ -140,11 +138,6 @@ var vtkjs_pointFeature = function (arg) {
         m_this.updateTime().getMTime() < m_this.getMTime()) {
       m_this._build();
     }
-    // if (m_actors) {
-    //   m_actors.forEach(function(actor) {
-    //     actor.getMapper().update();
-    //   });
-    // }
 
     m_this.updateTime().modified();
   };
