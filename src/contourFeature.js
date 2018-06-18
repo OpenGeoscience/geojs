@@ -25,7 +25,7 @@ var meshFeature = require('./meshFeature');
 
 /**
  * Contour specification.  All of these properties can be functions, which get
- * passed the `geo.meshFeature.meshInfo` object.
+ * passed the {@link geo.meshFeature.meshInfo} object.
  *
  * @typedef {geo.meshFeature.meshSpec} geo.contourFeature.contourSpec
  * @property {number} [min] Minimum contour value.  If unspecified, taken from

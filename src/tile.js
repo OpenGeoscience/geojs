@@ -8,10 +8,9 @@ module.exports = (function () {
    * defined as a rectangular section of a map.  The base implementation
    * is independent of the actual content of the tile, but assumes that
    * the content is loaded asynchronously via a url.  The tile object
-   * has a promise-like interface.  For example,
-   * ```
+   * has a promise-like interface.
+   * @example
    * tile.then(function (data) {...}).catch(function (data) {...});
-   * ```.
    *
    * @class
    * @alias geo.tile

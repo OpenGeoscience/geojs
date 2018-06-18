@@ -186,7 +186,7 @@ var polygonFeature = function (arg) {
    * @param {object|function} [val] If not specified, return the current
    *    polygon accessor.  If specified, use this for the polygon accessor and
    *    return `this`.  If a function is given, the function is passed
-   *    `(dataElement, dataIndex)` and returns a `geo.polygon`.
+   *    `(dataElement, dataIndex)` and returns a {@link geo.polygon}.
    * @returns {object|function|this} The current polygon accessor or this
    *    feature.
    */
@@ -498,7 +498,7 @@ var polygonFeature = function (arg) {
    * closet border, including hole edges.
    *
    * @param {geo.event} evt The event; this should be triggered from
-   *    `geo.event.feature.mouseover_order`.
+   *    {@link geo.event.feature.mouseover_order}.
    */
   this.mouseOverOrderClosestBorder = function (evt) {
     var data = evt.feature.data(),

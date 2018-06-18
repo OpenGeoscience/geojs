@@ -12,6 +12,10 @@ var textFeature = require('./textFeature');
 
 var annotationId = 0;
 
+/**
+ * @alias geo.annotation.state
+ * @enum {string}
+ */
 var annotationState = {
   create: 'create',
   done: 'done',
@@ -68,14 +72,15 @@ var editHandleFeatureLevel = 3;
  * @class
  * @alias geo.annotation
  * @param {string} type The type of annotation.  These should be registered
- *    with geo.registerAnnotation and can be listed with geo.listAnnotations.
+ *    with {@link geo.registerAnnotation} and can be listed with
+ *    {@link geo.listAnnotations}.
  * @param {object?} [args] Individual annotations have additional options.
  * @param {string} [args.name] A name for the annotation.  This defaults to
  *    the type with a unique ID suffixed to it.
  * @param {geo.annotationLayer} [arg.layer] A reference to the controlling
  *    layer.  This is used for coordinate transforms.
  * @param {string} [args.state] Initial annotation state.  One of the
- *    `geo.annotation.state` values.
+ *    {@link geo.annotation.state} values.
  * @param {boolean|string[]} [args.showLabel=true] `true` to show the
  *    annotation label on annotations in done or edit states.  Alternately, a
  *    list of states in which to show the label.  Falsy to not show the label.
@@ -217,7 +222,7 @@ var annotation = function (type, args) {
 
   /**
    * If the label should be shown, get a record of the label that can be used
-   * in a `geo.textFeature`.
+   * in a {@link geo.textFeature}.
    *
    * @returns {geo.annotationLayer.labelRecord|undefined} A label record, or
    *    `undefined` if it should not be shown.
@@ -284,7 +289,7 @@ var annotation = function (type, args) {
    *
    * @param {string|undefined} arg If `undefined`, return the state,
    *    otherwise change it.  This should be one of the
-   *    `geo.annotation.state` values.
+   *    {@link geo.annotation.state} values.
    * @returns {this|string} The current state or this annotation.
    * @fires geo.event.annotation.state
    */

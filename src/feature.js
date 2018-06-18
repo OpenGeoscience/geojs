@@ -10,73 +10,72 @@ var geo_event = require('./event');
  * @typedef {object} geo.feature.spec
  * @property {geo.layer} [layer] the parent layer associated with the feature.
  * @property {boolean} [selectionAPI=false] If truthy, enable selection events
- *      on the feature.  Selection events are those in `geo.event.feature`.
- *      They can be bound via a call like
- *      <pre><code>
- *      feature.geoOn(geo.event.feature.mousemove, function (evt) {
- *        // do something with the feature
- *      });
- *      </code></pre>
- *      where the handler is passed a `geo.feature.event` object.
+ *   on the feature.  Selection events are those in {@link geo.event.feature}.
+ *   They can be bound via a call like
+ *   ```
+ *   feature.geoOn(geo.event.feature.mousemove, function (evt) {
+ *     // do something with the feature
+ *   });
+ *   ```
+ *   where the handler is passed a {@link geo.event.feature} object.
  * @property {boolean} [visible=true] If truthy, show the feature.  If falsy,
- *      hide the feature and do not allow interaction with it.
+ *   hide the feature and do not allow interaction with it.
  * @property {string} [gcs] The interface gcs for this feature.  If `undefined`
- *      or `null`, this uses the layer's interface gcs.  This is a string used
- *      by {@linkcode geo.transform}.
- * @property {number} [bin=0] The bin number is used to determine the order
- *      of multiple features on the same layer.  It has no effect except on the
- *      vgl renderer.  A negative value hides the feature without stopping
- *      interaction with it.  Otherwise, more features with higher bin numbers
- *      are drawn above those with lower bin numbers.  If two features have the
- *      same bin number, their order relative to one another is indeterminate
- *      and may be unstable.
+ *   or `null`, this uses the layer's interface gcs.  This is a string used by
+ *   {@link geo.transform}.
+ * @property {number} [bin=0] The bin number is used to determine the order of
+ *   multiple features on the same layer.  It has no effect except on the vgl
+ *   renderer.  A negative value hides the feature without stopping interaction
+ *   with it.  Otherwise, more features with higher bin numbers are drawn above
+ *   those with lower bin numbers.  If two features have the same bin number,
+ *   their order relative to one another is indeterminate and may be unstable.
  * @property {geo.renderer?} [renderer] A reference to the renderer used for
- *      the feature.
+ *   the feature.
  * @property {object} [style] An object that contains style values for the
- *      feature.
+ *   feature.
  * @property {number|function} [style.opacity=1] The opacity on a scale of 0 to
- *      1.
+ *   1.
  */
 
 /**
  * @typedef {geo.feature.spec} geo.feature.createSpec
  * @property {string} type A supported feature type.
  * @property {object[]} [data=[]] An array of arbitrary objects used to
- *  construct the feature.  These objects (and their associated indices in the
- *  array) will be passed back to style and attribute accessors provided by the
- *  user.
+ *   construct the feature.  These objects (and their associated indices in the
+ *   array) will be passed back to style and attribute accessors provided by
+ *   the user.
  */
 
 /**
  * @typedef {geo.event} geo.feature.event
  * @property {number} index The index of the feature within the data array.
  * @property {object} data The data element associated with the indexed
- *      feature.
+ *   feature.
  * @property {geo.mouseState} mouse The mouse information during the event.
  * @property {object} [extra] Additional information about the feature.  This
- *      is sometimes used to identify a subsection of the feature.
+ *   is sometimes used to identify a subsection of the feature.
  * @property {number} [eventID] A monotonically increasing number identifying
- *      this feature event loop.  This is provided on
- *      `geo.event.feature.mousemove`, `geo.event.feature.mouseclick`,
- *      `geo.event.feature.mouseover`, `geo.event.feature.mouseout`,
- *      `geo.event.feature.brush`, and `geo.event.feature.brushend`
- *      events, since each of those can trigger multiple events for one mouse
- *      action (all events triggered by the same mouse action will have the
- *      same `eventID`).
+ *   this feature event loop.  This is provided on
+ *   {@link geo.event.feature.mousemove}, {@link geo.event.feature.mouseclick},
+ *   {@link geo.event.feature.mouseover}, {@link geo.event.feature.mouseout},
+ *   {@link geo.event.feature.brush}, and {@link geo.event.feature.brushend}
+ *   events, since each of those can trigger multiple events for one mouse
+ *   action (all events triggered by the same mouse action will have the same
+ *   `eventID`).
  * @property {boolean} [top] `true` if this is the top-most feature that the
- *      mouse is over.  Only the top-most feature gets
- *      `geo.event.feature.mouseon` events, whereas multiple features can get
- *      other events.
+ *   mouse is over.  Only the top-most feature gets
+ *   {@link geo.event.feature.mouseon} events, whereas multiple features can
+ *   get other events.
  */
 
 /**
  * @typedef {object} geo.feature.searchResult
  * @property {object[]} found A list of elements from the data array that were
- *      found by the search.
+ *   found by the search.
  * @property {number[]} index A list of the indices of the elements that were
- *      found by the search.
+ *   found by the search.
  * @property {object[]} [extra] A list of additional information per found
- *      element.  The information is passed to events without change.
+ *   element.  The information is passed to events without change.
  */
 
 /**
@@ -470,8 +469,8 @@ var feature = function (arg) {
   /**
    * Set style(s) from array(s).  For each style, the array should have one
    * value per data item.  The values are not converted or validated.  Color
-   * values should be `geo.geoColorObject`s.  If invalid values are given the
-   * behavior is undefined.
+   * values should be {@link geo.geoColorObject}s.  If invalid values are given
+   * the behavior is undefined.
    *   For some feature styles, if the first entry of an array is itself an
    * array, then each entry of the array is expected to be an array, and values
    * are used from these subarrays.  This allows a style to apply, for
@@ -551,7 +550,7 @@ var feature = function (arg) {
    * @param {string?} [val] If `undefined`, return the current gcs.  If
    *    `null`, use the map's interface gcs.  Otherwise, set a new value for
    *    the gcs.
-   * @returns {string|this} A string used by {@linkcode geo.transform}.  If the
+   * @returns {string|this} A string used by {@link geo.transform}.  If the
    *    map interface gcs is in use, that value will be returned.  If the gcs
    *    is set, return the current class instance.
    */
@@ -768,7 +767,7 @@ var feature = function (arg) {
    * will make it so that the mouseon events prefer the highest index feature.
    *
    * @param {geo.event} evt The event; this should be triggered from
-   *    `geo.event.feature.mouseover_order`.
+   *    {@link geo.event.feature.mouseover_order}.
    */
   this.mouseOverOrderHighestIndex = function (evt) {
     // sort the found indices.  The last one is the one "on top".
@@ -830,7 +829,7 @@ var feature = function (arg) {
 };
 
 /**
- * The most recent `geo.feature.event` triggered.
+ * The most recent {@link geo.feature.event} triggered.
  * @type {number}
  */
 feature.eventID = 0;
