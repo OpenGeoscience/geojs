@@ -4,7 +4,8 @@ var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
 
 var vtkActor = vtk.Rendering.Core.vtkActor;
-var vtkMapper = vtk.Rendering.Core.vtkMapper;
+var vtkMapper = vtk.Rendering.Core.vtkGlyph3DMapper;
+var vtkPointSet = vtk.Common.DataModel.vtkPointSet;
 var vtkSphereSource = vtk.Filters.Sources.vtkSphereSource;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -36,8 +37,28 @@ var vtkjs_pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
-      m_actors = [],
+      m_actor = null,
+      m_pointSet = null,
+      m_source = null,
       s_update = this._update;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create pipeline
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._createPipeline = function () {
+    m_pointSet = vtkPointSet.newInstance();
+    m_source = vtkSphereSource.newInstance();
+    m_source.setThetaResolution(30);
+    m_source.setPhiResolution(30);
+    var mapper = vtkMapper.newInstance();
+    mapper.setInputData(m_pointSet, 0);
+    mapper.setInputConnection(m_source.getOutputPort(), 1);
+    m_actor = vtkActor.newInstance();
+    m_actor.setMapper(mapper);
+    this.renderer().contextRenderer().addActor(m_actor);
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -45,6 +66,8 @@ var vtkjs_pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
+    m_this.renderer().contextRenderer().setLayer(1);
+    this._createPipeline();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -65,10 +88,6 @@ var vtkjs_pointFeature = function (arg) {
         colorFunc = m_this.style.get('fillColor'),
         opacityFunc = m_this.style.get('fillOpacity');
 
-    if (m_actors) {
-      m_this.renderer().contextRenderer().removeActor(m_actors);
-    }
-
      /* It is more efficient to do a transform on a single array rather than on
      * an array of arrays or an array of objects. */
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
@@ -77,6 +96,7 @@ var vtkjs_pointFeature = function (arg) {
       position[i3 + 1] = posVal.y;
       position[i3 + 2] = posVal.z || 0;
       nonzeroZ = nonzeroZ || position[i3 + 2];
+      m_actor.getProperty().setOpacity(opacityFunc(data[i]));
     }
     position = transform.transformCoordinates(
                   m_this.gcs(), m_this.layer().map().gcs(),
@@ -91,22 +111,11 @@ var vtkjs_pointFeature = function (arg) {
     /* Some transforms modify the z-coordinate.  If we started with all zero z
      * coordinates, don't modify them.  This could be changed if the
      * z-coordinate space of the gl cube is scaled appropriately. */
-    for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
-      var source = vtkSphereSource.newInstance();
-      source.setRadius(radFunc());
-      source.setCenter(position[i3], position[i3 + 1], position[i3 + 2]);
-      source.setThetaResolution(30);
-      var actor = vtkActor.newInstance();
-      var mapper = vtkMapper.newInstance();
-      mapper.setInputConnection(source.getOutputPort());
-      actor.setMapper(mapper);
-      actor.getProperty().setColor(colorFunc()['r'], colorFunc()['g'], colorFunc()['b']);
-      actor.getProperty().setOpacity(opacityFunc(data[i]));
-      actor.getProperty().setAmbient(1.0);
-      m_this.renderer().contextRenderer().addActor(actor);
-      m_this.renderer().contextRenderer().setLayer(1);
-      m_actors.push(actor);
-    }
+    m_pointSet.getPoints().setData(position, 3);
+    m_source.setRadius(radFunc());
+    m_actor.getProperty().setColor(colorFunc()['r'],
+                                   colorFunc()['g'],
+                                   colorFunc()['b']);
     m_this.buildTime().modified();
 
     console.debug('built vtkjs point feature');
@@ -137,7 +146,7 @@ var vtkjs_pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    m_this.renderer().contextRenderer().removeActor(m_actors);
+    m_this.renderer().contextRenderer().removeActor(m_actor);
     s_exit();
   };
 
