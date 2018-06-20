@@ -308,13 +308,15 @@ var pointFeature = function (arg) {
 
       rad = radius(data[i], i);
       rad += stroke(data[i], i) ? strokeWidth(data[i], i) : 0;
-      rad2 = rad * rad;
-      p = map.gcsToDisplay(p, fgcs);
-      dx = p.x - pt.x;
-      dy = p.y - pt.y;
-      if (dx * dx + dy * dy <= rad2) {
-        found.push(d);
-        ifound.push(i);
+      if (rad) {
+        rad2 = rad * rad;
+        p = map.gcsToDisplay(p, fgcs);
+        dx = p.x - pt.x;
+        dy = p.y - pt.y;
+        if (dx * dx + dy * dy <= rad2) {
+          found.push(d);
+          ifound.push(i);
+        }
       }
     });
 
