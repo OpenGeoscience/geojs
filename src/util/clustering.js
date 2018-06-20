@@ -83,7 +83,9 @@ ClusterTree.prototype.count = function () {
  * Recursively call a function on all points contained in the cluster.
  * Calls the function with `this` as the current ClusterTree object, and
  * arguments to arguments the point object and the zoom level:
- *   func.call(this, point, zoom)
+ * `func.call(this, point, zoom)`.
+ *
+ * @param {function} func The function to call.
  */
 ClusterTree.prototype.each = function (func) {
   var i;
@@ -101,6 +103,8 @@ ClusterTree.prototype.each = function (func) {
 /**
  * Get the coordinates of the cluster (the mean position of all the points
  * contained).  This is lazily calculated and cached.
+ *
+ * @returns {geo.geoPosition} The 2-d coordinates of the center.
  */
 ClusterTree.prototype.coords = function () {
   var i, center = {x: 0, y: 0};
@@ -128,15 +132,15 @@ ClusterTree.prototype.coords = function () {
 /**
  * This class manages clustering of an array of positions hierarchically.
  * The algorithm and code was adapted from the Leaflet marker cluster
- * plugin by David Leaver: https://github.com/Leaflet/Leaflet.markercluster
+ * plugin by David Leaver: https://github.com/Leaflet/Leaflet.markercluster .
  *
  * @class
  * @alias geo.util.ClusterGroup
  * @param {object} opts An options object
  * @param {number} width The width of the window; used for scaling.
  * @param {number} height The height of the window; used for scaling.
- * @param {number} maxZoom The maximimum zoom level to calculate
- * @param {number} radius Proportional to the clustering radius in pixels
+ * @param {number} maxZoom The maximimum zoom level to calculate.
+ * @param {number} radius Proportional to the clustering radius in pixels.
  */
 function C(opts, width, height) {
 
@@ -169,6 +173,10 @@ function C(opts, width, height) {
  * it, this call should be replaced by a calculation involving the view port
  * size in point coordinates at a particular zoom level.
  * @private
+ * @param {number} zoom The zoom level for the scale.
+ * @param {number} width The viewport width.
+ * @param {number} height The viewport height.
+ * @returns {number} The scale for clustering the feature coordinates.
  */
 C.prototype._scaleAtLevel = function (zoom, width, height) {
   return vgl.zoomToHeight(zoom, width, height) / 2 * this._opts.radius;
@@ -177,6 +185,7 @@ C.prototype._scaleAtLevel = function (zoom, width, height) {
 /**
  * Add a position to the cluster group.
  * @protected
+ * @param {geo.geoPosition} point A point to add to the cluster.
  */
 C.prototype.addPoint = function (point) {
   var zoom, closest, parent, newCluster, lastParent, z;
@@ -248,8 +257,8 @@ C.prototype.addPoint = function (point) {
 
 /**
  * Return the unclustered points contained at a given zoom level.
- * @param {number} zoom The zoom level
- * @return {object[]} The array of unclustered points
+ * @param {number} zoom The zoom level.
+ * @returns {object[]} The array of unclustered points.
  */
 C.prototype.points = function (zoom) {
   zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
@@ -258,8 +267,8 @@ C.prototype.points = function (zoom) {
 
 /**
  * Return the clusters contained at a given zoom level.
- * @param {number} zoom The zoom level
- * @return {ClusterTree[]} The array of clusters
+ * @param {number} zoom The zoom level.
+ * @returns {ClusterTree[]} The array of clusters.
  */
 C.prototype.clusters = function (zoom) {
   zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);

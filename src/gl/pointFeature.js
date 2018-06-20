@@ -4,11 +4,12 @@ var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
 
 /**
- * Create a new instance of pointFeature
+ * Create a new instance of gl.pointFeature.
  *
  * @class
  * @alias geo.gl.pointFeature
  * @extends geo.pointFeature
+ * @param {geo.pointFeature.spec} arg
  * @returns {geo.gl.pointFeature}
  */
 var gl_pointFeature = function (arg) {
@@ -196,18 +197,39 @@ var gl_pointFeature = function (arg) {
 
   fragmentShaderSource = fragmentShaderSource.join('\n');
 
+  /**
+   * Create the vertex shader for points.
+   *
+   * @returns {vgl.shader}
+   */
   function createVertexShader() {
     var shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
 
+  /**
+   * Create the fragment shader for points.
+   *
+   * @returns {vgl.shader}
+   */
   function createFragmentShader() {
     var shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
 
+  /**
+   * Given the current primitive shape and a basic size, return a set of
+   * vertices that can be used for a generic point.
+   *
+   * @param {number} x The base x coordinate.  Usually 0.
+   * @param {number} y The base y coordinate.  Usually 0.
+   * @param {number} w The base width.  Usually 1.
+   * @param {number} h The base height.  Usually 1.
+   * @returns {number[]} A flat array of vertices in the form of
+   *    `[x0, y0, x1, y1, ...]`.
+   */
   function pointPolygon(x, y, w, h) {
     var verts;
     switch (m_primitiveShape) {
@@ -240,6 +262,9 @@ var gl_pointFeature = function (arg) {
     return verts;
   }
 
+  /**
+   * Create and style the data needed to render the points.
+   */
   function createGLPoints() {
     // unit and associated data is not used when drawing sprite
     var i, j, numPts = m_this.data().length,
@@ -351,7 +376,7 @@ var gl_pointFeature = function (arg) {
   }
 
   /**
-   * Return list of actors
+   * Return list of vgl actorss used for rendering.
    *
    * @returns {vgl.actor[]}
    */
@@ -365,13 +390,33 @@ var gl_pointFeature = function (arg) {
   /**
    * Return the number of vertices used for each point.
    *
-   * @returns {Number}
+   * @returns {number}
    */
   this.verticesPerFeature = function () {
     var unit = pointPolygon(0, 0, 1, 1);
     return unit.length / 2;
   };
 
+  /**
+   * Set style(s) from array(s).  For each style, the array should have one
+   * value per data item.  The values are not converted or validated.  Color
+   * values should be {@link geo.geoColorObject}s.  If invalid values are given
+   * the behavior is undefined.
+   *   For some feature styles, if the first entry of an array is itself an
+   * array, then each entry of the array is expected to be an array, and values
+   * are used from these subarrays.  This allows a style to apply, for
+   * instance, per vertex of a data item rather than per data item.
+   *
+   * @param {string|object} keyOrObject Either the name of a single style or
+   *    an object where the keys are the names of styles and the values are
+   *    each arrays.
+   * @param {array} styleArray If keyOrObject is a string, an array of values
+   *    for the style.  If keyOrObject is an object, this parameter is ignored.
+   * @param {boolean} [refresh=false] `true` to redraw the feature when it has
+   *    been updated.  If an object with styles is passed, the redraw is only
+   *    done once.
+   * @returns {this}
+   */
   this.updateStyleFromArray = function (keyOrObject, styleArray, refresh) {
     var bufferedKeys = {
       fill: 'bool',
@@ -445,10 +490,11 @@ var gl_pointFeature = function (arg) {
     } else if (needsRender) {
       m_this.renderer()._render();
     }
+    return m_this;
   };
 
   /**
-   * Initialize
+   * Initialize.
    */
   this._init = function () {
     var prog = vgl.shaderProgram(),
@@ -547,9 +593,9 @@ var gl_pointFeature = function (arg) {
   };
 
   /**
-   * Build
+   * Build.  Create the necessary elements to render points.
    *
-   * @override
+   * @returns {this}
    */
   this._build = function () {
 
@@ -562,12 +608,13 @@ var gl_pointFeature = function (arg) {
     m_this.renderer().contextRenderer().addActor(m_actor);
     m_this.renderer().contextRenderer().render();
     m_this.buildTime().modified();
+    return m_this;
   };
 
   /**
-   * Update
+   * Update.  Rebuild if necessary.
    *
-   * @override
+   * @returns {this}
    */
   this._update = function () {
 
@@ -589,10 +636,11 @@ var gl_pointFeature = function (arg) {
     m_actor.material().setBinNumber(m_this.bin());
 
     m_this.updateTime().modified();
+    return m_this;
   };
 
   /**
-   * Destroy
+   * Destroy.  Free used resources.
    */
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
