@@ -52,28 +52,28 @@ $(function () {
   });
 
   // Create an osm layer with custom tile url for a white background.
-  // map.createLayer(
-  //   'osm',
-  //   {
-  //     url: function () {
-  //       return 'white.jpg';
-  //     }
-  //   }
-  // );
+  map.createLayer(
+    'osm',
+    {
+      url: function () {
+        return 'white.jpg';
+      }
+    }
+  );
 
-  // // Create a gl feature layer
-  // var vglLayer = map.createLayer(
-  //   'feature',
-  //   {
-  //     renderer: 'vgl'
-  //   }
-  // );
-
-  // Create an svg feature layer
-  var vtkjsLayer = map.createLayer(
+  // Create a gl feature layer
+  var vglLayer = map.createLayer(
     'feature',
     {
-      renderer: 'vtkjs'
+      renderer: 'vgl'
+    }
+  );
+
+  // Create an svg feature layer
+  var svgLayer = map.createLayer(
+    'feature',
+    {
+      renderer: 'd3'
     }
   );
 
@@ -82,18 +82,18 @@ $(function () {
   var svgColor = 'blue';
 
   // Generate some data for vgl
-  // var data = d3.range(2).map(function (i) {
-  //   return {
-  //     x: -95,             // longitude
-  //     y: 39.5 + 4.5 * i,  // latitude
-  //     c: vglColor,        // fill color
-  //     opacity: 0.1        // fill opacity
-  //   };
-  // });
-  // makePoints(data, vglLayer, vglColor);
+  var data = d3.range(2).map(function (i) {
+    return {
+      x: -95,             // longitude
+      y: 39.5 + 4.5 * i,  // latitude
+      c: vglColor,        // fill color
+      opacity: 0.1        // fill opacity
+    };
+  });
+  makePoints(data, vglLayer, vglColor);
 
   // Generate some data for svg
-  var data = d3.range(1).map(function (i) {
+  data = d3.range(2).map(function (i) {
     return {
       x: -101,            // longitude
       y: 39.5 + 4.5 * i,  // latitude
@@ -101,8 +101,5 @@ $(function () {
       opacity: 0.1        // fill opacity
     };
   });
-  makePoints(data, vtkjsLayer, svgColor);
-
-  // TODO: For now we need this extra call.
-  map.draw();
+  makePoints(data, svgLayer, svgColor);
 });
