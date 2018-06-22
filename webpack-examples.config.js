@@ -5,51 +5,55 @@ var path = require('path');
 var base = require('./webpack.config');
 var external = require('./external.config');
 
-var loaders = base.module.loaders.concat([{
+var rules = base.module.rules.concat([{
   test: /\.pug$/,
-  loader: 'pug'
+  use: ['pug-loader']
 }, {
   test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
-  loader: 'url?limit=10000&mimetype=application/font-woff'
+  use: ['url-loader?limit=10000&mimetype=application/font-woff']
 }, {
   test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-  loader: 'url?limit=10000&mimetype=application/octet-stream'
+  use: ['url-loader?limit=10000&mimetype=application/octet-stream']
 }, {
   test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-  loader: 'file'
+  use: ['file-loader']
 }, {
   test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-  loader: 'url?limit=10000&mimetype=image/svg+xml'
+  use: ['url-loader?limit=10000&mimetype=image/svg+xml']
 }, {
   test: require.resolve('codemirror'),
-  loader: 'expose?CodeMirror'
+  use: ['expose-loader?CodeMirror']
 }, {
   test: /jsonlint\.js$/,
-  loader: 'expose?jsonlint'
+  use: ['expose-loader?jsonlint']
 }, {
   test: require.resolve('colorbrewer'),
-  loader: 'expose?colorbrewer'
+  use: ['expose-loader?colorbrewer']
 }, {
   test: /bootstrap.css$/,
-  loader: StringReplacePlugin.replace({
+  use: [StringReplacePlugin.replace({
     replacements: [{
       pattern: /@import.*fonts.googleapis.com\/css\?family=Lato[^;]*;/g,
       replacement: () => '@import url(../../typeface-lato/index.css);'
     }]
-  })
+  })]
 }]);
 
-loaders = loaders.concat(external.module.loaders);
+rules = rules.concat(external.module.rules);
 
-var plugins = base.exposed_plugins;
+var plugins = base.plugins;
 plugins.push(new StringReplacePlugin());
 
 var resolve = {
-  extensions: ['.js', '.css', '.pug', ''],
+  extensions: ['.js', '.css', '.pug'],
   alias: base.resolve.alias
 };
 
 module.exports = {
+  /* webpack 4
+  mode: 'production',
+   */
+  performance: {hints: false},
   cache: true,
   devtool: 'source-map',
   context: path.join(__dirname),
@@ -62,7 +66,7 @@ module.exports = {
     filename: '[name].js'
   },
   module: {
-    loaders: loaders
+    rules: rules
   },
   resolve: resolve,
   plugins: plugins

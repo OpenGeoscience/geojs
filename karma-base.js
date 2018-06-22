@@ -249,6 +249,24 @@ var FirefoxPrefs = {
 };
 
 module.exports = function (config) {
+  webpack_config.plugins.push(function () {
+    this.plugin('done', function (stats) {
+      if (stats.compilation.warnings.length) {
+        // Log each of the warnings
+        stats.compilation.warnings.forEach(function (warning) {
+          console.log(warning.message || warning);
+        });
+        // Pretend no assets were generated. This prevents the tests
+        // from running making it clear that there were warnings.
+        stats.stats = [{
+          toJson: function () {
+            return this;
+          },
+          assets: []
+        }];
+      }
+    });
+  });
   var newConfig = {
     autoWatch: false,
     files: [
@@ -300,7 +318,7 @@ module.exports = function (config) {
           '--kiosk',
           '--incognito',
           '--translate-script-url=""',
-          '--proxy-pac-url=' + config.protocol + '//' + config.hostname + ':' + config.port + '/testdata/proxy-for-tests.pac'
+          '--proxy-pac-url=' + config.protocol + '//' + (config.hostname || '127.0.0.1') + ':' + config.port + '/testdata/proxy-for-tests.pac'
         ])
       },
       FirefoxHeadlessTouch: {
@@ -315,7 +333,7 @@ module.exports = function (config) {
         prefs: Object.assign({
           // enable proxy
           'network.proxy.type': 2,
-          'network.proxy.autoconfig_url': config.protocol + '//' + config.hostname + ':' + config.port + '/testdata/proxy-for-tests.pac',
+          'network.proxy.autoconfig_url': config.protocol + '//' + (config.hostname || '127.0.0.1') + ':' + config.port + '/testdata/proxy-for-tests.pac',
           // enable touch
           'dom.w3c_touch_events.enabled': 1
         }, FirefoxPrefs)
@@ -347,13 +365,17 @@ module.exports = function (config) {
       }
     },
     webpack: {
+      /* webpack 4
+      mode: 'production',
+       */
+      performance: {hints: false},
       cache: true,
       devtool: 'inline-source-map',
       module: {
-        loaders: webpack_config.module.loaders
+        rules: webpack_config.module.rules
       },
       resolve: webpack_config.resolve,
-      plugins: webpack_config.exposed_plugins
+      plugins: webpack_config.plugins
     },
     webpackMiddleware: {
       stats: 'errors-only'
