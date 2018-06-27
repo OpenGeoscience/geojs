@@ -60,7 +60,7 @@ var feature = require('./feature');
  *      stroke color.  May include opacity.
  * @property {geo.geoColor|function} [style.textStrokeWidth=0] Text stroke
  *      width in pixels.
- * @property {number|function} [style.renderedZone] If this is a positive
+ * @property {number|function} [style.renderThreshold] If this is a positive
  *      number, text elements may not be rendered if their base position
  *      (before offset and font effects are applied) is more than this distance
  *      in pixels outside of the current viewport.  If it is known that such

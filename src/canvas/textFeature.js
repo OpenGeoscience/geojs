@@ -99,7 +99,7 @@ var canvas_textFeature = function (arg) {
   this._renderOnCanvas = function (context2d, map) {
     var data = m_this.data(),
         posFunc = m_this.style.get('position'),
-        renderedZone = m_this.style.get('renderedZone')(data),
+        renderThreshold = m_this.style.get('renderThreshold')(data),
         textFunc = m_this.style.get('text'),
         mapRotation = map.rotation(),
         mapZoom = map.zoom(),
@@ -125,9 +125,9 @@ var canvas_textFeature = function (arg) {
        * render it, even if the offset of size would be sufficient to make it
        * appear in the viewport. */
       pos = posArray[i];
-      if (renderedZone > 0 && (
-          pos.x < -renderedZone || pos.x > mapSize.width + renderedZone ||
-          pos.y < -renderedZone || pos.y > mapSize.height + renderedZone)) {
+      if (renderThreshold > 0 && (
+          pos.x < -renderThreshold || pos.x > mapSize.width + renderThreshold ||
+          pos.y < -renderThreshold || pos.y > mapSize.height + renderThreshold)) {
         return;
       }
       visible = m_this.style.get('visible')(d, i);
