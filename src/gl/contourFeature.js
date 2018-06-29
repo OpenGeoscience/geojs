@@ -3,11 +3,12 @@ var registerFeature = require('../registry').registerFeature;
 var contourFeature = require('../contourFeature');
 
 /**
- * Create a new instance of contourFeature
+ * Create a new instance of contourFeature.
  *
  * @class
  * @alias geo.gl.contourFeature
  * @extends geo.contourFeature
+ * @param {geo.contourFeature.spec} arg
  * @returns {geo.gl.contourFeature}
  */
 var gl_contourFeature = function (arg) {
@@ -117,17 +118,23 @@ var gl_contourFeature = function (arg) {
    * into the various gl uniforms and buffers.
    */
   function createGLContours() {
-    var contour = m_this.createContours(),
+    var contour = m_this._createContours(),
         numPts = contour.elements.length,
         colorTable = [],
         i, i3, j, j3,
         posBuf, opacityBuf, valueBuf, indicesBuf,
         geom = m_mapper.geometryData();
 
-    m_minColorUniform.set([contour.minColor.r, contour.minColor.g,
-                           contour.minColor.b, contour.minColor.a]);
-    m_maxColorUniform.set([contour.maxColor.r, contour.maxColor.g,
-                           contour.maxColor.b, contour.maxColor.a]);
+    m_minColorUniform.set([
+      contour.minColor.r,
+      contour.minColor.g,
+      contour.minColor.b,
+      contour.minColor.a]);
+    m_maxColorUniform.set([
+      contour.maxColor.r,
+      contour.maxColor.g,
+      contour.maxColor.b,
+      contour.maxColor.a]);
     m_stepsUniform.set(contour.colorMap.length);
     m_steppedUniform.set(contour.stepped);
     for (i = 0; i < contour.colorMap.length; i += 1) {
@@ -162,7 +169,9 @@ var gl_contourFeature = function (arg) {
   }
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @param {geo.contourFeature.spec} arg The contour feature specification.
    */
   this._init = function (arg) {
     var blend = vgl.blend(),
@@ -230,9 +239,7 @@ var gl_contourFeature = function (arg) {
   };
 
   /**
-   * Build
-   *
-   * @override
+   * Build.
    */
   this._build = function () {
     if (m_actor) {
@@ -246,9 +253,7 @@ var gl_contourFeature = function (arg) {
   };
 
   /**
-   * Update
-   *
-   * @override
+   * Update.
    */
   this._update = function () {
     s_update.call(m_this);
@@ -264,7 +269,7 @@ var gl_contourFeature = function (arg) {
   };
 
   /**
-   * Destroy
+   * Destroy.
    */
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);

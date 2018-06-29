@@ -111,4 +111,17 @@ describe('geo.util', function () {
         {x: 50, y: 10}, {x: 10, y: 5}, {x: 30, y: 3}, {x: 50, y: 5}
     ]);
   });
+
+  it('getMinMaxValues', function () {
+    var values = [
+      211, 213, 215, 216, 218, 220, 223, 225, 227, 226, 224, 226, 234, 240,
+      243, 245, 245, 237, 227, 234, 254, 253, 265, 271, 271, 265, 258, 258,
+      263, 267, 282, 292, 299, 303, 302, 294, 287, 287, 295, 302, 283, 240,
+      206, 190, 181, 185, 189, 190, 191, 195];
+    expect(util.getMinMaxValues(values)).toEqual({min: 181, max: 303});
+    expect(util.getMinMaxValues(values, 200, 300)).toEqual({min: 200, max: 300});
+    expect(util.getMinMaxValues(values, 100, 400)).toEqual({min: 100, max: 400});
+    expect(util.getMinMaxValues(values, 200, 300, true)).toEqual({min: 200, max: 300});
+    expect(util.getMinMaxValues(values, 100, 400, true)).toEqual({min: 181, max: 303});
+  });
 });
