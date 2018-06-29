@@ -9,25 +9,27 @@ module.exports = (function () {
    * is independent of the actual content of the tile, but assumes that
    * the content is loaded asynchronously via a url.  The tile object
    * has a promise-like interface.  For example,
-   *
+   * ```
    * tile.then(function (data) {...}).catch(function (data) {...});
+   * ```.
    *
-   * @class geo.tile
-   * @param {Object} spec The tile specification object
+   * @class
+   * @alias geo.tile
+   * @param {object} spec The tile specification.
    *
-   * @param {Object} spec.index The global position of the tile
-   * @param {Number} spec.index.x The x-coordinate (usually the column number)
-   * @param {Number} spec.index.y The y-coordinate (usually the row number)
+   * @param {object} spec.index The global position of the tile.
+   * @param {number} spec.index.x The x-coordinate (usually the column number).
+   * @param {number} spec.index.y The y-coordinate (usually the row number).
    *
-   * @param {Object} spec.size The size of each tile
-   * @param {Number} spec.size.x Width (usually in pixels)
-   * @param {Number} spec.size.y Height (usually in pixels)
+   * @param {object} spec.size The size of each tile.
+   * @param {number} spec.size.x Width (usually in pixels).
+   * @param {number} spec.size.y Height (usually in pixels).
    *
-   * @param {Object|String} spec.url A url or jQuery ajax config object
+   * @param {object|string} spec.url A url or jQuery ajax config object.
    *
-   * @param {Object?} spec.overlap The size of overlap with neighboring tiles
-   * @param {Number} [spec.overlap.x=0]
-   * @param {Number} [spec.overlap.y=0]
+   * @param {object?} spec.overlap The size of overlap with neighboring tiles.
+   * @param {number} [spec.overlap.x=0]
+   * @param {number} [spec.overlap.y=0]
    */
   var tile = function (spec) {
     if (!(this instanceof tile)) {
@@ -44,6 +46,8 @@ module.exports = (function () {
 
     /**
      * Return the index coordinates.
+     *
+     * @returns {object} The index with `x` and `y` properties.
      */
     Object.defineProperty(this, 'index', {
       get:
@@ -51,25 +55,30 @@ module.exports = (function () {
     });
 
     /**
-     * Return the tile sizes.
+     * Return the tile size.
+     *
+     * @returns {object} The size with `x` and `y` properties.
      */
     Object.defineProperty(this, 'size', {
       get: function () { return this._size; }
     });
 
     /**
-     * Return the tile overlap sizes.
+     * Return the tile overlap.
+     *
+     * @returns {object} The overlap with `x` and `y` properties.
      */
     Object.defineProperty(this, 'overlap', {
       get: function () { return this._overlap; }
     });
 
     /**
-     * Initiate the ajax request and add a promise interface
-     * to the tile object.  This method exists to allow
-     * derived classes the ability to override how the tile
-     * is obtained.  For example, imageTile uses an Image
-     * element rather than $.get.
+     * Initiate the ajax request and add a promise interface to the tile
+     * object.  This method exists to allow derived classes the ability to
+     * override how the tile is obtained.  For example, imageTile uses an
+     * Image element rather than $.get.
+     *
+     * @returns {this}
      */
     this.fetch = function () {
       if (!this._fetched) {
@@ -93,10 +102,9 @@ module.exports = (function () {
      * Add a method to be called with the data when the ajax request is
      * successfully resolved.
      *
-     * @param {function?} onSuccess The success handler
-     * @param {function?} onFailure The failure handler
-     * @returns {this} Supports chained calling
-     *
+     * @param {function?} onSuccess The success handler.
+     * @param {function?} onFailure The failure handler.
+     * @returns {this}
      */
     this.then = function (onSuccess, onFailure) {
       // both fetch and _queueAdd can replace the current then method
@@ -118,9 +126,8 @@ module.exports = (function () {
     /**
      * Add a method to be called with the data when the ajax fails.
      *
-     * @param {function} method The rejection handler
-     * @returns {this} Supports chained calling
-     *
+     * @param {function} method The rejection handler.
+     * @returns {this}
      */
     this.catch = function (method) {
       this.then(undefined, method);
@@ -128,9 +135,10 @@ module.exports = (function () {
     };
 
     /**
-     * Return a unique string representation of the given tile useable
-     * as a hash key.  Possibly extend later to include url information
-     * to make caches aware of the tile source.
+     * Return a unique string representation of the given tile useable as a
+     * hash key.  Possibly extend later to include url information to make
+     * caches aware of the tile source.
+     *
      * @returns {string}
      */
     this.toString = function () {
@@ -138,11 +146,11 @@ module.exports = (function () {
     };
 
     /**
-     * Return the bounds of the tile given an index offset and
-     * a translation.
+     * Return the bounds of the tile given an index offset and a translation.
      *
-     * @param {object} index The tile index containing (0, 0)
-     * @param {object} shift The coordinates of (0, 0) inside the tile
+     * @param {object} index The tile index containing (0, 0).
+     * @param {object} shift The coordinates of (0, 0) inside the tile.
+     * @returns {object} An object with `left`, `top`, `right`, `bottom`.
      */
     this.bounds = function (index, shift) {
       var left, right, bottom, top;
@@ -199,22 +207,11 @@ module.exports = (function () {
     });
 
     /**
-     * Returns the global image size at this level.
-     * @returns {number}
-     */
-    Object.defineProperty(this, 'levelSize', {
-      value: {
-        width: Math.pow(2, this.index.level || 0) * this.size.x,
-        height: Math.pow(2, this.index.level || 0) * this.size.y
-      }
-    });
-
-    /**
-     * Set the opacity of the tile to 0 and gradually fade in
-     * over the given number of milliseconds.  This will also
-     * resolve the embedded promise interface.
-     * @param {number} duration the duration of the animation in ms
-     * @returns {this} chainable
+     * Set the opacity of the tile to 0 and gradually fade in over the given
+     * number of milliseconds.  This is just a delay.
+     *
+     * @param {number} duration The duration of the animation in ms.
+     * @returns {this}
      */
     this.fadeIn = function (duration) {
       $.noop(duration);

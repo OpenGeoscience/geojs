@@ -78,97 +78,79 @@ module.exports = (function () {
   }
 
   /**
-   * This method defines a tileLayer, which is an abstract class defining a
-   * layer divided into tiles of arbitrary data.  Notably, this class provides
-   * the core functionality of the osmLayer, but hooks exist to render tiles
-   * dynamically from vector data, or to display arbitrary grids of images
-   * in a custom coordinate system.  When multiple zoom levels are present
-   * in a given dataset, this class assumes that the space occupied by
-   * tile (i, j) at level z is covered by a 2x2 grid of tiles at zoom
-   * level z + 1:
-   *
+   * This method defines a tileLayer, an abstract class defining a layer
+   * divided into tiles of arbitrary data.  Notably, this class provides the
+   * core functionality of `geo.osmLayer`, but hooks exist to render tiles more
+   * generically.  When multiple zoom levels are present in a given dataset,
+   * this class assumes that the space occupied by tile `(i, j)` at level `z`
+   * is covered by a 2x2 grid of tiles at zoom level `z + 1`:
+   * ```
    *   (2i, 2j),     (2i, 2j + 1)
    *   (2i + 1, 2j), (2i + 1, 2j + 1)
-   *
+   * ```
    * The higher level tile set should represent a 2x increase in resolution.
    *
-   * Although not currently supported, this class is intended to extend to
-   * 3D grids of tiles as well where 1 tile is covered by a 2x2x2 grid of
-   * tiles at the next level.  The tiles are assumed to be rectangular,
-   * identically sized, and aligned with x/y axis of the underlying
-   * coordinate system.  The local coordinate system is in pixels relative
-   * to the current zoom level and changes when the zoom level crosses an
-   * integer threshold.
-   *
-   * The constructor takes a number of optional parameters that customize
-   * the display of the tiles.  The default values of these options are
-   * stored as the `defaults` attribution on the constructor.  Supporting
-   * alternate tiling protocols often only requires adjusting these
-   * defaults.
-   *
-   * @class geo.tileLayer
+   * @class
+   * @alias geo.tileLayer
    * @extends geo.featureLayer
    * @param {object?} options
-   * @param {number} [options.minLevel=0]    The minimum zoom level available
-   * @param {number} [options.maxLevel=18]   The maximum zoom level available
-   * @param {number} [options.tileOverlap=0]
-   *    Number of pixels of overlap between tiles
-   * @param {number} [options.tileWidth=256]
-   *    The tile width as displayed without overlap
-   * @param {number} [options.tileHeight=256]
-   *    The tile height as displayed without overlap
-   * @param {function} [options.tilesAtZoom=null]
-   *    A function that is given a zoom level and returns {x: (num), y: (num)}
-   *    with the number of tiles at that zoom level.
+   * @param {number} [options.minLevel=0] The minimum zoom level available.
+   * @param {number} [options.maxLevel=18] The maximum zoom level available.
+   * @param {object} [options.tileOverlap] Pixel overlap between tiles.
+   * @param {number} [options.tileOverlap.x] Horizontal overlap.
+   * @param {number} [options.tileOverlap.y] Vertical overlap.
+   * @param {number} [options.tileWidth=256] The tile width without overlap.
+   * @param {number} [options.tileHeight=256] The tile height without overlap.
+   * @param {function} [options.tilesAtZoom=null] A function that is given a
+   *    zoom level and returns `{x: (num), y: (num)}` with the number of tiles
+   *    at that zoom level.
    * @param {number} [options.cacheSize=400] The maximum number of tiles to
    *    cache.  The default is 200 if keepLower is false.
-   * @param {boolean}   [options.keepLower=true]
-   *    Keep lower zoom level tiles when showing high zoom level tiles.  This
-   *    uses more memory but results in smoother transitions.
-   * @param {boolean}   [options.wrapX=true]    Wrap in the x-direction
-   * @param {boolean}   [options.wrapY=false]   Wrap in the y-direction
-   * @param {string|function} [options.url=null]
-   *   A function taking the current tile indices and returning a URL or jquery
-   *   ajax config to be passed to the {geo.tile} constructor.
-   *   Example:
-   *     (x, y, z, subdomains) => "http://example.com/z/y/x.png"
+   * @param {boolean} [options.keepLower=true] When truthy, keep lower zoom
+   *    level tiles when showing high zoom level tiles.  This uses more memory
+   *    but results in smoother transitions.
+   * @param {boolean} [options.wrapX=true] Wrap in the x-direction.
+   * @param {boolean} [options.wrapY=false] Wrap in the y-direction.
+   * @param {string|function} [options.url=null] A function taking the current
+   *   tile indices `(x, y, level, subdomains)` and returning a URL or jquery
+   *   ajax config to be passed to the {geo.tile} constructor.  Example:
+   *   ```
+   *   (x, y, z, subdomains) => "http://example.com/z/y/x.png"
+   *   ```
    *   If this is a string, a template url with {x}, {y}, {z}, and {s} as
-   *   template variables.  {s} picks one of the subdomains parameter.
-   * @param {string|list} [options.subdomain="abc"]  Subdomains to use in
+   *   template variables.  {s} picks one of the subdomains parameter and may
+   *   contain a comma-separated list of subdomains.
+   * @param {string|list} [options.subdomain="abc"] Subdomains to use in
    *   template url strings.  If a string, this is converted to a list before
    *   being passed to a url function.
    * @param {string} [options.baseUrl=null]  If defined, use the old-style base
    *   url instead of the options.url parameter.  This is functionally the same
-   *   as using a url of baseUrl/{z}/{x}/{y}.(options.imageFormat || png).  If
-   *   the specified string does not end in a slash, one is added.
-   * @param {string} [options.imageFormat='png']
-   *   This is only used if a baseUrl is specified, in which case it determines
-   *   the image name extension used in the url.
-   * @param {number} [options.animationDuration=0]
-   *   The number of milliseconds for the tile loading animation to occur.  **This
-   *   option is currently buggy because old tiles will purge before the animation
-   *   is complete.**
-   * @param {string} [options.attribution]
-   *   An attribution to display with the layer (accepts HTML)
-   * @param {function} [options.tileRounding=Math.round]
-   *   This function determines which tiles will be loaded when the map is at
-   *   a non-integer zoom.  For example, `Math.floor`, will use tile level 2
-   *   when the map is at zoom 2.9.
-   * @param {function} [options.tileOffset]
-   *   This function takes a zoom level argument and returns, in units of
-   *   pixels, the coordinates of the point (0, 0) at the given zoom level
-   *   relative to the bottom left corner of the domain.
-   * @param {function} [options.tilesMaxBounds=null]
-   *   This function takes a zoom level argument and returns, in units of
-   *   pixels, the top, left, right, and bottom maximum value for which tiles
-   *   should be drawn at the given zoom level relative to the bottom left
-   *   corner of the domain.  This can be used to crop tiles at the edges of
-   *   tile layer.  Note that if tiles wrap, only complete tiles in the
-   *   wrapping direction(s) are supported, and this max bounds will probably
-   *   not behave properly.
-   * @param {boolean}   [options.topDown=false]  True if the gcs is top-down,
+   *   as using a url of `baseUrl/{z}/{x}/{y}.(options.imageFormat || png)`.
+   *   If the specified string does not end in a slash, one is added.
+   * @param {string} [options.imageFormat='png'] This is only used if a
+   *   `baseUrl` is specified, in which case it determines the image name
+   *   extension used in the url.
+   * @param {number} [options.animationDuration=0] The number of milliseconds
+   *   for the tile loading animation to occur.  Only some renderers support
+   *   this.
+   * @param {string} [options.attribution] An attribution to display with the
+   *   layer (accepts HTML).
+   * @param {function} [options.tileRounding=Math.round] This function
+   *   determines which tiles will be loaded when the map is at a non-integer
+   *   zoom.  For example, `Math.floor`, will use tile level 2 when the map is
+   *   at zoom 2.9.
+   * @param {function} [options.tileOffset] This function takes a zoom level
+   *   argument and returns, in units of pixels, the coordinates of the point
+   *   (0, 0) at the given zoom level relative to the bottom left corner of the
+   *   domain.
+   * @param {function} [options.tilesMaxBounds=null] This function takes a zoom
+   *   level argument and returns an object with `x` and `y` in pixels which is
+   *   used to crop the last row and column of tiles.  Note that if tiles wrap,
+   *   only complete tiles in the wrapping direction(s) are supported, and this
+   *   max bounds will probably not behave properly.
+   * @param {boolean} [options.topDown=false]  True if the gcs is top-down,
    *   false if bottom-up (the ingcs does not matter, only the gcs coordinate
-   *   system).  When false, this inverts the gcs y-coordinate when calculating
+   *   system).  When falsy, this inverts the gcs y-coordinate when calculating
    *   local coordinates.
    * @returns {geo.tileLayer}
    */
@@ -258,25 +240,28 @@ module.exports = (function () {
 
     /**
      * Readonly accessor to the tile cache object.
+     * @returns {geo.tileCache}
      */
     Object.defineProperty(this, 'cache', {get: function () {
       return this._cache;
     }});
 
     /**
-     * Readonly accessor to the active tile mapping.  This is an object containing
-     * all currently drawn tiles (hash(tile) => tile).
+     * Readonly accessor to the active tile mapping.  This is an object
+     * containing all currently drawn tiles (hash(tile) => tile).
+     * @returns {object}
      */
     Object.defineProperty(this, 'activeTiles', {get: function () {
       return $.extend({}, this._activeTiles); // copy on output
     }});
 
     /**
-     * The number of tiles at the given zoom level
-     * The default implementation just returns `Math.pow(2, z)`.
+     * The number of tiles at the given zoom level.  The default implementation
+     * just returns `Math.pow(2, z)`.
      *
-     * @param {number} level A zoom level
-     * @returns {{x: nx, y: ny}} The number of tiles in each axis
+     * @param {number} level A zoom level.
+     * @returns {object} The number of tiles in each axis in the form
+     *     `{x: nx, y: ny}`.
      */
     this.tilesAtZoom = function (level) {
       if (this._options.tilesAtZoom) {
@@ -290,9 +275,9 @@ module.exports = (function () {
      * The maximum tile bounds at the given zoom level, or null if no special
      * tile bounds.
      *
-     * @param {number} level A zoom level
-     * @returns {object} {x: width, y: height} The maximum tile bounds in
-     *      pixels for the specified level, or null if none specified.
+     * @param {number} level A zoom level.
+     * @returns {object} The maximum tile bounds in pixels for the specified
+     *    level, or null if none specified (`{x: width, y: height}`).
      */
     this.tilesMaxBounds = function (level) {
       if (this._options.tilesMaxBounds) {
@@ -305,8 +290,8 @@ module.exports = (function () {
      * Get the crop values for a tile based on the tilesMaxBounds function.
      * Returns undefined if the tile should not be cropped.
      *
-     * @param {object} tile: the tile to compute crop values for.
-     * @returns {object} either undefined or an object with x and y values
+     * @param {object} tile The tile to compute crop values for.
+     * @returns {object} Either `undefined` or an object with `x` and `y` values
      *      which is the size in pixels for the tile.
      */
     this.tileCropFromBounds = function (tile) {
@@ -328,10 +313,10 @@ module.exports = (function () {
     };
 
     /**
-     * Returns true if the given tile index is valid:
-     *   * min level <= level <= max level
-     *   * 0 <= x <= 2^level - 1
-     *   * 0 <= y <= 2^level - 1
+     * Returns `true` if the given tile index is valid:
+     * - min level <= level <= max level
+     * - 0 <= x <= 2^level - 1
+     * - 0 <= y <= 2^level - 1
      * If the layer wraps, the x and y values may be allowed to extend beyond
      * these values.
      *
@@ -339,7 +324,7 @@ module.exports = (function () {
      * @param {number} index.x
      * @param {number} index.y
      * @param {number} index.level
-     * @returns {geo.tile}
+     * @returns {boolean}
      */
     this.isValid = function (index) {
       if (!(this._options.minLevel <= index.level &&
@@ -363,9 +348,11 @@ module.exports = (function () {
      * Returns the current origin tile and offset at the given zoom level.
      * This is intended to be cached in the future to optimize coordinate
      * transformations.
+     *
      * @protected
      * @param {number} level The target zoom level.
-     * @returns {object} {index: {x, y}, offset: {x, y}}
+     * @returns {object} The origin and offset in the form
+     *   `{index: {x, y}, offset: {x, y}}`.
      */
     this._origin = function (level) {
       var origin = this.toLevel(this.toLocal(this.map().origin()), level),
@@ -391,8 +378,10 @@ module.exports = (function () {
 
     /**
      * Returns a tile's bounds in its level coordinates.
+     *
      * @param {geo.tile} tile The tile to check.
-     * @returns {object} The tile's bounds.
+     * @returns {object} The tile's bounds with `left`, `top`, `right`,
+     *   `bottom`.
      */
     this._tileBounds = function (tile) {
       var origin = this._origin(tile.index.level);
@@ -401,11 +390,13 @@ module.exports = (function () {
 
     /**
      * Returns the tile indices at the given point.
-     * @param {object} point The coordinates in pixels relative to the map origin.
+     *
+     * @param {object} point The coordinates in pixels relative to the map
+     *   origin.
      * @param {number} point.x
      * @param {number} point.y
      * @param {number} level The target zoom level.
-     * @returns {object} The tile indices.
+     * @returns {object} The tile indices.  This has `x` and `y` properties.
      */
     this.tileAtPoint = function (point, level) {
       var o = this._origin(level);
@@ -521,10 +512,10 @@ module.exports = (function () {
     /**
      * Returns a string representation of the tile at the given index.
      *
-     * Note: This method _must_ return the same string as:
-     *
+     * Note: This method **must** return the same string as:
+     * ```
      *   tile({index: index}).toString();
-     *
+     * ```
      * This method is used as a hashing function for the caching layer.
      *
      * @param {object} index The tile index
@@ -708,6 +699,7 @@ module.exports = (function () {
      * This method returns a metric that determines tile loading order.  The
      * default implementation prioritizes tiles that are closer to the center,
      * or at a lower zoom level.
+     *
      * @protected
      * @param {object} center The center tile.
      * @param {number} center.x
@@ -779,7 +771,7 @@ module.exports = (function () {
      * @param {number} coord.y The offset in pixels (level 0) from the bottom
      *      edge.
      * @param {number} level The zoom level of the new coordinates.
-     * @returns {object} The pixel coordinates.
+     * @returns {object} The pixel coordinates with `x` and `y`.
      */
     this.toLevel = function (coord, level) {
       var s = Math.pow(2, level);
@@ -790,8 +782,9 @@ module.exports = (function () {
     };
 
     /**
-     * Draw the given tile on the active canvas.
-     * @param {geo.tile} tile The tile to draw
+     * Draw the given tile on the active canvas
+     *.
+     * @param {geo.tile} tile The tile to draw.
      */
     this.drawTile = function (tile) {
       var hash = tile.toString();
@@ -814,7 +807,7 @@ module.exports = (function () {
      * this method to draw the tile on a renderer specific context.
      *
      * @protected
-     * @param {geo.tile} tile The tile to draw
+     * @param {geo.tile} tile The tile to draw.
      */
     this._drawTile = function (tile) {
       // Make sure this method is not called when there is
@@ -865,6 +858,7 @@ module.exports = (function () {
 
     /**
      * Remove the given tile from the canvas and the active cache.
+     *
      * @param {geo.tile|string} tile The tile (or hash) to remove.
      * @returns {geo.tile} The tile removed from the active layer.
      */
@@ -883,6 +877,7 @@ module.exports = (function () {
     /**
      * Remove the given tile from the canvas.  This implementation just
      * finds and removes the <img> element created for the tile.
+     *
      * @param {geo.tile|string} tile The tile object to remove.
      */
     this._remove = function (tile) {
@@ -903,6 +898,7 @@ module.exports = (function () {
 
     /**
      * Move the given tile to the top on the canvas.
+     *
      * @param {geo.tile} tile The tile object to move.
      */
     this._moveToTop = function (tile) {
@@ -915,7 +911,6 @@ module.exports = (function () {
      *
      * @returns {object} Bounds object with `left`, `right`, `top`, `bottom`,
      *      `scale`, and `level` keys.
-     * @protected
      */
     this._getViewBounds = function () {
       var map = this.map(),
@@ -943,9 +938,9 @@ module.exports = (function () {
      * view or the zoom has changed.
      *
      * @protected
-     * @param {number} zoom Tiles (in bounds) at this zoom level will be kept
+     * @param {number} zoom Tiles in bounds at this zoom level will be kept.
      * @param {boolean} doneLoading If true, allow purging additional tiles.
-     * @param {object} bounds view bounds.  If not specified, this is
+     * @param {geo.geoBounds} bounds View bounds.  If not specified, this is
      *   obtained from _getViewBounds().
      * @returns {this}
      */
@@ -974,6 +969,7 @@ module.exports = (function () {
 
     /**
      * Remove all active tiles from the canvas.
+     *
      * @returns {geo.tile[]} The array of tiles removed.
      */
     this.clear = function () {
@@ -994,9 +990,10 @@ module.exports = (function () {
     };
 
     /**
-     * Reset the layer to the initial state, clearing the canvas
-     * and resetting the tile cache.
-     * @returns {this} Chainable.
+     * Reset the layer to the initial state, clearing the canvas and resetting
+     * the tile cache.
+     *
+     * @returns {this}
      */
     this.reset = function () {
       this.clear();
@@ -1005,12 +1002,13 @@ module.exports = (function () {
     };
 
     /**
-     * Compute local coordinates from the given world coordinates.  The
-     * tile layer uses units of pixels relative to the world space
-     * coordinate origin.
-     * @param {object} pt A point in world space coordinates.
+     * Compute local coordinates from the given world coordinates.  The tile
+     * layer uses units of pixels relative to the world space coordinate
+     * origin.
+     *
+     * @param {object} pt A point in world space coordinates with `x` and `y`.
      * @param {number|undefined} zoom If unspecified, use the map zoom.
-     * @returns {object} Local coordinates.
+     * @returns {object} Local coordinates with `x` and `y`.
      */
     this.toLocal = function (pt, zoom) {
       var map = this.map(),
@@ -1022,12 +1020,13 @@ module.exports = (function () {
     };
 
     /**
-     * Compute world coordinates from the given local coordinates.  The
-     * tile layer uses units of pixels relative to the world space
-     * coordinate origin.
-     * @param {object} pt A point in world space coordinates.
+     * Compute world coordinates from the given local coordinates.  The tile
+     * layer uses units of pixels relative to the world space coordinate
+     * origin.
+     *
+     * @param {object} pt A point in world space coordinates with `x` and `y`.
      * @param {number|undefined} zoom If unspecified, use the map zoom.
-     * @returns {object} Local coordinates.
+     * @returns {object} Local coordinates with `x` and `y`.
      */
     this.fromLocal = function (pt, zoom) {
       // these need to always use the *layer* unitsPerPixel, or possibly
@@ -1052,6 +1051,7 @@ module.exports = (function () {
     /**
      * Return the DOM element containing a level specific layer.  This will
      * create the element if it doesn't already exist.
+     *
      * @param {number} level The zoom level of the layer to fetch.
      * @returns {DOM} The layer's DOM element.
      */
@@ -1072,10 +1072,11 @@ module.exports = (function () {
 
     /**
      * Set sublayer transforms to align them with the given zoom level.
+     *
      * @param {number} level The target zoom level.
      * @param {geo.geoBounds} view The view bounds.  The top and left are used
      *      to adjust the offset of tile layers.
-     * @returns {object} The x and y offsets for the current level.
+     * @returns {object} The `x` and `y` offsets for the current level.
      */
     this._updateSubLayers = function (level, view) {
       var canvas = this.canvas(),
@@ -1115,10 +1116,11 @@ module.exports = (function () {
 
     /**
      * Update the view according to the map/camera.
+     *
      * @param {geo.event} evt The event that triggered the change.  Zoom and
      *      rotate events do nothing, since they are always followed by a pan
      *      event which will cause appropriate action.
-     * @returns {this} Chainable.
+     * @returns {this}
      */
     this._update = function (evt) {
       /* Ignore zoom and rotate events, as they are ALWAYS followed by a pan
@@ -1251,8 +1253,9 @@ module.exports = (function () {
     /**
      * Set a value in the tile tree object indicating that the given area of
      * the canvas is covered by the tile.
+     *
      * @protected
-     * @param {geo.tile} tile
+     * @param {geo.tile} tile The tile to add.
      */
     this._setTileTree = function (tile) {
       if (this._options.keepLower) {
@@ -1265,7 +1268,7 @@ module.exports = (function () {
     };
 
     /**
-     * Get a value in the tile tree object if it exists or return null.
+     * Get a value in the tile tree object if it exists or return `null`.
      * @protected
      * @param {object} index A tile index object
      * @param {object} index.level
@@ -1290,7 +1293,7 @@ module.exports = (function () {
      * part of the tile is exposed.
      *
      * @protected
-     * @param {geo.tile} tile
+     * @param {geo.tile} tile The tile to check.
      * @returns {geo.tile[]|null}
      */
     this._isCovered = function (tile) {
@@ -1343,7 +1346,7 @@ module.exports = (function () {
      * Returns true if the provided tile is outside of the current view bounds
      * and can be removed from the canvas.
      * @protected
-     * @param {geo.tile} tile
+     * @param {geo.tile} tile The tile to check.
      * @param {geo.geoBounds} bounds The view bounds.
      * @returns {boolean}
      */
@@ -1362,12 +1365,12 @@ module.exports = (function () {
     };
 
     /**
-     * Returns true if the provided tile can be purged from the canvas.  This method
-     * will return `true` if the tile is completely covered by one or more other tiles
-     * or it is outside of the active view bounds.  This method returns the logical and
-     * of `_isCovered` and `_outOfBounds`.
+     * Returns true if the provided tile can be purged from the canvas.  This
+     * method will return `true` if the tile is completely covered by one or
+     * more other tiles or it is outside of the active view bounds.  This
+     * method returns the logical and of `_isCovered` and `_outOfBounds`.
      * @protected
-     * @param {geo.tile} tile
+     * @param {geo.tile} tile The tile to check.
      * @param {geo.geoBounds} [bounds] The view bounds (if unspecified, assume
      *      global bounds)
      * @param {number} bounds.level The zoom level the bounds are given as.
@@ -1410,7 +1413,7 @@ module.exports = (function () {
      * @param {object} [pt] The point to convert with `x` and `y`.  If
      *      `undefined`, use the center of the display.
      * @param {number} [zoom] If specified, the zoom level to use.
-     * @returns {object} The point in level coordinates.
+     * @returns {object} The point in level coordinates with `x` and `y`.
      */
     this.displayToLevel = function (pt, zoom) {
       var map = this.map(),
@@ -1566,7 +1569,7 @@ module.exports = (function () {
   tileLayer.defaults = {
     minLevel: 0,
     maxLevel: 18,
-    tileOverlap: 0,
+    tileOverlap: {x: 0, y: 0},
     tileWidth: 256,
     tileHeight: 256,
     wrapX: true,

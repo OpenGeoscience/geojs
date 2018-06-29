@@ -7,10 +7,11 @@ module.exports = (function () {
    * array keeps track of last access times for each tile to purge old tiles
    * once the maximum cache size is reached.
    *
-   * @class geo.tileCache
+   * @class
+   * @alias geo.tileCache
    *
-   * @param {object?} [options] A configuratoin object for the cache
-   * @param {number} [options.size=64] The maximum number of tiles to store
+   * @param {object} [options] A configuration object for the cache.
+   * @param {number} [options.size=64] The maximum number of tiles to store.
    */
   var tileCache = function (options) {
     if (!(this instanceof tileCache)) {
@@ -21,6 +22,8 @@ module.exports = (function () {
 
     /**
      * Get/set the maximum cache size.
+     * @param {number} The new maximum cache size.
+     * @returns {number} The maximum cache size.
      */
     Object.defineProperty(this, 'size', {
       get: function () { return this._size; },
@@ -34,6 +37,7 @@ module.exports = (function () {
 
     /**
      * Get the current cache size.
+     * @returns {number}
      */
     Object.defineProperty(this, 'length', {
       get: function () { return this._atime.length; }
@@ -41,8 +45,9 @@ module.exports = (function () {
 
     /**
      * Get the position of the tile in the access queue.
-     * @param {string} hash The tile's hash value
-     * @returns {number} The position in the queue or -1
+     *
+     * @param {string} hash The tile's hash value.
+     * @returns {number} The position in the queue or -1.
      */
     this._access = function (hash) {
       return this._atime.indexOf(hash);
@@ -50,8 +55,9 @@ module.exports = (function () {
 
     /**
      * Remove a tile from the cache.
-     * @param {string|geo.tile} tile The tile or its hash
-     * @returns {bool} true if a tile was removed
+     *
+     * @param {string|geo.tile} tile The tile or its hash.
+     * @returns {booliean} `true` if a tile was removed.
      */
     this.remove = function (tile) {
       var hash = typeof tile === 'string' ? tile : tile.toString();
@@ -71,6 +77,8 @@ module.exports = (function () {
 
     /**
      * Remove all tiles from the cache.
+     *
+     * @returns {this}
      */
     this.clear = function () {
       this._cache = {};  // The hash -> tile mapping
@@ -79,13 +87,12 @@ module.exports = (function () {
     };
 
     /**
-     * Get a tile from the cache if it exists, otherwise
-     * return null.  This method also moves the tile to the
-     * front of the access queue.
+     * Get a tile from the cache if it exists, otherwise return `null`.  This
+     * method also moves the tile to the front of the access queue.
      *
-     * @param {string|geo.tile} hash The tile or the tile hash value
-     * @param {boolean} noMove if true, don't move the tile to the front of the
-     *     access queue.
+     * @param {string|geo.tile} hash The tile or the tile hash value.
+     * @param {boolean} [noMove] If truthy, don't move the tile to the front of
+     *   the access queue.
      * @returns {geo.tile|null}
      */
     this.get = function (hash, noMove) {
@@ -103,8 +110,9 @@ module.exports = (function () {
 
     /**
      * Add a tile to the cache.
-     * @param {geo.tile} tile
-     * @param {function} removeFunc if specified and tiles must be purged from
+     *
+     * @param {geo.tile} tile The tile to add.
+     * @param {function} removeFunc If specified and tiles must be purged from
      *      the cache, call this function on each tile before purging.
      * @param {boolean} noPurge if true, don't purge tiles.
      */
@@ -124,7 +132,8 @@ module.exports = (function () {
 
     /**
      * Purge tiles from the cache if it is full.
-     * @param {function} removeFunc if specified and tiles must be purged from
+     *
+     * @param {function} removeFunc If specified and tiles must be purged from
      *      the cache, call this function on each tile before purging.
      */
     this.purge = function (removeFunc) {

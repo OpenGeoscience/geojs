@@ -25,5 +25,10 @@ describe('geo.registry', function () {
       expect(geo.rendererForFeatures(['point'])).toBe('d3');
       restoreVGLRenderer();
     });
+    it('expose registries', function () {
+      expect(geo.registries.unknown).toBe(undefined);
+      expect(geo.registries.annotations).not.toBe(undefined);
+      expect(geo.registries.features).not.toBe(undefined);
+    });
   });
 });

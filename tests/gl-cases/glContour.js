@@ -124,15 +124,6 @@ describe('glContour', function () {
     }, done);
   });
 
-  it('contours with options', function (done) {
-    // geo from x0, specified min-max, set color range, smooth
-    testContour('glContourOptions', {
-      url: 'oahu-dense.json',
-      range: true,
-      stepped: false
-    }, done);
-  });
-
   it('contours with nonlinear range', function (done) {
     // geo from x0, non-linear range
     testContour('glContourRange', {

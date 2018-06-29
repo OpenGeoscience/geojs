@@ -1,4 +1,9 @@
 var proj4 = require('proj4');
+/* These projections exist in proj4 but aren't included by default. */
+proj4.Proj.projections.add(require('proj4/projections/equi'));
+proj4.Proj.projections.add(require('proj4/projections/gauss'));
+proj4.Proj.projections.add(require('proj4/projections/gstmerc'));
+proj4.Proj.projections.add(require('proj4/projections/ortho'));
 var util = require('./util');
 
 /**
@@ -613,5 +618,8 @@ transform.vincentyDistance = function (pt1, pt2, gcs, baseGcs, ellipsoid, maxIte
     alpha2: Math.atan2(cosU1 * Math.sin(lambda), -sinU1 * cosU2 + cosU1 * sinU2 * Math.cos(lambda))
   };
 };
+
+/* Expose proj4 to make it easier to debug */
+transform.proj4 = proj4;
 
 module.exports = transform;

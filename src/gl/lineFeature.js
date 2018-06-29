@@ -546,25 +546,27 @@ var gl_lineFeature = function (arg) {
         }
 
         if (j) {
+          /* zero out the z position.  This can be changed if we handle it in
+           * the shader. */
           for (k = 0; k < order.length; k += 1, dest += 1, dest3 += 3) {
             v = vert[order[k][0]];
             v2 = vert[1 - order[k][0]];
             if (!onlyStyle) {
               posBuf[dest3] = position[v.pos];
               posBuf[dest3 + 1] = position[v.pos + 1];
-              posBuf[dest3 + 2] = position[v.pos + 2];
+              posBuf[dest3 + 2] = 0; // position[v.pos + 2];
             }
             if (!order[k][0]) {
               if (!onlyStyle) {
                 prevBuf[dest3] = position[v.prev];
                 prevBuf[dest3 + 1] = position[v.prev + 1];
-                prevBuf[dest3 + 2] = position[v.prev + 2];
+                prevBuf[dest3 + 2] = 0; // position[v.prev + 2];
                 nextBuf[dest3] = position[v.next];
                 nextBuf[dest3 + 1] = position[v.next + 1];
-                nextBuf[dest3 + 2] = position[v.next + 2];
+                nextBuf[dest3 + 2] = 0; // position[v.next + 2];
                 farBuf[dest3] = position[v2.next];
                 farBuf[dest3 + 1] = position[v2.next + 1];
-                farBuf[dest3 + 2] = position[v2.next + 2];
+                farBuf[dest3 + 2] = 0; // position[v2.next + 2];
               }
               if (updateFlags) {
                 flagsBuf[dest] = (flagsVertex[order[k][1]] |
@@ -576,13 +578,13 @@ var gl_lineFeature = function (arg) {
               if (!onlyStyle) {
                 prevBuf[dest3] = position[v.next];
                 prevBuf[dest3 + 1] = position[v.next + 1];
-                prevBuf[dest3 + 2] = position[v.next + 2];
+                prevBuf[dest3 + 2] = 0; // position[v.next + 2];
                 nextBuf[dest3] = position[v.prev];
                 nextBuf[dest3 + 1] = position[v.prev + 1];
-                nextBuf[dest3 + 2] = position[v.prev + 2];
+                nextBuf[dest3 + 2] = 0; // position[v.prev + 2];
                 farBuf[dest3] = position[v2.prev];
                 farBuf[dest3 + 1] = position[v2.prev + 1];
-                farBuf[dest3 + 2] = position[v2.prev + 2];
+                farBuf[dest3 + 2] = 0; // position[v2.prev + 2];
               }
               if (updateFlags) {
                 flagsBuf[dest] = (flagsVertex[order[k][1]] |
