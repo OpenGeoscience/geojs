@@ -209,7 +209,7 @@ var meshFeature = function (arg) {
    *    data point is removed from the resultant mesh.
    * @returns {geo.meshFeature.meshInfo} An object with the mesh information.
    */
-  this.createMesh = function (vertexValueFuncs) {
+  this._createMesh = function (vertexValueFuncs) {
     vertexValueFuncs = vertexValueFuncs || {};
     var i, i3, j, k, idx, numPts, usedPts, usePos, item, key,
         data = m_this.data(),

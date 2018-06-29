@@ -127,7 +127,7 @@ var contourFeature = function (arg) {
         opacityRange = contour.get('opacityRange')(),
         rangeValues = contour.get('rangeValues')(),
         minValue, maxValue, val, range, i, k;
-    var result = this.createMesh({
+    var result = this._createMesh({
       used: function (d, i) {
         return util.isNonNullFinite(valueFunc(d, i));
       },
