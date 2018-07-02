@@ -1156,10 +1156,8 @@ var mapInteractor = function (args) {
     }
     if (m_state.zoomrotateAllowRotation) {
       var theta = m_state.initialRotation + deltaTheta;
-      /* Compute the delta in the range of [-PI, PI).  This is involed to work
-       * around modulo returning a signed value. */
-      deltaTheta = ((theta - m_this.map().rotation()) % (Math.PI * 2) +
-                    Math.PI * 3) % (Math.PI * 2) - Math.PI;
+      /* Compute the delta in the range of [-PI, PI). */
+      deltaTheta = util.wrapAngle(theta - m_this.map().rotation());
       /* If we reverse direction, don't rotate until some threshold is
        * exceeded.  This helps prevent rotation bouncing while panning. */
       if (deltaTheta && (deltaTheta * (m_state.lastRotationDelta || 0) >= 0 ||

@@ -1021,6 +1021,23 @@ var util = module.exports = {
   },
 
   /**
+   * Given a value in radians, return a value wrapped to the range [-PI, PI).
+   *
+   * @param {number} value A value in radians.
+   * @returns {number} The wrapped value.
+   */
+  wrapAngle: function (value) {
+    /* Module will only ensure that this is between [-2 PI, 2 PI). */
+    value = value % (Math.PI * 2);
+    if (value < -Math.PI) {
+      value += Math.PI * 2;
+    } else if (value >= Math.PI) {
+      value -= Math.PI * 2;
+    }
+    return value;
+  },
+
+  /**
    * Escape any character in a string that has a code point >= 127.
    *
    * @param {string} text The string to escape.
