@@ -156,6 +156,15 @@ describe('geo.annotationLayer', function () {
         corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
       layer.addAnnotation(rect, map.gcs());
       expect(layer.annotations()[1]._coordinates()[1]).toEqual({x: 1, y: 0});
+      /* Change the map input gcs to the main gcs and the coordinates won't be
+       * altered. */
+      map.ingcs(map.gcs());
+      layer.removeAnnotation(rect);
+      rect = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
+      layer.addAnnotation(rect);
+      expect(layer.annotations()[1]._coordinates()[1]).toEqual({x: 1, y: 0});
     });
     it('annotationById', function () {
       expect(layer.annotationById()).toBe(undefined);
@@ -191,19 +200,6 @@ describe('geo.annotationLayer', function () {
       expect(layer.removeAllAnnotations(true)).toBe(1);
       expect(removeAnnotationEvent).toBe(3);
       expect(layer.annotations().length).toBe(1);
-    });
-    it('displayDistance', function () {
-      var c1 = {x: 100, y: 80},
-          c2 = map.displayToGcs({x: 105, y: 84}),        /* ingcs */
-          c3 = map.displayToGcs({x: 107, y: 88}, null);  /* gcs */
-      expect(layer.displayDistance(c1, 'display', c2)).toBeCloseTo(6.40, 2);
-      expect(layer.displayDistance(c1, 'display', c2, 'EPSG:4326')).toBeCloseTo(6.40, 2);
-      expect(layer.displayDistance(c1, 'display', c3, null)).toBeCloseTo(10.63, 2);
-      expect(layer.displayDistance(c1, 'display', c3, 'EPSG:3857')).toBeCloseTo(10.63, 2);
-      expect(layer.displayDistance(c2, undefined, c1, 'display')).toBeCloseTo(6.40, 2);
-      expect(layer.displayDistance(c2, undefined, c3, null)).toBeCloseTo(4.47, 2);
-      expect(layer.displayDistance(c3, null, c1, 'display')).toBeCloseTo(10.63, 2);
-      expect(layer.displayDistance(c3, null, c2)).toBeCloseTo(4.47, 2);
     });
     it('geojson', function () {
       layer.removeAllAnnotations();
@@ -329,6 +325,20 @@ describe('geo.annotationLayer', function () {
 
       expect(layer.validateAttribute(0.5, 'text')).toBe('0.5');
       expect(layer.validateAttribute('value', 'text')).toBe('value');
+    });
+    it('displayDistance', function () {
+      map.ingcs('EPSG:4326');
+      var c1 = {x: 100, y: 80},
+          c2 = map.displayToGcs({x: 105, y: 84}),        /* ingcs */
+          c3 = map.displayToGcs({x: 107, y: 88}, null);  /* gcs */
+      expect(layer.displayDistance(c1, 'display', c2)).toBeCloseTo(6.40, 2);
+      expect(layer.displayDistance(c1, 'display', c2, 'EPSG:4326')).toBeCloseTo(6.40, 2);
+      expect(layer.displayDistance(c1, 'display', c3, null)).toBeCloseTo(10.63, 2);
+      expect(layer.displayDistance(c1, 'display', c3, 'EPSG:3857')).toBeCloseTo(10.63, 2);
+      expect(layer.displayDistance(c2, undefined, c1, 'display')).toBeCloseTo(6.40, 2);
+      expect(layer.displayDistance(c2, undefined, c3, null)).toBeCloseTo(4.47, 2);
+      expect(layer.displayDistance(c3, null, c1, 'display')).toBeCloseTo(10.63, 2);
+      expect(layer.displayDistance(c3, null, c2)).toBeCloseTo(4.47, 2);
     });
   });
   describe('Private utility functions', function () {

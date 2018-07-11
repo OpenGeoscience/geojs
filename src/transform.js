@@ -1,9 +1,10 @@
 var proj4 = require('proj4');
-/* These projections exist in proj4 but aren't included by default. */
-proj4.Proj.projections.add(require('proj4/projections/equi'));
-proj4.Proj.projections.add(require('proj4/projections/gauss'));
-proj4.Proj.projections.add(require('proj4/projections/gstmerc'));
-proj4.Proj.projections.add(require('proj4/projections/ortho'));
+proj4 = proj4.__esModule ? proj4.default : proj4;
+/* Ensure all projections in proj4 are included. */
+var projections = require.context('proj4/projections', true, /.*\.js$/);
+projections.keys().forEach(function (key) {
+  proj4.Proj.projections.add(projections(key));
+});
 var util = require('./util');
 
 /**
@@ -254,7 +255,7 @@ transform.transformCoordinates = function (
 
   var trans = transform({source: srcPrj, target: tgtPrj}), output;
   if (util.isObject(coordinates) && 'x' in coordinates && 'y' in coordinates) {
-    output = trans.forward({x: coordinates.x, y: coordinates.y, z: coordinates.z || 0});
+    output = trans.forward({x: +coordinates.x, y: +coordinates.y, z: +coordinates.z || 0});
     if ('z' in coordinates) {
       return output;
     }
@@ -263,7 +264,7 @@ transform.transformCoordinates = function (
   if (Array.isArray(coordinates) && coordinates.length === 1 &&
       util.isObject(coordinates[0]) && 'x' in coordinates[0] &&
       'y' in coordinates[0]) {
-    output = trans.forward({x: coordinates[0].x, y: coordinates[0].y, z: coordinates[0].z || 0});
+    output = trans.forward({x: +coordinates[0].x, y: +coordinates[0].y, z: +coordinates[0].z || 0});
     if ('z' in coordinates[0]) {
       return [output];
     }
@@ -298,23 +299,23 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
     if (Array.isArray(coordinates[0])) {
       if (coordinates[0].length === 2) {
         xAcc = function (index) {
-          return coordinates[index][0];
+          return +coordinates[index][0];
         };
         yAcc = function (index) {
-          return coordinates[index][1];
+          return +coordinates[index][1];
         };
         writer = function (index, x, y) {
           output[index] = [x, y];
         };
       } else if (coordinates[0].length === 3) {
         xAcc = function (index) {
-          return coordinates[index][0];
+          return +coordinates[index][0];
         };
         yAcc = function (index) {
-          return coordinates[index][1];
+          return +coordinates[index][1];
         };
         zAcc = function (index) {
-          return coordinates[index][2];
+          return +coordinates[index][2];
         };
         writer = function (index, x, y, z) {
           output[index] = [x, y, z];
@@ -327,10 +328,10 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
         offset = 2;
 
         xAcc = function (index) {
-          return coordinates[index * offset];
+          return +coordinates[index * offset];
         };
         yAcc = function (index) {
-          return coordinates[index * offset + 1];
+          return +coordinates[index * offset + 1];
         };
         writer = function (index, x, y) {
           output[index] = x;
@@ -340,13 +341,13 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
         offset = 3;
 
         xAcc = function (index) {
-          return coordinates[index * offset];
+          return +coordinates[index * offset];
         };
         yAcc = function (index) {
-          return coordinates[index * offset + 1];
+          return +coordinates[index * offset + 1];
         };
         zAcc = function (index) {
-          return coordinates[index * offset + 2];
+          return +coordinates[index * offset + 2];
         };
         writer = function (index, x, y, z) {
           output[index] = x;
@@ -358,10 +359,10 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
           offset = numberOfComponents;
 
           xAcc = function (index) {
-            return coordinates[index];
+            return +coordinates[index];
           };
           yAcc = function (index) {
-            return coordinates[index + 1];
+            return +coordinates[index + 1];
           };
           if (numberOfComponents === 2) {
             writer = function (index, x, y) {
@@ -370,7 +371,7 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
             };
           } else {
             zAcc = function (index) {
-              return coordinates[index + 2];
+              return +coordinates[index + 2];
             };
             writer = function (index, x, y, z) {
               output[index] = x;
@@ -393,15 +394,15 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
         'x' in coordinates[0] &&
         'y' in coordinates[0]) {
       xAcc = function (index) {
-        return coordinates[index].x;
+        return +coordinates[index].x;
       };
       yAcc = function (index) {
-        return coordinates[index].y;
+        return +coordinates[index].y;
       };
 
       if ('z' in coordinates[0]) {
         zAcc = function (index) {
-          return coordinates[index].z;
+          return +coordinates[index].z;
         };
         writer = function (index, x, y, z) {
           output[i] = {x: x, y: y, z: z};
