@@ -53,6 +53,9 @@ describe('geo.pointFeature', function () {
       point = geo.pointFeature({layer: layer, position: pos});
       point._init({position: pos});
       expect(point.position()('a')).toEqual(pos);
+      // with null data
+      point.position(function (d, i) { return i; });
+      expect(point.position()(null, 2)).toBe(2);
     });
 
     it('data', function () {
