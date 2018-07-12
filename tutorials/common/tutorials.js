@@ -139,7 +139,6 @@ function process_block(selector) {
      * test's parent window to make debugging easier. */
     if (window.parent && window.parent !== window) {
       js = 'window.console = window.parent.parent.console;\n' +
-           'console.log("Testing " + window.parent.document.title);\n' +
            js;
     }
     html = html.substr(0, pos).replace(/\s+$/, '') + '\n<script type="text/javascript">\n' + js + '</script>\n' + html.substr(pos);

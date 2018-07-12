@@ -29,6 +29,8 @@ describe('tutorials', function () {
         var base$, tests;
 
         base$ = $('iframe#map')[0].contentWindow.jQuery;
+        /* Never complain if there are no explicit expect statements */
+        expect().nothing();
         /* If a codeblock test requires html video and the current browser
          * doesn't support video, skip the test. */
         if (!$('iframe#map')[0].contentWindow.HTMLVideoElement && base$('.codeblock[htmlvideo]').length) {
@@ -51,6 +53,8 @@ describe('tutorials', function () {
               var targetWindow = target[0].contentWindow,
                   tut$ = targetWindow.$,
                   deferreds = [];
+              /* Description of the current tutorial and test. */
+              var desc = $('iframe#map')[0].contentWindow.document.title + ' - ' + test.data('description');
               /* Evaluate and wait for each idle function and promises. */
               test.data('idlefuncs').forEach(function (idleFunc) {
                 var defer = tut$.Deferred();
@@ -66,21 +70,26 @@ describe('tutorials', function () {
               /* When all idle functions have resolved, evaluate each test in
                * the test list. */
               tut$.when.apply(tut$, deferreds).fail(function () {
-                throw new Error('Idle functions were rejected');
+                fail(desc + ' -> idle functions were rejected');
               }).then(function () {
                 var subtestDeferreds = [];
                 test.data('tests').forEach(function (testExp) {
                   /* The test expression can return a value or a promise.  We
                    * use jQuery's when to generically get the results in a
                    * resolution function.  A rejection is a failure. */
-                  var testResult = targetWindow.eval(testExp);
+                  try {
+                    var testResult = targetWindow.eval(testExp);
+                  } catch (err) {
+                    fail(desc + ' -> raised an error: ' + err);
+                    return;
+                  }
                   var subtestDefer = tut$.when(testResult).done(function (result) {
                     /* If the result isn't truthy, make sure our expect has a
                      * description telling which test block and specific test
                      * failed. */
-                    expect(result).toBeTruthy(test.data('description') + ' -> ' + testExp);
+                    expect(result).toBeTruthy(desc + ' -> ' + testExp);
                   }).fail(function () {
-                    expect(false).toBeTruthy(test.data('description') + ' promise failed -> ' + testExp);
+                    fail(desc + ' promise failed -> ' + testExp);
                   });
                   subtestDeferreds.push(subtestDefer);
                 });
@@ -109,7 +118,7 @@ describe('tutorials', function () {
         });
         /* Call the first step in the chained tests */
         done();
-      }, 15000);
+      }, 150000);
     });
   });
 });
