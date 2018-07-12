@@ -341,6 +341,11 @@ module.exports = function (config) {
     frameworks: [
       'jasmine', 'sinon'
     ],
+    client: {
+      jasmine: {
+        random: false
+      }
+    },
     webpack: {
       cache: true,
       devtool: 'inline-source-map',
