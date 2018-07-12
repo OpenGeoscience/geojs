@@ -4,7 +4,6 @@ var renderer = require('../renderer');
 var vtk = require('vtk.js');
 var vtkFullScreenRenderWindow = vtk.Rendering.Misc.vtkFullScreenRenderWindow;
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class vtkjsRenderer
  *
@@ -13,7 +12,6 @@ var vtkFullScreenRenderWindow = vtk.Rendering.Misc.vtkFullScreenRenderWindow;
  * @param canvas
  * @returns {geo.gl.vtkjsRenderer}
  */
-//////////////////////////////////////////////////////////////////////////////
 var vtkjsRenderer = function (arg) {
   'use strict';
 
@@ -36,48 +34,37 @@ var vtkjsRenderer = function (arg) {
   const vtkjsren = fullScreenRenderer.getRenderer();
   const renderWindow = fullScreenRenderer.getRenderWindow();
 
-  /// TODO: Move this API to the base class
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return width of the renderer
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.width = function () {
     return m_width;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return height of the renderer
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.height = function () {
     return m_height;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get context specific renderer
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.contextRenderer = function () {
     return vtkjsren;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get API used by the renderer
    */
-  ////////////////////////////////////////////////////////////////////////////
   this.api = function () {
     return 'vtkjs';
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     if (m_this.initialized()) {
       return m_this;
@@ -92,22 +79,18 @@ var vtkjsRenderer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Handle resize event
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._resize = function (x, y, w, h) {
     m_this._render();
 
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Render.  This actually schedules rendering for the next animation frame.
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._render = function () {
     /* If we are already scheduled to render, don't schedule again.  Rather,
      * mark that we should render after other animation frame requests occur.
@@ -127,11 +110,9 @@ var vtkjsRenderer = function (arg) {
     renderWindow.render();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Exit
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     // DO NOTHING
   };
@@ -149,13 +130,17 @@ var vtkjsRenderer = function (arg) {
     m_this.contextRenderer().getActiveCamera().setProjectionMatrix(projmat);
   };
 
-  // Connect to pan event.  This is sufficient, as all zooms and rotations also
-  // produce a pan
+  /**
+   * Connect to pan event.  This is sufficient, as all zooms and rotations also
+   *produce a pan
+   */
   m_this.layer().geoOn(geo_event.pan, function (evt) {
     // DO NOTHING
   });
 
-  // Connect to parallelprojection event
+  /**
+   * Connect to parallelprojection event
+   */
   m_this.layer().geoOn(geo_event.parallelprojection, function (evt) {
     // DO NOTHING
   });

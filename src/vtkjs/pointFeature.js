@@ -8,7 +8,6 @@ var vtkMapper = vtk.Rendering.Core.vtkGlyph3DMapper;
 var vtkPointSet = vtk.Common.DataModel.vtkPointSet;
 var vtkSphereSource = vtk.Filters.Sources.vtkSphereSource;
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of pointFeature
  *
@@ -16,7 +15,6 @@ var vtkSphereSource = vtk.Filters.Sources.vtkSphereSource;
  * @extends geo.pointFeature
  * @returns {geo.vtkjs.pointFeature}
  */
-//////////////////////////////////////////////////////////////////////////////
 var vtkjs_pointFeature = function (arg) {
   'use strict';
   if (!(this instanceof vtkjs_pointFeature)) {
@@ -30,11 +28,11 @@ var vtkjs_pointFeature = function (arg) {
 
   object.call(this);
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
+   * Member variables
+   *
    * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
       m_actor = null,
@@ -42,11 +40,9 @@ var vtkjs_pointFeature = function (arg) {
       m_source = null,
       s_update = this._update;
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create pipeline
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._createPipeline = function () {
     m_pointSet = vtkPointSet.newInstance();
     m_source = vtkSphereSource.newInstance();
@@ -60,23 +56,17 @@ var vtkjs_pointFeature = function (arg) {
     this.renderer().contextRenderer().addActor(m_actor);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     m_this.renderer().contextRenderer().setLayer(1);
     this._createPipeline();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
-   * Build
-   *
-   * @override
+   * Build this feature
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     var i, i3, posVal,
         nonzeroZ,
@@ -89,7 +79,7 @@ var vtkjs_pointFeature = function (arg) {
         opacityFunc = m_this.style.get('fillOpacity');
 
      /* It is more efficient to do a transform on a single array rather than on
-     * an array of arrays or an array of objects. */
+      * an array of arrays or an array of objects. */
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
       posVal = posFunc(data[i]);
       position[i3] = posVal.x;
@@ -121,13 +111,10 @@ var vtkjs_pointFeature = function (arg) {
     console.debug('built vtkjs point feature');
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
    *
-   * @override
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
 
     s_update.call(m_this);
@@ -140,11 +127,9 @@ var vtkjs_pointFeature = function (arg) {
     m_this.updateTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
    */
-  ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
     s_exit();
