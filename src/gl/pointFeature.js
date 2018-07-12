@@ -400,8 +400,8 @@ var gl_pointFeature = function (arg) {
   /**
    * Set style(s) from array(s).  For each style, the array should have one
    * value per data item.  The values are not converted or validated.  Color
-   * values should be {@link geo.geoColorObject}s.  If invalid values are given
-   * the behavior is undefined.
+   * values are {@link geo.geoColorObject} objects.  If invalid values are
+   * given the behavior is undefined.
    *   For some feature styles, if the first entry of an array is itself an
    * array, then each entry of the array is expected to be an array, and values
    * are used from these subarrays.  This allows a style to apply, for

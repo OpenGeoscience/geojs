@@ -44,9 +44,6 @@ var feature = require('./feature');
  * @property {number} [width=256]
  * @property {number} [height=256]
  */
-// TODO: refactor point clustering to (a) not be based on window size, (b) use
-// points in the map.gcs coordinate system, not the pointFeature.gcs coordinate
-// system, (c) convert the clustering radius to be in display pixels
 
 /**
  * Create a new instance of class pointFeature.
