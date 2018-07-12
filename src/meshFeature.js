@@ -204,9 +204,10 @@ var meshFeature = function (arg) {
    * @param {object} [vertexValueFuncs] A dictionary where the keys are the
    *    names of properties to include in the results and the values are
    *    functions that are evaluated at each vertex with the arguments
-   *    (data[idx], idx).  If a key is named `used`, then if its function
-   *    returns a falsy value for a data point, the vertex associated with that
-   *    data point is removed from the resultant mesh.
+   *    `(data[idx], idx, position)`.  If a key is named `used`, then its
+   *    function is passed `(data[idx], idx)` and if it returns a falsy value
+   *    for a data point, the vertex associated with that data point is removed
+   *    from the resultant mesh.
    * @returns {geo.meshFeature.meshInfo} An object with the mesh information.
    */
   this._createMesh = function (vertexValueFuncs) {
@@ -242,7 +243,7 @@ var meshFeature = function (arg) {
       wrapLongitude = !!(wrapLongitude === undefined || wrapLongitude);
       if (!usePos && wrapLongitude && (x0 < -180 || x0 > 180 ||
           x0 + dx * (gridW - 1) < -180 || x0 + dx * (gridW - 1) > 180) &&
-          dx > -180 && dx < 180) {
+          dx > -180 && dx < 180 && dx * (gridW - 1) < 360 + 1e-4) {
         calcX = [];
         for (i = 0; i < gridW; i += 1) {
           x = x0 + i * dx;
@@ -271,10 +272,9 @@ var meshFeature = function (arg) {
       }
       /* Calculate the value for point */
       numPts = gridW * gridH;
-      result.index = new Array(numPts);
-      for (i = 0; i < numPts; i += 1) {
-        origI = i;
-        if (skipColumn !== undefined) {
+      if (skipColumn !== undefined) {
+        result.index = new Array(numPts);
+        for (i = 0; i < numPts; i += 1) {
           j = Math.floor(i / gridW);
           origI = i - j * gridW;
           origI += (origI > skipColumn ? -2 : 0);
@@ -282,8 +282,8 @@ var meshFeature = function (arg) {
             origI -= gridWorig;
           }
           origI += j * gridWorig;
+          result.index[i] = origI;
         }
-        result.index[i] = origI;
       }
       /* Create triangles */
       for (j = idx = 0; j < gridH - 1; j += 1, idx += 1) {
@@ -336,10 +336,6 @@ var meshFeature = function (arg) {
           result.elements = elements.slice(0, elements.length - (elements.length % 3));
         }
       }
-      result.index = new Array(data.length);
-      for (i = 0; i < data.length; i += 1) {
-        result.index[i] = i;
-      }
       numPts = data.length;
       usePos = true;
     }
@@ -349,20 +345,37 @@ var meshFeature = function (arg) {
      * used.  This could leave vertices that are unused by any element, but
      * removing those is expensive so it is not done. */
     if (vertexValueFuncs.used) {
-      var remap = new Array(numPts),
-          vpe = result.verticesPerElement;
-      for (i = usedPts = 0; i < numPts; i += 1) {
-        idx = result.index[i];
-        if (vertexValueFuncs.used(data[idx], idx)) {
-          remap[i] = usedPts;
-          result.index[usedPts] = result.index[i];
-          usedPts += 1;
-        } else {
-          remap[i] = -1;
+      for (i = 0; i < numPts; i += 1) {
+        idx = result.index ? result.index[i] : i;
+        if (!vertexValueFuncs.used(data[idx], idx)) {
+          break;
         }
       }
-      result.index.splice(usedPts);
-      if (usedPts !== numPts) {
+      if (i !== numPts) {
+        usedPts = i;
+        var remap = new Array(numPts),
+            vpe = result.verticesPerElement;
+        for (j = 0; j < usedPts; j += 1) {
+          remap[j] = j;
+        }
+        remap[usedPts] = -1;
+        if (!result.index) {
+          result.index = new Array(data.length);
+          for (j = 0; j < data.length; j += 1) {
+            result.index[j] = j;
+          }
+        }
+        for (i = usedPts + 1; i < numPts; i += 1) {
+          idx = result.index[i];
+          if (vertexValueFuncs.used(data[idx], idx)) {
+            remap[i] = usedPts;
+            result.index[usedPts] = result.index[i];
+            usedPts += 1;
+          } else {
+            remap[i] = -1;
+          }
+        }
+        result.index.splice(usedPts);
         for (i = k = 0; i < result.elements.length; i += vpe) {
           for (j = 0; j < vpe; j += 1) {
             if (remap[result.elements[i + j]] < 0) {
@@ -375,8 +388,8 @@ var meshFeature = function (arg) {
           }
         }
         result.elements.splice(k);
+        numPts = usedPts;
       }
-      numPts = usedPts;
     }
     /* Get point locations and store them in a packed array */
     result.pos = new Array(numPts * 3);
@@ -386,7 +399,7 @@ var meshFeature = function (arg) {
       }
     }
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
-      idx = result.index[i];
+      idx = result.index ? result.index[i] : i;
       item = data[idx];
       if (usePos) {
         posVal = posFunc(item, idx);
@@ -401,10 +414,11 @@ var meshFeature = function (arg) {
         }
         result.pos[i3 + 1] = y0 + dy * Math.floor(idx / gridW);
         result.pos[i3 + 2] = 0;
+        posVal = {x: result.pos[i3], y: result.pos[i3 + 1], z: result.pos[i3 + 2]};
       }
       for (key in vertexValueFuncs) {
         if (key !== 'used' && vertexValueFuncs.hasOwnProperty(key)) {
-          result[key][i] = vertexValueFuncs[key](item, idx);
+          result[key][i] = vertexValueFuncs[key](item, idx, posVal);
         }
       }
     }
