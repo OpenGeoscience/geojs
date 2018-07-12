@@ -23,14 +23,16 @@ if (!window.requestAnimationFrame) {
 }
 
 // Add a polyfill for Math.log2
-if (!Math.log2) {
+if (!('log2' in Math)) {
   Math.log2 = function () {
     return Math.log.apply(Math, arguments) / Math.LN2;
   };
 }
 
-// Add a polyfill for Math.sinh
-Math.sinh = Math.sinh || function (x) {
-  var y = Math.exp(x);
-  return (y - 1 / y) / 2;
-};
+// Add a polyfill for Math.log10
+if (!('log10' in Math)) {
+  Math.log10 = function () {
+    return Math.log.apply(Math, arguments) / Math.LN10;
+  };
+  Math.log10.polyfilled = true;
+}

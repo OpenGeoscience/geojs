@@ -2,7 +2,7 @@
 // License headers that will be preserved in distributed bundles.
 /**
  * GeoJS
- * @copyright 2013-2017, Kitware, Inc.
+ * @copyright 2013-2018, Kitware, Inc.
  * @license Apache-2.0
  *
  * Bundled with the following libraries:
@@ -53,6 +53,7 @@ module.exports = $.extend({
   graphFeature: require('./graphFeature'),
   heatmapFeature: require('./heatmapFeature'),
   imageTile: require('./imageTile'),
+  isolineFeature: require('./isolineFeature'),
   jsonReader: require('./jsonReader'),
   layer: require('./layer'),
   lineFeature: require('./lineFeature'),

@@ -1,0 +1,7 @@
+{
+  "title": "Isolines",
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "This example shows how to add isolines to a map."
+  }
+}

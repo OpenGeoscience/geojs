@@ -12,10 +12,10 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
+import json
 import os
-import shutil
 import re
+import sys
 from glob import glob
 # from subprocess import check_output
 
@@ -73,7 +73,7 @@ copyright = u'Kitware, Inc.'
 # built documents.
 #
 # The short X.Y version.
-version = '0.16.0'
+version = json.load(open(os.path.join(toppath, 'package.json')))['version']
 # The full version, including alpha/beta/rc tags.
 release = version
 

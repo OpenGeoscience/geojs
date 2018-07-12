@@ -1,7 +1,12 @@
 var path = require('path');
-var webpack = require('webpack');
+var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
+  /* webpack 4
+  mode: 'production',
+   */
+  performance: {hints: false},
+  cache: true,
   context: path.join(__dirname, 'src'),
   entry: {
     'geo.ext': './vendor.js',
@@ -18,18 +23,41 @@ module.exports = {
       hammerjs: 'hammerjs/hammer.js'
     }
   },
+  /* webpack 3 */
   plugins: [
-    new webpack.optimize.UglifyJsPlugin({
+    new UglifyJsPlugin({
       include: /\.min\.js$/,
-      minimize: true,
-      comments: /@(license|copyright)/
+      parallel: true,
+      uglifyOptions: {
+        compress: true,
+        comments: /@(license|copyright)/
+      },
+      sourceMap: true
     })
   ],
+  /* end webpack 3 */
+  /* webpack 4
+  optimization: {
+    minimizer: [
+      new UglifyJsPlugin({
+        include: /\.min\.js$/,
+        parallel: true,
+        uglifyOptions: {
+          compress: true,
+          comments: /@(license|copyright)/
+        },
+        sourceMap: true
+      })
+    ]
+  },
+  */
   module: {
-    loaders: [{
-      test: require.resolve('d3'), loader: 'expose?d3'
+    rules: [{
+      test: require.resolve('d3'),
+      use: ['expose-loader?d3']
     }, {
-      test: require.resolve('hammerjs'), loader: 'expose?hammerjs'
+      test: require.resolve('hammerjs'),
+      use: ['expose-loader?hammerjs']
     }]
   }
 };

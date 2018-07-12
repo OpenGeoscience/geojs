@@ -148,7 +148,7 @@ var pointFeature = function (arg) {
     } else {
       var isFunc = util.isFunction(val);
       m_this.style('position', function (d, i) {
-        if (d.__cluster) {
+        if (d !== null && d !== undefined && d.__cluster) {
           return d;
         } else if (isFunc) {
           return val(d, i);
@@ -181,7 +181,7 @@ var pointFeature = function (arg) {
 
     // create an array of positions in geo coordinates
     pts = m_this.data().map(function (d, i) {
-      var pt = position(d);
+      var pt = position(d, i);
 
       // store the maximum point radius
       m_maxRadius = Math.max(
@@ -275,7 +275,7 @@ var pointFeature = function (arg) {
         idx = [];
     // TODO: use the range tree
     m_this.data().forEach(function (d, i) {
-      var p = pos(d);
+      var p = pos(d, i);
       if (p.x >= lowerLeft.x &&
           p.x <= upperRight.x &&
           p.y >= lowerLeft.y &&

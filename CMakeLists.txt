@@ -41,13 +41,6 @@ function(add_geojs_test test_name)
   set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "${test_name}")
 endfunction()
 
-# set variables for girder.cmake
-set(Girder_KEY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-data")
-set(Girder_DATA_DIR "${GEOJS_DEPLOY_DIR}/data")
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/girder.cmake)
-
-add_download_target()
-
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs_test_runner.py.in
                ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
 )
@@ -73,12 +66,37 @@ add_test(
 )
 set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "notes-reset")
 
-add_custom_target(
-  data_files
-  ALL
-  DEPENDS ${Girder_DOWNLOAD_FILES}
-)
-add_test(NAME get_data_files COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target data_files)
+# Use ExternalData to download all referenced files in tests/external-data
+include(ExternalData)
+set(ExternalData_URL_TEMPLATES "https://data.kitware.com/api/v1/file/hashsum/%(algo)/%(hash)/download")
+set(ExternalData_BINARY_ROOT "${GEOJS_DEPLOY_DIR}/data")
+set(ExternalData_SOURCE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/tests/external-data")
+# Get a list of files to download based on the name *.sha512
+file(GLOB data_files_list "${ExternalData_SOURCE_ROOT}/*.sha512")
+# Obtain the files using ExternalData
+foreach(data_file ${data_files_list})
+  string(REGEX REPLACE "^(.*)\\.sha512$" "\\1" base_file "${data_file}")
+  ExternalData_Expand_Arguments(data_files tmp DATA{${base_file}})
+endforeach()
+# Add a target to get the files
+ExternalData_Add_Target(data_files)
+# For any file that is a .tgz file, expand it after we get it
+foreach(data_file ${data_files_list})
+  string(REGEX REPLACE "^(.*)\\.sha512$" "\\1" base_file "${data_file}")
+  get_filename_component(base_file "${base_file}" NAME)
+  get_filename_component(base_fileext "${base_file}" EXT)
+  if("${base_fileext}" STREQUAL ".tgz")
+    get_filename_component(base_filename "${base_file}" NAME_WE)
+    add_custom_command(
+      TARGET data_files POST_BUILD
+      DEPENDS "${ExternalData_BINARY_ROOT}/${base_file}"
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${ExternalData_BINARY_ROOT}/${base_filename}"
+      COMMAND ${CMAKE_COMMAND} -E chdir "${ExternalData_BINARY_ROOT}/${base_filename}" tar zxf "${ExternalData_BINARY_ROOT}/${base_file}"
+    )
+  endif()
+endforeach()
+# Create a test that gets this target
+add_test(NAME get_data_files COMMAND "${CMAKE_COMMAND}" --build "${CMAKE_BINARY_DIR}" --target data_files)
 
 if(HEADLESS_TESTS)
   add_test(
