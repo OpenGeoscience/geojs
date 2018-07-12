@@ -1,6 +1,7 @@
 var path = require('path');
 var webpack = require('webpack');
 var exec = require('child_process').execSync;
+var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 var sha = '';
 
 if (!exec) {
@@ -19,6 +20,12 @@ var define_plugin = new webpack.DefinePlugin({
 });
 
 module.exports = {
+  /* webpack 4
+  mode: 'production',
+   */
+  performance: {hints: false},
+  cache: true,
+  devtool: 'source-map',
   context: path.join(__dirname, 'src'),
   entry: {
     geo: './index.js',
@@ -54,31 +61,54 @@ module.exports = {
     }
   },
   plugins: [
-    define_plugin,
-    new webpack.optimize.UglifyJsPlugin({
+    /* webpack 3 */
+    new UglifyJsPlugin({
       include: /\.min\.js$/,
-      minimize: true,
-      comments: /@(license|copyright)/
-    })
+      parallel: true,
+      uglifyOptions: {
+        compress: true,
+        comments: /@(license|copyright)/
+      },
+      sourceMap: true
+    }),
+    /* end webpack 3 */
+    define_plugin
   ],
+  /* webpack 4
+  optimization: {
+    minimizer: [
+      new UglifyJsPlugin({
+        include: /\.min\.js$/,
+        parallel: true,
+        uglifyOptions: {
+          compress: true,
+          comments: /@(license|copyright)/
+        },
+        sourceMap: true
+      })
+    ]
+  },
+  */
   module: {
-    loaders: [{
-      test: /\.json$/,
-      loader: 'json-loader'
-    }, {
+    rules: [{
       test: /\.styl$/,
-      loader: 'style-loader!css-loader!stylus-loader'
+      use: [
+        'style-loader',
+        'css-loader',
+        'stylus-loader'
+      ]
     }, {
       test: /\.css$/,
-      loader: 'style-loader!css-loader'
+      use: [
+        'style-loader',
+        'css-loader'
+      ]
     }, {
       test: /vgl\.js$/,
-      loader: 'expose?vgl!imports?mat4=gl-mat4,vec4=gl-vec4,vec3=gl-vec3,vec2=gl-vec2,$=jquery'
+      use: [
+        'expose-loader?vgl',
+        'imports-loader?mat4=gl-mat4,vec4=gl-vec4,vec3=gl-vec3,vec2=gl-vec2,$=jquery'
+      ]
     }]
-  },
-
-  // These are plugins that we want to run in Karma as well
-  exposed_plugins: [
-    define_plugin
-  ]
+  }
 };

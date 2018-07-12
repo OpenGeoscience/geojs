@@ -41,13 +41,11 @@ module.exports = function (config) {
       {type: 'text'}
     ]
   };
-  karma_config.webpack.module.preLoaders = [
-    {
-      test: /\.js$/,
-      include: path.resolve('src/'),
-      loader: 'istanbul-instrumenter'
-    }
-  ];
+  karma_config.webpack.module.rules.unshift({
+    test: /\.js$/,
+    include: path.resolve('src/'),
+    use: ['istanbul-instrumenter-loader']
+  });
 
   config.set(karma_config);
 };
