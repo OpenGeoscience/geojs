@@ -91,6 +91,19 @@ var layer = function (arg) {
   }
 
   /**
+   * Get a list of sibling layers.  If no parent has been assigned to this
+   * layer, assume that the map will be the parent.  This gets all of the
+   * parent's children that are layer instances.
+   *
+   * @returns {geo.layer[]} A list of sibling layers.
+   */
+  function _siblingLayers() {
+    return (m_this.parent() || m_this.map()).children().filter(function (child) {
+      return child instanceof layer;
+    });
+  }
+
+  /**
    * Get the name of the renderer.
    *
    * @returns {string}
@@ -118,8 +131,8 @@ var layer = function (arg) {
       // if any extant layer has the same index, then we move all of those
       // layers up.  We do this in reverse order since, if two layers above
       // this one share a z-index, they will resolve to the layer insert order.
-      m_map.children().reverse().forEach(function (child) {
-        if (child.zIndex && child !== this && child.zIndex() === zIndex) {
+      _siblingLayers().reverse().forEach(function (child) {
+        if (child !== this && child.zIndex() === zIndex) {
           child.zIndex(zIndex + 1);
         }
       });
@@ -153,7 +166,7 @@ var layer = function (arg) {
     }
 
     // get a sorted list of layers
-    order = m_this.map().layers().sort(
+    order = _siblingLayers().sort(
       function (a, b) { return sign * (a.zIndex() - b.zIndex()); }
     );
 
@@ -196,7 +209,7 @@ var layer = function (arg) {
    * @returns {this}
    */
   this.moveToTop = function () {
-    return m_this.moveUp(m_this.map().children().length - 1);
+    return m_this.moveUp(_siblingLayers().length - 1);
   };
 
   /**
@@ -205,7 +218,7 @@ var layer = function (arg) {
    * @returns {this}
    */
   this.moveToBottom = function () {
-    return m_this.moveDown(m_this.map().children().length - 1);
+    return m_this.moveDown(_siblingLayers().length - 1);
   };
 
   /**
@@ -537,25 +550,23 @@ var layer = function (arg) {
     return m_opacity;
   };
 
-  if (arg.zIndex === undefined) {
-    var maxZ = -1;
-    m_map.children().forEach(function (child) {
-      if (child.zIndex) {
-        maxZ = Math.max(maxZ, child.zIndex());
-      }
-    });
-    arg.zIndex = maxZ + 1;
-  }
-  m_zIndex = arg.zIndex;
-
   // Create top level div for the layer
   m_node = $(document.createElement('div'));
   m_node.addClass('geojs-layer');
   m_node.attr('id', m_name);
   m_this.opacity(m_opacity);
 
-  // set the z-index
-  m_this.zIndex(m_zIndex);
+  // set the z-index (this prevents duplication)
+  if (arg.zIndex === undefined) {
+    var maxZ = -1;
+    _siblingLayers().forEach(function (child) {
+      if (child.zIndex() !== undefined) {
+        maxZ = Math.max(maxZ, child.zIndex());
+      }
+    });
+    arg.zIndex = maxZ + 1;
+  }
+  m_this.zIndex(arg.zIndex);
 
   return m_this;
 };
