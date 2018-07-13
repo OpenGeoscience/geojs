@@ -404,6 +404,9 @@ var feature = function (arg) {
    * has a subfeature style, with `(subfeatureElement, subfeatureIndex,
    * dataElement, dataIndex)`.
    *
+   * See the feature's specification ({@link geo.feature.spec}) for available
+   * styles.
+   *
    * @param {string|object} [arg1] If `undefined`, return the current style
    *    object.  If a string and `arg2` is undefined, return the style
    *    associated with the specified key.  If a string and `arg2` is defined,

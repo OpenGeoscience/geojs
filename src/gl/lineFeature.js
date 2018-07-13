@@ -376,7 +376,7 @@ var gl_lineFeature = function (arg) {
     return shader;
   }
 
- /**
+  /**
    * Create and style the data needed to render the lines.
    *
    * @param {boolean} onlyStyle if true, use the existing geoemtry and just
