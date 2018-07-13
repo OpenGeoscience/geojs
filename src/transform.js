@@ -470,9 +470,9 @@ transform.affineForward = function (def, coords) {
 };
 
 /**
- * Apply an inverse affine transformation which is the inverse to {@link
- * geo.transform.affineForward}.  Note, the transformation occurs in place so
- * the input coordinate object are mutated.
+ * Apply an inverse affine transformation which is the inverse to
+ * {@link geo.transform.affineForward}.  Note, the transformation occurs in
+ * place so the input coordinate object are mutated.
  *
  * @param {object} def
  * @param {geo.geoPosition} def.origin The transformed origin

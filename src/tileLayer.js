@@ -80,10 +80,10 @@ module.exports = (function () {
   /**
    * This method defines a tileLayer, an abstract class defining a layer
    * divided into tiles of arbitrary data.  Notably, this class provides the
-   * core functionality of `geo.osmLayer`, but hooks exist to render tiles more
-   * generically.  When multiple zoom levels are present in a given dataset,
-   * this class assumes that the space occupied by tile `(i, j)` at level `z`
-   * is covered by a 2x2 grid of tiles at zoom level `z + 1`:
+   * core functionality of {@link geo.osmLayer}, but hooks exist to render
+   * tiles more generically.  When multiple zoom levels are present in a given
+   * dataset, this class assumes that the space occupied by tile `(i, j)` at
+   * level `z` is covered by a 2x2 grid of tiles at zoom level `z + 1`:
    * ```
    *   (2i, 2j),     (2i, 2j + 1)
    *   (2i + 1, 2j), (2i + 1, 2j + 1)

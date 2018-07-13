@@ -10,8 +10,8 @@ var util = require('./util');
  * @property {object[]} [data=[]] An array of arbitrary objects used to
  *    construct the feature.
  * @property {object} [style] An object that contains style values for the
- *    feature.  This includes `geo.lineFeature` and `geo.textFeature` style
- *    values.
+ *    feature.  This includes {@link geo.lineFeature} and
+ *    {@link geo.textFeature} style values.
  * @property {number|function} [style.opacity=1] Overall opacity on a scale of
  *    0 to 1.
  * @property {geo.geoPosition|function} [style.position=data] The position of
@@ -44,7 +44,7 @@ var util = require('./util');
 
 /**
  * Isoline specification.  All of these properties can be functions, which get
- * passed the `geo.meshFeature.meshInfo` object.
+ * passed the {@link geo.meshFeature.meshInfo} object.
  *
  * @typedef {geo.meshFeature.meshSpec} geo.isolineFeature.isolineSpec
  * @property {number} [min] Minimum isoline value.  If unspecified, taken from
@@ -89,7 +89,7 @@ var util = require('./util');
  *    is panned (including zoom, rotation, etc.), periodically regenerate
  *    labels.  This uses an internal function that has a threshold based on a
  *    fixed change in zoom, size, and other parameters.  Set `labelAutoUpdate`
- *    to `false` and handle the `geo.event.pan` elsewhere.
+ *    to `false` and handle the {@link geo.event.pan} elsewhere.
  */
 
 /**

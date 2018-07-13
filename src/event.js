@@ -503,7 +503,8 @@ geo_event.annotation.select_edit_handle = 'geo_annotation_select_edit_handle';
  *   selected or unselected.
  * @property {object} handle Information on the edit handle.
  * @property {boolean} action The edit action, typically one of
- *  `geo.event.actiondown`, `geo.event.actionmove`, `geo.event.actionup`.
+ *  {@link geo.event.actiondown}, {@link geo.event.actionmove},
+ *  {@link geo.event.actionup}.
  */
 geo_event.annotation.edit_action = 'geo_annotation_edit_action';
 
@@ -531,9 +532,9 @@ geo_event.annotation.state = 'geo_annotation_state';
  * @event geo.event.annotation.mode
  * @type {object}
  * @property {string?} mode The new annotation mode.  This is one of the values
- *      from `geo.annotation.annotationState`.
+ *      from {@link geo.annotation.state}.
  * @property {string?} oldMode The annotation mode before this change.  This is
- *      one of the values from `geo.annotation.annotationState`.
+ *      one of the values from {@link geo.annotation.state}.
  */
 geo_event.annotation.mode = 'geo_annotation_mode';
 

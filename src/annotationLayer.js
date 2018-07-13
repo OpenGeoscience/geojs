@@ -13,7 +13,7 @@ var textFeature = require('./textFeature');
  * @property {string} text The text of the label
  * @property {geo.geoPosition} position The position of the label in map gcs
  *      coordinates.
- * @property {object} [style] A `geo.textFeature` style object.
+ * @property {object} [style] A {@link geo.textFeature} style object.
  */
 
 /**
