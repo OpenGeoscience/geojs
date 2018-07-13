@@ -51,7 +51,7 @@
  *    this method is used to accumulate values that the callback uses
  *    when it finally executes.
  * @param {boolean} [debounce_mode] See the `at_begin` parameter of the
- *    `geo.util.debounce` function.
+ *    {@link geo.util.debounce} function.
  * @returns {function} The throttled version of `callback`.
  *
  * @example
@@ -168,7 +168,7 @@ var throttle = function (delay, no_trailing, callback, accumulator, debounce_mod
  *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
  *   X                                 X
  *
- * The bulk of the work is handled by the `geo.util.throttle` function.
+ * The bulk of the work is handled by the {@link geo.util.throttle} function.
  *
  * @param {number} delay A zero-or-greater delay in milliseconds. For event
  *    callbacks, values around 100 or 250 (or even higher) are most useful.

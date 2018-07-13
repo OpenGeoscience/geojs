@@ -2,13 +2,56 @@ var inherit = require('./inherit');
 var feature = require('./feature');
 
 /**
- * Create a new instance of class pointFeature
+ * Object specification for a point feature.
+ *
+ * @typedef {geo.feature.spec} geo.pointFeature.spec
+ * @property {geo.geoPosition|function} [position] Position of the data.
+ *   Default is (data).
+ * @property {object} [style] Style object with default style options.
+ * @property {number|function} [style.radius=5] Radius of each point in pixels.
+ *   This is the fill radius inside of the stroke.
+ * @property {boolean|function} [style.stroke=true] True to stroke point.
+ * @property {geo.geoColor|function} [style.strokeColor] Color to stroke each
+ *   point.
+ * @property {number|function} [style.strokeOpacity=1] Opacity for each point's
+ *   stroke.  Opacity is on a [0-1] scale.
+ * @property {number|function} [style.strokeWidth=1.25] The weight of the
+ *   point's stroke in pixels.
+ * @property {boolean|function} [style.fill=true] True to fill point.
+ * @property {geo.geoColor|function} [style.fillColor] Color to fill each
+ *   point/
+ * @property {number|function} [style.fillOpacity=1] Opacity for each point.
+ *   Opacity is on a [0-1] scale.
+ * @property {boolean|geo.pointFeature.clusteringSpec} [clustering=false]
+ *   Enable point clustering.
+ * @property {string} [primitiveShape='sprite'] For the gl renderer, select the
+ *   primitive shape.  This is one of `'triangle'`, `'square'`, or `'sprite'`.
+ *   `sprite` uses the least memory, `triangle` is fastest if the vertex shader
+ *   is the bottleneck, and `square` is fastest if the fragment shader is the
+ *   bottleneck.  `sprite` may not work for very large points.
+ * @property {boolean} [dynamicDraw=false] For the gl renderer, if this is
+ *   truthy, webgl source buffers can be modifies and updated directly.
+ */
+
+/**
+ * Point clustering specification.
+ *
+ * @typedef {object} geo.pointFeature.clusteringSpec
+ * @property {number} [radius=0.05] This is combined with the `width` and
+ *   `height` to determine how close points need to be to each other to be
+ *   clustered.
+ * @property {number} [maxZoom=18] Never cluster above this zoom level.
+ * @property {number} [width=256]
+ * @property {number} [height=256]
+ */
+
+/**
+ * Create a new instance of class pointFeature.
  *
  * @class
  * @alias geo.pointFeature
- * @param {object} arg Options object
- * @param {boolean} arg.clustering Enable point clustering
  * @extends geo.feature
+ * @param {geo.pointFeature.spec} arg
  * @returns {geo.pointFeature}
  */
 var pointFeature = function (arg) {
@@ -44,9 +87,13 @@ var pointFeature = function (arg) {
   this.featureType = 'point';
 
   /**
-   * Get/Set clustering option
+   * Get/Set clustering option.
    *
-   * @returns {geo.pointFeature|boolean}
+   * @param {boolean|geo.pointFeature.clusteringSpec} [val] If not specified,
+   *   return the current value.  If specified and falsy, turn off clustering.
+   *   If `true`, use a default clustering with `radius` set to `0.01`.
+   *   Otherwise, turn on clustering with these options.
+   * @returns {geo.pointFeature.clusteringSpec|boolean|this}
    */
   this.clustering = function (val) {
     if (val === undefined) {
@@ -101,6 +148,8 @@ var pointFeature = function (arg) {
    * Handle zoom events for clustering.  This keeps track of the last
    * clustering level, and only regenerates the displayed points when the
    * zoom level changes.
+   *
+   * @param {number} zoom The new zoom level.
    */
   this._handleZoom = function (zoom) {
     // get the current zoom level rounded down
@@ -138,9 +187,13 @@ var pointFeature = function (arg) {
   };
 
   /**
-   * Get/Set position
+   * Get/Set position.
    *
-   * @returns {geo.pointFeature}
+   * @param {function|geo.geoPosition} [val]  If not specified, return the
+   *    position accessor, which is guaranteed to be a function.  If specified,
+   *    wrap the value in an function that handles clustering if it is enabled
+   *    and set the position accessor to that function.
+   * @returns {this|function}
    */
   this.position = function (val) {
     if (val === undefined) {
@@ -199,8 +252,12 @@ var pointFeature = function (arg) {
   /**
    * Returns an array of datum indices that contain the given point.
    * Largely adapted from wigglemaps pointQuerier:
-   *
    * https://github.com/dotskapes/wigglemaps/blob/cf5bed3fbfe2c3e48d31799462a80c564be1fb60/src/query/PointQuerier.js
+   * This does not take into account clustering.
+   *
+   * @param {geo.geoPosition} p point to search for in map interface gcs.
+   * @returns {object} An object with `index`: a list of point indices, and
+   *    `found`: a list of points that contain the specified coordinate.
    */
   this.pointSearch = function (p) {
     var min, max, data, idx = [], found = [], ifound = [], map, pt,
@@ -269,6 +326,11 @@ var pointFeature = function (arg) {
 
   /**
    * Returns an array of datum indices that are contained in the given box.
+   * This does not take clustering into account.
+   *
+   * @param {geo.geoPosition} lowerLeft Lower-left corner in gcs coordinates.
+   * @param {geo.geoPosition} upperRight Upper-right corner in gcs coordinates.
+   * @returns {number[]} A list of point indices that are in the box region.
    */
   this.boxSearch = function (lowerLeft, upperRight) {
     var pos = m_this.position(),
@@ -289,6 +351,11 @@ var pointFeature = function (arg) {
 
   /**
    * Overloaded data method that updates the internal range tree on write.
+   * Get/Set the data array for the feature.
+   *
+   * @param {array} [data] A new data array or `undefined` to return the
+   *    existing array.
+   * @returns {array|this}
    */
   this.data = function (data) {
     if (data === undefined) {
@@ -307,7 +374,10 @@ var pointFeature = function (arg) {
   };
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @param {geo.pointFeature.spec} arg The feature specification.
+   * @returns {this}
    */
   this._init = function (arg) {
     arg = arg || {};
@@ -324,8 +394,6 @@ var pointFeature = function (arg) {
         fillColor: { r: 1.0, g: 0.839, b: 0.439 },
         fill: true,
         fillOpacity: 0.8,
-        sprites: false,
-        sprites_image: null,
         position: function (d) { return d; }
       },
       arg.style === undefined ? {} : arg.style
@@ -345,16 +413,11 @@ var pointFeature = function (arg) {
     m_this.geoOn(geo_event.zoom, function (evt) {
       m_this._handleZoom(evt.zoomLevel);
     });
+    return m_this;
   };
 
   return m_this;
 };
-
-/**
- * Object specification for a point feature.
- *
- * @typedef {geo.feature.spec} geo.pointFeature.spec
- */
 
 /**
  * Create a pointFeature from an object.

@@ -8,8 +8,8 @@ module.exports = (function () {
   var quadFeature = require('./quadFeature');
 
   /**
-   * Create a new instance of osmLayer.  This is a `geo.tileLayer` with an
-   * OSM url and attribution defaults and with the tiles centered on the
+   * Create a new instance of osmLayer.  This is a [@link geo.tileLayer} with
+   * an OSM url and attribution defaults and with the tiles centered on the
    * origin.
    *
    * @class

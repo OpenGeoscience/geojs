@@ -4,12 +4,13 @@ var pointFeature = require('../pointFeature');
 
 /**
  *
- * Create a new instance of pointFeature
+ * Create a new instance of d3.pointFeature.
  *
  * @class
  * @alias geo.d3.pointFeature
  * @extends geo.pointFeature
  * @extends geo.d3.object
+ * @param {geo.pointFeature.spec} arg
  * @returns {geo.d3.pointFeature}
  */
 var d3_pointFeature = function (arg) {
@@ -35,7 +36,10 @@ var d3_pointFeature = function (arg) {
       m_style = {};
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @param {geo.pointFeature.spec} arg The feature specification.
+   * @returns {this}
    */
   this._init = function (arg) {
     s_init.call(m_this, arg);
@@ -43,9 +47,9 @@ var d3_pointFeature = function (arg) {
   };
 
   /**
-   * Build
+   * Build.  Create the necessary elements to render points.
    *
-   * @override
+   * @returns {this}
    */
   this._build = function () {
     var data = m_this.data(),
@@ -84,11 +88,10 @@ var d3_pointFeature = function (arg) {
     m_this.updateTime().modified();
     return m_this;
   };
-
   /**
-   * Update
+   * Update.  Rebuild if necessary.
    *
-   * @override
+   * @returns {this}
    */
   this._update = function () {
     s_update.call(m_this);

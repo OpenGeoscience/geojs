@@ -334,7 +334,7 @@ var map = function (arg) {
    *
    * @param {string} [arg] If `undefined`, return the current gcs.  Otherwise,
    *    a new value for the gcs.
-   * @returns {string|this} A string used by {@linkcode geo.transform}.
+   * @returns {string|this} A string used by {@link geo.transform}.
    */
   this.gcs = function (arg) {
     if (arg === undefined) {
@@ -359,7 +359,7 @@ var map = function (arg) {
    *
    * @param {string} [arg] If `undefined`, returtn the current interface gcs.
    *    Otherwise, a new value for the interface gcs.
-   * @returns {string|this} A string used by {@linkcode geo.transform}.
+   * @returns {string|this} A string used by {@link geo.transform}.
    */
   this.ingcs = function (arg) {
     if (arg === undefined) {
@@ -1515,7 +1515,7 @@ var map = function (arg) {
 
   /**
    * Get the layers contained in the map.
-   * Alias of {@linkcode geo.sceneObject#children}.
+   * Alias of {@link geo.sceneObject#children}.
    * @method
    */
   this.layers = this.children;
@@ -1527,8 +1527,8 @@ var map = function (arg) {
    * attribution notices into a single element.  By default, this method
    * is called on each of the following events:
    *
-   *   * geo.event.layerAdd
-   *   * geo.event.layerRemove
+   *   * {@link geo.event.layerAdd}
+   *   * {@link geo.event.layerRemove}
    *
    * In addition, layers should call this method when their own attribution
    * notices have changed.  Users, in general, should not need to call this.

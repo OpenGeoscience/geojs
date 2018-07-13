@@ -8,17 +8,9 @@ html(lang="en")
     // include the main bundle
     script(type='text/javascript', src=bundle, charset='UTF-8')
 
-    // include example sources
-    block exampleHeader
-      // Include example specific files
-      each css in exampleCss
-        link(rel="stylesheet", href=css)
-      each src in exampleJs
-        if(typeof src === "string")
-          script(type="text/javascript", src=src)
-        else
-          script&attributes(src)
-
+    // Include example specific css
+    each css in exampleCss
+      link(rel="stylesheet", href=css)
   body
     if !hideNavbar
       // Add a navbar
@@ -70,3 +62,10 @@ html(lang="en")
     // Add the default main content element
     block mainContent
       #map
+
+    // Include example specific scripts
+    each src in exampleJs
+      if(typeof src === "string")
+        script(type="text/javascript", src=src)
+      else
+        script&attributes(src)
