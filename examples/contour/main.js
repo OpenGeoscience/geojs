@@ -8,9 +8,9 @@ $(function () {
 
   // Define a function we will use to generate contours.
   function makeContour(data, layer) {
-    /* There are two example data sets.  One has a position array which
-     * consists of objects each with x, y, z values.  The other has a values
-     * array which just has our contour values. */
+    // There are two example data sets.  One has a position array which
+    // consists of objects each with x, y, z values.  The other has a values
+    // array which just has our contour values.
     var contour = layer.createFeature('contour')
       .data(data.position || data.values)
       .style({
@@ -47,8 +47,8 @@ $(function () {
         value: function (d) { return d > -9999 ? d : null; }
       })
       .contour({
-        /* The geometry can be specified using 0-point coordinates and deltas
-         * since it is a regular grid. */
+        // The geometry can be specified using 0-point coordinates and deltas
+        // since it is a regular grid.
         x0: data.x0, y0: data.y0, dx: data.dx, dy: data.dy
       });
     }
@@ -107,7 +107,18 @@ $(function () {
     success: function (data) {
       var contour = makeContour(data, contourLayer);
       contour.draw();
-      /* After 10 second, load a denser data set */
+
+      // Make some values available in the global context to aid exploration
+      // and automated tests.
+      window.example = {
+        ready: true,
+        map: map,
+        contourLayer: contourLayer,
+        contour: contour,
+        data: data
+      };
+
+      // After 10 second, load a denser data set
       if (!query.url) {
         window.setTimeout(function () {
           $.ajax({

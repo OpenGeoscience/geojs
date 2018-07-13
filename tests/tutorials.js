@@ -21,7 +21,7 @@ describe('tutorials', function () {
         sinon.stub(console, 'warn', function () {});
         $('#map').one('load', function () { window.setTimeout(done, 1); });
         $('#map').attr('src', '/tutorials/' + tutorialName + '/index.html');
-      });
+      }, 150000);
       afterEach(function () {
         console.warn.restore();
       });
