@@ -347,8 +347,8 @@ geo_event.feature = {
    */
   mouseover:  'geo_feature_mouseover',
   /**
-   * This is triggered when the mouse changes either the feature components or
-   * the order of feature components that it is over.
+   * This event is fired when the mouse changes either which feature components
+   * or the order of the feature components that it is over.
    *
    * @event geo.event.feature.mouseover_order
    * @property {geo.feature} feature The feature.
