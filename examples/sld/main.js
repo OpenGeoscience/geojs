@@ -208,8 +208,7 @@ var utility = {
     for (var i = 0; i < count; i++) {
       this.createMapEntry(xml, palette[i], values[i], 1);
     }
-    var xmlString = (new XMLSerializer())
-      .serializeToString(xml.context);
+    var xmlString = new XMLSerializer().serializeToString(xml[0]);
 
     return xmlString;
   },
