@@ -1,7 +1,14 @@
 {
-  "title": "Deepzoom tiled image example",
+  "title": "Deep Zoom tiled image example",
   "exampleJs": ["main.js"],
   "about": {
-    "text": "Rendering a tiled image using the Deepzoom protocol."
-  }
+    "text": "Rendering a tiled image using the Deep Zoom protocol."
+  },
+  "tests": [{
+    "description": "data is loaded from the Deep Zoom server",
+    "idle": ["$('#map.geojs-map').data('data-geojs-map').onIdle"],
+    "tests": [
+      "Object.keys($('#map.geojs-map').data('data-geojs-map').layers()[0]._activeTiles).length === 11"
+    ]
+  }]
 }

@@ -80,13 +80,22 @@ describe('examples', function () {
           (test.idle || []).forEach(function (idleFunc) {
             var defer = ex$.Deferred();
             deferreds.push(defer);
-            var idle = exampleWindow.eval(idleFunc);
-            if (!ex$.isFunction(idle)) {
-              idle = idle.then || idle.done;
-            }
-            idle(function () {
-              defer.resolve();
-            });
+            var interval;
+            interval = exampleWindow.setInterval(function () {
+              var idle;
+              try {
+                idle = exampleWindow.eval(idleFunc);
+              } catch (err) { }
+              if (idle) {
+                exampleWindow.clearInterval(interval);
+                if (!ex$.isFunction(idle)) {
+                  idle = idle.then || idle.done;
+                }
+                idle(function () {
+                  defer.resolve();
+                });
+              }
+            }, 10);
           });
           (test.wait || []).forEach(function (waitCondition) {
             var defer = ex$.Deferred();
