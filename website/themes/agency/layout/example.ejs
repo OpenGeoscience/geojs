@@ -7,9 +7,6 @@ no_footer: true
 <link rel="stylesheet" href="<%- url_for("css/example.css") %>">
 <script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
 <div class="page example">
-    <% for(js of page.exampleJs) { %>
-        <script type="text/javascript" src="<%- js %>"></script>
-    <% } %>
     <% for(css of page.exampleCss) { %>
         <link rel="stylesheet" href="<%- css %>">
     <% } %>
@@ -52,3 +49,6 @@ no_footer: true
         </div>
     </div>
 </div>
+<% for(js of page.exampleJs) { %>
+    <script type="text/javascript" src="<%- js %>"></script>
+<% } %>
