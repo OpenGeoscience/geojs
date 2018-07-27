@@ -227,14 +227,20 @@ var vglRenderer = function (arg) {
         view = camera.view,
         proj = camera.projectionMatrix;
     if (proj[15]) {
-      /* we want positive z to be closer to the camera, but webGL does the
-       * converse, so reverse the z coordinates. */
-      proj = mat4.scale(util.mat4AsArray(), proj, [1, 1, -1]);
+      /* In the parallel projection, we want the clipbounds [near, far] to map
+       * to [0, 1].  The ortho matrix scales to [-1, 1]. */
+      proj = mat4.copy(util.mat4AsArray(), proj);
+      proj = mat4.scale(proj, proj, [1, 1, -0.5]);
+      proj = mat4.translate(proj, proj, [0, 0, camera.clipbounds.far]);
+    } else {
+      /* This rescales the perspective projection to work with most gl
+       * features.  It doesn't work with all clipbounds, and will probably need
+       * to be refactored when we have tiltable maps. */
+      var near = camera.clipbounds.near,
+          far = camera.clipbounds.far;
+      proj = mat4.copy(util.mat4AsArray(), proj);
+      proj = mat4.scale(proj, proj, [1 / near, 1 / near, -1 / far]);
     }
-    /* A similar kluge as in the base camera class worldToDisplay4.  With this,
-     * we can show z values from 0 to 1. */
-    proj = mat4.translate(util.mat4AsArray(), proj,
-                          [0, 0, camera.constructor.bounds.far]);
     /* Check if the rotation is a multiple of 90 */
     var basis = Math.PI / 2,
         angle = rotation % basis,  // move to range (-pi/2, pi/2)

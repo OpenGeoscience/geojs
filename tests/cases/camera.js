@@ -4,10 +4,10 @@
 
 var $ = require('jquery');
 var mat4 = require('gl-mat4');
-var vec3 = require('gl-vec3');
 var vec4 = require('gl-vec4');
 var geo = require('../test-utils').geo;
 var closeToArray = require('../test-utils').closeToArray;
+var closeToEqual = require('../test-utils').closeToEqual;
 
 describe('geo.camera', function () {
   'use strict';
@@ -21,10 +21,10 @@ describe('geo.camera', function () {
         c.bounds = b;
         b1 = c.bounds;
 
-        expect(b.left).toBe(b1.left);
-        expect(b.right).toBe(b1.right);
-        expect(b.top).toBe(b1.top);
-        expect(b.bottom).toBe(b1.bottom);
+        expect(b1.left).toBeCloseTo(b.left);
+        expect(b1.right).toBeCloseTo(b.right);
+        expect(b1.top).toBeCloseTo(b.top);
+        expect(b1.bottom).toBeCloseTo(b.bottom);
       };
     }
     function testcase(proj) {
@@ -47,28 +47,13 @@ describe('geo.camera', function () {
   });
 
   describe('resize viewport', function () {
-    function number_near(n1, n2, tol) {
-      return Math.abs(n1 - n2) < tol;
-    }
-    function bounds_near(b1, b2, tol) {
-      tol = tol || 1e-4;
-      var n = number_near(b1.left, b2.left, tol) &&
-              number_near(b1.right, b2.right, tol) &&
-              number_near(b1.bottom, b2.bottom, tol) &&
-              number_near(b1.top, b2.top, tol);
-      if (!n) {
-        console.log(JSON.stringify(b1) + ' != ' + JSON.stringify(b2));
-      }
-      return n;
-    }
-
     it('100 x 100 -> 90 x 90', function () {
       var c = geo.camera({viewport: {width: 100, height: 100}});
 
       c.bounds = {left: 0, right: 100, bottom: 0, top: 100};
       c.viewport = {width: 90, height: 90};
 
-      expect(bounds_near(c.bounds, {left: 5, right: 95, bottom: 5, top: 95}))
+      expect(closeToEqual(c.bounds, {left: 5, right: 95, bottom: 5, top: 95}, 4))
         .toBe(true);
     });
     it('100 x 100 -> 100 x 90', function () {
@@ -77,7 +62,7 @@ describe('geo.camera', function () {
       c.bounds = {left: 0, right: 100, bottom: 0, top: 100};
       c.viewport = {width: 100, height: 90};
 
-      expect(bounds_near(c.bounds, {left: 0, right: 100, bottom: 5, top: 95}))
+      expect(closeToEqual(c.bounds, {left: 0, right: 100, bottom: 5, top: 95}, 4))
         .toBe(true);
     });
     it('100 x 100 -> 20 x 10', function () {
@@ -86,7 +71,7 @@ describe('geo.camera', function () {
       c.bounds = {left: 0, right: 100, bottom: 0, top: 100};
       c.viewport = {width: 20, height: 10};
 
-      expect(bounds_near(c.bounds, {left: 40, right: 60, bottom: 45, top: 55}))
+      expect(closeToEqual(c.bounds, {left: 40, right: 60, bottom: 45, top: 55}, 4))
         .toBe(true);
     });
     it('100 x 100 -> 140 x 120', function () {
@@ -95,7 +80,7 @@ describe('geo.camera', function () {
       c.bounds = {left: 0, right: 100, bottom: 0, top: 100};
       c.viewport = {width: 140, height: 120};
 
-      expect(bounds_near(c.bounds, {left: -20, right: 120, bottom: -10, top: 110}))
+      expect(closeToEqual(c.bounds, {left: -20, right: 120, bottom: -10, top: 110}, 4))
         .toBe(true);
     });
     it('50 x 100 -> 100 x 100', function () {
@@ -104,7 +89,7 @@ describe('geo.camera', function () {
       c.bounds = {left: 0, right: 50, bottom: 0, top: 100};
       c.viewport = {width: 100, height: 100};
 
-      expect(bounds_near(c.bounds, {left: -25, right: 75, bottom: 0, top: 100}))
+      expect(closeToEqual(c.bounds, {left: -25, right: 75, bottom: 0, top: 100}, 4))
         .toBe(true);
     });
     it('50 x 50 -> 100 x 100', function () {
@@ -113,7 +98,7 @@ describe('geo.camera', function () {
       c.bounds = {left: 0, right: 50, bottom: 0, top: 50};
       c.viewport = {width: 100, height: 100};
 
-      expect(bounds_near(c.bounds, {left: -25, right: 75, bottom: -25, top: 75}))
+      expect(closeToEqual(c.bounds, {left: -25, right: 75, bottom: -25, top: 75}, 4))
         .toBe(true);
     });
   });
@@ -364,6 +349,7 @@ describe('geo.camera', function () {
         position: 'absolute',
         width: '100px',
         height: '100px',
+        'transform-origin': '0 0',
         transform: 'none'
         /*,border: '1px solid black'*/
       });
@@ -380,21 +366,15 @@ describe('geo.camera', function () {
         bottom: node.position().top + box.height,
         top: node.position().top,
         left: node.position().left,
-        right: node.position().left + box.width,
-        height: box.height,
-        width: box.width
+        right: node.position().left + box.width
       };
     }
 
     function assert_position(position) {
-      var _ = get_node_position(), k, actual = {};
-      for (k in position) {
-        if (position.hasOwnProperty(k)) {
-          position[k] = position[k].toFixed(2);
-          actual[k] = _[k].toFixed(2);
-        }
-      }
-      expect(actual).toEqual(position);
+      if (!closeToEqual(get_node_position(), position, 2)) { //DWM::
+        console.log('assert_position', get_node_position(), position); //DWM::
+      } //DWM::
+      expect(closeToEqual(get_node_position(), position, 2)).toBe(true);
     }
 
     it('Display and world parameters', function () {
@@ -413,24 +393,19 @@ describe('geo.camera', function () {
           camera = geo.camera();
 
       camera.viewport = {width: 100, height: 100};
-      camera.bounds = geo.camera.bounds;
-      camera.pan({x: 10, y: 0});
+      camera.bounds = geo.camera.clipbounds.parallel;
 
+      camera.pan({x: 10, y: 0});
       node.css('transform', geo.camera.css(camera.view));
-      expect(node.position().left).toBe(10);
-      expect(node.position().top).toBe(0);
+      assert_position({left: 10, top: 0, right: 110, bottom: 100});
 
       camera.pan({x: 0, y: -5});
-
       node.css('transform', geo.camera.css(camera.view));
-      expect(node.position().left).toBe(10);
-      expect(node.position().top).toBe(-5);
+      assert_position({left: 10, top: -5, right: 110, bottom: 95});
 
       camera.pan({x: -10, y: 5});
-
       node.css('transform', geo.camera.css(camera.view));
-      expect(node.position().left).toBe(0);
-      expect(node.position().top).toBe(0);
+      assert_position({left: 0, top: 0, right: 100, bottom: 100});
     });
     it('Simple zooming', function () {
       var node = make_node(),
@@ -438,50 +413,40 @@ describe('geo.camera', function () {
           view;
 
       camera.viewport = {width: 100, height: 100};
-      camera.bounds = geo.camera.bounds;
+      camera.bounds = geo.camera.clipbounds.parallel;
 
       view = camera.view;
       camera.zoom(1);
       expect(camera.view).toBe(view);
 
       camera.zoom(0.5);
-
       node.css('transform', geo.camera.css(camera.view));
-      expect(node.position().left).toBe(25);
-      expect(node.position().top).toBe(25);
+      assert_position({left: 0, top: 0, right: 50, bottom: 50});
 
       camera.zoom(6);
-
       node.css('transform', geo.camera.css(camera.view));
-      expect(node.position().left).toBe(-100);
-      expect(node.position().top).toBe(-100);
+      assert_position({left: 0, top: 0, right: 300, bottom: 300});
 
       camera.zoom(1 / 3);
-
       node.css('transform', geo.camera.css(camera.view));
-      expect(node.position().left).toBe(0);
-      expect(node.position().top).toBe(0);
+      assert_position({left: 0, top: 0, right: 100, bottom: 100});
     });
     it('Zooming + panning', function () {
       var node = make_node(),
           camera = geo.camera();
 
       camera.viewport = {width: 100, height: 100};
-      camera.bounds = geo.camera.bounds;
+      camera.bounds = geo.camera.clipbounds.parallel;
 
       camera.pan({x: -25, y: -25});
       camera.zoom(0.5);
-
       node.css('transform', geo.camera.css(camera.view));
-      expect(node.position().left).toBe(0);
-      expect(node.position().top).toBe(0);
+      assert_position({left: -25, top: -25, right: 25, bottom: 25});
 
       camera.pan({x: 50, y: 50});
       camera.zoom(2);
-
       node.css('transform', geo.camera.css(camera.view));
-      expect(node.position().left).toBe(0);
-      expect(node.position().top).toBe(0);
+      assert_position({left: 0, top: 0, right: 100, bottom: 100});
     });
     it('Simple rotation', function () {
       var node = make_node(),
@@ -489,7 +454,7 @@ describe('geo.camera', function () {
           view;
 
       camera.viewport = {width: 100, height: 100};
-      camera.bounds = geo.camera.bounds;
+      camera.bounds = geo.camera.clipbounds.parallel;
 
       view = camera.view;
       camera._rotate(0);
@@ -497,18 +462,15 @@ describe('geo.camera', function () {
 
       camera._rotate(30 * Math.PI / 180);
       node.css('transform', geo.camera.css(camera.view));
-      expect(node.position().left).toBeLessThan(-18);
-      expect(node.position().top).toBeLessThan(-18);
+      assert_position({left: 0, top: -50, right: 136.60, bottom: 86.60});
 
       camera._rotate(-30 * Math.PI / 180);
       node.css('transform', geo.camera.css(camera.view));
-      expect(node.position().left).toBeCloseTo(0, 4);
-      expect(node.position().top).toBeCloseTo(0, 4);
+      assert_position({left: 0, top: 0, right: 100, bottom: 100});
 
       camera._rotate(-30 * Math.PI / 180, {x: 50, y: 0});
       node.css('transform', geo.camera.css(camera.view));
-      expect(node.position().left).toBeLessThan(-10);
-      expect(node.position().top).toBeLessThan(-40);
+      assert_position({left: -43.30, top: -25, right: 93.30, bottom: 111.60});
     });
 
     describe('World to display', function () {
@@ -520,12 +482,7 @@ describe('geo.camera', function () {
         camera.bounds = {left: 0, right: 100, bottom: 0, top: 100};
 
         node.css('transform', camera.css());
-        assert_position({
-          left: 0,
-          right: 100,
-          top: 0,
-          bottom: 100
-        });
+        assert_position({left: 0, top: 0, right: 100, bottom: 100});
       });
 
       it('zoom', function () {
@@ -537,21 +494,11 @@ describe('geo.camera', function () {
 
         camera.zoom(2);
         node.css('transform', camera.css());
-        assert_position({
-          left: -50,
-          top: -50,
-          right: 150,
-          bottom: 150
-        });
+        assert_position({left: 0, top: -100, right: 200, bottom: 100});
 
         camera.zoom(1 / 4);
         node.css('transform', camera.css());
-        assert_position({
-          left: 25,
-          top: 25,
-          right: 75,
-          bottom: 75
-        });
+        assert_position({left: 0, top: 50, right: 50, bottom: 100});
       });
 
       it('pan', function () {
@@ -563,21 +510,11 @@ describe('geo.camera', function () {
 
         camera.pan({x: 50, y: 0});
         node.css('transform', camera.css());
-        assert_position({
-          left: 50,
-          top: 0,
-          right: 150,
-          bottom: 100
-        });
+        assert_position({left: 50, top: 0, right: 150, bottom: 100});
 
         camera.pan({x: -25, y: 10});
         node.css('transform', camera.css());
-        assert_position({
-          left: 25,
-          top: -10,
-          right: 125,
-          bottom: 90
-        });
+        assert_position({left: 25, top: -10, right: 125, bottom: 90});
       });
       it('pan + zoom', function () {
         var node = make_node(),
@@ -589,21 +526,11 @@ describe('geo.camera', function () {
         camera.zoom(2);
         camera.pan({x: 10, y: -5});
         node.css('transform', camera.css());
-        assert_position({
-          left: -30,
-          top: -40,
-          right: 170,
-          bottom: 160
-        });
+        assert_position({left: 20, top: -90, right: 220, bottom: 110});
 
         camera.zoom(0.5);
         node.css('transform', camera.css());
-        assert_position({
-          left: 20,
-          top: 10,
-          right: 120,
-          bottom: 110
-        });
+        assert_position({left: 20, top: 10, right: 120, bottom: 110});
       });
     });
   });
@@ -778,37 +705,6 @@ describe('geo.camera', function () {
     c.zoom(5);
 
     expect(c.toString()).toEqual(c.ppMatrix(c.transform));
-  });
-
-  it('Affine transform generator', function () {
-    var t, v;
-
-    t = geo.camera.affine(
-      {x: 10, y: 20, z: 30},
-      {x: 2, y: 3, z: 4},
-      {x: -10, y: -20, z: -30}
-    );
-
-    v = vec3.transformMat4(
-      vec3.create(),
-      vec3.fromValues(1, 0, 0),
-      t
-    );
-    expect(v).toEqual(vec3.fromValues(12, 40, 90));
-
-    v = vec3.transformMat4(
-      vec3.create(),
-      vec3.fromValues(0, 1, 0),
-      t
-    );
-    expect(v).toEqual(vec3.fromValues(10, 43, 90));
-
-    v = vec3.transformMat4(
-      vec3.create(),
-      vec3.fromValues(0, 0, 1),
-      t
-    );
-    expect(v).toEqual(vec3.fromValues(10, 40, 94));
   });
 
   it('Unknown transform error', function () {

@@ -120,30 +120,10 @@ var camera = function (spec) {
    * @protected
    */
   this._createProj = function () {
-    var s = this.constructor.bounds.near / this.constructor.bounds.far;
-
-    // call mat4.frustum or mat4.ortho here
-    if (this._projection === 'perspective') {
-      mat4.frustum(
-        this._proj,
-        this.constructor.bounds.left * s,
-        this.constructor.bounds.right * s,
-        this.constructor.bounds.bottom * s,
-        this.constructor.bounds.top * s,
-        -this.constructor.bounds.near,
-        -this.constructor.bounds.far
-      );
-    } else if (this._projection === 'parallel') {
-      mat4.ortho(
-        this._proj,
-        this.constructor.bounds.left,
-        this.constructor.bounds.right,
-        this.constructor.bounds.bottom,
-        this.constructor.bounds.top,
-        this.constructor.bounds.near,
-        this.constructor.bounds.far
-      );
-    }
+    var func = this._projection === 'perspective' ? mat4.frustum : mat4.ortho,
+        clipbounds = this._clipbounds[this._projection];
+    func(this._proj, clipbounds.left, clipbounds.right, clipbounds.bottom,
+         clipbounds.top, clipbounds.near, clipbounds.far);
   };
 
   /**
@@ -156,7 +136,7 @@ var camera = function (spec) {
     this._bounds = null;
     this._display = null;
     this._world = null;
-    this._transform = camera.combine(this._proj, this._view);
+    this._transform = mat4.multiply(util.mat4AsArray(), this._proj, this._view);
     mat4.invert(this._inverse, this._transform);
     this.geoTrigger(geo_event.camera.view, {
       camera: this
@@ -203,40 +183,81 @@ var camera = function (spec) {
   });
 
   /**
-   * Getter for the "display" matrix.  This matrix converts from
-   * world coordinates into display coordinates.  This matrix exists to
-   * generate matrix3d css transforms that can be used in layers that
-   * render on the DOM.  Read only.
+   * Getter/setter for the render clipbounds.  Opposite bounds must have
+   * different values.  There are independant clipbounds for each projection
+   * (parallel and perspective); switching the projection will switch to the
+   * clipbounds.  Individual values of the clipbounds can be set either via a
+   * command like `camera.clipbounds = {near: 3, far: 1}` or
+   * `camera.clipbounds.near = 3`.  In the second example, no check is made to
+   * ensure a non-zero volume clipbounds.
+   *
+   * @property {object} clipbounds The clipbounds for the current projection.
+   * @name geo.camera#clipbounds
+   */
+  Object.defineProperty(this, 'clipbounds', {
+    get: function () {
+      return this._clipbounds[this._projection];
+    },
+    set: function (bounds) {
+      var clipbounds = this._clipbounds[this._projection];
+      bounds = {
+        left: bounds.left === undefined ? clipbounds.left : bounds.left,
+        right: bounds.right === undefined ? clipbounds.right : bounds.right,
+        top: bounds.top === undefined ? clipbounds.top : bounds.top,
+        bottom: bounds.bottom === undefined ? clipbounds.bottom : bounds.bottom,
+        near: bounds.near === undefined ? clipbounds.near : bounds.near,
+        far: bounds.far === undefined ? clipbounds.far : bounds.far
+      };
+      if (bounds.left === bounds.right) {
+        throw new Error('Left and right values must be different');
+      }
+      if (bounds.top === bounds.bottom) {
+        throw new Error('Top and bottom values must be different');
+      }
+      if (bounds.near === bounds.far) {
+        throw new Error('Near and far values must be different');
+      }
+      this._clipbounds[this._projection] = bounds;
+      this._createProj();
+      this._update();
+    }
+  });
+
+  /**
+   * Getter for the "display" matrix.  This matrix converts from world
+   * coordinates into display coordinates.  Read only.
    *
    * @property {mat4} display The display matrix.
    * @name geo.camera#display
    */
   Object.defineProperty(this, 'display', {
     get: function () {
-      var mat;
       if (this._display === null) {
-        mat = camera.affine(
-          {x: 1, y: 1}, // translate to: [0, 2] x [0, 2]
-          {
-            x: this.viewport.width / 2,
-            y: this.viewport.height / -2
-          }             // scale to: [0, width] x [-height, 0]
-        );
-
-        // applies mat to the transform (world -> normalized)
-        this._display = camera.combine(
-          mat,
-          this._transform
-        );
+        var b = this._clipbounds[this._projection];
+        var mat = util.mat4AsArray();
+        mat4.translate(mat, mat, [
+          this.viewport.width / 2,
+          this.viewport.height / 2,
+          0]);
+        mat4.scale(mat, mat, [
+          this.viewport.width / (b.right - b.left),
+          this.viewport.height / (b.bottom - b.top),
+          1]);
+        mat4.translate(mat, mat, [
+          -(b.left + b.right) / 2,
+          -(b.top + b.bottom) / 2,
+          0]);
+        mat4.multiply(mat, mat, this._transform);
+        this._display = mat;
       }
       return this._display;
     }
   });
 
   /**
-   * Getter for the "world" matrix.  This matrix converts from
-   * display coordinates into world coordinates.  This is constructed
-   * by inverting the "display" matrix.  Read only.
+   * Getter for the "world" matrix.  This matrix converts from display
+   * coordinates into world coordinates.  This is the inverse of the "display"
+   * matrix.  Read only.
    *
    * @property {mat4} world The world matrix.
    * @name geo.camera#world
@@ -422,7 +443,7 @@ var camera = function (spec) {
    * @returns {vec4} The point in clip space coordinates.
    */
   this._worldToClip4 = function (point) {
-    return camera.applyTransform(this._transform, point);
+    return vec4.transformMat4(point, point, this._transform);
   };
 
   /**
@@ -432,7 +453,7 @@ var camera = function (spec) {
    * @returns {vec4} The point in world space coordinates.
    */
   this._clipToWorld4 = function (point) {
-    return camera.applyTransform(this._inverse, point);
+    return vec4.transformMat4(point, point, this._inverse);
   };
 
   /**
@@ -474,92 +495,63 @@ var camera = function (spec) {
   };
 
   /**
-   * Project a vec4 from world space into viewport space.
-   * @param {vec4} point The point in world coordinates (mutated).
+   * Project a vector from world space into viewport (display) space.  The
+   * resulting vector always has the last component (`w`) equal to 1.
+   *
+   * @param {vec2|vec3|vec4} point The point in world coordinates.
    * @returns {vec4} The point in display coordinates.
-   *
-   * @note For the moment, this computation assumes the following:
-   *   * point[3] > 0
-   *   * depth range [0, 1]
-   *
-   * The clip space z and w coordinates are returned with the window
-   * x/y coordinates.
    */
   this.worldToDisplay4 = function (point) {
-    // This is because z = 0 is the far plane exposed to the user, but
-    // internally the far plane is at -2.
-    point[2] -= 2;
-
-    // convert to clip space
-    this._worldToClip4(point);
-
-    // apply projection specific transformation
-    point = this.applyProjection(point);
-
-    // convert to display space
-    point[0] = this._viewport.width * (1 + point[0]) / 2.0;
-    point[1] = this._viewport.height * (1 - point[1]) / 2.0;
-    point[2] = (1 + point[2]) / 2.0;
+    point = [point[0], point[1], point[2] || 0, point[3] || 1];
+    point = vec4.transformMat4(point, point, this.display);
+    if (point[3] && point[3] !== 1) {
+      point = [point[0] / point[3], point[1] / point[3], point[2] / point[3], 1];
+    }
     return point;
   };
 
   /**
-   * Project a vec4 from display space into world space in place.
-   * @param {vec4} point The point in display coordinates (mutated).
-   * @returns {vec4} The point in world space coordinates.
+   * Project a vector from viewport (display) space into world space.  The
+   * resulting vector always has the last component (`w`) equal to 1.
    *
-   * @note For the moment, this computation assumes the following:
-   *   * point[3] > 0
-   *   * depth range [0, 1]
+   * @param {vec2|vec3|vec4} point The point in display coordinates.
+   * @returns {vec4} The point in world space coordinates.
    */
   this.displayToWorld4 = function (point) {
-    // convert to clip space
-    point[0] = 2 * point[0] / this._viewport.width - 1;
-    point[1] = -2 * point[1] / this._viewport.height + 1;
-    point[2] = 2 * point[2] - 1;
-
-    // invert projection transform
-    point = this.unapplyProjection(point);
-
-    // convert to world coordinates
-    this._clipToWorld4(point);
-
-    // move far surface to z = 0
-    point[2] += 2;
+    point = [point[0], point[1], point[2] || 0, point[3] || 1];
+    point = vec4.transformMat4(point, point, this.world);
+    if (point[3] && point[3] !== 1) {
+      point = [point[0] / point[3], point[1] / point[3], point[2] / point[3], 1];
+    }
     return point;
   };
 
   /**
-   * Project a point object from world space into viewport space.
+   * Project a 2D point object from world space into viewport space.  `z` is
+   * set to `-this.clipbounds.near` to scale with the clip space.
+   *
    * @param {object} point The point in world coordinates.
    * @param {number} point.x
    * @param {number} point.y
    * @returns {object} The point in display coordinates.
    */
   this.worldToDisplay = function (point) {
-    // define some magic numbers:
-    var z = 0, // z coordinate of the surface in world coordinates
-        w = 1; // enables perspective divide (i.e. for point conversion)
-    point = this.worldToDisplay4(
-      [point.x, point.y, z, w]
-    );
+    var b = this._clipbounds[this._projection];
+    point = this.worldToDisplay4([point.x, point.y, -b.near]);
     return {x: point[0], y: point[1]};
   };
 
   /**
-   * Project a point object from viewport space into world space.
+   * Project a 2D point object from viewport space into world space.  `z` is
+   * set to -1 to scale with the clip space.
+   *
    * @param {object} point The point in display coordinates.
    * @param {number} point.x
    * @param {number} point.y
    * @returns {object} The point in world coordinates.
    */
   this.displayToWorld = function (point) {
-    // define some magic numbers:
-    var z = 1, // the z coordinate of the surface
-        w = 2; // perspective divide at z = 1
-    point = this.displayToWorld4(
-      [point.x, point.y, z, w]
-    );
+    point = this.displayToWorld4([point.x, point.y, -1]);
     return {x: point[0], y: point[1]};
   };
 
@@ -578,10 +570,7 @@ var camera = function (spec) {
     ul = this.displayToWorld({x: 0, y: 0});
     ur = this.displayToWorld({x: this._viewport.width, y: 0});
     ll = this.displayToWorld({x: 0, y: this._viewport.height});
-    lr = this.displayToWorld({
-      x: this._viewport.width,
-      y: this._viewport.height
-    });
+    lr = this.displayToWorld({x: this._viewport.width, y: this._viewport.height});
 
     bds.left = Math.min(ul.x, ur.x, ll.x, lr.x);
     bds.bottom = Math.min(ul.y, ur.y, ll.y, lr.y);
@@ -768,19 +757,13 @@ var camera = function (spec) {
 
   /**
    * Returns a CSS transform that converts (by default) from world coordinates
-   * into display coordinates.  This allows users of this module to
-   * position elements using world coordinates directly inside DOM
-   * elements.
+   * into display coordinates.  This allows users of this module to position
+   * elements using world coordinates directly inside DOM elements.  This
+   * expects that the transform-origin is 0 0.
    *
-   * @note This transform will not take into account projection specific
-   * transforms.  For perspective projections, one can use the properties
-   * `perspective` and `perspective-origin` to apply the projection
-   * in css directly.
-   *
-   * @param {string} transform The transform to return
-   *   * display
-   *   * world
-   * @returns {string} The css transform string
+   * @param {string} [transform='display'] The transform to return.  One of
+   *   `display` or `world`.
+   * @returns {string} The css transform string.
    */
   this.css = function (transform) {
     var m;
@@ -855,6 +838,7 @@ var camera = function (spec) {
     return this._transform;
   };
 
+  this._clipbounds = this.constructor.clipbounds;
   // initialize the view matrix
   this._resetView();
 
@@ -881,103 +865,49 @@ camera.projection = {
 };
 
 /**
- * Camera clipping bounds, probably shouldn't be modified.
+ * Default camera clipping bounds.  Some features and renderers may rely on the
+ * far clip value being more positive than the near clip value.
  */
-camera.bounds = {
-  left: -1,
-  right: 1,
-  top: 1,
-  bottom: -1,
-  far: -2,
-  near: -1
+camera.clipbounds = {
+  perspective: {
+    left: -1,
+    right: 1,
+    top: 1,
+    bottom: -1,
+    far: 2000,
+    near: 0.01
+  },
+  parallel: {
+    left: -1,
+    right: 1,
+    top: 1,
+    bottom: -1,
+    far: -1,
+    near: 1
+  }
 };
 
 /**
- * Output a mat4 as a css transform.
+ * Output a mat4 as a css transform.  This expects that the transform-origin is
+ * 0 0.
+ *
  * @param {mat4} t A matrix transform.
  * @returns {string} A css transform string.
  */
 camera.css = function (t) {
-  return (
-    'matrix3d(' +
-      [
-        t[0].toFixed(20),
-        t[1].toFixed(20),
-        t[2].toFixed(20),
-        t[3].toFixed(20),
-        t[4].toFixed(20),
-        t[5].toFixed(20),
-        t[6].toFixed(20),
-        t[7].toFixed(20),
-        t[8].toFixed(20),
-        t[9].toFixed(20),
-        t[10].toFixed(20),
-        t[11].toFixed(20),
-        t[12].toFixed(20),
-        t[13].toFixed(20),
-        t[14].toFixed(20),
-        t[15].toFixed(20)
-      ].join(',') +
-    ')'
-  );
-};
-
-/**
- * Generate a mat4 representing an affine coordinate transformation.
- *
- * For the following affine transform:
- *
- *    x |-> m * (x + a) + b
- *
- * applies the css transform:
- *
- *    translate(b) scale(m) translate(a) .
- *
- * If a parameter is `null` or `undefined`, that component is skipped.
- *
- * @param {object?} pre Coordinate offset **before** scaling.
- * @param {object?} scale Coordinate scaling.
- * @param {object?} post Coordinate offset **after** scaling.
- * @returns {mat4} The new transform matrix.
- */
-camera.affine = function (pre, scale, post) {
-  var mat = util.mat4AsArray();
-
-  // Note: mat4 operations are applied to the right side of the current
-  // transform, so the first applied here is the last applied to the
-  // coordinate.
-  if (post) {
-    mat4.translate(mat, mat, [post.x || 0, post.y || 0, post.z || 0]);
-  }
-  if (scale) {
-    mat4.scale(mat, mat, [scale.x || 1, scale.y || 1, scale.z || 1]);
-  }
-  if (pre) {
-    mat4.translate(mat, mat, [pre.x || 0, pre.y || 0, pre.z || 0]);
-  }
-  return mat;
-};
-
-/**
- * Apply the given transform matrix to a point in place.
- * @param {mat4} t
- * @param {vec4} pt
- * @returns {vec4}
- */
-camera.applyTransform = function (t, pt) {
-  return vec4.transformMat4(pt, pt, t);
-};
-
-/**
- * Combine two transforms by multiplying their matrix representations.
- * @note The second transform provided will be the first applied in the
- * coordinate transform.
- * @param {mat4} A
- * @param {mat4} B
- * @returns {mat4} A * B
- */
-camera.combine = function (A, B) {
-  return mat4.multiply(util.mat4AsArray(), A, B);
+  return 'matrix3d(' +
+      t.map(function (val) {
+        /* Format each value with a certain precision, but don't use scientific
+         * notation or keep needless trailing zeroes. */
+        val = (+val).toPrecision(15);
+        if (val.indexOf('e') >= 0) {
+          val = (+val).toString();
+        } else if (val.indexOf('.') >= 0) {
+          val = val.replace(/(\.|)0+$/, '');
+        }
+        return val;
+      }).join(',') +
+    ')';
 };
 
 inherit(camera, object);
