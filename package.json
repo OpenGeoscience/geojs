@@ -70,7 +70,7 @@
     "nib": "^1.1.2",
     "pako": "^1.0.6",
     "phantomjs-prebuilt": "^2.1.5",
-    "proj4": "2.3.16",
+    "proj4": "^2.4.4",
     "pug": "^2.0.3",
     "pug-lint": "^2.4.0",
     "pug-loader": "^2.4.0",

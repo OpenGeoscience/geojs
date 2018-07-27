@@ -236,6 +236,10 @@ describe('geo.transform', function () {
       expect(closeToEqual(geo.transform.transformCoordinates(source, target, {x: 1, y: 2}), {x: 1, y: -2})).toBe(true);
       expect(closeToEqual(geo.transform.transformCoordinates(source, target, {x: 3, y: 4, z: 5}), {x: 3, y: -4, z: 5})).toBe(true);
     });
+    it('coordinate format - single object with strings', function () {
+      expect(closeToEqual(geo.transform.transformCoordinates(source, target, {x: '1', y: '2'}), {x: 1, y: -2})).toBe(true);
+      expect(closeToEqual(geo.transform.transformCoordinates(source, target, {x: '3', y: '4', z: '5'}), {x: 3, y: -4, z: 5})).toBe(true);
+    });
     it('empty array', function () {
       var res = geo.transform.transformCoordinates(source, target, []);
       expect(res instanceof Array).toBe(true);
@@ -247,9 +251,13 @@ describe('geo.transform', function () {
       expect(res instanceof Array).toBe(true);
       expect(res.length).toBe(1);
       expect(closeToEqual(res[0], {x: 1, y: -2})).toBe(true);
+      res = geo.transform.transformCoordinates(source, target, [{x: '1', y: '2'}]);
+      expect(closeToEqual(res[0], {x: 1, y: -2})).toBe(true);
       res = geo.transform.transformCoordinates(source, target, [{x: 3, y: 4, z: 5}]);
       expect(res instanceof Array).toBe(true);
       expect(res.length).toBe(1);
+      expect(closeToEqual(res[0], {x: 3, y: -4, z: 5})).toBe(true);
+      res = geo.transform.transformCoordinates(source, target, [{x: '3', y: '4', z: '5'}]);
       expect(closeToEqual(res[0], {x: 3, y: -4, z: 5})).toBe(true);
     });
     it('coordinate format - single array', function () {
@@ -257,6 +265,8 @@ describe('geo.transform', function () {
       expect(closeToArray(geo.transform.transformCoordinates(source, target, [3, 4, 5]), [3, -4, 5])).toBe(true);
       expect(closeToArray(geo.transform.transformCoordinates(source, target, [1, 2, 3, 4, 5, 6], 2), [1, -2, 3, -4, 5, -6])).toBe(true);
       expect(closeToArray(geo.transform.transformCoordinates(source, target, [1, 2, 3, 4, 5, 6], 3), [1, -2, 3, 4, -5, 6])).toBe(true);
+      expect(closeToArray(geo.transform.transformCoordinates(source, target, ['1', '2']), [1, -2])).toBe(true);
+      expect(closeToArray(geo.transform.transformCoordinates(source, target, ['3', '4', '5']), [3, -4, 5])).toBe(true);
     });
     it('coordinate format - array of arrays', function () {
       var res;
@@ -265,10 +275,14 @@ describe('geo.transform', function () {
       expect(closeToArray(res[0], [1, -2])).toBe(true);
       expect(closeToArray(res[1], [3, -4])).toBe(true);
       expect(closeToArray(res[2], [5, -6])).toBe(true);
+      res = geo.transform.transformCoordinates(source, target, [['1', '2'], ['3', '4'], ['5', '6']]);
+      expect(closeToArray(res[0], [1, -2])).toBe(true);
       res = geo.transform.transformCoordinates(source, target, [[1, 2, 3], [4, 5, 6]]);
       expect(res.length).toBe(2);
       expect(closeToArray(res[0], [1, -2, 3])).toBe(true);
       expect(closeToArray(res[1], [4, -5, 6])).toBe(true);
+      res = geo.transform.transformCoordinates(source, target, [['1', '2', '3'], ['4', '5', '6']]);
+      expect(closeToArray(res[0], [1, -2, 3])).toBe(true);
     });
     it('coordinate format - array of objects', function () {
       var res;
@@ -277,10 +291,14 @@ describe('geo.transform', function () {
       expect(closeToEqual(res[0], {x: 1, y: -2})).toBe(true);
       expect(closeToEqual(res[1], {x: 3, y: -4})).toBe(true);
       expect(closeToEqual(res[2], {x: 5, y: -6})).toBe(true);
+      res = geo.transform.transformCoordinates(source, target, [{x: '1', y: '2'}, {x: '3', y: '4'}, {x: '5', y: '6'}]);
+      expect(closeToEqual(res[0], {x: 1, y: -2})).toBe(true);
       res = geo.transform.transformCoordinates(source, target, [{x: 1, y: 2, z: 3}, {x: 4, y: 5, z: 6}]);
       expect(res.length).toBe(2);
       expect(closeToEqual(res[0], {x: 1, y: -2, z: 3})).toBe(true);
       expect(closeToEqual(res[1], {x: 4, y: -5, z: 6})).toBe(true);
+      res = geo.transform.transformCoordinates(source, target, [{x: '1', y: '2', z: '3'}, {x: '4', y: '5', z: '6'}]);
+      expect(closeToEqual(res[0], {x: 1, y: -2, z: 3})).toBe(true);
     });
   });
 
