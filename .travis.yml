@@ -43,7 +43,7 @@ before_install:
   # Prune the npm packages.  If this fails for any reason, just remove them all
   - npm prune || rm -r node_modules
   # Get a specific version of Chrome
-  - curl -L -C - https://www.slimjet.com/chrome/download-chrome.php?file=lnx%2Fchrome64_67.0.3396.79.deb -o "${HOME}/cache/chrome64_67.0.3396.79.deb"
+  - if ! [ -f "${HOME}/cache/chrome64_67.0.3396.79.deb" ]; then curl -L https://www.slimjet.com/chrome/download-chrome.php?file=lnx%2Fchrome64_67.0.3396.79.deb -o "${HOME}/cache/chrome64_67.0.3396.79.deb"; fi
   - sudo dpkg -i "${HOME}/cache/chrome64_67.0.3396.79.deb"
   - google-chrome --version
 

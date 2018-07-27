@@ -208,6 +208,7 @@ var osmtiles_middleware = function (config) {
 var ChromeFlags = [
   '--no-sandbox',  // necessary to run tests in a docker
   '--no-pings',    // no auditing pings
+  '--force-color-profile=srgb',  // for consistent tests
   '--disable-background-networking',
   '--disable-component-extensions-with-background-pages'
 ];

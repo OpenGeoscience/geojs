@@ -103,7 +103,9 @@ var gl_contourFeature = function (arg) {
           '    } else {',
           '      step = valueVar;',
           '    }',
-          '    clr = texture2D(sampler2d, vec2(step / steps, 0.0));',
+          // our texture is padded on either end by a repeated value to ensure
+          // we interpolate smoothly at the ends.
+          '    clr = texture2D(sampler2d, vec2((step + 1.0) / (steps + 2.0), 0.0));',
           '  }',
           '  gl_FragColor = vec4(clr.rgb, clr.a * opacityVar);',
           '}'
@@ -137,11 +139,14 @@ var gl_contourFeature = function (arg) {
       contour.maxColor.a]);
     m_stepsUniform.set(contour.colorMap.length);
     m_steppedUniform.set(contour.stepped);
-    for (i = 0; i < contour.colorMap.length; i += 1) {
-      colorTable.push(contour.colorMap[i].r * 255);
-      colorTable.push(contour.colorMap[i].g * 255);
-      colorTable.push(contour.colorMap[i].b * 255);
-      colorTable.push(contour.colorMap[i].a * 255);
+    // pad the colortable by repeating the end colors an extra time to ensure
+    // interpolation never goes off of the colormap.
+    for (i = -1; i < contour.colorMap.length + 1; i += 1) {
+      j = Math.max(0, Math.min(contour.colorMap.length - 1, i));
+      colorTable.push(contour.colorMap[j].r * 255);
+      colorTable.push(contour.colorMap[j].g * 255);
+      colorTable.push(contour.colorMap[j].b * 255);
+      colorTable.push(contour.colorMap[j].a * 255);
     }
     m_texture.setColorTable(colorTable);
     contour.pos = transform.transformCoordinates(

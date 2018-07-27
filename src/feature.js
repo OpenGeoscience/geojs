@@ -23,12 +23,14 @@ var geo_event = require('./event');
  * @property {string} [gcs] The interface gcs for this feature.  If `undefined`
  *   or `null`, this uses the layer's interface gcs.  This is a string used by
  *   {@link geo.transform}.
- * @property {number} [bin=0] The bin number is used to determine the order of
- *   multiple features on the same layer.  It has no effect except on the vgl
- *   renderer.  A negative value hides the feature without stopping interaction
- *   with it.  Otherwise, more features with higher bin numbers are drawn above
- *   those with lower bin numbers.  If two features have the same bin number,
- *   their order relative to one another is indeterminate and may be unstable.
+ * @property {number} [bin=null] The bin number is used to determine the order
+ *   of multiple features on the same layer.  It has no effect except on the
+ *   vgl renderer.  A negative value hides the feature without stopping
+ *   interaction with it.  Otherwise, more features with higher bin numbers are
+ *   drawn above those with lower bin numbers.  If two features have the same
+ *   bin number, their order relative to one another is indeterminate and may
+ *   be unstable.  A value of `null` will use the current position of the
+ *   feature within its parent's list of children as the bin number.
  * @property {geo.renderer?} [renderer] A reference to the renderer used for
  *   the feature.
  * @property {object} [style] An object that contains style values for the
@@ -108,7 +110,7 @@ var feature = function (arg) {
       m_layer = arg.layer === undefined ? null : arg.layer,
       m_gcs = arg.gcs,
       m_visible = arg.visible === undefined ? true : arg.visible,
-      m_bin = arg.bin === undefined ? 0 : arg.bin,
+      m_bin = arg.bin === undefined ? null : arg.bin,
       m_renderer = arg.renderer === undefined ? null : arg.renderer,
       m_dataTime = timestamp(),
       m_buildTime = timestamp(),
@@ -646,17 +648,24 @@ var feature = function (arg) {
    * Get/Set bin of the feature.  The bin number is used to determine the order
    * of multiple features on the same layer.  It has no effect except on the
    * vgl renderer.  A negative value hides the feature without stopping
-   * interaction with it.  Otherwise, more features with higher bin numbers are
+   * interaction with it.  Otherwise, features with higher bin numbers are
    * drawn above those with lower bin numbers.  If two features have the same
    * bin number, their order relative to one another is indeterminate and may
    * be unstable.
    *
    * @param {number} [val] The new bin number.  If `undefined`, return the
-   *    current bin number.
+   *    current bin number.  If `null`, the bin is dynamically computed based
+   *    on order within the parent.  If children are nested, this may not be
+   *    what is desired.
    * @returns {number|this} The current bin number or a reference to `this`.
    */
   this.bin = function (val) {
     if (val === undefined) {
+      if (m_bin === null) {
+        var parent = this.parent(),
+            idx = parent ? parent.children().indexOf(m_this) : -1;
+        return idx >= 0 ? idx : 0;
+      }
       return m_bin;
     } else {
       m_bin = val;
