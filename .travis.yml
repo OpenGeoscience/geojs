@@ -51,6 +51,8 @@ install:
   # travis moved to "npm ci", but that fails with canvas-prebuilt as it tries
   # to install it before node-pre-gyp
   - npm install
+  # Install for the website build
+  - npm run setup-website
 
 before_script:
   - export DISPLAY=:99.0
@@ -63,6 +65,8 @@ script:
   - mkdir _build
   - ctest -S cmake/travis_build.cmake -VV || true
   - if [ -f _build/test_failed ] ; then false ; fi
+  # Build the website to ensure that it will pass
+  - npm run build-website
 
 after_failure:
   # Upload test results.  First make them smaller with optipng.
@@ -79,3 +83,11 @@ env:
   global:
     - secure: JYWs3zJV09uAb7CvX32pADRYTH2XqSGvImNEI6zVFxJxs9r0JsGgyOTz4PPBgs3dv1OjVBXqxu4GD2ZBKeo0Ax13ZnBNVR/BacupBtIwXbxp/FG2lr+WBzE0YnEBhAF/mW5DEkNBWJyLSiBlxYA5QFAAHYwb/GOADl+Z9Qi2FIU=
     - secure: on13Ka+3jkLDCXxqzxuT+CY4sPM0Zxfbe9M2F3LE0yhN2ww5vaBKdbTrzEWa0TOlBkM2qQUPAFybjHXfHeRyKpZDlsssjogH8YO5qx4zFRP5ZB9ny39QAqBsfZTuXt2WmOTLEcXkByYXVH8my/8ZqZqofSeBZsZdeauzoLbr0R0=
+
+deploy:
+  - provider: pages
+    local-dir: website/public
+    github-token: $GITHUB_TOKEN
+    skip-cleanup: true
+    on:
+      branch: master
