@@ -1,5 +1,6 @@
 var $ = require('jquery');
 var proj4 = require('proj4');
+proj4 = proj4.__esModule ? proj4.default : proj4;
 
 var throttle = require('./throttle');
 var mockVGL = require('./mockVGL');

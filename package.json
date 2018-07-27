@@ -70,7 +70,7 @@
     "nib": "^1.1.2",
     "pako": "^1.0.6",
     "phantomjs-prebuilt": "^2.1.5",
-    "proj4": "2.3.16",
+    "proj4": "^2.4.4",
     "pug": "^2.0.3",
     "pug-lint": "^2.4.0",
     "pug-loader": "^2.4.0",
@@ -119,7 +119,7 @@
     "docs": "jsdoc --pedantic -d dist/apidocs -r src -c jsdoc.conf.json",
     "website": "cd website && npx hexo server",
     "setup-website": "cd website && npm install",
-    "build-website": "npm run build && cp -a dist/built/. website/source/built && npm run build-website-examples && npm run build-website-tutorials && npm run docs && cp -ar dist/data/. website/source/data && cp -ar dist/apidocs/. website/source/apidocs && cd website && npm install && rm -f db.json && npx hexo generate"
+    "build-website": "npm run build && cp -a dist/built/. website/source/built && npm run build-website-examples && npm run build-website-tutorials && npm run docs && cd dist && find data \\( -name tiles -o -name base-images -o -name '*-hash-stamp' -o -name '*.tgz' \\) -prune -o \\( -print0 \\) | cpio -pmdL0 ../website/source && cp -ar apidocs/. ../website/source/apidocs && cd ../website && npm install && rm -f db.json && npx hexo generate"
   },
   "keywords": [
     "map",
