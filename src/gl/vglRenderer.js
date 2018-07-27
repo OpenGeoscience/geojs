@@ -317,48 +317,45 @@ inherit(vglRenderer, renderer);
 
 registerRenderer('vgl', vglRenderer);
 
-(function () {
-  'use strict';
+/* Code for checking if the renderer is supported */
 
-  var checkedWebGL;
+var checkedWebGL;
 
-  /**
-   * Report if the vgl renderer is supported.  This is just a check if webGL is
-   * supported and available.
-   *
-   * @returns {boolean} true if available.
-   */
-  vglRenderer.supported = function () {
-    if (checkedWebGL === undefined) {
-      /* This is extracted from what Modernizr uses. */
-      var canvas, ctx, exts; // eslint-disable-line no-unused-vars
-      try {
-        canvas = document.createElement('canvas');
-        ctx = (canvas.getContext('webgl') ||
-               canvas.getContext('experimental-webgl'));
-        exts = ctx.getSupportedExtensions();
-        checkedWebGL = true;
-      } catch (e) {
-        console.warn('No webGL support');
-        checkedWebGL = false;
-      }
-      canvas = undefined;
-      ctx = undefined;
-      exts = undefined;
+/**
+ * Report if the vgl renderer is supported.  This is just a check if webGL is
+ * supported and available.
+ *
+ * @returns {boolean} true if available.
+ */
+vglRenderer.supported = function () {
+  if (checkedWebGL === undefined) {
+    /* This is extracted from what Modernizr uses. */
+    var canvas, ctx, exts; // eslint-disable-line no-unused-vars
+    try {
+      canvas = document.createElement('canvas');
+      ctx = (canvas.getContext('webgl') ||
+             canvas.getContext('experimental-webgl'));
+      exts = ctx.getSupportedExtensions();
+      checkedWebGL = true;
+    } catch (e) {
+      console.warn('No webGL support');
+      checkedWebGL = false;
     }
-    return checkedWebGL;
-  };
+    canvas = undefined;
+    ctx = undefined;
+    exts = undefined;
+  }
+  return checkedWebGL;
+};
 
-  /**
-   * If the vgl renderer is not supported, supply the name of a renderer that
-   * should be used instead.  This asks for the null renderer.
-   *
-   * @returns {null} null for the null renderer.
-   */
-  vglRenderer.fallback = function () {
-    return null;
-  };
-
-})();
+/**
+ * If the vgl renderer is not supported, supply the name of a renderer that
+ * should be used instead.  This asks for the null renderer.
+ *
+ * @returns {null} null for the null renderer.
+ */
+vglRenderer.fallback = function () {
+  return null;
+};
 
 module.exports = vglRenderer;

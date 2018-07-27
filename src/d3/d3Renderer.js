@@ -666,35 +666,33 @@ inherit(d3Renderer, renderer);
 
 registerRenderer('d3', d3Renderer);
 
-(function () {
-  'use strict';
+/* Code for checking if the renderer is supported */
 
-  /**
-   * Report if the d3 renderer is supported.  This is just a check if d3 is
-   * available.
-   *
-   * @returns {boolean} true if available.
-   */
-  d3Renderer.supported = function () {
-    delete d3Renderer.d3;
-    // webpack expects optional dependencies to be wrapped in a try-catch
-    try {
-      d3Renderer.d3 = require('d3');
-    } catch (_error) {}
-    return d3Renderer.d3 !== undefined;
-  };
+/**
+ * Report if the d3 renderer is supported.  This is just a check if d3 is
+ * available.
+ *
+ * @returns {boolean} true if available.
+ */
+d3Renderer.supported = function () {
+  delete d3Renderer.d3;
+  // webpack expects optional dependencies to be wrapped in a try-catch
+  try {
+    d3Renderer.d3 = require('d3');
+  } catch (_error) {}
+  return d3Renderer.d3 !== undefined;
+};
 
-  /**
-   * If the d3 renderer is not supported, supply the name of a renderer that
-   * should be used instead.  This asks for the null renderer.
-   *
-   * @returns {null} `null` for the null renderer.
-   */
-  d3Renderer.fallback = function () {
-    return null;
-  };
+/**
+ * If the d3 renderer is not supported, supply the name of a renderer that
+ * should be used instead.  This asks for the null renderer.
+ *
+ * @returns {null} `null` for the null renderer.
+ */
+d3Renderer.fallback = function () {
+  return null;
+};
 
-  d3Renderer.supported();  // cache reference to d3 if it is available
-})();
+d3Renderer.supported();  // cache reference to d3 if it is available
 
 module.exports = d3Renderer;

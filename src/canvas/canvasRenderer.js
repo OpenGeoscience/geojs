@@ -154,40 +154,38 @@ inherit(canvasRenderer, renderer);
 
 registerRenderer('canvas', canvasRenderer);
 
-(function () {
-  'use strict';
+/* Code for checking if the renderer is supported */
 
-  var checkedCanvas;
+var checkedCanvas;
 
-  /**
-   * Report if the canvas renderer is supported.
-   *
-   * @returns {boolean} true if available.
-   */
-  canvasRenderer.supported = function () {
-    if (checkedCanvas === undefined) {
-      /* This is extracted from what Modernizr uses. */
-      var canvas; // eslint-disable-line no-unused-vars
-      try {
-        canvas = document.createElement('canvas');
-        checkedCanvas = !!(canvas.getContext && canvas.getContext('2d'));
-      } catch (e) {
-        checkedCanvas = false;
-      }
-      canvas = undefined;
+/**
+ * Report if the canvas renderer is supported.
+ *
+ * @returns {boolean} true if available.
+ */
+canvasRenderer.supported = function () {
+  if (checkedCanvas === undefined) {
+    /* This is extracted from what Modernizr uses. */
+    var canvas; // eslint-disable-line no-unused-vars
+    try {
+      canvas = document.createElement('canvas');
+      checkedCanvas = !!(canvas.getContext && canvas.getContext('2d'));
+    } catch (e) {
+      checkedCanvas = false;
     }
-    return checkedCanvas;
-  };
+    canvas = undefined;
+  }
+  return checkedCanvas;
+};
 
-  /**
-   * If the canvas renderer is not supported, supply the name of a renderer that
-   * should be used instead.  This asks for the null renderer.
-   *
-   * @returns {null} `null` for the null renderer.
-   */
-  canvasRenderer.fallback = function () {
-    return null;
-  };
-})();
+/**
+ * If the canvas renderer is not supported, supply the name of a renderer that
+ * should be used instead.  This asks for the null renderer.
+ *
+ * @returns {null} `null` for the null renderer.
+ */
+canvasRenderer.fallback = function () {
+  return null;
+};
 
 module.exports = canvasRenderer;
