@@ -314,35 +314,86 @@ geo_event.parallelprojection = 'geo_parallelprojection';
  */
 geo_event.feature = {
   /**
-   * The event is the feature version of {@link geo.event.mousemove}.
+   * The event is the feature version of {@link geo.event.mousemove}.  It is
+   * fired for each data component of a feature below the mouse when the mouse
+   * moves.
+   *
    * @event geo.event.feature.mousemove
+   * @property {object} data The feature data the mouse is over.
+   * @property {number} index The index of the feature data the mouse is over.
+   * @property {object} extra Extra information about the feature and mouse
+   *    location.
+   * @property {geo.mouseState} mouse The mouse state.
+   * @property {number} eventID a monotonically increasing event number.  All
+   *    features that the mouse moves over simultaneously will have the same
+   *    `eventID`.
+   * @property {boolean} top True if this is the topmost data element.
    */
   mousemove:  'geo_feature_mousemove',
   /**
-   * The event is the feature version of {@link geo.event.mouseover}.
+   * This event is fired for each data component of a feature when the mouse is
+   * above it.
+   *
    * @event geo.event.feature.mouseover
+   * @property {object} data The feature data the mouse is over.
+   * @property {number} index The index of the feature data the mouse is over.
+   * @property {object} extra Extra information about the feature and mouse
+   *    location.
+   * @property {geo.mouseState} mouse The mouse state.
+   * @property {number} eventID a monotonically increasing event number.  All
+   *    features that the mouse goes over simultaneously will have the same
+   *    `eventID`.
+   * @property {boolean} top True if this is the topmost data element.
    */
   mouseover:  'geo_feature_mouseover',
   /**
-   * The event contains the `feature`, the `mouse` record, the `previous`
-   * record of data elements that were under the mouse, and `over`, the new
-   * record of data elements that are unrder the mouse.
+   * This event is fired when the mouse changes either which feature components
+   * or the order of the feature components that it is over.
+   *
    * @event geo.event.feature.mouseover_order
-  */
+   * @property {geo.feature} feature The feature.
+   * @property {geo.mouseState} mouse The mouse state.
+   * @proeprty {geo.feature.searchResult} over A list of feature components
+   *    that the mouse is over.
+   * @proeprty {number[]} The indices of the data components that the mouse
+   *    was over before this event.
+   */
   mouseover_order: 'geo_feature_mouseover_order',
   /**
-   * The event is the feature version of {@link geo.event.mouseout}.
+   * The event is the feature version of {@link geo.event.mouseout}.a
+   * This event is fired for each data component of a feature when the mouse is
+   * no longer above it.
+   *
    * @event geo.event.feature.mouseout
+   * @property {object} data The feature data the mouse is over.
+   * @property {number} index The index of the feature data the mouse is over.
+   * @property {object} extra Extra information about the feature and mouse
+   *    location.
+   * @property {geo.mouseState} mouse The mouse state.
+   * @property {number} eventID a monotonically increasing event number.  All
+   *    features that the mouse goes over simultaneously will have the same
+   *    `eventID`.
+   * @property {boolean} top True if this is the topmost data element.
    */
   mouseout:   'geo_feature_mouseout',
   /**
-   * The event is the feature version of {@link geo.event.mouseon}.
+   * This event is fired when mouse is over a new topmost data component of a
+   * feature.
+   *
    * @event geo.event.feature.mouseon
+   * @property {object} data The feature data the mouse is on.
+   * @property {number} index The index of the feature data the mouse is on.
+   * @property {geo.mouseState} mouse The mouse state.
    */
   mouseon:    'geo_feature_mouseon',
   /**
-   * The event is the feature version of {@link geo.event.mouseoff}.
+   * This event is fired when mouse is no longer has the same topmost data
+   * component of a feature.
+   *
    * @event geo.event.feature.mouseoff
+   * @property {object} data The feature data the mouse is off.
+   * @property {number} index The index of the feature data the mouse is off.
+   * @property {geo.mouseState} mouse The mouse state.
    */
   mouseoff:   'geo_feature_mouseoff',
   /**
@@ -354,16 +405,40 @@ geo_event.feature = {
    * The event contains the `feature`, the `mouse` record, and `over`, the
    * record of data elements that are unrder the mouse.
    * @event geo.event.feature.mouseclick_order
-  */
+   * @property {geo.feature} feature The feature that was clicked.
+   * @property {geo.mouseState} mouse The mouse state.
+   * @proeprty {geo.feature.searchResult} over A list of feature components
+   *    that the mouse is over.
+   */
   mouseclick_order: 'geo_feature_mouseclick_order',
   /**
-   * The event is the feature version of {@link geo.event.brushend}.
+   * This event is fired for each data component of a feature under a brush
+   * that has just finished its selection.
+   *
    * @event geo.event.feature.brushend
+   * @property {object} data The feature data the mouse is over.
+   * @property {number} index The index of the feature data the mouse is over.
+   * @property {geo.mouseState} mouse The mouse state.
+   * @property {geo.brushSelection} brush The current brush selection.
+   * @property {number} eventID a monotonically increasing event number.  All
+   *    features that the mouse goes over simultaneously will have the same
+   *    `eventID`.
+   * @property {boolean} top True if this is the topmost data element.
    */
   brushend:   'geo_feature_brushend',
   /**
-   * The event is the feature version of {@link geo.event.brush}.
+   * This event is fired for each data component of a feature under an active
+   * brush.
+   *
    * @event geo.event.feature.brush
+   * @property {object} data The feature data the mouse is over.
+   * @property {number} index The index of the feature data the mouse is over.
+   * @property {geo.mouseState} mouse The mouse state.
+   * @property {geo.brushSelection} brush The current brush selection.
+   * @property {number} eventID a monotonically increasing event number.  All
+   *    features that the mouse goes over simultaneously will have the same
+   *    `eventID`.
+   * @property {boolean} top True if this is the topmost data element.
    */
   brush:      'geo_feature_brush'
 };
