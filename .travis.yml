@@ -104,3 +104,10 @@ deploy:
       # We could emit artifacts on all branches rather than just master
       branch: master
       # all_branches: true
+  - provider: npm
+    api_key: $NPM_TOKEN
+    email: david.manthey@kitware.com
+    skip-cleanup: true
+    script: "npm publish"
+    on:
+      tags: true
