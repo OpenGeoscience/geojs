@@ -107,7 +107,7 @@ module.exports = {
       test: /vgl\.js$/,
       use: [
         'expose-loader?vgl',
-        'imports-loader?mat4=gl-mat4,vec4=gl-vec4,vec3=gl-vec3,vec2=gl-vec2,$=jquery'
+        'imports-loader?mat4=gl-mat4,vec4=gl-vec4,vec3=gl-vec3,$=jquery'
       ]
     }]
   }
