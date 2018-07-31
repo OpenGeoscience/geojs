@@ -15,43 +15,16 @@ are just building a simple page out of GeoJS like in the
 work well; however, when using GeoJS as part of an application,
 you may need to customize the loading order or versions of the
 bundled applications.  In this case, you may need to include the
-sources manually or bundle them yourself.  The following is a
-list of libraries used by GeoJS.
+sources manually or bundle them yourself.
 
-.. table:: Internally bundled GeoJS dependencies
-
-    +---------------------------+------------+---------------------------+
-    | Library                   | Version    | Component                 |
-    +===========================+============+===========================+
-    | `proj4`_                  | 2.4        | Core                      |
-    +---------------------------+------------+---------------------------+
-    | `GL matrix`_              | 2.1        | Core, GL renderer         |
-    +---------------------------+------------+---------------------------+
-    | `earcut`_                 | 2.1        | GL polygon feature        |
-    +---------------------------+------------+---------------------------+
-    | `jQuery`_                 | 3.3        | Core                      |
-    +---------------------------+------------+---------------------------+
-
-.. table:: External GeoJS dependencies
-
-    +---------------------------+------------+---------------------------+
-    | Library                   | Version    | Component                 |
-    +===========================+============+===========================+
-    | `d3`_                     | 3.5        | D3 renderer, UI widgets   |
-    +---------------------------+------------+---------------------------+
+See the package.json file for a list of required and optional dependencies used by GeoJS.
 
 .. note::
 
-    JQuery is now included in the distributed bundle.  Internally, this
+    JQuery is included in the distributed bundle.  Internally, this
     version will always be used and exposed as ``geo.jQuery``.  GeoJS
     will also set the global variable ``window.$`` if no other version
     is detected.
-
-.. _jQuery: http://jquery.com/
-.. _proj4: http://proj4js.org/
-.. _GL matrix: http://glmatrix.net/
-.. _earcut: https://github.com/mapbox/earcut/
-.. _d3: http://d3js.org/
 
 
 Software conventions
