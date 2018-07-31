@@ -91,3 +91,16 @@ deploy:
     skip-cleanup: true
     on:
       branch: master
+  - provider: releases
+    api_key: $GITHUB_TOKEN
+    file:
+      - dist/built/geo.js
+      - dist/built/geo.min.js
+      - dist/built/geo.ext.js
+      - dist/built/geo.ext.min.js
+    skip-cleanup: true
+    on:
+      tag: true
+      # We could emit artifacts on all branches rather than just master
+      branch: master
+      # all_branches: true
