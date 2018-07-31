@@ -100,4 +100,7 @@ deploy:
       - dist/built/geo.ext.min.js
     skip-cleanup: true
     on:
-      tag: true
+      tags: true
+      # We could emit artifacts on all branches rather than just master
+      branch: master
+      # all_branches: true
