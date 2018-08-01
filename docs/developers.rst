@@ -116,3 +116,15 @@ in a normal browser, run ``npm run start`` and browse to
 screen output is used, the browser must be running on the same machine as the
 ``npm run start`` command.
 
+Release Process
+---------------
+
+To make a new GeoJS release:
+
+- Update the version number in package.json.
+- Update the CHANGELOG.md file with changes since the last release
+- Commit to GitHub and merge to master
+- Tag the commit on GitHub with a tag of the form vX.Y.Z (e.g., v0.17.0).
+- After the release appears on GitHub, update the release notes with the changes since the last release.
+
+Tagging a commit on the master branch will trigger a build on travis-ci.org, at the end of which the new version will be published to npm and the build artifacts will be pushed to the tagged version on GitHub.
