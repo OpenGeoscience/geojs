@@ -444,6 +444,7 @@ var mapInteractor = function (args) {
    * @param {object} evt The event with metakeys.
    * @param {object} keys Keys used to trigger the event.  `keys.simulated` is
    *    true if artificially triggered.
+   * @fires geo.event.keyaction
    */
   this._handleKeys = function (action, evt, keys) {
     if (keys && keys.simulated === true) {
@@ -642,6 +643,7 @@ var mapInteractor = function (args) {
 
   /**
    * Retrigger a mouse movement with the current mouse state.
+   * @fires geo.event.mousemove
    */
   this.retriggerMouseMove = function () {
     m_this.map().geoTrigger(geo_event.mousemove, m_this.mouse());
@@ -987,6 +989,8 @@ var mapInteractor = function (args) {
    * Handle event when a mouse button is pressed.
    *
    * @param {jQuery.Event} evt The event that triggered this.
+   * @fires geo.event.brushstart
+   * @fires geo.event.actiondown
    */
   this._handleMouseDown = function (evt) {
     var action, actionRecord;
@@ -1095,6 +1099,7 @@ var mapInteractor = function (args) {
    * Handle mouse move event.
    *
    * @param {jQuery.Event} evt The event that triggered this.
+   * @fires geo.event.mousemove
    */
   this._handleMouseMove = function (evt) {
     if (m_paused) {
@@ -1196,6 +1201,8 @@ var mapInteractor = function (args) {
    * Handle mouse move event on the document (temporary bindings).
    *
    * @param {jQuery.Event} evt The event that triggered this.
+   * @fires geo.event.brush
+   * @fires geo.event.actionmove
    */
   this._handleMouseMoveDocument = function (evt) {
     var dx, dy, selectionObj;
@@ -1418,6 +1425,12 @@ var mapInteractor = function (args) {
    * Removes temporary bindings.
    *
    * @param {jQuery.Event} evt The event that triggered this.
+   * @fires geo.event.brushend
+   * @fires geo.event.actionselection
+   * @fires geo.event.actionup
+   * @fires geo.event.select
+   * @fires geo.event.zoomselect
+   * @fires geo.event.unzoomselect
    */
   this._handleMouseUpDocument = function (evt) {
     var selectionObj, oldAction;
@@ -1511,6 +1524,7 @@ var mapInteractor = function (args) {
    * events were triggered in the interim.
    *
    * @param {jQuery.Event} evt The event that triggered this.
+   * @fires geo.event.mouseup
    */
   this._handleMouseClick = function (evt) {
 
@@ -1649,6 +1663,7 @@ var mapInteractor = function (args) {
    *
    * @returns {function} A function that takes a jQuery.Event for mouse wheel
    *    actions.
+   * @fires geo.event.actionwheel
    */
   function throttled_wheel() {
     var my_queue = {};

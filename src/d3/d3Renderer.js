@@ -445,6 +445,7 @@ var d3Renderer = function (arg) {
    * @param {number} w New width in pixels.
    * @param {number} h New height in pixels.
    * @returns {this}
+   * @fires geo.event.d3.rescale
    */
   this._resize = function (x, y, w, h) {
     if (!m_corners) {

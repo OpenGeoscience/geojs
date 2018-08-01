@@ -381,6 +381,8 @@ var annotationLayer = function (args) {
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
    * @returns {this} The current layer.
+   * @fires geo.event.annotation.add_before
+   * @fires geo.event.annotation.add
    */
   this.addAnnotation = function (annotation, gcs) {
     var pos = $.inArray(annotation, m_annotations);
@@ -413,6 +415,7 @@ var annotationLayer = function (args) {
    * @param {boolean} update If `false`, don't update the layer after removing
    *    the annotation.
    * @returns {boolean} `true` if an annotation was removed.
+   * @fires geo.event.annotation.remove
    */
   this.removeAnnotation = function (annotation, update) {
     var pos = $.inArray(annotation, m_annotations);
@@ -504,6 +507,7 @@ var annotationLayer = function (args) {
    * @param {geo.annotation} [editAnnotation] If `arg === this.modes.edit`,
    *    this is the annotation that should be edited.
    * @returns {string|null|this} The current mode or the layer.
+   * @fires geo.event.annotation.mode
    */
   this.mode = function (arg, editAnnotation) {
     if (arg === undefined) {
@@ -651,6 +655,7 @@ var annotationLayer = function (args) {
    * @param {geo.feature} feature The feature to convert.
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
+   * @fires geo.event.annotation.update
    */
   this._geojsonFeatureToAnnotation = function (feature, gcs) {
     var dataList = feature.data(),
@@ -1028,6 +1033,7 @@ var annotationLayer = function (args) {
    * @param {object[]|null} labels The list of labels to display of `null` for
    *    no labels.
    * @returns {this} The class instance.
+   * @fires geo.event.annotation.layerAdd
    */
   this._updateLabels = function (labels) {
     if (!labels || !labels.length) {
@@ -1083,6 +1089,7 @@ var annotationLayer = function (args) {
    * Remove the label feature if it exists.
    *
    * @returns {this} The current layer.
+   * @fires geo.event.annotation.layerRemove
    */
   this._removeLabelFeature = function () {
     if (m_labelLayer) {
