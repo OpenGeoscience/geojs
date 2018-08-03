@@ -488,7 +488,7 @@ var annotation = function (type, args) {
    *    current style with the values in the specified object.
    * @param {*} [arg2] If `arg1` is a string, the new value for that style.
    * @param {string} [styleType='style'] The name of the style type, such as
-   *    `createStyle', `editStyle`, `editHandleStyle`, `labelStyle`, or
+   *    `createStyle`, `editStyle`, `editHandleStyle`, `labelStyle`, or
    *    `highlightStyle`.
    * @returns {object|this} Either the entire style object, the value of a
    *    specific style, or the current class instance.
@@ -513,20 +513,38 @@ var annotation = function (type, args) {
     return m_this;
   };
 
+  /**
+   * Calls {@link geo.annotation#style} with `styleType='createStyle'`.
+   * @function createStyle
+   * @memberof geo.annotation
+   * @instance
+   */
+  /**
+   * Calls {@link geo.annotation#style} with `styleType='editStyle'`.
+   * @function editStyle
+   * @memberof geo.annotation
+   * @instance
+   */
+  /**
+   * Calls {@link geo.annotation#style} with `styleType='editHandleStyle'`.
+   * @function editHandleStyle
+   * @memberof geo.annotation
+   * @instance
+   */
+  /**
+   * Calls {@link geo.annotation#style} with `styleType='labelStyle'`.
+   * @function labelStyle
+   * @memberof geo.annotation
+   * @instance
+   */
+  /**
+   * Calls {@link geo.annotation#style} with `styleType='highlightHandleStyle'`.
+   * @function highlightHandleStyle
+   * @memberof geo.annotation
+   * @instance
+   */
   ['createStyle', 'editStyle', 'editHandleStyle', 'labelStyle', 'highlightStyle'
   ].forEach(function (styleType) {
-    /**
-     * Set or get a specific style type.
-     *
-     * @param {string|object} [arg1] If `undefined`, return the current style
-     *    object.  If a string and `arg2` is undefined, return the style
-     *    associated with the specified key.  If a string and `arg2` is defined,
-     *    set the named style to the specified value.  Otherwise, extend the
-     *    current style with the values in the specified object.
-     * @param {*} [arg2] If `arg1` is a string, the new value for that style.
-     * @returns {object|this} Either the entire style object, the value of a
-     *    specific style, or the current class instance.
-     */
     m_this[styleType] = function (arg1, arg2) {
       return m_this.style(arg1, arg2, styleType);
     };
