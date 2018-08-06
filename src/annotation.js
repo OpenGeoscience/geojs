@@ -67,6 +67,21 @@ var defaultEditHandleStyle = {
 var editHandleFeatureLevel = 3;
 
 /**
+ * General annotation specification.
+ *
+ * @typedef {object} geo.annotation.spec
+ * @property {string} [name] A name for the annotation.  This defaults to the
+ *    type with a unique ID suffixed to it.
+ * @property {geo.annotationLayer} [layer] A reference to the controlling
+ *    layer.  This is used for coordinate transforms.
+ * @property {string} [state] Initial annotation state.  One of the
+ *    {@link geo.annotation.state} values.
+ * @property {boolean|string[]} [showLabel=true] `true` to show the annotation
+ *    label on annotations in done or edit states.  Alternately, a list of
+ *    states in which to show the label.  Falsy to not show the label.
+ */
+
+/**
  * Base annotation class.
  *
  * @class
@@ -74,16 +89,7 @@ var editHandleFeatureLevel = 3;
  * @param {string} type The type of annotation.  These should be registered
  *    with {@link geo.registerAnnotation} and can be listed with
  *    {@link geo.listAnnotations}.
- * @param {object?} [args] Individual annotations have additional options.
- * @param {string} [args.name] A name for the annotation.  This defaults to
- *    the type with a unique ID suffixed to it.
- * @param {geo.annotationLayer} [arg.layer] A reference to the controlling
- *    layer.  This is used for coordinate transforms.
- * @param {string} [args.state] Initial annotation state.  One of the
- *    {@link geo.annotation.state} values.
- * @param {boolean|string[]} [args.showLabel=true] `true` to show the
- *    annotation label on annotations in done or edit states.  Alternately, a
- *    list of states in which to show the label.  Falsy to not show the label.
+ * @param {geo.annotation.spec?} [args] Options for the annotation.
  * @returns {geo.annotation}
  */
 var annotation = function (type, args) {
@@ -1068,6 +1074,23 @@ var annotation = function (type, args) {
 };
 
 /**
+ * Rectangle annotation specification.
+ *
+ * @typedef {geo.annotation.spec} geo.rectangleAnnotation.spec
+ * @property {geo.geoPosition[]} [corners] A list of four corners in map gcs
+ *    coordinates.  These must be in order around the perimeter of the
+ *    rectangle (in either direction).
+ * @property {geo.geoPosition[]} [coordinates] An alternate name for `corners`.
+ * @property {object} [style] The style to apply to a finished rectangle.  This
+ *    uses styles for polygons, including `fill`, `fillColor`, `fillOpacity`,
+ *    `stroke`, `strokeWidth`, `strokeColor`, and `strokeOpacity`.
+ * @property {object} [editStyle] The style to apply to a rectangle in edit
+ *    mode.  This uses styles for polygons and lines, including `fill`,
+ *    `fillColor`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+ *    `strokeOpacity`.
+ */
+
+/**
  * Rectangle annotation class.
  *
  * Rectangles are always rendered as polygons.  This could be changed -- if no
@@ -1078,27 +1101,7 @@ var annotation = function (type, args) {
  * @alias geo.rectangleAnnotation
  * @extends geo.annotation
  *
- * @param {object?} [args] Options for the annotation.
- * @param {string} [args.name] A name for the annotation.  This defaults to
- *    the type with a unique ID suffixed to it.
- * @param {string} [args.state] initial annotation state.  One of the
- *    annotation.state values.
- * @param {boolean|string[]} [args.showLabel=true] `true` to show the
- *    annotation label on annotations in done or edit states.  Alternately, a
- *    list of states in which to show the label.  Falsy to not show the label.
- * @param {geo.geoPosition[]} [args.corners] A list of four corners in map
- *    gcs coordinates.  These must be in order around the perimeter of the
- *    rectangle (in either direction).
- * @param {geo.geoPosition[]} [args.coordinates] An alternate name for
- *    `args.corners`.
- * @param {object} [args.style] The style to apply to a finished rectangle.
- *    This uses styles for polygons, including `fill`, `fillColor`,
- *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
- *    `strokeOpacity`.
- * @param {object} [args.editStyle] The style to apply to a rectangle in edit
- *    mode.  This uses styles for polygons and lines, including `fill`,
- *    `fillColor`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
- *    `strokeOpacity`.
+ * @param {geo.rectangleAnnotation.spec?} [args] Options for the annotation.
  */
 var rectangleAnnotation = function (args) {
   'use strict';
@@ -1457,6 +1460,24 @@ rectangleRequiredFeatures[polygonFeature.capabilities.feature] = true;
 registerAnnotation('rectangle', rectangleAnnotation, rectangleRequiredFeatures);
 
 /**
+ * Polygon annotation specification.
+ *
+ * @typedef {geo.annotation.spec} geo.polygonAnnotation.spec
+ * @property {geo.geoPosition[]} [vertices] A list of vertices in map gcs
+ *    coordinates.  These must be in order around the perimeter of the polygon
+ *    (in either direction).
+ * @property {geo.geoPosition[]} [coordinates] An alternate name for
+ *    `vertices`.
+ * @property {object} [style] The style to apply to a finished polygon.  This
+ *    uses styles for polygons, including `fill`, `fillColor`, `fillOpacity`,
+ *    `stroke`, `strokeWidth`, `strokeColor`, and `strokeOpacity`.
+ * @property {object} [editStyle] The style to apply to a polygon in edit mode.
+ *    This uses styles for polygons and lines, including `fill`, `fillColor`,
+ *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
+ *    `strokeOpacity`.
+ */
+
+/**
  * Polygon annotation class
  *
  * When complete, polygons are rendered as polygons.  During creation they are
@@ -1466,27 +1487,7 @@ registerAnnotation('rectangle', rectangleAnnotation, rectangleRequiredFeatures);
  * @alias geo.polygonAnnotation
  * @extends geo.annotation
  *
- * @param {object?} [args] Options for the annotation.
- * @param {string} [args.name] A name for the annotation.  This defaults to
- *    the type with a unique ID suffixed to it.
- * @param {string} [args.state] initial annotation state.  One of the
- *    annotation.state values.
- * @param {boolean|string[]} [args.showLabel=true] `true` to show the
- *    annotation label on annotations in done or edit states.  Alternately, a
- *    list of states in which to show the label.  Falsy to not show the label.
- * @param {geo.geoPosition[]} [args.vertices] A list of vertices in map gcs
- *    coordinates.  These must be in order around the perimeter of the
- *    polygon (in either direction).
- * @param {geo.geoPosition[]} [args.coordinates] An alternate name for
- *    `args.vertices`.
- * @param {object} [args.style] The style to apply to a finished polygon.
- *    This uses styles for polygons, including `fill`, `fillColor`,
- *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
- *    `strokeOpacity`.
- * @param {object} [args.editStyle] The style to apply to a polygon in edit
- *    mode.  This uses styles for polygons and lines, including `fill`,
- *    `fillColor`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
- *    `strokeOpacity`.
+ * @param {geo.polygonAnnotation.spec?} [args] Options for the annotation.
  */
 var polygonAnnotation = function (args) {
   'use strict';
@@ -1724,31 +1725,29 @@ polygonRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.creat
 registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
 
 /**
+ * Line annotation specification.
+ *
+ * @typedef {geo.annotation.spec} geo.lineAnnotation.spec
+ * @property {geo.geoPosition[]} [vertices] A list of vertices in map gcs
+ *    coordinates.
+ * @property {geo.geoPosition[]} [coordinates] An alternate name for
+ *    `vertices`.
+ * @property {object} [style] The style to apply to a finished line.  This uses
+ *    styles for lines, including `strokeWidth`, `strokeColor`,
+ *    `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`, and `lineJoin`.
+ * @property {object} [editStyle] The style to apply to a line in edit mode.
+ *    This uses styles for lines, including `strokeWidth`, `strokeColor`,
+ *    `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`, and `lineJoin`.
+ */
+
+/**
  * Line annotation class.
  *
  * @class
  * @alias geo.lineAnnotation
  * @extends geo.annotation
  *
- * @param {object?} [args] Options for the annotation.
- * @param {string} [args.name] A name for the annotation.  This defaults to
- *    the type with a unique ID suffixed to it.
- * @param {string} [args.state] initial annotation state.  One of the
- *    annotation.state values.
- * @param {boolean|string[]} [args.showLabel=true] `true` to show the
- *    annotation label on annotations in done or edit states.  Alternately, a
- *    list of states in which to show the label.  Falsy to not show the label.
- * @param {geo.geoPosition[]} [args.vertices] A list of vertices in map gcs
- *    coordinates.
- * @param {geo.geoPosition[]} [args.coordinates] An alternate name for
- *    `args.corners`.
- * @param {object} [args.style] The style to apply to a finished line.
- *    This uses styles for lines, including `strokeWidth`, `strokeColor`,
- *    `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`, and `lineJoin`.
- * @param {object} [args.editStyle] The style to apply to a line in edit
- *    mode.  This uses styles for lines, including `strokeWidth`,
- *    `strokeColor`, `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`,
- *    and `lineJoin`.
+ * @param {geo.lineAnnotation.spec?} [args] Options for the annotation.
  */
 var lineAnnotation = function (args) {
   'use strict';
@@ -2111,33 +2110,30 @@ lineRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
 registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
 
 /**
+ * Point annotation specification.
+ *
+ * @typedef {geo.annotation.spec} geo.pointAnnotation.spec
+ * @property {geo.geoPosition} [position] A coordinate in map gcs coordinates.
+ * @property {geo.geoPosition[]} [coordinates] An array with one coordinate to
+ *    use in place of `position`.
+ * @property {object} [style] The style to apply to a finished point.  This
+ *    uses styles for points, including `radius`, `fill`, `fillColor`,
+ *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, `strokeOpacity`,
+ *    and `scaled`.  If `scaled` is `false`, the point is not scaled with zoom
+ *    level.  If it is `true`, the radius is based on the zoom level at first
+ *    instantiation.  Otherwise, if it is a number, the radius is used at that
+ *    zoom level.
+ * @property {object} [editStyle] The style to apply to a point in edit mode.
+ */
+
+/**
  * Point annotation class.
  *
  * @class
- * @alias geo.poinyAnnotation
+ * @alias geo.pointAnnotation
  * @extends geo.annotation
  *
- * @param {object?} [args] Options for the annotation.
- * @param {string} [args.name] A name for the annotation.  This defaults to
- *    the type with a unique ID suffixed to it.
- * @param {string} [args.state] initial annotation state.  One of the
- *    annotation.state values.
- * @param {boolean|string[]} [args.showLabel=true] `true` to show the
- *    annotation label on annotations in done or edit states.  Alternately, a
- *    list of states in which to show the label.  Falsy to not show the label.
- * @param {geo.geoPosition} [args.position] A coordinate in map gcs
- *    coordinates.
- * @param {geo.geoPosition[]} [args.coordinates] An array with one coordinate
- *  to use in place of `args.position`.
- * @param {object} [args.style] The style to apply to a finished point.
- *    This uses styles for points, including `radius`, `fill`, `fillColor`,
- *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, `strokeOpacity`,
- *    and `scaled`.  If `scaled` is `false`, the point is not scaled with
- *    zoom level.  If it is `true`, the radius is based on the zoom level at
- *    first instantiation.  Otherwise, if it is a number, the radius is used
- *    at that zoom level.
- * @param {object} [args.editStyle] The style to apply to a point in edit
- *    mode.
+ * @param {geo.pointAnnotation.spec?} [args] Options for the annotation.
  */
 var pointAnnotation = function (args) {
   'use strict';
