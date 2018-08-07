@@ -425,6 +425,8 @@ var colorLegendWidget = function (arg) {
 
 /**
  * Get the number of decimals of a number.
+ *
+ * @private
  * @param {number} number the number input
  * @returns {number} the number of decimal
  */

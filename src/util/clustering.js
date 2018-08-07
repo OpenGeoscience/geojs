@@ -1,4 +1,4 @@
-/**
+/*
  * Using methods adapted from leaflet to cluster an array of positions
  * hierarchically given an array of length scales (zoom levels).
  */
@@ -15,7 +15,7 @@ var vgl = require('vgl');
  * cluster containing child clusters and unclustered points.
  *
  * @class
- * @private
+ * @alias geo.util.ClusterTree
  *
  * @param {geo.util.ClusterGroup} group The source cluster group
  * @param {number} zoom The zoom level of the current node
@@ -268,7 +268,7 @@ C.prototype.points = function (zoom) {
 /**
  * Return the clusters contained at a given zoom level.
  * @param {number} zoom The zoom level.
- * @returns {ClusterTree[]} The array of clusters.
+ * @returns {geo.util.ClusterTree[]} The array of clusters.
  */
 C.prototype.clusters = function (zoom) {
   zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
