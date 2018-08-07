@@ -150,6 +150,7 @@ var camera = function (spec) {
    * Update the internal state of the camera on change to camera
    * parameters.
    * @protected
+   * @fires geo.event.camera.view
    */
   this._update = function () {
     this._bounds = null;
@@ -165,6 +166,8 @@ var camera = function (spec) {
   /**
    * Getter/setter for the view matrix.
    * @note copies the matrix value on set.
+   * @property {mat4} view The view matrix.
+   * @name geo.camera#view
    */
   Object.defineProperty(this, 'view', {
     get: function () {
@@ -179,12 +182,12 @@ var camera = function (spec) {
   /**
    * Getter/setter for the view bounds.
    *
-   * If not provided, near and far bounds will be set to [-1, 1] by
-   * default.  We will probably want to change this to a unit specific
-   * value initialized by the map when drawing true 3D objects or
-   * tilting the camera.
-   *
-   * Returned near/far bounds are also -1, 1 for the moment.
+   * @property {object} bounds The view bounds.
+   * @property {number} bounds.left
+   * @property {number} bounds.top
+   * @property {number} bounds.right
+   * @property {number} bounds.bottom
+   * @name geo.camera#bounds
    */
   Object.defineProperty(this, 'bounds', {
     get: function () {
@@ -203,7 +206,10 @@ var camera = function (spec) {
    * Getter for the "display" matrix.  This matrix converts from
    * world coordinates into display coordinates.  This matrix exists to
    * generate matrix3d css transforms that can be used in layers that
-   * render on the DOM.
+   * render on the DOM.  Read only.
+   *
+   * @property {mat4} display The display matrix.
+   * @name geo.camera#display
    */
   Object.defineProperty(this, 'display', {
     get: function () {
@@ -230,7 +236,10 @@ var camera = function (spec) {
   /**
    * Getter for the "world" matrix.  This matrix converts from
    * display coordinates into world coordinates.  This is constructed
-   * by inverting the "display" matrix.
+   * by inverting the "display" matrix.  Read only.
+   *
+   * @property {mat4} world The world matrix.
+   * @name geo.camera#world
    */
   Object.defineProperty(this, 'world', {
     get: function () {
@@ -246,6 +255,11 @@ var camera = function (spec) {
 
   /**
    * Getter/setter for the projection type.
+   *
+   * @property {string} projection The projection type.  One of `parallel` or
+   *    `perspective`.
+   * @name geo.camera#projection
+   * @fires geo.event.camera.projection
    */
   Object.defineProperty(this, 'projection', {
     get: function () {
@@ -268,10 +282,10 @@ var camera = function (spec) {
   });
 
   /**
-   * Getter for the projection matrix (when applicable).
-   * This generally shouldn't be modified directly because
-   * the rest of the code assumes that the clipping bounds
-   * are [-1, -1, -1] to [1, 1, 1] in camera coordinates.
+   * Getter for the projection matrix.  Read only.
+   *
+   * @property {mat4} projectionMatrix The projection matrix.
+   * @name geo.camera#projectionMatrix
    */
   Object.defineProperty(this, 'projectionMatrix', {
     get: function () {
@@ -280,7 +294,11 @@ var camera = function (spec) {
   });
 
   /**
-   * Getter for the transform matrix.
+   * Getter for the transform matrix.  This is the projection multiplied by the
+   * view matrix.  Read only.
+   *
+   * @property {mat4} transform The transform matrix.
+   * @name geo.camera#transform
    */
   Object.defineProperty(this, 'transform', {
     get: function () {
@@ -289,7 +307,10 @@ var camera = function (spec) {
   });
 
   /**
-   * Getter for the inverse transform matrix.
+   * Getter for the inverse transform matrix.  Read only.
+   *
+   * @property {mat4} inverse The inverse transform matrix.
+   * @name geo.camera#inverse
    */
   Object.defineProperty(this, 'inverse', {
     get: function () {
@@ -303,6 +324,14 @@ var camera = function (spec) {
    * The viewport consists of a width and height in pixels, plus a left and
    * top offset in pixels.  The offsets are only used to determine if pixel
    * alignment is possible.
+   *
+   * @property {object} viewport The viewport in pixels.
+   * @property {number} viewport.width
+   * @property {number} viewport.height
+   * @property {number} viewport.top
+   * @property {number} viewport.left
+   * @name geo.camera#viewport
+   * @fires geo.event.camera.viewport
    */
   Object.defineProperty(this, 'viewport', {
     get: function () {

@@ -657,6 +657,7 @@ var map = function (arg) {
    *
    * @param {geo.screenSize} [arg] Size in pixels.
    * @returns {geo.screenSize|this} The size in pixels or the map object.
+   * @fires geo.event.resize
    */
   this.size = function (arg) {
     if (arg === undefined) {
@@ -1598,6 +1599,7 @@ var map = function (arg) {
    *    include the attribution.  If `true`, always include it.
    * @returns {deferred} A jQuery Deferred object.  The done function receives
    *    either a data URL or an `HTMLCanvasElement` with the result.
+   * @fires geo.event.screenshot.ready
    */
   this.screenshot = function (layers, type, encoderOptions, opts) {
     var defer;
