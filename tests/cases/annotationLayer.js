@@ -343,8 +343,14 @@ describe('geo.annotationLayer', function () {
   });
   describe('Private utility functions', function () {
     var map, layer, point, rect, rect2, editActionEvent = 0;
-    it('_update', function () {
+
+    beforeAll(function () {
       sinon.stub(console, 'warn', function () {});
+    });
+    afterAll(function () {
+      console.warn.restore();
+    });
+    it('_update', function () {
       /* Most of update is covered as a side effect of other code.  This tests
        * some edge conditions */
       map = createMap();
@@ -372,7 +378,6 @@ describe('geo.annotationLayer', function () {
       layer.options('clickToEdit', false);
       layer._update();
       expect(layer.features()[0].geoIsOn(geo.event.feature.mouseon)).toBe(false);
-      console.warn.restore();
     });
     it('_updateLabels and _removeLabelFeature', function () {
       var numChild, canvasLayer, canvasLine;
