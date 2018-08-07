@@ -34,6 +34,7 @@ cache:
   directories:
     - node_modules
     - "$HOME/cache"
+    - "$HOME/_build/ExternalData"
 
 before_install:
   # Start xvfb with a specific resolution and pixel depth
