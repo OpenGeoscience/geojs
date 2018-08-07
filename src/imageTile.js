@@ -7,7 +7,7 @@ var tile = require('./tile');
  * column, and zoom level.  The number of rows/columns at zoom level z is
  * `2^z`, the number of pixels per tile is configurable.
  *
- * By default, this class assumes that images are fetch from the url, but
+ * By default, this class assumes that images are fetched from the url, but
  * subclasses may define additional rendering steps to produce the images
  * before passing them off to the handlers.
  *
