@@ -1074,9 +1074,10 @@ var annotation = function (type, args) {
 };
 
 /**
- * Rectangle annotation specification.
+ * Rectangle annotation specification.  Extends {@link geo.annotation.spec}.
  *
- * @typedef {geo.annotation.spec} geo.rectangleAnnotation.spec
+ * @typedef {object} geo.rectangleAnnotation.spec
+ * @extends geo.annotation.spec
  * @property {geo.geoPosition[]} [corners] A list of four corners in map gcs
  *    coordinates.  These must be in order around the perimeter of the
  *    rectangle (in either direction).
@@ -1460,9 +1461,10 @@ rectangleRequiredFeatures[polygonFeature.capabilities.feature] = true;
 registerAnnotation('rectangle', rectangleAnnotation, rectangleRequiredFeatures);
 
 /**
- * Polygon annotation specification.
+ * Polygon annotation specification.  Extends {@link geo.annotation.spec}.
  *
- * @typedef {geo.annotation.spec} geo.polygonAnnotation.spec
+ * @typedef {object} geo.polygonAnnotation.spec
+ * @extends geo.annotation.spec
  * @property {geo.geoPosition[]} [vertices] A list of vertices in map gcs
  *    coordinates.  These must be in order around the perimeter of the polygon
  *    (in either direction).
@@ -1725,9 +1727,10 @@ polygonRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.creat
 registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
 
 /**
- * Line annotation specification.
+ * Line annotation specification.  Extends {@link geo.annotation.spec}.
  *
- * @typedef {geo.annotation.spec} geo.lineAnnotation.spec
+ * @typedef {object} geo.lineAnnotation.spec
+ * @extends geo.annotation.spec
  * @property {geo.geoPosition[]} [vertices] A list of vertices in map gcs
  *    coordinates.
  * @property {geo.geoPosition[]} [coordinates] An alternate name for
@@ -2110,9 +2113,10 @@ lineRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
 registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
 
 /**
- * Point annotation specification.
+ * Point annotation specification.  Extends {@link geo.annotation.spec}.
  *
- * @typedef {geo.annotation.spec} geo.pointAnnotation.spec
+ * @typedef {object} geo.pointAnnotation.spec
+ * @extends geo.annotation.spec
  * @property {geo.geoPosition} [position] A coordinate in map gcs coordinates.
  * @property {geo.geoPosition[]} [coordinates] An array with one coordinate to
  *    use in place of `position`.
