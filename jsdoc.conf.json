@@ -1,6 +1,6 @@
 {
   "opts": {
-    "template": "node_modules/jaguarjs-jsdoc"
+    "template": "jsdoc/template"
   },
   "plugins": [
     "jsdoc/plugins/events",

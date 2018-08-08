@@ -1,0 +1,57 @@
+<?js
+var data = obj;
+var self = this;
+?>
+
+<?js if (data.kind === 'package') { ?>
+    <h2><?js= env.conf.templates.applicationName ?> <?js= data.version ?></h2>
+    <?js if (data.gitsha && data.homepage) { ?>
+        <span><a href="<?js= data.homepage + '/commit/' + data.gitsha ?>"> <?js= data.name ?> commit <?js= data.gitsha.substr(0, 7) ?></a></span>
+    <?js } ?>
+<?js } ?>
+
+<?js if (data.readme) { ?>
+    <section>
+        <article class="readme"><?js= data.readme ?></article>
+    </section>
+<?js } ?>
+
+<?js if (data.kind === 'package') { ?>
+    <h3>Classes</h3>
+    <ul class="list">
+    <?js
+    this.nav.forEach(function (item) {
+      if (item.type === 'class') {
+    ?>
+        <li class="item" data-name="<?js= item.longname ?>">
+            <span class="title">
+                <?js= self.linkto(item.longname, item.longname) ?>
+            </span>
+    <?js
+      }
+    });
+    ?>
+    </ul>
+
+    <h3>Typedefs</h3>
+    <ul class="list">
+    <?js
+    var typedefs = [];
+    this.nav.forEach(function (parent) {
+      (parent.typedefs || []).forEach(function (item) {
+        typedefs.push(item);
+      });
+    });
+    typedefs.sort(function (a, b) { return a.longname > b.longname ? 1 : -1; });
+    typedefs.forEach(function (item) {
+    ?>
+        <li class="item" data-name="<?js= item.longname ?>">
+            <span class="title">
+                <?js= self.linkto(item.longname, item.longname) ?>
+            </span>
+    <?js
+    });
+    ?>
+    </ul>
+<?js } ?>
+

@@ -14,3 +14,5 @@
 .eslintcache
 /lcov
 /notes
+/jsdoc/template/tmpl
+/jsdoc/template/static
