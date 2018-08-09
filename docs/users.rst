@@ -5,19 +5,12 @@ User's guide
 Dependencies
 ------------
 
-GeoJS depends on several Javascript libraries that must be loaded
-prior to use as well as a few recommended libraries for optional
-features.  As a convenience, we provide a bundle containing all
-required and optional dependencies in a single minified file.
-This bundle is built as ``dist/built/geo.ext.min.js``.  If you
-are just building a simple page out of GeoJS like in the
-:ref:`quick start guide <quick-start-guide>`, this will probably
-work well; however, when using GeoJS as part of an application,
-you may need to customize the loading order or versions of the
-bundled applications.  In this case, you may need to include the
-sources manually or bundle them yourself.
-
 See the package.json file for a list of required and optional dependencies used by GeoJS.
+All libraries listed as optional dependencies are built into the main ``geo.min.js`` bundle,
+but are not present in the ``geo.lean.min.js`` bundle. If you want to use a subset of the
+optional dependencies, you can use the lean bundle and import any required dependency
+libraries into your page before the lean bundle, making sure that the library is exposed
+under its standard name in global scope.
 
 .. note::
 
