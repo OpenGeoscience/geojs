@@ -1,5 +1,5 @@
 // The lean build does not include any of the third-party runtime dependencies, rather
-// it assume they are in the global namespace at runtime.
+// it assumes they are in the global namespace at runtime.
 var config = require('./webpack.base.config');
 var merge = require('webpack-merge');
 

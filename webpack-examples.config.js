@@ -3,7 +3,6 @@ const StringReplacePlugin = require('string-replace-webpack-plugin');
 var path = require('path');
 
 var base = require('./webpack.config');
-var external = require('./external.config');
 
 var rules = base.module.rules.concat([{
   test: /\.pug$/,
@@ -38,8 +37,6 @@ var rules = base.module.rules.concat([{
     }]
   })]
 }]);
-
-rules = rules.concat(external.module.rules);
 
 var plugins = base.plugins;
 plugins.push(new StringReplacePlugin());

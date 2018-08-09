@@ -97,8 +97,8 @@ deploy:
     file:
       - dist/built/geo.js
       - dist/built/geo.min.js
-      - dist/built/geo.ext.js
-      - dist/built/geo.ext.min.js
+      - dist/built/geo.lean.js
+      - dist/built/geo.lean.min.js
     skip-cleanup: true
     on:
       tags: true
