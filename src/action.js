@@ -1,6 +1,9 @@
 /**
  * Common object containing all action types that are provided by the GeoJS
  * API.
+ *
+ * @namespace
+ * @alias geo.action
  */
 var geo_action = {
   momentum: 'geo_action_momentum',

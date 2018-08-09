@@ -1,0 +1,10 @@
+.main ul.list {
+  column-width: 300px;
+}
+.main td.name .inherited {
+  background-color: #ccc!important;
+}
+.main td.name .inherited a {
+  color: #c7254e;
+}
+

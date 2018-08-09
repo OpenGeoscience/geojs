@@ -259,6 +259,8 @@ var pixelmapFeature = function (arg) {
    * Given the loaded pixelmap image, create a canvas the size of the image.
    * Compute a color for each distinct index and recolor the canvas based on
    * thise colors, then draw the resultant image as a quad.
+   *
+   * @fires geo.event.pixelmap.prepared
    */
   this._computePixelmap = function () {
     var data = m_this.data() || [],

@@ -1,9 +1,10 @@
 {
   "opts": {
-    "template": "node_modules/jaguarjs-jsdoc"
+    "template": "jsdoc/template"
   },
   "plugins": [
     "jsdoc/plugins/events",
+    "jsdoc/plugins/typedef_augments",
     "node_modules/jsdoc-autoprivate/autoprivate.js",
     "plugins/markdown"
   ],

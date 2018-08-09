@@ -170,6 +170,7 @@ var throttle = function (delay, no_trailing, callback, accumulator, debounce_mod
  *
  * The bulk of the work is handled by the {@link geo.util.throttle} function.
  *
+ * @method geo.util.debounce
  * @param {number} delay A zero-or-greater delay in milliseconds. For event
  *    callbacks, values around 100 or 250 (or even higher) are most useful.
  * @param {boolean} [at_begin=false] If at_begin is false or

@@ -191,6 +191,7 @@ var feature = function (arg) {
    * Private mousemove handler.  This uses `pointSearch` to determine which
    * features the mouse is over, then fires appropriate events.
    *
+   * @fires geo.event.feature.mouseover_order
    * @fires geo.event.feature.mouseover
    * @fires geo.event.feature.mouseout
    * @fires geo.event.feature.mousemove
@@ -319,6 +320,7 @@ var feature = function (arg) {
    * feature.
    *
    * @param {geo.event} evt The event that triggered this handler.
+   * @fires geo.event.feature.mouseclick_order
    * @fires geo.event.feature.mouseclick
    */
   this._handleMouseclick = function (evt) {
