@@ -122,7 +122,7 @@
     "website": "cd website && npx hexo server",
     "setup-website": "cd website && npm install",
     "build-website": "npm run build && cp -a dist/built/. website/source/built && npm run build-website-examples && npm run build-website-tutorials && npm run docs && cd dist && find data \\( -name tiles -o -name base-images -o -name '*-hash-stamp' -o -name '*.tgz' \\) -prune -o \\( -print0 \\) | cpio -pmdL0 ../website/source && cp -ar apidocs/. ../website/source/apidocs && cd ../website && npm install && rm -f db.json && npx hexo generate",
-    "prepublishOnly": "webpack --config webpack.config.js && webpack --config external.config.js && cp dist/built/*.js ."
+    "prepublishOnly": "webpack --config webpack.config.js && webpack --config webpack-lean.config.js && cp dist/built/*.js ."
   },
   "keywords": [
     "map",
