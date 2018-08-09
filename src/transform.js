@@ -7,6 +7,13 @@ projections.keys().forEach(function (key) {
 });
 var util = require('./util');
 
+var transformCache = {};
+/* Up to maxTransformCacheSize squared might be cached.  When the maximum cache
+ * size is reached, the cache is completely emptied.  Since we probably won't
+ * be rapidly switching between a large number of transforms, this is adequate
+ * simple behavior. */
+var maxTransformCacheSize = 10;
+
 /**
  * This purpose of this class is to provide a generic interface for computing
  * coordinate transformationss.  The interface is taken from the proj4js,
@@ -29,14 +36,6 @@ var util = require('./util');
  * @param {string} options.target A proj4 string for the target projection
  * @returns {geo.transform}
  */
-
-var transformCache = {};
-/* Up to maxTransformCacheSize squared might be cached.  When the maximum cache
- * size is reached, the cache is completely emptied.  Since we probably won't
- * be rapidly switching between a large number of transforms, this is adequate
- * simple behavior. */
-var maxTransformCacheSize = 10;
-
 var transform = function (options) {
   'use strict';
   if (!(this instanceof transform)) {
