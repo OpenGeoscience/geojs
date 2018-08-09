@@ -43,6 +43,7 @@
 - Remove bower support (#856)
 - Switch to webpack v3 (#854)
 - Removed needless function wrappers (#870)
+- Changed build process: optional dependencies are now included in the bundle by default (#890)
 
 ## Version 0.16.0
 
