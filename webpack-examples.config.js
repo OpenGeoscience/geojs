@@ -9,6 +9,12 @@ var rules = base.module.rules.concat([{
   test: /\.pug$/,
   use: ['pug-loader']
 }, {
+  test: /\.css$/,
+  loader: 'style-loader!css-loader'
+}, {
+  test: /\.jade$/,
+  loader: 'jade'
+}, {
   test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
   use: ['url-loader?limit=10000&mimetype=application/font-woff']
 }, {

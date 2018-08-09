@@ -888,8 +888,8 @@ camera.bounds = {
   right: 1,
   top: 1,
   bottom: -1,
-  far: -2,
-  near: -1
+  far: -100000,
+  near: 100000
 };
 
 /**
