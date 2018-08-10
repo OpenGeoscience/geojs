@@ -61,9 +61,11 @@ is needed. ::
     npm install
     npm run build
 
-Compiled javascript libraries will be named ``geo.min.js`` and ``geo.ext.min.js`` in ``dist/built``.
-The first file contains geojs and vgl bundled together with a number of dependent libraries.
-The second file contains d3.  The bundled libraries are minified, but source maps are provided
+The compiled javascript libraries will be named ``geo.min.js`` and ``geo.lean.min.js`` in ``dist/built``.
+The first file contains geojs including all optional dependencies. The second file is a version of
+geojs without any of the third party dependencies such as d3 and Hammer; if you want to use the lean
+bundle but need any of these dependencies, you must include them first in your page and expose them in
+global scope under their standard names. The bundled libraries are minified, but source maps are provided.
 
 .. _quick-start-guide:
 
@@ -76,7 +78,6 @@ and creating a basic full map using the `osmLayer` class.
 .. code-block:: html
 
     <head>
-        <script charset="UTF-8" src="/built/geo.ext.min.js"></script>
         <script src="/built/geo.min.js"></script>
 
         <style>

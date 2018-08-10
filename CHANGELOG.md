@@ -1,5 +1,12 @@
 # Change Log
 
+## Unreleased
+
+### Changes
+
+- Changed build process: optional dependencies are now included in the bundle by default (#890)
+
+
 ## Version 0.17.0
 
 ### Features
