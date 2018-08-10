@@ -1,12 +1,6 @@
-var vtk = require('vtk.js');
 var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
-
-var vtkActor = vtk.Rendering.Core.vtkActor;
-var vtkMapper = vtk.Rendering.Core.vtkGlyph3DMapper;
-var vtkPointSet = vtk.Common.DataModel.vtkPointSet;
-var vtkSphereSource = vtk.Filters.Sources.vtkSphereSource;
 
 /**
  * Create a new instance of pointFeature
@@ -25,6 +19,11 @@ var vtkjs_pointFeature = function (arg) {
 
   var transform = require('../transform');
   var object = require('../object');
+  var vtk = require('./vtkjsRenderer').vtkjs;
+  var vtkActor = vtk.Rendering.Core.vtkActor;
+  var vtkMapper = vtk.Rendering.Core.vtkGlyph3DMapper;
+  var vtkPointSet = vtk.Common.DataModel.vtkPointSet;
+  var vtkSphereSource = vtk.Filters.Sources.vtkSphereSource;
 
   object.call(this);
 
