@@ -1,8 +1,6 @@
 var inherit = require('../inherit');
 var registerRenderer = require('../registry').registerRenderer;
 var renderer = require('../renderer');
-var vtk = require('vtk.js');
-var vtkFullScreenRenderWindow = vtk.Rendering.Misc.vtkFullScreenRenderWindow;
 
 /**
  * Create a new instance of class vtkjsRenderer
@@ -23,6 +21,8 @@ var vtkjsRenderer = function (arg) {
 
   var mat4 = require('gl-mat4');
   var geo_event = require('../event');
+  var vtkjs = vtkjsRenderer.vtkjs;
+  var vtkFullScreenRenderWindow = vtkjs.Rendering.Misc.vtkFullScreenRenderWindow;
 
   var m_this = this,
       m_width = 0,
@@ -151,5 +151,31 @@ var vtkjsRenderer = function (arg) {
 inherit(vtkjsRenderer, renderer);
 
 registerRenderer('vtkjs', vtkjsRenderer);
+
+/**
+ * Report if the vtkjs renderer is supported.  This is just a check if vtkjs is available.
+ *
+ * @returns {boolean} true if available.
+ */
+vtkjsRenderer.supported = function () {
+  delete vtkjsRenderer.vtkjs;
+  // webpack expects optional dependencies to be wrapped in a try-catch
+  try {
+    vtkjsRenderer.vtkjs = require('vtk.js');
+  } catch (_error) {}
+  return vtkjsRenderer.vtks !== undefined;
+};
+
+/**
+ * If the vtks renderer is not supported, supply the name of a renderer that
+ * should be used instead.  This asks for the null renderer.
+ *
+ * @returns {null} `null` for the null renderer.
+ */
+vtkjsRenderer.fallback = function () {
+  return null;
+};
+
+vtkjsRenderer.supported();  // cache reference to vtkjs if it is available
 
 module.exports = vtkjsRenderer;
