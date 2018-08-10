@@ -29,10 +29,10 @@ var vtkjsRenderer = function (arg) {
       m_height = 0,
       s_init = this._init;
 
-  const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
+  var fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
     background: [0.1, 0.5, 0.5] });
-  const vtkjsren = fullScreenRenderer.getRenderer();
-  const renderWindow = fullScreenRenderer.getRenderWindow();
+  var vtkjsren = fullScreenRenderer.getRenderer();
+  var renderWindow = fullScreenRenderer.getRenderWindow();
 
   /**
    * Return width of the renderer
@@ -122,9 +122,9 @@ var vtkjsRenderer = function (arg) {
         camera = map.camera(),
         view = camera.view,
         proj = camera.projectionMatrix;
-    const viewmat = mat4.create();
+    var viewmat = mat4.create();
     mat4.copy(viewmat, view);
-    const projmat = mat4.create();
+    var projmat = mat4.create();
     mat4.copy(projmat, proj);
     m_this.contextRenderer().getActiveCamera().setViewMatrix(viewmat);
     m_this.contextRenderer().getActiveCamera().setProjectionMatrix(projmat);
