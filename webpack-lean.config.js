@@ -18,6 +18,7 @@ module.exports = merge(config, {
       // Since GeoJS's libraryTarget is "umd", defining this (undocumented) external library type
       // will allow Webpack to create a better error message if a "hammerjs" import fails
       umd: 'hammerjs'
-    }
+    },
+    'vtk.js': 'vtkjs'
   }
 });
