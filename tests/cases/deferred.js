@@ -8,6 +8,7 @@ describe('Testing onIdle event handling', function () {
     it('no deferred', function () {
       var obj = geo.object(), called = false;
 
+      expect(obj.idle).toBe(true);
       obj.onIdle(function () {
         called = true;
       });
@@ -19,10 +20,12 @@ describe('Testing onIdle event handling', function () {
       var obj = geo.object(), defer = $.Deferred();
 
       obj.addPromise(defer);
+      expect(obj.idle).toBe(false);
       window.setTimeout(function () {
         var called = false;
         defer.resolve();
 
+        expect(obj.idle).toBe(true);
         obj.onIdle(function () {
           called = true;
         });
