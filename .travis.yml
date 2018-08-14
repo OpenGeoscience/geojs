@@ -63,7 +63,7 @@ before_script:
 script:
   - npm run build
   - npm run docs
-  - mkdir _build
+  - mkdir -p _build
   - ctest -S cmake/travis_build.cmake -VV || true
   - if [ -f _build/test_failed ] ; then false ; fi
   # Build the website to ensure that it will pass
