@@ -130,5 +130,5 @@
     "webgl",
     "svg"
   ],
-  "main": "geo.js"
+  "main": "geo.lean.js"
 }
