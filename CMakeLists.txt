@@ -29,22 +29,6 @@ if(NOT NPM_EXECUTABLE)
   message(FATAL_ERROR "npm is required for many tests")
 endif()
 
-function(add_geojs_test test_name)
-  add_test(
-    NAME "${test_name}"
-    WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
-    COMMAND ${PYTHON_EXECUTABLE}
-            ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
-            ${ARGN}
-  )
-  set_property(TEST "${test_name}" APPEND PROPERTY DEPENDS "notes-reset")
-  set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "${test_name}")
-endfunction()
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/runners/geojs_test_runner.py.in
-               ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
-)
-
 # Generate notes to send along with the test reports
 add_test(
   NAME "notes-reset"
