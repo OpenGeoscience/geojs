@@ -717,4 +717,21 @@ describe('geo.camera', function () {
     expect(function () { c.viewport = {width: 0, height: 100}; }).toThrow();
     expect(function () { c.viewport = {width: 100, height: -100}; }).toThrow();
   });
+
+  it('clipbounds', function () {
+    var c = geo.camera();
+
+    expect(c.clipbounds.near).toBe(1);
+    c.clipbounds = {near: 2, far: -2};
+    expect(c.clipbounds.near).toBe(2);
+    expect(function () { c.clipbounds = {near: 2, far: 2}; }).toThrow();
+    expect(function () { c.clipbounds = {left: 2, right: 2}; }).toThrow();
+    expect(function () { c.clipbounds = {top: 2, bottom: 2}; }).toThrow();
+    c.projection = 'perspective';
+    expect(c.clipbounds.near).toBe(0.01);
+    c.clipbounds = {near: 0.1, far: 1000};
+    expect(c.clipbounds.near).toBe(0.1);
+    c.projection = 'parallel';
+    expect(c.clipbounds.near).toBe(2);
+  });
 });
