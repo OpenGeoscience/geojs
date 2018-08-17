@@ -132,9 +132,9 @@ var object = function () {
    * Trigger an event (or events) on this object and call all handlers.
    *
    * @param {string|string[]} event An event or list of events from
-   *       {@link geo.event} or defined by the user.
+   *   {@link geo.event} or defined by the user.
    * @param {object} [args] Additional information to add to the
-   *       {@link geo.event} object passed to the handlers.
+   *   {@link geo.event} object passed to the handlers.
    * @returns {this}
    */
   this.geoTrigger = function (event, args) {
@@ -169,11 +169,11 @@ var object = function () {
    * provided all handlers will be removed.
    *
    * @param {string|string[]} [event] An event or a list of events from
-   *       {@link geo.event} or defined by the user, or `undefined` to remove
-   *       all events (in which case `arg` is ignored).
+   *   {@link geo.event} or defined by the user, or `undefined` to remove all
+   *   events (in which case `arg` is ignored).
    * @param {(function|function[])?} [arg] A function or array of functions to
-   *       remove from the events or a falsey value to remove all handlers
-   *       from the events.
+   *   remove from the events or a falsy value to remove all handlers from the
+   *   events.
    * @returns {this}
    */
   this.geoOff = function (event, arg) {
@@ -199,8 +199,7 @@ var object = function () {
     if (m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event] = m_eventHandlers[event].filter(function (f) {
         return f !== arg;
-      }
-      );
+      });
     }
     return m_this;
   };

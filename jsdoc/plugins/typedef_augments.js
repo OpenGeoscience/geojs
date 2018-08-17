@@ -44,10 +44,10 @@ exports.handlers = {
          * reversing the augments list). */
         doclet.augments.slice().reverse().forEach(function (augmentName) {
           if (augmentName !== name && typedefs[augmentName] && typedefs[augmentName].properties) {
-            typedefs[augmentName].properties.forEach(function (prop) {
-              if (!properties[prop.name]) {
+            typedefs[augmentName].properties.forEach(function (origprop) {
+              if (!properties[origprop.name]) {
                 /* Make a copy so we don't mutate the original property. */
-                prop = Object.assign(prop);
+                var prop = Object.assign({}, origprop);
                 /* Add a value that a rendering template could use to show that
                  * the property was inherted from a parent.  Since that in turn
                  * could have been inherited, preserve a known value. */

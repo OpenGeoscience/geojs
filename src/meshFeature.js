@@ -2,6 +2,18 @@ var inherit = require('./inherit');
 var feature = require('./feature');
 
 /**
+ * Mesh feature specification.
+ *
+ * @typedef {geo.feature.spec} geo.meshFeature.spec
+ * @property {object[]} [data=[]] An array of arbitrary objects used to
+ *    construct the feature.
+ * @property {geo.feature.styleSpec} [style] An object that contains style
+ *    values for the feature.
+ * @property {geo.meshFeature.meshSpec} [mesh] The mesh specification for the
+ *    feature.
+ */
+
+/**
  * A mesh formed by a set of triangular or square elements or a
  * squarely-connected grid that is of rectangular extent.  The gird can be
  * regularly spaced or have arbitrary position coordinates for each node.  All

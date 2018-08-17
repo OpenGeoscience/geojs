@@ -6,66 +6,73 @@ var feature = require('./feature');
  *
  * @typedef {geo.feature.spec} geo.textFeature.spec
  * @property {geo.geoPosition[]|function} [position] The position of each data
- *      element.  Defaults to the `x`, `y`, and `z` properties of the data
- *      element.
+ *   element.  Defaults to the `x`, `y`, and `z` properties of the data
+ *   element.
  * @property {string[]|function} [text] The text of each data element.
- *      Defaults to the `text` property of the data element.
- * @property {object} [style] The style to apply to each data element.
- * @property {boolean|function} [style.visible=true] If falsy, don't show this
- *      data element.
- * @property {string|function} [style.font] A css font specification.  This
- *      is of the form `[style] [variant] [weight] [stretch] size[/line-height]
- *      family`.  Individual font styles override this value if a style is
- *      specified in each.  See the individual font styles for details.
- * @property {string|function} [style.fontStyle='normal'] The font style.  One
- *      of `normal`, `italic`, or `oblique`.
- * @property {string|function} [style.fontVariant='normal'] The font variant.
- *      This can have values such as `small-caps` or `slashed-zero`.
- * @property {string|function} [style.fontWeight='normal'] The font weight.
- *      This may be a numeric value where 400 is normal and 700 is bold, or a
- *      string such as `bold` or `lighter`.
- * @property {string|function} [style.fontStretch='normal'] The font stretch,
- *      such as `condensed`.
- * @property {string|function} [style.fontSize='medium'] The font size.
- * @property {string|function} [style.lineHeight='normal'] The font line
- *      height.
- * @property {string|function} [style.fontFamily] The font family.
- * @property {string|function} [style.textAlign='center'] The horizontal text
- *      alignment.  One of `start`, `end`, `left`, `right`, or `center`.
- * @property {string|function} [style.textBaseline='middle'] The vertical text
- *      alignment.  One of `top`, `hanging`, `middle`, `alphabetic`,
- *      `ideographic`, or `bottom`.
- * @property {geo.geoColor|function} [style.color='black'] Text color.  May
- *      include opacity.
- * @property {number|function} [style.textOpacity=1] The opacity of the text.
- *      If the color includes opacity, this is combined with that value.
- * @property {number|function} [style.rotation=0] Text rotation in radians.
- * @property {boolean|function} [style.rotateWithMap=false] If truthy, rotate
- *      the text when the map rotates.  Otherwise, the text is always in the
- *      same orientation.
- * @property {number|function} [style.textScaled] If defined, the text is
- *      scaled when the map zoomes and this is the basis zoom for the fontSize.
- * @property {geo.screenPosition|function} [style.offset] Offset from the
- *      default position for the text.  This is applied before rotation.
- * @property {geo.geoColor|function} [style.shadowColor='black'] Text shadow
- *      color.  May include opacity.
- * @property {geo.screenPosition|function} [style.shadowOffset] Offset for a
- *      text shadow.  This is applied before rotation.
- * @property {number|null|function} [style.shadowBlur] If not null, add a text
- *      shadow with this much blur.
- * @property {boolean|function} [style.shadowRotate=false] If truthy, rotate
- *      the shadow offset based on the text rotation (the `shadowOffset` is
- *      the offset if the text has a 0 rotation).
- * @property {geo.geoColor|function} [style.textStrokeColor='transparent'] Text
- *      stroke color.  May include opacity.
- * @property {geo.geoColor|function} [style.textStrokeWidth=0] Text stroke
- *      width in pixels.
- * @property {number|function} [style.renderThreshold] If this is a positive
- *      number, text elements may not be rendered if their base position
- *      (before offset and font effects are applied) is more than this distance
- *      in pixels outside of the current viewport.  If it is known that such
- *      text elements cannot affect the current viewport, setting this can
- *      speed up rendering.  This is computed once for the whole feature.
+ *   Defaults to the `text` property of the data element.
+ * @property {geo.textFeature.styleSpec} [style] The style to apply to each
+ *   data element.
+ */
+
+/**
+ * Style specification for a text feature.
+ *
+ * @typedef {geo.feature.styleSpec} geo.textFeature.styleSpec
+ * @extends geo.feature.styleSpec
+ * @property {boolean|function} [visible=true] If falsy, don't show this data
+ *    element.
+ * @property {string|function} [font] A css font specification.  This is of the
+ *    form `[style] [variant] [weight] [stretch] size[/line-height] family`.
+ *    Individual font styles override this value if a style is specified in
+ *    each.  See the individual font styles for details.
+ * @property {string|function} [fontStyle='normal'] The font style.  One of
+ *    `normal`, `italic`, or `oblique`.
+ * @property {string|function} [fontVariant='normal'] The font variant.  This
+ *    can have values such as `small-caps` or `slashed-zero`.
+ * @property {string|function} [fontWeight='normal'] The font weight.  This may
+ *    be a numeric value where 400 is normal and 700 is bold, or a string such
+ *    as `bold` or `lighter`.
+ * @property {string|function} [fontStretch='normal'] The font stretch, such as
+ *    `condensed`.
+ * @property {string|function} [fontSize='medium'] The font size.
+ * @property {string|function} [lineHeight='normal'] The font line height.
+ * @property {string|function} [fontFamily] The font family.
+ * @property {string|function} [textAlign='center'] The horizontal text
+ *    alignment.  One of `start`, `end`, `left`, `right`, or `center`.
+ * @property {string|function} [textBaseline='middle'] The vertical text
+ *    alignment.  One of `top`, `hanging`, `middle`, `alphabetic`,
+ *    `ideographic`, or `bottom`.
+ * @property {geo.geoColor|function} [color='black'] Text color.  May include
+ *    opacity.
+ * @property {number|function} [textOpacity=1] The opacity of the text.  If the
+ *    color includes opacity, this is combined with that value.
+ * @property {number|function} [rotation=0] Text rotation in radians.
+ * @property {boolean|function} [rotateWithMap=false] If truthy, rotate the
+ *    text when the map rotates.  Otherwise, the text is always in the same
+ *    orientation.
+ * @property {number|function} [textScaled] If defined, the text is scaled when
+ *    the map zoomes and this is the basis zoom for the fontSize.
+ * @property {geo.screenPosition|function} [offset] Offset from the default
+ *    position for the text.  This is applied before rotation.
+ * @property {geo.geoColor|function} [shadowColor='black'] Text shadow color.
+ *    May include opacity.
+ * @property {geo.screenPosition|function} [shadowOffset] Offset for a text
+ *    shadow.  This is applied before rotation.
+ * @property {number|null|function} [shadowBlur] If not null, add a text shadow
+ *    with this much blur.
+ * @property {boolean|function} [shadowRotate=false] If truthy, rotate the
+ *    shadow offset based on the text rotation (the `shadowOffset` is the
+ *    offset if the text has a 0 rotation).
+ * @property {geo.geoColor|function} [textStrokeColor='transparent'] Text
+ *    stroke color.  May include opacity.
+ * @property {geo.geoColor|function} [textStrokeWidth=0] Text stroke width in
+ *    pixels.
+ * @property {number|function} [renderThreshold] If this is a positive number,
+ *    text elements may not be rendered if their base position (before offset
+ *    and font effects are applied) is more than this distance in pixels
+ *    outside of the current viewport.  If it is known that such text elements
+ *    cannot affect the current viewport, setting this can speed up rendering.
+ *    This is computed once for the whole feature.
  */
 
 /**

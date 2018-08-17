@@ -33,10 +33,16 @@ var geo_event = require('./event');
  *   feature within its parent's list of children as the bin number.
  * @property {geo.renderer?} [renderer] A reference to the renderer used for
  *   the feature.
- * @property {object} [style] An object that contains style values for the
- *   feature.
- * @property {number|function} [style.opacity=1] The opacity on a scale of 0 to
- *   1.
+ * @property {geo.feature.styleSpec} [style] An object that contains style
+ *   values for the feature.
+ */
+
+/**
+ * Style specification for a feature.
+ *
+ * @typedef {object} geo.feature.styleSpec
+ * @property {number|function} [opacity=1] The opacity for the whole feature on
+ *    a scale of 0 to 1.
  */
 
 /**
@@ -420,8 +426,8 @@ var feature = function (arg) {
    * has a subfeature style, with `(subfeatureElement, subfeatureIndex,
    * dataElement, dataIndex)`.
    *
-   * See the feature's specification ({@link geo.feature.spec}) for available
-   * styles.
+   * See the <a href="#.styleSpec">style specification
+   * <code>styleSpec</code></a> for available styles.
    *
    * @param {string|object} [arg1] If `undefined`, return the current style
    *    object.  If a string and `arg2` is undefined, return the style

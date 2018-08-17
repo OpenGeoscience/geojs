@@ -1710,12 +1710,13 @@ var util = module.exports = {
  * A list of regex and processing functions for color conversions to rgb
  * objects.  Each entry is a {@link geo.util.cssColorConversionRecord}.  In
  * general, these conversions are somewhat more forgiving than the css
- * specification (see https://drafts.csswg.org/css-color/) in that
+ * specification (see {@link https://drafts.csswg.org/css-color/}) in that
  * percentages may be mixed with numbers, and that floating point values are
  * accepted for all numbers.  Commas are optional.  As per the latest draft
  * standard, `rgb` and `rgba` are aliases of each other, as are `hsl` and
  * `hsla`.
- * @alias cssColorConversions
+ * @name cssColorConversions
+ * @property cssColorConversions
  * @memberof geo.util
  */
 util.cssColorConversions = [{

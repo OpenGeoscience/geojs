@@ -15,33 +15,41 @@ var util = require('./util');
  *   points.  Only lines that have at least two points are rendered.  The
  *   position function is called for each point as `position(linePoint,
  *   pointIndex, lineEntry, lineEntryIndex)`.
- * @property {object} [style] Style object with default style options.
- * @property {geo.geoColor|function} [style.strokeColor] Color to stroke each
- *   line.  The color can vary by point.
- * @property {number|function} [style.strokeOpacity] Opacity for each line
- *   stroke.  The opacity can vary by point.  Opacity is on a [0-1] scale.
- * @property {number|function} [style.strokeWidth] The weight of the line
- *   stroke in pixels.  The width can vary by point.
- * @property {number|function} [style.strokeOffset] This is a value from -1
- *   (left) to 1 (right), with 0 being centered.  This can vary by point.
- * @property {string|function} [style.lineCap='butt'] One of 'butt', 'square',
- *   or 'round'.  This can vary by point.
- * @property {string|function} [style.lineJoin='miter'] One of 'miter',
- *   'bevel', 'round', or 'miter-clip'.  This can vary by point.
- * @property {boolean|function} [style.closed=false] If true and the renderer
+ * @property {geo.lineFeature.styleSpec} [style] Style object with default
+ *   style options.
+ */
+
+/**
+ * Style specification for a line feature.
+ *
+ * @typedef {geo.feature.styleSpec} geo.lineFeature.styleSpec
+ * @extends geo.feature.styleSpec
+ * @property {geo.geoColor|function} [strokeColor] Color to stroke each line.
+ *   The color can vary by point.
+ * @property {number|function} [strokeOpacity] Opacity for each line stroke.
+ *   The opacity can vary by point.  Opacity is on a [0-1] scale.
+ * @property {number|function} [strokeWidth] The weight of the line stroke in
+ *   pixels.  The width can vary by point.
+ * @property {number|function} [strokeOffset] This is a value from -1 (left) to
+ *   1 (right), with 0 being centered.  This can vary by point.
+ * @property {string|function} [lineCap='butt'] One of 'butt', 'square', or
+ *   'round'.  This can vary by point.
+ * @property {string|function} [lineJoin='miter'] One of 'miter', 'bevel',
+ *   'round', or 'miter-clip'.  This can vary by point.
+ * @property {boolean|function} [closed=false] If true and the renderer
  *   supports it, connect the first and last points of a line if the line has
  *   more than two points.  This applies per line (if a function, it is called
  *   with `(lineEntry, lineEntryIndex)`.
- * @property {number|function} [style.miterLimit=10] For lines of more than two
+ * @property {number|function} [miterLimit=10] For lines of more than two
  *   segments that are mitered, if the miter length exceeds the `strokeWidth`
  *   divided by the sine of half the angle between segments, then a bevel join
  *   is used instead.  This is a single value that applies to all lines.  If a
  *   function, it is called with `(data)`.
- * @property {number|function} [style.antialiasing] Antialiasing distance in
- *   pixels.  Values must be non-negative.  A value greater than 1 will produce
- *   a visible gradient.  This is a single value that applies to all lines.
- * @property {string|function} [style.debug] If 'debug', render lines in debug
- *   mode.  This is a single value that applies to all lines.
+ * @property {number|function} [antialiasing] Antialiasing distance in pixels.
+ *   Values must be non-negative.  A value greater than 1 will produce a
+ *   visible gradient.  This is a single value that applies to all lines.
+ * @property {string|function} [debug] If 'debug', render lines in debug mode.
+ *   This is a single value that applies to all lines.
  */
 
 /**
