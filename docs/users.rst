@@ -181,7 +181,7 @@ documentation for each of the classes.
 `geo.fileReader <http://opengeoscience.github.io/geojs/apidocs/geo.fileReader.html>`_
     This is an abstract class defining the interface for file readers.  Currently,
     the only implemented reader is
-    `geo.jsonReader <http://opengeoscience.github.io/geojs/apidocs/geo.jsonReader.html>`_,
+    `geo.geojsonReader <http://opengeoscience.github.io/geojs/apidocs/geo.geojsonReader.html>`_,
     which is an extendable geojson reader.
 
 Coordinate systems

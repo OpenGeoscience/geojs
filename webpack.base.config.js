@@ -83,6 +83,7 @@ module.exports = {
       use: [{
         loader: 'babel-loader',
         options: {
+          plugins: [require('babel-plugin-transform-object-rest-spread')],
           presets: [[
             'env', {
               targets: {
@@ -105,6 +106,7 @@ module.exports = {
       use: [{
         loader: 'babel-loader',
         options: {
+          plugins: [require('babel-plugin-transform-object-rest-spread')],
           presets: [[
             'env', {
               targets: {
