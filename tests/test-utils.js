@@ -311,7 +311,5 @@ module.exports.createMap = function (opts, css) {
  * @returns {boolean}
  */
 module.exports.isPhantomJS = function () {
-  /* PhantomJS doesn't have Math.log10, but Chrome and Firefox do.  If we
-   * polyfilled it, we will have marked it as such. */
-  return !Math.log10 || Math.log10.polyfilled;
+  return window.navigator.userAgent.indexOf('PhantomJS') >= 0;
 };

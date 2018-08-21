@@ -86,12 +86,12 @@ module.exports = {
         loader: 'babel-loader',
         options: {
           presets: [[
-            'env', {
+            '@babel/preset-env', {
               targets: {
-                node: true,
-                browsers: ['defaults'],
-                uglify: true
-              }
+                browsers: ['defaults']
+              },
+              forceAllTransforms: true,
+              useBuiltIns: 'usage'
             }
           ]]
         }
