@@ -88,7 +88,7 @@ block append mainContent
 
     .form-group(title="The camera can use a parallel or perspective projection.  The difference is subtly unless the data has non-zero z-values.")
       label(for="camera-projection") Camera Projection
-      select#camera-projection.cameraparam(param-name="projection", placeholder="parallel")
+      select#camera-projection.cameraparam(param-name="projection", placeholder="parallel", reload="true")
         option(value="parallel") Parallel
         option(value="perspective") Perspective
 
