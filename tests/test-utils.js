@@ -4,6 +4,7 @@
 
 var $ = require('jquery');
 
+require('../src/polyfills');
 var geo = require('../src');
 var bowser = require('bowser');
 
