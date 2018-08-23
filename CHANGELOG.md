@@ -4,9 +4,12 @@
 
 ### Features
 - Added an idle property to objects (#894)
+- Better handling and changing of camera clipbounds (#899)
+
+### Bug Fixes
+- Fixed an issue with overlapping, cropped tiles on old browsers (#901)
 
 ### Changes
-
 - Changed build process: optional dependencies are now included in the bundle by default (#890)
 - Transpile with Babel to support old browsers and new language features (#900)
 
