@@ -28,6 +28,11 @@
     "hammerjs": "^2.0.8"
   },
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-istanbul": "^4.1.6",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "body-parser": "^1.15.0",
     "bootstrap": "^3.3.6",
     "bootswatch": "^3.3.6",
@@ -65,6 +70,7 @@
     "karma-jasmine": "^1.0.2",
     "karma-jasmine-html-reporter": "^1.1.0",
     "karma-phantomjs-launcher": "^1.0.0",
+    "karma-phantomjs-shim": "^1.5.0",
     "karma-sinon": "^1.0.4",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-spec-reporter": "^0.0.32",

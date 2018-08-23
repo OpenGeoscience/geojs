@@ -75,6 +75,29 @@ module.exports = {
   */
   module: {
     rules: [{
+      test: /\.js$/,
+      include: [
+        path.resolve(__dirname, 'src'),
+        path.resolve(__dirname, 'tests'),
+        path.resolve(__dirname, 'examples'),
+        path.resolve(__dirname, 'tutorials')
+      ],
+      use: [{
+        loader: 'babel-loader',
+        options: {
+          presets: [[
+            'env', {
+              targets: {
+                browsers: ['defaults'],
+                uglify: true
+              },
+              useBuiltIns: 'usage'
+            }
+          ]],
+          cacheDirectory: true
+        }
+      }]
+    }, {
       test: /\.styl$/,
       use: [
         'style-loader',

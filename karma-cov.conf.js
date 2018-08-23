@@ -34,16 +34,16 @@ module.exports = function (config) {
   karma_config.specReporter = {suppressPassed: true, suppressSkipped: true};
   karma_config.coverageReporter = {
     reporters: [
-      {type: 'html', dir: 'dist/coverage/', subdir: subdir_name},
       {type: 'cobertura', dir: 'dist/cobertura/', file: 'coverage.xml', subdir: subdir_name},
       {type: 'json', dir: 'dist/coverage/json/', subdir: subdir_name},
-      {type: 'lcovonly', dir: 'lcov', subdir: subdir_name},
+      {type: 'lcovonly', dir: 'dist/coverage/lcov', subdir: subdir_name},
       {type: 'text'}
     ]
   };
   karma_config.webpack.module.rules.unshift({
     test: /\.js$/,
     include: path.resolve('src/'),
+    exclude: path.resolve('src/polyfills.js'),
     use: ['istanbul-instrumenter-loader']
   });
 
