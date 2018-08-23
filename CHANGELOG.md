@@ -8,6 +8,7 @@
 ### Changes
 
 - Changed build process: optional dependencies are now included in the bundle by default (#890)
+- Transpile with Babel to support old browsers and new language features (#900)
 
 ## Version 0.17.0
 
