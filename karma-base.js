@@ -1,4 +1,4 @@
-var webpack_config = require('./webpack.config');
+var webpack_config = require('./webpack.base.config');
 var url = require('url');
 var fs = require('fs');
 var path = require('path');
