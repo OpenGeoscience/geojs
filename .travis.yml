@@ -14,20 +14,6 @@ addons:
   chrome: stable
   apt:
     packages:
-      # I suspect that not all of these are necessary
-      - mesa-utils
-      - xvfb
-      - libosmesa6
-
-      - libgif-dev
-      - libpng-dev
-
-      - freeglut3-dev
-      - libxmu-dev
-      - libxi-dev
-      - libxxf86vm-dev
-      - libxrandr-dev
-
       - optipng
 
 cache:
@@ -57,8 +43,6 @@ install:
 
 before_script:
   - export DISPLAY=:99.0
-  # Report on available GL support
-  - glxinfo
 
 script:
   - npm run build
