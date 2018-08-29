@@ -209,7 +209,7 @@ h1, h2, h3, h4, h5, h6 {
     .navbar-custom.affix {
         background-color: #f7f7f7;
         border-bottom-color: #e5e5e5;
-        padding: 10px 0;
+        padding: 0px 0;
     }
     .navbar-custom.affix .navbar-brand {
         font-size: 1.5em;
