@@ -162,6 +162,9 @@ var choroplethFeature = function (arg) {
    * A uniform getter that always returns a function even for constant values.
    * If undefined input, return all the choropleth values as an object.
    *
+   * @function choropleth_DOT_get
+   * @memberof geo.choroplethFeature
+   * @instance
    * @param {string|undefined} key defines one of the attributes of a
    *  choropleth.
    * @return {function}
