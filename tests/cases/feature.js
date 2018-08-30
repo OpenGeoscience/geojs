@@ -363,5 +363,13 @@ describe('geo.feature', function () {
       expect(feat.selectionAPI(true, true)).toBe(feat);
       expect(feat.selectionAPI()).toBe(true);
     });
+    it('ready', function () {
+      feat = geo.feature({layer: layer});
+      expect(feat.ready).toBe(true);
+      feat._exit();
+      expect(feat.ready).toBe(false);
+      feat._init({});
+      expect(feat.ready).toBe(true);
+    });
   });
 });
