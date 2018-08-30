@@ -41,7 +41,8 @@ var vec4 = require('gl-vec4');
  * @alias geo.camera
  * @extends geo.object
  * @param {object?} spec Options argument
- * @param {string} spec.projection One of the supported geo.camera.projection
+ * @param {string} spec.projection One of the supported
+ *    {@link geo.camera.projection}.
  * @param {object} spec.viewport The initial camera viewport
  * @param {object} spec.viewport.width
  * @param {object} spec.viewport.height
@@ -858,6 +859,7 @@ var camera = function (spec) {
 
 /**
  * Supported projection types.
+ * @enum
  */
 camera.projection = {
   perspective: true,
@@ -867,6 +869,7 @@ camera.projection = {
 /**
  * Default camera clipping bounds.  Some features and renderers may rely on the
  * far clip value being more positive than the near clip value.
+ * @enum
  */
 camera.clipbounds = {
   perspective: {
@@ -891,6 +894,7 @@ camera.clipbounds = {
  * Output a mat4 as a css transform.  This expects that the transform-origin is
  * 0 0.
  *
+ * @variation 2
  * @param {mat4} t A matrix transform.
  * @returns {string} A css transform string.
  */

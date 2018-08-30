@@ -10,7 +10,9 @@ var fse = require('fs-extra');
 
 fse.copySync('node_modules/jaguarjs-jsdoc/tmpl', 'jsdoc/template/tmpl');
 fse.copySync('node_modules/jaguarjs-jsdoc/static', 'jsdoc/template/static');
+fse.copySync('jsdoc/template/container.tmpl', 'jsdoc/template/tmpl/container.tmpl');
 fse.copySync('jsdoc/template/mainpage.tmpl', 'jsdoc/template/tmpl/mainpage.tmpl');
+fse.copySync('jsdoc/template/navigation.tmpl', 'jsdoc/template/tmpl/navigation.tmpl');
 fse.copySync('jsdoc/template/properties.tmpl', 'jsdoc/template/tmpl/properties.tmpl');
 fse.appendFileSync('jsdoc/template/static/styles/jaguar.css', fse.readFileSync('jsdoc/template/style.css').toString());
 
