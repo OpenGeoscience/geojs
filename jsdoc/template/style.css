@@ -16,3 +16,6 @@
   border-top: 3px double #e1e1e1;
   padding-top: 20px;
 }    
+:target {
+  background-color: #ff8;
+}
