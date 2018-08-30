@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 0.18.0
+
 ### Features
 - Added an idle property to objects (#894)
 - Better handling and changing of camera clipbounds (#899)
@@ -13,8 +15,9 @@
 
 ### Changes
 - Changed build process: optional dependencies are now included in the bundle by default (#890)
-- Transpile with Babel to support old browsers and new language features (#900)
+- Transpile with Babel to support old browsers and new language features (#900, #903)
 - The geojsonReader has been renamed from `jsonReader` to `geojsonReader`.  The old name still works as an alias (#905)
+- Catch errors in animation frame callbacks (#911)
 
 ## Version 0.17.0
 
