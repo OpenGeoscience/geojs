@@ -70,9 +70,11 @@ var canvas_object = function (arg) {
    * @returns {this} The current object.
    */
   this.draw = function () {
-    m_this._update();
-    m_this.renderer()._render();
-    s_draw();
+    if (m_this.ready) {
+      m_this._update();
+      m_this.renderer()._render();
+      s_draw();
+    }
     return m_this;
   };
 

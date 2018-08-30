@@ -406,6 +406,7 @@ describe('geo.polygonFeature', function () {
       var buildTime = polygons.buildTime().getMTime();
       layer.deleteFeature(polygons);
       polygons.data(testPolygons);
+      polygons._update();
       map.draw();
       expect(buildTime).toEqual(polygons.buildTime().getMTime());
       destroyMap();

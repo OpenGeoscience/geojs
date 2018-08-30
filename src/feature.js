@@ -105,6 +105,7 @@ var feature = function (arg) {
 
   var m_this = this,
       s_exit = this._exit,
+      m_ready,
       m_selectionAPI = arg.selectionAPI === undefined ? false : !!arg.selectionAPI,
       m_style = {},
       m_layer = arg.layer === undefined ? null : arg.layer,
@@ -123,15 +124,26 @@ var feature = function (arg) {
   this._subfeatureStyles = {};
 
   /**
+   * @property {boolean} ready `true` if this feature has been initialized,
+   *    `false` if it was destroyed, `undefined` if it was created but not
+   *    initialized.
+   * @name geo.feature#ready
+   */
+  Object.defineProperty(this, 'ready', {
+    get: function () {
+      return m_ready;
+    }
+  });
+
+  /**
    * Private method to bind mouse handlers on the map element.  This does
    * nothing if the selectionAPI is turned off.  Otherwise, it first unbinds
    * any existing handlers and then binds handlers.
    */
   this._bindMouseHandlers = function () {
-
     // Don't bind handlers for improved performance on features that don't
     // require it.
-    if (!this.selectionAPI()) {
+    if (!m_this.selectionAPI()) {
       return;
     }
 
@@ -217,7 +229,7 @@ var feature = function (arg) {
     // evt.previous.
     if (over.index.length > 1) {
       m_this.geoTrigger(geo_event.feature.mouseover_order, {
-        feature: this,
+        feature: m_this,
         mouse: mouse,
         previous: m_selectedFeatures,
         over: over
@@ -334,7 +346,7 @@ var feature = function (arg) {
     // maintain evt.over.found.  Handlers should not modify evt.over.extra.
     if (over.index.length > 1) {
       m_this.geoTrigger(geo_event.feature.mouseclick_order, {
-        feature: this,
+        feature: m_this,
         mouse: mouse,
         over: over
       });
@@ -463,7 +475,7 @@ var feature = function (arg) {
       if (util.isFunction(m_style[key])) {
         out = function () {
           return util.convertColor(
-            m_style[key].apply(this, arguments)
+            m_style[key].apply(m_this, arguments)
           );
         };
       } else {
@@ -667,7 +679,7 @@ var feature = function (arg) {
   this.bin = function (val) {
     if (val === undefined) {
       if (m_bin === null) {
-        var parent = this.parent(),
+        var parent = m_this.parent(),
             idx = parent ? parent.children().indexOf(m_this) : -1;
         return idx >= 0 ? idx : 0;
       }
@@ -772,10 +784,10 @@ var feature = function (arg) {
     arg = !!arg;
     if (arg !== m_selectionAPI || direct) {
       m_selectionAPI = arg;
-      this._unbindMouseHandlers();
-      this._bindMouseHandlers();
+      m_this._unbindMouseHandlers();
+      m_this._bindMouseHandlers();
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -810,6 +822,7 @@ var feature = function (arg) {
                 {'opacity': 1.0}, arg.style === undefined ? {} :
                 arg.style);
     m_this._bindMouseHandlers();
+    m_ready = true;
   };
 
   /**
@@ -839,6 +852,7 @@ var feature = function (arg) {
     m_selectedFeatures = [];
     m_style = {};
     s_exit();
+    m_ready = false;
   };
 
   this._init(arg);

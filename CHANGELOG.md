@@ -8,6 +8,7 @@
 
 ### Bug Fixes
 - Fixed an issue with overlapping, cropped tiles on old browsers (#901)
+- Fixed an issue where a `geo.gl.polygonFeature` could be updated after it was deleted (#913)
 
 ### Changes
 - Changed build process: optional dependencies are now included in the bundle by default (#890)
