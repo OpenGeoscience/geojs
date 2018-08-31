@@ -1,7 +1,7 @@
 // General utilities that are made available to tests.
 
 var $ = require('jquery');
-var geo = require('../src');
+var geo = require('./test-utils').geo;
 
 module.exports = {
   createOsmMap: function (mapOpts, osmOpts, notiles) {

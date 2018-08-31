@@ -4,6 +4,9 @@
  * @copyright 2010-2016, Michael Bostock
  * @license BSD-3-Clause
  */
+
+require('./polyfills');
+
 var globals = {
   d3: require('d3'),
   hammerjs: require('hammerjs')

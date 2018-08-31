@@ -75,6 +75,49 @@ module.exports = {
   */
   module: {
     rules: [{
+      /* The first rule only includes src/*.js so that it can conveniently be
+       * modified for istanbul instrumentation */
+      test: /\.js$/,
+      include: path.resolve('src'),
+      exclude: path.resolve('src/polyfills.js'),
+      use: [{
+        loader: 'babel-loader',
+        options: {
+          presets: [[
+            'env', {
+              targets: {
+                browsers: ['defaults'],
+                uglify: true
+              },
+              useBuiltIns: 'usage'
+            }
+          ]],
+          cacheDirectory: true
+        }
+      }]
+    }, {
+      test: /\.js$/,
+      include: [
+        path.resolve('tests'),
+        path.resolve('examples'),
+        path.resolve('tutorials')
+      ],
+      use: [{
+        loader: 'babel-loader',
+        options: {
+          presets: [[
+            'env', {
+              targets: {
+                browsers: ['defaults'],
+                uglify: true
+              },
+              useBuiltIns: 'usage'
+            }
+          ]],
+          cacheDirectory: true
+        }
+      }]
+    }, {
       test: /\.styl$/,
       use: [
         'style-loader',

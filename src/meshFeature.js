@@ -157,6 +157,9 @@ var meshFeature = function (arg) {
    * A uniform getter that always returns a function even for constant values.
    * If undefined input, return all the mesh values as an object.
    *
+   * @function mesh_DOT_get
+   * @memberof geo.meshFeature
+   * @instance
    * @param {string|undefined} key The name of the mesh key or `undefined` to
    *    return an object with all keys as functions.
    * @returns {object|function} A function related to the key, or an object

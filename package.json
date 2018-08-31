@@ -29,13 +29,11 @@
     "vtk.js": "^5.15.6"
   },
   "devDependencies": {
-    "babel-core": "^6.0.0",
-    "babel-loader": "^6.0.0",
-    "babel-plugin-istanbul": "2.0.0",
-    "babel-polyfill": "6.13.0",
-    "babel-preset-react": "^6.16.0",
-    "babel-preset-stage-2": "^6.18.0",
-    "blanket": "~1.2",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-istanbul": "^4.1.6",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "body-parser": "^1.15.0",
     "bootstrap": "^3.3.6",
     "bootswatch": "^3.3.6",
@@ -73,6 +71,7 @@
     "karma-jasmine": "^1.0.2",
     "karma-jasmine-html-reporter": "^1.1.0",
     "karma-phantomjs-launcher": "^1.0.0",
+    "karma-phantomjs-shim": "^1.5.0",
     "karma-sinon": "^1.0.4",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-spec-reporter": "^0.0.32",
@@ -139,5 +138,5 @@
     "webgl",
     "svg"
   ],
-  "main": "geo.js"
+  "main": "geo.lean.js"
 }

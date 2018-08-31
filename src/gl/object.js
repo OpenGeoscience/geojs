@@ -27,9 +27,11 @@ var gl_object = function (arg) {
    * @returns {this}
    */
   this.draw = function () {
-    m_this._update({mayDelay: true});
-    m_this.renderer()._render();
-    s_draw();
+    if (m_this.ready) {
+      m_this._update({mayDelay: true});
+      m_this.renderer()._render();
+      s_draw();
+    }
     return m_this;
   };
 

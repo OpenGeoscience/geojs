@@ -223,6 +223,20 @@ describe('geo.core.map', function () {
       expect(queue3).not.toEqual(queue2);
       unmockAnimationFrame();
     });
+    it('animationQueue with bad callback', function () {
+      mockAnimationFrame();
+      var error = sinon.stub(console, 'error', function () {}),
+          m = createMap(),
+          called = 0,
+          start = new Date().getTime();
+      m.scheduleAnimationFrame(function () { throw new Error('fail'); });
+      m.scheduleAnimationFrame(function () { called += 1; });
+      stepAnimationFrame(start);
+      unmockAnimationFrame();
+      expect(called).toBe(1);
+      expect(error.calledOnce).toBe(true);
+      console.error.restore();
+    });
     it('autoResize', function () {
       var m = createMap();
       expect(m.autoResize()).toBe(true);

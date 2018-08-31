@@ -339,6 +339,9 @@ var gl_polygonFeature = function (arg) {
    *    frame for the update.
    */
   this._update = function (opts) {
+    if (!m_this.ready) {
+      return;
+    }
     if (opts && opts.mayDelay && m_builtOnce) {
       m_updateAnimFrameRef = m_this.layer().map().scheduleAnimationFrame(m_this._update);
       return;
@@ -363,6 +366,10 @@ var gl_polygonFeature = function (arg) {
    * Destroy.
    */
   this._exit = function () {
+    if (m_updateAnimFrameRef && m_this.layer()) {
+      m_this.layer().map().scheduleAnimationFrame(m_this._update, 'remove');
+      m_updateAnimFrameRef = null;
+    }
     m_this.renderer().contextRenderer().removeActor(m_actor);
     s_exit();
   };

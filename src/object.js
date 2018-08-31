@@ -23,8 +23,9 @@ var object = function () {
       m_promiseCount = 0;
 
   /**
-   * Bind a handler that will be called once when all internal promises are
-   * resolved.
+   * Bind a handler that will be called one time when all internal promises are
+   * resolved.  If there are no outstanding promises, this is invoked
+   * synchronously.
    *
    * @param {function} handler A function taking no arguments.
    * @returns {this}
@@ -37,6 +38,20 @@ var object = function () {
     }
     return m_this;
   };
+
+  /**
+   * Getter for the idle state.  Read only.
+   *
+   * @property {boolean} idle `true` if the object is idle (`onIdle` would call
+   *    a handler immediately).
+   * @name geo.object#idle
+   */
+  Object.defineProperty(this, 'idle', {
+    get: function () {
+      return !m_promiseCount;
+    },
+    configurable: true
+  });
 
   /**
    * Add a new promise object preventing idle event handlers from being called

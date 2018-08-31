@@ -1803,7 +1803,11 @@ var map = function (arg) {
 
     /* The first entry is the reference to the window.requestAnimationFrame. */
     for (var i = 1; i < queue.length; i += 1) {
-      queue[i].apply(this, arguments);
+      try {
+        queue[i].apply(this, arguments);
+      } catch (err) {
+        console.error(err);
+      }
     }
   }
 

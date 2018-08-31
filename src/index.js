@@ -34,7 +34,6 @@
  */
 
 var $ = require('jquery');
-require('./polyfills');
 
 require('./main.styl');
 

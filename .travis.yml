@@ -14,27 +14,13 @@ addons:
   chrome: stable
   apt:
     packages:
-      # I suspect that not all of these are necessary
-      - mesa-utils
-      - xvfb
-      - libosmesa6
-
-      - libgif-dev
-      - libpng-dev
-
-      - freeglut3-dev
-      - libxmu-dev
-      - libxi-dev
-      - libxxf86vm-dev
-      - libxrandr-dev
-
       - optipng
 
 cache:
   directories:
     - node_modules
     - "$HOME/cache"
-    - "$HOME/_build/ExternalData"
+    - "$TRAVIS_BUILD_DIR/_build/ExternalData"
 
 before_install:
   # Start xvfb with a specific resolution and pixel depth
@@ -57,13 +43,11 @@ install:
 
 before_script:
   - export DISPLAY=:99.0
-  # Report on available GL support
-  - glxinfo
 
 script:
   - npm run build
   - npm run docs
-  - mkdir _build
+  - mkdir -p _build
   - ctest -S cmake/travis_build.cmake -VV || true
   - if [ -f _build/test_failed ] ; then false ; fi
   # Build the website to ensure that it will pass

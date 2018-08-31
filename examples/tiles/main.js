@@ -349,7 +349,7 @@ $(function () {
         }
         break;
     }
-    if (ctl.is('.layerparam') && ctl.attr('reload') === 'true') {
+    if (ctl.is('.layerparam,.cameraparam') && ctl.attr('reload') === 'true') {
       map.deleteLayer(osmLayer);
       osmLayer = map.createLayer('osm', layerParams);
       tileDebug.osmLayer = osmLayer;

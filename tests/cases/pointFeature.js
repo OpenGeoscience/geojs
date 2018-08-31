@@ -248,8 +248,8 @@ describe('geo.pointFeature', function () {
       stepAnimationFrame();
       var circles = layer.node().find('circle');
       expect(circles.length).toBe(19);
-      expect(circles.eq(0).attr('r')).toBe('5');
-      expect(circles.eq(12).attr('r')).toBe('10');
+      expect(circles.eq(0).attr('r')).toBeCloseTo('5');
+      expect(circles.eq(12).attr('r')).toBeCloseTo('10');
       unmockAnimationFrame();
     });
   });
