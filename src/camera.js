@@ -1,6 +1,8 @@
 var inherit = require('./inherit');
 var object = require('./object');
 var util = require('./util');
+var mat3 = require('gl-mat3');
+var vec3 = require('gl-vec3');
 var mat4 = require('gl-mat4');
 var vec4 = require('gl-vec4');
 
@@ -913,6 +915,12 @@ camera.css = function (t) {
       }).join(',') +
     ')';
 };
+
+// expose the vector and matrix functions for convenience
+camera.vec3 = vec3;
+camera.mat3 = mat3;
+camera.vec4 = vec4;
+camera.mat4 = mat4;
 
 inherit(camera, object);
 module.exports = camera;

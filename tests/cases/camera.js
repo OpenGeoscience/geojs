@@ -371,9 +371,6 @@ describe('geo.camera', function () {
     }
 
     function assert_position(position) {
-      if (!closeToEqual(get_node_position(), position, 2)) { //DWM::
-        console.log('assert_position', get_node_position(), position); //DWM::
-      } //DWM::
       expect(closeToEqual(get_node_position(), position, 2)).toBe(true);
     }
 
