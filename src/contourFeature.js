@@ -7,20 +7,25 @@ var meshFeature = require('./meshFeature');
  * @typedef {geo.feature.spec} geo.contourFeature.spec
  * @property {object[]} [data=[]] An array of arbitrary objects used to
  *    construct the feature.
- * @property {object} [style] An object that contains style values for the
- *    feature.
- * @property {number|function} [style.opacity=1] The opacity on a scale of 0 to
- *    1.
- * @property {geo.geoPosition|function} [style.position=data] The position of
- *    each data element.  This defaults to just using `x`, `y`, and `z`
- *    properties of the data element itself.  The position is in the feature's
- *    gcs coordinates.
- * @property {number|function} [style.value=data.z] The value of each data
- *    element.  This defaults `z` properties of the data element.  If the value
- *    of a grid point is `null` or `undefined`, that point and elements that
- *    use that point won't be included in the results.
+ * @property {geo.contourFeature.styleSpec} [style] An object that contains
+ *    style values for the feature.
  * @property {geo.contourFeature.contourSpec} [contour] The contour
  *    specification for the feature.
+ */
+
+/**
+ * Style specification for a contour feature.
+ *
+ * @typedef {geo.feature.styleSpec} geo.contourFeature.styleSpec
+ * @extends geo.feature.styleSpec
+ * @property {geo.geoPosition|function} [position=data] The position of each
+ *    data element.  This defaults to just using `x`, `y`, and `z` properties
+ *    of the data element itself.  The position is in the feature's gcs
+ *    coordinates.
+ * @property {number|function} [value=data.z] The value of each data element.
+ *    This defaults to the `z` property of the data elements.  If the value of
+ *    a grid point is `null` or `undefined`, the point and elements that use
+ *    that point won't be included in the results.
  */
 
 /**
