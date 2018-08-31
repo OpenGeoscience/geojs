@@ -4,7 +4,7 @@ block mainTutorial
   :markdown-it
     # Tutorial - Choropleth Map
     First, let's create our map, add a base map, and create a feature layer. Also, to keep it simple, we import our data inline.
-  
+
   +codeblock('javascript', 1, undefined, true).
     var map = geo.map({
       node: '#map',
@@ -21,7 +21,7 @@ block mainTutorial
     We can use GeoJSON reader to create the polygon feature.
 
   +codeblock('javascript', 2, 1, true).
-    var reader = geo.createFileReader('jsonReader', { 'layer': layer });
+    var reader = geo.createFileReader('geojsonReader', { 'layer': layer });
     var polygon = null;
     reader.read(states, function (features) {
       polygon = features[0];

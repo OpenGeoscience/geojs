@@ -1,6 +1,10 @@
+/* globals utils */
+
 // Run after the DOM loads
 $(function () {
   'use strict';
+
+  var query = utils.getQuery();
 
   // Create a map object
   var map = geo.map({
@@ -27,11 +31,15 @@ $(function () {
 
   // Create a layer to put the features in.  We could need point, line, and
   // polygon features, so ask for a layer that supports all of them.
-  var layer = map.createLayer('feature', {features: ['point', 'line', 'polygon']});
+  // Optionally handle a query parameter to try out specific renderers.
+  var layer = map.createLayer('feature', {
+    renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
+    features: query.renderer ? undefined : ['point', 'line', 'polygon']
+  });
   map.draw();
 
   // Initialize the json reader.
-  var reader = geo.createFileReader('jsonReader', {'layer': layer});
+  var reader = geo.createFileReader('geojsonReader', {'layer': layer});
 
   // At this point we could just attach the reader to the map like
   // this:

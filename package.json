@@ -31,6 +31,7 @@
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.5",
     "babel-plugin-istanbul": "^4.1.6",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "body-parser": "^1.15.0",

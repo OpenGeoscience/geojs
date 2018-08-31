@@ -12,8 +12,9 @@ var textFeature = require('./textFeature');
  * @typedef {object} geo.annotationLayer.labelRecord
  * @property {string} text The text of the label
  * @property {geo.geoPosition} position The position of the label in map gcs
- *      coordinates.
- * @property {object} [style] A {@link geo.textFeature} style object.
+ *    coordinates.
+ * @property {geo.textFeature.styleSpec} [style] A {@link geo.textFeature}
+ *    style object.
  */
 
 /**
@@ -601,7 +602,7 @@ var annotationLayer = function (args) {
    */
   this.geojson = function (geojson, clear, gcs, includeCrs) {
     if (geojson !== undefined) {
-      var reader = registry.createFileReader('jsonReader', {layer: m_this});
+      var reader = registry.createFileReader('geojsonReader', {layer: m_this});
       if (!reader.canRead(geojson)) {
         return;
       }

@@ -398,13 +398,13 @@ describe('geo.core.map', function () {
       var m = createMap();
       expect(m.fileReader()).toBe(null);
       var layerCount = m.layers().length;
-      expect(m.fileReader('jsonReader')).toBe(m);
+      expect(m.fileReader('geojsonReader')).toBe(m);
       expect(m.fileReader()).not.toBe(null);
       expect(m.layers().length).toBe(layerCount + 1);
       expect(m.layers()[m.layers().length - 1].renderer().api()).not.toBe('d3');
-      expect(m.fileReader('jsonReader', {renderer: 'd3'})).toBe(m);
+      expect(m.fileReader('geojsonReader', {renderer: 'd3'})).toBe(m);
       expect(m.layers()[m.layers().length - 1].renderer().api()).toBe('d3');
-      var r = geo.createFileReader('jsonReader', {layer: m.layers()[m.layers().length - 1]});
+      var r = geo.createFileReader('geojsonReader', {layer: m.layers()[m.layers().length - 1]});
       expect(m.fileReader(r)).toBe(m);
       expect(m.fileReader()).toBe(r);
     });
@@ -988,7 +988,7 @@ describe('geo.core.map', function () {
       evt.originalEvent.dataTransfer = {};
       $(m.node()).trigger(evt);
       expect(evt.originalEvent.dataTransfer.dropEffect).not.toBe('copy');
-      m.fileReader('jsonReader');
+      m.fileReader('geojsonReader');
       evt = $.Event('dragover');
       evt.originalEvent = new window.Event('dragover');
       evt.originalEvent.dataTransfer = {};
@@ -997,7 +997,7 @@ describe('geo.core.map', function () {
     });
     it('drop', function () {
       var m = createMap();
-      m.fileReader('jsonReader', {renderer: 'd3'});
+      m.fileReader('geojsonReader', {renderer: 'd3'});
       var evt = $.Event('drop');
       evt.originalEvent = new window.Event('drop');
       evt.originalEvent.dataTransfer = {files: [{
