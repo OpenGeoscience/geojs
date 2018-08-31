@@ -146,17 +146,17 @@ describe('geo.pixelmapFeature', function () {
           position: position,
           url: testImageSrc
         });
-        buildTime = pixelmap.buildTime().getMTime();
+        buildTime = pixelmap.buildTime().timestamp();
         pixelmap._build().then(function () {
-          expect(pixelmap.buildTime().getMTime()).toBeGreaterThan(buildTime);
+          expect(pixelmap.buildTime().timestamp()).toBeGreaterThan(buildTime);
           expect(pixelmap.maxIndex()).toBe(6);
           done();
         });
       });
       it('built', function () {
-        buildTime = pixelmap.buildTime().getMTime();
+        buildTime = pixelmap.buildTime().timestamp();
         expect(pixelmap._build()).toBe(pixelmap);
-        expect(pixelmap.buildTime().getMTime()).toBeGreaterThan(buildTime);
+        expect(pixelmap.buildTime().timestamp()).toBeGreaterThan(buildTime);
       });
       it('unloaded image', function (done) {
         var img = new Image(), loaded;
@@ -199,21 +199,21 @@ describe('geo.pixelmapFeature', function () {
           position: position,
           url: testImageSrc
         });
-        buildTime = pixelmap.buildTime().getMTime();
-        updateTime = pixelmap.updateTime().getMTime();
+        buildTime = pixelmap.buildTime().timestamp();
+        updateTime = pixelmap.updateTime().timestamp();
         pixelmap._update().then(function () {
-          expect(pixelmap.buildTime().getMTime()).toBeGreaterThan(buildTime);
-          expect(pixelmap.updateTime().getMTime()).toBeGreaterThan(updateTime);
+          expect(pixelmap.buildTime().timestamp()).toBeGreaterThan(buildTime);
+          expect(pixelmap.updateTime().timestamp()).toBeGreaterThan(updateTime);
           expect(pixelmap.maxIndex()).toBe(6);
           done();
         });
       });
       it('updated', function (done) {
-        buildTime = pixelmap.buildTime().getMTime();
-        updateTime = pixelmap.updateTime().getMTime();
+        buildTime = pixelmap.buildTime().timestamp();
+        updateTime = pixelmap.updateTime().timestamp();
         pixelmap._update().then(function () {
-          expect(pixelmap.buildTime().getMTime()).toBe(buildTime);
-          expect(pixelmap.updateTime().getMTime()).toBeGreaterThan(updateTime);
+          expect(pixelmap.buildTime().timestamp()).toBe(buildTime);
+          expect(pixelmap.updateTime().timestamp()).toBeGreaterThan(updateTime);
           done();
         });
       });
@@ -297,11 +297,11 @@ describe('geo.pixelmapFeature', function () {
       });
       /* Trigger rerendering */
       pixelmap.data(['a', 'b', 'c', 'd', 'e', 'f']);
-      buildTime = pixelmap.buildTime().getMTime();
+      buildTime = pixelmap.buildTime().timestamp();
       logCanvas2D();
       counts = $.extend({}, window._canvasLog.counts);
       map.draw();
-      expect(buildTime).not.toEqual(pixelmap.buildTime().getMTime());
+      expect(buildTime).not.toEqual(pixelmap.buildTime().timestamp());
     });
     waitForIt('next render canvas A', function () {
       return window._canvasLog.counts.clearRect >= (counts.clearRect || 0) + 1 &&

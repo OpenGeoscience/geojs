@@ -908,7 +908,7 @@ var annotationLayer = function (args) {
    * @returns {this} The current layer.
    */
   this._update = function () {
-    if (m_this.getMTime() > m_buildTime.getMTime()) {
+    if (m_this.timestamp() > m_buildTime.timestamp()) {
       var labels = m_this.options('showLabels') ? [] : null,
           editable = m_this.options('clickToEdit') || m_this.mode() === m_this.modes.edit;
       /* Interally, we have a set of feature levels (to provide z-index

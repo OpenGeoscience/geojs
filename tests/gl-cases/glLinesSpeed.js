@@ -44,7 +44,7 @@ describe('glLinesSpeed', function () {
       // very minimal test threshold
       expect(totaltime).toBeLessThan(10000);
       /* Test animation time. */
-      starttime = new Date().getTime();
+      starttime = Date.now();
       animationFrame();
       $('#map').append($('<div style="display: none" id="loadResults">')
         .attr('results', totaltime));
@@ -84,7 +84,7 @@ describe('glLinesSpeed', function () {
     }
 
     function loadTest() {
-      starttime = new Date().getTime();
+      starttime = Date.now();
       feature.data(lines)
         .style({
           strokeColor: function (d) {
@@ -95,7 +95,7 @@ describe('glLinesSpeed', function () {
           strokeOpacity: 0.05
         });
       myMap.draw();
-      stoptime = new Date().getTime();
+      stoptime = Date.now();
       times.push(stoptime - starttime);
       if (times.length < 12 && stoptime - firsttime < 10000) {
         window.setTimeout(loadTest, 1);
@@ -119,7 +119,7 @@ describe('glLinesSpeed', function () {
       feature.actors()[0].mapper().updateSourceBuffer('strokeOpacity');
       myMap.draw();
       frames += 1;
-      stoptime = new Date().getTime();
+      stoptime = Date.now();
       animTimes.push(stoptime);
       if (animTimes.length < 2 || (animTimes.length < 201 &&
           stoptime - animTimes[0] < 10000)) {
@@ -147,7 +147,7 @@ describe('glLinesSpeed', function () {
         }
       }
 
-      firsttime = new Date().getTime();
+      firsttime = Date.now();
       loadTest();
     });
   }, 30000);

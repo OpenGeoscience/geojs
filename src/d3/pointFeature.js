@@ -96,7 +96,7 @@ var d3_pointFeature = function (arg) {
   this._update = function () {
     s_update.call(m_this);
 
-    if (m_this.getMTime() >= m_buildTime.getMTime()) {
+    if (m_this.timestamp() >= m_buildTime.timestamp()) {
       m_this._build();
     }
 

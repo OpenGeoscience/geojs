@@ -414,7 +414,7 @@ describe('geo.annotationLayer', function () {
       layer.mode('polygon');
       expect(layer.annotations().length).toBe(1);
       expect(layer.annotations()[0].options('vertices').length).toBe(0);
-      var time = new Date().getTime();
+      var time = Date.now();
       layer._handleMouseClick({
         buttonsDown: {left: true},
         time: time,
@@ -561,7 +561,7 @@ describe('geo.annotationLayer', function () {
     it('_handleMouseMove', function () {
       layer.removeAllAnnotations();
       layer.mode('polygon');
-      var time = new Date().getTime();
+      var time = Date.now();
       layer._handleMouseClick({
         buttonsDown: {left: true},
         time: time,
@@ -582,14 +582,14 @@ describe('geo.annotationLayer', function () {
       layer.removeAllAnnotations();
       layer.addAnnotation(point);
       layer._update();
-      var mod = layer.features()[0].getMTime();
+      var mod = layer.features()[0].timestamp();
       layer._handleZoom();
-      expect(layer.features()[0].getMTime()).toBe(mod);
+      expect(layer.features()[0].timestamp()).toBe(mod);
       layer.annotations()[0].options({style: {scaled: true}});
       layer._update();
-      mod = layer.features()[0].getMTime();
+      mod = layer.features()[0].timestamp();
       layer._handleZoom();
-      expect(layer.features()[0].getMTime()).toBeGreaterThan(mod);
+      expect(layer.features()[0].timestamp()).toBeGreaterThan(mod);
     });
     it('_processAction', function () {
       layer.removeAllAnnotations();

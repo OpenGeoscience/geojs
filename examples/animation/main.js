@@ -198,7 +198,7 @@ $(function () {
   function animation_frame() {
     var datalen = animationState.order.length,
         styles = animationState.styleArrays,
-        curTime = new Date().getTime(), genTime, updateTime,
+        curTime = Date.now(), genTime, updateTime,
         position, i, idx, p;
     timeRecords.frames.push(curTime);
     animationState.raf = null;
@@ -284,9 +284,9 @@ $(function () {
         updateStyles[key] = styles[key];
       }
     });
-    genTime = new Date().getTime();
+    genTime = Date.now();
     pointFeature.updateStyleFromArray(updateStyles, null, true);
-    updateTime = new Date().getTime();
+    updateTime = Date.now();
     timeRecords.generate.push(genTime - curTime);
     timeRecords.update.push(updateTime - genTime);
     show_framerate();
@@ -325,7 +325,7 @@ $(function () {
     if (animationState.position === undefined || animationState.position === null) {
       animationState.position = 0;
     }
-    animationState.startTime = new Date().getTime() - animationState.duration * animationState.position;
+    animationState.startTime = Date.now() - animationState.duration * animationState.position;
     if (!animationState.styleArrays || datalen !== animationState.order.length) {
       animationState.order = new Array(datalen);
       if (!animationState.orderedData) {

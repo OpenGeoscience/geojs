@@ -386,16 +386,16 @@ describe('Isoline Feature', function () {
       var isoline = layer.createFeature('isoline', {
         isoline: {elements: squareElements}}).data(vertexList);
       isoline.modified();
-      updateTime = isoline.updateTime().getMTime();
-      buildTime = isoline.buildTime().getMTime();
+      updateTime = isoline.updateTime().timestamp();
+      buildTime = isoline.buildTime().timestamp();
       expect(isoline._update()).toBe(isoline);
-      expect(isoline.updateTime().getMTime()).toBeGreaterThan(updateTime);
-      expect(isoline.buildTime().getMTime()).toBeGreaterThan(buildTime);
-      updateTime = isoline.updateTime().getMTime();
-      buildTime = isoline.buildTime().getMTime();
+      expect(isoline.updateTime().timestamp()).toBeGreaterThan(updateTime);
+      expect(isoline.buildTime().timestamp()).toBeGreaterThan(buildTime);
+      updateTime = isoline.updateTime().timestamp();
+      buildTime = isoline.buildTime().timestamp();
       expect(isoline._update()).toBe(isoline);
-      expect(isoline.updateTime().getMTime()).toBeGreaterThan(updateTime);
-      expect(isoline.buildTime().getMTime()).toBe(buildTime);
+      expect(isoline.updateTime().timestamp()).toBeGreaterThan(updateTime);
+      expect(isoline.buildTime().timestamp()).toBe(buildTime);
     });
     it('_updateLabelPositions', function () {
       var isoline = layer.createFeature('isoline', {

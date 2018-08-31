@@ -621,8 +621,8 @@ var gl_pointFeature = function (arg) {
 
     // For now build if the data or style changes. In the future we may
     // we able to partially update the data using dynamic gl buffers.
-    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
-        m_this.updateTime().getMTime() < m_this.getMTime()) {
+    if (m_this.dataTime().timestamp() >= m_this.buildTime().timestamp() ||
+        m_this.updateTime().timestamp() < m_this.timestamp()) {
       m_this._build();
     }
 

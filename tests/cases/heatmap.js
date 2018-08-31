@@ -44,7 +44,7 @@ describe('canvas heatmap', function () {
         .style('blurRadius', 15);
 
       map.draw();
-      stepAnimationFrame(new Date().getTime());
+      stepAnimationFrame(Date.now());
       expect(layer.children().length).toBe(1);
       // leave animation frames mocked for later tests.
     });
@@ -79,21 +79,21 @@ describe('canvas heatmap', function () {
     });
     it('_animatePan', function () {
       map.draw();
-      var buildTime = feature1.buildTime().getMTime();
+      var buildTime = feature1.buildTime().timestamp();
       map.pan({x: 10, y: 0});
-      expect(feature1.buildTime().getMTime()).toBe(buildTime);
+      expect(feature1.buildTime().timestamp()).toBe(buildTime);
       clock.tick(800);
       map.pan({x: 10, y: 0});
-      expect(feature1.buildTime().getMTime()).toBe(buildTime);
+      expect(feature1.buildTime().timestamp()).toBe(buildTime);
       clock.tick(800);
-      expect(feature1.buildTime().getMTime()).toBe(buildTime);
+      expect(feature1.buildTime().timestamp()).toBe(buildTime);
       clock.tick(800);
-      expect(feature1.buildTime().getMTime()).not.toBe(buildTime);
-      buildTime = feature1.buildTime().getMTime();
+      expect(feature1.buildTime().timestamp()).not.toBe(buildTime);
+      buildTime = feature1.buildTime().timestamp();
       map.pan({x: 0, y: 0});
-      expect(feature1.buildTime().getMTime()).toBe(buildTime);
+      expect(feature1.buildTime().timestamp()).toBe(buildTime);
       clock.tick(2000);
-      expect(feature1.buildTime().getMTime()).toBe(buildTime);
+      expect(feature1.buildTime().timestamp()).toBe(buildTime);
     });
     it('radius, blurRadius, and gaussian', function () {
       // animation frames are already mocked
@@ -104,18 +104,18 @@ describe('canvas heatmap', function () {
       expect(feature1._circle.height).toBe(40);
       feature1.style('gaussian', false);
       map.draw();
-      stepAnimationFrame(new Date().getTime());
+      stepAnimationFrame(Date.now());
       expect(feature1._circle.gaussian).toBe(false);
       feature1.style('radius', 10);
       expect(feature1._circle.radius).toBe(5);
       map.draw();
-      stepAnimationFrame(new Date().getTime());
+      stepAnimationFrame(Date.now());
       expect(feature1._circle.radius).toBe(10);
       expect(feature1._circle.width).toBe(50);
       expect(feature1._circle.height).toBe(50);
       feature1.style('blurRadius', 0);
       map.draw();
-      stepAnimationFrame(new Date().getTime());
+      stepAnimationFrame(Date.now());
       expect(feature1._circle.blurRadius).toBe(0);
       expect(feature1._circle.width).toBe(20);
       expect(feature1._circle.height).toBe(20);
@@ -131,19 +131,19 @@ describe('canvas heatmap', function () {
           idx;
       feature1.style({radius: r, blurRadius: 0});
       map.draw();
-      stepAnimationFrame(new Date().getTime());
+      stepAnimationFrame(Date.now());
       expect(feature1._binned).toBe(false);
       feature1.binned(true);
       map.draw();
-      stepAnimationFrame(new Date().getTime());
+      stepAnimationFrame(Date.now());
       expect(feature1._binned).toBe(r / 8);
       feature1.binned(2);
       map.draw();
-      stepAnimationFrame(new Date().getTime());
+      stepAnimationFrame(Date.now());
       expect(feature1._binned).toBe(2);
       feature1.binned(20);
       map.draw();
-      stepAnimationFrame(new Date().getTime());
+      stepAnimationFrame(Date.now());
       expect(feature1._binned).toBe(20);
       for (idx = data.length; idx < numpoints + 1; idx += 1) {
         data.push([
@@ -152,16 +152,16 @@ describe('canvas heatmap', function () {
       feature1.data(data);
       feature1.binned('auto');
       map.draw();
-      stepAnimationFrame(new Date().getTime());
+      stepAnimationFrame(Date.now());
       expect(feature1._binned).toBe(r / 8);
       data.splice(numpoints);
       feature1.data(data);
       map.draw();
-      stepAnimationFrame(new Date().getTime());
+      stepAnimationFrame(Date.now());
       expect(feature1._binned).toBe(false);
       feature1.binned(true);
       map.zoom(10);
-      stepAnimationFrame(new Date().getTime());
+      stepAnimationFrame(Date.now());
       expect(feature1._binned).toBe(r / 8);
     });
     it('Remove a feature from a layer', function () {

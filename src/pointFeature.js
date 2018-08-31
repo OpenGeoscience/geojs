@@ -226,7 +226,7 @@ var pointFeature = function (arg) {
    * data changes.
    */
   this._updateRangeTree = function () {
-    if (m_rangeTreeTime.getMTime() >= m_this.dataTime().getMTime()) {
+    if (m_rangeTreeTime.timestamp() >= m_this.dataTime().timestamp()) {
       return;
     }
     var pts, position,
