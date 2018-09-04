@@ -67,7 +67,7 @@ function getScreenImage(name, left, top, width, height) {
   var child_process = require('child_process');
   var dest = path.resolve(image_path, name + '-screen.png');
   child_process.execSync(
-     'import -window root ' +
+    'import -window root ' +
     '-crop ' + width + 'x' + height + (left >= 0 ? '+' : '') + left +
     (top >= 0 ? '+' : '') + top + ' +repage ' +
     '\'' + dest.replace(/'/g, "'\\''") + '\'');

@@ -349,7 +349,7 @@ var geojsonReader = function (arg) {
                     [key]: m_this._style(key, m_options.pointStyle[key]),
                     ...styleObj
                   }
-                ))
+                  ))
               );
             allFeatures.push(feature);
           }
@@ -372,7 +372,7 @@ var geojsonReader = function (arg) {
                     [key]: m_this._style(key, m_options.lineStyle[key]),
                     ...styleObj
                   }
-                ))
+                  ))
               );
             allFeatures.push(feature);
           }
@@ -398,7 +398,7 @@ var geojsonReader = function (arg) {
                     [key]: m_this._style(key, m_options.polygonStyle[key]),
                     ...styleObj
                   }
-                ))
+                  ))
               );
             allFeatures.push(feature);
           }

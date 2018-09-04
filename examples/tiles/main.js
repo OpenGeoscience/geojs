@@ -58,12 +58,12 @@ $(function () {
   // Parse query parameters into an object for ease of access
   var query = document.location.search.replace(/(^\?)/, '').split(
     '&').map(function (n) {
-      n = n.split('=');
-      if (n[0]) {
-        this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
-      }
-      return this;
-    }.bind({}))[0];
+    n = n.split('=');
+    if (n[0]) {
+      this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
+    }
+    return this;
+  }.bind({}))[0];
 
   // hide the controls if requested
   $('#controls').toggleClass('no-controls', query.controls === 'false');
@@ -110,7 +110,7 @@ $(function () {
      * big enough cache. */
     cacheSize: 600,
     attribution: $('#url-list [value="' + $('#layer-url').val() + '"]').attr(
-        'credit')
+      'credit')
   };
   if (layerParams.renderer === 'null' || layerParams.renderer === 'html') {
     layerParams.renderer = null;
@@ -235,10 +235,10 @@ $(function () {
     zoomAnimationEnabled : zoomAnimationDisabled);
   // Enable debug classes, if requested.
   $('#map').toggleClass('debug-label', (
-      query.debug === 'true' || query.debug === 'all'))
-    .toggleClass('debug-border', (
-      query.debug === 'border' || query.debug === 'all'))
-    .toggleClass('fade-image', (query.fade === 'true'));
+    query.debug === 'true' || query.debug === 'all'))
+  .toggleClass('debug-border', (
+    query.debug === 'border' || query.debug === 'all'))
+  .toggleClass('fade-image', (query.fade === 'true'));
   // Add the tile layer with the specified parameters
   var osmLayer = map.createLayer('osm', layerParams);
   // Make variables available as a global for easier debug
@@ -265,7 +265,7 @@ $(function () {
       return;
     }
     var processedValue = (ctl.is('[type="checkbox"]') ?
-        (value === 'true') : value);
+      (value === 'true') : value);
     switch (param) {
       case 'allowRotation':
         mapParams.allowRotation = get_allow_rotation(value);
@@ -273,13 +273,13 @@ $(function () {
         break;
       case 'animateZoom':
         map.interactor().options(
-            value === 'true' ? zoomAnimationEnabled : zoomAnimationDisabled);
+          value === 'true' ? zoomAnimationEnabled : zoomAnimationDisabled);
         break;
       case 'debug':
         $('#map').toggleClass('debug-label', (
-            value === 'true' || value === 'all'))
-          .toggleClass('debug-border', (
-            value === 'border' || value === 'all'));
+          value === 'true' || value === 'all'))
+        .toggleClass('debug-border', (
+          value === 'border' || value === 'all'));
         break;
       case 'discrete':
         mapParams.discreteZoom = processedValue;
@@ -315,14 +315,14 @@ $(function () {
         break;
       case 'spring':
         map.interactor().options(
-            value === 'true' ? springEnabled : springDisabled);
+          value === 'true' ? springEnabled : springDisabled);
         break;
       case 'url':
         var url = processedValue;
         layerParams[param] = processedValue;
         osmLayer.url(url);
         osmLayer.attribution($('#url-list [value="' + value + '"]').attr(
-            'credit'));
+          'credit'));
         break;
       case 'x': case 'y':
         var coord = map.center();

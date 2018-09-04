@@ -129,11 +129,11 @@ describe('geo.quadFeature', function () {
     },
     previewColor: function (d) {
       return d.previewColor !== undefined ? d.previewColor :
-          {r: 1, g: 0.75, b: 0.75};
+        {r: 1, g: 0.75, b: 0.75};
     },
     previewImage: function (d) {
       return d.previewImage !== undefined ? d.previewImage :
-          previewImage;
+        previewImage;
     },
     drawOnAsyncResourceLoaded: function (d) {
       return d.reload !== undefined ? d.reload : true;
@@ -301,20 +301,20 @@ describe('geo.quadFeature', function () {
         expect(quad._objectListGet(olist, 2)).toBe(undefined);
         quad._objectListAdd(olist, 2, 'b');
         expect(olist).toEqual([
-            {entry: 1, value: 'a', used: true},
-            {entry: 2, value: 'b', used: true}]);
+          {entry: 1, value: 'a', used: true},
+          {entry: 2, value: 'b', used: true}]);
         expect(quad._objectListGet(olist, 2)).toEqual('b');
       });
       it('_objectListEnd', function () {
         quad._objectListEnd(olist);
         expect(olist).toEqual([
-            {entry: 1, value: 'a', used: true},
-            {entry: 2, value: 'b', used: true}]);
+          {entry: 1, value: 'a', used: true},
+          {entry: 2, value: 'b', used: true}]);
         quad._objectListStart(olist);
         expect(quad._objectListGet(olist, 1)).toEqual('a');
         expect(olist).toEqual([
-            {entry: 1, value: 'a', used: true},
-            {entry: 2, value: 'b', used: false}]);
+          {entry: 1, value: 'a', used: true},
+          {entry: 2, value: 'b', used: false}]);
         quad._objectListEnd(olist);
         expect(olist).toEqual([{entry: 1, value: 'a', used: true}]);
       });

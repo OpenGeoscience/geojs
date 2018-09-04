@@ -140,10 +140,12 @@ var contourFeature = function (arg) {
     result.stepped = stepped === undefined || stepped ? true : false;
     /* Create the min/max colors and the color array */
     result.colorMap = [];
-    result.minColor = $.extend({a: contour.get('minOpacity')(result) || 0},
-        util.convertColor(contour.get('minColor')(result)));
-    result.maxColor = $.extend({a: contour.get('maxOpacity')(result) || 0},
-        util.convertColor(contour.get('maxColor')(result)));
+    result.minColor = $.extend(
+      {a: contour.get('minOpacity')(result) || 0},
+      util.convertColor(contour.get('minColor')(result)));
+    result.maxColor = $.extend(
+      {a: contour.get('maxOpacity')(result) || 0},
+      util.convertColor(contour.get('maxColor')(result)));
     contour.get('colorRange')(result).forEach(function (clr, idx) {
       result.colorMap.push($.extend({
         a: opacityRange && opacityRange[idx] !== undefined ? opacityRange[idx] : 1

@@ -971,17 +971,17 @@ var util = module.exports = {
      * we are either allowed to self-cross or it does not self-cross the rest
      * of the line. */
     if (maxDistSq <= toleranceSq && (!noCrossLines || !util.segmentCrossesLineList2d(
-         pts[0], pts[pts.length - 1], noCrossLines))) {
+      pts[0], pts[pts.length - 1], noCrossLines))) {
       return [pts[0], pts[pts.length - 1]];
     }
     var left = pts.slice(0, index + 1),
         right = pts.slice(index),
         leftSide = util.rdpLineSimplify(
-            left, tolerance, false,
-            noCrossLines ? noCrossLines.concat([right]) : null),
+          left, tolerance, false,
+          noCrossLines ? noCrossLines.concat([right]) : null),
         rightSide = util.rdpLineSimplify(
-            right, tolerance, false,
-            noCrossLines ? noCrossLines.concat([left]) : null);
+          right, tolerance, false,
+          noCrossLines ? noCrossLines.concat([left]) : null);
     return leftSide.slice(0, leftSide.length - 1).concat(rightSide);
   },
 
@@ -1206,14 +1206,14 @@ var util = module.exports = {
           m_htmlToImageSupport = true;
         } catch (err) {
           console.warn(
-              'This browser does not support converting HTML to an image via ' +
-              'SVG foreignObject.  Some functionality will be limited.', err);
+            'This browser does not support converting HTML to an image via ' +
+            'SVG foreignObject.  Some functionality will be limited.', err);
           m_htmlToImageSupport = false;
         }
         defer.resolve(m_htmlToImageSupport);
       };
       img.src = 'data:image/svg+xml;base64,' + btoa(util.escapeUnicodeHTML(
-          new XMLSerializer().serializeToString(svg[0])));
+        new XMLSerializer().serializeToString(svg[0])));
       return defer;
     }
     return m_htmlToImageSupport;
@@ -1338,7 +1338,7 @@ var util = module.exports = {
         // Firefox requires the HTML to be base64 encoded.  Chrome doesn't, but
         // doing so does no harm.
         img.src = 'data:image/svg+xml;base64,' + btoa(util.escapeUnicodeHTML(
-            new XMLSerializer().serializeToString(svg[0])));
+          new XMLSerializer().serializeToString(svg[0])));
       }
     });
     return defer;
@@ -1411,7 +1411,7 @@ var util = module.exports = {
     m_timingData[name].recent.push(duration);
     if (m_timingData[name].recent.length > m_timingKeepRecent) {
       m_timingData[name].recent.splice(
-          0, m_timingData[name].recent.length - m_timingKeepRecent);
+        0, m_timingData[name].recent.length - m_timingKeepRecent);
     }
   },
 
@@ -1476,9 +1476,9 @@ var util = module.exports = {
             track.recentsub.push([]);
             if (track.recent.length > m_timingKeepRecent) {
               track.recent.splice(
-                  0, track.recent.length - m_timingKeepRecent);
+                0, track.recent.length - m_timingKeepRecent);
               track.recentsub.splice(
-                  0, track.recentsub.length - m_timingKeepRecent);
+                0, track.recentsub.length - m_timingKeepRecent);
             }
           }
           track.subcalls += 1;

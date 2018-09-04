@@ -70,7 +70,7 @@ var sliderWidget = function (arg) {
         .attr(
           'transform',
           'translate(' + cx + ',' + cy + ') scale(' + s + ') translate(-512,-512)'
-      )
+        )
       .append('path')
         .attr('d', icon)
         .attr('class', 'geo-glyphicon');

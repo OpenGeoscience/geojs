@@ -55,7 +55,7 @@ $(function () {
           gcsBounds[proj.name] = proj.bounds;
         }
         var opt = $('<option/>').attr({value: proj.name}).text(
-            proj.name + ' - ' + proj.desc);
+          proj.name + ' - ' + proj.desc);
         $('#map-gcs').append(opt);
       });
       var pos = 0;
@@ -68,7 +68,7 @@ $(function () {
         }
       });
       $('#map-gcs option').eq(pos).before($('<option/>').attr(
-          {value: 'EPSG:3857'}).text('--------'));
+        {value: 'EPSG:3857'}).text('--------'));
       // select boxes with thousands of options cause performance issues.  To
       // see all of the projection options, disable the following line:
       $('#map-gcs option').slice(pos).remove();
@@ -83,12 +83,12 @@ $(function () {
     // Parse query parameters into an object for ease of access
     var query = document.location.search.replace(/(^\?)/, '').split(
       '&').map(function (n) {
-        n = n.split('=');
-        if (n[0]) {
-          this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
-        }
-        return this;
-      }.bind({}))[0];
+      n = n.split('=');
+      if (n[0]) {
+        this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
+      }
+      return this;
+    }.bind({}))[0];
 
     // hide the controls if requested
     $('#controls').toggleClass('no-controls', query.controls === 'false');
@@ -106,7 +106,7 @@ $(function () {
     $('#controls').on('change', change_controls);
 
     var range = geo.transform.transformCoordinates(
-        'EPSG:4326', 'EPSG:3857', [{x: -180, y: 0}, {x: 180, y: 0}]);
+      'EPSG:4326', 'EPSG:3857', [{x: -180, y: 0}, {x: 180, y: 0}]);
     // Set map defaults to use our named node and have a reasonable center and
     // zoom level
     var gcs = query.gcs || 'EPSG:3857';
@@ -130,7 +130,7 @@ $(function () {
       zIndex: 0,
       gcs: 'EPSG:3857',
       attribution: $('#url-list [value="' + $('#layer-url').val() + '"]').attr(
-          'credit'),
+        'credit'),
       minLevel: query.minLevel ? parseInt(query.minLevel, 10) : 4,
       keepLower: true,
       wrapX: false,
@@ -150,7 +150,7 @@ $(function () {
     var uiLayer = map.createLayer('ui', {zIndex: 2});
     var tooltip = uiLayer.createWidget('dom', {position: {x: 0, y: 0}});
     var tooltipElem = $(tooltip.canvas()).attr('id', 'tooltip').addClass(
-        'hidden');
+      'hidden');
     // Create a layer with cities
     var pointLayer = map.createLayer('feature', {renderer: 'vgl', zIndex: 1});
     var pointFeature = pointLayer
@@ -224,7 +224,7 @@ $(function () {
         return;
       }
       var processedValue = (ctl.is('[type="checkbox"]') ?
-          (value === 'true') : value);
+        (value === 'true') : value);
       switch (param) {
         case 'capitals':
           pointFeature.visible(processedValue);
@@ -246,7 +246,7 @@ $(function () {
           layerParams[param] = processedValue;
           osmLayer.url(url);
           osmLayer.attribution($('#url-list [value="' + value + '"]').attr(
-              'credit'));
+            'credit'));
           break;
         default:
           if (ctl.is('.layerparam')) {

@@ -668,12 +668,12 @@ var isolineFeature = function (arg) {
       /* Distance in scaled pixels between the map's current center and the
        * center when the labels were computed. */
       var lastDelta = Math.sqrt(util.distance2dSquared(
-            map.gcsToDisplay(map.center()), map.gcsToDisplay(last.center))) *
-            Math.pow(2, last.zoom - zoom);
+        map.gcsToDisplay(map.center()), map.gcsToDisplay(last.center))) *
+        Math.pow(2, last.zoom - zoom);
       /* Half the viewport, less twice the maxSpacing, less any expansion of
        * the map. */
       var threshold = last.labelViewport / 2 - last.maxSpacing * 2 - Math.max(
-            mapSize.width - last.size.width, mapSize.height - last.size.height, 0);
+        mapSize.width - last.size.width, mapSize.height - last.size.height, 0);
       update = update || (lastDelta >= threshold);
     }
     if (update) {

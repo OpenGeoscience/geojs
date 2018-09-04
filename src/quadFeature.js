@@ -154,8 +154,7 @@ var quadFeature = function (arg) {
         data = m_this.data(),
         map = m_this.layer().map(),
         i, coordbasis;
-    coordinate = transform.transformCoordinates(
-        map.ingcs(), map.gcs(), coordinate);
+    coordinate = transform.transformCoordinates(map.ingcs(), map.gcs(), coordinate);
     if (!m_quads) {
       this._generateQuads();
     }
@@ -262,7 +261,7 @@ var quadFeature = function (arg) {
         }
         if (gcs !== map_gcs && gcs !== false) {
           pos[key] = transform.transformCoordinates(
-              gcs, map_gcs, pos[key]);
+            gcs, map_gcs, pos[key]);
         }
       }
     });
@@ -358,8 +357,8 @@ var quadFeature = function (arg) {
       }
       diag2 = Math.pow(pos.ll[0] - pos.ur[0], 2) + Math.pow(pos.ll[1] -
           pos.ur[1], 2) + Math.pow(pos.ll[2] - pos.ur[0], 2) + Math.pow(
-          pos.lr[0] - pos.ur[0], 2) + Math.pow(pos.lr[1] - pos.ur[1], 2) +
-          Math.pow(pos.lr[2] - pos.ur[0], 2);
+        pos.lr[0] - pos.ur[0], 2) + Math.pow(pos.lr[1] - pos.ur[1], 2) +
+        Math.pow(pos.lr[2] - pos.ur[0], 2);
       quadinfo.diag2 = diag2;
       quadinfo.ll = pos.ll;
       if (origindiag2 === undefined || (diag2 && diag2 < origindiag2)) {

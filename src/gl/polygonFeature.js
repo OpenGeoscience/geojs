@@ -286,9 +286,9 @@ var gl_polygonFeature = function (arg) {
         geom = vgl.geometryData(),
         sourcePositions = vgl.sourceDataP3fv({'name': 'pos'}),
         sourceFillColor = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Two, {'name': 'fillColor'}),
+          3, vgl.vertexAttributeKeysIndexed.Two, {'name': 'fillColor'}),
         sourceFillOpacity = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'fillOpacity'}),
+          1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'fillOpacity'}),
         trianglePrimitive = vgl.triangles();
 
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);

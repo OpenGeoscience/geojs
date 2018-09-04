@@ -130,8 +130,7 @@ describe('glPointsSpeed', function () {
 
     common.loadCitiesData(function (citieslatlon) {
       while (points.length < numPoints) {
-        for (i = 0; i < citieslatlon.length && points.length < numPoints;
-            i += 1) {
+        for (i = 0; i < citieslatlon.length && points.length < numPoints; i += 1) {
           points.push({
             x: citieslatlon[i].lon + dx,
             y: citieslatlon[i].lat + dy,
