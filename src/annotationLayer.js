@@ -875,7 +875,7 @@ var annotationLayer = function (args) {
         value = +value;
         break;
       case 'opacity':
-        if (value === undefined || value === null || value === '') {
+        if (value === '') {
           return;
         }
         value = +value;

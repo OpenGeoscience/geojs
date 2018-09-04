@@ -253,7 +253,7 @@ var meshFeature = function (arg) {
       /* If we are not using the position values (we are using x0, y0, dx, dy),
        * and wrapLongitude is turned on, and the position spans 180 degrees,
        * duplicate one or two columns of points at opposite ends of the map. */
-      usePos = (elements || x0 === null || x0 === undefined || y0 === null ||
+      usePos = (x0 === null || x0 === undefined || y0 === null ||
           y0 === undefined || !dx || !dy);
       wrapLongitude = !!(wrapLongitude === undefined || wrapLongitude);
       if (!usePos && wrapLongitude && (x0 < -180 || x0 > 180 ||

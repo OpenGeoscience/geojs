@@ -1,7 +1,0 @@
-{
-  "globals": {
-    "geo": true,
-    "d3": true,
-    "$": true
-  }
-}

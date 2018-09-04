@@ -292,7 +292,7 @@ $(function () {
         layerParams.keepLower = (value === 'true');
         break;
       case 'max': case 'min':
-        mapParams[param] = processedValue = parseFloat(value);
+        mapParams[param] = parseFloat(value);
         map.zoomRange(mapParams);
         break;
       case 'projection':
