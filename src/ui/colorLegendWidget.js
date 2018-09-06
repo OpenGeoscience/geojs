@@ -80,7 +80,7 @@ var colorLegendWidget = function (arg) {
    * Clear the DOM container and create legends.
    */
   this._draw = function () {
-    d3.select(m_this.canvas()).selectAll('div.legends').remove();
+    d3.select(m_this.canvas()).selectAll('div.geojs-color-legends').remove();
 
     if (!m_categories.length) {
       d3.select(m_this.canvas()).style('display', 'none');
@@ -91,7 +91,7 @@ var colorLegendWidget = function (arg) {
 
     var container = d3.select(m_this.canvas())
       .append('div')
-      .attr('class', 'legends');
+      .attr('class', 'geojs-color-legends');
 
     var width = m_width;
     var margin = 20;
@@ -99,11 +99,11 @@ var colorLegendWidget = function (arg) {
     m_categories.forEach(function (category, index) {
       var legendContainer = container
         .append('div')
-        .attr('class', 'legend');
+        .attr('class', 'geojs-color-legend');
 
       legendContainer
         .append('div')
-        .attr('class', 'title')
+        .attr('class', 'geojs-title')
         .text(category.name);
 
       var legendSvg = legendContainer

@@ -97,7 +97,7 @@ describe('color legend', function () {
   });
 
   it('Create basic color legend widget', function () {
-    expect($(container).find('.legend').length).toBe(1);
+    expect($(container).find('.geojs-color-legend').length).toBe(1);
   });
 
   it('Create color legend widget without initial categories', function () {
@@ -106,7 +106,7 @@ describe('color legend', function () {
     legendWidget = uiLayer.createWidget('colorLegend', {
       categories: []
     });
-    expect($(container).find('.legend').length).toBe(0);
+    expect($(container).find('.geojs-color-legend').length).toBe(0);
   });
 
   it('Use unsupported scale', function () {
@@ -133,20 +133,20 @@ describe('color legend', function () {
 
   it('set new categories', function () {
     legendWidget.categories([allCategories[1], allCategories[2]]);
-    expect($(container).find('.legend').length).toBe(2);
+    expect($(container).find('.geojs-color-legend').length).toBe(2);
     expect(legendWidget.categories().length).toBe(2);
   });
 
   it('add remove categories', function () {
     legendWidget.addCategories([allCategories[1], allCategories[2]]);
-    expect($(container).find('.legend').length).toBe(3);
+    expect($(container).find('.geojs-color-legend').length).toBe(3);
     legendWidget.removeCategories([allCategories[1], allCategories[2]]);
-    expect($(container).find('.legend').length).toBe(1);
+    expect($(container).find('.geojs-color-legend').length).toBe(1);
   });
 
   it('test different kind of categories', function () {
     legendWidget.categories(allCategories);
-    var legends = $(container).find('.legend');
+    var legends = $(container).find('.geojs-color-legend');
     expect(legends.length).toBe(allCategories.length);
     expect($(legends[0]).find('svg>rect').length).toBe(4);
     expect($(legends[0]).find('svg>rect:first').attr('fill')).toBe('red');
@@ -214,12 +214,12 @@ describe('color legend', function () {
     container[0].dispatchEvent(CreateEvent('mouseleave'));
 
     legendWidget.categories([allCategories[1], allCategories[6]]);
-    var x = Math.floor($('.legends', container).offset().left) + 115,
-        y = Math.floor($('.legends', container).offset().top) + 555;
+    var x = Math.floor($('.geojs-color-legends', container).offset().left) + 115,
+        y = Math.floor($('.geojs-color-legends', container).offset().top) + 555;
 
     var mouseout = CreateEvent('mouseout');
     var mousemove = CreateEvent('mousemove', {x: x, y: y});
-    var legends = $(container).find('.legend');
+    var legends = $(container).find('.geojs-color-legend');
     $(legends[0]).find('svg>rect')[0].dispatchEvent(mousemove);
     $(legends[0]).find('svg>rect')[0].dispatchEvent(mouseout);
     expect($(container).find('.color-legend-popup').text()).toBe('100 - 200');
