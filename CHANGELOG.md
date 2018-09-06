@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Bug Fixes
+- Fixed an issue with the annotation key handler (#923)
+
 ## Version 0.18.0
 
 ### Features

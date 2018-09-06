@@ -77,7 +77,8 @@ var annotationLayer = function (args) {
       m_annotations = [],
       m_features = [],
       m_labelFeature,
-      m_labelLayer;
+      m_labelLayer,
+      m_keyHandler;
 
   var geojsonStyleProperties = {
     'closed': {dataType: 'boolean', keys: ['closed', 'close']},
@@ -519,10 +520,13 @@ var annotationLayer = function (args) {
           mapNode = m_this.map().node(), oldMode = m_mode;
       m_mode = arg;
       mapNode.toggleClass('annotation-input', !!(m_mode && m_mode !== m_this.modes.edit));
+      if (!m_keyHandler) {
+        m_keyHandler = Mousetrap(mapNode[0]);
+      }
       if (m_mode) {
-        Mousetrap(mapNode[0]).bind('esc', function () { m_this.mode(null); });
+        m_keyHandler.bind('esc', function () { m_this.mode(null); });
       } else {
-        Mousetrap(mapNode[0]).unbind('esc');
+        m_keyHandler.unbind('esc');
       }
       if (m_this.currentAnnotation) {
         switch (m_this.currentAnnotation.state()) {
@@ -1150,6 +1154,9 @@ var annotationLayer = function (args) {
    * @returns {this} The current layer.
    */
   this._exit = function () {
+    if (m_keyHandler) {
+      m_keyHandler.reset();
+    }
     m_this._removeLabelFeature();
     // Call super class exit
     s_exit.call(m_this);
