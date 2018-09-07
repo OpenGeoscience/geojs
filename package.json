@@ -1,6 +1,6 @@
 {
   "name": "geojs",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "JavaScript Geo visualization and Analysis Library",
   "homepage": "https://github.com/OpenGeoscience/geojs",
   "license": "Apache-2.0",
