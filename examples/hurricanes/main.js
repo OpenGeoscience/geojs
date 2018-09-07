@@ -25,9 +25,6 @@ $(function () {
   var start = new Date('1980-01-01');
   var drange = (new Date('2015-01-01') - start);
 
-  function hoverInfo() {
-  }
-
   function any(a, f) {
     var v = false;
     a.forEach(function (d) {
@@ -342,7 +339,6 @@ $(function () {
         data.forEach(function (d) {
           d.hover = false;
         });
-        hoverInfo(evt.data);
         evt.data.hover = true;
         makeInfoBox(evt.data);
         this.modified();
@@ -437,6 +433,4 @@ $(function () {
     draw();
     makeInfoBox();
   });
-
-  hoverInfo();
 });

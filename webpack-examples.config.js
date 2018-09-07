@@ -23,9 +23,6 @@ var rules = base.module.rules.concat([{
   test: require.resolve('codemirror'),
   use: ['expose-loader?CodeMirror']
 }, {
-  test: /jsonlint\.js$/,
-  use: ['expose-loader?jsonlint']
-}, {
   test: require.resolve('colorbrewer'),
   use: ['expose-loader?colorbrewer']
 }, {

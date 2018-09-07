@@ -284,7 +284,7 @@ $(function () {
         layer.draw();
         break;
       case 'edit':
-        show_edit_dialog(id, annotation);
+        show_edit_dialog(id);
         break;
       case 'remove':
         layer.removeAnnotation(annotation);

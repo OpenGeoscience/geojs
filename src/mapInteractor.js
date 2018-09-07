@@ -1651,7 +1651,7 @@ var mapInteractor = function (args) {
           return;
         }
         accum(dz, org);
-        apply(dz, org);
+        apply();
       };
     }
   }

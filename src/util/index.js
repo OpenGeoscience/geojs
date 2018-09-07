@@ -102,7 +102,7 @@ var util = module.exports = {
     }
 
     if (inner && inside) {
-      (inner || []).forEach(function (hole) {
+      inner.forEach(function (hole) {
         inside = inside && !util.pointInPolygon(point, hole);
       });
     }
