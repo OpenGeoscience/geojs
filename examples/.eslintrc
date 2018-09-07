@@ -3,7 +3,6 @@
     "d3": true,
     "geo": true,
     "$": true,
-    "CodeMirror": true,
-    "jsonlint": true
+    "CodeMirror": true
   }
 }

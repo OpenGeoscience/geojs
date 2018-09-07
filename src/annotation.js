@@ -1668,7 +1668,7 @@ var polygonAnnotation = function (args) {
       m_this.state(annotationState.done);
       return 'done';
     }
-    return (end || !skip);
+    return !skip;
   };
 
   /**
@@ -1922,7 +1922,7 @@ var lineAnnotation = function (args) {
       m_this.state(annotationState.done);
       return 'done';
     }
-    return (end || !skip);
+    return !skip;
   };
 
   /**

@@ -79,11 +79,8 @@ $(function () {
       // Here we listen for changes in the text area content.
       text.on('changes', function () {
 
-        try {
-
-          // Try to parse the json here.  If it fails, then we just exit.
-          jsonlint.parse(text.getValue());
-        } catch (err) {
+        // This will return false if the json is invalid.
+        if (!reader.canRead(text.getValue())) {
           return;
         }
 

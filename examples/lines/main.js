@@ -196,7 +196,7 @@ $(function () {
         !query.resimplify || query.resimplify === 'false') {
       return;
     }
-    window.setTimeout(function () {
+    resimplifyTimeout = window.setTimeout(function () {
       resimplifyTimeout = null;
       if (map.zoom() !== lastSimplifyZoom) {
         simplify_lines(reduceddata);

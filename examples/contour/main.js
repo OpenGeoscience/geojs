@@ -125,7 +125,7 @@ $(function () {
             url: '../../data/oahu-dense.json',
             success: function (data) {
               contourLayer.deleteFeature(contour);
-              contour = makeContour(data, contourLayer, contour);
+              contour = makeContour(data, contourLayer);
               contour.draw();
             }
           });

@@ -2,7 +2,6 @@ src/util/distanceGrid.js
 dist/**
 website/**
 **/*.min.js
-examples/common/jsonlint.js
 jsdoc/template/publish.js
 jsdoc/template/static/**
 jsdoc/template/tmpl/**
