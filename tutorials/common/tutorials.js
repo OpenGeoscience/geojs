@@ -231,16 +231,11 @@ function run_tutorial() {
 }
 
 /**
- * Get query parameters for each step and update them as we start.  Monitor the
- * code blocks and update the url when they change if appropriate.
+ * Fill the codeblocks based on the encoded values in a query.
  *
- * @param {boolean} alwaysKeep If `true`, update the url even if the `keep` url
- *      parameter is not specified.
+ * @param {object} query An object as returned from `utils.getQuery()`.
  */
-function start_keeper(alwaysKeep) {
-  var query = utils.getQuery(),
-      keep = query.keep || (alwaysKeep === true);
-
+function fill_codeblocks(query) {
   $('.codeblock').each(function () {
     var block = $(this),
         key = 'src' + (block.attr('step') !== '1' ? block.attr('step') : '');
@@ -259,10 +254,25 @@ function start_keeper(alwaysKeep) {
       } catch (err) { }
     }
   });
+}
+
+/**
+ * Get query parameters for each step and update them as we start.  Monitor the
+ * code blocks and update the url when they change if appropriate.
+ *
+ * @param {boolean} alwaysKeep If `true`, update the url even if the `keep` url
+ *      parameter is not specified.
+ */
+function start_keeper(alwaysKeep) {
+  var query = utils.getQuery(),
+      keep = query.keep || (alwaysKeep === true),
+      inPop = false;
+
+  fill_codeblocks(query);
   if (keep) {
     $(document).on('geojs-tutorial-run', '.codeblock', function () {
       var newQuery = {};
-      if (query.keep && alwaysKeep !== true) {
+      if (query.keep && (alwaysKeep !== true || query.keep === 'history')) {
         newQuery.keep = query.keep;
       }
       $('.codeblock').each(function () {
@@ -280,8 +290,18 @@ function start_keeper(alwaysKeep) {
           newQuery[key] = comp;
         }
       });
-      utils.setQuery(newQuery);
+      if (!inPop) {
+        utils.setQuery(newQuery, keep === 'history');
+      }
     });
+  }
+  if (keep === 'history') {
+    window.addEventListener('popstate', function (evt) {
+      inPop = true;
+      fill_codeblocks(utils.getQuery());
+      run_tutorial();
+      inPop = false;
+    }, false);
   }
 }
 
