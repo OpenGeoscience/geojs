@@ -4,6 +4,8 @@
 [![codecov.io](https://codecov.io/github/OpenGeoscience/geojs/coverage.svg?branch=master)](https://codecov.io/github/OpenGeoscience/geojs?branch=master)
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.15459.svg)](http://dx.doi.org/10.5281/zenodo.15459)
 [![Gitter](https://badges.gitter.im/OpenGeoscience/geojs.svg)](https://gitter.im/OpenGeoscience/geojs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Code Quality: Javascript](https://img.shields.io/lgtm/grade/javascript/g/OpenGeoscience/geojs.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/OpenGeoscience/geojs/context:javascript)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/OpenGeoscience/geojs.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/OpenGeoscience/geojs/alerts)
 
 Primarily developed by [Kitware](http://www.kitware.com) and
 [Epidemico](http://epidemico.com/). GeoJS is intended to bridge the gap between
