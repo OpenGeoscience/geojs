@@ -73,7 +73,7 @@ var layer = function (arg) {
       m_initialized = false,
       m_rendererName = arg.renderer !== undefined ? arg.renderer : (
         arg.annotations ? rendererForAnnotations(arg.annotations) :
-        rendererForFeatures(arg.features)),
+          rendererForFeatures(arg.features)),
       m_dataTime = timestamp(),
       m_updateTime = timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,

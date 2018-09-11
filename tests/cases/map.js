@@ -755,14 +755,16 @@ describe('geo.core.map', function () {
       layer1 = m.createLayer('feature', {renderer: 'canvas'});
       l1 = layer1.createFeature('line', {
         style: {strokeWidth: 5, strokeColor: 'blue'}});
-      l1.data([[{x: 0, y: 0}, {x: 5, y: 0}],
-               [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}],
-               [{x: 10, y: 0}, {x: 15, y: 2}, {x: 12, y: 5}]]);
+      l1.data([
+        [{x: 0, y: 0}, {x: 5, y: 0}],
+        [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}],
+        [{x: 10, y: 0}, {x: 15, y: 2}, {x: 12, y: 5}]]);
       layer2 = m.createLayer('feature', {renderer: 'canvas'});
       l2 = layer2.createFeature('line', {
         style: {strokeWidth: 5, strokeColor: 'black'}});
-      l2.data([[{x: 10, y: 10}, {x: 15, y: 10}],
-               [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}]]);
+      l2.data([
+        [{x: 10, y: 10}, {x: 15, y: 10}],
+        [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}]]);
 
       m.draw();
       // make sure that drawing has occurred

@@ -60,7 +60,7 @@ var gl_contourFeature = function (arg) {
 
           'void main(void)',
           '{',
-      /* Don't use z values; something is rotten in one of our matrices */
+          /* Don't use z values; something is rotten in one of our matrices */
           '  vec4 scrPos = projectionMatrix * modelViewMatrix * vec4(pos.xy, 0, 1);',
           '  if (scrPos.w != 0.0) {',
           '    scrPos = scrPos / scrPos.w;',
@@ -150,7 +150,7 @@ var gl_contourFeature = function (arg) {
     }
     m_texture.setColorTable(colorTable);
     contour.pos = transform.transformCoordinates(
-        m_this.gcs(), m_this.layer().map().gcs(), contour.pos, 3);
+      m_this.gcs(), m_this.layer().map().gcs(), contour.pos, 3);
     posBuf = util.getGeomBuffer(geom, 'pos', numPts * 3);
     opacityBuf = util.getGeomBuffer(geom, 'opacity', numPts);
     valueBuf = util.getGeomBuffer(geom, 'value', numPts);
@@ -194,9 +194,9 @@ var gl_contourFeature = function (arg) {
         opacityAttr = vgl.vertexAttribute('opacity'),
         sourcePositions = vgl.sourceDataP3fv({'name': 'pos'}),
         sourceValues = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.One, {'name': 'value'}),
+          1, vgl.vertexAttributeKeysIndexed.One, {'name': 'value'}),
         sourceOpacity = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Two, {'name': 'opacity'}),
+          1, vgl.vertexAttributeKeysIndexed.Two, {'name': 'opacity'}),
         primitive = new vgl.triangles();
 
     s_init.call(m_this, arg);

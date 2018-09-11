@@ -6,12 +6,12 @@ var exampleUtils = {
   getQuery: function () {
     var query = document.location.search.replace(/(^\?)/, '').split(
       '&').map(function (n) {
-        n = n.split('=');
-        if (n[0]) {
-          this[decodeURIComponent(n[0].replace(/\+/g, '%20'))] = decodeURIComponent(n[1].replace(/\+/g, '%20'));
-        }
-        return this;
-      }.bind({}))[0];
+      n = n.split('=');
+      if (n[0]) {
+        this[decodeURIComponent(n[0].replace(/\+/g, '%20'))] = decodeURIComponent(n[1].replace(/\+/g, '%20'));
+      }
+      return this;
+    }.bind({}))[0];
     return query;
   },
 

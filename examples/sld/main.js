@@ -65,8 +65,8 @@ var layerController = {
     // Orchestrates the sld generation
     var sequence = utility.generateSequence(layer.min, layer.max, layer.selectedNum);
     var palette_array = utility.getPalette(layer.palette, layer.selectedNum);
-    var xml = utility.generateXml(layer.name, layer.selectedNum, sequence,
-      palette_array, layer.type);
+    var xml = utility.generateXml(
+      layer.name, layer.selectedNum, sequence, palette_array, layer.type);
     return xml;
   }
 };
@@ -107,8 +107,7 @@ $(function () {
 
       map.deleteLayer(wms);
 
-      wms = utility.createWMSLayer(map, layer.sld, layer.projection,
-        layer.name);
+      wms = utility.createWMSLayer(map, layer.sld, layer.projection, layer.name);
     });
 
 });

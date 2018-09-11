@@ -36,12 +36,12 @@ $(function () {
   // Parse query parameters into an object for ease of access
   var query = document.location.search.replace(/(^\?)/, '').split(
     '&').map(function (n) {
-      n = n.split('=');
-      if (n[0]) {
-        this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
-      }
-      return this;
-    }.bind({}))[0];
+    n = n.split('=');
+    if (n[0]) {
+      this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
+    }
+    return this;
+  }.bind({}))[0];
   $.each(query, function (key, value) {
     var ctlvalue, ctlkey = key;
     switch (key) {
@@ -204,8 +204,8 @@ $(function () {
     if (!param || value === query[param]) {
       return;
     }
-    var processedValue = (ctl.is('[type="checkbox"]') ?
-                          (value === 'true') : value);
+    var processedValue = (
+      ctl.is('[type="checkbox"]') ? (value === 'true') : value);
     if (ctl.closest('table.gradient').length) {
       param = 'gradient';
     }

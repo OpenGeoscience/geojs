@@ -340,13 +340,11 @@ var tileLayer = function (options) {
       return false;
     }
     if (!(this._options.wrapX || (
-          0 <= index.x &&
-          index.x <= this.tilesAtZoom(index.level).x - 1))) {
+      0 <= index.x && index.x <= this.tilesAtZoom(index.level).x - 1))) {
       return false;
     }
     if (!(this._options.wrapY || (
-          0 <= index.y &&
-          index.y <= this.tilesAtZoom(index.level).y - 1))) {
+      0 <= index.y && index.y <= this.tilesAtZoom(index.level).y - 1))) {
       return false;
     }
     return true;
@@ -453,7 +451,7 @@ var tileLayer = function (options) {
       x: bounds.right * unit, y: this._topDown() * bounds.bottom * unit
     }];
     gcs = (gcs === null ? map.gcs() : (
-        gcs === undefined ? map.ingcs() : gcs));
+      gcs === undefined ? map.ingcs() : gcs));
     if (gcs !== map.gcs()) {
       coord = transform.transformCoordinates(map.gcs(), gcs, coord);
     }
@@ -487,8 +485,8 @@ var tileLayer = function (options) {
       size: {x: this._options.tileWidth, y: this._options.tileHeight},
       queue: this._queue,
       url: this._options.url.call(
-          this, urlParams.x, urlParams.y, urlParams.level || 0,
-          this._options.subdomains)
+        this, urlParams.x, urlParams.y, urlParams.level || 0,
+        this._options.subdomains)
     });
   };
 
@@ -581,8 +579,7 @@ var tileLayer = function (options) {
   this._getTiles = function (maxLevel, bounds, sorted, onlyIfChanged) {
     var i, j, tiles = [], index, nTilesLevel,
         start, end, indexRange, source, center, changed = false, old, level,
-        minLevel = (this._options.keepLower ? this._options.minLevel :
-                    maxLevel);
+        minLevel = (this._options.keepLower ? this._options.minLevel : maxLevel);
     if (maxLevel < minLevel) {
       maxLevel = minLevel;
     }
@@ -696,11 +693,9 @@ var tileLayer = function (options) {
   this.prefetch = function (level, bounds) {
     var tiles;
     tiles = this._getTiles(level, bounds, true);
-    return $.when.apply($,
-      tiles.map(function (tile) {
-        return tile.fetch();
-      })
-    );
+    return $.when.apply($, tiles.map(function (tile) {
+      return tile.fetch();
+    }));
   };
 
   /**
@@ -1286,10 +1281,8 @@ var tileLayer = function (options) {
    */
   this._getTileTree = function (index) {
     return (
-        (
-          this._tileTree[index.level] || {}
-        )[index.x] || {}
-      )[index.y] || null;
+      (this._tileTree[index.level] || {})[index.x] || {}
+    )[index.y] || null;
   };
 
   /**

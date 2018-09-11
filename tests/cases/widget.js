@@ -183,21 +183,18 @@ describe('widget api', function () {
     expect(widget.parent()).toEqual(jasmine.any(geo.gui.uiLayer));
   });
 
-  it('a widget stuck to albany shouldn\'t be in the viewport ' +
-     'if we pan to moscow',
-     function () {
-       var o = makeMap(), widget = o.uiLayer.createWidget(
-         'dom', {
-           position: {
-             x: -73.7572,
-             y: 42.6525
-           }
-         }
-       );
-
-       o.map.center({x: 37.6167, y: 55.7500});
-       expect(widget.isInViewport()).toBe(false);
-     });
+  it('a widget stuck to albany shouldn\'t be in the viewport if we pan to moscow', function () {
+    var o = makeMap(), widget = o.uiLayer.createWidget(
+      'dom', {
+        position: {
+          x: -73.7572,
+          y: 42.6525
+        }
+      }
+    );
+    o.map.center({x: 37.6167, y: 55.7500});
+    expect(widget.isInViewport()).toBe(false);
+  });
 
   it('a widget stuck to albany should be in the viewport if albany is', function () {
     var o = makeMap(),
@@ -224,8 +221,8 @@ describe('widget api', function () {
   });
 
   it('Widgets positions can be changed', function () {
-    var o = makeMap(), widget = o.uiLayer.createWidget('dom', {
-          position: {left: 15, top: 10}});
+    var o = makeMap(),
+        widget = o.uiLayer.createWidget('dom', {position: {left: 15, top: 10}});
 
     expect($(widget.canvas()).position()).toEqual({top: 10, left: 15});
     widget.position({top: null, bottom: '20%', left: 10});

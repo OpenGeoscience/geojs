@@ -109,8 +109,8 @@ describe('geo.choroplethFeature', function () {
 
   it('multipolygon', function () {
     var map, layer, choropleth, scalarData = [
-          {'id': 0, 'value': 10}
-        ];
+      {'id': 0, 'value': 10}
+    ];
 
     map = createMap();
     layer = map.createLayer('feature', {renderer: 'vgl'});

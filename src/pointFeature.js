@@ -134,7 +134,7 @@ var pointFeature = function (arg) {
     // generate the cluster tree from the raw data
     var position = m_this.position();
     m_clusterTree = new ClusterGroup(
-        opts, m_this.layer().width(), m_this.layer().height());
+      opts, m_this.layer().width(), m_this.layer().height());
 
     m_allData.forEach(function (d, i) {
 

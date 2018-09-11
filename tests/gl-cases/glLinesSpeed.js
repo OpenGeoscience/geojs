@@ -132,8 +132,7 @@ describe('glLinesSpeed', function () {
     common.loadCitiesData(function (citieslatlon) {
       /* Connect various cities with lines */
       for (j = 1; lines.length < numLines; j += 1) {
-        for (i = 0; i < citieslatlon.length - j && lines.length < numLines;
-             i += j + 1) {
+        for (i = 0; i < citieslatlon.length - j && lines.length < numLines; i += j + 1) {
           lines.push([{
             x: citieslatlon[i].lon,
             y: citieslatlon[i].lat,

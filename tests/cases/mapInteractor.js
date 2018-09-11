@@ -22,9 +22,7 @@ describe('mapInteractor', function () {
       ctrlKey: false,
       metaKey: false,
       shiftKey: false
-    },
-    args
-    );
+    }, args);
 
     return new $.Event(type, args);
   };
@@ -482,7 +480,7 @@ describe('mapInteractor', function () {
     // check the rotation event was called
     expect(map.info.rotation).toBe(1);
     expect(map.info.rotationArgs).toBeCloseTo(
-        0.1 - Math.atan2(20 - 50, 20 - 50) + Math.atan2(10 - 50, 20 - 50));
+      0.1 - Math.atan2(20 - 50, 20 - 50) + Math.atan2(10 - 50, 20 - 50));
 
     // create a rotation event
     interactor.simulateEvent(
@@ -496,7 +494,7 @@ describe('mapInteractor', function () {
     // check the rotation event was called
     expect(map.info.rotation).toBe(2);
     expect(map.info.rotationArgs).toBeCloseTo(
-        0.1 - Math.atan2(20 - 50, 20 - 50) + Math.atan2(25 - 50, 30 - 50));
+      0.1 - Math.atan2(20 - 50, 20 - 50) + Math.atan2(25 - 50, 30 - 50));
   });
 
   it('Test zoom selection event propagation', function () {

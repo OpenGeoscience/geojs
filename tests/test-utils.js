@@ -265,14 +265,13 @@ module.exports.advanceDate = function (delta) {
  * @returns {object} the query parameters as a dictionary.
  */
 module.exports.getQuery = function () {
-  var query = document.location.search.replace(/(^\?)/, '').split(
-    '&').map(function (n) {
-      n = n.split('=');
-      if (n[0]) {
-        this[decodeURIComponent(n[0].replace(/\+/g, '%20'))] = decodeURIComponent(n[1].replace(/\+/g, '%20'));
-      }
-      return this;
-    }.bind({}))[0];
+  var query = document.location.search.replace(/(^\?)/, '').split('&').map(function (n) {
+    n = n.split('=');
+    if (n[0]) {
+      this[decodeURIComponent(n[0].replace(/\+/g, '%20'))] = decodeURIComponent(n[1].replace(/\+/g, '%20'));
+    }
+    return this;
+  }.bind({}))[0];
   return query;
 };
 

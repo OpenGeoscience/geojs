@@ -141,20 +141,25 @@ describe('Isoline Feature', function () {
     });
     it('_chainVertex', function () {
       var isoline = geo.isolineFeature({layer: layer});
-      expect(closeToEqual(isoline._chainVertex(
-        {value: [10, 15], pos: [1, 2, 3, 5, 4, 1]}, {value: 11}, [0, 1]),
+      expect(closeToEqual(
+        isoline._chainVertex(
+          {value: [10, 15], pos: [1, 2, 3, 5, 4, 1]}, {value: 11}, [0, 1]),
         {x: 1.8, y: 2.4, z: 2.6})).toBe(true);
-      expect(closeToEqual(isoline._chainVertex(
-        {value: [10, 15], pos: [1, 2, 3, 5, 4, 1]}, {value: 11}, [1, 0]),
+      expect(closeToEqual(
+        isoline._chainVertex(
+          {value: [10, 15], pos: [1, 2, 3, 5, 4, 1]}, {value: 11}, [1, 0]),
         {x: 1.8, y: 2.4, z: 2.6})).toBe(true);
-      expect(closeToEqual(isoline._chainVertex(
-        {value: [15, 10], pos: [1, 2, 3, 5, 4, 1]}, {value: 11}, [0, 1]),
+      expect(closeToEqual(
+        isoline._chainVertex(
+          {value: [15, 10], pos: [1, 2, 3, 5, 4, 1]}, {value: 11}, [0, 1]),
         {x: 4.2, y: 3.6, z: 1.4})).toBe(true);
-      expect(closeToEqual(isoline._chainVertex(
-        {value: [10, 15], pos: [1, 2, 3, 5, 4, 1]}, {value: 15}, [0, 1]),
+      expect(closeToEqual(
+        isoline._chainVertex(
+          {value: [10, 15], pos: [1, 2, 3, 5, 4, 1]}, {value: 15}, [0, 1]),
         {x: 5, y: 4, z: 1})).toBe(true);
-      expect(closeToEqual(isoline._chainVertex(
-        {value: [10, 15], pos: [1, 2, 3, 5, 4, 1]}, {value: 15}, [1, 0]),
+      expect(closeToEqual(
+        isoline._chainVertex(
+          {value: [10, 15], pos: [1, 2, 3, 5, 4, 1]}, {value: 15}, [1, 0]),
         {x: 5, y: 4, z: 1})).toBe(true);
     });
     describe('_createIsolines', function () {

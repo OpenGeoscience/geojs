@@ -520,10 +520,10 @@ var gl_lineFeature = function (arg) {
         if (!onlyStyle) {
           v1.pos = j === lidx ? posIdx3 : firstPosIdx3;
           v1.prev = lidx ? posIdx3 - 3 : (closed[i] ?
-              firstPosIdx3 + (lineItem.length - 3 + closed[i]) * 3 : posIdx3);
+            firstPosIdx3 + (lineItem.length - 3 + closed[i]) * 3 : posIdx3);
           v1.next = j + 1 < lineItem.length ? posIdx3 + 3 : (closed[i] ?
-              (j !== lidx ? firstPosIdx3 + 3 : firstPosIdx3 + 6 - closed[i] * 3) :
-              posIdx3);
+            (j !== lidx ? firstPosIdx3 + 3 : firstPosIdx3 + 6 - closed[i] * 3) :
+            posIdx3);
         }
         v1.strokeWidth = strokeWidthVal === undefined ? strokeWidthFunc(lineItemData, lidx, d, i) : strokeWidthVal;
         v1.strokeColor = strokeColorVal === undefined ? strokeColorFunc(lineItemData, lidx, d, i) : strokeColorVal;
@@ -620,8 +620,9 @@ var gl_lineFeature = function (arg) {
    * @returns {array[]}
    */
   this.featureVertices = function () {
-    return [[0, 'corner', -1], [0, 'near', 1], [1, 'far', -1],
-            [1, 'corner', 1], [1, 'near', -1], [0, 'far', 1]];
+    return [
+      [0, 'corner', -1], [0, 'near', 1], [1, 'far', -1],
+      [1, 'corner', 1], [1, 'near', -1], [0, 'far', 1]];
   };
 
   /**
@@ -659,26 +660,26 @@ var gl_lineFeature = function (arg) {
         // Sources
         posData = vgl.sourceDataP3fv({name: 'pos'}),
         prvPosData = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Four, {name: 'prev'}),
+          3, vgl.vertexAttributeKeysIndexed.Four, {name: 'prev'}),
         nxtPosData = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Five, {name: 'next'}),
+          3, vgl.vertexAttributeKeysIndexed.Five, {name: 'next'}),
         farPosData = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Six, {name: 'far'}),
+          3, vgl.vertexAttributeKeysIndexed.Six, {name: 'far'}),
         flagsData = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Seven, {name: 'flags'}),
+          1, vgl.vertexAttributeKeysIndexed.Seven, {name: 'flags'}),
         strkWidthData = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.One, {name: 'strokeWidth'}),
+          1, vgl.vertexAttributeKeysIndexed.One, {name: 'strokeWidth'}),
         strkColorData = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Two, {name: 'strokeColor'}),
+          3, vgl.vertexAttributeKeysIndexed.Two, {name: 'strokeColor'}),
         strkOpacityData = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Three, {name: 'strokeOpacity'}),
+          1, vgl.vertexAttributeKeysIndexed.Three, {name: 'strokeOpacity'}),
         // Primitive indices
         triangles = vgl.triangles();
 
-    m_pixelWidthUnif = new vgl.floatUniform('pixelWidth',
-                          1.0 / m_this.renderer().width());
-    m_aspectUniform = new vgl.floatUniform('aspect',
-        m_this.renderer().width() / m_this.renderer().height());
+    m_pixelWidthUnif = new vgl.floatUniform(
+      'pixelWidth', 1.0 / m_this.renderer().width());
+    m_aspectUniform = new vgl.floatUniform(
+      'aspect', m_this.renderer().width() / m_this.renderer().height());
     m_miterLimitUniform = new vgl.floatUniform('miterLimit', 10);
     m_antialiasingUniform = new vgl.floatUniform('antialiasing', 0);
     m_flagsUniform = new vgl.floatUniform('fixedFlags', 0);

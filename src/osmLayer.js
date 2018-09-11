@@ -56,8 +56,8 @@ var osmLayer = function (arg) {
       overlap: this._options.tileOverlap,
       scale: this._options.tileScale,
       url: this._options.url.call(
-          this, urlParams.x, urlParams.y, urlParams.level || 0,
-          this._options.subdomains),
+        this, urlParams.x, urlParams.y, urlParams.level || 0,
+        this._options.subdomains),
       crossDomain: this._options.crossDomain
     });
   }.bind(this);

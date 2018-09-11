@@ -10,9 +10,10 @@ describe('canvas heatmap', function () {
     var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
     var map, layer, feature1,
-        testData = [[0.6, 42.8584, -70.9301],
-                    [0.233, 42.2776, -83.7409],
-                    [0.2, 42.2776, -83.7409]];
+        testData = [
+          [0.6, 42.8584, -70.9301],
+          [0.233, 42.2776, -83.7409],
+          [0.2, 42.2776, -83.7409]];
     var clock;
     beforeEach(function () {
       clock = sinon.useFakeTimers();
@@ -145,8 +146,8 @@ describe('canvas heatmap', function () {
       stepAnimationFrame(new Date().getTime());
       expect(feature1._binned).toBe(20);
       for (idx = data.length; idx < numpoints + 1; idx += 1) {
-        data.push([Math.random(), (Math.random() - 0.5) * 190, (
-                   Math.random() - 0.5) * 360]);
+        data.push([
+          Math.random(), (Math.random() - 0.5) * 190, (Math.random() - 0.5) * 360]);
       }
       feature1.data(data);
       feature1.binned('auto');

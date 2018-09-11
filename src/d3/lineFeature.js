@@ -86,7 +86,7 @@ var d3_lineFeature = function (arg) {
           .x(function (d) { return m_this.featureGcsToDisplay(d).x; })
           .y(function (d) { return m_this.featureGcsToDisplay(d).y; })
           .interpolate(m_this.style.get('closed')(item, idx) && ln.length > 2 ?
-                       'linear-closed' : 'linear');
+            'linear-closed' : 'linear');
       // item is an object representing a single line
       // m_this.line()(item) is an array of coordinates
       m_style = {
