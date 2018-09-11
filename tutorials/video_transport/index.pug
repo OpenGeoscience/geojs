@@ -143,7 +143,7 @@ block mainTutorial
         return;
       }
       if (!video.seeking) {
-        var position = reverse.startPosition + ((new Date().getTime()) - reverse.startTime) * 0.001 * rate;
+        var position = reverse.startPosition + (Date.now() - reverse.startTime) * 0.001 * rate;
         // adjust the position so that it is within the video duration
         position = (position % video.duration + video.duration) % video.duration;
         // round to the nearest frame.  We add a small amount to ensure that rounding errors
@@ -169,7 +169,7 @@ block mainTutorial
       // record where the video currently is; we use the animation from loop to
       // calculate which frame should be shown.
       reverse = {
-        startTime: new Date().getTime(),
+        startTime: Date.now(),
         startPosition: video.currentTime
       }
       video.pause();

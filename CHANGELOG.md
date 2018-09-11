@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changes
+- Removed the dependency on the vgl module for the `object` and `timestamp` classes (#918)
+
 ## Version 0.18.1
 
 ### Bug Fixes

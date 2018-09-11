@@ -56,7 +56,7 @@ describe('geo.annotation', function () {
       mouse: {mapgcs: map.displayToGcs(end, null)},
       state: {origin: {mapgcs: map.displayToGcs(start, null)}},
       buttonsDown: {},
-      time: new Date().getTime()
+      time: Date.now()
     };
   }
 
@@ -246,9 +246,9 @@ describe('geo.annotation', function () {
     });
     it('modified', function () {
       var ann = geo.annotation.annotation('test', {layer: layer});
-      var buildTime = layer.getMTime();
+      var buildTime = layer.timestamp();
       ann.modified();
-      expect(layer.getMTime()).toBeGreaterThan(buildTime);
+      expect(layer.timestamp()).toBeGreaterThan(buildTime);
     });
     it('draw', function () {
       var oldDraw = layer.draw, drawCalled = 0;
@@ -738,7 +738,7 @@ describe('geo.annotation', function () {
         annotations: ['rectangle']
       });
       var ann = geo.annotation.rectangleAnnotation({layer: layer});
-      var time = new Date().getTime();
+      var time = Date.now();
       expect(ann.mouseClick({
         buttonsDown: {left: true},
         time: time,
@@ -987,7 +987,7 @@ describe('geo.annotation', function () {
         annotations: ['polygon']
       });
       var ann = geo.annotation.polygonAnnotation({layer: layer});
-      var time = new Date().getTime();
+      var time = Date.now();
       expect(ann.mouseClick({
         buttonsDown: {left: true},
         time: time,
@@ -1219,7 +1219,7 @@ describe('geo.annotation', function () {
         annotations: ['line']
       });
       var ann = geo.annotation.lineAnnotation({layer: layer});
-      var time = new Date().getTime();
+      var time = Date.now();
       expect(ann.mouseClick({
         buttonsDown: {left: true},
         time: time,

@@ -160,7 +160,7 @@ module.exports.unmockAnimationFrame = function () {
  */
 module.exports.stepAnimationFrame = function (time) {
   if (time === undefined) {
-    time = new Date().getTime();
+    time = Date.now();
   }
   var callbacks = animFrameCallbacks, action;
   animFrameCallbacks = [];
@@ -210,7 +210,7 @@ module.exports.mockAnimationFrame = function (mockDate) {
 };
 
 var origDate = window.Date,
-    startDate = (new Date()).getTime();
+    startDate = Date.now();
 
 /**
  * Allow mocking calls to Date so that each new object is slightly after the

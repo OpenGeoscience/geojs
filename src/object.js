@@ -1,12 +1,12 @@
-var vgl = require('vgl');
 var inherit = require('./inherit');
+var timestamp = require('./timestamp');
 
 /**
  * Create a new instance of class object.
  *
  * @class
  * @alias geo.object
- * @extends vgl.object
+ * @extends geo.timestamp
  * @returns {geo.object}
  */
 var object = function () {
@@ -211,10 +211,11 @@ var object = function () {
     m_this.geoOff();
   };
 
-  vgl.object.call(this);
+  timestamp.call(this);
+  this.modified();
 
   return this;
 };
 
-inherit(object, vgl.object);
+inherit(object, timestamp);
 module.exports = object;

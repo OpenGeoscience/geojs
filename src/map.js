@@ -1,5 +1,4 @@
 var $ = require('jquery');
-var vgl = require('vgl');
 var inherit = require('./inherit');
 var sceneObject = require('./sceneObject');
 
@@ -1097,10 +1096,10 @@ var map = function (arg) {
 
     // Transform zoom level into z-coordinate and inverse.
     function zoom2z(z) {
-      return vgl.zoomToHeight(z + 1, m_width, m_height) * units;
+      return Math.pow(2, -(z + 1)) * units * m_height;
     }
     function z2zoom(z) {
-      return vgl.heightToZoom(z / units, m_width, m_height) - 1;
+      return -Math.log2(z / units / m_height) - 1;
     }
 
     var defaultOpts = {

@@ -200,7 +200,7 @@ var featureLayer = function (arg) {
     // Call base class update
     s_update.call(m_this, request);
 
-    if (m_this.dataTime().getMTime() > m_this.updateTime().getMTime()) {
+    if (m_this.dataTime().timestamp() > m_this.updateTime().timestamp()) {
       for (i = 0; i < m_features.length; i += 1) {
         m_features[i].renderer(m_this.renderer());
       }

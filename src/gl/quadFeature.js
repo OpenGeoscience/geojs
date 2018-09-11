@@ -1,6 +1,7 @@
 var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var quadFeature = require('../quadFeature');
+var timestamp = require('../timestamp');
 
 /**
  * Create a new instance of class quadFeature.
@@ -31,8 +32,8 @@ var gl_quadFeature = function (arg) {
       m_modelViewUniform,
       m_actor_image, m_actor_color, m_glBuffers = {}, m_imgposbuf,
       m_clrposbuf, m_clrModelViewUniform,
-      m_glCompileTimestamp = vgl.timestamp(),
-      m_glColorCompileTimestamp = vgl.timestamp(),
+      m_glCompileTimestamp = timestamp(),
+      m_glColorCompileTimestamp = timestamp(),
       m_quads;
   var fragmentShaderImageSource = [
     'varying highp vec2 iTextureCoord;',
@@ -145,6 +146,29 @@ var gl_quadFeature = function (arg) {
   }
 
   /**
+   * Get a vgl mapper, mark dynamicDraw, augment the timestamp and the render
+   * function.
+   *
+   * @private
+   * @param {function} renderFunc Our own render function.
+   * @returns {vgl.mapper} a vgl mapper object.
+   */
+  function getVGLMapper(renderFunc) {
+    var mapper = new vgl.mapper({dynamicDraw: true});
+    mapper.s_modified = mapper.modified;
+    mapper.g_timestamp = timestamp();
+    mapper.timestamp = mapper.g_timestamp.timestamp;
+    mapper.modified = function () {
+      mapper.s_modified();
+      mapper.g_timestamp.modified();
+      return mapper;
+    };
+    mapper.s_render = mapper.render;
+    mapper.render = renderFunc;
+    return mapper;
+  }
+
+  /**
    * Build this feature.
    */
   this._build = function () {
@@ -157,7 +181,7 @@ var gl_quadFeature = function (arg) {
     /* Create an actor to render image quads */
     if (m_quads.imgQuads.length && !m_actor_image) {
       m_this.visible(false);
-      mapper = new vgl.mapper({dynamicDraw: true});
+      mapper = getVGLMapper(m_this._renderImageQuads);
       m_actor_image = new vgl.actor();
       /* This is similar to vgl.utils.createTextureMaterial */
       m_actor_image.setMapper(mapper);
@@ -193,16 +217,13 @@ var gl_quadFeature = function (arg) {
 
       mapper.setGeometryData(geom);
       m_actor_image.setMaterial(mat);
-
-      mapper.s_render = mapper.render;
-      mapper.render = m_this._renderImageQuads;
       m_this.renderer().contextRenderer().addActor(m_actor_image);
       m_this.visible(true);
     }
     /* Create an actor to render color quads */
     if (m_quads.clrQuads.length && !m_actor_color) {
       m_this.visible(false);
-      mapper = new vgl.mapper({dynamicDraw: true});
+      mapper = getVGLMapper(m_this._renderColorQuads);
       m_actor_color = new vgl.actor();
       /* This is similar to vgl.utils.createTextureMaterial */
       m_actor_color.setMapper(mapper);
@@ -231,8 +252,6 @@ var gl_quadFeature = function (arg) {
       mapper.setGeometryData(geom);
       m_actor_color.setMaterial(mat);
 
-      mapper.s_render = mapper.render;
-      mapper.render = m_this._renderColorQuads;
       m_this.renderer().contextRenderer().addActor(m_actor_color);
       m_this.visible(true);
     }
@@ -277,8 +296,8 @@ var gl_quadFeature = function (arg) {
       return;
     }
     var mapper = this;
-    if (mapper.getMTime() > m_glColorCompileTimestamp.getMTime() ||
-        m_this.dataTime().getMTime() > m_glColorCompileTimestamp.getMTime() ||
+    if (mapper.timestamp() > m_glColorCompileTimestamp.timestamp() ||
+        m_this.dataTime().timestamp() > m_glColorCompileTimestamp.timestamp() ||
         renderState.m_contextChanged || !m_clrposbuf ||
         m_quads.clrQuads.length * 12 > m_clrposbuf.length) {
       setupColorDrawObjects(renderState);
@@ -324,8 +343,8 @@ var gl_quadFeature = function (arg) {
       return;
     }
     var mapper = this;
-    if (mapper.getMTime() > m_glCompileTimestamp.getMTime() ||
-        m_this.dataTime().getMTime() > m_glCompileTimestamp.getMTime() ||
+    if (mapper.timestamp() > m_glCompileTimestamp.timestamp() ||
+        m_this.dataTime().timestamp() > m_glCompileTimestamp.timestamp() ||
         renderState.m_contextChanged || !m_imgposbuf ||
         m_quads.imgQuads.length * 12 > m_imgposbuf.length) {
       setupDrawObjects(renderState);
@@ -371,8 +390,8 @@ var gl_quadFeature = function (arg) {
    */
   this._update = function () {
     s_update.call(m_this);
-    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
-        m_this.updateTime().getMTime() < m_this.getMTime()) {
+    if (m_this.buildTime().timestamp() <= m_this.dataTime().timestamp() ||
+        m_this.updateTime().timestamp() < m_this.timestamp()) {
       m_this._build();
     }
     if (m_actor_color) {

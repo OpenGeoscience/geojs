@@ -161,14 +161,14 @@ describe('geo.featureLayer', function () {
       expect(feat1.draw.calledOnce).toBe(true);
     });
     it('clear', function () {
-      var modTime = layer.getMTime();
+      var modTime = layer.timestamp();
       expect(layer.clear()).toBe(layer);
       expect(layer.features().length).toBe(0);
-      expect(layer.getMTime()).toBeGreaterThan(modTime);
-      modTime = layer.getMTime();
+      expect(layer.timestamp()).toBeGreaterThan(modTime);
+      modTime = layer.timestamp();
       expect(layer.clear()).toBe(layer);
       expect(layer.features().length).toBe(0);
-      expect(layer.getMTime()).toBe(modTime);
+      expect(layer.timestamp()).toBe(modTime);
     });
   });
 });

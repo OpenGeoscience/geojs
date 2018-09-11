@@ -9,17 +9,17 @@ describe('geo.timestamp', function () {
     t2.modified();
     t3.modified();
 
-    expect(t1.getMTime()).toBe(t1.getMTime());
-    expect(t1.getMTime() < t2.getMTime()).toBe(true);
-    expect(t2.getMTime() < t3.getMTime()).toBe(true);
+    expect(t1.timestamp()).toBe(t1.timestamp());
+    expect(t1.timestamp() < t2.timestamp()).toBe(true);
+    expect(t2.timestamp() < t3.timestamp()).toBe(true);
 
     t2.modified();
     t3.modified();
     t2.modified();
 
-    expect(t2.getMTime()).toBe(t2.getMTime());
-    expect(t1.getMTime() < t2.getMTime()).toBe(true);
-    expect(t3.getMTime() < t2.getMTime()).toBe(true);
-    expect(t1.getMTime() < t3.getMTime()).toBe(true);
+    expect(t2.timestamp()).toBe(t2.timestamp());
+    expect(t1.timestamp() < t2.timestamp()).toBe(true);
+    expect(t3.timestamp() < t2.timestamp()).toBe(true);
+    expect(t1.timestamp() < t3.timestamp()).toBe(true);
   });
 });

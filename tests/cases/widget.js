@@ -40,9 +40,9 @@ describe('geo.gui.widget', function () {
       map = createMap();
       layer = map.createLayer('ui');
       widget = geo.gui.widget({layer: layer});
-      modTime = widget.getMTime();
+      modTime = widget.timestamp();
       expect(widget._init()).toBe(widget);
-      expect(widget.getMTime()).toBeGreaterThan(modTime);
+      expect(widget.timestamp()).toBeGreaterThan(modTime);
     });
     it('_exit', function () {
       map = createMap();

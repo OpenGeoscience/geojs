@@ -228,7 +228,7 @@ describe('geo.core.map', function () {
       var error = sinon.stub(console, 'error', function () {}),
           m = createMap(),
           called = 0,
-          start = new Date().getTime();
+          start = Date.now();
       m.scheduleAnimationFrame(function () { throw new Error('fail'); });
       m.scheduleAnimationFrame(function () { called += 1; });
       stepAnimationFrame(start);
@@ -542,7 +542,7 @@ describe('geo.core.map', function () {
       mockAnimationFrame();
       var m = createMap(), start, wasCalled;
       expect(m.transition()).toBe(null);
-      start = new Date().getTime();
+      start = Date.now();
       m.transition({
         center: {x: 10, y: 0},
         zoom: 2,
@@ -650,7 +650,7 @@ describe('geo.core.map', function () {
       expect(m.center().x).toBeCloseTo(0);
       expect(m.center().y).toBeCloseTo(0);
       // test cancel
-      start = new Date().getTime();
+      start = Date.now();
       wasCalled = undefined;
       m.transition({
         center: {x: 10, y: 0},

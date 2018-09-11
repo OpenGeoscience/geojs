@@ -337,11 +337,11 @@ describe('geo.polygonFeature', function () {
       map = createMap();
       layer = map.createLayer('feature');
       polygons = layer.createFeature('polygon', {style: testStyle, data: testPolygons});
-      buildTime = polygons.buildTime().getMTime();
+      buildTime = polygons.buildTime().timestamp();
       /* Trigger rerendering */
       polygons.data(testPolygons);
       map.draw();
-      expect(buildTime).not.toEqual(polygons.buildTime().getMTime());
+      expect(buildTime).not.toEqual(polygons.buildTime().timestamp());
       glCounts = $.extend({}, vgl.mockCounts());
     });
     waitForIt('next render gl A', function () {
@@ -360,55 +360,55 @@ describe('geo.polygonFeature', function () {
         return 'red';
       });
       glCounts = $.extend({}, vgl.mockCounts());
-      buildTime = polygons.buildTime().getMTime();
+      buildTime = polygons.buildTime().timestamp();
       polygons.draw();
     });
     waitForIt('next render gl B', function () {
       return vgl.mockCounts().bufferData >= (glCounts.bufferData || 0) + 1 &&
-             buildTime !== polygons.buildTime().getMTime();
+             buildTime !== polygons.buildTime().timestamp();
     });
     it('update the style B', function () {
       polygons.style('fillColor', function (d) {
         return '#ff0000';
       });
       glCounts = $.extend({}, vgl.mockCounts());
-      buildTime = polygons.buildTime().getMTime();
+      buildTime = polygons.buildTime().timestamp();
       polygons.draw();
     });
     waitForIt('next render gl C', function () {
       return vgl.mockCounts().bufferData >= (glCounts.bufferData || 0) + 1 &&
-             buildTime !== polygons.buildTime().getMTime();
+             buildTime !== polygons.buildTime().timestamp();
     });
     it('update the style C', function () {
       polygons.style('fill', function (d, i) {
         return i % 2 > 0;
       });
       glCounts = $.extend({}, vgl.mockCounts());
-      buildTime = polygons.buildTime().getMTime();
+      buildTime = polygons.buildTime().timestamp();
       polygons.draw();
     });
     waitForIt('next render gl D', function () {
       return vgl.mockCounts().bufferData >= (glCounts.bufferData || 0) + 1 &&
-             buildTime !== polygons.buildTime().getMTime();
+             buildTime !== polygons.buildTime().timestamp();
     });
     it('poor data', function () {
       polygons.data([undefined, testPolygons[1]]);
       polygons.style('fill', true);
       glCounts = $.extend({}, vgl.mockCounts());
-      buildTime = polygons.buildTime().getMTime();
+      buildTime = polygons.buildTime().timestamp();
       polygons.draw();
     });
     waitForIt('next render gl E', function () {
       return vgl.mockCounts().bufferData >= (glCounts.bufferData || 0) + 1 &&
-             buildTime !== polygons.buildTime().getMTime();
+             buildTime !== polygons.buildTime().timestamp();
     });
     it('_exit', function () {
-      var buildTime = polygons.buildTime().getMTime();
+      var buildTime = polygons.buildTime().timestamp();
       layer.deleteFeature(polygons);
       polygons.data(testPolygons);
       polygons._update();
       map.draw();
-      expect(buildTime).toEqual(polygons.buildTime().getMTime());
+      expect(buildTime).toEqual(polygons.buildTime().timestamp());
       destroyMap();
       restoreVGLRenderer();
     });

@@ -352,8 +352,8 @@ var pixelmapFeature = function (arg) {
    */
   this._update = function () {
     s_update.call(m_this);
-    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
-        m_this.updateTime().getMTime() < m_this.getMTime()) {
+    if (m_this.buildTime().timestamp() <= m_this.dataTime().timestamp() ||
+        m_this.updateTime().timestamp() < m_this.timestamp()) {
       m_this._build();
     }
 

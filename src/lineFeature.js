@@ -142,8 +142,8 @@ var lineFeature = function (arg) {
    * @returns {object} The point search information record.
    */
   this._updatePointSearchInfo = function () {
-    if (m_pointSearchTime.getMTime() >= m_this.dataTime().getMTime() &&
-        m_pointSearchTime.getMTime() >= m_this.getMTime()) {
+    if (m_pointSearchTime.timestamp() >= m_this.dataTime().timestamp() &&
+        m_pointSearchTime.timestamp() >= m_this.timestamp()) {
       return m_pointSearchInfo;
     }
     m_pointSearchTime.modified();
