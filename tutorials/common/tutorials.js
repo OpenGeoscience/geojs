@@ -272,7 +272,7 @@ function start_keeper(alwaysKeep) {
   if (keep) {
     $(document).on('geojs-tutorial-run', '.codeblock', function () {
       var newQuery = {};
-      if (query.keep && (alwaysKeep !== true || query.keep === 'history')) {
+      if (query.keep && alwaysKeep !== true) {
         newQuery.keep = query.keep;
       }
       $('.codeblock').each(function () {
@@ -291,18 +291,16 @@ function start_keeper(alwaysKeep) {
         }
       });
       if (!inPop) {
-        utils.setQuery(newQuery, keep === 'history');
+        utils.setQuery(newQuery, true);
       }
     });
   }
-  if (keep === 'history') {
-    window.addEventListener('popstate', function (evt) {
-      inPop = true;
-      fill_codeblocks(utils.getQuery());
-      run_tutorial();
-      inPop = false;
-    }, false);
-  }
+  window.addEventListener('popstate', function (evt) {
+    inPop = true;
+    fill_codeblocks(utils.getQuery());
+    run_tutorial();
+    inPop = false;
+  }, false);
 }
 
 /**
