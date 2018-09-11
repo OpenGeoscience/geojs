@@ -104,7 +104,7 @@ var d3_pathFeature = function (arg) {
   this._update = function () {
     s_update.call(m_this);
 
-    if (m_this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+    if (m_this.dataTime().timestamp() >= m_buildTime.timestamp()) {
       m_this._build();
     }
 

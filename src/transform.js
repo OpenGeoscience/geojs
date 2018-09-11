@@ -244,8 +244,7 @@ transform.lookup = function (projection) {
  * @param {number} numberOfComponents For flat arrays, either 2 or 3.
  * @returns {geoPosition|geoPosition[]|number[]} The transformed coordinates.
  */
-transform.transformCoordinates = function (
-        srcPrj, tgtPrj, coordinates, numberOfComponents) {
+transform.transformCoordinates = function (srcPrj, tgtPrj, coordinates, numberOfComponents) {
   'use strict';
 
   if (srcPrj === tgtPrj) {
@@ -587,8 +586,8 @@ transform.vincentyDistance = function (pt1, pt2, gcs, baseGcs, ellipsoid, maxIte
   }
   for (iter = maxIterations; iter > 0 && Math.abs(lambda - lastLambda) > 1e-12; iter -= 1) {
     sinSigma = Math.pow(
-        Math.pow(cosU2 * Math.sin(lambda), 2) +
-        Math.pow(cosU1 * sinU2 - sinU1 * cosU2 * Math.cos(lambda), 2), 0.5);
+      Math.pow(cosU2 * Math.sin(lambda), 2) +
+      Math.pow(cosU1 * sinU2 - sinU1 * cosU2 * Math.cos(lambda), 2), 0.5);
     cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * Math.cos(lambda);
     sigma = Math.atan2(sinSigma, cosSigma);
     sinAlpha = cosU1 * cosU2 * Math.sin(lambda) / sinSigma;
@@ -600,7 +599,7 @@ transform.vincentyDistance = function (pt1, pt2, gcs, baseGcs, ellipsoid, maxIte
     C = f / 16 * cos2alpha * (4 + f * (4 - 3 * cos2alpha));
     lastLambda = lambda;
     lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma * (
-        cos2sigmasubm + C * cosSigma * (-1 + 2 * Math.pow(cos2sigmasubm, 2))));
+      cos2sigmasubm + C * cosSigma * (-1 + 2 * Math.pow(cos2sigmasubm, 2))));
   }
   if (!iter) { // failure to converge
     return;

@@ -160,7 +160,7 @@ module.exports.unmockAnimationFrame = function () {
  */
 module.exports.stepAnimationFrame = function (time) {
   if (time === undefined) {
-    time = new Date().getTime();
+    time = Date.now();
   }
   var callbacks = animFrameCallbacks, action;
   animFrameCallbacks = [];
@@ -210,7 +210,7 @@ module.exports.mockAnimationFrame = function (mockDate) {
 };
 
 var origDate = window.Date,
-    startDate = (new Date()).getTime();
+    startDate = Date.now();
 
 /**
  * Allow mocking calls to Date so that each new object is slightly after the
@@ -265,14 +265,13 @@ module.exports.advanceDate = function (delta) {
  * @returns {object} the query parameters as a dictionary.
  */
 module.exports.getQuery = function () {
-  var query = document.location.search.replace(/(^\?)/, '').split(
-    '&').map(function (n) {
-      n = n.split('=');
-      if (n[0]) {
-        this[decodeURIComponent(n[0].replace(/\+/g, '%20'))] = decodeURIComponent(n[1].replace(/\+/g, '%20'));
-      }
-      return this;
-    }.bind({}))[0];
+  var query = document.location.search.replace(/(^\?)/, '').split('&').map(function (n) {
+    n = n.split('=');
+    if (n[0]) {
+      this[decodeURIComponent(n[0].replace(/\+/g, '%20'))] = decodeURIComponent(n[1].replace(/\+/g, '%20'));
+    }
+    return this;
+  }.bind({}))[0];
   return query;
 };
 

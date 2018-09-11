@@ -1,5 +1,4 @@
 var $ = require('jquery');
-var vgl = require('vgl');
 var inherit = require('./inherit');
 var sceneObject = require('./sceneObject');
 
@@ -111,9 +110,10 @@ var map = function (arg) {
       m_transition = null,
       m_queuedTransition = null,
       m_discreteZoom = arg.discreteZoom ? true : false,
-      m_allowRotation = (typeof arg.allowRotation === 'function' ?
-                         arg.allowRotation : (arg.allowRotation === undefined ?
-                         true : !!arg.allowRotation)),
+      m_allowRotation = (
+        typeof arg.allowRotation === 'function' ?
+          arg.allowRotation : (arg.allowRotation === undefined ?
+            true : !!arg.allowRotation)),
       m_maxBounds = arg.maxBounds || {},
       m_camera = arg.camera || camera(),
       m_unitsPerPixel,
@@ -467,8 +467,9 @@ var map = function (arg) {
     }
     /* If m_clampBoundsX or m_clampBoundsY is true, clamp the pan */
     var bounds = m_camera.bounds;
-    bounds = fix_bounds(bounds, m_rotation, ignoreClampBounds === 'limited' ? {
-      x: delta.x, y: delta.y, unit: unit} : undefined,
+    bounds = fix_bounds(
+      bounds, m_rotation, ignoreClampBounds === 'limited' ? {
+        x: delta.x, y: delta.y, unit: unit} : undefined,
       ignoreClampBounds === true);
     if (bounds !== m_camera.bounds) {
       var panPos = m_this.gcsToDisplay({
@@ -526,7 +527,7 @@ var map = function (arg) {
     m_rotation = rotation;
 
     var bounds = m_this.boundsFromZoomAndCenter(
-        m_zoom, m_center, m_rotation, null, ignoreRotationFunc, true);
+      m_zoom, m_center, m_rotation, null, ignoreRotationFunc, true);
     m_this.modified();
 
     camera_bounds(bounds, m_rotation);
@@ -571,8 +572,7 @@ var map = function (arg) {
    * @returns {geo.geoPosition|this}
    * @fires geo.event.pan
    */
-  this.center = function (coordinates, gcs, ignoreDiscreteZoom,
-                          ignoreClampBounds) {
+  this.center = function (coordinates, gcs, ignoreDiscreteZoom, ignoreClampBounds) {
     var center;
     if (coordinates === undefined) {
       center = $.extend({}, m_this.worldToGcs(m_center, gcs));
@@ -583,8 +583,8 @@ var map = function (arg) {
     center = m_this.gcsToWorld(coordinates, gcs);
 
     camera_bounds(m_this.boundsFromZoomAndCenter(
-        m_zoom, center, m_rotation, null, ignoreDiscreteZoom,
-        ignoreClampBounds), m_rotation);
+      m_zoom, center, m_rotation, null, ignoreDiscreteZoom,
+      ignoreClampBounds), m_rotation);
     m_this.modified();
     // trigger a pan event
     m_this.geoTrigger(geo_event.pan, {
@@ -708,7 +708,7 @@ var map = function (arg) {
       };
     }
     var bds = rotate_bounds_center(
-        {x: 0, y: 0}, {width: m_width, height: m_height}, this.rotation());
+      {x: 0, y: 0}, {width: m_width, height: m_height}, this.rotation());
     return {
       width: Math.abs(bds.right - bds.left),
       height: Math.abs(bds.top - bds.bottom)
@@ -1096,10 +1096,10 @@ var map = function (arg) {
 
     // Transform zoom level into z-coordinate and inverse.
     function zoom2z(z) {
-      return vgl.zoomToHeight(z + 1, m_width, m_height) * units;
+      return Math.pow(2, -(z + 1)) * units * m_height;
     }
     function z2zoom(z) {
-      return vgl.heightToZoom(z / units, m_width, m_height) - 1;
+      return -Math.log2(z / units / m_height) - 1;
     }
 
     var defaultOpts = {
@@ -1437,8 +1437,7 @@ var map = function (arg) {
    *    the center of the bounds (rather than being forced to be at the edge).
    * @returns {geo.geoBounds}
    */
-  this.boundsFromZoomAndCenter = function (zoom, center, rotation, gcs,
-        ignoreDiscreteZoom, ignoreClampBounds) {
+  this.boundsFromZoomAndCenter = function (zoom, center, rotation, gcs, ignoreDiscreteZoom, ignoreClampBounds) {
     var width, height, halfw, halfh, bounds, units;
 
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
@@ -1955,7 +1954,7 @@ var map = function (arg) {
   function reset_minimum_zoom() {
     if (m_clampZoom) {
       m_validZoomRange.min = Math.max(
-          m_validZoomRange.origMin, calculate_zoom(m_maxBounds));
+        m_validZoomRange.origMin, calculate_zoom(m_maxBounds));
     } else {
       m_validZoomRange.min = m_validZoomRange.origMin;
     }

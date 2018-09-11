@@ -549,26 +549,26 @@ describe('geo.camera', function () {
     expect(c.view).toEqual([0.02,0,0,0, 0,0.02,0,0, 0,0,1,0, 0,0,0,1]);
 
     c.viewFromCenterSizeRotation(
-        {x: 0, y: 0}, {width: 100, height: 100}, 90 * Math.PI / 180);
+      {x: 0, y: 0}, {width: 100, height: 100}, 90 * Math.PI / 180);
     expect(closeToArray(
-        c.view, [0,-0.02,0,0, 0.02,0,0,0, 0,0,1,0, 0,0,0,1], 3)).toBe(true);
+      c.view, [0,-0.02,0,0, 0.02,0,0,0, 0,0,1,0, 0,0,0,1], 3)).toBe(true);
 
     c.viewFromCenterSizeRotation(
-        {x: 0, y: 0}, {width: 100, height: 100}, -90 * Math.PI / 180);
+      {x: 0, y: 0}, {width: 100, height: 100}, -90 * Math.PI / 180);
     expect(closeToArray(
-        c.view, [0,0.02,0,0, -0.02,0,0,0, 0,0,1,0, 0,0,0,1], 3)).toBe(true);
+      c.view, [0,0.02,0,0, -0.02,0,0,0, 0,0,1,0, 0,0,0,1], 3)).toBe(true);
 
     c.viewFromCenterSizeRotation(
-        {x: 0, y: 0}, {width: 2, height: 1}, 30 * Math.PI / 180);
+      {x: 0, y: 0}, {width: 2, height: 1}, 30 * Math.PI / 180);
     expect(closeToArray(
-        c.view, [0.866,-0.5,0,0, 0.5,0.866,0,0, 0,0,1,0, 0,0,0,1], 3)).toBe(
-        true);
+      c.view, [0.866,-0.5,0,0, 0.5,0.866,0,0, 0,0,1,0, 0,0,0,1], 3)).toBe(
+      true);
 
     c.viewFromCenterSizeRotation(
-        {x: 0.10, y: 0.22}, {width: 2, height: 1}, 30 * Math.PI / 180);
+      {x: 0.10, y: 0.22}, {width: 2, height: 1}, 30 * Math.PI / 180);
     expect(closeToArray(
-        c.view, [0.866,-0.5,0,0, 0.5,0.866,0,0, 0,0,1,0, -0.1966,-0.1405,0,1],
-        3)).toBe(true);
+      c.view, [0.866,-0.5,0,0, 0.5,0.866,0,0, 0,0,1,0, -0.1966,-0.1405,0,1],
+      3)).toBe(true);
   });
   /*eslint-enable comma-spacing*/
 

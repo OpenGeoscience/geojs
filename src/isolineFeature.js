@@ -536,7 +536,7 @@ var isolineFeature = function (arg) {
    * @returns {this}
    */
   this.labelPositions = function () {
-    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime()) {
+    if (m_this.dataTime().timestamp() >= m_this.buildTime().timestamp()) {
       m_this._build();
     }
     m_lastLabelPositions = null;
@@ -668,12 +668,12 @@ var isolineFeature = function (arg) {
       /* Distance in scaled pixels between the map's current center and the
        * center when the labels were computed. */
       var lastDelta = Math.sqrt(util.distance2dSquared(
-            map.gcsToDisplay(map.center()), map.gcsToDisplay(last.center))) *
-            Math.pow(2, last.zoom - zoom);
+        map.gcsToDisplay(map.center()), map.gcsToDisplay(last.center))) *
+        Math.pow(2, last.zoom - zoom);
       /* Half the viewport, less twice the maxSpacing, less any expansion of
        * the map. */
       var threshold = last.labelViewport / 2 - last.maxSpacing * 2 - Math.max(
-            mapSize.width - last.size.width, mapSize.height - last.size.height, 0);
+        mapSize.width - last.size.width, mapSize.height - last.size.height, 0);
       update = update || (lastDelta >= threshold);
     }
     if (update) {
@@ -756,8 +756,8 @@ var isolineFeature = function (arg) {
   this._update = function () {
     s_update.call(m_this);
 
-    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
-        m_this.updateTime().getMTime() <= m_this.getMTime()) {
+    if (m_this.dataTime().timestamp() >= m_this.buildTime().timestamp() ||
+        m_this.updateTime().timestamp() <= m_this.timestamp()) {
       m_this._build();
     }
     m_this.updateTime().modified();

@@ -82,8 +82,9 @@ $(function () {
 
   $('#test').click(function () {
     geo.util.timeRequestAnimationFrame(undefined, undefined, undefined, 10000);
-    var list = ['pan-to-london', 'elastic-to-moscow', 'bounce-to-istanbul',
-                'fly-to-bern', 'spin-to-budapest'];
+    var list = [
+      'pan-to-london', 'elastic-to-moscow', 'bounce-to-istanbul',
+      'fly-to-bern', 'spin-to-budapest'];
     var maxrepeat = 3, repeat, i, l;
     for (repeat = 0, i = 0; repeat < maxrepeat; repeat += 1) {
       for (l = 0; l < list.length; l += 1, i += 1) {
@@ -105,8 +106,12 @@ $(function () {
         '<div class="modal-body"/></div></div></div>'
       );
       var report = {
-        count: res.count, max: res.max, above_threshold: res.above_threshold,
-        subcalls: res.subcalls, stddev: res.stddev, average: res.average
+        count: res.count,
+        max: res.max,
+        above_threshold: res.above_threshold,
+        subcalls: res.subcalls,
+        stddev: res.stddev,
+        average: res.average
       };
       $('.modal-body', modal).append($('<div/>').text(
         JSON.stringify(report, undefined, 2)));

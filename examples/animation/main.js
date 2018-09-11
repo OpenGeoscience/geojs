@@ -32,12 +32,12 @@ $(function () {
   // Parse query parameters into an object for ease of access
   var query = document.location.search.replace(/(^\?)/, '').split(
     '&').map(function (n) {
-      n = n.split('=');
-      if (n[0]) {
-        this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
-      }
-      return this;
-    }.bind({}))[0];
+    n = n.split('=');
+    if (n[0]) {
+      this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
+    }
+    return this;
+  }.bind({}))[0];
   $.each(query, function (key, value) {
     var ctlvalue, ctlkey = key, ctl;
     switch (key) {
@@ -154,8 +154,8 @@ $(function () {
     if (!param || value === query[param]) {
       return;
     }
-    var processedValue = (ctl.is('[type="checkbox"]') ?
-                          (value === 'true') : value);
+    var processedValue = (
+      ctl.is('[type="checkbox"]') ? (value === 'true') : value);
     if (ctl.closest('table.gradient').length) {
       param = 'gradient';
     }
@@ -198,7 +198,7 @@ $(function () {
   function animation_frame() {
     var datalen = animationState.order.length,
         styles = animationState.styleArrays,
-        curTime = new Date().getTime(), genTime, updateTime,
+        curTime = Date.now(), genTime, updateTime,
         position, i, idx, p;
     timeRecords.frames.push(curTime);
     animationState.raf = null;
@@ -284,9 +284,9 @@ $(function () {
         updateStyles[key] = styles[key];
       }
     });
-    genTime = new Date().getTime();
+    genTime = Date.now();
     pointFeature.updateStyleFromArray(updateStyles, null, true);
-    updateTime = new Date().getTime();
+    updateTime = Date.now();
     timeRecords.generate.push(genTime - curTime);
     timeRecords.update.push(updateTime - genTime);
     show_framerate();
@@ -325,7 +325,7 @@ $(function () {
     if (animationState.position === undefined || animationState.position === null) {
       animationState.position = 0;
     }
-    animationState.startTime = new Date().getTime() - animationState.duration * animationState.position;
+    animationState.startTime = Date.now() - animationState.duration * animationState.position;
     if (!animationState.styleArrays || datalen !== animationState.order.length) {
       animationState.order = new Array(datalen);
       if (!animationState.orderedData) {

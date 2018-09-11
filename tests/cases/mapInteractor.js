@@ -22,9 +22,7 @@ describe('mapInteractor', function () {
       ctrlKey: false,
       metaKey: false,
       shiftKey: false
-    },
-    args
-    );
+    }, args);
 
     return new $.Event(type, args);
   };
@@ -482,7 +480,7 @@ describe('mapInteractor', function () {
     // check the rotation event was called
     expect(map.info.rotation).toBe(1);
     expect(map.info.rotationArgs).toBeCloseTo(
-        0.1 - Math.atan2(20 - 50, 20 - 50) + Math.atan2(10 - 50, 20 - 50));
+      0.1 - Math.atan2(20 - 50, 20 - 50) + Math.atan2(10 - 50, 20 - 50));
 
     // create a rotation event
     interactor.simulateEvent(
@@ -496,7 +494,7 @@ describe('mapInteractor', function () {
     // check the rotation event was called
     expect(map.info.rotation).toBe(2);
     expect(map.info.rotationArgs).toBeCloseTo(
-        0.1 - Math.atan2(20 - 50, 20 - 50) + Math.atan2(25 - 50, 30 - 50));
+      0.1 - Math.atan2(20 - 50, 20 - 50) + Math.atan2(25 - 50, 30 - 50));
   });
 
   it('Test zoom selection event propagation', function () {
@@ -1354,7 +1352,7 @@ describe('mapInteractor', function () {
     expect(map.info.panArgs.y).toBe(0);
     interactor.simulateEvent(
       'mouseup', {map: {x: 10, y: 0}, button: 'left'});
-    start = new Date().getTime();
+    start = Date.now();
     stepAnimationFrame(start);
     expect(map.info.pan).toBe(2);
     expect(map.info.panArgs.x).toBeGreaterThan(0.25);
@@ -1414,7 +1412,7 @@ describe('mapInteractor', function () {
     expect(map.info.panArgs.x).toBeCloseTo(1);
     interactor.simulateEvent(
       'mouseup', {map: {x: 200.1, y: 0}, button: 'left'});
-    start = new Date().getTime();
+    start = Date.now();
     stepAnimationFrame(start);
     expect(map.info.pan).toBe(4);
     expect(map.info.panArgs.x).toBeLessThan(0);
@@ -1451,7 +1449,7 @@ describe('mapInteractor', function () {
         'wheel',
         {wheelDelta: {x: 0, y: -20}, wheelMode: 0}
       );
-      start = new Date().getTime();
+      start = Date.now();
       stepAnimationFrame(start);
       expect(map.zoom()).toBe(2);
       stepAnimationFrame(start + 50);
@@ -1471,7 +1469,7 @@ describe('mapInteractor', function () {
         'wheel',
         {wheelDelta: {x: 0, y: -20}, wheelMode: 0}
       );
-      start = new Date().getTime();
+      start = Date.now();
       stepAnimationFrame(start);
       expect(map.zoom()).toBe(2);
       stepAnimationFrame(start + 50);
@@ -1503,7 +1501,7 @@ describe('mapInteractor', function () {
         'wheel',
         {wheelDelta: {x: 0, y: -20}, wheelMode: 0}
       );
-      start = new Date().getTime();
+      start = Date.now();
       stepAnimationFrame(start);
       expect(map.zoom()).toBe(2);
       stepAnimationFrame(start + 50);
@@ -1537,7 +1535,7 @@ describe('mapInteractor', function () {
         'wheel',
         {wheelDelta: {x: 0, y: -20}, wheelMode: 0}
       );
-      start = new Date().getTime();
+      start = Date.now();
       stepAnimationFrame(start);
       expect(map.zoom()).toBe(2);
       stepAnimationFrame(start + 50);

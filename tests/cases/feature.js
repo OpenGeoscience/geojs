@@ -194,19 +194,19 @@ describe('geo.feature', function () {
     });
     it('visible', function () {
       expect(feat.visible()).toBe(true);
-      var modTime = feat.getMTime();
+      var modTime = feat.timestamp();
       expect(feat.visible(false)).toBe(feat);
       expect(feat.visible()).toBe(false);
-      expect(feat.getMTime()).toBeGreaterThan(modTime);
+      expect(feat.timestamp()).toBeGreaterThan(modTime);
 
       expect(feat.visible(true)).toBe(feat);
       var depFeat = geo.feature({layer: layer, renderer: layer.renderer()});
       feat.dependentFeatures([depFeat]);
-      modTime = depFeat.getMTime();
+      modTime = depFeat.timestamp();
       expect(feat.visible(false)).toBe(feat);
       expect(feat.visible()).toBe(false);
       expect(depFeat.visible()).toBe(false);
-      expect(depFeat.getMTime()).toBeGreaterThan(modTime);
+      expect(depFeat.timestamp()).toBeGreaterThan(modTime);
       feat.dependentFeatures([]);
       expect(feat.visible(true)).toBe(feat);
       expect(depFeat.visible()).toBe(false);

@@ -286,9 +286,9 @@ var gl_polygonFeature = function (arg) {
         geom = vgl.geometryData(),
         sourcePositions = vgl.sourceDataP3fv({'name': 'pos'}),
         sourceFillColor = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Two, {'name': 'fillColor'}),
+          3, vgl.vertexAttributeKeysIndexed.Two, {'name': 'fillColor'}),
         sourceFillOpacity = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'fillOpacity'}),
+          1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'fillOpacity'}),
         trianglePrimitive = vgl.triangles();
 
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
@@ -322,7 +322,7 @@ var gl_polygonFeature = function (arg) {
    * @override
    */
   this._build = function () {
-    createGLPolygons(m_this.dataTime().getMTime() < m_this.buildTime().getMTime() && m_geometry);
+    createGLPolygons(m_this.dataTime().timestamp() < m_this.buildTime().timestamp() && m_geometry);
 
     if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
       m_this.renderer().contextRenderer().addActor(m_actor);
@@ -352,8 +352,8 @@ var gl_polygonFeature = function (arg) {
     }
     s_update.call(m_this);
 
-    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
-        m_this.updateTime().getMTime() <= m_this.getMTime()) {
+    if (m_this.dataTime().timestamp() >= m_this.buildTime().timestamp() ||
+        m_this.updateTime().timestamp() <= m_this.timestamp()) {
       m_this._build();
     }
 

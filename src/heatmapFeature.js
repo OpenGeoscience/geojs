@@ -276,7 +276,7 @@ var heatmapFeature = function (arg) {
       m_minIntensity -= 1;
     }
     m_gcsPosition = transform.transformCoordinates(
-        m_this.gcs(), m_this.layer().map().gcs(), position);
+      m_this.gcs(), m_this.layer().map().gcs(), position);
 
     m_this.buildTime().modified();
     return m_this;

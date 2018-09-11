@@ -297,7 +297,7 @@ var canvas_heatmapFeature = function (arg) {
    */
   this._renderOnCanvas = function (context2d, map) {
 
-    if (m_renderTime.getMTime() < m_this.buildTime().getMTime()) {
+    if (m_renderTime.timestamp() < m_this.buildTime().timestamp()) {
       var data = m_this.data() || [],
           radius = m_this.style('radius') + m_this.style('blurRadius'),
           binned = m_this.binned(),
@@ -375,8 +375,8 @@ var canvas_heatmapFeature = function (arg) {
    */
   this._update = function () {
     s_update.call(m_this);
-    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
-        m_this.updateTime().getMTime() < m_this.getMTime()) {
+    if (m_this.buildTime().timestamp() <= m_this.dataTime().timestamp() ||
+        m_this.updateTime().timestamp() < m_this.timestamp()) {
       m_this._build();
     }
     m_this.updateTime().modified();

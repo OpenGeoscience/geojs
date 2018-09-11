@@ -824,9 +824,10 @@ var feature = function (arg) {
     if (!m_layer) {
       throw new Error('Feature requires a valid layer');
     }
-    m_style = $.extend({},
-                {'opacity': 1.0}, arg.style === undefined ? {} :
-                arg.style);
+    m_style = $.extend(
+      {},
+      {'opacity': 1.0},
+      arg.style === undefined ? {} : arg.style);
     m_this._bindMouseHandlers();
     m_ready = true;
   };

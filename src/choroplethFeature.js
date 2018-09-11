@@ -44,18 +44,19 @@ var choroplethFeature = function (arg) {
   var d3 = require('./d3/d3Renderer').d3,
       m_this = this,
       s_init = this._init,
-      m_choropleth = $.extend({},
+      m_choropleth = $.extend(
+        {},
         {
           colorRange: [
-                {r: 0.07514311, g: 0.468049805, b: 1},
-                {r: 0.468487184, g: 0.588057293, b: 1},
-                {r: 0.656658579, g: 0.707001303, b: 1},
-                {r: 0.821573924, g: 0.837809045, b: 1},
-                {r: 0.943467973, g: 0.943498599, b: 0.943398095},
-                {r: 1, g: 0.788626485, b: 0.750707739},
-                {r: 1, g: 0.6289553, b: 0.568237474},
-                {r: 1, g: 0.472800903, b: 0.404551679},
-                {r: 0.916482116, g: 0.236630659, b: 0.209939162}
+            {r: 0.07514311, g: 0.468049805, b: 1},
+            {r: 0.468487184, g: 0.588057293, b: 1},
+            {r: 0.656658579, g: 0.707001303, b: 1},
+            {r: 0.821573924, g: 0.837809045, b: 1},
+            {r: 0.943467973, g: 0.943498599, b: 0.943398095},
+            {r: 1, g: 0.788626485, b: 0.750707739},
+            {r: 1, g: 0.6289553, b: 0.568237474},
+            {r: 1, g: 0.472800903, b: 0.404551679},
+            {r: 0.916482116, g: 0.236630659, b: 0.209939162}
           ],
           scale: d3.scale.quantize(),
           accessors: {
@@ -110,7 +111,7 @@ var choroplethFeature = function (arg) {
 
           accumeDictionary[id] =
             accumeDictionary[id] ?
-            accumeDictionary[id].push(value) : [value];
+              accumeDictionary[id].push(value) : [value];
 
           return accumeDictionary;
         }, {});

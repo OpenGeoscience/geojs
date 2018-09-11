@@ -88,8 +88,8 @@ describe('Contour Feature', function () {
         values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
       };
       var contour = layer.createFeature('contour').data(
-          contour1.values).contour(contour1).style({
-            value: function (d) { return d; }});
+        contour1.values).contour(contour1).style({
+        value: function (d) { return d; }});
       var result = contour._createContours();
       expect(result.minValue).toBe(0);
       expect(result.maxValue).toBe(13);
@@ -108,8 +108,8 @@ describe('Contour Feature', function () {
         values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
       };
       var contour = layer.createFeature('contour').data(
-          contour1.values).contour(contour1).style({
-            value: function (d) { return d; }});
+        contour1.values).contour(contour1).style({
+        value: function (d) { return d; }});
       var result = contour._createContours();
       expect(result.elements.length).toBe(42); /* 5 + 2 sq. * 2 tri. * 3 pts. */
       expect(result.pos.length).toBe(54); /* 12 + 6 distinct points * 3 coor. */
@@ -128,8 +128,8 @@ describe('Contour Feature', function () {
         values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
       };
       var contour = layer.createFeature('contour').data(
-          contour1.values).contour(contour1).style({
-            value: function (d) { return d; }});
+        contour1.values).contour(contour1).style({
+        value: function (d) { return d; }});
       var result = contour._createContours();
       /* This will appear to have only two rows */
       expect(result.elements.length).toBe(42); /* 5 + 2 sq. * 2 tri. * 3 pts. */
@@ -150,8 +150,8 @@ describe('Contour Feature', function () {
         wrapLongitude: false
       };
       var contour = layer.createFeature('contour').data(
-          contour1.values).contour(contour1).style({
-            value: function (d) { return d; }});
+        contour1.values).contour(contour1).style({
+        value: function (d) { return d; }});
       var result = contour._createContours();
       expect(result.elements.length).toBe(30); /* 5 sq. * 2 tri. * 3 pts. */
       expect(result.pos.length).toBe(36); /* 12 distinct points * 3 coor. */
@@ -169,8 +169,8 @@ describe('Contour Feature', function () {
         values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
       };
       var contour = layer.createFeature('contour').data(
-          contour1.values).contour(contour1).style({
-            value: function (d) { return d; }});
+        contour1.values).contour(contour1).style({
+        value: function (d) { return d; }});
       var result = contour._createContours();
       expect(result.elements.length).toBe(36); /* 5 + 1 sq. * 2 tri. * 3 pts. */
       expect(result.pos.length).toBe(48); /* 12 + 4 distinct points * 3 coor. */
@@ -188,8 +188,8 @@ describe('Contour Feature', function () {
         values: [0, 1, 2, 3, 4, 5, 6]
       };
       var contour = layer.createFeature('contour').data(
-          contour1.values).contour(contour1).style({
-            value: function (d) { return d; }});
+        contour1.values).contour(contour1).style({
+        value: function (d) { return d; }});
       var result = contour._createContours();
       expect(result.elements.length).toBe(0);
       expect(result.pos.length).toBe(21);

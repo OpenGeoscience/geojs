@@ -134,7 +134,7 @@ var pointFeature = function (arg) {
     // generate the cluster tree from the raw data
     var position = m_this.position();
     m_clusterTree = new ClusterGroup(
-        opts, m_this.layer().width(), m_this.layer().height());
+      opts, m_this.layer().width(), m_this.layer().height());
 
     m_allData.forEach(function (d, i) {
 
@@ -226,7 +226,7 @@ var pointFeature = function (arg) {
    * data changes.
    */
   this._updateRangeTree = function () {
-    if (m_rangeTreeTime.getMTime() >= m_this.dataTime().getMTime()) {
+    if (m_rangeTreeTime.timestamp() >= m_this.dataTime().timestamp()) {
       return;
     }
     var pts, position,

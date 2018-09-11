@@ -149,30 +149,30 @@ var legendWidget = function (arg) {
     applyColor(g.filter(function (d) {
       return d.type !== 'point' && d.type !== 'line';
     }).append('rect')
-               .attr('x', 0)
-               .attr('y', -6)
-               .attr('rx', 5)
-               .attr('ry', 5)
-               .attr('width', 40)
-               .attr('height', 12)
-              );
+      .attr('x', 0)
+      .attr('y', -6)
+      .attr('rx', 5)
+      .attr('ry', 5)
+      .attr('width', 40)
+      .attr('height', 12)
+    );
 
     applyColor(g.filter(function (d) {
       return d.type === 'point';
     }).append('circle')
-               .attr('cx', 20)
-               .attr('cy', 0)
-               .attr('r', 6)
-              );
+      .attr('cx', 20)
+      .attr('cy', 0)
+      .attr('r', 6)
+    );
 
     applyColor(g.filter(function (d) {
       return d.type === 'line';
     }).append('line')
-               .attr('x1', 0)
-               .attr('y1', 0)
-               .attr('x2', 40)
-               .attr('y2', 0)
-              );
+      .attr('x1', 0)
+      .attr('y1', 0)
+      .attr('x2', 40)
+      .attr('y2', 0)
+    );
 
     g.append('text')
       .attr('x', '50px')

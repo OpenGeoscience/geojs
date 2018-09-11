@@ -255,7 +255,7 @@ $(function () {
       $('#annotationlist').append(entry);
     });
     $('#annotationheader').css(
-        'display', $('#annotationlist .entry').length <= 1 ? 'none' : 'block');
+      'display', $('#annotationlist .entry').length <= 1 ? 'none' : 'block');
     if (!fromGeojsonUpdate) {
       // update the geojson textarea
       var geojson = layer.geojson();
