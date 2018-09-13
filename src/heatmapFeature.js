@@ -9,28 +9,29 @@ var transform = require('./transform');
  * @typedef {geo.feature.spec} geo.heatmapFeature.spec
  * @property {geo.geoPosition|function} [position] Position of the data.
  *   Default is (data).
- * @param {function} [intensity] Scalar value of each data point.  The scalar
- *   value must be a positive real number and is used to compute the weight
- *   for each data point.
- * @param {number} [maxIntensity=null] Maximum intensity of the data.  Maximum
- *   intensity must be a positive real number and is used to normalize all
- *   intensities within a dataset.  If `null`, it is computed.
- * @param {number} [minIntensity=null] Minimum intensity of the data.  Minimum
- *   intensity must be a positive real number and is used to normalize all
- *   intensities within a dataset.  If `null`, it is computed.
- * @param {number} [updateDelay=1000] Delay in milliseconds after a zoom,
+ * @property {function} [intensity] Scalar value of each data point.  The
+ *   scalar value must be a positive real number and is used to compute the
+ *   weight for each data point.
+ * @property {number} [maxIntensity=null] Maximum intensity of the data.
+ *   Maximum intensity must be a positive real number and is used to normalize
+ *   all intensities within a dataset.  If `null`, it is computed.
+ * @property {number} [minIntensity=null] Minimum intensity of the data.
+ *   Minimum intensity must be a positive real number and is used to normalize
+ *   all intensities within a dataset.  If `null`, it is computed.
+ * @property {number} [updateDelay=1000] Delay in milliseconds after a zoom,
  *   rotate, or pan event before recomputing the heatmap.
- * @param {boolean|number|'auto'} [binned='auto'] If `true` or a number,
+ * @property {boolean|number|'auto'} [binned='auto'] If `true` or a number,
  *   spatially bin data as part of producing the heatmap.  If falsy, each
  *   datapoint stands on its own.  If `'auto'`, bin data if there are more data
  *   points than there would be bins.  Using `true` or `auto` uses bins that
  *   are `max(Math.floor((radius + blurRadius) / 8), 3)`.
- * @param {object} [style.color] An object where the keys are numbers from
+ * @property {object} [style.color] An object where the keys are numbers from
  *   [0-1] and the values are {@link geo.geoColor}.  This is used to transform
  *   normalized intensity.
- * @param {number} [style.radius=10] Radius of a point in pixels.
- * @param {number} [style.blurRadius=10] Blur radius for each point in pixels.
- * @param {boolean} [style.gaussian=true] If truthy, appoximate a gaussian
+ * @property {number} [style.radius=10] Radius of a point in pixels.
+ * @property {number} [style.blurRadius=10] Blur radius for each point in
+ *   pixels.
+ * @property {boolean} [style.gaussian=true] If truthy, appoximate a gaussian
  *   distribution for each point using a multi-segment linear radial
  *   appoximation.  The total weight of the gaussian area is approximately the
  *   `9/16 r^2`.  The sum of `radius + blurRadius` is used as the radius for
@@ -42,7 +43,7 @@ var transform = require('./transform');
  *
  * @class
  * @alias geo.heatmapFeature
- * @param {geo.heatmapFeature.spec} arg
+ * @param {geo.heatmapFeature.spec} arg Feature specification.
  * @extends geo.feature
  * @returns {geo.heatmapFeature}
  */
