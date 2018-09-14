@@ -80,8 +80,8 @@ block mainTutorial
       }));
 
     choropleth.choropleth({ colorRange: ['rgb(237,248,233)', 'rgb(186,228,179)', 'rgb(116,196,118)', 'rgb(35,139,69)'] });
-    // get choropleth options and set the geoId accessor
-    choropleth.choropleth().accessors.geoId = function (state) { return state.properties.name };
+    // set the geoId accessor
+    choropleth.choropleth('geoId', function (state) { return state.properties.name });
     choropleth.draw();
 
   :markdown-it
