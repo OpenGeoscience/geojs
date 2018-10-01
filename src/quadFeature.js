@@ -209,9 +209,9 @@ var quadFeature = function (arg) {
    * Get/Set position.
    *
    * @memberof geo.quadFeature
-   * @param {object|Function} [val] Object or function that returns the
+   * @param {object|function} [val] Object or function that returns the
    *    position of each quad.  `undefined` to get the current position value.
-   * @returns {geo.quadFeature}
+   * @returns {geo.quadFeature|this}
    */
   this.position = function (val) {
     if (val === undefined) {
