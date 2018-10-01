@@ -3,11 +3,12 @@ var registerFeature = require('../registry').registerFeature;
 var choroplethFeature = require('../choroplethFeature');
 
 /**
- * Create a new instance of choroplethFeature
+ * Create a new instance of choroplethFeature.
  *
  * @class
  * @alias geo.gl.choroplethFeature
  * @extends geo.choroplethFeature
+ * @param {geo.choroplethFeature.spec} arg
  * @returns {geo.gl.choroplethFeature}
  */
 var gl_choroplethFeature = function (arg) {
@@ -25,17 +26,14 @@ var gl_choroplethFeature = function (arg) {
   var m_this = this,
       m_gl_polygons = null,
       s_exit = this._exit,
-      s_init = this._init,
       s_draw = this.draw,
       s_update = this._update;
 
-  /* Create the choropleth.  This calls the base class to generate the contours,
-   * into the various gl uniforms and buffers.
+  /**
+   * Draw each of the polygons associated with this feature.
+   *
+   * @returns {this}
    */
-  function createGLChoropleth() {
-    return m_this.createChoropleth();
-  }
-
   this.draw = function () {
     m_this._update();
     if (m_gl_polygons) {
@@ -48,26 +46,19 @@ var gl_choroplethFeature = function (arg) {
   };
 
   /**
-   * Initialize
-   */
-  this._init = function (arg) {
-    s_init.call(m_this, arg);
-  };
-
-  /**
-   * Build
+   * Build.
    *
-   * @override
+   * @returns {geo.featurePolygon[]}
    */
   this._build = function () {
     m_this.buildTime().modified();
-    return (m_gl_polygons = createGLChoropleth());
+    m_gl_polygons = m_this.createChoropleth();
+    return m_gl_polygons;
   };
 
   /**
-   * Update
-   *
-   * @override
+   * Update the choropleth if the data was updated since the last build or the
+   * feature was updated.
    */
   this._update = function () {
     s_update.call(m_this);
@@ -80,7 +71,7 @@ var gl_choroplethFeature = function (arg) {
   };
 
   /**
-   * Destroy Polygon Sub-Features
+   * Destroy polygon sub-features.
    */
   this._wipePolygons = function () {
     if (m_gl_polygons) {
@@ -92,7 +83,7 @@ var gl_choroplethFeature = function (arg) {
   };
 
   /**
-   * Destroy
+   * Destroy.
    */
   this._exit = function () {
     m_this._wipePolygons();
@@ -107,5 +98,4 @@ inherit(gl_choroplethFeature, choroplethFeature);
 
 // Now register it
 registerFeature('vgl', 'choropleth', gl_choroplethFeature);
-
 module.exports = gl_choroplethFeature;

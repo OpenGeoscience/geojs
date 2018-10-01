@@ -195,7 +195,7 @@ var pointFeature = function (arg) {
   /**
    * Get/Set position.
    *
-   * @param {function|geo.geoPosition} [val]  If not specified, return the
+   * @param {function|geo.geoPosition} [val] If not specified, return the
    *    position accessor, which is guaranteed to be a function.  If specified,
    *    wrap the value in an function that handles clustering if it is enabled
    *    and set the position accessor to that function.

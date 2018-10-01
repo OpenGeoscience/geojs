@@ -5,31 +5,57 @@ var geo_event = require('./event');
 var util = require('./util');
 
 /**
- * Create a new instance of class imagemapFeature
+ * Pixelmap feature specification.
  *
- * @class
- * @alias geo.pixelmapFeature
- * @param {Object} arg Options object
- * @extends geo.feature
- * @param {Object|Function|HTMLImageElement} [url] URL of a pixel map or an
+ * @typedef {geo.feature.spec} geo.pixelmapFeature.spec
+ * @property {string|function|HTMLImageElement} [url] URL of a pixel map or an
  *   HTML Image element.  The rgb data is interpretted as an index of the form
  *   0xbbggrr.  The alpha channel is ignored.
- * @param {Object|Function} [color] The color that should be used for each data
- *   element.  Data elements correspond to the indices in the pixel map.  If an
- *   index is larger than the number of data elements, it will be transparent.
- *   If there is more data than there are indices, it is ignored.
- * @param {Object|Function} [position] Position of the image.  Default is
- *   (data).  The position is an Object which specifies the corners of the
- *   quad: ll, lr, ur, ul.  At least two opposite corners must be specified.
- *   The corners do not have to physically correspond to the order specified,
- *   but rather correspond to that part of the image map.  If a corner is
- *   unspecified, it will use the x coordinate from one adjacent corner, the y
- *   coordinate from the other adjacent corner, and the average z value of
- *   those two corners.  For instance, if ul is unspecified, it is
+ * @property {geo.geoColor|function} [color] The color that should be used
+ *   for each data element.  Data elements correspond to the indices in the
+ *   pixel map. If an index is larger than the number of data elements, it will
+ *   be transparent.  If there is more data than there are indices, it is
+ *   ignored.
+ * @property {geo.geoPosition|function} [position] Position of the image.
+ *   Default is (data).  The position is an Object which specifies the corners
+ *   of the quad: ll, lr, ur, ul.  At least two opposite corners must be
+ *   specified.  The corners do not have to physically correspond to the order
+ *   specified, but rather correspond to that part of the image map.  If a
+ *   corner is unspecified, it will use the x coordinate from one adjacent
+ *   corner, the y coordinate from the other adjacent corner, and the average z
+ *   value of those two corners.  For instance, if ul is unspecified, it is
  *   {x: ll.x, y: ur.y}.  Note that each quad is rendered as a pair of
  *   triangles: (ll, lr, ul) and (ur, ul, lr).  Nothing special is done for
  *   quads that are not convex or quads that have substantially different
  *   transformations for those two triangles.
+ */
+
+/**
+ * Pixelmap feature information record.
+ *
+ * @typedef {object} geo.pixelmapFeature.info
+ * @property {number} width The width of the source image.
+ * @property {number} height The width of the source image.
+ * @property {context} context The HTMLCanvasElement context used for handling
+ *    the pixelmap.
+ * @property {ImageData} imageData The context's image data.
+ * @property {number[]} indices An array, one per pixel, of the index value in
+ *    the image.  This decodes the pixel value to the corresponding integer.
+ * @property number} area The number of pixels in the image.  This is
+ *    `width * height`.
+ * @property {object[]} mappedColors This has one entry for each distinct index
+ *    value.  Each entry has `first` and `last` with the first and last pixel
+ *    locations where that index occurs.  Note that last is the inclusive value
+ *    of the location (so its maximum possible value is `size -1`).
+ */
+
+/**
+ * Create a new instance of class pixelmapFeature
+ *
+ * @class
+ * @alias geo.pixelmapFeature
+ * @param {geo.pixelmapFeature.spec} arg Options object.
+ * @extends geo.feature
  * @returns {geo.pixelmapFeature}
  */
 
@@ -53,9 +79,13 @@ var pixelmapFeature = function (arg) {
       s_exit = this._exit;
 
   /**
-   * Get/Set position accessor
+   * Get/Set position accessor.
    *
-   * @returns {geo.pixelmap}
+   * @param {geo.geoPosition|function} [val] If not specified, return the
+   *    current position accessor.  If specified, use this for the position
+   *    accessor and return `this`.  See {@link geo.quadFeature.position} for
+   *    for details on this position.
+   * @returns {geo.geoPosition|function|this}
    */
   this.position = function (val) {
     if (val === undefined) {
@@ -69,9 +99,12 @@ var pixelmapFeature = function (arg) {
   };
 
   /**
-   * Get/Set url accessor
+   * Get/Set url accessor.
    *
-   * @returns {geo.pixelmap}
+   * @param {string|function} [val] If not specified, return the current url
+   *    accessor.  If specified, use this for the url accessor and return
+   *    `this`.
+   * @returns {string|function|this}
    */
   this.url = function (val) {
     if (val === undefined) {
@@ -89,7 +122,7 @@ var pixelmapFeature = function (arg) {
    * Get the maximum index value from the pixelmap.  This is a value present in
    * the pixelmap.
    *
-   * @returns {geo.pixelmap}
+   * @returns {number} The maximum index value.
    */
   this.maxIndex = function () {
     if (m_info) {
@@ -108,9 +141,11 @@ var pixelmapFeature = function (arg) {
   };
 
   /**
-   * Get/Set color accessor
+   * Get/Set color accessor.
    *
-   * @returns {geo.pixelmap}
+   * @param {geo.geoColor|function} [val] The new color map accessor or
+   *    `undefined` to get the current accessor.
+   * @returns {geo.geoColor|function|this}
    */
   this.color = function (val) {
     if (val === undefined) {
@@ -126,14 +161,15 @@ var pixelmapFeature = function (arg) {
   /**
    * If the specified coordinates are in the rendered quad, use the basis
    * information from the quad to determine the pixelmap index value so that it
-   * can be included in the found results.
+   * can be included in the `found` results.
    *
-   * @param {geo.geoPosition} coordinate point to search for in map interface
-   *    gcs.
+   * @param {geo.geoPosition} geo Coordinate in interface gcs.
+   * @returns {geo.feature.searchResult} An object with a list of features and
+   *    feature indices that are located at the specified point.
    */
-  this.pointSearch = function (coordinate) {
+  this.pointSearch = function (geo) {
     if (m_quadFeature && m_info) {
-      var result = m_quadFeature.pointSearch(coordinate);
+      var result = m_quadFeature.pointSearch(geo);
       if (result.index.length === 1 && result.extra && result.extra[result.index[0]].basis) {
         var basis = result.extra[result.index[0]].basis, x, y, idx;
         x = Math.floor(basis.x * m_info.width);
@@ -153,12 +189,14 @@ var pixelmapFeature = function (arg) {
   };
 
   /**
-   * Build
+   * Build.  Fetches the image if necesary.
+   *
+   * @returns {this}
    */
   this._build = function () {
     /* Set the build time at the start of the call.  A build can result in
-     * drawing a quad, which can trigger a full layer update, which in tern
-     * checks if this feature is built.  Setting the build time avoid calling
+     * drawing a quad, which can trigger a full layer update, which in turn
+     * checks if this feature is built.  Setting the build time avoids calling
      * this a second time. */
     m_this.buildTime().modified();
     if (!m_srcImage) {
@@ -215,9 +253,11 @@ var pixelmapFeature = function (arg) {
   };
 
   /**
-   * Compute information for this pixelmap image.  It is wasterful to call this
+   * Compute information for this pixelmap image.  It is wasteful to call this
    * if the pixelmap has already been prepared (it is invalidated by a change
    * in the image).
+   *
+   * @returns {geo.pixelmapFeature.info}
    */
   this._preparePixelmap = function () {
     var i, idx, pixelData;
@@ -228,8 +268,7 @@ var pixelmapFeature = function (arg) {
     m_info = {
       width: m_srcImage.naturalWidth,
       height: m_srcImage.naturalHeight,
-      canvas: document.createElement('canvas'),
-      updateIdx: {}
+      canvas: document.createElement('canvas')
     };
 
     m_info.canvas.width = m_info.width;
@@ -348,7 +387,9 @@ var pixelmapFeature = function (arg) {
   };
 
   /**
-   * Update
+   * Update.
+   *
+   * @returns {this}
    */
   this._update = function () {
     s_update.call(m_this);
@@ -362,20 +403,25 @@ var pixelmapFeature = function (arg) {
   };
 
   /**
-   * Destroy
-   * @memberof geo.pixelmapFeature
+   * Destroy.  Deletes the associated quadFeature.
+   *
+   * @returns {this}
    */
-  this._exit = function (abc) {
+  this._exit = function () {
     if (m_quadFeature && m_this.layer()) {
       m_this.layer().deleteFeature(m_quadFeature);
       m_quadFeature = null;
       m_this.dependentFeatures([]);
     }
     s_exit();
+    return m_this;
   };
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @param {geo.pixelmapFeature.spec} arg
+   * @returns {this}
    */
   this._init = function (arg) {
     arg = arg || {};
@@ -407,6 +453,8 @@ var pixelmapFeature = function (arg) {
     }
     m_this.style(style);
     m_this.dataTime().modified();
+
+    return m_this;
   };
 
   return this;
