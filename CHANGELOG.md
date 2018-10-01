@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Features
+- Feature selection API is now enabled automatically if any event handlers are bounds to the feature (#921)
+
 ### Changes
 - Removed the dependency on the vgl module for the `object` and `timestamp` classes (#918)
 
