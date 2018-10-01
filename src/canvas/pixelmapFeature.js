@@ -3,13 +3,13 @@ var registerFeature = require('../registry').registerFeature;
 var pixelmapFeature = require('../pixelmapFeature');
 
 /**
- * Create a new instance of class pixelmapFeature
+ * Create a new instance of class pixelmapFeature.
  *
  * @class
  * @alias geo.canvas.pixelmapFeature
- * @param {Object} arg Options object
  * @extends geo.pixelmapFeature
- * @returns {canvas_pixelmapFeature}
+ * @param {geo.pixelmapFeature.spec} arg
+ * @returns {geo.canvas.pixelmapFeature}
  */
 var canvas_pixelmapFeature = function (arg) {
   'use strict';
