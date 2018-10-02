@@ -210,7 +210,8 @@ var ChromeFlags = [
   '--no-pings',    // no auditing pings
   '--force-color-profile=srgb',  // for consistent tests
   '--disable-background-networking',
-  '--disable-component-extensions-with-background-pages'
+  '--disable-component-extensions-with-background-pages',
+  '--translate-script-url=""'
 ];
 
 /* By default, when Firefox starts it makes many connections to sites like
@@ -318,7 +319,6 @@ module.exports = function (config) {
           '--start-fullscreen',
           '--kiosk',
           '--incognito',
-          '--translate-script-url=""',
           '--proxy-pac-url=' + config.protocol + '//' + (config.hostname || '127.0.0.1') + ':' + config.port + '/testdata/proxy-for-tests.pac'
         ])
       },
