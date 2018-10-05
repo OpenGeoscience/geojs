@@ -401,8 +401,8 @@ var polygonFeature = function (arg) {
   };
 
   /**
-   * When the feature is marked as modified, mark our sub-feature as
-   * modified, too.
+   * Update the timestamp to the next global timestamp value.  Mark
+   * sub-features as modified, too.
    *
    * @returns {object} The results of the superclass modified function.
    */
