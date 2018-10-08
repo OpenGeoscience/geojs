@@ -43,8 +43,6 @@ var geo_event = require('./event');
  * Style specification for a feature.
  *
  * @typedef {object} geo.feature.styleSpec
- * @property {number|function} [opacity=1] The opacity for the whole feature on
- *    a scale of 0 to 1.
  */
 
 /**
@@ -837,7 +835,7 @@ var feature = function (arg) {
     }
     m_style = $.extend(
       {},
-      {'opacity': 1.0},
+      {opacity: 1.0},
       arg.style === undefined ? {} : arg.style);
     m_this._bindMouseHandlers();
     m_ready = true;

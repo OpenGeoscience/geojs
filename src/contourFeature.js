@@ -26,6 +26,8 @@ var meshFeature = require('./meshFeature');
  *    This defaults to the `z` property of the data elements.  If the value of
  *    a grid point is `null` or `undefined`, the point and elements that use
  *    that point won't be included in the results.
+ * @property {number|function} [opacity=1] The opacity for the whole feature on
+ *    a scale of 0 to 1.
  */
 
 /**
