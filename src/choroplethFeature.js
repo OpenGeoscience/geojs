@@ -74,6 +74,8 @@ var choroplethFeature = function (arg) {
         },
         arg);
 
+  this.featureType = 'choropleth';
+
   /**
    * Get/Set choropleth scalar data.
    *

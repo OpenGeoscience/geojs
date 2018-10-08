@@ -25,6 +25,8 @@ var pathFeature = function (arg) {
       m_position = arg.position === undefined ? [] : arg.position,
       s_init = this._init;
 
+  this.featureType = 'path';
+
   /**
    * Get/Set positions
    *

@@ -78,6 +78,8 @@ var pixelmapFeature = function (arg) {
       s_init = this._init,
       s_exit = this._exit;
 
+  this.featureType = 'pixelmap';
+
   /**
    * Get/Set position accessor.
    *

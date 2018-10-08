@@ -68,6 +68,8 @@ var heatmapFeature = function (arg) {
       m_gcsPosition,
       s_init = this._init;
 
+  this.featureType = 'heatmap';
+
   m_position = arg.position || function (d) { return d; };
   m_intensity = arg.intensity || function (d) { return 1; };
   m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
