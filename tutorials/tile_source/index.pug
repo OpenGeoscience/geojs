@@ -23,7 +23,7 @@ block mainTutorial
     layer.url('http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png')
     layer.attribution(
       'Map tiles by <a href="http://stamen.com">Stamen Design</a>, ' +
-      'under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>.  ' +
+      'under <a href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>.  ' +
       'Data by <a href="https://openstreetmap.org">OpenStreetMap</a>, ' +
       'under <a href="https://openstreetmap.org/copyright">ODbL</a>.')
   +codeblock_test('url is from stamen.com',
@@ -39,7 +39,7 @@ block mainTutorial
     });
     var layer = map.createLayer('osm', {
       url: 'http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png',
-      attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="https://openstreetmap.org">OpenStreetMap</a>, under <a href="https://openstreetmap.org/copyright">ODbL</a>.'
+      attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="https://openstreetmap.org">OpenStreetMap</a>, under <a href="https://openstreetmap.org/copyright">ODbL</a>.'
     });
   +codeblock_test('map has one osm layer from stamen', [
       'map.layers().length === 1',

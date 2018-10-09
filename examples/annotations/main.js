@@ -47,7 +47,7 @@ $(function () {
       annotationDebug.mapLayer = map.createLayer('osm');
     }
     if (query.map === 'satellite' || query.map === 'dual') {
-      annotationDebug.satelliteLayer = map.createLayer('osm', {url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.png', opacity: query.map === 'dual' ? 0.25 : 1});
+      annotationDebug.satelliteLayer = map.createLayer('osm', {url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.png', opacity: query.map === 'dual' ? 0.25 : 1});
     }
   }
   // create an annotation layer

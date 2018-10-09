@@ -108,16 +108,16 @@ Class overview
 ---------------
 
 The latest version of the full API documentation is at
-`http://opengeoscience.github.io/geojs/apidocs/geo.html <http://opengeoscience.github.io/geojs/apidocs/geo.html>`_.
+`https://opengeoscience.github.io/geojs/apidocs/geo.html <https://opengeoscience.github.io/geojs/apidocs/geo.html>`_.
 
 GeoJS is made up of the following core classes.  Click on the link to go to the
 documentation for each of the classes.
 
-`geo.map <http://opengeoscience.github.io/geojs/apidocs/geo.map.html>`_
+`geo.map <https://opengeoscience.github.io/geojs/apidocs/geo.map.html>`_
     The map object is attached to a DOM element and contains all visible layers and
     features.
 
-`geo.renderer <http://opengeoscience.github.io/geojs/apidocs/geo.renderer.html>`_
+`geo.renderer <https://opengeoscience.github.io/geojs/apidocs/geo.renderer.html>`_
     A renderer is responsible for drawing geometries and images on the map.  This is an
     abstract class which serves to define the minimal interface for a renderer.
     Not all features are available in all renderers, and an appropriate
@@ -126,27 +126,27 @@ documentation for each of the classes.
     If a renderer is requested when creating a layer, and that renderer is not
     supported by the current installation, a fallback renderer may be used
     instead and a warning sent to the console.
-    `geo.gl.vglRenderer <http://opengeoscience.github.io/geojs/apidocs/geo.gl.vglRenderer.html>`_
+    `geo.gl.vglRenderer <https://opengeoscience.github.io/geojs/apidocs/geo.gl.vglRenderer.html>`_
     requires webGL support.
-    `geo.d3.d3Renderer <http://opengeoscience.github.io/geojs/apidocs/geo.d3.d3Renderer.html>`_
+    `geo.d3.d3Renderer <https://opengeoscience.github.io/geojs/apidocs/geo.d3.d3Renderer.html>`_
     requires the d3 library to be present.
 
-`geo.layer <http://opengeoscience.github.io/geojs/apidocs/geo.layer.html>`_
+`geo.layer <https://opengeoscience.github.io/geojs/apidocs/geo.layer.html>`_
     Layer objects are created by the map's ``createLayer`` method.  This is an abstract
     class defining the interfaces required for all layers.  Every layer must have a
     specific renderer.  The following are useful layer implementations.
 
-    `geo.featureLayer <http://opengeoscience.github.io/geojs/apidocs/geo.featureLayer.html>`_
+    `geo.featureLayer <https://opengeoscience.github.io/geojs/apidocs/geo.featureLayer.html>`_
         This is the primary container for features such as lines, points, etc.
 
-    `geo.osmLayer <http://opengeoscience.github.io/geojs/apidocs/geo.osmLayer.html>`_
+    `geo.osmLayer <https://opengeoscience.github.io/geojs/apidocs/geo.osmLayer.html>`_
         This layer displays tiled imagery from an openstreetmaps compatible tile server.
 
-    `geo.gui.uiLayer <http://opengeoscience.github.io/geojs/apidocs/geo.gui.uiLayer.html>`_
+    `geo.gui.uiLayer <https://opengeoscience.github.io/geojs/apidocs/geo.gui.uiLayer.html>`_
         This layer contains user interface widgets that should generally be placed on
         top of all other layers.
 
-`geo.feature <http://opengeoscience.github.io/geojs/apidocs/geo.feature.html>`_
+`geo.feature <https://opengeoscience.github.io/geojs/apidocs/geo.feature.html>`_
     Feature objects are created by the featureLayers's ``createFeature`` method.  Features
     are created from an arbitrary array of objects given by the ``feature.data`` method.
     Properties of the features can be given as constant values or as functional accessors
@@ -154,34 +154,34 @@ documentation for each of the classes.
     renderer used; however, some differences are necessary due to internal limitations.
     The following are feature types currently available.
 
-        * `geo.pointFeature <http://opengeoscience.github.io/geojs/apidocs/geo.pointFeature.html>`_
-        * `geo.lineFeature <http://opengeoscience.github.io/geojs/apidocs/geo.lineFeature.html>`_
-        * `geo.pathFeature <http://opengeoscience.github.io/geojs/apidocs/geo.pathFeature.html>`_
-        * `geo.graphFeature <http://opengeoscience.github.io/geojs/apidocs/geo.graphFeature.html>`_
-        * `geo.vectorFeature <http://opengeoscience.github.io/geojs/apidocs/geo.vectorFeature.html>`_
+        * `geo.pointFeature <https://opengeoscience.github.io/geojs/apidocs/geo.pointFeature.html>`_
+        * `geo.lineFeature <https://opengeoscience.github.io/geojs/apidocs/geo.lineFeature.html>`_
+        * `geo.pathFeature <https://opengeoscience.github.io/geojs/apidocs/geo.pathFeature.html>`_
+        * `geo.graphFeature <https://opengeoscience.github.io/geojs/apidocs/geo.graphFeature.html>`_
+        * `geo.vectorFeature <https://opengeoscience.github.io/geojs/apidocs/geo.vectorFeature.html>`_
 
 .. note::
 
     Some features types are only available for specific renderers.
 
-`geo.gui.widget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.widget.html>`_
+`geo.gui.widget <https://opengeoscience.github.io/geojs/apidocs/geo.gui.widget.html>`_
     This is an abstract interface for creating widgets that the user can interact with.
 
-        * `geo.gui.domWidget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.domWidget.html>`_
-        * `geo.gui.svgWidget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.svgWidget.html>`_
+        * `geo.gui.domWidget <https://opengeoscience.github.io/geojs/apidocs/geo.gui.domWidget.html>`_
+        * `geo.gui.svgWidget <https://opengeoscience.github.io/geojs/apidocs/geo.gui.svgWidget.html>`_
 
-         * `geo.gui.sliderWidget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.sliderWidget.html>`_
-         * `geo.gui.legendWidget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.legendWidget.html>`_
+         * `geo.gui.sliderWidget <https://opengeoscience.github.io/geojs/apidocs/geo.gui.sliderWidget.html>`_
+         * `geo.gui.legendWidget <https://opengeoscience.github.io/geojs/apidocs/geo.gui.legendWidget.html>`_
 
 
-`geo.mapInteractor <http://opengeoscience.github.io/geojs/apidocs/geo.mapInteractor.html>`_
+`geo.mapInteractor <https://opengeoscience.github.io/geojs/apidocs/geo.mapInteractor.html>`_
     This class handles all mouse and keyboard events for the map.  Users can customize
     the mouse and keyboard bindings through this class.
 
-`geo.fileReader <http://opengeoscience.github.io/geojs/apidocs/geo.fileReader.html>`_
+`geo.fileReader <https://opengeoscience.github.io/geojs/apidocs/geo.fileReader.html>`_
     This is an abstract class defining the interface for file readers.  Currently,
     the only implemented reader is
-    `geo.geojsonReader <http://opengeoscience.github.io/geojs/apidocs/geo.geojsonReader.html>`_,
+    `geo.geojsonReader <https://opengeoscience.github.io/geojs/apidocs/geo.geojsonReader.html>`_,
     which is an extendable geojson reader.
 
 Coordinate systems
