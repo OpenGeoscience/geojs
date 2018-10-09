@@ -27,6 +27,8 @@ var vectorFeature = function (arg) {
       s_init = this._init,
       s_style = this.style;
 
+  this.featureType = 'vector';
+
   /**
    * Get or set the accessor for the origin of the vector.  This is the point
    * that the vector base resides at.  Defaults to (0, 0, 0).
