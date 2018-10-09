@@ -117,6 +117,8 @@ var meshFeature = function (arg) {
       s_init = this._init,
       m_mesh = {};
 
+  this.featureType = 'mesh';
+
   /**
    * Get/Set mesh accessor.
    *

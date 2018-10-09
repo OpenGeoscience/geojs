@@ -211,6 +211,8 @@ var isolineFeature = function (arg) {
       s_modified = this.modified,
       s_update = this._update;
 
+  this.featureType = 'isoline';
+
   this.contour = m_this.mesh;
   this.isoline = m_this.mesh;
 

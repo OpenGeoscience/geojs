@@ -80,6 +80,8 @@ var quadFeature = function (arg) {
       m_videos = [],
       m_quads;
 
+  this.featureType = 'quad';
+
   /**
    * Track a list of object->object mappings.  The mappings are kept in a list.
    * This marks all known mappings as unused.  If they are not marked as used
