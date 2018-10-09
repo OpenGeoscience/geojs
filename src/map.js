@@ -3,67 +3,78 @@ var inherit = require('./inherit');
 var sceneObject = require('./sceneObject');
 
 /**
+ * Map specification.
+ *
+ * @typedef {object} geo.map.spec
+ * @property {string} node DOM selector for the map container.
+ * @property {string|geo.transform} [gcs='EPSG:3857'] The main coordinate
+ *   system of the map (this is often web Mercator).
+ * @property {string|geo.transform} [ingcs='EPSG:4326'] The default coordinate
+ *   system of interface calls (this is often latitude and longitude).
+ * @property {number} [unitsPerPixel=156543] GCS to pixel unit scaling at zoom
+ *   0 (i.e., meters per pixel or degrees per pixel).  The actual default is
+ *   `maxBounds.right - maxBounds.left` converted to `gcs` and then divided by
+ *   `256`.
+ * @property {object} [maxBounds] The maximum visible map bounds.
+ * @property {number} [maxBounds.left=-180] The left bound.
+ * @property {number} [maxBounds.right=180] The right bound.
+ * @property {number} [maxBounds.bottom=-85.06] The bottom bound.  The default
+ *   is actually the `left` value transformed to the map's `gcs` coordinate
+ *   system.
+ * @property {number} [maxBounds.top=85.06] The top bound.  The default is
+ *   actually the `right` value transformed to the map's `gcs` coordinate
+ *   system.
+ * @property {number} [maxBounds.gcs=ingcs] The coordinate system for the
+ *   bounds.
+ * @property {number} [zoom=4] Initial zoom.
+ * @property {object} [center] Initial map center.
+ * @property {number} center.x=0
+ * @property {number} center.y=0
+ * @property {number} [rotation=0] Initial clockwise rotation in radians.
+ * @property {number} [width] The map width (default node width).
+ * @property {number} [height] The map height (default node height).
+ * @property {number} [min=0] Minimum zoom level (though fitting to the
+ *   viewport may make it so this is smaller than the smallest possible value).
+ * @property {number} [max=16] Maximum zoom level.
+ * @property {boolean} [discreteZoom=false] If `true`, only allow integer zoom
+ *   levels.  `false` for any zoom level.
+ * @property {boolean|function} [allowRotation=true] `false` prevents rotation,
+ *   `true` allows any rotation.  If a function, the function is called with a
+ *   rotation (angle in radians) and returns a valid rotation.  This can be
+ *   used to constrain the rotation to a range or specific values.
+ * @property {geo.camera} [camera] The camera to control the view.
+ * @property {geo.mapInteractor} [interactor] The UI event handler.  If
+ *   `undefined`, a default interactor is created and used.  If `null`, no
+ *   interactor is attached to the map.
+ * @property {array} [animationQueue] An array used to synchronize animations.
+ *   If specified, this should be an empty array or the same array as passed to
+ *   other map instances.
+ * @property {boolean} [autoResize=true] Adjust map size on window resize.
+ * @property {boolean} [clampBoundsX=false] Prevent panning outside of the
+ *   maximum bounds in the horizontal direction.
+ * @property {boolean} [clampBoundsY=true] Prevent panning outside of the
+ *   maximum bounds in the vertical direction.
+ * @property {boolean} [clampZoom=true] Prevent zooming out so that the map
+ *   area is smaller than the window.
+ */
+
+/**
+ * Specification used with `map.create`.
+ *
+ * @typedef {geo.map.spec} geo.map.createSpec
+ * @property {object[]} [data=[]] The default data array to apply to each
+ *      feature if none exists.
+ * @property {geo.layer.spec[]} [layers=[]] Layers to create.
+ */
+
+/**
  * Creates a new map object.
  *
  * @class
  * @alias geo.map
  * @extends geo.sceneObject
  *
- * @param {object} arg Options object
- *
- * @param {string} arg.node DOM selector for the map container.
- *   *** Always required ***
- *
- * @param {string|geo.transform} [arg.gcs='EPSG:3857']
- *   The main coordinate system of the map (this is often web Mercator).
- *   * Required when using a domain/CS different from OSM *
- * @param {string|geo.transform} [arg.ingcs='EPSG:4326']
- *   The default coordinate system of interface calls (this is often latitude
- *   and longitude).
- * @param {number} [arg.unitsPerPixel=156543] GCS to pixel unit scaling at zoom
- *   0 (i.e. meters per pixel or degrees per pixel).
- * @param {object?} [arg.maxBounds] The maximum visible map bounds.
- * @param {number} [arg.maxBounds.left=-20037508] The left bound.
- * @param {number} [arg.maxBounds.right=20037508] The right bound.
- * @param {number} [arg.maxBounds.bottom=-20037508] The bottom bound.
- * @param {number} [arg.maxBounds.top=20037508] The top bound.
- * @param {number} [arg.maxBounds.gcs=arg.ingcs] The coordinate system for the
- *   bounds.
- *
- * @param {number} [arg.zoom=4] Initial zoom.
- * @param {object?} [arg.center] Initial map center.
- * @param {number} arg.center.x=0
- * @param {number} arg.center.y=0
- * @param {number} [arg.rotation=0] Initial clockwise rotation in radians.
- * @param {number?} [arg.width] The map width (default node width).
- * @param {number?} [arg.height] The map height (default node height).
- *
- * @param {number} [arg.min=0] Minimum zoom level (though fitting to the
- *   viewport may make it so this is smaller than the smallest possible value).
- * @param {number} [arg.max=16] Maximum zoom level.
- * @param {boolean} [arg.discreteZoom=false] If `true`, only allow integer zoom
- *   levels.  `false` for any zoom level.
- * @param {boolean|function} [arg.allowRotation=true] `false` prevents
- *   rotation, `true` allows any rotation.  If a function, the function is
- *   called with a rotation (angle in radians) and returns a valid rotation
- *   (this can be used to constrain the rotation to a range or specific to
- *   values).
- *
- * @param {geo.camera?} [arg.camera] The camera to control the view.
- * @param {geo.mapInteractor?} [arg.interactor] The UI event handler.  If
- *   `undefined`, a default interactor is created and used.  If `null`, no
- *   interactor is attached to the map.
- * @param {array} [arg.animationQueue] An array used to synchronize animations.
- *   If specified, this should be an empty array or the same array as passed to
- *   other map instances.
- * @param {boolean} [arg.autoResize=true] Adjust map size on window resize.
- * @param {boolean} [arg.clampBoundsX=false] Prevent panning outside of the
- *   maximum bounds in the horizontal direction.
- * @param {boolean} [arg.clampBoundsY=true] Prevent panning outside of the
- *   maximum bounds in the vertical direction.
- * @param {boolean} [arg.clampZoom=true] Prevent zooming out so that the map
- *   area is smaller than the window.
- *
+ * @param {geo.map.spec} arg Map specification
  * @returns {geo.map}
  */
 var map = function (arg) {
@@ -2262,7 +2273,7 @@ var map = function (arg) {
  * Create a map from an object.  Any errors in the creation
  * of the map will result in returning `null`.
  *
- * @param {geo.map.spec} spec The object specification.
+ * @param {geo.map.createSpec} spec The map creation specification.
  * @returns {geo.map|null}
  */
 map.create = function (spec) {

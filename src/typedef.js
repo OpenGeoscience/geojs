@@ -3,17 +3,6 @@
  */
 
 /**
- * General object specification for map types.  Any additional values in the
- * object are passed to the map constructor.
- *
- * @typedef geo.map.spec
- * @type {object}
- * @property {object[]} [data=[]] The default data array to apply to each
- *      feature if none exists.
- * @property {geo.layer.spec[]} [layers=[]] Layers to create.
- */
-
-/**
  * General representation of rectangular bounds in world coordinates.
  *
  * @typedef geo.geoBounds
