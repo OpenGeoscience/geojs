@@ -12,6 +12,7 @@
     "url": "https://github.com/OpenGeoscience/geojs"
   },
   "dependencies": {
+    "color-name": "^1.1.4",
     "earcut": "^2.1.1",
     "gl-mat3": "^1.0.0",
     "gl-mat4": "^1.1.4",
