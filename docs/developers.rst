@@ -18,7 +18,7 @@ Code quality tests
 ------------------
 
 All javascript source files included in the library for deployment are
-checked against `ESLint <http://eslint.org/>`_ for uniform styling
+checked against `ESLint <https://eslint.org/>`_ for uniform styling
 and strict for common errors patterns.  The style rules for geojs are
 located in the ``.eslintrc`` file in the root of the repository.  These
 tests are preformed automatically for every file added to the build; no
@@ -31,7 +31,7 @@ Code coverage
 Code coverage information is generated automatically for all headless unit tests
 by Karma's test runner when running ``npm run test``.  The coverage information is
 submitted to `codecov <https://codecov.io/github/OpenGeoscience/geojs>`_ and
-`cdash <http://my.cdash.org/index.php?project=geojs>`_ after every
+`cdash <https://my.cdash.org/index.php?project=geojs>`_ after every
 successful Travis run.
 
 Headless browser testing
@@ -44,7 +44,7 @@ mocked or run in an environment such as xvfb.
 
 The headless unit tests should be placed in the ``tests/cases/``
 directory.  All javascript files in this directory will be detected
-by the `Karma <http://karma-runner.github.io/0.13/index.html>`_ test
+by the `Karma <https://karma-runner.github.io/0.13/index.html>`_ test
 runner and executed automatically when you run ``npm run test``.  It
 is possible to debug these tests in a normal browser as well.  Just run
 ``npm run start`` and browse to `<http://localhost:9876/debug.html>`_.  The
@@ -56,7 +56,7 @@ that developers can use to make better unit tests.  For example, a mocked
 vgl renderer can be used to hit code paths within gl rendered layers.  There
 are also methods for mocking global methods like ``requestAnimationFrame``
 to test complex, asynchronous code paths in a stable and repeatable manner.
-The `Sinon <http://sinonjs.org/>`_ testing library is also available to
+The `Sinon <https://sinonjs.org/>`_ testing library is also available to
 generate stubs, spies, and mocked methods.  Because all tests share
 a global scope, they should be careful to clean up all mocking and
 instrumentation after running.  Ideally, each test should be runnable

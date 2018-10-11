@@ -7,7 +7,7 @@ block append mainContent
       select#layer-url.layerparam(param-name="url", list="url-list", placeholder="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
         option(value="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", credit="© OpenStreetMap contributors") OpenStreetMap
         option(value="../../data/tilefancy.png", credit="") Fancy Test Tile
-        option(value="http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", credit='Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="https://openstreetmap.org">OpenStreetMap</a>, under <a href="https://openstreetmap.org/copyright">ODbL</a>.') Toner Lite
+        option(value="http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", credit='Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="https://openstreetmap.org">OpenStreetMap</a>, under <a href="https://openstreetmap.org/copyright">ODbL</a>.') Toner Lite
     .form-group(title="Web maps are most often rendered using a Mercator geographic coordinate system, but other projections can be used.  See spatialreference.org for more information on projections.")
       label(for="map-gcs") Map GCS
       select#map-gcs.mapparam(param-name="gcs", placeholder="EPSG:3857 - Web Mercator", reload="true")
