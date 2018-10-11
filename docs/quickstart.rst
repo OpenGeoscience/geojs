@@ -9,26 +9,26 @@ Build dependencies
 
 The following software is required to build geojs from source:
 
-* `Git <http://git-scm.com/>`_
-* `Node.js <http://nodejs.org/>`_
+* `Git <https://git-scm.com/>`_
+* `Node.js <https://nodejs.org/>`_
 
 For testing and development, the following additional software is required:
 
-* `Python 2.7 <http://www.python.org/>`_
-* `CMake <http://www.cmake.org/>`_
+* `Python 2.7 <https://www.python.org/>`_
+* `CMake <https://www.cmake.org/>`_
 
 In addition, the following python modules are recommended for development
 and testing of geojs.
 
-* `Girder Client <http://girder.readthedocs.io>`_
-* `Pillow <http://pillow.readthedocs.io>`_
+* `Girder Client <https://girder.readthedocs.io>`_
+* `Pillow <https://pillow.readthedocs.io>`_
 * `Requests <http://docs.python-requests.org/en/latest/>`_
 
 For testing WebGL in a headless environment, the additional packages are needed:
 
-* `mesa-utils <http://www.mesa3d.org/>`_ and `libosmesa6 <http://www.mesa3d.org/>`_
+* `mesa-utils <https://www.mesa3d.org/>`_ and `libosmesa6 <https://www.mesa3d.org/>`_
 * `xvfb <https://www.x.org/archive/X11R7.6/doc/man/man1/Xvfb.1.xhtml>`_
-* `Firefox <http://www.mozilla.org/firefox>`_
+* `Firefox <https://www.mozilla.org/firefox>`_
 
 For an example on how to install all packages for a specific OS, see
 :ref:`Ubuntu 14.04 Provisioning <ubuntu-development>`.

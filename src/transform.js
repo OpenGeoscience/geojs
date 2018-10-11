@@ -215,7 +215,7 @@ transform.lookup = function (projection) {
   code = parts[1];
 
   return $.ajax({
-    url: 'http://epsg.io/?q=' + code + '&format=json'
+    url: 'https://epsg.io/?q=' + code + '&format=json'
   }).done(function (data) {
     var result = (data.results || [])[0];
     if (!result || !result.proj4) {

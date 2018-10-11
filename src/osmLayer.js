@@ -72,7 +72,7 @@ osmLayer.defaults = $.extend({}, tileLayer.defaults, {
     return {x: s, y: s};
   },
   url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  attribution: 'Tile data &copy; <a href="http://osm.org/copyright">' +
+  attribution: 'Tile data &copy; <a href="https://osm.org/copyright">' +
     'OpenStreetMap</a> contributors'
 });
 
