@@ -6,6 +6,7 @@
 - Feature selection API is now enabled automatically if any event handlers are bounds to the feature (#921)
 
 ### Improvements
+- Coordinate transforms on flat arrays are now faster (#939)
 - `convertColor` is memoized to speed up repeated calls (#936)
 - All features have a `featureType` property (#931)
 
