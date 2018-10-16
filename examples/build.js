@@ -23,6 +23,17 @@ examples.map(function (json) {
       fs.removeSync(path.resolve(json.output, 'docs', 'public'));
     });
   }
+  (json.docJs || []).forEach(function (name) {
+    docco({
+      args: [path.resolve(json.dir, name)],
+      output: path.resolve(json.output, 'docs'),
+      layout: 'classic'
+    }, function () {
+      // simplify the docco output to reduce the output size by
+      // removing the unnecessary public/ directory
+      fs.removeSync(path.resolve(json.output, 'docs', 'public'));
+    });
+  });
   json.docHTML = 'docs/' + path.basename(json.main).replace(/js$/, 'html');
 
   var pugFile = path.relative('.', path.resolve(json.dir, 'index.pug'));
