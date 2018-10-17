@@ -9,6 +9,7 @@
 - Coordinate transforms on flat arrays are now faster (#939)
 - `convertColor` is memoized to speed up repeated calls (#936)
 - All features have a `featureType` property (#931)
+- When changing geometry sizes, buffers are reallocated less (#941)
 
 ### Changes
 - Removed the dependency on the vgl module for the `object` and `timestamp` classes (#918)

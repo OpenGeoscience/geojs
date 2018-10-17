@@ -343,17 +343,41 @@ var util = {
    * @param {vgl.geometryData} geom The geometry to reference and modify.
    * @param {string} srcName The name of the source.
    * @param {number} len The number of elements for the array.
+   * @param {number} [allowLarger=0.2] If the existing buffer is larger than
+   *    requested, don't reallocate it unless it exceeds the size of
+   *    `len * (1 + allowLarger)`.
+   * @param {number} [allocateLarger=0.1] If reallocating an existing buffer,
+   *    allocate `len * (1 + allocateLarger)` to reduce the need to reallocate
+   *    on subsequent calls.  If this is the first allocation (the previous
+   *    size was 0), `len` is allocated.
    * @returns {Float32Array} A buffer for the named source.
    * @memberof geo.util
    */
-  getGeomBuffer: function (geom, srcName, len) {
-    var src = geom.sourceByName(srcName), data;
+  getGeomBuffer: function (geom, srcName, len, allowLarger, allocateLarger) {
+    allowLarger = allowLarger === undefined ? 0.2 : allowLarger;
+    allocateLarger = allocateLarger === undefined ? 0.1 : allocateLarger;
+    var src = geom.sourceByName(srcName),
+        data = src.data(),
+        allow = Math.floor((allowLarger + 1) * len);
 
     data = src.data();
-    if (data instanceof Float32Array && data.length === len) {
+    /* If the current buffer is either the length we want or no larger than a
+     * factor of allowBigger more in size, just return it. */
+    if (data instanceof Float32Array && (data.length === len || (data.length >= len && data.length <= allow))) {
       return data;
     }
-    data = new Float32Array(len);
+    /* If we need to allocate a new buffer (smaller or larger), and we have an
+     * existing, non-zero-length buffer, allocate a larger than needed buffer.
+     * Add an extra factor of allocateLarger, but if a power-of-two is between
+     * the specified size and the larger permitted size, perfer the power-of-
+     * two. */
+    var allocate = len;
+    if (data instanceof Float32Array && data.length && len && allocateLarger > 0) {
+      allocate = Math.min(
+        Math.floor((allocateLarger + 1) * len),
+        Math.pow(2, Math.ceil(Math.log(len) / Math.log(2))));
+    }
+    data = new Float32Array(allocate);
     src.setData(data);
     return data;
   },
