@@ -212,56 +212,6 @@
  */
 
 /**
- * A color value.  Although opacity can be specified, it is not always used.
- * When a string is specified, any of the following forms can be used:
- *   - CSS color name
- *   - `#rrggbb` The color specified in hexadecmial with each channel on a
- *     scale between 0 and 255 (`ff`).  Case insensitive.
- *   - `#rrggbbaa` The color and opacity specified in hexadecmial with each
- *     channel on a scale between 0 and 255 (`ff`).  Case insensitive.
- *   - `#rgb` The color specified in hexadecmial with each channel on a scale
- *     between 0 and 15 (`f`).  Case insensitive.
- *   - `#rgba` The color and opacity specified in hexadecmial with each channel
- *      on a scale between 0 and 15 (`f`).  Case insensitive.
- *   - `rgb(R, G, B)`, `rgb(R, G, B, A)`, `rgba(R, G, B)`, `rgba(R, G, B, A)`
- *     The color with the values of each color channel specified as numeric
- *     values between 0 and 255 or as percent (between 0 and 100) if a percent
- *     `%` follows the number.  The alpha (opacity) channel is optional and can
- *     either be a number between 0 and 1 or a percent.  White space may appear
- *     before and after numbers, and between the number and a percent symbol.
- *     Commas are not required.  A slash may be used as a separator before the
- *     alpha value instead of a comma.  The numbers conform to the CSS number
- *     specification, and can be signed floating-point values, possibly with
- *     exponents.
- *   - `hsl(H, S, L)`, `hsl(H, S, L, A)`, `hsla(H, S, L)`, `hsla(H, S, L, A)`
- *     Hue, saturation, and lightness with optional alpha (opacity).  Hue is a
- *     number between 0 and 360 and is interpretted as degrees unless an angle
- *     unit is specified.  CSS units of `deg`, `grad`, `rad`, and `turn` are
- *     supported.  Saturation and lightness are percentages between 0 and 100
- *     and *must* be followed by a percent `%` symbol.  The alpha (opacity)
- *     channel is optional and is specified as with `rgba(R, G, B, A)`.
- *   - `transparent` Black with 0 opacity.
- *
- * See {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value} for
- * more details on CSS color values.
- *
- * @typedef geo.geoColor
- * @type {geo.geoColorObject|string}
- */
-
-/**
- * A color value represented as an object.  Although opacity can be specified,
- * it is not always used.
- *
- * @typedef {object} geo.geoColorObject
- * @property {number} r The red intensity on a scale of [0-1].
- * @property {number} g The green intensity on a scale of [0-1].
- * @property {number} b The blue intensity on a scale of [0-1].
- * @property {number} [a] The opacity on a scale of [0-1].  If unspecified and
- *      used, it should be treated as 1.
- */
-
-/**
  * Polygon as a flat array.  An array of vertices.  The polygon has no holes.
  * The first and last point of may be the same.
  *

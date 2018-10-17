@@ -460,6 +460,9 @@ var feature = function (arg) {
    * A uniform getter that always returns a function even for constant styles.
    * This can also return all defined styles as functions in a single object.
    *
+   * If the style `key` is a color, the returned function will also coerce
+   * the result to be a {@link geo.geoColorObject}.
+   *
    * @function style_DOT_get
    * @memberof geo.feature
    * @instance
