@@ -5,8 +5,14 @@
 ### Features
 - Feature selection API is now enabled automatically if any event handlers are bounds to the feature (#921)
 
+### Improvements
+- Coordinate transforms on flat arrays are now faster (#939)
+- `convertColor` is memoized to speed up repeated calls (#936)
+- All features have a `featureType` property (#931)
+
 ### Changes
 - Removed the dependency on the vgl module for the `object` and `timestamp` classes (#918)
+- CSS color names are obtained from an npm package rather than being defined in the util module (#936)
 
 ## Version 0.18.1
 

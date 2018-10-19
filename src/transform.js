@@ -251,6 +251,9 @@ transform.transformCoordinates = function (srcPrj, tgtPrj, coordinates, numberOf
     return coordinates;
   }
 
+  if (Array.isArray(coordinates) && coordinates.length >= 3 && numberOfComponents === 3 && !util.isObject(coordinates[0])) {
+    return transform.transformCoordinatesFlatArray3(srcPrj, tgtPrj, coordinates);
+  }
   var trans = transform({source: srcPrj, target: tgtPrj}), output;
   if (util.isObject(coordinates) && 'x' in coordinates && 'y' in coordinates) {
     output = trans.forward({x: +coordinates.x, y: +coordinates.y, z: +coordinates.z || 0});
@@ -285,7 +288,8 @@ transform.transformCoordinates = function (srcPrj, tgtPrj, coordinates, numberOf
  * @returns {geoPosition[]|number[]} The transformed coordinates
  */
 transform.transformCoordinatesArray = function (trans, coordinates, numberOfComponents) {
-  var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint;
+  var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint,
+      initPoint = {};
 
   // Default Z accessor
   zAcc = function () {
@@ -439,10 +443,41 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
   }
 
   for (i = 0; i < count; i += offset) {
-    projPoint = trans.forward({x: xAcc(i), y: yAcc(i), z: zAcc(i)});
+    initPoint.x = xAcc(i);
+    initPoint.y = yAcc(i);
+    initPoint.z = zAcc(i);
+    projPoint = trans.forward(initPoint);
     writer(i, projPoint.x, projPoint.y, projPoint.z);
   }
   return output;
+};
+
+/**
+ * Transform an array of coordinates from one projection into another.  The
+ * transformation occurs in place, modifying the input coordinate array.  The
+ * coordinates are an array of [x0, y0, z0, x1, y1, z1, ...].
+ *
+ * @param {string} srcPrj The source projection.
+ * @param {string} tgtPrj The destination projection.
+ * @param {number[]} coordinates A flat array of values.
+ * @returns {number[]} The transformed coordinates.
+ */
+transform.transformCoordinatesFlatArray3 = function (srcPrj, tgtPrj, coordinates) {
+  'use strict';
+
+  var src = proj4.Proj(srcPrj),
+      tgt = proj4.Proj(tgtPrj),
+      i, projPoint, initPoint = {};
+  for (i = coordinates.length - 3; i >= 0; i -= 3) {
+    initPoint.x = +coordinates[i];
+    initPoint.y = +coordinates[i + 1];
+    initPoint.z = +(coordinates[i + 2] || 0.0);
+    projPoint = proj4.transform(src, tgt, initPoint);
+    coordinates[i] = projPoint.x;
+    coordinates[i + 1] = projPoint.y;
+    coordinates[i + 2] = projPoint.z === undefined ? initPoint.z : projPoint.z;
+  }
+  return coordinates;
 };
 
 /**
