@@ -401,6 +401,13 @@ describe('geo.lineFeature', function () {
     waitForIt('next render gl A', function () {
       return vgl.mockCounts().createProgram >= (glCounts.createProgram || 0) + 1;
     });
+    it('style update', function () {
+      glCounts = $.extend({}, vgl.mockCounts());
+      line.style('strokeOpacity', 1).draw();
+    });
+    waitForIt('next render gl B', function () {
+      return vgl.mockCounts().bufferSubData === (glCounts.bufferSubData || 0) + 4;
+    });
     it('_exit', function () {
       expect(line.actors().length).toBe(1);
       layer.deleteFeature(line);

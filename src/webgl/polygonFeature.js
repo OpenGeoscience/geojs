@@ -229,7 +229,7 @@ var webgl_polygonFeature = function (arg) {
           fillColor[d3] = color.r;
           fillColor[d3 + 1] = color.g;
           fillColor[d3 + 2] = color.b;
-          if (!uniform && fillOpacityVal === undefined) {
+          if (!uniform && fill && fillOpacityVal === undefined) {
             opacity = fillOpacityFunc(original[j], j, item, itemIndex);
           }
           fillOpacity[d] = opacity;
@@ -241,10 +241,13 @@ var webgl_polygonFeature = function (arg) {
         items[k].opacity = opacity;
       }
     }
-    m_mapper.modified();
     if (!onlyStyle) {
+      m_mapper.modified();
       geom.boundsDirty(true);
       m_mapper.boundsDirtyTimestamp().modified();
+    } else {
+      m_mapper.updateSourceBuffer('fillOpacity');
+      m_mapper.updateSourceBuffer('fillColor');
     }
   }
 
@@ -315,7 +318,7 @@ var webgl_polygonFeature = function (arg) {
    * Build.
    */
   this._build = function () {
-    createGLPolygons(m_this.dataTime().timestamp() < m_this.buildTime().timestamp() && m_geometry);
+    createGLPolygons(!!(m_this.dataTime().timestamp() < m_this.buildTime().timestamp() && m_geometry));
 
     if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
       m_this.renderer().contextRenderer().addActor(m_actor);
