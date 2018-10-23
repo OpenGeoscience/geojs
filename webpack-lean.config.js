@@ -19,6 +19,6 @@ module.exports = merge(config, {
       // will allow Webpack to create a better error message if a "hammerjs" import fails
       umd: 'hammerjs'
     },
-    'vtk.js': 'vtkjs'
+    'vtk.js': 'vtk'
   }
 });
