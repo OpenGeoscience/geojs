@@ -163,7 +163,7 @@ vtkjsRenderer.supported = function () {
   try {
     vtkjsRenderer.vtkjs = require('vtk.js');
   } catch (_error) {}
-  return vtkjsRenderer.vtks !== undefined;
+  return vtkjsRenderer.vtkjs !== undefined;
 };
 
 /**
