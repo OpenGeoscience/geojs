@@ -71,7 +71,7 @@ var legendWidget = function (arg) {
 
   /**
    * Get the widget's size
-   * @return {{width: number, height: number}} The size in pixels
+   * @returns {{width: number, height: number}} The size in pixels
    */
   this.size = function () {
     var width = 1, height;

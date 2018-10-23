@@ -77,7 +77,7 @@ var vtkjs_pointFeature = function (arg) {
         colorFunc = m_this.style.get('fillColor'),
         opacityFunc = m_this.style.get('fillOpacity');
 
-     /* It is more efficient to do a transform on a single array rather than on
+    /* It is more efficient to do a transform on a single array rather than on
       * an array of arrays or an array of objects. */
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
       posVal = posFunc(data[i]);
@@ -88,8 +88,8 @@ var vtkjs_pointFeature = function (arg) {
       m_actor.getProperty().setOpacity(opacityFunc(data[i]));
     }
     position = transform.transformCoordinates(
-                  m_this.gcs(), m_this.layer().map().gcs(),
-                  position, 3);
+      m_this.gcs(), m_this.layer().map().gcs(),
+      position, 3);
 
     if (!nonzeroZ && m_this.gcs() !== m_this.layer().map().gcs()) {
       for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {

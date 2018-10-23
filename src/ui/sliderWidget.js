@@ -51,11 +51,11 @@ var sliderWidget = function (arg) {
    * Add an icon from a path string.  Returns a d3 group element.
    *
    * @function
-   * @argument {String} icon svg path string
+   * @argument {string} icon svg path string
    * @argument {Array} base where to append the element (d3 selection)
-   * @argument {Number} cx Center x-coordinate
-   * @argument {Number} cy Center y-coordinate
-   * @argument {Number} size Icon size in pixels
+   * @argument {number} cx Center x-coordinate
+   * @argument {number} cy Center y-coordinate
+   * @argument {number} size Icon size in pixels
    * @returns {object}
    * @private
    */
