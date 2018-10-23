@@ -65,7 +65,7 @@ var throttle = function (delay, no_trailing, callback, accumulator, debounce_mod
   // debounce modes.
   var timeout_id,
 
-    // Keep track of the last time `callback` was executed.
+      // Keep track of the last time `callback` was executed.
       last_exec = 0;
 
   // `no_trailing` defaults to falsy.

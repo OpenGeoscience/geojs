@@ -1,4 +1,4 @@
-var colorbrewer = colorbrewer;
+/* global colorbrewer */
 
 // Run after the DOM loads
 $(function () {

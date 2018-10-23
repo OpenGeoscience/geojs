@@ -204,11 +204,11 @@ var canvas_heatmapFeature = function (arg) {
         intensityFunc = m_this.intensity(),
         minIntensity = m_this.minIntensity(),
         rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1,
-        viewport = map.camera()._viewport,
+        mapSize = map.size(),
         bins = [],
         rw = Math.ceil(radius / binSize),
-        maxx = Math.ceil(viewport.width / binSize) + rw * 2 + 2,
-        maxy = Math.ceil(viewport.height / binSize) + rw * 2 + 2,
+        maxx = Math.ceil(mapSize.width / binSize) + rw * 2 + 2,
+        maxy = Math.ceil(mapSize.height / binSize) + rw * 2 + 2,
         datalen = data.length,
         idx, pos, intensity, x, y, binrow, offsetx, offsety;
 
@@ -297,20 +297,20 @@ var canvas_heatmapFeature = function (arg) {
    */
   this._renderOnCanvas = function (context2d, map) {
 
-    if (m_renderTime.getMTime() < m_this.buildTime().getMTime()) {
+    if (m_renderTime.timestamp() < m_this.buildTime().timestamp()) {
       var data = m_this.data() || [],
           radius = m_this.style('radius') + m_this.style('blurRadius'),
           binned = m_this.binned(),
           canvas, pixelArray,
           layer = m_this.layer(),
-          viewport = map.camera()._viewport;
+          mapSize = map.size();
 
       /* Determine if we should bin the data */
       if (binned === true || binned === 'auto') {
         binned = Math.max(Math.floor(radius / 8), 3);
         if (m_this.binned() === 'auto') {
-          var numbins = (Math.ceil((viewport.width + radius * 2) / binned) *
-                         Math.ceil((viewport.height + radius * 2) / binned));
+          var numbins = (Math.ceil((mapSize.width + radius * 2) / binned) *
+                         Math.ceil((mapSize.height + radius * 2) / binned));
           if (numbins >= data.length) {
             binned = 0;
           }
@@ -323,7 +323,7 @@ var canvas_heatmapFeature = function (arg) {
       m_this._binned = binned;
 
       context2d.setTransform(1, 0, 0, 1, 0, 0);
-      context2d.clearRect(0, 0, viewport.width, viewport.height);
+      context2d.clearRect(0, 0, mapSize.width, mapSize.height);
       m_heatMapTransform = '';
       map.scheduleAnimationFrame(m_this._setTransform, false);
       layer.canvas().css({transform: ''});
@@ -375,8 +375,8 @@ var canvas_heatmapFeature = function (arg) {
    */
   this._update = function () {
     s_update.call(m_this);
-    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
-        m_this.updateTime().getMTime() < m_this.getMTime()) {
+    if (m_this.buildTime().timestamp() <= m_this.dataTime().timestamp() ||
+        m_this.updateTime().timestamp() < m_this.timestamp()) {
       m_this._build();
     }
     m_this.updateTime().modified();

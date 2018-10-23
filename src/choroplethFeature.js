@@ -2,29 +2,27 @@ var inherit = require('./inherit');
 var feature = require('./feature');
 
 /**
- * Create a new instance of class choroplethFeature
+ * Choropleth feature specification.
+ *
+ * @typedef {geo.feature.spec} geo.choroplethFeature.spec
+ * @property {geo.colorObject[]} [colorRange] Color lookup table.  Default is
+ *   9-step color table.
+ * @property {function} [scale] A scale converts a input domain into the
+ *   the colorRange.  Default is `d3.scale.quantize()`.
+ * @property {function} [geoId] Given a geometry feature, return an identifier.
+ * @property {function} [scalarId] Given a scalar element, return an
+ *   identifier.
+ * @property {function} [scalarValue] Given a scalar element, return a numeric
+ *   values.
+ */
+
+/**
+ * Create a new instance of class choroplethFeature.
  *
  * @class
  * @alias geo.choroplethFeature
- * @param {Object} arg Options object
+ * @param {geo.choroplethFeature.spec} arg Feature specification.
  * @extends geo.feature
- * @param {Array} [colorRange] Color lookup table for
- *   choroplethFeature. Default is 9-step color table.
- * @param {Function} [scale] A scale converts a input domain into the
- *   the colorRange. Default is d3.scale.quantize.
- * @param {Object} [accessor] A accessor defines three functions; Retrieve
- *   geoId from geometry feature and scalarId and scalarValue from scalarData. By
- *   default geoId uses GEO_ID key in the geometry feature property,
- *   scalarId uses id key and scalarValue uses value from a object within
- *   the scalar array.
- * @param {Object|Function} [scalar] A scalar is a array of objects with keys id
- *   that maps scalar value to the geometry and value of the scalar.
- *   Multiple values mapped to the same id are aggregated by the aggregator.
- * @param {Object|Function} [choropleth] Defines accessor for choropleth. It
- *   provides an API to replace or add attributes to the choropleth.
- * @param {Object|Function} [choropleth.get] A uniform getter that
- *   always returns a function even for constant values.
- *   If undefined input, return all the choropleth values as an object.
  * @returns {geo.choroplethFeature}
  */
 var choroplethFeature = function (arg) {
@@ -38,54 +36,56 @@ var choroplethFeature = function (arg) {
   var $ = require('jquery');
   var ensureFunction = require('./util').ensureFunction;
 
+  delete arg.layer;
+  delete arg.renderer;
   /**
    * @private
    */
   var d3 = require('./d3/d3Renderer').d3,
       m_this = this,
       s_init = this._init,
-      m_choropleth = $.extend({},
+      m_choropleth = $.extend(
+        {},
         {
           colorRange: [
-                {r: 0.07514311, g: 0.468049805, b: 1},
-                {r: 0.468487184, g: 0.588057293, b: 1},
-                {r: 0.656658579, g: 0.707001303, b: 1},
-                {r: 0.821573924, g: 0.837809045, b: 1},
-                {r: 0.943467973, g: 0.943498599, b: 0.943398095},
-                {r: 1, g: 0.788626485, b: 0.750707739},
-                {r: 1, g: 0.6289553, b: 0.568237474},
-                {r: 1, g: 0.472800903, b: 0.404551679},
-                {r: 0.916482116, g: 0.236630659, b: 0.209939162}
+            {r: 0.07514311, g: 0.468049805, b: 1},
+            {r: 0.468487184, g: 0.588057293, b: 1},
+            {r: 0.656658579, g: 0.707001303, b: 1},
+            {r: 0.821573924, g: 0.837809045, b: 1},
+            {r: 0.943467973, g: 0.943498599, b: 0.943398095},
+            {r: 1, g: 0.788626485, b: 0.750707739},
+            {r: 1, g: 0.6289553, b: 0.568237474},
+            {r: 1, g: 0.472800903, b: 0.404551679},
+            {r: 0.916482116, g: 0.236630659, b: 0.209939162}
           ],
           scale: d3.scale.quantize(),
-          accessors: {
-            //accessor for ID on geodata feature
-            geoId: function (geoFeature) {
-              return geoFeature.properties.GEO_ID;
-            },
-            //accessor for ID on scalar element
-            scalarId: function (scalarElement) {
-              return scalarElement.id;
-            },
-            //accessor for value on scalar element
-            scalarValue: function (scalarElement) {
-              return scalarElement.value;
-            }
+          //accessor for ID on geodata feature
+          geoId: function (geoFeature) {
+            return geoFeature.properties.GEO_ID;
+          },
+          //accessor for ID on scalar element
+          scalarId: function (scalarElement) {
+            return scalarElement.id;
+          },
+          //accessor for value on scalar element
+          scalarValue: function (scalarElement) {
+            return scalarElement.value;
           }
         },
-        arg.choropleth);
+        arg);
+
+  this.featureType = 'choropleth';
 
   /**
-   * Get/Set choropleth scalar data
+   * Get/Set choropleth scalar data.
    *
-   * @memberof geo.choroplethFeature
-   * @param {Array} [data] Scalar data is an array of objects in which each
-   *   object provides an id and a value for that id. The id uniquely identifies
-   *   the geometry this scalar is associated with.
-   * @param {Function} [aggregator] The aggregator aggregates the scalar in case
-   *   there are multiple values are found with the same id. The default
-   *   is d3.mean.
-   * @returns {geo.feature.choropleth}
+   * @param {object[]} [data] An array of objects that are passed to the
+   *   `scalarId` and `scalarValue` functions to get the associated information
+   *   for each scalar.
+   * @param {function} [aggregator] The aggregator aggregates the scalar when
+   *   there are multiple values with the same id. The default is `d3.mean`.
+   * @returns {object[]|this} Either the current scalar data or the feature
+   *   instance.
    */
   this.scalar = function (data, aggregator) {
     var scalarId, scalarValue;
@@ -93,8 +93,8 @@ var choroplethFeature = function (arg) {
     if (data === undefined) {
       return m_this.choropleth.get('scalar')() || [];
     } else {
-      scalarId = m_this.choropleth.get('accessors')().scalarId;
-      scalarValue = m_this.choropleth.get('accessors')().scalarValue;
+      scalarId = m_this.choropleth.get('scalarId');
+      scalarValue = m_this.choropleth.get('scalarValue');
       m_choropleth.scalar = data;
       m_choropleth.scalarAggregator = aggregator || d3.mean;
       // we make internal dictionary from array for faster lookup
@@ -110,7 +110,7 @@ var choroplethFeature = function (arg) {
 
           accumeDictionary[id] =
             accumeDictionary[id] ?
-            accumeDictionary[id].push(value) : [value];
+              accumeDictionary[id].push(value) : [value];
 
           return accumeDictionary;
         }, {});
@@ -120,17 +120,16 @@ var choroplethFeature = function (arg) {
   };
 
   /**
-   * Get/Set choropleth accessor
+   * Get/Set choropleth accessor.
    *
-   * @memberof geo.choroplethFeature
-   * @param {Object|String} [arg1] The first argument is the key for a
-   *   attributes of the choropleth. If the argument is a string and the second
-   *   argument is undefined, the value of the key is returned. If the arg1 is
-   *   an object and the second argument is undefined, choropleth attributes
-   *   are extended by that object. If arg1 is an object and arg2 is defined,
-   *   a new key-value pair is then added to the choropleth as an attribute.
-   * @param {Object|String} [arg2] arg2 defines the value of the key (arg1).
-   * @returns {geo.feature.choropleth}
+   * @param {string|geo.choroplethFeature.spec} [arg1] If `undefined`,
+   *    return the current choropleth specification.  If a string is specified,
+   *    either get or set the named property.  If an object is given, set
+   *    or update the specification with the specified parameters.
+   * @param {object} [arg2] If `arg1` is a string, set that property to `arg2`.
+   *    If `undefined`, return the current value of the named  property.
+   * @returns {geo.choroplethFeature.spec|object|this} The current choropleth
+   *    specification, the value of a named property, or this object.
    */
   this.choropleth = function (arg1, arg2) {
     var choropleth;
@@ -156,18 +155,18 @@ var choroplethFeature = function (arg) {
   };
 
   /**
-   * Get/Set choropleth getter
-   *
-   * @memberof geo.choroplethFeature
-   * A uniform getter that always returns a function even for constant values.
-   * If undefined input, return all the choropleth values as an object.
+   * A uniform getter that always returns a function even for constant
+   * choropleth properties.  This can also return all defined properties as
+   * functions in a single object.
    *
    * @function choropleth_DOT_get
    * @memberof geo.choroplethFeature
    * @instance
-   * @param {string|undefined} key defines one of the attributes of a
-   *  choropleth.
-   * @return {function}
+   * @param {string} [key] If defined, return a function for the named
+   *    property.  Otherwise, return an object with a function for all defined
+   *    properties.
+   * @returns {function|object} Either a function for the named property or an
+   *    object with functions for all defined properties.
    */
   this.choropleth.get = function (key) {
     var all = {}, k;
@@ -183,15 +182,14 @@ var choroplethFeature = function (arg) {
   };
 
   /**
-   * A method that adds a polygon feature to the current layer.
+   * Add a geojson polygon feature to the current layer.
    *
-   * @param {array} coordinateArray
-   * @param {geo.color} fillColor
-   * @return {geo.feature}
+   * @param {geojsonFeature} feature A geojson parsed feature.
+   * @param {geo.geoColor} fillColor The fill color for the feature.
+   * @returns {geo.polygonFeature}
    */
-  this._addPolygonFeature = function (feature, fillColor) {
-    var newFeature = m_this.layer()
-        .createFeature('polygon', {});
+  this._featureToPolygons = function (feature, fillColor) {
+    var newFeature = m_this.layer().createFeature('polygon', {});
 
     if (feature.geometry.type === 'Polygon') {
       newFeature.data([{
@@ -228,26 +226,14 @@ var choroplethFeature = function (arg) {
   };
 
   /**
-   * A method that adds polygons from a given feature to the current layer.
+   * Set a choropleth scale's domain and range.
    *
-   * @param {} geoJsonFeature
-   * @param geo.color
-   * @return [{geo.feature}]
-   */
-  this._featureToPolygons = function (feature, fillValue) {
-    return m_this
-      ._addPolygonFeature(feature, fillValue);
-  };
-
-  /**
-   * A method that sets a choropleth scale's domain and range.
-   *
-   * @param {undefined | function({})} valueAccessor
-   * @return {geo.feature.choropleth}
+   * @param {function} valueAccessor A function that can be passed to
+   *    `d3.extent`.
+   * @returns {this}
    */
   this._generateScale = function (valueAccessor) {
-    var extent =
-        d3.extent(m_this.scalar(), valueAccessor || undefined);
+    var extent = d3.extent(m_this.scalar(), valueAccessor || undefined);
 
     m_this.choropleth()
       .scale
@@ -259,37 +245,36 @@ var choroplethFeature = function (arg) {
 
   /**
    * Generate scale for choropleth.data(), make polygons from features.
-   * @returns: [ [geo.feature.polygon, ...] , ... ]
+   *
+   * @returns {geo.featurePolygon[]}
    */
   this.createChoropleth = function () {
     var choropleth = m_this.choropleth,
         data = m_this.data(),
         scalars = m_this.scalar(),
-        valueFunc = choropleth.get('accessors')().scalarValue,
-        getFeatureId = choropleth.get('accessors')().geoId;
+        valueFunc = choropleth.get('scalarValue'),
+        getFeatureId = choropleth.get('geoId');
 
     m_this._generateScale(valueFunc);
 
-    return data
-      .map(function (feature) {
-        var id = getFeatureId(feature);
-        var valueArray = scalars._dictionary[id];
-        var accumulatedScalarValue = choropleth().scalarAggregator(valueArray);
-        // take average of this array of values
-        // which allows for non-bijective correspondence
-        // between geo data and scalar data
-        var fillColor =
-            m_this
-            .choropleth()
-            .scale(accumulatedScalarValue);
+    return data.map(function (feature) {
+      var id = getFeatureId(feature);
+      var valueArray = scalars._dictionary[id];
+      var accumulatedScalarValue = choropleth().scalarAggregator(valueArray);
+      // take average of this array of values
+      // which allows for non-bijective correspondence
+      // between geo data and scalar data
+      var fillColor = m_this.choropleth().scale(accumulatedScalarValue);
 
-        return m_this
-          ._featureToPolygons(feature, fillColor);
-      });
+      return m_this._featureToPolygons(feature, fillColor);
+    });
   };
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @param {geo.choroplethFeature} arg
+   * @returns {this}
    */
   this._init = function (arg) {
     s_init.call(m_this, arg);
@@ -297,6 +282,7 @@ var choroplethFeature = function (arg) {
     if (m_choropleth) {
       m_this.dataTime().modified();
     }
+    return m_this;
   };
 
   this._init(arg);

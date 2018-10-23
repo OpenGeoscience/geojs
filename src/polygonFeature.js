@@ -11,22 +11,25 @@ var transform = require('./transform');
  *   Default is (data).
  * @property {geo.polygon|function} [polygon] Polygons from the data.  Default
  *   (data).
- * @property {object} [style] Style object with default style options.
- * @property {boolean|function} [style.fill=true] True to fill polygon.
- * @property {geo.geoColor|function} [style.fillColor] Color to fill each
- *   polygon.  The color can vary by vertex.
- * @property {number|function} [style.fillOpacity] Opacity for each polygon.
- *   The opacity can vary by vertex.  Opacity is on a [0-1] scale.
- * @property {boolean|function} [style.stroke=false] True to stroke polygon.
- * @property {geo.geoColor|function} [style.strokeColor] Color to stroke each
- *   polygon.  The color can vary by vertex.
- * @property {number|function} [style.strokeOpacity] Opacity for each polygon
- *   stroke.  The opacity can vary by vertex.  Opacity is on a [0-1] scale.
- * @property {number|function} [style.strokeWidth] The weight of the polygon
- *   stroke in pixels.  The width can vary by vertex.
- * @property {boolean|function} [style.uniformPolygon=false] Boolean indicating
- *   if each polygon has a uniform style (uniform fill color, fill opacity,
- *   stroke color, and stroke opacity).  Can vary by polygon.
+ * @property {geo.polygonFeature.styleSpec} [style] Style object with default
+ *   style options.
+ */
+
+/**
+ * Style specification for a polygon feature.
+ *
+ * @typedef {geo.lineFeature.styleSpec} geo.polygonFeature.styleSpec
+ * @extends geo.lineFeature.styleSpec
+ * @property {boolean|function} [fill=true] True to fill polygon.
+ * @property {geo.geoColor|function} [fillColor] Color to fill each polygon.
+ *   The color can vary by vertex.
+ * @property {number|function} [fillOpacity] Opacity for each polygon.  The
+ *   opacity can vary by vertex.  Opacity is on a [0-1] scale.
+ * @property {boolean|function} [stroke=false] True to stroke polygon.
+ * @property {boolean|function} [uniformPolygon=false] Boolean indicating if
+ *   each polygon has a uniform style (uniform fill color, fill opacity, stroke
+ *   color, and stroke opacity).  Can vary by polygon.
+ * @property {boolean|function} [closed=true] Ignored.  Always `true`.
  */
 
 /**
@@ -269,6 +272,9 @@ var polygonFeature = function (arg) {
    * Get/Set style used by the feature.  This calls the super function, then
    * checks if strokes are required.
    *
+   * See the <a href="#.styleSpec">style specification
+   * <code>styleSpec</code></a> for available styles.
+   *
    * @param {string|object} [arg1] If `undefined`, return the current style
    *    object.  If a string and `arg2` is undefined, return the style
    *    associated with the specified key.  If a string and `arg2` is defined,
@@ -395,8 +401,8 @@ var polygonFeature = function (arg) {
   };
 
   /**
-   * When the feature is marked as modified, mark our sub-feature as
-   * modified, too.
+   * Update the timestamp to the next global timestamp value.  Mark
+   * sub-features as modified, too.
    *
    * @returns {object} The results of the superclass modified function.
    */

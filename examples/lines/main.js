@@ -196,7 +196,7 @@ $(function () {
         !query.resimplify || query.resimplify === 'false') {
       return;
     }
-    window.setTimeout(function () {
+    resimplifyTimeout = window.setTimeout(function () {
       resimplifyTimeout = null;
       if (map.zoom() !== lastSimplifyZoom) {
         simplify_lines(reduceddata);
@@ -311,8 +311,8 @@ $(function () {
     if (!param || value === query[param]) {
       return;
     }
-    var processedValue = (ctl.is('[type="checkbox"]') ?
-                          (value === 'true') : value);
+    var processedValue = (
+      ctl.is('[type="checkbox"]') ? (value === 'true') : value);
     if (ctl.closest('table.gradient').length) {
       param = 'gradient';
     }
@@ -437,7 +437,7 @@ $(function () {
     }
     osm.url(
       value !== 'false' ? mapUrl.url :
-      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVQI12P4DwABAQEAG7buVgAAAABJRU5ErkJggg=='  /* white 1x1 */
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVQI12P4DwABAQEAG7buVgAAAABJRU5ErkJggg=='  /* white 1x1 */
     );
     osm.attribution(value !== 'false' ? mapUrl.attribution : '');
   }
@@ -451,7 +451,7 @@ $(function () {
   var uiLayer = map.createLayer('ui', {zIndex: 2});
   var tooltip = uiLayer.createWidget('dom', {position: {x: 0, y: 0}});
   var tooltipElem = $(tooltip.canvas()).attr('id', 'tooltip').addClass(
-      'hidden');
+    'hidden');
   // Ceate a line feature
   lineFeature = layer.createFeature('line', lineOptions)
     .line(lineAccessor)

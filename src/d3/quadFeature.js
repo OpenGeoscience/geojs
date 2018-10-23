@@ -61,8 +61,9 @@ var d3_quadFeature = function (arg) {
       append: function (d) {
         var ns = this.namespaceURI,
             element = d.type === 'clr' ? 'polygon' : 'image';
-        return (ns ? document.createElementNS(ns, element) :
-                document.createElement(element));
+        return (
+          ns ? document.createElementNS(ns, element) :
+            document.createElement(element));
       },
       attributes: {
         fill: function (d) {
@@ -155,8 +156,9 @@ var d3_quadFeature = function (arg) {
               d.svgTransform[5] = Math.round(d.svgTransform[5] / imgscale) * imgscale;
             }
           }
-          return ((d.type !== 'img' || !d.quad.image) ? undefined :
-                  'matrix(' + d.svgTransform.join(' ') + ')');
+          return (
+            (d.type !== 'img' || !d.quad.image) ? undefined :
+              'matrix(' + d.svgTransform.join(' ') + ')');
         },
         width: function (d) {
           return d.type === 'clr' ? undefined : 1;
@@ -165,8 +167,8 @@ var d3_quadFeature = function (arg) {
           return d.type === 'clr' ? undefined : 0;
         },
         'xlink:href': function (d) {
-          return ((d.type === 'clr' || !d.quad.image) ? undefined :
-                  d.quad.image.src);
+          return (
+            (d.type === 'clr' || !d.quad.image) ? undefined : d.quad.image.src);
         },
         y: function (d) {
           return d.type === 'clr' ? undefined : 0;
@@ -194,8 +196,8 @@ var d3_quadFeature = function (arg) {
    */
   this._update = function () {
     s_update.call(m_this);
-    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
-        m_this.buildTime().getMTime() < m_this.getMTime()) {
+    if (m_this.buildTime().timestamp() <= m_this.dataTime().timestamp() ||
+        m_this.buildTime().timestamp() < m_this.timestamp()) {
       m_this._build();
     }
     return m_this;

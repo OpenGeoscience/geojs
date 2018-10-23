@@ -228,7 +228,7 @@ describe('geo.core.map', function () {
       var error = sinon.stub(console, 'error', function () {}),
           m = createMap(),
           called = 0,
-          start = new Date().getTime();
+          start = Date.now();
       m.scheduleAnimationFrame(function () { throw new Error('fail'); });
       m.scheduleAnimationFrame(function () { called += 1; });
       stepAnimationFrame(start);
@@ -398,13 +398,13 @@ describe('geo.core.map', function () {
       var m = createMap();
       expect(m.fileReader()).toBe(null);
       var layerCount = m.layers().length;
-      expect(m.fileReader('jsonReader')).toBe(m);
+      expect(m.fileReader('geojsonReader')).toBe(m);
       expect(m.fileReader()).not.toBe(null);
       expect(m.layers().length).toBe(layerCount + 1);
       expect(m.layers()[m.layers().length - 1].renderer().api()).not.toBe('d3');
-      expect(m.fileReader('jsonReader', {renderer: 'd3'})).toBe(m);
+      expect(m.fileReader('geojsonReader', {renderer: 'd3'})).toBe(m);
       expect(m.layers()[m.layers().length - 1].renderer().api()).toBe('d3');
-      var r = geo.createFileReader('jsonReader', {layer: m.layers()[m.layers().length - 1]});
+      var r = geo.createFileReader('geojsonReader', {layer: m.layers()[m.layers().length - 1]});
       expect(m.fileReader(r)).toBe(m);
       expect(m.fileReader()).toBe(r);
     });
@@ -542,7 +542,7 @@ describe('geo.core.map', function () {
       mockAnimationFrame();
       var m = createMap(), start, wasCalled;
       expect(m.transition()).toBe(null);
-      start = new Date().getTime();
+      start = Date.now();
       m.transition({
         center: {x: 10, y: 0},
         zoom: 2,
@@ -650,7 +650,7 @@ describe('geo.core.map', function () {
       expect(m.center().x).toBeCloseTo(0);
       expect(m.center().y).toBeCloseTo(0);
       // test cancel
-      start = new Date().getTime();
+      start = Date.now();
       wasCalled = undefined;
       m.transition({
         center: {x: 10, y: 0},
@@ -755,14 +755,16 @@ describe('geo.core.map', function () {
       layer1 = m.createLayer('feature', {renderer: 'canvas'});
       l1 = layer1.createFeature('line', {
         style: {strokeWidth: 5, strokeColor: 'blue'}});
-      l1.data([[{x: 0, y: 0}, {x: 5, y: 0}],
-               [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}],
-               [{x: 10, y: 0}, {x: 15, y: 2}, {x: 12, y: 5}]]);
+      l1.data([
+        [{x: 0, y: 0}, {x: 5, y: 0}],
+        [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}],
+        [{x: 10, y: 0}, {x: 15, y: 2}, {x: 12, y: 5}]]);
       layer2 = m.createLayer('feature', {renderer: 'canvas'});
       l2 = layer2.createFeature('line', {
         style: {strokeWidth: 5, strokeColor: 'black'}});
-      l2.data([[{x: 10, y: 10}, {x: 15, y: 10}],
-               [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}]]);
+      l2.data([
+        [{x: 10, y: 10}, {x: 15, y: 10}],
+        [{x: 0, y: 10}, {x: 5, y: 12}, {x: 2, y: 15}]]);
 
       m.draw();
       // make sure that drawing has occurred
@@ -988,7 +990,7 @@ describe('geo.core.map', function () {
       evt.originalEvent.dataTransfer = {};
       $(m.node()).trigger(evt);
       expect(evt.originalEvent.dataTransfer.dropEffect).not.toBe('copy');
-      m.fileReader('jsonReader');
+      m.fileReader('geojsonReader');
       evt = $.Event('dragover');
       evt.originalEvent = new window.Event('dragover');
       evt.originalEvent.dataTransfer = {};
@@ -997,7 +999,7 @@ describe('geo.core.map', function () {
     });
     it('drop', function () {
       var m = createMap();
-      m.fileReader('jsonReader', {renderer: 'd3'});
+      m.fileReader('geojsonReader', {renderer: 'd3'});
       var evt = $.Event('drop');
       evt.originalEvent = new window.Event('drop');
       evt.originalEvent.dataTransfer = {files: [{

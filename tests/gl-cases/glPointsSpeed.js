@@ -44,7 +44,7 @@ describe('glPointsSpeed', function () {
       // very minimal test threshold
       expect(totaltime).toBeLessThan(10000);
       /* Test animation time. */
-      starttime = new Date().getTime();
+      starttime = Date.now();
       animationFrame();
       $('#map').append($('<div style="display: none" id="loadResults">')
         .attr('results', totaltime));
@@ -85,7 +85,7 @@ describe('glPointsSpeed', function () {
     }
 
     function loadTest() {
-      starttime = new Date().getTime();
+      starttime = Date.now();
       feature.data(points)
         .style({
           fillColor: 'black',
@@ -94,7 +94,7 @@ describe('glPointsSpeed', function () {
           radius: 5
         });
       myMap.draw();
-      stoptime = new Date().getTime();
+      stoptime = Date.now();
       times.push(stoptime - starttime);
       if (times.length < 12 && stoptime - firsttime < 10000) {
         window.setTimeout(loadTest, 1);
@@ -118,7 +118,7 @@ describe('glPointsSpeed', function () {
       feature.actors()[0].mapper().updateSourceBuffer('fillOpacity');
       myMap.draw();
       frames += 1;
-      stoptime = new Date().getTime();
+      stoptime = Date.now();
       animTimes.push(stoptime);
       if (animTimes.length < 2 || (animTimes.length < 201 &&
           stoptime - animTimes[0] < 10000)) {
@@ -130,8 +130,7 @@ describe('glPointsSpeed', function () {
 
     common.loadCitiesData(function (citieslatlon) {
       while (points.length < numPoints) {
-        for (i = 0; i < citieslatlon.length && points.length < numPoints;
-            i += 1) {
+        for (i = 0; i < citieslatlon.length && points.length < numPoints; i += 1) {
           points.push({
             x: citieslatlon[i].lon + dx,
             y: citieslatlon[i].lat + dy,
@@ -143,7 +142,7 @@ describe('glPointsSpeed', function () {
         dy = Math.sin(pass) * 0.2;
       }
 
-      firsttime = new Date().getTime();
+      firsttime = Date.now();
       loadTest();
     });
   }, 30000);

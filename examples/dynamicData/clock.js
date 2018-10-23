@@ -13,7 +13,6 @@ geo.clock = function (opts) {
     return new geo.clock(opts);
   }
   geo.object.call(this, opts);
-  opts = opts || {};
 
   /**
    * @private

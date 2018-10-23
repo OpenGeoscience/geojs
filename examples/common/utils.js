@@ -6,12 +6,12 @@ var exampleUtils = {
   getQuery: function () {
     var query = document.location.search.replace(/(^\?)/, '').split(
       '&').map(function (n) {
-        n = n.split('=');
-        if (n[0]) {
-          this[decodeURIComponent(n[0].replace(/\+/g, '%20'))] = decodeURIComponent(n[1].replace(/\+/g, '%20'));
-        }
-        return this;
-      }.bind({}))[0];
+      n = n.split('=');
+      if (n[0]) {
+        this[decodeURIComponent(n[0].replace(/\+/g, '%20'))] = decodeURIComponent(n[1].replace(/\+/g, '%20'));
+      }
+      return this;
+    }.bind({}))[0];
     return query;
   },
 
@@ -19,9 +19,11 @@ var exampleUtils = {
    * location and history.  This will also remove undefined values from the
    * set properites of params.
    *
-   * @param {object} params: the query parameters as a dictionary.
+   * @param {object} params The query parameters as a dictionary.
+   * @param {boolean} [updateHistory] If true, update the browser history.  If
+   *    falsy, replace the history state.
    */
-  setQuery: function (params) {
+  setQuery: function (params, updateHistory) {
     $.each(params, function (key, value) {
       if (value === undefined) {
         delete params[key];
@@ -29,7 +31,11 @@ var exampleUtils = {
     });
     var newurl = window.location.protocol + '//' + window.location.host +
         window.location.pathname + '?' + $.param(params);
-    window.history.replaceState(params, '', newurl);
+    if (updateHistory) {
+      window.history.pushState(params, '', newurl);
+    } else {
+      window.history.replaceState(params, '', newurl);
+    }
   }
 };
 

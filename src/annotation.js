@@ -665,7 +665,7 @@ var annotation = function (type, args) {
     if (m_this.layer()) {
       var map = m_this.layer().map();
       gcs = (gcs === null ? map.gcs() : (
-             gcs === undefined ? map.ingcs() : gcs));
+        gcs === undefined ? map.ingcs() : gcs));
       if (gcs !== map.gcs()) {
         coord = transform.transformCoordinates(map.gcs(), gcs, coord);
       }
@@ -796,7 +796,7 @@ var annotation = function (type, args) {
     if (includeCrs) {
       var map = m_this.layer().map();
       gcs = (gcs === null ? map.gcs() : (
-             gcs === undefined ? map.ingcs() : gcs));
+        gcs === undefined ? map.ingcs() : gcs));
       obj.crs = {
         type: 'name',
         properties: {
@@ -825,9 +825,10 @@ var annotation = function (type, args) {
     var editPoints,
         style = $.extend({}, defaultEditHandleStyle, m_this.editHandleStyle()),
         handles = util.ensureFunction(style.handles)() || {},
-        selected = (m_this._editHandle && m_this._editHandle.handle &&
-                    m_this._editHandle.handle.selected ?
-                    m_this._editHandle.handle : undefined);
+        selected = (
+          m_this._editHandle && m_this._editHandle.handle &&
+          m_this._editHandle.handle.selected ?
+            m_this._editHandle.handle : undefined);
     /* opts specify which handles are allowed.  They must be allowed by the
      * original opts object and by the editHandleStyle.handle object. */
     opts = $.extend({}, opts);
@@ -923,11 +924,11 @@ var annotation = function (type, args) {
           y: evt.mouse.mapgcs.y - evt.state.origin.mapgcs.y
         },
         ang1 = Math.atan2(
-            handle.rotatePosition.y - handle.center.y,
-            handle.rotatePosition.x - handle.center.x),
+          handle.rotatePosition.y - handle.center.y,
+          handle.rotatePosition.x - handle.center.x),
         ang2 = Math.atan2(
-            handle.rotatePosition.y + delta.y - handle.center.y,
-            handle.rotatePosition.x + delta.x - handle.center.x),
+          handle.rotatePosition.y + delta.y - handle.center.y,
+          handle.rotatePosition.x + delta.x - handle.center.x),
         ang = ang2 - ang1,
         curPts = m_this._coordinates();
     var pts = start.map(function (elem) {
@@ -1042,12 +1043,12 @@ var annotation = function (type, args) {
        * allow it to be merged into another vertex.  This prevents small scale
        * edits from collapsing immediately. */
     } else if (layer.displayDistance(
-        curPts[index], null,
-        curPts[(index + 1) % curPts.length], null) <= aPP) {
+      curPts[index], null,
+      curPts[(index + 1) % curPts.length], null) <= aPP) {
       near = (index + 1) % curPts.length;
     } else if (layer.displayDistance(
-        curPts[index], null,
-        curPts[(index + curPts.length - 1) % curPts.length], null) <= aPP) {
+      curPts[index], null,
+      curPts[(index + curPts.length - 1) % curPts.length], null) <= aPP) {
       near = (index + curPts.length - 1) % curPts.length;
     }
     atEnd = ((near === 0 && index === curPts.length - 1) ||
@@ -1082,13 +1083,10 @@ var annotation = function (type, args) {
  *    coordinates.  These must be in order around the perimeter of the
  *    rectangle (in either direction).
  * @property {geo.geoPosition[]} [coordinates] An alternate name for `corners`.
- * @property {object} [style] The style to apply to a finished rectangle.  This
- *    uses styles for polygons, including `fill`, `fillColor`, `fillOpacity`,
- *    `stroke`, `strokeWidth`, `strokeColor`, and `strokeOpacity`.
- * @property {object} [editStyle] The style to apply to a rectangle in edit
- *    mode.  This uses styles for polygons and lines, including `fill`,
- *    `fillColor`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
- *    `strokeOpacity`.
+ * @property {geo.polygonFeature.styleSpec} [style] The style to apply to a
+ *    finished rectangle.  This uses styles for {@link geo.polygonFeature}.
+ * @property {geo.polygonFeature.styleSpec} [editStyle] The style to apply to a
+ *    rectangle in edit mode.
  */
 
 /**
@@ -1470,13 +1468,10 @@ registerAnnotation('rectangle', rectangleAnnotation, rectangleRequiredFeatures);
  *    (in either direction).
  * @property {geo.geoPosition[]} [coordinates] An alternate name for
  *    `vertices`.
- * @property {object} [style] The style to apply to a finished polygon.  This
- *    uses styles for polygons, including `fill`, `fillColor`, `fillOpacity`,
- *    `stroke`, `strokeWidth`, `strokeColor`, and `strokeOpacity`.
- * @property {object} [editStyle] The style to apply to a polygon in edit mode.
- *    This uses styles for polygons and lines, including `fill`, `fillColor`,
- *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, and
- *    `strokeOpacity`.
+ * @property {geo.polygonFeature.styleSpec} [style] The style to apply to a
+ *    finished polygon.  This uses styles for {@link geo.polygonFeature}.
+ * @property {geo.polygonFeature.styleSpec} [editStyle] The style to apply to ai
+ *    polygon in edit mode.
  */
 
 /**
@@ -1522,7 +1517,7 @@ var polygonAnnotation = function (args) {
         /* Return an array that has the same number of items as we have
          * vertices. */
         return Array.apply(null, Array(m_this.options('vertices').length)).map(
-            function () { return d; });
+          function () { return d; });
       },
       position: function (d, i) {
         return m_this.options('vertices')[i];
@@ -1644,16 +1639,16 @@ var polygonAnnotation = function (args) {
     if (evt.buttonsDown.left) {
       if (vertices.length) {
         if (vertices.length >= 2 && layer.displayDistance(
-            vertices[vertices.length - 2], null, evt.map, 'display') <=
-            layer.options('adjacentPointProximity')) {
+          vertices[vertices.length - 2], null, evt.map, 'display') <=
+          layer.options('adjacentPointProximity')) {
           skip = true;
           if (m_this._lastClick &&
               evt.time - m_this._lastClick < layer.options('dblClickTime')) {
             end = true;
           }
         } else if (vertices.length >= 2 && layer.displayDistance(
-            vertices[0], null, evt.map, 'display') <=
-            layer.options('finalPointProximity')) {
+          vertices[0], null, evt.map, 'display') <=
+          layer.options('finalPointProximity')) {
           end = true;
         } else {
           vertices[vertices.length - 1] = evt.mapgcs;
@@ -1674,7 +1669,7 @@ var polygonAnnotation = function (args) {
       m_this.state(annotationState.done);
       return 'done';
     }
-    return (end || !skip);
+    return !skip;
   };
 
   /**
@@ -1735,12 +1730,10 @@ registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
  *    coordinates.
  * @property {geo.geoPosition[]} [coordinates] An alternate name for
  *    `vertices`.
- * @property {object} [style] The style to apply to a finished line.  This uses
- *    styles for lines, including `strokeWidth`, `strokeColor`,
- *    `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`, and `lineJoin`.
- * @property {object} [editStyle] The style to apply to a line in edit mode.
- *    This uses styles for lines, including `strokeWidth`, `strokeColor`,
- *    `strokeOpacity`, `strokeOffset`, `closed`, `lineCap`, and `lineJoin`.
+ * @property {geo.lineFeature.styleSpec} [style] The style to apply to a
+ *    finished line.  This uses styles for {@link geo.lineFeature}.
+ * @property {geo.lineFeature.styleSpec} [editStyle] The style to apply to a
+ *    line in edit mode.
  */
 
 /**
@@ -1764,7 +1757,7 @@ var lineAnnotation = function (args) {
         /* Return an array that has the same number of items as we have
          * vertices. */
         return Array.apply(null, Array(m_this.options('vertices').length)).map(
-            function () { return d; });
+          function () { return d; });
       },
       position: function (d, i) {
         return m_this.options('vertices')[i];
@@ -1784,7 +1777,7 @@ var lineAnnotation = function (args) {
         /* Return an array that has the same number of items as we have
          * vertices. */
         return Array.apply(null, Array(m_this.options('vertices').length)).map(
-            function () { return d; });
+          function () { return d; });
       },
       position: function (d, i) {
         return m_this.options('vertices')[i];
@@ -1898,16 +1891,16 @@ var lineAnnotation = function (args) {
     if (evt.buttonsDown.left) {
       if (vertices.length) {
         if (vertices.length >= 2 && layer.displayDistance(
-            vertices[vertices.length - 2], null, evt.map, 'display') <=
-            layer.options('adjacentPointProximity')) {
+          vertices[vertices.length - 2], null, evt.map, 'display') <=
+          layer.options('adjacentPointProximity')) {
           skip = true;
           if (m_this._lastClick &&
               evt.time - m_this._lastClick < layer.options('dblClickTime')) {
             end = true;
           }
         } else if (vertices.length >= 2 && layer.displayDistance(
-            vertices[0], null, evt.map, 'display') <=
-            layer.options('finalPointProximity')) {
+          vertices[0], null, evt.map, 'display') <=
+          layer.options('finalPointProximity')) {
           end = 'close';
         } else {
           vertices[vertices.length - 1] = evt.mapgcs;
@@ -1930,7 +1923,7 @@ var lineAnnotation = function (args) {
       m_this.state(annotationState.done);
       return 'done';
     }
-    return (end || !skip);
+    return !skip;
   };
 
   /**
@@ -2120,14 +2113,14 @@ registerAnnotation('line', lineAnnotation, lineRequiredFeatures);
  * @property {geo.geoPosition} [position] A coordinate in map gcs coordinates.
  * @property {geo.geoPosition[]} [coordinates] An array with one coordinate to
  *    use in place of `position`.
- * @property {object} [style] The style to apply to a finished point.  This
- *    uses styles for points, including `radius`, `fill`, `fillColor`,
- *    `fillOpacity`, `stroke`, `strokeWidth`, `strokeColor`, `strokeOpacity`,
- *    and `scaled`.  If `scaled` is `false`, the point is not scaled with zoom
- *    level.  If it is `true`, the radius is based on the zoom level at first
- *    instantiation.  Otherwise, if it is a number, the radius is used at that
+ * @property {geo.pointFeature.styleSpec} [style] The style to apply to a
+ *    finished point.  This uses styles for {@link geo.pointFeature}.
+ * @property {boolean|number} [style.scaled=false] If `false`, the point is not
+ *    scaled with zoom level.  If `true`, the radius is based on the zoom level
+ *    at first instantiation.  If a number, the radius is used at the `scaled`
  *    zoom level.
- * @property {object} [editStyle] The style to apply to a point in edit mode.
+ * @property {geo.pointFeature.styleSpec} [editStyle] The style to apply to a
+ *    point in edit mode.
  */
 
 /**

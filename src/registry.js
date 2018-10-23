@@ -490,7 +490,8 @@ util.registries = {
   featureCapabilities: featureCapabilities,
   fileReaders: fileReaders,
   layers: layers,
-  renderers: renderers
+  renderers: renderers,
+  widgets: widgets
 };
 
 module.exports = util;

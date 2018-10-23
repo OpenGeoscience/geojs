@@ -341,7 +341,7 @@ vglRenderer.supported = function () {
       canvas = document.createElement('canvas');
       ctx = (canvas.getContext('webgl') ||
              canvas.getContext('experimental-webgl'));
-      exts = ctx.getSupportedExtensions();
+      exts = ctx.getSupportedExtensions(); // used for side effects
       checkedWebGL = true;
     } catch (e) {
       console.warn('No webGL support');

@@ -215,7 +215,7 @@ transform.lookup = function (projection) {
   code = parts[1];
 
   return $.ajax({
-    url: 'http://epsg.io/?q=' + code + '&format=json'
+    url: 'https://epsg.io/?q=' + code + '&format=json'
   }).done(function (data) {
     var result = (data.results || [])[0];
     if (!result || !result.proj4) {
@@ -244,14 +244,16 @@ transform.lookup = function (projection) {
  * @param {number} numberOfComponents For flat arrays, either 2 or 3.
  * @returns {geoPosition|geoPosition[]|number[]} The transformed coordinates.
  */
-transform.transformCoordinates = function (
-        srcPrj, tgtPrj, coordinates, numberOfComponents) {
+transform.transformCoordinates = function (srcPrj, tgtPrj, coordinates, numberOfComponents) {
   'use strict';
 
   if (srcPrj === tgtPrj) {
     return coordinates;
   }
 
+  if (Array.isArray(coordinates) && coordinates.length >= 3 && numberOfComponents === 3 && !util.isObject(coordinates[0])) {
+    return transform.transformCoordinatesFlatArray3(srcPrj, tgtPrj, coordinates);
+  }
   var trans = transform({source: srcPrj, target: tgtPrj}), output;
   if (util.isObject(coordinates) && 'x' in coordinates && 'y' in coordinates) {
     output = trans.forward({x: +coordinates.x, y: +coordinates.y, z: +coordinates.z || 0});
@@ -286,7 +288,8 @@ transform.transformCoordinates = function (
  * @returns {geoPosition[]|number[]} The transformed coordinates
  */
 transform.transformCoordinatesArray = function (trans, coordinates, numberOfComponents) {
-  var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint;
+  var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint,
+      initPoint = {};
 
   // Default Z accessor
   zAcc = function () {
@@ -440,10 +443,41 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
   }
 
   for (i = 0; i < count; i += offset) {
-    projPoint = trans.forward({x: xAcc(i), y: yAcc(i), z: zAcc(i)});
+    initPoint.x = xAcc(i);
+    initPoint.y = yAcc(i);
+    initPoint.z = zAcc(i);
+    projPoint = trans.forward(initPoint);
     writer(i, projPoint.x, projPoint.y, projPoint.z);
   }
   return output;
+};
+
+/**
+ * Transform an array of coordinates from one projection into another.  The
+ * transformation occurs in place, modifying the input coordinate array.  The
+ * coordinates are an array of [x0, y0, z0, x1, y1, z1, ...].
+ *
+ * @param {string} srcPrj The source projection.
+ * @param {string} tgtPrj The destination projection.
+ * @param {number[]} coordinates A flat array of values.
+ * @returns {number[]} The transformed coordinates.
+ */
+transform.transformCoordinatesFlatArray3 = function (srcPrj, tgtPrj, coordinates) {
+  'use strict';
+
+  var src = proj4.Proj(srcPrj),
+      tgt = proj4.Proj(tgtPrj),
+      i, projPoint, initPoint = {};
+  for (i = coordinates.length - 3; i >= 0; i -= 3) {
+    initPoint.x = +coordinates[i];
+    initPoint.y = +coordinates[i + 1];
+    initPoint.z = +(coordinates[i + 2] || 0.0);
+    projPoint = proj4.transform(src, tgt, initPoint);
+    coordinates[i] = projPoint.x;
+    coordinates[i + 1] = projPoint.y;
+    coordinates[i + 2] = projPoint.z === undefined ? initPoint.z : projPoint.z;
+  }
+  return coordinates;
 };
 
 /**
@@ -587,8 +621,8 @@ transform.vincentyDistance = function (pt1, pt2, gcs, baseGcs, ellipsoid, maxIte
   }
   for (iter = maxIterations; iter > 0 && Math.abs(lambda - lastLambda) > 1e-12; iter -= 1) {
     sinSigma = Math.pow(
-        Math.pow(cosU2 * Math.sin(lambda), 2) +
-        Math.pow(cosU1 * sinU2 - sinU1 * cosU2 * Math.cos(lambda), 2), 0.5);
+      Math.pow(cosU2 * Math.sin(lambda), 2) +
+      Math.pow(cosU1 * sinU2 - sinU1 * cosU2 * Math.cos(lambda), 2), 0.5);
     cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * Math.cos(lambda);
     sigma = Math.atan2(sinSigma, cosSigma);
     sinAlpha = cosU1 * cosU2 * Math.sin(lambda) / sinSigma;
@@ -600,7 +634,7 @@ transform.vincentyDistance = function (pt1, pt2, gcs, baseGcs, ellipsoid, maxIte
     C = f / 16 * cos2alpha * (4 + f * (4 - 3 * cos2alpha));
     lastLambda = lambda;
     lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma * (
-        cos2sigmasubm + C * cosSigma * (-1 + 2 * Math.pow(cos2sigmasubm, 2))));
+      cos2sigmasubm + C * cosSigma * (-1 + 2 * Math.pow(cos2sigmasubm, 2))));
   }
   if (!iter) { // failure to converge
     return;

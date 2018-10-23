@@ -2,6 +2,18 @@ var inherit = require('./inherit');
 var feature = require('./feature');
 
 /**
+ * Mesh feature specification.
+ *
+ * @typedef {geo.feature.spec} geo.meshFeature.spec
+ * @property {object[]} [data=[]] An array of arbitrary objects used to
+ *    construct the feature.
+ * @property {geo.feature.styleSpec} [style] An object that contains style
+ *    values for the feature.
+ * @property {geo.meshFeature.meshSpec} [mesh] The mesh specification for the
+ *    feature.
+ */
+
+/**
  * A mesh formed by a set of triangular or square elements or a
  * squarely-connected grid that is of rectangular extent.  The gird can be
  * regularly spaced or have arbitrary position coordinates for each node.  All
@@ -104,6 +116,8 @@ var meshFeature = function (arg) {
   var m_this = this,
       s_init = this._init,
       m_mesh = {};
+
+  this.featureType = 'mesh';
 
   /**
    * Get/Set mesh accessor.
@@ -241,7 +255,7 @@ var meshFeature = function (arg) {
       /* If we are not using the position values (we are using x0, y0, dx, dy),
        * and wrapLongitude is turned on, and the position spans 180 degrees,
        * duplicate one or two columns of points at opposite ends of the map. */
-      usePos = (elements || x0 === null || x0 === undefined || y0 === null ||
+      usePos = (x0 === null || x0 === undefined || y0 === null ||
           y0 === undefined || !dx || !dy);
       wrapLongitude = !!(wrapLongitude === undefined || wrapLongitude);
       if (!usePos && wrapLongitude && (x0 < -180 || x0 > 180 ||

@@ -7,21 +7,8 @@ var feature = require('./feature');
  * @typedef {geo.feature.spec} geo.pointFeature.spec
  * @property {geo.geoPosition|function} [position] Position of the data.
  *   Default is (data).
- * @property {object} [style] Style object with default style options.
- * @property {number|function} [style.radius=5] Radius of each point in pixels.
- *   This is the fill radius inside of the stroke.
- * @property {boolean|function} [style.stroke=true] True to stroke point.
- * @property {geo.geoColor|function} [style.strokeColor] Color to stroke each
- *   point.
- * @property {number|function} [style.strokeOpacity=1] Opacity for each point's
- *   stroke.  Opacity is on a [0-1] scale.
- * @property {number|function} [style.strokeWidth=1.25] The weight of the
- *   point's stroke in pixels.
- * @property {boolean|function} [style.fill=true] True to fill point.
- * @property {geo.geoColor|function} [style.fillColor] Color to fill each
- *   point/
- * @property {number|function} [style.fillOpacity=1] Opacity for each point.
- *   Opacity is on a [0-1] scale.
+ * @property {geo.pointFeature.styleSpec} [style] Style object with default
+ *   style options.
  * @property {boolean|geo.pointFeature.clusteringSpec} [clustering=false]
  *   Enable point clustering.
  * @property {string} [primitiveShape='sprite'] For the gl renderer, select the
@@ -31,6 +18,25 @@ var feature = require('./feature');
  *   bottleneck.  `sprite` may not work for very large points.
  * @property {boolean} [dynamicDraw=false] For the gl renderer, if this is
  *   truthy, webgl source buffers can be modifies and updated directly.
+ */
+
+/**
+ * Style specification for a point feature.
+ *
+ * @typedef {geo.feature.styleSpec} geo.pointFeature.styleSpec
+ * @extends geo.feature.styleSpec
+ * @property {number|function} [radius=5] Radius of each point in pixels.  This
+ *   is the fill radius inside of the stroke.
+ * @property {boolean|function} [stroke=true] True to stroke point.
+ * @property {geo.geoColor|function} [strokeColor] Color to stroke each point.
+ * @property {number|function} [strokeOpacity=1] Opacity for each point's
+ *   stroke.  Opacity is on a [0-1] scale.
+ * @property {number|function} [strokeWidth=1.25] The weight of the point's
+ *   stroke in pixels.
+ * @property {boolean|function} [fill=true] True to fill point.
+ * @property {geo.geoColor|function} [fillColor] Color to fill each point.
+ * @property {number|function} [fillOpacity=1] Opacity for each point.  Opacity
+ *   is on a [0-1] scale.
  */
 
 /**
@@ -128,7 +134,7 @@ var pointFeature = function (arg) {
     // generate the cluster tree from the raw data
     var position = m_this.position();
     m_clusterTree = new ClusterGroup(
-        opts, m_this.layer().width(), m_this.layer().height());
+      opts, m_this.layer().width(), m_this.layer().height());
 
     m_allData.forEach(function (d, i) {
 
@@ -189,7 +195,7 @@ var pointFeature = function (arg) {
   /**
    * Get/Set position.
    *
-   * @param {function|geo.geoPosition} [val]  If not specified, return the
+   * @param {function|geo.geoPosition} [val] If not specified, return the
    *    position accessor, which is guaranteed to be a function.  If specified,
    *    wrap the value in an function that handles clustering if it is enabled
    *    and set the position accessor to that function.
@@ -220,7 +226,7 @@ var pointFeature = function (arg) {
    * data changes.
    */
   this._updateRangeTree = function () {
-    if (m_rangeTreeTime.getMTime() >= m_this.dataTime().getMTime()) {
+    if (m_rangeTreeTime.timestamp() >= m_this.dataTime().timestamp()) {
       return;
     }
     var pts, position,

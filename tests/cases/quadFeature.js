@@ -129,11 +129,11 @@ describe('geo.quadFeature', function () {
     },
     previewColor: function (d) {
       return d.previewColor !== undefined ? d.previewColor :
-          {r: 1, g: 0.75, b: 0.75};
+        {r: 1, g: 0.75, b: 0.75};
     },
     previewImage: function (d) {
       return d.previewImage !== undefined ? d.previewImage :
-          previewImage;
+        previewImage;
     },
     drawOnAsyncResourceLoaded: function (d) {
       return d.reload !== undefined ? d.reload : true;
@@ -301,20 +301,20 @@ describe('geo.quadFeature', function () {
         expect(quad._objectListGet(olist, 2)).toBe(undefined);
         quad._objectListAdd(olist, 2, 'b');
         expect(olist).toEqual([
-            {entry: 1, value: 'a', used: true},
-            {entry: 2, value: 'b', used: true}]);
+          {entry: 1, value: 'a', used: true},
+          {entry: 2, value: 'b', used: true}]);
         expect(quad._objectListGet(olist, 2)).toEqual('b');
       });
       it('_objectListEnd', function () {
         quad._objectListEnd(olist);
         expect(olist).toEqual([
-            {entry: 1, value: 'a', used: true},
-            {entry: 2, value: 'b', used: true}]);
+          {entry: 1, value: 'a', used: true},
+          {entry: 2, value: 'b', used: true}]);
         quad._objectListStart(olist);
         expect(quad._objectListGet(olist, 1)).toEqual('a');
         expect(olist).toEqual([
-            {entry: 1, value: 'a', used: true},
-            {entry: 2, value: 'b', used: false}]);
+          {entry: 1, value: 'a', used: true},
+          {entry: 2, value: 'b', used: false}]);
         quad._objectListEnd(olist);
         expect(olist).toEqual([{entry: 1, value: 'a', used: true}]);
       });
@@ -513,11 +513,11 @@ describe('geo.quadFeature', function () {
       map = createMap();
       layer = map.createLayer('feature');
       quads = layer.createFeature('quad', {style: testStyle, data: testQuads});
-      buildTime = quads.buildTime().getMTime();
+      buildTime = quads.buildTime().timestamp();
       /* Trigger rerendering */
       quads.data(testQuads);
       map.draw();
-      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+      expect(buildTime).not.toEqual(quads.buildTime().timestamp());
       glCounts = $.extend({}, vgl.mockCounts());
     });
     waitForIt('next render gl A', function () {
@@ -525,10 +525,10 @@ describe('geo.quadFeature', function () {
     });
     it('only img quad', function () {
       glCounts = $.extend({}, vgl.mockCounts());
-      var buildTime = quads.buildTime().getMTime();
+      var buildTime = quads.buildTime().timestamp();
       quads.data([testQuads[0], testQuads[1]]);
       map.draw();
-      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+      expect(buildTime).not.toEqual(quads.buildTime().timestamp());
     });
     waitForIt('next render gl B', function () {
       return vgl.mockCounts().activeTexture >= glCounts.activeTexture + 2 &&
@@ -537,10 +537,10 @@ describe('geo.quadFeature', function () {
     });
     it('only clr quad', function () {
       glCounts = $.extend({}, vgl.mockCounts());
-      var buildTime = quads.buildTime().getMTime();
+      var buildTime = quads.buildTime().timestamp();
       quads.data([testQuads[8], testQuads[9]]);
       map.draw();
-      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+      expect(buildTime).not.toEqual(quads.buildTime().timestamp());
     });
     waitForIt('next render gl C', function () {
       return vgl.mockCounts().activeTexture === glCounts.activeTexture &&
@@ -563,11 +563,11 @@ describe('geo.quadFeature', function () {
              vgl.mockCounts().bufferSubData === glCounts.bufferSubData;
     });
     it('_exit', function () {
-      var buildTime = quads.buildTime().getMTime();
+      var buildTime = quads.buildTime().timestamp();
       layer.deleteFeature(quads);
       quads.data(testQuads);
       map.draw();
-      expect(buildTime).toEqual(quads.buildTime().getMTime());
+      expect(buildTime).toEqual(quads.buildTime().timestamp());
       destroyMap();
       restoreVGLRenderer();
     });
@@ -587,22 +587,22 @@ describe('geo.quadFeature', function () {
       map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
       quads = layer.createFeature('quad', {style: testStyle, data: testQuads});
-      buildTime = quads.buildTime().getMTime();
+      buildTime = quads.buildTime().timestamp();
       /* Trigger rerendering */
       quads.data(testQuads);
       counts = $.extend({}, window._canvasLog.counts);
       map.draw();
-      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+      expect(buildTime).not.toEqual(quads.buildTime().timestamp());
     });
     waitForIt('next render canvas A', function () {
       return window._canvasLog.counts.clearRect >= (counts.clearRect || 0) + 1;
     });
     it('only img quad', function () {
       counts = $.extend({}, window._canvasLog.counts);
-      var buildTime = quads.buildTime().getMTime();
+      var buildTime = quads.buildTime().timestamp();
       quads.data([testQuads[0], testQuads[1]]);
       map.draw();
-      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+      expect(buildTime).not.toEqual(quads.buildTime().timestamp());
     });
     waitForIt('next render canvas B', function () {
       return window._canvasLog.counts.drawImage >= counts.drawImage + 2 &&
@@ -656,11 +656,11 @@ describe('geo.quadFeature', function () {
       logCanvas2D(false);  // disable call logging
     });
     it('_exit', function () {
-      var buildTime = quads.buildTime().getMTime();
+      var buildTime = quads.buildTime().timestamp();
       layer.deleteFeature(quads);
       quads.data(testQuads);
       map.draw();
-      expect(buildTime).toEqual(quads.buildTime().getMTime());
+      expect(buildTime).toEqual(quads.buildTime().timestamp());
     });
   });
 
@@ -677,31 +677,31 @@ describe('geo.quadFeature', function () {
       map = createMap();
       layer = map.createLayer('feature', {renderer: 'd3'});
       quads = layer.createFeature('quad', {style: testStyle, data: testQuads});
-      buildTime = quads.buildTime().getMTime();
+      buildTime = quads.buildTime().timestamp();
       /* Trigger rerendering */
       quads.data(testQuads);
       map.draw();
-      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+      expect(buildTime).not.toEqual(quads.buildTime().timestamp());
       /* Force the quads to render synchronously. */
       layer.renderer()._renderFrame();
       expect($('svg image').length).toBe(11);
       expect($('svg polygon').length).toBe(5);
     });
     it('only img quad', function () {
-      var buildTime = quads.buildTime().getMTime();
+      var buildTime = quads.buildTime().timestamp();
       quads.data([testQuads[0], testQuads[1]]);
       map.draw();
-      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+      expect(buildTime).not.toEqual(quads.buildTime().timestamp());
       /* Force the quads to render synchronously. */
       layer.renderer()._renderFrame();
       expect($('svg image').length).toBe(2);
       expect($('svg polygon').length).toBe(0);
     });
     it('only clr quad', function () {
-      var buildTime = quads.buildTime().getMTime();
+      var buildTime = quads.buildTime().timestamp();
       quads.data([testQuads[8], testQuads[9]]);
       map.draw();
-      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+      expect(buildTime).not.toEqual(quads.buildTime().timestamp());
       /* Force the quads to render synchronously. */
       layer.renderer()._renderFrame();
       expect($('svg image').length).toBe(0);
@@ -721,11 +721,11 @@ describe('geo.quadFeature', function () {
       expect($('svg polygon').length).toBe(200);
     });
     it('_exit', function () {
-      var buildTime = quads.buildTime().getMTime();
+      var buildTime = quads.buildTime().timestamp();
       layer.deleteFeature(quads);
       quads.data(testQuads);
       map.draw();
-      expect(buildTime).toEqual(quads.buildTime().getMTime());
+      expect(buildTime).toEqual(quads.buildTime().timestamp());
     });
   });
 });

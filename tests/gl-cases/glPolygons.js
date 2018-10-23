@@ -2442,7 +2442,7 @@ describe('glPolygons', function () {
 
     var layer = myMap.createLayer('feature');
 
-    geo.createFileReader('jsonReader', {
+    geo.createFileReader('geojsonReader', {
       layer: layer
     }).read(JSON.stringify(data), function () {
       myMap.draw();

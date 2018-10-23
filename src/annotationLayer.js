@@ -12,8 +12,9 @@ var textFeature = require('./textFeature');
  * @typedef {object} geo.annotationLayer.labelRecord
  * @property {string} text The text of the label
  * @property {geo.geoPosition} position The position of the label in map gcs
- *      coordinates.
- * @property {object} [style] A {@link geo.textFeature} style object.
+ *    coordinates.
+ * @property {geo.textFeature.styleSpec} [style] A {@link geo.textFeature}
+ *    style object.
  */
 
 /**
@@ -76,7 +77,8 @@ var annotationLayer = function (args) {
       m_annotations = [],
       m_features = [],
       m_labelFeature,
-      m_labelLayer;
+      m_labelLayer,
+      m_keyHandler;
 
   var geojsonStyleProperties = {
     'closed': {dataType: 'boolean', keys: ['closed', 'close']},
@@ -93,15 +95,21 @@ var annotationLayer = function (args) {
     'strokeOpacity': {dataType: 'opacity', keys: ['strokeOpacity', 'stroke-opacity']},
     'strokeWidth': {dataType: 'positive', keys: ['strokeWidth', 'stroke-width']}
   };
+  var textFeatureDataTypes = {
+    offset: 'coordinate2',
+    rotateWithMap: 'boolean',
+    rotation: 'angle',
+    scaleWithMap: 'boolean',
+    scale: 'booleanOrNumber',
+    shadowBlur: 'numberOrBlank',
+    shadowOffset: 'coordinate2',
+    strokeWidth: 'numberOrBlank',
+    visible: 'boolean'
+  };
   textFeature.usedStyles.forEach(function (key) {
     geojsonStyleProperties[key] = {
       option: 'labelStyle',
-      dataType: ['visible', 'rotateWithMap', 'scaleWithMap'].indexOf(key) >= 0 ? 'boolean' : (
-        ['scale'].indexOf(key) >= 0 ? 'booleanOrNumber' : (
-        ['rotation'].indexOf(key) >= 0 ? 'angle' : (
-        ['offset', 'shadowOffset'].indexOf(key) >= 0 ? 'coordinate2' : (
-        ['shadowBlur, strokeWidth'].indexOf(key) >= 0 ? 'numberOrBlank' :
-        'text')))),
+      dataType: textFeatureDataTypes[key] || 'text',
       keys: [
         key,
         'label' + key.charAt(0).toUpperCase() + key.slice(1),
@@ -148,8 +156,8 @@ var annotationLayer = function (args) {
               action: evt.event
             });
             if (evt.event === geo_event.actionup) {
-              m_this._selectEditHandle({
-                data: m_this.currentAnnotation._editHandle.handle},
+              m_this._selectEditHandle(
+                {data: m_this.currentAnnotation._editHandle.handle},
                 m_this.currentAnnotation._editHandle.handle.selected);
             }
           }
@@ -361,12 +369,12 @@ var annotationLayer = function (args) {
     var map = m_this.map();
     if (gcs1 !== 'display') {
       gcs1 = (gcs1 === null ? map.gcs() : (
-              gcs1 === undefined ? map.ingcs() : gcs1));
+        gcs1 === undefined ? map.ingcs() : gcs1));
       coord1 = map.gcsToDisplay(coord1, gcs1);
     }
     if (gcs2 !== 'display') {
       gcs2 = (gcs2 === null ? map.gcs() : (
-              gcs2 === undefined ? map.ingcs() : gcs2));
+        gcs2 === undefined ? map.ingcs() : gcs2));
       coord2 = map.gcsToDisplay(coord2, gcs2);
     }
     var dist = Math.sqrt(Math.pow(coord1.x - coord2.x, 2) +
@@ -394,10 +402,10 @@ var annotationLayer = function (args) {
       annotation.layer(m_this);
       var map = m_this.map();
       gcs = (gcs === null ? map.gcs() : (
-             gcs === undefined ? map.ingcs() : gcs));
+        gcs === undefined ? map.ingcs() : gcs));
       if (gcs !== map.gcs()) {
         annotation._coordinates(transform.transformCoordinates(
-            gcs, map.gcs(), annotation._coordinates()));
+          gcs, map.gcs(), annotation._coordinates()));
       }
       m_this.modified();
       m_this.draw();
@@ -518,10 +526,13 @@ var annotationLayer = function (args) {
           mapNode = m_this.map().node(), oldMode = m_mode;
       m_mode = arg;
       mapNode.toggleClass('annotation-input', !!(m_mode && m_mode !== m_this.modes.edit));
+      if (!m_keyHandler) {
+        m_keyHandler = Mousetrap(mapNode[0]);
+      }
       if (m_mode) {
-        Mousetrap(mapNode[0]).bind('esc', function () { m_this.mode(null); });
+        m_keyHandler.bind('esc', function () { m_this.mode(null); });
       } else {
-        Mousetrap(mapNode[0]).unbind('esc');
+        m_keyHandler.unbind('esc');
       }
       if (m_this.currentAnnotation) {
         switch (m_this.currentAnnotation.state()) {
@@ -601,7 +612,7 @@ var annotationLayer = function (args) {
    */
   this.geojson = function (geojson, clear, gcs, includeCrs) {
     if (geojson !== undefined) {
-      var reader = registry.createFileReader('jsonReader', {layer: m_this});
+      var reader = registry.createFileReader('geojsonReader', {layer: m_this});
       if (!reader.canRead(geojson)) {
         return;
       }
@@ -662,7 +673,7 @@ var annotationLayer = function (args) {
         annotationList = registry.listAnnotations(),
         map = m_this.map();
     gcs = (gcs === null ? map.gcs() : (
-        gcs === undefined ? map.ingcs() : gcs));
+      gcs === undefined ? map.ingcs() : gcs));
     $.each(dataList, function (data_idx, data) {
       var type = (data.properties || {}).annotationType || feature.featureType,
           options = $.extend({}, data.properties || {}),
@@ -806,7 +817,7 @@ var annotationLayer = function (args) {
           return;
         }
         var factor = (parts[2] === 'grad' ? Math.PI / 200 :
-            (parts[2] === 'deg' ? Math.PI / 180 :
+          (parts[2] === 'deg' ? Math.PI / 180 :
             (parts[2] === 'turn' ? 2 * Math.PI : 1)));
         value = +parts[1] * factor;
         break;
@@ -870,7 +881,7 @@ var annotationLayer = function (args) {
         value = +value;
         break;
       case 'opacity':
-        if (value === undefined || value === null || value === '') {
+        if (value === '') {
           return;
         }
         value = +value;
@@ -897,7 +908,7 @@ var annotationLayer = function (args) {
    * @returns {this} The current layer.
    */
   this._update = function () {
-    if (m_this.getMTime() > m_buildTime.getMTime()) {
+    if (m_this.timestamp() > m_buildTime.timestamp()) {
       var labels = m_this.options('showLabels') ? [] : null,
           editable = m_this.options('clickToEdit') || m_this.mode() === m_this.modes.edit;
       /* Interally, we have a set of feature levels (to provide z-index
@@ -967,7 +978,7 @@ var annotationLayer = function (args) {
                 style[key] = function (d, i, d2, i2) {
                   var style = (
                     (d && d.style) ? d.style : (d && d[2] && d[2].style) ?
-                    d[2].style : d2.style);
+                      d[2].style : d2.style);
                   var result = style ? style[key] : d;
                   if (util.isFunction(result)) {
                     result = result(d, i, d2, i2);
@@ -1149,6 +1160,9 @@ var annotationLayer = function (args) {
    * @returns {this} The current layer.
    */
   this._exit = function () {
+    if (m_keyHandler) {
+      m_keyHandler.reset();
+    }
     m_this._removeLabelFeature();
     // Call super class exit
     s_exit.call(m_this);

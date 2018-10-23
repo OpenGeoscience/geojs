@@ -67,7 +67,7 @@ describe('geo.util.convertColor', function () {
     $.each(tests, function (key, value) {
       it(key, function () {
         var c = geo.util.convertColor(key);
-        expect(closeToEqual(c, value, 4));
+        expect(closeToEqual(c, value, 4)).toBe(true);
       });
     });
   });
@@ -113,6 +113,28 @@ describe('geo.util.convertColor', function () {
     });
     it('undefined', function () {
       expect(geo.util.convertColor(undefined)).toBe(undefined);
+    });
+  });
+  describe('Memoization', function () {
+    it('Response is memoized', function () {
+      var c = geo.util.convertColor(1);
+      c.alreadySeen = true;
+      c = geo.util.convertColor(1);
+      expect(c.alreadySeen).toBe(true);
+    });
+    it('Memoization gets reset', function () {
+      var c = geo.util.convertColor(1);
+      c.alreadySeen = true;
+      c = geo.util.convertColor(1);
+      expect(c.alreadySeen).toBe(true);
+      for (var i = 2; i < 2 + 1000; i += 1) {
+        geo.util.convertColor(i);
+      }
+      c = geo.util.convertColor(1);
+      expect(c.alreadySeen).toBe(undefined);
+      c.alreadySeen = true;
+      c = geo.util.convertColor(1);
+      expect(c.alreadySeen).toBe(true);
     });
   });
 });

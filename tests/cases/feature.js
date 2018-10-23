@@ -59,6 +59,7 @@ describe('geo.feature', function () {
       feat = geo.feature({layer: layer});
       expect(feat.style('opacity')).toBe(1);
       expect(feat.selectionAPI()).toBe(false);
+      expect(feat.selectionAPI(undefined, true)).toBe('auto');
     });
     it('_exit', function () {
       feat = geo.feature({layer: layer});
@@ -194,19 +195,19 @@ describe('geo.feature', function () {
     });
     it('visible', function () {
       expect(feat.visible()).toBe(true);
-      var modTime = feat.getMTime();
+      var modTime = feat.timestamp();
       expect(feat.visible(false)).toBe(feat);
       expect(feat.visible()).toBe(false);
-      expect(feat.getMTime()).toBeGreaterThan(modTime);
+      expect(feat.timestamp()).toBeGreaterThan(modTime);
 
       expect(feat.visible(true)).toBe(feat);
       var depFeat = geo.feature({layer: layer, renderer: layer.renderer()});
       feat.dependentFeatures([depFeat]);
-      modTime = depFeat.getMTime();
+      modTime = depFeat.timestamp();
       expect(feat.visible(false)).toBe(feat);
       expect(feat.visible()).toBe(false);
       expect(depFeat.visible()).toBe(false);
-      expect(depFeat.getMTime()).toBeGreaterThan(modTime);
+      expect(depFeat.timestamp()).toBeGreaterThan(modTime);
       feat.dependentFeatures([]);
       expect(feat.visible(true)).toBe(feat);
       expect(depFeat.visible()).toBe(false);
@@ -338,6 +339,8 @@ describe('geo.feature', function () {
       expect(feat.style('data')).toEqual([1]);
     });
     it('selectionAPI', function () {
+      var bindSpy, unbindSpy;
+
       expect(feat.selectionAPI()).toBe(false);
       feat = geo.feature({layer: layer, renderer: layer.renderer(), selectionAPI: true});
       expect(feat.selectionAPI()).toBe(true);
@@ -362,6 +365,25 @@ describe('geo.feature', function () {
       expect(feat.selectionAPI()).toBe(false);
       expect(feat.selectionAPI(true, true)).toBe(feat);
       expect(feat.selectionAPI()).toBe(true);
+
+      // auto will change the selection mode depending on bound events
+      bindSpy = sinon.spy(feat, '_bindMouseHandlers');
+      unbindSpy = sinon.spy(feat, '_unbindMouseHandlers');
+      expect(feat.selectionAPI('auto')).toBe(feat);
+      expect(feat.selectionAPI()).toBe(false);
+      expect(feat.selectionAPI(undefined, true)).toBe('auto');
+      expect(bindSpy.callCount).toBe(1);
+      expect(unbindSpy.callCount).toBe(1);
+      feat.geoOn(geo.event.feature.mouseover, function () {});
+      expect(feat.selectionAPI()).toBe(true);
+      expect(feat.selectionAPI(undefined, true)).toBe('auto');
+      expect(bindSpy.callCount).toBe(2);
+      expect(unbindSpy.callCount).toBe(2);
+      feat.geoOff(geo.event.feature.mouseover);
+      expect(feat.selectionAPI()).toBe(false);
+      expect(feat.selectionAPI(undefined, true)).toBe('auto');
+      expect(bindSpy.callCount).toBe(2);
+      expect(unbindSpy.callCount).toBe(3);
     });
     it('ready', function () {
       feat = geo.feature({layer: layer});

@@ -153,12 +153,12 @@ module.exports.imageTest = function (name, elemSelector, threshold, doneFunc, id
     defer = defer.then(function () {
       var innerScreenX = window.mozInnerScreenX !== undefined ?
             window.mozInnerScreenX : window.screenX ?
-            (window.outerWidth - window.innerWidth) / 2 + window.screenX : 0,
+              (window.outerWidth - window.innerWidth) / 2 + window.screenX : 0,
           innerScreenY = window.mozInnerScreenY !== undefined ?
             window.mozInnerScreenY : window.screenY ?
-            window.outerHeight - window.innerHeight -
+              window.outerHeight - window.innerHeight -
             (window.outerWidth - window.innerWidth) / 2 + window.screenY :
-            window.outerHeight - window.innerHeight;
+              window.outerHeight - window.innerHeight;
       var win = window;
       while (win !== win.top && window.mozInnerScreenX === undefined) {
         innerScreenX += win.parent.document.getElementsByTagName('iframe')[0].offsetLeft;

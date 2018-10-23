@@ -3,8 +3,28 @@
 ## Unreleased
 
 ### Features
+- Feature selection API is now enabled automatically if any event handlers are bounds to the feature (#921)
+
+### Improvements
+- Coordinate transforms on flat arrays are now faster (#939)
+- `convertColor` is memoized to speed up repeated calls (#936)
+- All features have a `featureType` property (#931)
+
+### Changes
+- Removed the dependency on the vgl module for the `object` and `timestamp` classes (#918)
+- CSS color names are obtained from an npm package rather than being defined in the util module (#936)
+
+## Version 0.18.1
+
+### Bug Fixes
+- Fixed an issue with the annotation key handler (#923)
+
+## Version 0.18.0
+
+### Features
 - Added an idle property to objects (#894)
 - Better handling and changing of camera clipbounds (#899)
+- File readers (the geojsonReader) now returns a Promise.  The layer will report that it is not idle until this promise is finalized (#905)
 
 ### Bug Fixes
 - Fixed an issue with overlapping, cropped tiles on old browsers (#901)
@@ -12,7 +32,9 @@
 
 ### Changes
 - Changed build process: optional dependencies are now included in the bundle by default (#890)
-- Transpile with Babel to support old browsers and new language features (#900)
+- Transpile with Babel to support old browsers and new language features (#900, #903)
+- The geojsonReader has been renamed from `jsonReader` to `geojsonReader`.  The old name still works as an alias (#905)
+- Catch errors in animation frame callbacks (#911)
 
 ## Version 0.17.0
 
@@ -75,7 +97,7 @@
 - Polygon strokes were sometimes drawn under polygon fills (#806)
 
 ### Documentation
-- Added a [line tutorial](http://opengeoscience.github.io/geojs/tutorials/lines) (#805)
+- Added a [line tutorial](https://opengeoscience.github.io/geojs/tutorials/lines) (#805)
 
 ## Version 0.15.2
 
@@ -92,8 +114,8 @@
 - Add tests for geo.gui.widget and geo.gui.domWidget (#795)
 
 ### Documentation
-- Enable the [color legend example](http://opengeoscience.github.io/geojs/examples/color-legend/) (#790)
-- Add a new [editor tutorial](http://opengeoscience.github.io/geojs/tutorials/editor3) with HTML and CSS panes (#783)
+- Enable the [color legend example](https://opengeoscience.github.io/geojs/examples/color-legend/) (#790)
+- Add a new [editor tutorial](https://opengeoscience.github.io/geojs/tutorials/editor3) with HTML and CSS panes (#783)
 - Use https urls for openstreetmap tiles in all examples and tutorials (#793)
 
 ## Version 0.15.1
@@ -157,10 +179,10 @@
 - Fixed handling GCS in geojson annotation imports (#748)
 
 ### Improvements to the website and documentation
-- Updated GeoJS's [website](http://opengeoscience.github.io/geojs/) (#729)
-- Improved the [API documentation](http://opengeoscience.github.io/geojs/apidocs/) (#738)
-- Added an "editor" [tutorial](http://opengeoscience.github.io/geojs/tutorials/) (#742)
-- Updated some [examples](http://opengeoscience.github.io/geojs/tutorials/) (#743)
+- Updated GeoJS's [website](https://opengeoscience.github.io/geojs/) (#729)
+- Improved the [API documentation](https://opengeoscience.github.io/geojs/apidocs/) (#738)
+- Added an "editor" [tutorial](https://opengeoscience.github.io/geojs/tutorials/) (#742)
+- Updated some [examples](https://opengeoscience.github.io/geojs/tutorials/) (#743)
 
 ## Version 0.12.4
 
@@ -178,16 +200,16 @@
 
 ## Version 0.12.2
 
-- Started revamping our [API documentation](http://opengeoscience.github.io/geojs/apidocs/) with a new template (#704, #706, #708, #710, #713)
+- Started revamping our [API documentation](https://opengeoscience.github.io/geojs/apidocs/) with a new template (#704, #706, #708, #710, #713)
 - Several minor API improvements (#707)
 - Added subdomain template parameters for tile layer urls (#715)
 
 ## Version 0.12.1
 
 - Fix bugs in rectangle annotations (#693, #694)
-- Add new optimized methods for updating styles of features for animations and a new [example](http://opengeoscience.github.io/geojs/examples/animation/) (#687)
+- Add new optimized methods for updating styles of features for animations and a new [example](https://opengeoscience.github.io/geojs/examples/animation/) (#687)
 - Fix checks for optional dependencies (#696)
-- Change the template for our [apidocs](http://opengeoscience.github.io/geojs/apidocs/) to [jaguarjs-jsdoc](https://github.com/davidshimjs/jaguarjs-jsdoc) (#697)
+- Change the template for our [apidocs](https://opengeoscience.github.io/geojs/apidocs/) to [jaguarjs-jsdoc](https://github.com/davidshimjs/jaguarjs-jsdoc) (#697)
 - Fix a bug in applying polygon stroke styles (#700)
 
 ## Version 0.12.0
@@ -209,7 +231,7 @@
 
 ## Version 0.11.0
 
-- Refactored GL line feature with a number of new styling options available.  See our [blog post](https://blog.kitware.com/drawing-lines-in-geojs/) and the new [line example](http://opengeoscience.github.io/geojs/examples/lines/) for more details.  (#649, #662)
+- Refactored GL line feature with a number of new styling options available.  See our [blog post](https://blog.kitware.com/drawing-lines-in-geojs/) and the new [line example](https://opengeoscience.github.io/geojs/examples/lines/) for more details.  (#649, #662)
 - Added keyboard shortcuts for map navigation.  (#661)
 - Most DOM styling is now done with a CSS file rather than setting inline styles.  (#660)
 - Added GCS options to the annotation interface.  (#654)
@@ -226,7 +248,7 @@
 ## Version 0.10.4
 
 ### Changes
-- Added a pixelmap feature and [example](http://opengeoscience.github.io/geojs/examples/pixelmap/) (#637)
+- Added a pixelmap feature and [example](https://opengeoscience.github.io/geojs/examples/pixelmap/) (#637)
 - The location with a quad is reported in mouse events and point search functions (#635)
 - Canvas elements can be rendered in quads on the canvas renderer (#634)
 - Most features support visibility (#632)
@@ -249,7 +271,7 @@
 - Minor fixes to geojson rendering (#609)
 - Update to VGL 0.3.10 (#608, #612)
 - Reduce flickering in point cluster rendering (#621)
-- Beta support for interactive annotations and a new [example](http://opengeoscience.github.io/geojs/examples/annotations/) (#613, #616)
+- Beta support for interactive annotations and a new [example](https://opengeoscience.github.io/geojs/examples/annotations/) (#613, #616)
 
 ## Version 0.10.1
 
@@ -263,13 +285,13 @@
 - Changed the callback signature for the `fill` style, which turns on or off rendering the polygon fill (#597)
 
 ### Additions and improvements
-- Improved heatmap feature and [example](http://opengeoscience.github.io/geojs/examples/heatmap/) (#574, #577, #578, #579)
+- Improved heatmap feature and [example](https://opengeoscience.github.io/geojs/examples/heatmap/) (#574, #577, #578, #579)
 - Replaced grunt build tasks with webpack and npm scripts (#580)
 - Added a d3 rendered `quadFeature` (#581)
 - Added selection-based zoom (#582)
 - Added an interface for `createLayer` to request renderers by feature support (#590)
-- Improved polygon rendering performance  ([massively](https://github.com/OpenGeoscience/geojs/pull/594#issuecomment-226821131)) and added a usage [example](http://opengeoscience.github.io/geojs/examples/polygons/) (#594)
-- Added an [example](http://opengeoscience.github.io/geojs/examples/sld/) of customizing the style of WMS layers (#595)
+- Improved polygon rendering performance  ([massively](https://github.com/OpenGeoscience/geojs/pull/594#issuecomment-226821131)) and added a usage [example](https://opengeoscience.github.io/geojs/examples/polygons/) (#594)
+- Added an [example](https://opengeoscience.github.io/geojs/examples/sld/) of customizing the style of WMS layers (#595)
 - Added stroking to the polygon feature (#597)
 
 ### Bug fixes
@@ -281,7 +303,7 @@
 ## Version 0.9.1
 
 ### Changes
-- Added a new [heatmap](http://opengeoscience.github.io/geojs/examples/heatmap/) feature (#557)
+- Added a new [heatmap](https://opengeoscience.github.io/geojs/examples/heatmap/) feature (#557)
 - Switched to [earcut](https://github.com/mapbox/earcut) for triangulating polygons (#555)
 - Added methods on `geo.transform` to load EPSG projections from [epsg.io](http://epsg.io/) (#561)
 - Recorded the git SHA at build time as `geo.sha` (#562)
@@ -294,11 +316,11 @@
 ### New features
 - Added a canvas renderer for tile layers and quad features
 - Added new marker styles for d3 rendered vectors
-- Zooming with the mouse wheel now supports animation and momentum (see the updated [Tiles](http://opengeoscience.github.io/geojs/examples/tiles/) example)
+- Zooming with the mouse wheel now supports animation and momentum (see the updated [Tiles](https://opengeoscience.github.io/geojs/examples/tiles/) example)
 - All files have been converted into CommonJS modules and are built with [webpack](https://webpack.github.io/)
 - PhantomJS tests are now executed with the [Karma test runner](https://karma-runner.github.io/0.13/index.html)
 - Unit test coverage information is collected by [istanbul](https://gotwarlost.github.io/istanbul/) and reported to [codecov](https://codecov.io/github/OpenGeoscience/geojs?branch=master)
-- Performance results are submitted to CDash during testing as a JSON-encoded "notes" file ([example](http://my.cdash.org/viewNotes.php?buildid=936301))
+- Performance results are submitted to CDash during testing as a JSON-encoded "notes" file ([example](https://my.cdash.org/viewNotes.php?buildid=936301))
 
 ### Bug fixes
 - Fixed several bugs related to map animations and transitions
@@ -315,10 +337,10 @@
 
 ### Major changes
 - Quad features have been created as a replacement for plane features.  They can draw multiple convex quadrilaterals with images or solid colors as textures within a single feature instantiation.  These features also support default styles or images that display while asynchronous resources load.
-- A new [quad example](http://opengeoscience.github.io/geojs/examples/quads/) demonstrates the new capabilities of the quad feature.
-- A new [reprojection example](http://opengeoscience.github.io/geojs/examples/reprojection/) demonstrates how quad features can be used to reproject a standard tile layer.  It also provides an additional example of using mouse events on point features to display textual information in a popup box and to recenter the map on click.
+- A new [quad example](https://opengeoscience.github.io/geojs/examples/quads/) demonstrates the new capabilities of the quad feature.
+- A new [reprojection example](https://opengeoscience.github.io/geojs/examples/reprojection/) demonstrates how quad features can be used to reproject a standard tile layer.  It also provides an additional example of using mouse events on point features to display textual information in a popup box and to recenter the map on click.
 - UI Layers will now automatically remain on top when adding new layers.
-- Migrated to [ESLint](http://eslint.org/) from jshint/jscs for style checking.
+- Migrated to [ESLint](https://eslint.org/) from jshint/jscs for style checking.
 
 ### Performance improvements
 
@@ -343,7 +365,7 @@ Migrating from the plane feature to the new quad feature provides major performa
 - A new renderer fallback API supports querying support for a renderer and falling back to a different supported renderer.  The default OSM layer now supports this mechanism falling back to a raw HTML interface when webGL is not available.
 
 ### Bug fixes
--  The [Deepzoom example](http://opengeoscience.github.io/geojs/examples/deepzoom/) was mistakenly using the HTML renderer.
+-  The [Deepzoom example](https://opengeoscience.github.io/geojs/examples/deepzoom/) was mistakenly using the HTML renderer.
 - Fixed several race conditions involved in loading and purging tiles
 - The tile cache will now automatically grow when it is not large enough to contain all of the tiles in use
 
@@ -362,10 +384,10 @@ Migrating from the plane feature to the new quad feature provides major performa
   - Hooks for dynamically generated tiles rather than just static images
   - The definition of "zoom level" is now consistent with the use in other libraries
 - New camera class used to keep track of the visible area and world to image space conversions
-- General support for image pyramids through the tile layer (including [medical imaging](http://opengeoscience.github.io/geojs/examples/deepzoom/))
-- [Choropleth](http://opengeoscience.github.io/geojs/examples/choropleth/) feature type
-- New API for [widgets](http://opengeoscience.github.io/geojs/examples/widgets/)
-- New [example](http://opengeoscience.github.io/geojs/examples/tiles/) showing off the features available for tile layers
+- General support for image pyramids through the tile layer (including [medical imaging](https://opengeoscience.github.io/geojs/examples/deepzoom/))
+- [Choropleth](https://opengeoscience.github.io/geojs/examples/choropleth/) feature type
+- New API for [widgets](https://opengeoscience.github.io/geojs/examples/widgets/)
+- New [example](https://opengeoscience.github.io/geojs/examples/tiles/) showing off the features available for tile layers
 - GeoJSON reader now supports [Polygon](http://geojson.org/geojson-spec.html#polygon) and [Multipolygon](http://geojson.org/geojson-spec.html#multipolygon) geometries
 - Layers can now be reordered dynamically
 - Added a new mouse event (`click`) that detects mouse clicks on the map canvas
@@ -410,7 +432,7 @@ Migrating from the plane feature to the new quad feature provides major performa
 | camera.js | 97.7% |  |  |  |  |
 
 ### Infrastructure and building
-- Continuous coverage reporting of unit tests submitted to [CDash](http://my.cdash.org/index.php?project=geojs)
+- Continuous coverage reporting of unit tests submitted to [CDash](https://my.cdash.org/index.php?project=geojs)
 - VGL submodule removed in favor of inclusion via bower
 - Support for installing as the `root` user
 - Data used for testing and examples are now hosted at [data.kitware.com](https://data.kitware.com/)
@@ -441,7 +463,7 @@ Huge thanks to all of the contributers, and the many others who tested, created 
 ## Version 0.5.0
 
 ### New features
-- Contour feature for generating [contour plots](http://opengeoscience.github.io/geojs/examples/contour/) from gridded data
+- Contour feature for generating [contour plots](https://opengeoscience.github.io/geojs/examples/contour/) from gridded data
 - Hierarchical data clustering with an experimental option for clustered point features
 - Multipolygon support in the GeoJSON reader
 - Support for rendering with parallel projection along with discrete zooming and image to device pixel alignment
@@ -457,7 +479,7 @@ Huge thanks to all of the contributers, and the many others who tested, created 
 
 ## Version 0.4.2
 
-- New examples added showing [map transitions](http://opengeoscience.github.io/geojs/examples/transitions/) and [data animation](http://opengeoscience.github.io/geojs/examples/dynamicData/)
+- New examples added showing [map transitions](https://opengeoscience.github.io/geojs/examples/transitions/) and [data animation](https://opengeoscience.github.io/geojs/examples/dynamicData/)
 - Large performance improvement for point feature mouse handler setup
 - Removed jquery-mousewheel dependency
 - Toggling feature visibility now toggles mouse handlers as well

@@ -47,7 +47,7 @@ $(function () {
       annotationDebug.mapLayer = map.createLayer('osm');
     }
     if (query.map === 'satellite' || query.map === 'dual') {
-      annotationDebug.satelliteLayer = map.createLayer('osm', {url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.png', opacity: query.map === 'dual' ? 0.25 : 1});
+      annotationDebug.satelliteLayer = map.createLayer('osm', {url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.png', opacity: query.map === 'dual' ? 0.25 : 1});
     }
   }
   // create an annotation layer
@@ -255,7 +255,7 @@ $(function () {
       $('#annotationlist').append(entry);
     });
     $('#annotationheader').css(
-        'display', $('#annotationlist .entry').length <= 1 ? 'none' : 'block');
+      'display', $('#annotationlist .entry').length <= 1 ? 'none' : 'block');
     if (!fromGeojsonUpdate) {
       // update the geojson textarea
       var geojson = layer.geojson();
@@ -284,7 +284,7 @@ $(function () {
         layer.draw();
         break;
       case 'edit':
-        show_edit_dialog(id, annotation);
+        show_edit_dialog(id);
         break;
       case 'remove':
         layer.removeAnnotation(annotation);

@@ -35,14 +35,16 @@ var graphFeature = function (arg) {
       s_init = this._init,
       s_exit = this._exit;
 
+  this.featureType = 'graph';
+
   /**
    * Initialize
    */
   this._init = function (arg) {
     s_init.call(m_this, arg);
 
-    var defaultStyle = $.extend(true, {},
-      {
+    var defaultStyle = $.extend(
+      true, {}, {
         nodes: {
           radius: 5.0,
           fill: true,
@@ -54,8 +56,7 @@ var graphFeature = function (arg) {
         },
         linkType: 'path' /* 'path' || 'line' */
       },
-      arg.style === undefined ? {} : arg.style
-    );
+      arg.style === undefined ? {} : arg.style);
 
     m_this.style(defaultStyle);
     m_this.nodes(function (d) { return d; });

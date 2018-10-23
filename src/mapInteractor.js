@@ -706,7 +706,8 @@ var mapInteractor = function (args) {
       }
       m_boundKeys = bound;
     }
-    $node.toggleClass('highlight-focus',
+    $node.toggleClass(
+      'highlight-focus',
       !!(m_boundKeys && m_boundKeys.length && m_options.keyboard.focusHighlight));
     // bind touch events
     if ((m_this.hasTouchSupport() || m_options.alwaysTouch) &&
@@ -1651,7 +1652,7 @@ var mapInteractor = function (args) {
           return;
         }
         accum(dz, org);
-        apply(dz, org);
+        apply();
       };
     }
   }
@@ -1721,7 +1722,7 @@ var mapInteractor = function (args) {
       m_this._getMouseModifiers(evt);
 
       actionRecord = actionMatch({wheel: true}, m_mouse.modifiers,
-                                m_options.actions);
+                                 m_options.actions);
       action = (actionRecord || {}).action;
 
       if (action) {
@@ -1746,9 +1747,9 @@ var mapInteractor = function (args) {
             break;
           case geo_action.rotate:
             m_this.map().rotation(
-                m_this.map().rotation() +
-                m_queue.scroll.y * m_options.rotateWheelScale,
-                m_mouse);
+              m_this.map().rotation() +
+              m_queue.scroll.y * m_options.rotateWheelScale,
+              m_mouse);
             break;
         }
         m_this.map().geoTrigger(geo_event.actionwheel, {
@@ -1973,7 +1974,7 @@ var mapInteractor = function (args) {
    */
   this.removeAction = function (action, name, owner) {
     var removed = util.removeAction(
-        m_options.actions, action, name, owner);
+      m_options.actions, action, name, owner);
     if (m_options.map && !m_options.actions.some(function (action) {
       return action.input.right;
     })) {

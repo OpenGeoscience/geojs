@@ -9,37 +9,44 @@ var util = require('./util');
  * @typedef {geo.feature.spec} geo.isolineFeature.spec
  * @property {object[]} [data=[]] An array of arbitrary objects used to
  *    construct the feature.
- * @property {object} [style] An object that contains style values for the
- *    feature.  This includes {@link geo.lineFeature} and
- *    {@link geo.textFeature} style values.
- * @property {number|function} [style.opacity=1] Overall opacity on a scale of
- *    0 to 1.
- * @property {geo.geoPosition|function} [style.position=data] The position of
- *    each data element.  This defaults to just using `x`, `y`, and `z`
- *    properties of the data element itself.  The position is in thea feature's
- *    gcs coordinates.
- * @property {number|function} [style.value=data.z] The value of each data
- *    element.  This defaults `z` properties of the data element.  If the value
- *    of a grid point is `null` or `undefined`, that point and elements that
- *    use that point won't be included in the results.
- * @property {geo.geoColor|function} [style.strokeColor='black'] Color to
- *    stroke each line.
- * @property {number|function} [style.strokeWidth] The weight of the line
- *    stroke in pixels.  This defaults to the line value's level + 0.5.
- * @property {boolean|function} [style.rotateWithMap=true] Rotate label text
- *    when the map rotates.
- * @property {number|function} [style.rotation] Text rotation in radians.  This
+ * @property {geo.isolineFeature.styleSpec} [style] An object that contains
+ *    style values for the feature.
+ * @property {geo.isolineFeature.isolineSpec} [isoline] The isoline
+ *    specification for the feature.
+ */
+
+/**
+ * Style specification for an isoline feature.  Extends
+ * {@link geo.lineFeasture.styleSpec} and {@link geo.textFeasture.styleSpec}.
+ *
+ * @typedef {geo.feature.styleSpec} geo.isolineFeature.styleSpec
+ * @extends geo.feature.styleSpec
+ * @extends geo.textFeature.styleSpec
+ * @extends geo.lineFeature.styleSpec
+ * @property {geo.geoPosition|function} [position=data] The position of each
+ *    data element.  This defaults to just using `x`, `y`, and `z` properties
+ *    of the data element itself.  The position is in the feature's gcs
+ *    coordinates.
+ * @property {number|function} [value=data.z] The value of each data element.
+ *    This defaults to the `z` property of the data elements.  If the value of
+ *    a grid point is `null` or `undefined`, the point and elements that use
+ *    that point won't be included in the results.
+ * @property {geo.geoColor|function} [strokeColor='black'] Color to stroke each
+ *    line.
+ * @property {number|function} [strokeWidth] The weight of the line stroke in
+ *    pixels.  This defaults to the line value's level + 0.5.
+ * @property {boolean|function} [rotateWithMap=true] Rotate label text when the
+ *    map rotates.
+ * @property {number|function} [rotation] Text rotation in radians.  This
  *    defaults to the label oriented so that top of the text is toward the
  *    higher value.  There is a utility function that can be used for common
  *    rotation preferences.  See {@link geo.isolineFeature#rotationFunction}.
  *    For instance, `rotation=geo.isolineFeature.rotationFunction('map')`.
- * @property {string|function} [style.fontSize='12px'] The font size.
- * @property {geo.geoColor|function} [style.textStrokeColor='white'] Text
+ * @property {string|function} [fontSize='12px'] The font size.
+ * @property {geo.geoColor|function} [textStrokeColor='white'] Text
  *    stroke color.  This adds contrast between the label and the isoline.
- * @property {geo.geoColor|function} [style.textStrokeWidth=2] Text stroke
- *    width in pixels.
- * @property {geo.isolineFeature.isolineSpec} [isoline] The isoline
- *    specification for the feature.
+ * @property {geo.geoColor|function} [textStrokeWidth=2] Text stroke width in
+ *    pixels.
  */
 
 /**
@@ -203,6 +210,8 @@ var isolineFeature = function (arg) {
       s_init = this._init,
       s_modified = this.modified,
       s_update = this._update;
+
+  this.featureType = 'isoline';
 
   this.contour = m_this.mesh;
   this.isoline = m_this.mesh;
@@ -503,8 +512,8 @@ var isolineFeature = function (arg) {
   };
 
   /**
-   * When the feature is marked as modified, mark our sub-feature as
-   * modified, too.
+   * Update the timestamp to the next global timestamp value.  Mark
+   * sub-features as modified, too.
    *
    * @returns {object} The results of the superclass modified function.
    */
@@ -529,7 +538,7 @@ var isolineFeature = function (arg) {
    * @returns {this}
    */
   this.labelPositions = function () {
-    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime()) {
+    if (m_this.dataTime().timestamp() >= m_this.buildTime().timestamp()) {
       m_this._build();
     }
     m_lastLabelPositions = null;
@@ -661,12 +670,12 @@ var isolineFeature = function (arg) {
       /* Distance in scaled pixels between the map's current center and the
        * center when the labels were computed. */
       var lastDelta = Math.sqrt(util.distance2dSquared(
-            map.gcsToDisplay(map.center()), map.gcsToDisplay(last.center))) *
-            Math.pow(2, last.zoom - zoom);
+        map.gcsToDisplay(map.center()), map.gcsToDisplay(last.center))) *
+        Math.pow(2, last.zoom - zoom);
       /* Half the viewport, less twice the maxSpacing, less any expansion of
        * the map. */
       var threshold = last.labelViewport / 2 - last.maxSpacing * 2 - Math.max(
-            mapSize.width - last.size.width, mapSize.height - last.size.height, 0);
+        mapSize.width - last.size.width, mapSize.height - last.size.height, 0);
       update = update || (lastDelta >= threshold);
     }
     if (update) {
@@ -749,8 +758,8 @@ var isolineFeature = function (arg) {
   this._update = function () {
     s_update.call(m_this);
 
-    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
-        m_this.updateTime().getMTime() <= m_this.getMTime()) {
+    if (m_this.dataTime().timestamp() >= m_this.buildTime().timestamp() ||
+        m_this.updateTime().timestamp() <= m_this.timestamp()) {
       m_this._build();
     }
     m_this.updateTime().modified();

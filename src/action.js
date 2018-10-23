@@ -4,6 +4,7 @@
  *
  * @namespace
  * @alias geo.action
+ * @enum {string}
  */
 var geo_action = {
   momentum: 'geo_action_momentum',

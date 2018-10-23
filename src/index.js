@@ -54,7 +54,7 @@ module.exports = $.extend({
   heatmapFeature: require('./heatmapFeature'),
   imageTile: require('./imageTile'),
   isolineFeature: require('./isolineFeature'),
-  jsonReader: require('./jsonReader'),
+  geojsonReader: require('./geojsonReader'),
   layer: require('./layer'),
   lineFeature: require('./lineFeature'),
   map: require('./map'),

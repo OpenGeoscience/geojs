@@ -304,8 +304,7 @@ var gl_pointFeature = function (arg) {
       nonzeroZ = nonzeroZ || position[i3 + 2];
     }
     position = transform.transformCoordinates(
-                  m_this.gcs(), m_this.layer().map().gcs(),
-                  position, 3);
+      m_this.gcs(), m_this.layer().map().gcs(), position, 3);
     /* Some transforms modify the z-coordinate.  If we started with all zero z
      * coordinates, don't modify them.  This could be changed if the
      * z-coordinate space of the gl cube is scaled appropriately. */
@@ -517,33 +516,33 @@ var gl_pointFeature = function (arg) {
         geom = vgl.geometryData(),
         sourcePositions = vgl.sourceDataP3fv({'name': 'pos'}),
         sourceUnits = vgl.sourceDataAnyfv(
-            2, vgl.vertexAttributeKeysIndexed.One, {'name': 'unit'}),
+          2, vgl.vertexAttributeKeysIndexed.One, {'name': 'unit'}),
         sourceRadius = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Two, {'name': 'radius'}),
+          1, vgl.vertexAttributeKeysIndexed.Two, {'name': 'radius'}),
         sourceStrokeWidth = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'strokeWidth'}),
+          1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'strokeWidth'}),
         sourceFillColor = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Four, {'name': 'fillColor'}),
+          3, vgl.vertexAttributeKeysIndexed.Four, {'name': 'fillColor'}),
         sourceFill = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Five, {'name': 'fill'}),
+          1, vgl.vertexAttributeKeysIndexed.Five, {'name': 'fill'}),
         sourceStrokeColor = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Six, {'name': 'strokeColor'}),
+          3, vgl.vertexAttributeKeysIndexed.Six, {'name': 'strokeColor'}),
         sourceStroke = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Seven, {'name': 'stroke'}),
+          1, vgl.vertexAttributeKeysIndexed.Seven, {'name': 'stroke'}),
         sourceAlpha = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Eight, {'name': 'fillOpacity'}),
+          1, vgl.vertexAttributeKeysIndexed.Eight, {'name': 'fillOpacity'}),
         sourceStrokeOpacity = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Nine, {'name': 'strokeOpacity'}),
+          1, vgl.vertexAttributeKeysIndexed.Nine, {'name': 'strokeOpacity'}),
         primitive = new vgl.triangles();
 
     if (m_primitiveShape === 'sprite') {
       primitive = new vgl.points();
     }
 
-    m_pixelWidthUniform = new vgl.floatUniform('pixelWidth',
-                            2.0 / m_this.renderer().width());
-    m_aspectUniform = new vgl.floatUniform('aspect',
-                        m_this.renderer().width() / m_this.renderer().height());
+    m_pixelWidthUniform = new vgl.floatUniform(
+      'pixelWidth', 2.0 / m_this.renderer().width());
+    m_aspectUniform = new vgl.floatUniform(
+      'aspect', m_this.renderer().width() / m_this.renderer().height());
 
     s_init.call(m_this, arg);
     m_mapper = vgl.mapper({dynamicDraw: m_dynamicDraw});
@@ -622,8 +621,8 @@ var gl_pointFeature = function (arg) {
 
     // For now build if the data or style changes. In the future we may
     // we able to partially update the data using dynamic gl buffers.
-    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
-        m_this.updateTime().getMTime() < m_this.getMTime()) {
+    if (m_this.dataTime().timestamp() >= m_this.buildTime().timestamp() ||
+        m_this.updateTime().timestamp() < m_this.timestamp()) {
       m_this._build();
     }
 

@@ -10,8 +10,12 @@ var fse = require('fs-extra');
 
 fse.copySync('node_modules/jaguarjs-jsdoc/tmpl', 'jsdoc/template/tmpl');
 fse.copySync('node_modules/jaguarjs-jsdoc/static', 'jsdoc/template/static');
-fse.copySync('jsdoc/template/mainpage.tmpl', 'jsdoc/template/tmpl/mainpage.tmpl');
-fse.copySync('jsdoc/template/properties.tmpl', 'jsdoc/template/tmpl/properties.tmpl');
+
+Object.values(fse.readdirSync('jsdoc/template')).forEach(file => {
+  if (file.endsWith('.tmpl')) {
+    fse.copySync('jsdoc/template/' + file, 'jsdoc/template/tmpl/' + file);
+  }
+});
 fse.appendFileSync('jsdoc/template/static/styles/jaguar.css', fse.readFileSync('jsdoc/template/style.css').toString());
 
 /* Also get the git sha, if possible */
@@ -33,7 +37,6 @@ var template = require('jsdoc/template'),
     htmlsafe = helper.htmlsafe,
     linkto = helper.linkto,
     resolveAuthorLinks = helper.resolveAuthorLinks,
-    scopeToPunc = helper.scopeToPunc,
     hasOwnProp = Object.prototype.hasOwnProperty,
     data,
     view,

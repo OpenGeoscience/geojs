@@ -112,8 +112,7 @@ var canvasRenderer = function (arg) {
   this._renderFrame = function () {
     var layer = m_this.layer(),
         map = layer.map(),
-        camera = map.camera(),
-        viewport = camera._viewport,
+        mapSize = map.size(),
         features = layer.features(),
         i;
 
@@ -129,7 +128,7 @@ var canvasRenderer = function (arg) {
     // Clear the canvas.
     if (m_clearCanvas) {
       m_this.context2d.setTransform(1, 0, 0, 1, 0, 0);
-      m_this.context2d.clearRect(0, 0, viewport.width, viewport.height);
+      m_this.context2d.clearRect(0, 0, mapSize.width, mapSize.height);
     }
 
     for (i = 0; i < features.length; i += 1) {

@@ -56,8 +56,8 @@ var osmLayer = function (arg) {
       overlap: this._options.tileOverlap,
       scale: this._options.tileScale,
       url: this._options.url.call(
-          this, urlParams.x, urlParams.y, urlParams.level || 0,
-          this._options.subdomains),
+        this, urlParams.x, urlParams.y, urlParams.level || 0,
+        this._options.subdomains),
       crossDomain: this._options.crossDomain
     });
   }.bind(this);
@@ -72,7 +72,7 @@ osmLayer.defaults = $.extend({}, tileLayer.defaults, {
     return {x: s, y: s};
   },
   url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  attribution: 'Tile data &copy; <a href="http://osm.org/copyright">' +
+  attribution: 'Tile data &copy; <a href="https://osm.org/copyright">' +
     'OpenStreetMap</a> contributors'
 });
 

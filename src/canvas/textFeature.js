@@ -126,8 +126,8 @@ var canvas_textFeature = function (arg) {
        * appear in the viewport. */
       pos = posArray[i];
       if (renderThreshold > 0 && (
-          pos.x < -renderThreshold || pos.x > mapSize.width + renderThreshold ||
-          pos.y < -renderThreshold || pos.y > mapSize.height + renderThreshold)) {
+        pos.x < -renderThreshold || pos.x > mapSize.width + renderThreshold ||
+        pos.y < -renderThreshold || pos.y > mapSize.height + renderThreshold)) {
         return;
       }
       visible = m_this.style.get('visible')(d, i);

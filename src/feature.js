@@ -9,9 +9,11 @@ var geo_event = require('./event');
  *
  * @typedef {object} geo.feature.spec
  * @property {geo.layer} [layer] the parent layer associated with the feature.
- * @property {boolean} [selectionAPI=false] If truthy, enable selection events
- *   on the feature.  Selection events are those in {@link geo.event.feature}.
- *   They can be bound via a call like
+ * @property {boolean|'auto'} [selectionAPI='auto'] If `'auto'`, enable
+ *   selection events if any {@link geo.event.feature} events are bound to the
+ *   feature.  Otherwise, if truthy, enable selection events on the feature.
+ *   Selection events are those in {@link geo.event.feature}.  They can be
+ *   bound via a call like
  *   ```
  *   feature.geoOn(geo.event.feature.mousemove, function (evt) {
  *     // do something with the feature
@@ -33,10 +35,14 @@ var geo_event = require('./event');
  *   feature within its parent's list of children as the bin number.
  * @property {geo.renderer?} [renderer] A reference to the renderer used for
  *   the feature.
- * @property {object} [style] An object that contains style values for the
- *   feature.
- * @property {number|function} [style.opacity=1] The opacity on a scale of 0 to
- *   1.
+ * @property {geo.feature.styleSpec} [style] An object that contains style
+ *   values for the feature.
+ */
+
+/**
+ * Style specification for a feature.
+ *
+ * @typedef {object} geo.feature.styleSpec
  */
 
 /**
@@ -105,8 +111,10 @@ var feature = function (arg) {
 
   var m_this = this,
       s_exit = this._exit,
+      s_geoOn = this.geoOn,
+      s_geoOff = this.geoOff,
       m_ready,
-      m_selectionAPI = arg.selectionAPI === undefined ? false : !!arg.selectionAPI,
+      m_selectionAPI = arg.selectionAPI === undefined ? 'auto' : arg.selectionAPI,
       m_style = {},
       m_layer = arg.layer === undefined ? null : arg.layer,
       m_gcs = arg.gcs,
@@ -420,8 +428,8 @@ var feature = function (arg) {
    * has a subfeature style, with `(subfeatureElement, subfeatureIndex,
    * dataElement, dataIndex)`.
    *
-   * See the feature's specification ({@link geo.feature.spec}) for available
-   * styles.
+   * See the <a href="#.styleSpec">style specification
+   * <code>styleSpec</code></a> for available styles.
    *
    * @param {string|object} [arg1] If `undefined`, return the current style
    *    object.  If a string and `arg2` is undefined, return the style
@@ -451,6 +459,9 @@ var feature = function (arg) {
   /**
    * A uniform getter that always returns a function even for constant styles.
    * This can also return all defined styles as functions in a single object.
+   *
+   * If the style `key` is a color, the returned function will also coerce
+   * the result to be a {@link geo.geoColorObject}.
    *
    * @function style_DOT_get
    * @memberof geo.feature
@@ -766,22 +777,29 @@ var feature = function (arg) {
   /**
    * Get/Set if the selection API is enabled for this feature.
    *
-   * @param {boolean} [arg] `undefined` to return the selectionAPI state, or a
-   *    boolean to change the state.
+   * @param {boolean|string} [arg] `undefined` to return the selectionAPI
+   *    state, a boolean to change the state, or `'auto'` to set the state
+   *    based on the existence of event handlers.  When getting the state, if
+   *    `direct` is not specified, `'auto'` is never returned.
    * @param {boolean} [direct] If `true`, when getting the selectionAPI state,
    *    disregard the state of the parent layer, and when setting, refresh the
    *    state regardless of whether it has changed or not.
-   * @returns {boolean|this} Either the selectionAPI state (if getting) or the
-   *    feature (if setting).
+   * @returns {boolean|string|this} Either the selectionAPI state or the
+   *    feature instance.
    */
   this.selectionAPI = function (arg, direct) {
     if (arg === undefined) {
       if (!direct && m_layer && m_layer.selectionAPI && !m_layer.selectionAPI()) {
         return false;
       }
+      if (!direct && m_selectionAPI === 'auto') {
+        return !!m_this.geoIsOn(Object.values(geo_event.feature));
+      }
       return m_selectionAPI;
     }
-    arg = !!arg;
+    if (arg !== 'auto') {
+      arg = !!arg;
+    }
     if (arg !== m_selectionAPI || direct) {
       m_selectionAPI = arg;
       m_this._unbindMouseHandlers();
@@ -818,9 +836,10 @@ var feature = function (arg) {
     if (!m_layer) {
       throw new Error('Feature requires a valid layer');
     }
-    m_style = $.extend({},
-                {'opacity': 1.0}, arg.style === undefined ? {} :
-                arg.style);
+    m_style = $.extend(
+      {},
+      {opacity: 1.0},
+      arg.style === undefined ? {} : arg.style);
     m_this._bindMouseHandlers();
     m_ready = true;
   };
@@ -839,6 +858,47 @@ var feature = function (arg) {
    * Derived classes should implement this.
    */
   this._update = function () {
+  };
+
+  /**
+   * Bind an event handler to this object.
+   *
+   * @param {string} event An event from {@link geo.event} or a user-defined
+   *   value.
+   * @param {function} handler A function that is called when `event` is
+   *   triggered.  The function is passed a {@link geo.event} object.
+   * @returns {this}
+   */
+  this.geoOn = function (event, handler) {
+    var isAuto = m_this.selectionAPI(undefined, true) === 'auto',
+        selection = isAuto && m_this.selectionAPI();
+    var result = s_geoOn.apply(m_this, arguments);
+    if (isAuto && !selection && m_this.selectionAPI()) {
+      m_this._bindMouseHandlers();
+    }
+    return result;
+  };
+
+  /**
+   * Remove handlers from one event or an array of events.  If no event is
+   * provided all handlers will be removed.
+   *
+   * @param {string|string[]} [event] An event or a list of events from
+   *   {@link geo.event} or defined by the user, or `undefined` to remove all
+   *   events (in which case `arg` is ignored).
+   * @param {(function|function[])?} [arg] A function or array of functions to
+   *   remove from the events or a falsy value to remove all handlers from the
+   *   events.
+   * @returns {this}
+   */
+  this.geoOff = function (event, arg) {
+    var isAuto = m_this.selectionAPI(undefined, true) === 'auto',
+        selection = isAuto && m_this.selectionAPI();
+    var result = s_geoOff.apply(m_this, arguments);
+    if (isAuto && selection && !m_this.selectionAPI()) {
+      m_this._unbindMouseHandlers();
+    }
+    return result;
   };
 
   /**

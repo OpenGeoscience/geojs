@@ -109,8 +109,8 @@ describe('geo.choroplethFeature', function () {
 
   it('multipolygon', function () {
     var map, layer, choropleth, scalarData = [
-          {'id': 0, 'value': 10}
-        ];
+      {'id': 0, 'value': 10}
+    ];
 
     map = createMap();
     layer = map.createLayer('feature', {renderer: 'vgl'});
@@ -121,12 +121,10 @@ describe('geo.choroplethFeature', function () {
     choropleth.choropleth('name', 'multipolygon');
     expect(choropleth instanceof geo.choroplethFeature).toBe(true);
     expect(choropleth.choropleth('name')).toBe('multipolygon');
-    expect(choropleth.choropleth.get('accessors')()
-      .scalarValue(scalarData[0])).toBe(10);
-    expect(choropleth.choropleth.get('accessors')()
-      .geoId(mpdata[0])).toBe(0);
+    expect(choropleth.choropleth.get('scalarValue')(scalarData[0])).toBe(10);
+    expect(choropleth.choropleth.get('geoId')(mpdata[0])).toBe(0);
     expect(Object.keys(choropleth.choropleth.get())).toEqual([
-      'colorRange', 'scale', 'accessors', 'scalar',
+      'colorRange', 'scale', 'geoId', 'scalarId', 'scalarValue', 'scalar',
       'scalarAggregator', 'name']);
   });
 });

@@ -6,4 +6,3 @@
 
 var tests = require.context('./gl-cases', true, /.*\.js$/);
 tests.keys().forEach(tests);
-

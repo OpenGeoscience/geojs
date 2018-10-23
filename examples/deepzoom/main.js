@@ -44,7 +44,7 @@ $.get(dzi_url).then(function (dzi_info) {
 
   // get some standard parameters for map and level in pixel-coordinate space
   var defaultParams = geo.util.pixelCoordinateParams(
-      '#map', sizeX, sizeY, tileSize, tileSize);
+    '#map', sizeX, sizeY, tileSize, tileSize);
 
   // Create a map object
   var map = geo.map(defaultParams.map);

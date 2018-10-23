@@ -26,6 +26,7 @@ var $ = require('jquery');
  * @param {object?} spec.overlap The size of overlap with neighboring tiles.
  * @param {number} [spec.overlap.x=0]
  * @param {number} [spec.overlap.y=0]
+ * @returns {geo.tile}
  */
 var tile = function (spec) {
   if (!(this instanceof tile)) {
