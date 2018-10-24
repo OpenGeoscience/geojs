@@ -1,3 +1,4 @@
+// Fetch the dataset from the server
 $.ajax({url: 'capitals.json'}).done(function (capitals) {
   // Create a map object with reasonable center and zoom level
   var map = geo.map({
@@ -9,7 +10,7 @@ $.ajax({url: 'capitals.json'}).done(function (capitals) {
     clampZoom: false,
     discreteZoom: false
   });
-  // Add the tile layer with the specified parameters
+  // Add the map tile layer
   map.createLayer('osm', {
     zIndex: 0,
     minLevel: 4,
@@ -27,7 +28,8 @@ $.ajax({url: 'capitals.json'}).done(function (capitals) {
       fillOpacity: Math.random
     }
   })
-  .data(capitals) // bind data
+  // Bind the dataset to the vtk layer
+  .data(capitals)
   .position(function (d) {
     return {x: d.longitude, y: d.latitude};  // position accessor
   })
