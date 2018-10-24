@@ -1,0 +1,7 @@
+{
+  "title": "VTK.js",
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "Show state capitals as points using the vtkjs renderer."
+  }
+}
