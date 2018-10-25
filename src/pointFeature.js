@@ -73,7 +73,7 @@ var pointFeature = function (arg) {
   var ClusterGroup = require('./util/clustering');
   var geo_event = require('./event');
   var util = require('./util');
-  var kdbush = require('kdbush');
+  var KDBush = require('kdbush');
 
   /**
    * @private
@@ -251,7 +251,7 @@ var pointFeature = function (arg) {
       return [pt.x, pt.y];
     });
 
-    m_rangeTree = kdbush(pts);
+    m_rangeTree = new KDBush(pts);
     m_rangeTreeTime.modified();
   };
 
