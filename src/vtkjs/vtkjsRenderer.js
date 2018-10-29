@@ -22,6 +22,9 @@ var vtkjsRenderer = function (arg) {
   var mat4 = require('gl-mat4');
   var geo_event = require('../event');
   var vtkjs = vtkjsRenderer.vtkjs;
+  // TODO: use the GenericRenderWindow, match the size of the parent div, and
+  // call setContainer to attach it to the parent div.  The parent div is:
+  // m_this.layer().node().get(0)
   var vtkFullScreenRenderWindow = vtkjs.Rendering.Misc.vtkFullScreenRenderWindow;
 
   var m_this = this,
@@ -29,10 +32,11 @@ var vtkjsRenderer = function (arg) {
       m_height = 0,
       s_init = this._init;
 
-  var fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
+  // TODO: don't draw a background.  Does transparent work?
+  var vtkRenderer = vtkFullScreenRenderWindow.newInstance({
     background: [0.1, 0.5, 0.5] });
-  var vtkjsren = fullScreenRenderer.getRenderer();
-  var renderWindow = fullScreenRenderer.getRenderWindow();
+  var vtkjsren = vtkRenderer.getRenderer();
+  var renderWindow = vtkRenderer.getRenderWindow();
 
   /**
    * Return width of the renderer
@@ -76,6 +80,9 @@ var vtkjsRenderer = function (arg) {
     var map = m_this.layer().map(),
         mapSize = map.size();
     m_this._resize(0, 0, mapSize.width, mapSize.height);
+    // TODO: figure out what the clipbounds actually should be and handle
+    // perspective modes properly.
+    map.camera().clipbounds = {near: -map.unitsPerPixel(), far: map.unitsPerPixel()};
     return m_this;
   };
 
@@ -106,6 +113,15 @@ var vtkjsRenderer = function (arg) {
    * This clears the render timer and actually renders.
    */
   this._renderFrame = function () {
+    var layer = m_this.layer(),
+        features = layer.features(),
+        i;
+    // TODO: draw something else should trigger feature update
+    for (i = 0; i < features.length; i += 1) {
+      if (features[i].visible()) {
+        features[i]._update();
+      }
+    }
     m_this._updateRendererCamera();
     renderWindow.render();
   };
@@ -135,6 +151,8 @@ var vtkjsRenderer = function (arg) {
    *produce a pan
    */
   m_this.layer().geoOn(geo_event.pan, function (evt) {
+    // TODO: If the zoom level has changed, our point size needs to be
+    // recalculated, so we should call m_this._render
     // DO NOTHING
   });
 
