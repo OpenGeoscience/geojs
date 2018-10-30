@@ -22,19 +22,19 @@ var vtkjsRenderer = function (arg) {
   var mat4 = require('gl-mat4');
   var geo_event = require('../event');
   var vtkjs = vtkjsRenderer.vtkjs;
-  // TODO: use the GenericRenderWindow, match the size of the parent div, and
-  // call setContainer to attach it to the parent div.  The parent div is:
-  // m_this.layer().node().get(0)
-  var vtkFullScreenRenderWindow = vtkjs.Rendering.Misc.vtkFullScreenRenderWindow;
+  var vtkGenericRenderWindow = vtkjs.Rendering.Misc.vtkGenericRenderWindow;
 
   var m_this = this,
       m_width = 0,
       m_height = 0,
       s_init = this._init;
 
-  // TODO: don't draw a background.  Does transparent work?
-  var vtkRenderer = vtkFullScreenRenderWindow.newInstance({
-    background: [0.1, 0.5, 0.5] });
+  var vtkRenderer = vtkGenericRenderWindow.newInstance({
+    background: [0, 0, 0, 0]});
+  vtkRenderer.setContainer(m_this.layer().node().get(0));
+  // TODO: Is there a way to start with no interactor rather than unbinding it?
+  vtkRenderer.getInteractor().unbindEvents()
+  vtkRenderer.resize();
   var vtkjsren = vtkRenderer.getRenderer();
   var renderWindow = vtkRenderer.getRenderWindow();
 
@@ -90,8 +90,8 @@ var vtkjsRenderer = function (arg) {
    * Handle resize event
    */
   this._resize = function (x, y, w, h) {
+    vtkRenderer.resize();
     m_this._render();
-
     return m_this;
   };
 
@@ -148,7 +148,7 @@ var vtkjsRenderer = function (arg) {
 
   /**
    * Connect to pan event.  This is sufficient, as all zooms and rotations also
-   *produce a pan
+   * produce a pan
    */
   m_this.layer().geoOn(geo_event.pan, function (evt) {
     // TODO: If the zoom level has changed, our point size needs to be

@@ -31,11 +31,13 @@ module.exports.waitForIt = function waitForIt(desc, testFunc) {
     interval = setInterval(function () {
       if (testFunc()) {
         clearInterval(interval);
+        expect(true).toBe(true);
         done();
       }
     }, 10);
   });
   it('done waiting for ' + desc, function () {
+    expect(!!(testFunc ? testFunc() : true)).toBe(true);
   });
 };
 

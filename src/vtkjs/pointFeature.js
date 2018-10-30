@@ -82,13 +82,13 @@ var vtkjs_pointFeature = function (arg) {
     /* It is more efficient to do a transform on a single array rather than on
       * an array of arrays or an array of objects. */
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
-      posVal = posFunc(data[i]);
+      posVal = posFunc(data[i], i);
       position[i3] = posVal.x;
       position[i3 + 1] = posVal.y;
       position[i3 + 2] = posVal.z || 0;
       nonzeroZ = nonzeroZ || position[i3 + 2];
       // TODO: fix the opacity per point.
-      m_actor.getProperty().setOpacity(opacityFunc(data[i]));
+      m_actor.getProperty().setOpacity(opacityFunc(data[i], i));
     }
     position = transform.transformCoordinates(
       m_this.gcs(), m_this.layer().map().gcs(),
@@ -106,16 +106,14 @@ var vtkjs_pointFeature = function (arg) {
     // TODO: points can vary, this needs to be refactors to have a distinct
     // size per point.  What should be done with the strokeColor, strokeWidth,
     // and strokeOpacity?  Honor the fill/stroke options or document that we
-    // don't honot them.
-    var rad = radFunc(), clr = colorFunc();
+    // don't honot them.  Handle the zero-data-itmes condition.
+    var rad = radFunc(data[0], 0), clr = colorFunc(data[0], 0);
     rad *= m_this.layer().map().unitsPerPixel(m_this.layer().map().zoom());
     m_pointSet.getPoints().setData(position, 3);
     m_source.setRadius(rad);
     // TODO: This is not setting the color of the rendered points
     m_actor.getProperty().setColor(clr.r, clr.g, clr.b);
     m_this.buildTime().modified();
-
-    console.debug('built vtkjs point feature');
   };
 
   /**
