@@ -53,6 +53,7 @@ var vtkjs_pointFeature = function (arg) {
     mapper.setInputConnection(m_source.getOutputPort(), 1);
     m_actor = vtkActor.newInstance();
     m_actor.setMapper(mapper);
+    m_actor.getProperty().setAmbient(1);
     this.renderer().contextRenderer().addActor(m_actor);
   };
 
@@ -111,7 +112,6 @@ var vtkjs_pointFeature = function (arg) {
     rad *= m_this.layer().map().unitsPerPixel(m_this.layer().map().zoom());
     m_pointSet.getPoints().setData(position, 3);
     m_source.setRadius(rad);
-    // TODO: This is not setting the color of the rendered points
     m_actor.getProperty().setColor(clr.r, clr.g, clr.b);
     m_this.buildTime().modified();
   };
