@@ -3,10 +3,12 @@ var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
 
 /**
- * Create a new instance of pointFeature
+ * Create a new instance of vtkjs.pointFeature.
  *
- * @class geo.vtkjs.pointFeature
+ * @class
+ * @alias geo.vtkjs.pointFeature
  * @extends geo.pointFeature
+ * @param {geo.pointFeature.spec} arg
  * @returns {geo.vtkjs.pointFeature}
  */
 var vtkjs_pointFeature = function (arg) {
@@ -28,20 +30,18 @@ var vtkjs_pointFeature = function (arg) {
   object.call(this);
 
   /**
-   * Member variables
-   *
    * @private
    */
   var m_this = this,
+      m_actor,
+      m_pointSet,
+      m_source,
       s_init = this._init,
       s_exit = this._exit,
-      m_actor = null,
-      m_pointSet = null,
-      m_source = null,
       s_update = this._update;
 
   /**
-   * Create pipeline
+   * Create pipeline.
    */
   this._createPipeline = function () {
     m_pointSet = vtkPointSet.newInstance();
@@ -58,7 +58,7 @@ var vtkjs_pointFeature = function (arg) {
   };
 
   /**
-   * Initialize
+   * Initialize.
    */
   this._init = function () {
     s_init.call(m_this, arg);
@@ -67,7 +67,7 @@ var vtkjs_pointFeature = function (arg) {
   };
 
   /**
-   * Build this feature
+   * Build this feature.
    */
   this._build = function () {
     var i, i3, posVal,
@@ -117,11 +117,9 @@ var vtkjs_pointFeature = function (arg) {
   };
 
   /**
-   * Update
-   *
+   * Update.
    */
   this._update = function () {
-
     s_update.call(m_this);
 
     if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
@@ -139,7 +137,7 @@ var vtkjs_pointFeature = function (arg) {
   };
 
   /**
-   * Destroy
+   * Destroy.
    */
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);

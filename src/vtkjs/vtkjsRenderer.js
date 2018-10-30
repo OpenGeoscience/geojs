@@ -3,12 +3,16 @@ var registerRenderer = require('../registry').registerRenderer;
 var renderer = require('../renderer');
 
 /**
- * Create a new instance of class vtkjsRenderer
+ * Create a new instance of class vtkjsRenderer.
  *
- * @class geo.gl.vtkjsRenderer
+ * @class
+ * @alias geo.vtkjs.vglRenderer
  * @extends geo.renderer
- * @param canvas
- * @returns {geo.gl.vtkjsRenderer}
+ * @param {object} arg Options for the renderer.
+ * @param {geo.layer} [arg.layer] Layer associated with the renderer.
+ * @param {HTMLElement} [arg.canvas] Canvas element associated with the
+ *   renderer.
+ * @returns {geo.vtkjs.vtkjsRenderer}
  */
 var vtkjsRenderer = function (arg) {
   'use strict';
@@ -39,35 +43,45 @@ var vtkjsRenderer = function (arg) {
   var renderWindow = vtkRenderer.getRenderWindow();
 
   /**
-   * Return width of the renderer
+   * Return width of the renderer.
+   *
+   * @returns {number} The width of the current canvas.
    */
   this.width = function () {
     return m_width;
   };
 
   /**
-   * Return height of the renderer
+   * Return height of the renderer.
+   *
+   * @returns {number} The height of the current canvas.
    */
   this.height = function () {
     return m_height;
   };
 
   /**
-   * Get context specific renderer
+   * Get context specific renderer.
+   *
+   * @returns {object} The vtkjs context renderer.
    */
   this.contextRenderer = function () {
     return vtkjsren;
   };
 
   /**
-   * Get API used by the renderer
+   * Get API used by the renderer.
+   *
+   * @returns {string} `vtkjs`.
    */
   this.api = function () {
     return 'vtkjs';
   };
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @returns {this}
    */
   this._init = function () {
     if (m_this.initialized()) {
@@ -87,7 +101,13 @@ var vtkjsRenderer = function (arg) {
   };
 
   /**
-   * Handle resize event
+   * Handle resize event.
+   *
+   * @param {number} x The left coordinate.
+   * @param {number} y The top coordinate.
+   * @param {number} w The width in pixels.
+   * @param {number} h The height in pixels.
+   * @returns {this}
    */
   this._resize = function (x, y, w, h) {
     vtkRenderer.resize();
@@ -97,6 +117,8 @@ var vtkjsRenderer = function (arg) {
 
   /**
    * Render.  This actually schedules rendering for the next animation frame.
+   *
+   * @returns {this}
    */
   this._render = function () {
     /* If we are already scheduled to render, don't schedule again.  Rather,
@@ -110,7 +132,7 @@ var vtkjsRenderer = function (arg) {
   };
 
   /**
-   * This clears the render timer and actually renders.
+   * This actually renders.
    */
   this._renderFrame = function () {
     var layer = m_this.layer(),
@@ -127,7 +149,7 @@ var vtkjsRenderer = function (arg) {
   };
 
   /**
-   * Exit
+   * Exit.
    */
   this._exit = function () {
     // DO NOTHING
@@ -146,18 +168,14 @@ var vtkjsRenderer = function (arg) {
     m_this.contextRenderer().getActiveCamera().setProjectionMatrix(projmat);
   };
 
-  /**
-   * Connect to pan event.  This is sufficient, as all zooms and rotations also
-   * produce a pan
-   */
+  /* Connect to pan event.  This is sufficient, as all zooms and rotations also
+   * produce a pan */
   m_this.layer().geoOn(geo_event.pan, function (evt) {
     // TODO: We may only need to do this if the zoom level has changed.
     m_this._render();
   });
 
-  /**
-   * Connect to parallelprojection event
-   */
+  /* Connect to parallelprojection event. */
   m_this.layer().geoOn(geo_event.parallelprojection, function (evt) {
     // DO NOTHING
   });
@@ -170,7 +188,8 @@ inherit(vtkjsRenderer, renderer);
 registerRenderer('vtkjs', vtkjsRenderer);
 
 /**
- * Report if the vtkjs renderer is supported.  This is just a check if vtkjs is available.
+ * Report if the vtkjs renderer is supported.  This is just a check if vtkjs is
+ * available.
  *
  * @returns {boolean} true if available.
  */
@@ -184,7 +203,7 @@ vtkjsRenderer.supported = function () {
 };
 
 /**
- * If the vtks renderer is not supported, supply the name of a renderer that
+ * If the vtkjs renderer is not supported, supply the name of a renderer that
  * should be used instead.  This asks for the null renderer.
  *
  * @returns {null} `null` for the null renderer.
