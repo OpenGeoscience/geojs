@@ -24,14 +24,20 @@
  *    the polling and update interval.
  * keep: 3600 (default) or a time in seconds.  If specified and collecting live
  *    data, only keep this duration of data.  If 0, keep all data.
+ * x: starting center longitude.  Default -75.
+ * y: starting center latitude.  Default 40.
+ * zoom: starting zoom level.  Default 7.
  */
 
-var query = utils.getQuery();
+var query = utils.getQuery(),
+    canSelect = query.select !== 'false',
+    hasOpacity = query.opacity !== 'false',
+    hasScale = query.scale !== 'false';
 
 var map, layer, feature, ranges, data;
 // We use a d3 color scale, but getting colors from it is slow.  Since we use a
 // 10-part piecewise linear scale (with 11 specification values), we can use a
-// 10 * 256 + 1 size array to use pre-computed colors with surity that it has
+// 10 * 256 + 1 size array to use pre-computed colors with surety that it has
 // all possible values for 8-bit color displays.  We can manually interpolate
 // to use the scale array.
 var d3Scale = d3.scale.linear()
@@ -54,7 +60,7 @@ function draw(drawData) {
     ranges = data.ranges;
     if (!ranges) {
       ranges = {};
-      ['time', 'z', 'v', 'vz'].forEach(function (key) {
+      ['time', 'z', 'v'].forEach(function (key) {
         ranges[key] = {min: data[0][key][0], max: data[0][key][0]};
         data.forEach(function (line) {
           for (var i = 0; i < line[key].length; i += 1) {
@@ -62,21 +68,23 @@ function draw(drawData) {
             ranges[key].max = Math.max(ranges[key].max, line[key][i]);
           }
         });
+        ranges[key].range = ranges[key].max - ranges[key].min;
       });
     }
     feature.data(data);
   }
-  feature.draw();
+  // feature.draw();
+  map.scheduleAnimationFrame(feature.draw);
 }
 
 // Create a map object
 map = geo.map({
   node: '#map',
   center: {
-    x: -75,
-    y: 40
+    x: query.x !== undefined ? +query.x : -75,
+    y: query.y !== undefined ? +query.y : 40
   },
-  zoom: 7
+  zoom: query.zoom !== undefined ? +query.zoom : 7
 });
 
 // Add the default osm layer
@@ -96,44 +104,42 @@ map.layers()[0].attribution(map.layers()[0].attribution() + '.  Flight data from
 layer = map.createLayer('feature', {features: [geo.lineFeature.capabilities.multicolor]});
 
 // Create a line feature
-feature = layer.createFeature('line', {selectionAPI: query.select !== 'false'})
+feature = layer.createFeature('line', {selectionAPI: canSelect})
   // For the line accessor, we can return any array that is the length of the
-  // number of verticies in the line.
+  // number of vertices in the line.
   .line(function (d) {
     return d.time;
   })
-  .position(function (d, i, l, li) {
-    return {x: data[li].lon[i], y: data[li].lat[i]};
+  .position(function (d, i, l) {
+    return {x: l.lon[i], y: l.lat[i]};
   })
   .style({
-    'strokeColor': function (d, i, l, li) {
-      if (query.scale === 'false') {
+    strokeColor: function (d, i, l) {
+      if (!hasScale) {
         // d3 scales are slow
         // return d3Scale(0);
         return scale[0];
       }
-      var val = (data[li].v[i] - ranges.v.min) / (ranges.v.max - ranges.v.min);
+      var val = (l.v[i] - ranges.v.min) / ranges.v.range;
       // d3 scales are slow
       // return d3Scale(val);
-      val = Math.round(d3ScaleParts * val);
-      return val < 0 ? scale[0] : val > d3ScaleParts ? scale[d3ScaleParts] : scale[val];
+      return val < 0 ? scale[0] : val > 1 ? scale[d3ScaleParts] : scale[Math.round(d3ScaleParts * val)];
     },
-    'strokeWidth': function (d, i, l, li) {
-      var width = 0.5 + 4.5 * (data[li].z[i] - ranges.z.min) / (ranges.z.max - ranges.z.min);
-      if (data[li].hover) {
+    strokeWidth: function (d, i, l) {
+      var width = 0.5 + 3.0 * (l.z[i] - ranges.z.min) / ranges.z.range;
+      if (canSelect && l.hover) {
         width = width * 2 + 1;
       }
       return width;
     },
-    'strokeOpacity': function (d, i, l, li) {
-      if (data[li].hover) {
+    strokeOpacity: function (d, i, l) {
+      if (canSelect && l.hover) {
         return 1;
       }
-      if (query.opacity === 'false') {
+      if (!hasOpacity) {
         return 0.25;
       }
-      var opac = 0.05 + 0.70 * (data[li].time[i] - ranges.time.min) / (ranges.time.max - ranges.time.min);
-      return opac;
+      return 0.05 + 0.70 * (d - ranges.time.min) / ranges.time.range;
     },
     lineCap: 'round',
     lineJoin: 'round'
@@ -141,11 +147,12 @@ feature = layer.createFeature('line', {selectionAPI: query.select !== 'false'})
   .geoOff(geo.event.feature.mouseover)
   .geoOff(geo.event.feature.mouseout)
   .geoOn(geo.event.feature.mouseover, function (evt) {
-    if (!evt.top) { return; }
+    if (!evt.top || evt.data.hover) { return; }
     data.forEach(function (d) {
       d.hover = false;
     });
     evt.data.hover = true;
+    console.log(evt.data.id);
     this.modified();
     feature.draw();
   });
