@@ -368,14 +368,10 @@ var util = {
     }
     /* If we need to allocate a new buffer (smaller or larger), and we have an
      * existing, non-zero-length buffer, allocate a larger than needed buffer.
-     * Add an extra factor of allocateLarger, but if a power-of-two is between
-     * the specified size and the larger permitted size, perfer the power-of-
-     * two. */
+     * Add an extra factor of allocateLarger. */
     var allocate = len;
     if (data instanceof Float32Array && data.length && len && allocateLarger > 0) {
-      allocate = Math.min(
-        Math.floor((allocateLarger + 1) * len),
-        Math.pow(2, Math.ceil(Math.log(len) / Math.log(2))));
+      allocate = Math.floor((allocateLarger + 1) * len);
     }
     data = new Float32Array(allocate);
     src.setData(data);
