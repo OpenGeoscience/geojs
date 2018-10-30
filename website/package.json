@@ -1,13 +1,13 @@
 {
-  "name": "hexo-site",
+  "name": "geojs-site",
   "version": "0.0.0",
   "private": true,
   "hexo": {
-    "version": "3.7.1"
+    "version": ""
   },
   "dependencies": {
-    "hexo": "^3.4.4",
-    "hexo-fs": "^0.2.2",
+    "hexo": "^3.8.0",
+    "hexo-fs": "^1.0.0",
     "hexo-renderer-ejs": "^0.3.0",
     "hexo-renderer-marked": "^0.3.2",
     "hexo-renderer-scss": "^1.0.3",
