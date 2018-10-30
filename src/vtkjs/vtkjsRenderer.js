@@ -33,7 +33,7 @@ var vtkjsRenderer = function (arg) {
     background: [0, 0, 0, 0]});
   vtkRenderer.setContainer(m_this.layer().node().get(0));
   // TODO: Is there a way to start with no interactor rather than unbinding it?
-  vtkRenderer.getInteractor().unbindEvents()
+  vtkRenderer.getInteractor().unbindEvents();
   vtkRenderer.resize();
   var vtkjsren = vtkRenderer.getRenderer();
   var renderWindow = vtkRenderer.getRenderWindow();
@@ -151,9 +151,8 @@ var vtkjsRenderer = function (arg) {
    * produce a pan
    */
   m_this.layer().geoOn(geo_event.pan, function (evt) {
-    // TODO: If the zoom level has changed, our point size needs to be
-    // recalculated, so we should call m_this._render
-    // DO NOTHING
+    // TODO: We may only need to do this if the zoom level has changed.
+    m_this._render();
   });
 
   /**

@@ -127,6 +127,12 @@ var vtkjs_pointFeature = function (arg) {
     if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
         m_this.updateTime().getMTime() < m_this.getMTime()) {
       m_this._build();
+    } else {
+      var data = m_this.data(),
+          radFunc = m_this.style.get('radius'),
+          rad = radFunc(data[0], 0);
+      rad *= m_this.layer().map().unitsPerPixel(m_this.layer().map().zoom());
+      m_source.setRadius(rad);
     }
 
     m_this.updateTime().modified();
