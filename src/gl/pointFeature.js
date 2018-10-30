@@ -588,6 +588,11 @@ var gl_pointFeature = function (arg) {
     geom.addSource(sourceAlpha);
     geom.addSource(sourceStrokeOpacity);
     geom.addPrimitive(primitive);
+    /* We don't need vgl to comptue bounds, so make the geo.computeBounds just
+     * set them to 0. */
+    geom.computeBounds = function () {
+      geom.setBounds(0, 0, 0, 0, 0, 0);
+    };
     m_mapper.setGeometryData(geom);
   };
 
