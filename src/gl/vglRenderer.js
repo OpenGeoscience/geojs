@@ -341,7 +341,14 @@ vglRenderer.supported = function () {
       canvas = document.createElement('canvas');
       ctx = (canvas.getContext('webgl') ||
              canvas.getContext('experimental-webgl'));
-      exts = ctx.getSupportedExtensions(); // used for side effects
+      /* getSupportExtensions will throw an exception if the context isn't
+       * really supported. */
+      exts = ctx.getSupportedExtensions();
+      /* If available, store the unmasked renderer to aid in debugging. */
+      if (exts.indexOf('WEBGL_debug_renderer_info') >= 0) {
+        vglRenderer._unmaskedRenderer = ctx.getParameter(ctx.getExtension(
+          'WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL);
+      }
       checkedWebGL = true;
     } catch (e) {
       console.warn('No webGL support');

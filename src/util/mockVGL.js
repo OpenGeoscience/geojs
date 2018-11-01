@@ -107,6 +107,10 @@ module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
         return true;
       }
     },
+    getSupportedExtensions: function () {
+      count('getSupportedExtensions');
+      return [];
+    },
     getUniformLocation: incID('getUniformLocation'),
     isEnabled: function (key) {
       count('isEnabled');
