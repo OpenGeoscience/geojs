@@ -1,0 +1,8 @@
+{
+  "title": "Use VTK.js along with GeoJS",
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "Show national capitals as points using the vtkjs renderer."
+  },
+  "disabled": true
+}
