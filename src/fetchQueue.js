@@ -23,7 +23,7 @@ var $ = require('jquery');
  * adjusted.
  *
  * At this time (2018-11-02) most major browsers support 6 concurrent requests
- * from any given server, so, when using the queue for tile images, thie number
+ * from any given server, so, when using the queue for tile images, the number
  * of concurrent requests should be 6 * (number of subdomains serving tiles).
  *
  * @class
