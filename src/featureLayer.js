@@ -10,7 +10,7 @@ var registry = require('./registry');
  * @class
  * @alias geo.featureLayer
  * @extends geo.layer
- * @param {object} arg Options for the new layer.
+ * @param {geo.layer.spec} [arg] Specification for the new layer.
  * @returns {geo.featureLayer}
  */
 var featureLayer = function (arg) {

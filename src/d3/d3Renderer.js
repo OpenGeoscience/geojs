@@ -380,7 +380,7 @@ var d3Renderer = function (arg) {
           .attr('mode', 'normal');
 
       if (!arg.widget) {
-        canvas = m_svg.append('g');
+        canvas = arg.canvas || m_svg.append('g');
       }
 
       shadow = m_defs.append('filter')

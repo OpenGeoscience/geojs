@@ -17,6 +17,9 @@
 - Removed the dependency on the vgl module for the `object` and `timestamp` classes (#918)
 - CSS color names are obtained from an npm package rather than being defined in the util module (#936)
 
+### Bug Fixes
+- Fixed some minor issues with layers (#949)
+
 ## Version 0.18.1
 
 ### Bug Fixes

@@ -6,41 +6,52 @@ var rendererForFeatures = require('./registry').rendererForFeatures;
 var rendererForAnnotations = require('./registry').rendererForAnnotations;
 
 /**
+ * Object specification for a layer.
+ *
+ * @typedef {object} geo.layer.spec
+ * @property {number} [id] The id of the layer.  Defaults to a increasing
+ *   sequence.
+ * @property {geo.map} [map=null] Parent map of the layer.
+ * @property {string|geo.renderer} [renderer] Renderer to associate with the
+ *   layer.  If not specified, either `annotations` or `features` can be used
+ *   to determine the renderer.  If a `geo.renderer` instance, the renderer is
+ *   not recreated; not all renderers can be shared by multiple layers.
+ * @property {HTMLElement} [canvas] If specified, use this canvas rather than
+ *   a canvas associaied with the renderer directly.  Renderers may not support
+ *   sharing a canvas.
+ * @property {string[]|object} [annotations] A list of annotations that will be
+ *   used on this layer, used to select a renderer.  Instead of a list, if
+ *   this is an object, the keys are the annotation names, and the values are
+ *   each a list of modes that will be used with that annotation.  See
+ *   `featuresForAnnotations` more details.  This is ignored if `renderer` is
+ *   specified.
+ * @property {string[]} [features] A list of features that will be used on this
+ *   layer, used to select a renderer.  Features are the basic feature names
+ *   (e.g., `'quad'`), or the feature name followed by a required capability
+ *   (e.g., `'quad.image'`).  This is ignored if `renderer` or `annotations` is
+ *   specified.
+ * @property {boolean} [active=true] Truthy if the layer has the `active` css
+ *   class and may receive native mouse events.
+ * @property {string} [attribution] An attribution string to display.
+ * @property {number} [opacity=1] The layer opacity on a scale of [0-1].
+ * @property {string} [name=''] A name for the layer for user convenience.  If
+ *   specified, this is also the `id` property of the containing DOM element.
+ * @property {boolean} [selectionAPI=true] Truthy if the layer can generate
+ *   selection and other interaction events.
+ * @property {boolean} [sticky=true] Truthy if the layer should navigate with
+ *   the map.
+ * @property {boolean} [visible=true] Truthy if the layer is visible.
+ * @property {number} [zIndex] The z-index to assign to the layer (defaults to
+ *   the index of the layer inside the map).
+ */
+
+/**
  * Create a new layer.
  *
  * @class
  * @alias geo.layer
  * @extends geo.sceneObject
- * @param {object} [arg] Options for the new layer.
- * @param {number} [arg.id] The id of the layer.  Defaults to a increasing
- *   sequence.
- * @param {geo.map} [arg.map=null] Parent map of the layer.
- * @param {string|geo.renderer} [arg.renderer] Renderer to associate with the
- *   layer.  If not specified, either `arg.annotations` or `arg.features` can
- *   be used to determine the renderer.
- * @param {string[]|object} [arg.annotations] A list of annotations that will
- *   be used on this layer, used to select a renderer.  Instead of a list, if
- *   this is an object, the keys are the annotation names, and the values are
- *   each a list of modes that will be used with that annotation.  See
- *   `featuresForAnnotations` more details.  This is ignored if `arg.renderer`
- *   is specified.
- * @param {string[]} [arg.features] A list of features that will be used on
- *   this layer, used to select a renderer.  Features are the basic feature
- *   names (e.g., `'quad'`), or the feature name followed by a required
- *   capability (e.g., `'quad.image'`).  This is ignored if `arg.renderer` or
- *   `arg.annotations` is specified.
- * @param {boolean} [arg.active=true] Truthy if the layer has the `active` css
- *   class and may receive native mouse events.
- * @param {string} [arg.attribution] An attribution string to display.
- * @param {number} [arg.opacity=1] The layer opacity on a scale of [0-1].
- * @param {string} [arg.name=''] A name for the layer for user convenience.
- * @param {boolean} [arg.selectionAPI=true] Truthy if the layer can generate
- *   selection and other interaction events.
- * @param {boolean} [arg.sticky=true] Truthy if the layer should navigate with
- *   the map.
- * @param {boolean} [arg.visible=true] Truthy if the layer is visible.
- * @param {number} [arg.zIndex] The z-index to assign to the layer (defaults
- *   to the index of the layer inside the map).
+ * @param {geo.layer.spec} [arg] Specification for the new layer.
  * @returns {geo.layer}
  */
 var layer = function (arg) {
@@ -54,10 +65,9 @@ var layer = function (arg) {
 
   var $ = require('jquery');
   var timestamp = require('./timestamp');
+  var renderer = require('./renderer');
   var createRenderer = require('./registry').createRenderer;
-  var newLayerId = require('./util').newLayerId;
   var geo_event = require('./event');
-  var camera = require('./camera');
 
   /**
    * @private
@@ -68,10 +78,11 @@ var layer = function (arg) {
       m_name = arg.name === undefined ? '' : arg.name,
       m_map = arg.map === undefined ? null : arg.map,
       m_node = null,
-      m_canvas = null,
-      m_renderer = null,
+      m_canvas = arg.canvas === undefined ? null : arg.canvas,
+      m_renderer = arg.renderer instanceof renderer ? arg.renderer : null,
       m_initialized = false,
-      m_rendererName = arg.renderer !== undefined ? arg.renderer : (
+      m_rendererName = arg.renderer !== undefined ? (
+        arg.renderer instanceof renderer ? arg.renderer.api() : arg.renderer) : (
         arg.annotations ? rendererForAnnotations(arg.annotations) :
           rendererForFeatures(arg.features)),
       m_dataTime = timestamp(),
@@ -261,14 +272,15 @@ var layer = function (arg) {
   /**
    * Get/Set id of the layer.
    *
-   * @param {string} [val] If specified, the new id of the layer.
+   * @param {string|null} [val] If `null`, generate a new layer id.  Otherwise,
+   *    if specified, the new id of the layer.
    * @returns {string|this}
    */
   this.id = function (val) {
     if (val === undefined) {
       return m_id;
     }
-    m_id = newLayerId();
+    m_id = val === null ? layer.newLayerId() : val;
     m_this.modified();
     return m_this;
   };
@@ -284,6 +296,7 @@ var layer = function (arg) {
       return m_name;
     }
     m_name = val;
+    m_node.attr('id', m_name);
     m_this.modified();
     return m_this;
   };
@@ -361,9 +374,6 @@ var layer = function (arg) {
    * @returns {geo.geoPosition} Renderer coordinates.
    */
   this.toLocal = function (input) {
-    if (m_this._toLocalMatrix) {
-      camera.applyTransform(m_this._toLocalMatrix, input);
-    }
     return input;
   };
 
@@ -374,9 +384,6 @@ var layer = function (arg) {
    * @returns {geo.geoPosition} World coordinates.
    */
   this.fromLocal = function (input) {
-    if (m_this._fromLocalMatrix) {
-      camera.applyTransform(m_this._fromLocalMatrix, input);
-    }
     return input;
   };
 
@@ -454,9 +461,10 @@ var layer = function (arg) {
     var options = $.extend({}, arg);
     delete options.map;
 
-    if (m_rendererName === null) {
-      // if given a "null" renderer, then pass the map element as the
-      // canvas
+    if (m_renderer) {
+      m_canvas = m_renderer.canvas();
+    } else if (m_rendererName === null) {
+      // if given a "null" renderer, then pass the map element as the canvas
       m_renderer = null;
       m_canvas = m_node;
     } else if (m_canvas) { // Share context if we have valid one
@@ -512,8 +520,10 @@ var layer = function (arg) {
    * Update layer.
    *
    * This is a stub that should be subclasses.
+   * @returns {this}
    */
   this._update = function () {
+    return m_this;
   };
 
   /**
@@ -537,13 +547,13 @@ var layer = function (arg) {
   /**
    * Get or set the current layer opacity.  The opacity is in the range [0-1].
    *
-   * @param {number} [opac] If specified, set the opacity.  Otherwise, return
-   *    the opacity.
+   * @param {number} [opacity] If specified, set the opacity.  Otherwise,
+   *    return the opacity.
    * @returns {number|this} The current opacity or the current layer.
    */
-  this.opacity = function (opac) {
-    if (opac !== undefined) {
-      m_opacity = opac;
+  this.opacity = function (opacity) {
+    if (opacity !== undefined) {
+      m_opacity = opacity;
       m_node.css('opacity', m_opacity);
       return m_this;
     }
@@ -553,7 +563,9 @@ var layer = function (arg) {
   // Create top level div for the layer
   m_node = $(document.createElement('div'));
   m_node.addClass('geojs-layer');
-  m_node.attr('id', m_name);
+  if (m_name) {
+    m_node.attr('id', m_name);
+  }
   m_this.opacity(m_opacity);
 
   // set the z-index (this prevents duplication)
@@ -589,13 +601,13 @@ layer.newLayerId = (function () {
 
 /**
  * General object specification for feature types.
- * @typedef geo.layer.spec
- * @type {object}
+ * @typedef {geo.layer.spec} geo.layer.createSpec
+ * @extends {geo.layer.spec}
  * @property {string} [type='feature'] For feature compatibility with more than
  *    one kind of creatable layer
  * @property {object[]} [data=[]] The default data array to apply to each
- *    feature if none exists
- * @property {string} [renderer='vgl'] The renderer to use
+ *    feature if none exists.
+ * @property {string} [renderer='vgl'] The renderer to use.
  * @property {geo.feature.spec[]} [features=[]] Features to add to the layer.
  */
 
@@ -603,7 +615,7 @@ layer.newLayerId = (function () {
  * Create a layer from an object.  Any errors in the creation
  * of the layer will result in returning null.
  * @param {geo.map} map The map to add the layer to
- * @param {geo.layer.spec} spec The object specification
+ * @param {geo.layer.createSpec} spec The layer specification.
  * @returns {geo.layer|null}
  */
 layer.create = function (map, spec) {
@@ -611,14 +623,9 @@ layer.create = function (map, spec) {
 
   spec = spec || {};
 
-  // add osmLayer later
-  spec.type = 'feature';
-  if (spec.type !== 'feature') {
-    console.warn('Unsupported layer type');
-    return null;
-  }
+  spec.type = spec.type || 'feature';
 
-  spec.renderer = spec.renderer || 'vgl';
+  spec.renderer = spec.renderer === undefined ? 'vgl' : spec.renderer;
   spec.renderer = checkRenderer(spec.renderer);
 
   if (!spec.renderer) {
@@ -632,11 +639,13 @@ layer.create = function (map, spec) {
     return null;
   }
 
-  // probably move this down to featureLayer eventually
-  spec.features.forEach(function (f) {
-    f.data = f.data || spec.data;
-    f.feature = feature.create(layer, f);
-  });
+  if (spec.features) {
+    // probably move this down to featureLayer eventually
+    spec.features.forEach(function (f) {
+      f.data = f.data || spec.data;
+      f.feature = feature.create(layer, f);
+    });
+  }
 
   return layer;
 };

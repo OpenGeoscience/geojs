@@ -8,7 +8,7 @@ var layer = require('../layer');
  * @class
  * @alias geo.gui.uiLayer
  * @extends {geo.layer}
- * @param {object} [arg] Options for the layer.
+ * @param {geo.layer.spec} [arg] Specification for the new layer.
  * @returns {geo.gui.uiLayer}
  */
 var uiLayer = function (arg) {

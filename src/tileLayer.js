@@ -2,6 +2,68 @@ var inherit = require('./inherit');
 var featureLayer = require('./featureLayer');
 
 /**
+ * Object specification for a tile layer.
+ *
+ * @typedef {geo.layer.spec} geo.tileLayer.spec
+ * @extends {geo.layer.spec}
+ * @property {number} [minLevel=0] The minimum zoom level available.
+ * @property {number} [maxLevel=18] The maximum zoom level available.
+ * @property {object} [tileOverlap] Pixel overlap between tiles.
+ * @property {number} [tileOverlap.x] Horizontal overlap.
+ * @property {number} [tileOverlap.y] Vertical overlap.
+ * @property {number} [tileWidth=256] The tile width without overlap.
+ * @property {number} [tileHeight=256] The tile height without overlap.
+ * @property {function} [tilesAtZoom=null] A function that is given a zoom
+ *   level and returns `{x: (num), y: (num)}` with the number of tiles at that
+ *   zoom level.
+ * @property {number} [cacheSize=400] The maximum number of tiles to cache.
+ *   The default is 200 if keepLower is false.
+ * @property {boolean} [keepLower=true] When truthy, keep lower zoom level
+ *   tiles when showing high zoom level tiles.  This uses more memory but
+ *   results in smoother transitions.
+ * @property {boolean} [wrapX=true] Wrap in the x-direction.
+ * @property {boolean} [wrapY=false] Wrap in the y-direction.
+ * @property {string|function} [url=null] A function taking the current tile
+ *   indices `(x, y, level, subdomains)` and returning a URL or jquery ajax
+ *   config to be passed to the {geo.tile} constructor.  Example:
+ *   ```
+ *   (x, y, z, subdomains) => "http://example.com/z/y/x.png"
+ *   ```
+ *   If this is a string, a template url with {x}, {y}, {z}, and {s} as
+ *   template variables.  {s} picks one of the subdomains parameter and may
+ *   contain a comma-separated list of subdomains.
+ * @property {string|list} [subdomain="abc"] Subdomains to use in template url
+ *   strings.  If a string, this is converted to a list before being passed to
+ *   a url function.
+ * @property {string} [baseUrl=null]  If defined, use the old-style base url
+ *   instead of the url parameter.  This is functionally the same as using a
+ *   url of `baseUrl/{z}/{x}/{y}.(imageFormat || png)`.  If the specified
+ *   string does not end in a slash, one is added.
+ * @property {string} [imageFormat='png'] This is only used if a `baseUrl` is
+ *   specified, in which case it determines the image name extension used in
+ *   the url.
+ * @property {number} [animationDuration=0] The number of milliseconds for the
+ *   tile loading animation to occur.  Only some renderers support this.
+ * @property {string} [attribution] An attribution to display with the layer
+ *   (accepts HTML).
+ * @property {function} [tileRounding=Math.round] This function determines
+ *   which tiles will be loaded when the map is at a non-integer zoom.  For
+ *   example, `Math.floor`, will use tile level 2 when the map is at zoom 2.9.
+ * @property {function} [tileOffset] This function takes a zoom level argument
+ *   and returns, in units of pixels, the coordinates of the point (0, 0) at
+ *   the given zoom level relative to the bottom left corner of the domain.
+ * @property {function} [tilesMaxBounds=null] This function takes a zoom level
+ *   argument and returns an object with `x` and `y` in pixels which is used to
+ *   crop the last row and column of tiles.  Note that if tiles wrap, only
+ *   complete tiles in the wrapping direction(s) are supported, and this max
+ *   bounds will probably not behave properly.
+ * @property {boolean} [topDown=false]  True if the gcs is top-down, false if
+ *   bottom-up (the ingcs does not matter, only the gcs coordinate system).
+ *   When falsy, this inverts the gcs y-coordinate when calculating local
+ *   coordinates.
+ */
+
+/**
  * Standard modulo operator where the output is in [0, b) for all inputs.
  * @private
  * @param {number} a Any finite number.
@@ -90,73 +152,15 @@ function m_tileUrlFromTemplate(base) {
  * @class
  * @alias geo.tileLayer
  * @extends geo.featureLayer
- * @param {object?} options
- * @param {number} [options.minLevel=0] The minimum zoom level available.
- * @param {number} [options.maxLevel=18] The maximum zoom level available.
- * @param {object} [options.tileOverlap] Pixel overlap between tiles.
- * @param {number} [options.tileOverlap.x] Horizontal overlap.
- * @param {number} [options.tileOverlap.y] Vertical overlap.
- * @param {number} [options.tileWidth=256] The tile width without overlap.
- * @param {number} [options.tileHeight=256] The tile height without overlap.
- * @param {function} [options.tilesAtZoom=null] A function that is given a
- *    zoom level and returns `{x: (num), y: (num)}` with the number of tiles
- *    at that zoom level.
- * @param {number} [options.cacheSize=400] The maximum number of tiles to
- *    cache.  The default is 200 if keepLower is false.
- * @param {boolean} [options.keepLower=true] When truthy, keep lower zoom
- *    level tiles when showing high zoom level tiles.  This uses more memory
- *    but results in smoother transitions.
- * @param {boolean} [options.wrapX=true] Wrap in the x-direction.
- * @param {boolean} [options.wrapY=false] Wrap in the y-direction.
- * @param {string|function} [options.url=null] A function taking the current
- *   tile indices `(x, y, level, subdomains)` and returning a URL or jquery
- *   ajax config to be passed to the {geo.tile} constructor.  Example:
- *   ```
- *   (x, y, z, subdomains) => "http://example.com/z/y/x.png"
- *   ```
- *   If this is a string, a template url with {x}, {y}, {z}, and {s} as
- *   template variables.  {s} picks one of the subdomains parameter and may
- *   contain a comma-separated list of subdomains.
- * @param {string|list} [options.subdomain="abc"] Subdomains to use in
- *   template url strings.  If a string, this is converted to a list before
- *   being passed to a url function.
- * @param {string} [options.baseUrl=null]  If defined, use the old-style base
- *   url instead of the options.url parameter.  This is functionally the same
- *   as using a url of `baseUrl/{z}/{x}/{y}.(options.imageFormat || png)`.
- *   If the specified string does not end in a slash, one is added.
- * @param {string} [options.imageFormat='png'] This is only used if a
- *   `baseUrl` is specified, in which case it determines the image name
- *   extension used in the url.
- * @param {number} [options.animationDuration=0] The number of milliseconds
- *   for the tile loading animation to occur.  Only some renderers support
- *   this.
- * @param {string} [options.attribution] An attribution to display with the
- *   layer (accepts HTML).
- * @param {function} [options.tileRounding=Math.round] This function
- *   determines which tiles will be loaded when the map is at a non-integer
- *   zoom.  For example, `Math.floor`, will use tile level 2 when the map is
- *   at zoom 2.9.
- * @param {function} [options.tileOffset] This function takes a zoom level
- *   argument and returns, in units of pixels, the coordinates of the point
- *   (0, 0) at the given zoom level relative to the bottom left corner of the
- *   domain.
- * @param {function} [options.tilesMaxBounds=null] This function takes a zoom
- *   level argument and returns an object with `x` and `y` in pixels which is
- *   used to crop the last row and column of tiles.  Note that if tiles wrap,
- *   only complete tiles in the wrapping direction(s) are supported, and this
- *   max bounds will probably not behave properly.
- * @param {boolean} [options.topDown=false]  True if the gcs is top-down,
- *   false if bottom-up (the ingcs does not matter, only the gcs coordinate
- *   system).  When falsy, this inverts the gcs y-coordinate when calculating
- *   local coordinates.
+ * @param {geo.tileLayer.spec} [arg] Specification for the layer.
  * @returns {geo.tileLayer}
  */
-var tileLayer = function (options) {
+var tileLayer = function (arg) {
   'use strict';
   if (!(this instanceof tileLayer)) {
-    return new tileLayer(options);
+    return new tileLayer(arg);
   }
-  featureLayer.call(this, options);
+  featureLayer.call(this, arg);
 
   var $ = require('jquery');
   var geo_event = require('./event');
@@ -166,27 +170,27 @@ var tileLayer = function (options) {
   var adjustLayerForRenderer = require('./registry').adjustLayerForRenderer;
   var Tile = require('./tile');
 
-  options = $.extend(true, {}, this.constructor.defaults, options || {});
-  if (!options.cacheSize) {
+  arg = $.extend(true, {}, this.constructor.defaults, arg || {});
+  if (!arg.cacheSize) {
     // this size should be sufficient for a 4k display
-    options.cacheSize = options.keepLower ? 600 : 200;
+    arg.cacheSize = arg.keepLower ? 600 : 200;
   }
-  if ($.type(options.subdomains) === 'string') {
-    options.subdomains = options.subdomains.split('');
+  if ($.type(arg.subdomains) === 'string') {
+    arg.subdomains = arg.subdomains.split('');
   }
   /* We used to call the url option baseUrl.  If a baseUrl is specified, use
    * it instead of url, interpretting it as before. */
-  if (options.baseUrl) {
-    var url = options.baseUrl;
+  if (arg.baseUrl) {
+    var url = arg.baseUrl;
     if (url && url.charAt(url.length - 1) !== '/') {
       url += '/';
     }
-    options.url = url + '{z}/{x}/{y}.' + (options.imageFormat || 'png');
+    arg.url = url + '{z}/{x}/{y}.' + (arg.imageFormat || 'png');
   }
   /* Save the original url so that we can return it if asked */
-  options.originalUrl = options.url;
-  if ($.type(options.url) === 'string') {
-    options.url = m_tileUrlFromTemplate(options.url);
+  arg.originalUrl = arg.url;
+  if ($.type(arg.url) === 'string') {
+    arg.url = m_tileUrlFromTemplate(arg.url);
   }
 
   var s_init = this._init,
@@ -202,10 +206,10 @@ var tileLayer = function (options) {
   this._levelZIncrement = 1e-5;
 
   // copy the options into a private variable
-  this._options = $.extend(true, {}, options);
+  this._options = $.extend(true, {}, arg);
 
   // set the layer attribution text
-  this.attribution(options.attribution);
+  this.attribution(arg.attribution);
 
   // initialize the object that keeps track of actively drawn tiles
   this._activeTiles = {};
@@ -216,7 +220,7 @@ var tileLayer = function (options) {
   this._tileTree = {};
 
   // initialize the in memory tile cache
-  this._cache = tileCache({size: options.cacheSize});
+  this._cache = tileCache({size: arg.cacheSize});
 
   // initialize the tile fetch queue
   this._queue = fetchQueue({
@@ -225,7 +229,7 @@ var tileLayer = function (options) {
     // if track is the same as the cache size, then neither processing time
     // nor memory will be wasted.  Larger values will use more memory,
     // smaller values will do needless computations.
-    track: options.cacheSize,
+    track: arg.cacheSize,
     needed: function (tile) {
       return tile === this.cache.get(tile.toString(), true);
     }.bind(this)

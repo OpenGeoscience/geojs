@@ -89,7 +89,7 @@ var vglRenderer = function (arg) {
 
     s_init.call(m_this);
 
-    var canvas = $(document.createElement('canvas'));
+    var canvas = arg.canvas || $(document.createElement('canvas'));
     canvas.addClass('webgl-canvas');
     $(m_this.layer().node().get(0)).append(canvas);
 
