@@ -1,6 +1,21 @@
 var $ = require('jquery');
 
 /**
+ * @typedef {object} geo.tile.spec
+ *
+ * @property {object} index The global position of the tile.
+ * @property {number} index.x The x-coordinate (usually the column number).
+ * @property {number} index.y The y-coordinate (usually the row number).
+ * @property {object} size The size of each tile.
+ * @property {number} size.x Width (usually in pixels).
+ * @property {number} size.y Height (usually in pixels).
+ * @property {object|string} url A url or jQuery ajax config object.
+ * @property {object} [overlap] The size of overlap with neighboring tiles.
+ * @property {number} overlap.x=0
+ * @property {number} overlap.y=0
+ */
+
+/**
  * This class defines the raw interface for a "tile" on a map.  A tile is
  * defined as a rectangular section of a map.  The base implementation
  * is independent of the actual content of the tile, but assumes that
@@ -11,21 +26,7 @@ var $ = require('jquery');
  *
  * @class
  * @alias geo.tile
- * @param {object} spec The tile specification.
- *
- * @param {object} spec.index The global position of the tile.
- * @param {number} spec.index.x The x-coordinate (usually the column number).
- * @param {number} spec.index.y The y-coordinate (usually the row number).
- *
- * @param {object} spec.size The size of each tile.
- * @param {number} spec.size.x Width (usually in pixels).
- * @param {number} spec.size.y Height (usually in pixels).
- *
- * @param {object|string} spec.url A url or jQuery ajax config object.
- *
- * @param {object?} spec.overlap The size of overlap with neighboring tiles.
- * @param {number} [spec.overlap.x=0]
- * @param {number} [spec.overlap.y=0]
+ * @param {geo.tile.spec} spec The tile specification.
  * @returns {geo.tile}
  */
 var tile = function (spec) {
