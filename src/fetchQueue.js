@@ -1,30 +1,35 @@
 var $ = require('jquery');
 
 /**
+ * @typedef {object} geo.fetchQueue.spec
+ * @property {number} [size=6] The maximum number of concurrent deferred
+ *   objects.
+ * @property {number} [track=600] The number of objects that are tracked that
+ *   trigger checking if any of them have been abandoned.  The fetch queue can
+ *   grow to the greater of this size and the number of items that are still
+ *   needed.  Setting this to a low number will increase processing time, to a
+ *   high number can increase memory.  Ideally, it should reflect the number of
+ *   items that are kept in memory elsewhere.  If `needed` is `null`, this is
+ *   ignored.
+ * @property {function} [needed=null] If set, this function is passed a
+ *   Deferred object and must return a truthy value if the object is still
+ *   needed.
+ */
+
+/**
  * This class implements a queue for Deferred objects.  Whenever one of the
  * objects in the queue completes (resolved or rejected), another item in the
  * queue is processed.  The number of concurrently processing items can be
- * adjusted.  At this time (2015-12-29) most major browsers support 6
- * concurrent requests from any given server, so, when using the queue for
- * tile images, thie number of concurrent requests should be 6 * (number of
- * subdomains serving tiles).
+ * adjusted.
+ *
+ * At this time (2018-11-02) most major browsers support 6 concurrent requests
+ * from any given server, so, when using the queue for tile images, thie number
+ * of concurrent requests should be 6 * (number of subdomains serving tiles).
  *
  * @class
  * @alias geo.fetchQueue
- *
- * @param {object} [options] A configuration object for the queue.
- * @param {number} [options.size=6] The maximum number of concurrent deferred
- *    objects.
- * @param {number} [options.track=600] The number of objects that are tracked
- *    that trigger checking if any of them have been abandoned.  The fetch
- *    queue can grow to the greater of this size and the number of items that
- *    are still needed.  Setting this to a low number will increase
- *    processing time, to a high number can increase memory.  Ideally, it
- *    should reflect the number of items that are kept in memory elsewhere.
- *    If needed is null, this is ignored.
- * @param {function} [options.needed=null] If set, this function is passed a
- *    Deferred object and must return a truthy value if the object is still
- *    needed.
+ * @param {geo.fetchQueue.spec} [options] A configuration object for the queue.
+ * @returns {geo.fetchQueue}
  */
 var fetchQueue = function (options) {
   if (!(this instanceof fetchQueue)) {
