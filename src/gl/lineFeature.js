@@ -734,7 +734,7 @@ var gl_lineFeature = function (arg) {
   };
 
   /**
-   * Return list of vgl actorss used for rendering.
+   * Return list of vgl actors used for rendering.
    *
    * @returns {vgl.actor[]}
    */
