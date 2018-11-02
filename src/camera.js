@@ -159,7 +159,8 @@ var camera = function (spec) {
     set: function (view) {
       mat4.copy(this._view, view);
       this._update();
-    }
+    },
+    configurable: true
   });
 
   /**
