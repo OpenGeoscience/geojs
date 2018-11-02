@@ -17,15 +17,20 @@ var $ = require('jquery');
  */
 
 /**
+ * @typedef {object} geo.gui.widget.spec
+ *
+ * @property {geo.layer} [layer] Layer associated with the widget.
+ * @property {geo.gui.widget.position} [position] Location of the widget.
+ * @property {geo.gui.widget} [parent] Optional parent widget.
+ */
+
+/**
  * Create a new instance of class widget.
  *
  * @class
  * @alias geo.gui.widget
- * @param {object} [arg] Options for the widget.
- * @param {geo.layer} [arg.layer] Layer associated with the widget.
- * @param {geo.gui.widget.position} [arg.position] Location of the widget.
- * @param {geo.gui.widget} [arg.parent] Optional parent widget.
  * @extends {geo.sceneObject}
+ * @param {geo.gui.widget.spec} [arg] Options for the widget.
  * @returns {geo.gui.widget}
  */
 var widget = function (arg) {

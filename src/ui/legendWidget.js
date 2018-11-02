@@ -3,11 +3,38 @@ var inherit = require('../inherit');
 var registerWidget = require('../registry').registerWidget;
 
 /**
- * Create a new instance of class legendWidget
+ * @typedef {object} geo.gui.legendWidget.categorySpec
+ *
+ * @property {string} name The name of the category.
+ * @property {string} type The type of the category.  `point` shows as a
+ *   circle, `line` as a line segment, all others as a rounded rectangle.
+ * @property {geo.gui.legendWidget.styleSpec} style The style for the category.
+ */
+
+/**
+ * Style specification for a legend category.
+ *
+ * @typedef {geo.feature.styleSpec} geo.gui.legendWidget.styleSpec
+ * @extends geo.feature.styleSpec
+ * @property {boolean|function} [stroke=true] True to stroke legend.
+ * @property {geo.geoColor|function} [strokeColor] Color to stroke each legend.
+ * @property {number|function} [strokeOpacity=1] Opacity for each legend's
+ *   stroke.  Opacity is on a [0-1] scale.
+ * @property {number|function} [strokeWidth=1.5] The weight of the legend's
+ *   stroke in pixels.
+ * @property {boolean|function} [fill=true] True to fill legend.
+ * @property {geo.geoColor|function} [fillColor] Color to fill each legend.
+ * @property {number|function} [fillOpacity=1] Opacity for each legend.
+ *   Opacity is on a [0-1] scale.
+ */
+
+/**
+ * Create a new instance of class geo.gui.legendWidget.
  *
  * @class
  * @alias geo.gui.legendWidget
  * @extends geo.gui.svgWidget
+ * @param {geo.gui.widget.spec} arg Options for the widget.
  * @returns {geo.gui.legendWidget}
  */
 var legendWidget = function (arg) {
@@ -20,7 +47,6 @@ var legendWidget = function (arg) {
   var d3 = require('../d3/d3Renderer').d3;
   var geo_event = require('../event');
 
-  /** @private */
   var m_this = this,
       m_categories = [],
       m_top = null,
@@ -30,29 +56,12 @@ var legendWidget = function (arg) {
       m_padding = 12; // padding in pixels inside the border
 
   /**
-   * Get or set the category array associated with
-   * the legend.  Each element of this array is
-   * an object: ::
-   *     {
-   *         name: string,
-   *         style: object,
-   *         type: 'point' | 'line' | ...
-   *     }
+   * Get or set the category array associated with the legend.
    *
-   * The style property can contain the following feature styles:
-   *     * fill: bool
-   *     * fillColor: object | string
-   *     * fillOpacity: number
-   *     * stroke: bool
-   *     * strokeColor: object | string
-   *     * strokeWidth: number
-   *     * strokeOpacity: number
-   *
-   * The type controls how the element is displayed, point as a circle,
-   * line as a line segment.  Any other value will display as a rounded
-   * rectangle.
-   *
-   * @param {object[]?} categories The categories to display
+   * @param {geo.gui.legendWidget.categorySpec[]} [arg] The categories to
+   *   display.
+   * @returns {geo.gui.legendWidget.categorySpec[]|this} The current categories
+   *   or the widget instance.
    */
   this.categories = function (arg) {
     if (arg === undefined) {
@@ -70,8 +79,9 @@ var legendWidget = function (arg) {
   };
 
   /**
-   * Get the widget's size
-   * @returns {{width: number, height: number}} The size in pixels
+   * Return the size of the widget.
+   *
+   * @returns {geo.screenSize}
    */
   this.size = function () {
     var width = 1, height;
@@ -92,7 +102,9 @@ var legendWidget = function (arg) {
   };
 
   /**
-   * Redraw the legend
+   * Redraw the legend.
+   *
+   * @returns {this}
    */
   this.draw = function () {
 
@@ -189,7 +201,8 @@ var legendWidget = function (arg) {
 
   /**
    * Get scales for the x and y axis for the current size.
-   * @private
+   *
+   * @returns {object} An object with `x` and `y`, each containing a d3 scale.
    */
   this._scale = function () {
     return {

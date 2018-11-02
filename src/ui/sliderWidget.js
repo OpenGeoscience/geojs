@@ -3,11 +3,20 @@ var inherit = require('../inherit');
 var registerWidget = require('../registry').registerWidget;
 
 /**
- * Create a new instance of class sliderWidget
+ * @typedef {geo.gui.widget.spec} geo.gui.sliderWidget.spec
+ * @extends {geo.gui.widget.spec}
+ * @property {number} [width=20] The width of the slider in pixels.
+ * @property {number} [height=160] The height of the slider in pixels.  The
+ *   actual bar is `height - 3 * width`.
+ */
+
+/**
+ * Create a new instance of class sliderWidget.
  *
  * @class
  * @alias geo.gui.sliderWidget
- * @extends {geo.gui.svgWidget}
+ * @extends geo.gui.svgWidget
+ * @param {geo.gui.sliderWidget.spec} arg Options for the widget.
  * @returns {geo.gui.sliderWidget}
  */
 var sliderWidget = function (arg) {
@@ -50,14 +59,12 @@ var sliderWidget = function (arg) {
   /**
    * Add an icon from a path string.  Returns a d3 group element.
    *
-   * @function
-   * @argument {string} icon svg path string
-   * @argument {Array} base where to append the element (d3 selection)
-   * @argument {number} cx Center x-coordinate
-   * @argument {number} cy Center y-coordinate
-   * @argument {number} size Icon size in pixels
-   * @returns {object}
-   * @private
+   * @param {string} icon svg path string.
+   * @param {d3Selection} base where to append the element.
+   * @param {number} cx Center x-coordinate.
+   * @param {number} cy Center y-coordinate.
+   * @param {number} size Icon size in pixels.
+   * @returns {d3GroupElement}
    */
   function put_icon(icon, base, cx, cy, size) {
     var g = base.append('g');
@@ -78,16 +85,19 @@ var sliderWidget = function (arg) {
     return g;
   }
 
+  /**
+   * Return the size of the widget.
+   *
+   * @returns {geo.screenSize}
+   */
   this.size = function () {
     return {width: m_width, height: m_height};
   };
 
   /**
-   * Initialize the slider widget in the map.
+   * Initialize the slider widget.
    *
-   * @function
-   * @returns {geo.gui.sliderWidget}
-   * @private
+   * @returns {this}
    */
   this._init = function () {
     m_this._createCanvas();
@@ -189,7 +199,12 @@ var sliderWidget = function (arg) {
         stroke: null
       });
 
-    // Respond to a mouse event on the widget
+    /**
+     * Respond to a mouse event on the widget.
+     *
+     * @param {d3Event} evt The event on the widget.
+     * @param {boolean} trans Truthy for an animated transition.
+     */
     function respond(evt, trans) {
       var z = m_yscale.invert(d3.mouse(svg.node())[1]),
           zrange = map.zoomRange();
@@ -255,7 +270,10 @@ var sliderWidget = function (arg) {
         d3.event.stopPropagation();
       });
 
-    var mouseOver = function () {
+    /**
+     * When the mouse is over the widget, change the style.
+     */
+    function mouseOver() {
       d3.select(this).attr('filter', 'url(#geo-highlight)');
       m_group.selectAll('rect,path,circle').transition()
         .duration(m_highlightDur)
@@ -265,10 +283,12 @@ var sliderWidget = function (arg) {
         .style('stroke', function (d) {
           return d.stroke || null;
         });
+    }
 
-    };
-
-    var mouseOut = function () {
+    /**
+     * When the mouse is no longer over the widget, change the style.
+     */
+    function mouseOut() {
       d3.select(this).attr('filter', null);
       m_group.selectAll('circle,rect,path').transition()
         .duration(m_highlightDur)
@@ -278,7 +298,7 @@ var sliderWidget = function (arg) {
         .style('stroke', function (d) {
           return m_lowContrast[d.stroke] || null;
         });
-    };
+    }
 
     m_group.selectAll('*')
       .on('mouseover', mouseOver)
@@ -289,14 +309,11 @@ var sliderWidget = function (arg) {
 
     mouseOut();
     m_this._update();
+    return m_this;
   };
 
   /**
    * Removes the slider element from the map and unbinds all handlers.
-   *
-   * @function
-   * @returns {geo.gui.sliderWidget}
-   * @private
    */
   this._exit = function () {
     m_this.geoOff(geo_event.zoom, m_this._update);
@@ -308,9 +325,8 @@ var sliderWidget = function (arg) {
    * Update the slider widget state in reponse to map changes.  I.e. zoom
    * range changes.
    *
-   * @function
-   * @returns {geo.gui.sliderWidget}
-   * @private
+   * @param {object} [obj] An object that can specify a zoom value.
+   * @param {number} [obj.zoom] The new zoom value to show on the slider.
    */
   this._update = function (obj) {
     var map = m_this.layer().map(),
