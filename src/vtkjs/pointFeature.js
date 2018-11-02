@@ -48,7 +48,26 @@ var vtkjs_pointFeature = function (arg) {
     m_source = vtkSphereSource.newInstance();
     m_source.setThetaResolution(30);
     m_source.setPhiResolution(30);
-    var mapper = vtkMapper.newInstance();
+    var mapper = vtkMapper.newInstance({
+      // Orientation
+      orient: false,
+
+      // Color
+      // useLookupTableScalarRange: true,  // FIXME <----
+      // lookupTable,                      // FIXME <----
+      colorByArrayName: 'color',
+      colorMode: vtkMapper.ColorMode.MAP_SCALARS,
+      scalarMode: vtkMapper.ScalarMode.USE_POINT_FIELD_DATA,
+      scalarVisibility: true,
+
+      // Opactity
+      // => not available yet
+
+      // Scaling
+      scaling: true,
+      scaleArray: 'radius',
+      scaleMode: vtkGlyph3DMapper.ScaleModes.SCALE_BY_MAGNITUDE,
+    });
     mapper.setInputData(m_pointSet, 0);
     mapper.setInputConnection(m_source.getOutputPort(), 1);
     m_actor = vtkActor.newInstance();
@@ -73,12 +92,17 @@ var vtkjs_pointFeature = function (arg) {
     var i, i3, posVal,
         nonzeroZ,
         numPts = m_this.data().length,
-        position = new Array(numPts * 3),
         data = m_this.data(),
         posFunc = m_this.position(),
         radFunc = m_this.style.get('radius'),
         colorFunc = m_this.style.get('fillColor'),
         opacityFunc = m_this.style.get('fillOpacity');
+
+
+    const position = new Float64Array(numPts * 3);
+    const opacityArray = new Float32Array(numPts);
+    const colorArray = new Float32Array(numPts); // FIXME maybe not the right type
+    const radiusArray = new Float32Array(numPts);
 
     /* It is more efficient to do a transform on a single array rather than on
       * an array of arrays or an array of objects. */
@@ -88,8 +112,11 @@ var vtkjs_pointFeature = function (arg) {
       position[i3 + 1] = posVal.y;
       position[i3 + 2] = posVal.z || 0;
       nonzeroZ = nonzeroZ || position[i3 + 2];
-      // TODO: fix the opacity per point.
-      m_actor.getProperty().setOpacity(opacityFunc(data[i], i));
+
+      // Register opacity/color/radius
+      opacityArray[i] = opacityFunc(data[i], i);
+      colorArray[i] = colorFunc(data[i], i);
+      radiusArray[i] = radFunc(data[i], i)
     }
     position = transform.transformCoordinates(
       m_this.gcs(), m_this.layer().map().gcs(),
@@ -108,11 +135,14 @@ var vtkjs_pointFeature = function (arg) {
     // size per point.  What should be done with the strokeColor, strokeWidth,
     // and strokeOpacity?  Honor the fill/stroke options or document that we
     // don't honot them.  Handle the zero-data-itmes condition.
-    var rad = radFunc(data[0], 0), clr = colorFunc(data[0], 0);
     rad *= m_this.layer().map().unitsPerPixel(m_this.layer().map().zoom());
     m_pointSet.getPoints().setData(position, 3);
-    m_source.setRadius(rad);
-    m_actor.getProperty().setColor(clr.r, clr.g, clr.b);
+
+    // Attach fields
+    m_pointSet.getPointData().addArray(vtkDataArray.newInstance({ name: 'color', values: colorArray }));
+    m_pointSet.getPointData().addArray(vtkDataArray.newInstance({ name: 'opacity', values: opacityArray }));
+    m_pointSet.getPointData().addArray(vtkDataArray.newInstance({ name: 'radius', values: radiusArray }));
+
     m_this.buildTime().modified();
   };
 
@@ -127,10 +157,13 @@ var vtkjs_pointFeature = function (arg) {
       m_this._build();
     } else {
       var data = m_this.data(),
-          radFunc = m_this.style.get('radius'),
-          rad = radFunc(data[0], 0);
-      rad *= m_this.layer().map().unitsPerPixel(m_this.layer().map().zoom());
-      m_source.setRadius(rad);
+          radFunc = m_this.style.get('radius');
+
+      const scalingFactor = m_this.layer().map().unitsPerPixel(m_this.layer().map().zoom());
+      const dataArray = m_pointSet.getPointData().getArray('radius');
+      const newScaleArray = dataArray.getData().map((v, i) => radFunc(data[i], i) * scalingFactor);
+
+      dataArray.setData(newScaleArray);
     }
 
     m_this.updateTime().modified();
