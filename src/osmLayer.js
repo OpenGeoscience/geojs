@@ -5,6 +5,15 @@ var registry = require('./registry');
 var quadFeature = require('./quadFeature');
 
 /**
+ * Object specification for an OSM layer.
+ *
+ * @typedef {geo.tileLayer.spec} geo.osmLayer.spec
+ * @extends {geo.tileLayer.spec}
+ * @property {number} [mapOpacity] If specified, and `opacity` is not
+ *   specified, use this as the layer opacity.
+ */
+
+/**
  * Create a new instance of osmLayer.  This is a {@link geo.tileLayer} with
  * an OSM url and attribution defaults and with the tiles centered on the
  * origin.
@@ -13,9 +22,7 @@ var quadFeature = require('./quadFeature');
  * @alias geo.osmLayer
  * @extends geo.tileLayer
  *
- * @param {object} arg
- * @param {number} [arg.mapOpacity] If specified, and `arg.opacity` is not
- *    specified, use this as the layer opacity.
+ * @param {geo.osmLayer.spec} [arg] Specification for the layer.
  */
 var osmLayer = function (arg) {
 

@@ -2,6 +2,19 @@ var inherit = require('./inherit');
 var tile = require('./tile');
 
 /**
+ * @typedef {geo.tile.spec} geo.imageTile.spec
+ * @extends {geo.tile.spec}
+ * @property {object} index The global position of the tile.
+ * @property {number} index.x The x-coordinate (the column number).
+ * @property {number} index.y The y-coordinate (the row number).
+ * @property {number} index.level The zoom level.
+ * @property {object} [size] The size of each tile.
+ * @property {number} [size.x=256] Width in pixels.
+ * @property {number} [size.y=256] Height in pixels.
+ * @property {string} [crossDomain='anonymous'] Image CORS attribute.
+ */
+
+/**
  * This class defines a tile that is part of a standard "image pyramid", such
  * as an open street map tile set.  Every tile is uniquely indexed by a row,
  * column, and zoom level.  The number of rows/columns at zoom level z is
@@ -14,23 +27,7 @@ var tile = require('./tile');
  * @class
  * @alias geo.imageTile
  * @extends geo.tile
- * @param {object} spec The tile specification.
- *
- * @param {object} spec.index The global position of the tile.
- * @param {number} spec.index.x The x-coordinate (usually the column number).
- * @param {number} spec.index.y The y-coordinate (usually the row number).
- * @param {number} spec.index.level The zoom level.
- *
- * @param {object?} spec.size The size of each tile.
- * @param {number} [spec.size.x=256] Width in pixels.
- * @param {number} [spec.size.y=256] Height in pixels.
- *
- * @param {string} spec.url A url to the image.
- * @param {string} [spec.crossDomain='anonymous'] Image CORS attribute.
- *
- * @param {object} spec.overlap The size of overlap with neighboring tiles.
- * @param {number} [spec.overlap.x=0]
- * @param {number} [spec.overlap.y=0]
+ * @param {geo.imageTile.spec} spec The tile specification.
  */
 var imageTile = function (spec) {
   if (!(this instanceof imageTile)) {
