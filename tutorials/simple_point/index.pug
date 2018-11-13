@@ -26,7 +26,7 @@ block mainTutorial
     We create a layer first.
 
   +codeblock('javascript', 2).
-    var layer = map.createLayer('feature');
+    var layer = map.createLayer('feature', {features: ['point']});
 
 
   :markdown-it
@@ -55,6 +55,12 @@ block mainTutorial
       // Or we can draw the whole map
       // map.draw();
     });
+  +codeblock_test('map has a feature layer with six points', [
+    'map.layers().length === 2',
+    'map.layers()[1] instanceof geo.featureLayer',
+    'map.layers()[1].features()[0] instanceof geo.pointFeature',
+    'map.layers()[1].features()[0].data().length === 6'
+    ])
 
   :markdown-it
     We could change the style of our point feature.
@@ -66,3 +72,7 @@ block mainTutorial
         'strokeWidth': 2
       })
       .draw();
+  +codeblock_test('point color changed', [
+    'map.layers()[1].features()[0].style().fillColor === "red"',
+    'map.layers()[1].features()[0].style().strokeColor === "black"'
+    ])
