@@ -9,6 +9,34 @@ var Mousetrap = require('mousetrap');
 var textFeature = require('./textFeature');
 
 /**
+ * Object specification for an annotation layer.
+ *
+ * @typedef {geo.layer.spec} geo.annotationLayer.spec
+ * @extends {geo.layer.spec}
+ * @property {number} [dblClickTime=300] The delay in milliseconds that is
+ *   treated as a double-click when working with annotations.
+ * @property {number} [adjacentPointProximity=5] The minimum distance in
+ *   display coordinates (pixels) between two adjacent points when creating a
+ *   polygon or line.  A value of 0 requires an exact match.
+ * @property {number} [continuousPointProximity=5] The minimum distance in
+ *   display coordinates (pixels) between two adjacent points when dragging
+ *   to create an annotation.  `false` disables continuous drawing mode.
+ * @property {number} [continuousPointColinearity=1.0deg] The minimum angle
+ *   between a series of three points when dragging to not interpret them as
+ *   colinear.  Only applies if `continuousPointProximity` is not `false`.
+ * @property {number} [finalPointProximity=10] The maximum distance in display
+ *   coordinates (pixels) between the starting point and the mouse coordinates
+ *   to signal closing a polygon.  A value of 0 requires an exact match.  A
+ *   negative value disables closing a polygon by clicking on the start point.
+ * @property {boolean} [showLabels=true] Truthy to show feature labels that are
+ *   allowed by the associated feature to be shown.
+ * @property {boolean} [clickToEdit=false] Truthy to allow clicking an
+ *   annotation to place it in edit mode.
+ * @property {geo.textFeature.styleSpec} [defaultLabelStyle] Default styles for
+ *   labels.
+ */
+
+/**
  * @typedef {object} geo.annotationLayer.labelRecord
  * @property {string} text The text of the label
  * @property {geo.geoPosition} position The position of the label in map gcs
@@ -26,41 +54,19 @@ var textFeature = require('./textFeature');
  * @class
  * @alias geo.annotationLayer
  * @extends geo.featureLayer
- * @param {object} [args] Layer options.
- * @param {number} [args.dblClickTime=300] The delay in milliseconds that is
- *    treated as a double-click when working with annotations.
- * @param {number} [args.adjacentPointProximity=5] The minimum distance in
- *    display coordinates (pixels) between two adjacent points when creating a
- *    polygon or line.  A value of 0 requires an exact match.
- * @param {number} [args.continuousPointProximity=5] The minimum distance in
- *    display coordinates (pixels) between two adjacent points when dragging
- *    to create an annotation.  `false` disables continuous drawing mode.
- * @param {number} [args.continuousPointColinearity=1.0deg] The minimum
- *    angle between a series of three points when dragging to not interpret
- *    them as colinear.  Only applies if `continuousPointProximity` is not
- *    `false`.
- * @param {number} [args.finalPointProximity=10] The maximum distance in
- *    display coordinates (pixels) between the starting point and the mouse
- *    coordinates to signal closing a polygon.  A value of 0 requires an exact
- *    match.  A negative value disables closing a polygon by clicking on the
- *    start point.
- * @param {boolean} [args.showLabels=true] Truthy to show feature labels that
- *    are allowed by the associated feature to be shown.
- * @param {boolean} [args.clickToEdit=false] Truthy to allow clicking an
- *    annotation to place it in edit mode.
- * @param {object} [args.defaultLabelStyle] Default styles for labels.
+ * @param {geo.annotationLayer.spec} [arg] Specification for the new layer.
  * @returns {geo.annotationLayer}
  * @fires geo.event.annotation.state
  * @fires geo.event.annotation.coordinates
  * @fires geo.event.annotation.edit_action
  * @fires geo.event.annotation.select_edit_handle
  */
-var annotationLayer = function (args) {
+var annotationLayer = function (arg) {
   'use strict';
   if (!(this instanceof annotationLayer)) {
-    return new annotationLayer(args);
+    return new annotationLayer(arg);
   }
-  featureLayer.call(this, args);
+  featureLayer.call(this, arg);
 
   var mapInteractor = require('./mapInteractor');
   var timestamp = require('./timestamp');
@@ -130,7 +136,7 @@ var annotationLayer = function (args) {
     finalPointProximity: 10,  // in pixels, 0 is exact
     showLabels: true,
     clickToEdit: false
-  }, args);
+  }, arg);
 
   /**
    * Process an action event.  If we are in rectangle-creation mode, this

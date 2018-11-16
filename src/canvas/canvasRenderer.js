@@ -61,7 +61,7 @@ var canvasRenderer = function (arg) {
 
     s_init.call(m_this);
 
-    var canvas = $(document.createElement('canvas'));
+    var canvas = arg.canvas || $(document.createElement('canvas'));
     m_this.context2d = canvas[0].getContext('2d');
 
     canvas.addClass('canvas-canvas');
@@ -113,7 +113,7 @@ var canvasRenderer = function (arg) {
     var layer = m_this.layer(),
         map = layer.map(),
         mapSize = map.size(),
-        features = layer.features(),
+        features = layer.features ? layer.features() : [],
         i;
 
     for (i = 0; i < features.length; i += 1) {

@@ -16,8 +16,7 @@ var registerWidget = require('../registry').registerWidget;
  * @class
  * @alias geo.gui.svgWidget
  * @extends geo.gui.widget
- * @param {object} arg
- * @param {geo.widget} [parent] A parent widget for this widget.
+ * @param {geo.gui.widget.spec} arg Options for the widget.
  * @returns {geo.gui.svgWidget}
  */
 var svgWidget = function (arg) {

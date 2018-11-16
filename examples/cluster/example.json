@@ -1,0 +1,8 @@
+{
+  "title": "Cluster points",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "Cluster nearby points on a map."
+  }
+}
