@@ -23,8 +23,9 @@ var vtkjs_pointFeature = function (arg) {
   var object = require('../object');
   var vtk = require('./vtkjsRenderer').vtkjs;
   var vtkActor = vtk.Rendering.Core.vtkActor;
-  var vtkGlyph3DMapper = vtk.Rendering.Core.vtkGlyph3DMapper;
   var vtkDataArray = vtk.Common.Core.vtkDataArray;
+  var vtkGlyph3DMapper = vtk.Rendering.Core.vtkGlyph3DMapper;
+  var vtkMapper = vtk.Rendering.Core.vtkMapper;
   var vtkPointSet = vtk.Common.DataModel.vtkPointSet;
   var vtkSphereSource = vtk.Filters.Sources.vtkSphereSource;
 
@@ -34,6 +35,7 @@ var vtkjs_pointFeature = function (arg) {
       m_actor,
       m_pointSet,
       m_source,
+      m_mappedColorArray,
       s_init = this._init,
       s_exit = this._exit,
       s_update = this._update;
@@ -50,22 +52,14 @@ var vtkjs_pointFeature = function (arg) {
       // Orientation
       orient: false,
 
-      // Color
-      // useLookupTableScalarRange: true,  // FIXME <----
-      // lookupTable,                      // FIXME <----
-      /*
+      // Color and Opacity
+      useLookupTableScalarRange: true,
       colorByArrayName: 'color',
-      colorMode: vtkMapper.ColorMode.MAP_SCALARS,
       scalarMode: vtkMapper.ScalarMode.USE_POINT_FIELD_DATA,
-      scalarVisibility: true,
-      */
-
-      // Opactity
-      // => not available yet
 
       // Scaling
       scaling: true,
-      scaleArray: 'radius',
+      scaleArray: 'diam',
       scaleMode: vtkGlyph3DMapper.ScaleModes.SCALE_BY_MAGNITUDE
     });
     mapper.setInputData(m_pointSet, 0);
@@ -74,6 +68,20 @@ var vtkjs_pointFeature = function (arg) {
     m_actor.setMapper(mapper);
     m_actor.getProperty().setAmbient(1);
     this.renderer().contextRenderer().addActor(m_actor);
+
+    // Fake the mapper lookup table to return our colors
+    mapper.setLookupTable({
+      mapScalars: function () {
+        return {
+          getNumberOfComponents: function () { return 4; },
+          getData: function () { return m_mappedColorArray; }
+        };
+      },
+      build: function () {},
+      isOpaque: function () { return false; },
+      getMTime: function () { return 1; },
+      setRange: function () {}
+    });
   };
 
   /**
@@ -89,7 +97,7 @@ var vtkjs_pointFeature = function (arg) {
    * Build this feature.
    */
   this._build = function () {
-    var i, i3, posVal,
+    var i, i3, i4, posVal, clrVal,
         nonzeroZ,
         numPts = m_this.data().length,
         position = new Array(numPts * 3),
@@ -100,24 +108,29 @@ var vtkjs_pointFeature = function (arg) {
         opacityFunc = m_this.style.get('fillOpacity'),
         unitsPerPixel = m_this.layer().map().unitsPerPixel(m_this.layer().map().zoom());
 
-    const opacityArray = new Float32Array(numPts);
-    const colorArray = new Float32Array(numPts); // FIXME maybe not the right type
-    const radiusArray = new Float32Array(numPts);
+    const diamArray = new Float32Array(numPts);
+    const colorArray = new Int32Array(numPts);
+    if (!m_mappedColorArray || m_mappedColorArray.length !== numPts * 4) {
+      m_mappedColorArray = new Uint8Array(numPts * 4);
+    }
 
     /* It is more efficient to do a transform on a single array rather than on
-      * an array of arrays or an array of objects. */
-    for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
+     * an array of arrays or an array of objects. */
+    for (i = i3 = i4 = 0; i < numPts; i += 1, i3 += 3, i4 += 4) {
       posVal = posFunc(data[i], i);
       position[i3] = posVal.x;
       position[i3 + 1] = posVal.y;
       position[i3 + 2] = posVal.z || 0;
       nonzeroZ = nonzeroZ || position[i3 + 2];
 
-      // Register opacity/color/radius
-      opacityArray[i] = opacityFunc(data[i], i);
-      // The colorFunc returns an object with r, g, b on a scale of [0-1] (e.g., red is {r: 1, g: 0, b: 0})
-      colorArray[i] = colorFunc(data[i], i);
-      radiusArray[i] = radFunc(data[i], i) * unitsPerPixel;
+      diamArray[i] = radFunc(data[i], i) * unitsPerPixel * 2;
+      // I'm not sure the colorArray is used other than for its size
+      colorArray[i] = i;
+      clrVal = colorFunc(data[i], i);
+      m_mappedColorArray[i4] = clrVal.r * 255;
+      m_mappedColorArray[i4 + 1] = clrVal.g * 255;
+      m_mappedColorArray[i4 + 2] = clrVal.b * 255;
+      m_mappedColorArray[i4 + 3] = opacityFunc(data[i], i) * 255;
     }
     position = transform.transformCoordinates(
       m_this.gcs(), m_this.layer().map().gcs(),
@@ -135,13 +148,8 @@ var vtkjs_pointFeature = function (arg) {
     m_pointSet.getPoints().setData(position, 3);
 
     // Attach fields
-    m_pointSet.getPointData().addArray(vtkDataArray.newInstance({ name: 'color', values: colorArray }));
-    m_pointSet.getPointData().addArray(vtkDataArray.newInstance({ name: 'opacity', values: opacityArray }));
-    m_pointSet.getPointData().addArray(vtkDataArray.newInstance({ name: 'radius', values: radiusArray }));
-
-    var clr = colorFunc(data[0], 0);
-    m_actor.getProperty().setColor(clr.r, clr.g, clr.b); // TODO fix colors
-    m_actor.getProperty().setOpacity(opacityFunc(data[0], 0)); // TODO fix opacity
+    m_pointSet.getPointData().addArray(vtkDataArray.newInstance({name: 'color', values: colorArray}));
+    m_pointSet.getPointData().addArray(vtkDataArray.newInstance({name: 'diam', values: diamArray}));
 
     m_this.buildTime().modified();
   };
@@ -160,8 +168,8 @@ var vtkjs_pointFeature = function (arg) {
           radFunc = m_this.style.get('radius');
 
       const scalingFactor = m_this.layer().map().unitsPerPixel(m_this.layer().map().zoom());
-      const dataArray = m_pointSet.getPointData().getArray('radius');
-      const newScaleArray = dataArray.getData().map((v, i) => radFunc(data[i], i) * scalingFactor);
+      const dataArray = m_pointSet.getPointData().getArray('diam');
+      const newScaleArray = dataArray.getData().map((v, i) => radFunc(data[i], i) * scalingFactor * 2);
 
       dataArray.setData(newScaleArray);
       m_pointSet.modified();
