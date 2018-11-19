@@ -20,7 +20,7 @@ var vtkjs_pointFeature = function (arg) {
   pointFeature.call(this, arg);
 
   var transform = require('../transform');
-  var object = require('../object');
+  var object = require('./object');
   var vtk = require('./vtkjsRenderer').vtkjs;
   var vtkActor = vtk.Rendering.Core.vtkActor;
   var vtkDataArray = vtk.Common.Core.vtkDataArray;
@@ -35,7 +35,8 @@ var vtkjs_pointFeature = function (arg) {
       m_actor,
       m_pointSet,
       m_source,
-      m_mappedColorArray,
+      m_colorArray,
+      m_diamArray,
       s_init = this._init,
       s_exit = this._exit,
       s_update = this._update;
@@ -53,9 +54,9 @@ var vtkjs_pointFeature = function (arg) {
       orient: false,
 
       // Color and Opacity
-      useLookupTableScalarRange: true,
       colorByArrayName: 'color',
       scalarMode: vtkMapper.ScalarMode.USE_POINT_FIELD_DATA,
+      colorMode: vtkMapper.ColorMode.DIRECT_SCALARS,
 
       // Scaling
       scaling: true,
@@ -68,20 +69,6 @@ var vtkjs_pointFeature = function (arg) {
     m_actor.setMapper(mapper);
     m_actor.getProperty().setAmbient(1);
     this.renderer().contextRenderer().addActor(m_actor);
-
-    // Fake the mapper lookup table to return our colors
-    mapper.setLookupTable({
-      mapScalars: function () {
-        return {
-          getNumberOfComponents: function () { return 4; },
-          getData: function () { return m_mappedColorArray; }
-        };
-      },
-      build: function () {},
-      isOpaque: function () { return false; },
-      getMTime: function () { return 1; },
-      setRange: function () {}
-    });
   };
 
   /**
@@ -104,14 +91,16 @@ var vtkjs_pointFeature = function (arg) {
         data = m_this.data(),
         posFunc = m_this.position(),
         radFunc = m_this.style.get('radius'),
+        fillFunc = m_this.style.get('fill'),
         colorFunc = m_this.style.get('fillColor'),
         opacityFunc = m_this.style.get('fillOpacity'),
         unitsPerPixel = m_this.layer().map().unitsPerPixel(m_this.layer().map().zoom());
 
-    const diamArray = new Float32Array(numPts);
-    const colorArray = new Int32Array(numPts);
-    if (!m_mappedColorArray || m_mappedColorArray.length !== numPts * 4) {
-      m_mappedColorArray = new Uint8Array(numPts * 4);
+    if (!m_diamArray || m_diamArray.length !== numPts) {
+      m_diamArray = new Float32Array(numPts);
+    }
+    if (!m_colorArray || m_colorArray.length !== numPts * 4) {
+      m_colorArray = new Uint8Array(numPts * 4);
     }
 
     /* It is more efficient to do a transform on a single array rather than on
@@ -123,14 +112,12 @@ var vtkjs_pointFeature = function (arg) {
       position[i3 + 2] = posVal.z || 0;
       nonzeroZ = nonzeroZ || position[i3 + 2];
 
-      diamArray[i] = radFunc(data[i], i) * unitsPerPixel * 2;
-      // I'm not sure the colorArray is used other than for its size
-      colorArray[i] = i;
+      m_diamArray[i] = radFunc(data[i], i) * unitsPerPixel * 2;
       clrVal = colorFunc(data[i], i);
-      m_mappedColorArray[i4] = clrVal.r * 255;
-      m_mappedColorArray[i4 + 1] = clrVal.g * 255;
-      m_mappedColorArray[i4 + 2] = clrVal.b * 255;
-      m_mappedColorArray[i4 + 3] = opacityFunc(data[i], i) * 255;
+      m_colorArray[i4] = clrVal.r * 255;
+      m_colorArray[i4 + 1] = clrVal.g * 255;
+      m_colorArray[i4 + 2] = clrVal.b * 255;
+      m_colorArray[i4 + 3] = fillFunc(data[i], i) ? opacityFunc(data[i], i) * 255 : 0;
     }
     position = transform.transformCoordinates(
       m_this.gcs(), m_this.layer().map().gcs(),
@@ -148,8 +135,8 @@ var vtkjs_pointFeature = function (arg) {
     m_pointSet.getPoints().setData(position, 3);
 
     // Attach fields
-    m_pointSet.getPointData().addArray(vtkDataArray.newInstance({name: 'color', values: colorArray}));
-    m_pointSet.getPointData().addArray(vtkDataArray.newInstance({name: 'diam', values: diamArray}));
+    m_pointSet.getPointData().addArray(vtkDataArray.newInstance({name: 'color', values: m_colorArray, numberOfComponents: 4}));
+    m_pointSet.getPointData().addArray(vtkDataArray.newInstance({name: 'diam', values: m_diamArray}));
 
     m_this.buildTime().modified();
   };
@@ -192,7 +179,10 @@ var vtkjs_pointFeature = function (arg) {
 
 inherit(vtkjs_pointFeature, pointFeature);
 
+var capabilities = {};
+capabilities[pointFeature.capabilities.stroke] = false;
+
 // Now register it
-registerFeature('vtkjs', 'point', vtkjs_pointFeature);
+registerFeature('vtkjs', 'point', vtkjs_pointFeature, capabilities);
 
 module.exports = vtkjs_pointFeature;

@@ -109,7 +109,10 @@ var d3_pointFeature = function (arg) {
 
 inherit(d3_pointFeature, pointFeature);
 
+var capabilities = {};
+capabilities[pointFeature.capabilities.stroke] = true;
+
 // Now register it
-registerFeature('d3', 'point', d3_pointFeature);
+registerFeature('d3', 'point', d3_pointFeature, capabilities);
 
 module.exports = d3_pointFeature;
