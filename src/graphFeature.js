@@ -2,11 +2,31 @@ var inherit = require('./inherit');
 var feature = require('./feature');
 
 /**
- * Create a new instance of class graphFeature
+ * Object specification for a graph feature.
+ *
+ * @typedef {geo.feature.spec} geo.graphFeature.spec
+ * @property {geo.pointFeature.styleSpec} [style] Style object with default
+ *   style options.
+ */
+
+/**
+ * Style specification for a graph feature.
+ *
+ * @typedef {geo.feature.styleSpec} geo.graphFeature.styleSpec
+ * @extends geo.feature.styleSpec
+ * @property {geo.pointFeature.styleSpec} [nodes] Point style for nodes.
+ * @property {geo.lineFeature.styleSpec|geo.pathFeature.styleSpec} [links] Line
+ *   or path style for links.
+ * @property {string} [linkType='path'] Link type, either `'line'` or `'path'`.
+ */
+
+/**
+ * Create a new instance of class graphFeature.
  *
  * @class
  * @alias geo.graphFeature
  * @extends geo.feature
+ * @param {geo.graphFeature.spec} arg Feature options.
  * @returns {geo.graphFeature}
  */
 var graphFeature = function (arg) {
@@ -22,9 +42,6 @@ var graphFeature = function (arg) {
   var util = require('./util');
   var registry = require('./registry');
 
-  /**
-   * @private
-   */
   var m_this = this,
       s_draw = this.draw,
       s_style = this.style,
@@ -38,7 +55,10 @@ var graphFeature = function (arg) {
   this.featureType = 'graph';
 
   /**
-   * Initialize
+   * Initialize.
+   *
+   * @param {geo.graphFeature.spec} arg The feature specification.
+   * @returns {this}
    */
   this._init = function (arg) {
     s_init.call(m_this, arg);
@@ -60,10 +80,11 @@ var graphFeature = function (arg) {
 
     m_this.style(defaultStyle);
     m_this.nodes(function (d) { return d; });
+    return m_this;
   };
 
   /**
-   * Call child _build methods
+   * Call child _build methods.
    */
   this._build = function () {
     m_this.children().forEach(function (child) {
@@ -72,7 +93,7 @@ var graphFeature = function (arg) {
   };
 
   /**
-   * Call child _update methods
+   * Call child _update methods.
    */
   this._update = function () {
     m_this.children().forEach(function (child) {
@@ -81,7 +102,9 @@ var graphFeature = function (arg) {
   };
 
   /**
-   * Custom _exit method to remove all sub-features
+   * Custom _exit method to remove all sub-features.
+   *
+   * @returns {this}
    */
   this._exit = function () {
     m_this.data([]);
@@ -97,23 +120,47 @@ var graphFeature = function (arg) {
   };
 
   /**
-   * Get/Set style
+   * Get/Set style used by the feature.  Styles can be constant values or
+   * functions.  If a function, the style is typically called with parameters
+   * such as `(dataElement, dataIndex)` or, if the specific style of a feature
+   * has a subfeature style, with `(subfeatureElement, subfeatureIndex,
+   * dataElement, dataIndex)`.
+   *
+   * See the <a href="#.styleSpec">style specification
+   * <code>styleSpec</code></a> for available styles.
+   *
+   * @param {string|object} [arg1] If `undefined`, return the current style
+   *    object.  If a string and `arg2` is undefined, return the style
+   *    associated with the specified key.  If a string and `arg2` is defined,
+   *    set the named style to the specified value.  Otherwise, extend the
+   *    current style with the values in the specified object.
+   * @param {*} [arg2] If `arg1` is a string, the new value for that style.
+   * @returns {object|this} Either the entire style object, the value of a
+   *    specific style, or the current class instance.
    */
-  this.style = function (arg, arg2) {
-    var out = s_style.call(m_this, arg, arg2);
+  this.style = function (arg1, arg2) {
+    var out = s_style.call(m_this, arg1, arg2);
     if (out !== m_this) {
       return out;
     }
     // set styles for sub-features
-    m_points.style(arg.nodes);
+    m_points.style(arg1.nodes);
     m_links.forEach(function (l) {
-      l.style(arg.links);
+      l.style(arg1.links);
     });
     return m_this;
   };
 
+  this.style.get = s_style.get;
+
   /**
    * Get/Set links accessor.
+   *
+   * @param {function|array} [arg] If specified, the list of links or a
+   *    function that returns the list of links.  If unspecified, return the
+   *    existing value.
+   * @returns {fuction|this} Either a function that returns the list of links,
+   *    or the feature.
    */
   this.links = function (arg) {
     if (arg === undefined) {
@@ -125,7 +172,12 @@ var graphFeature = function (arg) {
   };
 
   /**
-   * Get/Set nodes
+   * Get/Set nodes.
+   *
+   * @param {geo.geoPosition[]} [val] If specified, set the nodes to this list,
+   *    otherwise return the current list of nodes.
+   * @returns {geo.geoPostion[]|this} Either the current list of nodes or this
+   *    feature.
    */
   this.nodes = function (val) {
     if (val === undefined) {
@@ -137,21 +189,28 @@ var graphFeature = function (arg) {
   };
 
   /**
-   * Get internal node feature
+   * Get internal node feature.
+   *
+   * @returns {geo.pointFeature} The point feature used for nodes.
    */
   this.nodeFeature = function () {
     return m_points;
   };
 
   /**
-   * Get internal link features
+   * Get internal link features.
+   *
+   * @returns {geo.lineFeature[]|geo.pathFeature[]} An array or line or path
+   *    features used for links.
    */
   this.linkFeatures = function () {
     return m_links;
   };
 
   /**
-   * Build the feature for drawing
+   * Draw the feature, building as necessary.
+   *
+   * @returns {this}
    */
   this.draw = function () {
 

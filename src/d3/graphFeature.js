@@ -3,9 +3,14 @@ var registerFeature = require('../registry').registerFeature;
 var graphFeature = require('../graphFeature');
 
 /**
+ * Create a new instance of d3.graphFeature.
+ *
  * @class
  * @alias geo.d3.graphFeature
  * @extends geo.graphFeature
+ * @extends geo.d3.object
+ * @param {geo.graphFeature.spec} arg Feature options.
+ * @returns {geo.graphFeature}
  */
 var d3_graphFeature = function (arg) {
   'use strict';
@@ -18,8 +23,11 @@ var d3_graphFeature = function (arg) {
   graphFeature.call(this, arg);
 
   /**
-  *  Returns a d3 selection for the graph elements
-  */
+   * Return a d3 selection for the graph elements.
+   *
+   * @returns {object} An object with `nodes` and `links`, both d3 selectors
+   *    for the graph elements.
+   */
   this.select = function () {
     var renderer = m_this.renderer(),
         selection = {},
