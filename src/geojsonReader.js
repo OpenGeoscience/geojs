@@ -299,8 +299,8 @@ var geojsonReader = function (arg) {
    *    `Blob` object, a string representation of a file, or an object
    *    representing data from a file.
    * @param {function} [done] An optional callback function when the read is
-   *    complete.  This is called with `false` on error or the object that was
-   *    read and parsed by the reader.
+   *    complete.  This is called with `false` on error or a list of
+   *    {@link geo.feature} on success.
    * @param {function} [progress] A function which is passed `ProgressEvent`
    *    information from a `FileReader`.  This includes `loaded` and `total`
    *    each with a number of bytes.
