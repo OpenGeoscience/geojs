@@ -5,7 +5,7 @@ var feature = require('./feature');
  * Object specification for a graph feature.
  *
  * @typedef {geo.feature.spec} geo.graphFeature.spec
- * @property {geo.pointFeature.styleSpec} [style] Style object with default
+ * @property {geo.graphFeature.styleSpec} [style] Style object with default
  *   style options.
  */
 

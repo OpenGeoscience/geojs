@@ -8,7 +8,6 @@ var graphFeature = require('../graphFeature');
  * @class
  * @alias geo.d3.graphFeature
  * @extends geo.graphFeature
- * @extends geo.d3.object
  * @param {geo.graphFeature.spec} arg Feature options.
  * @returns {geo.graphFeature}
  */

@@ -110,7 +110,7 @@
     "build-website-examples": "node examples/build-website.js && webpack --config webpack-website-examples.config.js",
     "build-tutorials": "node tutorials/build.js && webpack --config webpack-tutorials.config.js",
     "build-website-tutorials": "node tutorials/build-website.js && webpack --config webpack-website-tutorials.config.js",
-    "lint": "eslint --cache .",
+    "lint": "eslint --cache . --max-warnings=0",
     "puglint": "pug-lint src examples",
     "test": "GEOJS_TEST_CASE=tests/test-unit.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch,FirefoxHeadlessTouch,PhantomJS",
     "test-all": "GEOJS_TEST_CASE=tests/test-unit.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch,FirefoxHeadlessTouch,PhantomJS",

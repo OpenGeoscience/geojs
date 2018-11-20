@@ -14,8 +14,9 @@ var rendererForAnnotations = require('./registry').rendererForAnnotations;
  * @property {geo.map} [map=null] Parent map of the layer.
  * @property {string|geo.renderer} [renderer] Renderer to associate with the
  *   layer.  If not specified, either `annotations` or `features` can be used
- *   to determine the renderer.  If a `geo.renderer` instance, the renderer is
- *   not recreated; not all renderers can be shared by multiple layers.
+ *   to determine the renderer.  If a {@link geo.renderer} instance, the
+ *   renderer is not recreated; not all renderers can be shared by multiple
+ *   layers.
  * @property {HTMLElement} [canvas] If specified, use this canvas rather than
  *   a canvas associaied with the renderer directly.  Renderers may not support
  *   sharing a canvas.
