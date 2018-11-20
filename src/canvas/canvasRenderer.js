@@ -89,6 +89,7 @@ var canvasRenderer = function (arg) {
     var canvas = m_this.canvas();
     if (parseInt(canvas.attr('width'), 10) !== w ||
         parseInt(canvas.attr('height'), 10) !== h) {
+      m_this._setWidthHeight(w, h);
       canvas.attr('width', w);
       canvas.attr('height', h);
       m_this._render();

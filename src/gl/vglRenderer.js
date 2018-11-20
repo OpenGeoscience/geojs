@@ -33,31 +33,10 @@ var vglRenderer = function (arg) {
   var m_this = this,
       m_contextRenderer = null,
       m_viewer = null,
-      m_width = 0,
-      m_height = 0,
       m_lastZoom,
       m_updateCamera = false,
       s_init = this._init,
       s_exit = this._exit;
-
-  // TODO: Move this API to the base class
-  /**
-   * Return width of the renderer.
-   *
-   * @returns {number} The width of the current canvas.
-   */
-  this.width = function () {
-    return m_width;
-  };
-
-  /**
-   * Return height of the renderer.
-   *
-   * @returns {number} The height of the current canvas.
-   */
-  this.height = function () {
-    return m_height;
-  };
 
   /**
    * Get context specific renderer.
@@ -140,9 +119,8 @@ var vglRenderer = function (arg) {
 
     if (x !== renderWindow.windowPosition[0] ||
         y !== renderWindow.windowPosition[1] ||
-        w !== m_width || h !== m_height) {
-      m_width = w;
-      m_height = h;
+        w !== m_this.width() || h !== m_this.height()) {
+      m_this._setWidthHeight(w, h);
       m_this.canvas().attr('width', w);
       m_this.canvas().attr('height', h);
       renderWindow.positionAndResize(x, y, w, h);
