@@ -41,7 +41,11 @@ var d3_tileLayer = function () {
     m_this.draw();
   };
 
-  /* Remove the tile feature. */
+  /**
+   * Remove the tile feature.
+   *
+   * @param {geo.tile} tile The tile to remove.
+   */
   this._remove = function (tile) {
     if (tile.quadId !== undefined && m_quadFeature) {
       for (var i = 0; i < m_tiles.length; i += 1) {
@@ -66,7 +70,8 @@ var d3_tileLayer = function () {
     s_exit.apply(m_this, arguments);
   };
 
-  /* Initialize the tile layer.  This creates a series of sublayers so that
+  /**
+   * Initialize the tile layer.  This creates a series of sublayers so that
    * the different layers will stack in the proper order.
    */
   this._init = function () {

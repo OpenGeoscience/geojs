@@ -2,14 +2,67 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var vectorFeature = require('../vectorFeature');
 
+/* These markers are available to all instances of the vectorFeature. */
+var markerConfigs = {
+  arrow: {
+    attrs: {
+      class: 'geo-vector-arrow geo-vector-marker',
+      viewBox: '0 0 10 10',
+      refX: 1,
+      refY: 5,
+      markerHeight: 5,
+      markerWidth: 5,
+      orient: 'auto'
+    },
+    path: 'M 0 0 L 10 5 L 0 10 z'
+  },
+  point: {
+    attrs: {
+      class: 'geo-vector-point geo-vector-marker',
+      viewBox: '0 0 12 12',
+      refX: 6,
+      refY: 6,
+      markerHeight: 8,
+      markerWidth: 8,
+      orient: 'auto'
+    },
+    path: 'M 6 3 A 3 3 0 1 1 5.99999 3 Z'
+  },
+  bar: {
+    attrs: {
+      class: 'geo-vector-bar geo-vector-marker',
+      viewBox: '0 0 10 10',
+      refX: 0,
+      refY: 5,
+      markerHeight: 6,
+      markerWidth: 6,
+      orient: 'auto'
+    },
+    path: 'M 0 0 L 2 0 L 2 10 L 0 10 z'
+  },
+  wedge: {
+    attrs: {
+      class: 'geo-vector-wedge geo-vector-marker',
+      viewBox: '0 0 10 10',
+      refX: 10,
+      refY: 5,
+      markerHeight: 5,
+      markerWidth: 5,
+      orient: 'auto'
+    },
+    path: 'M 0 0 L 1 0 L 10 5 L 1 10 L 0 10 L 9 5 L 0 0'
+  }
+};
+
 /**
- * Create a new instance of vectorFeature
+ * Create a new instance of d3.vectorFeature.
  *
  * @class
  * @alias geo.d3.vectorFeature
  * @extends geo.vectorFeature
  * @extends geo.d3.object
- * @returns {geo.d3.vectorFeature}
+ * @param {geo.vectorFeature.spec} arg Feature options.
+ * @returns {geo.vectorFeature}
  */
 var d3_vectorFeature = function (arg) {
   'use strict';
@@ -29,18 +82,19 @@ var d3_vectorFeature = function (arg) {
    * @private
    */
   var m_this = this,
-      s_init = this._init,
       s_exit = this._exit,
       s_update = this._update,
       m_buildTime = timestamp(),
       m_style = {};
 
   /**
-   * Generate a unique ID for a marker definition
-   * @private
-   * @param {object} d Unused datum (for d3 compat)
-   * @param {number} i The marker index
-   * @param {string} position The marker's vector position (head or tail)
+   * Generate a unique ID for a marker definition.
+   *
+   * @param {object} d The marker datum (unused).
+   * @param {number} i The marker index.
+   * @param {string} position The marker's vector position (`'head'` or
+   *   `'tail'`).
+   * @returns {string} The constructed ID.
    */
   function markerID(d, i, position) {
     return m_this._d3id() + '_marker_' + i + '_' + position;
@@ -48,35 +102,15 @@ var d3_vectorFeature = function (arg) {
 
   /**
    * Add marker styles for vector arrows.
-   * @private
-   * @param {object[]} data The vector data array
-   * @param {function} stroke The stroke accessor
-   * @param {function} opacity The opacity accessor
-   * @param {function} originStyle The marker style for the vector head
-   * @param {function} endStyle The marker style for the vector tail
+   *
+   * @param {object[]} data The vector data array.
+   * @param {function} stroke The stroke accessor.
+   * @param {function} opacity The opacity accessor.
+   * @param {function} originStyle The marker style for the vector head.
+   * @param {function} endStyle The marker style for the vector tail.
    */
   function updateMarkers(data, stroke, opacity, originStyle, endStyle) {
-
-    var markerConfigs = {
-      'arrow': {
-        attrs: {'class': 'geo-vector-arrow geo-vector-marker', 'viewBox': '0 0 10 10', 'refX': '1', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
-        path: 'M 0 0 L 10 5 L 0 10 z'
-      },
-      'point': {
-        attrs: {'class': 'geo-vector-point geo-vector-marker', 'viewBox': '0 0 12 12', 'refX': '6', 'refY': '6', 'markerHeight': '8', 'markerWidth': '8', 'orient': 'auto'},
-        path: 'M 6 3 A 3 3 0 1 1 5.99999 3 Z'
-      },
-      'bar': {
-        attrs: {'class': 'geo-vector-bar geo-vector-marker', 'viewBox': '0 0 10 10', 'refX': '0', 'refY': '5', 'markerHeight': '6', 'markerWidth': '6', 'orient': 'auto'},
-        path: 'M 0 0 L 2 0 L 2 10 L 0 10 z'
-      },
-      'wedge': {
-        attrs: {'class': 'geo-vector-wedge geo-vector-marker', 'viewBox': '0 0 10 10', 'refX': '10', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
-        path: 'M 0 0 L 1 0 L 10 5 L 1 10 L 0 10 L 9 5 L 0 0'
-      }
-    };
-
-    //this allows for multiple VectorFeatures in a layer
+    //this allows for multiple vectorFeature in a layer
     var markerGroup = m_this.renderer()._definitions()
       .selectAll('g.marker-group#' + m_this._d3id())
       .data(data.length ? [1] : []);
@@ -148,17 +182,9 @@ var d3_vectorFeature = function (arg) {
   }
 
   /**
-   * Initialize
-   * @protected
-   */
-  this._init = function (arg) {
-    s_init.call(m_this, arg);
-    return m_this;
-  };
-
-  /**
-   * Build
-   * @protected
+   * Build.
+   *
+   * @returns {this}.
    */
   this._build = function () {
     var data = m_this.data(),
@@ -168,7 +194,7 @@ var d3_vectorFeature = function (arg) {
         size_func = m_this.delta(),
         cache = [],
         scale = m_this.style('scale'),
-        max = Number.NEGATIVE_INFINITY;
+        max = 0;
 
     // call super-method
     s_update.call(m_this);
@@ -191,7 +217,7 @@ var d3_vectorFeature = function (arg) {
 
     max = Math.sqrt(max);
     if (!scale) {
-      scale = 75 / max;
+      scale = 75 / (max ? max : 1);
     }
 
     function getScale() {
@@ -246,8 +272,9 @@ var d3_vectorFeature = function (arg) {
   };
 
   /**
-   * Update
-   * @protected
+   * Update.
+   *
+   * @returns {this}
    */
   this._update = function () {
     s_update.call(m_this);
@@ -268,8 +295,7 @@ var d3_vectorFeature = function (arg) {
   };
 
   /**
-   * Exit
-   * @protected
+   * Exit.  Remove markers.
    */
   this._exit = function () {
     s_exit.call(m_this);
@@ -280,6 +306,8 @@ var d3_vectorFeature = function (arg) {
   this._init(arg);
   return this;
 };
+
+d3_vectorFeature.markerConfigs = markerConfigs;
 
 inherit(d3_vectorFeature, vectorFeature);
 
