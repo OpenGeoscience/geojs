@@ -27,7 +27,10 @@ describe('geo.vtkjs.pointFeature', function () {
         }
       }
     }).data(testPoints);
+    sinon.spy(point, '_update');
     point.draw();
+    expect(point._update.calledOnce).toBe(true);
+    point._update.restore();
     expect($('#map div canvas').length).toBe(1);
   });
   waitForIt('points to be generated', function () {

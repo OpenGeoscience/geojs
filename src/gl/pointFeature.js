@@ -658,7 +658,10 @@ var gl_pointFeature = function (arg) {
 
 inherit(gl_pointFeature, pointFeature);
 
+var capabilities = {};
+capabilities[pointFeature.capabilities.stroke] = true;
+
 // Now register it
-registerFeature('vgl', 'point', gl_pointFeature);
+registerFeature('vgl', 'point', gl_pointFeature, capabilities);
 
 module.exports = gl_pointFeature;

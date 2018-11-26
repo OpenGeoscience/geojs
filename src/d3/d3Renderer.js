@@ -43,8 +43,6 @@ var d3Renderer = function (arg) {
       m_sticky = null,
       m_features = {},
       m_corners = null,
-      m_width = null,
-      m_height = null,
       m_diagonal = null,
       m_scale = 1,
       m_transform = {dx: 0, dy: 0, rx: 0, ry: 0, rotation: 0},
@@ -209,11 +207,10 @@ var d3Renderer = function (arg) {
         width = map.size().width,
         height = map.size().height;
 
-    m_width = width;
-    m_height = height;
-    if (!m_width || !m_height) {
+    if (!width || !height) {
       throw new Error('Map layer has size 0');
     }
+    m_this._setWidthHeight(width, height);
     m_diagonal = Math.pow(width * width + height * height, 0.5);
     m_corners = {
       upperLeft: map.displayToGcs({x: 0, y: 0}, null),
@@ -249,8 +246,8 @@ var d3Renderer = function (arg) {
       Math.pow(lowerRight.x - upperLeft.x, 2)) / m_diagonal;
     // calculate the translation
     rotation = map.rotation();
-    rx = -m_width / 2;
-    ry = -m_height / 2;
+    rx = -m_this.width() / 2;
+    ry = -m_this.height() / 2;
     dx = scale * rx + center.x;
     dy = scale * ry + center.y;
 
@@ -454,6 +451,7 @@ var d3Renderer = function (arg) {
     m_svg.attr('width', w);
     m_svg.attr('height', h);
     m_this._setTransform();
+    m_this._setWidthHeight(w, h);
     m_this.layer().geoTrigger(d3Rescale, { scale: m_scale }, true);
     return m_this;
   };

@@ -444,7 +444,9 @@ pointFeature.create = function (layer, spec) {
 
 pointFeature.capabilities = {
   /* core feature name -- support in any manner */
-  feature: 'point'
+  feature: 'point',
+  /* support for stroke properties */
+  stroke: 'line.stroke'
 };
 
 inherit(pointFeature, feature);
