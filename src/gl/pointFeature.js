@@ -282,7 +282,7 @@ var gl_pointFeature = function (arg) {
         vpf = m_this.verticesPerFeature(),
         data = m_this.data(),
         item, ivpf, ivpf3, iunit, i3,
-        geom = m_mapper.geometryData(), nonzeroZ;
+        geom = m_mapper.geometryData();
 
     posFunc = m_this.position();
     radFunc = m_this.style.get('radius');
@@ -300,19 +300,11 @@ var gl_pointFeature = function (arg) {
       posVal = posFunc(data[i], i);
       position[i3] = posVal.x;
       position[i3 + 1] = posVal.y;
-      position[i3 + 2] = posVal.z || 0;
-      nonzeroZ = nonzeroZ || position[i3 + 2];
+      // ignore the z values until we support them
+      position[i3 + 2] = 0;  // posVal.z || 0;
     }
     position = transform.transformCoordinates(
       m_this.gcs(), m_this.layer().map().gcs(), position, 3);
-    /* Some transforms modify the z-coordinate.  If we started with all zero z
-     * coordinates, don't modify them.  This could be changed if the
-     * z-coordinate space of the gl cube is scaled appropriately. */
-    if (!nonzeroZ && m_this.gcs() !== m_this.layer().map().gcs()) {
-      for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
-        position[i3 + 2] = 0;
-      }
-    }
 
     posBuf = util.getGeomBuffer(geom, 'pos', vpf * numPts * 3);
 
