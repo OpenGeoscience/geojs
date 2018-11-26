@@ -3,7 +3,6 @@ var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
 
 /**
- *
  * Create a new instance of d3.pointFeature.
  *
  * @class
