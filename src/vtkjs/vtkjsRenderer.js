@@ -29,8 +29,6 @@ var vtkjsRenderer = function (arg) {
   var vtkGenericRenderWindow = vtkjs.Rendering.Misc.vtkGenericRenderWindow;
 
   var m_this = this,
-      m_width = 0,
-      m_height = 0,
       s_init = this._init;
 
   var vtkRenderer = vtkGenericRenderWindow.newInstance({
@@ -41,24 +39,6 @@ var vtkjsRenderer = function (arg) {
   vtkRenderer.resize();
   var vtkjsren = vtkRenderer.getRenderer();
   var renderWindow = vtkRenderer.getRenderWindow();
-
-  /**
-   * Return width of the renderer.
-   *
-   * @returns {number} The width of the current canvas.
-   */
-  this.width = function () {
-    return m_width;
-  };
-
-  /**
-   * Return height of the renderer.
-   *
-   * @returns {number} The height of the current canvas.
-   */
-  this.height = function () {
-    return m_height;
-  };
 
   /**
    * Get context specific renderer.
@@ -110,6 +90,7 @@ var vtkjsRenderer = function (arg) {
    * @returns {this}
    */
   this._resize = function (x, y, w, h) {
+    m_this._setWidthHeight(w, h);
     vtkRenderer.resize();
     m_this._render();
     return m_this;

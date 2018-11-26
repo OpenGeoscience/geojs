@@ -23,6 +23,8 @@ var renderer = function (arg) {
 
   arg = arg || {};
   var m_this = this,
+      m_width = 0,
+      m_height = 0,
       m_layer = arg.layer === undefined ? null : arg.layer,
       m_canvas = arg.canvas === undefined ? null : arg.canvas,
       m_initialized = false;
@@ -95,6 +97,37 @@ var renderer = function (arg) {
   };
 
   /**
+   * Get the width of the renderer.
+   *
+   * @returns {number} The width of the renderer.
+   */
+  this.width = function () {
+    return m_width;
+  };
+
+  /**
+   * Get the height of the renderer.
+   *
+   * @returns {number} The height of the renderer.
+   */
+  this.height = function () {
+    return m_height;
+  };
+
+  /**
+   * Set the width and height of the renderer.
+   *
+   * @param {number} width The new width.
+   * @param {number} height The new height.
+   * @returns {this}
+   */
+  this._setWidthHeight = function (width, height) {
+    m_width = width;
+    m_height = height;
+    return m_this;
+  };
+
+  /**
    * Initialize.
    *
    * @returns {this}
@@ -113,6 +146,7 @@ var renderer = function (arg) {
    * @returns {this}
    */
   this._resize = function (x, y, w, h) {
+    m_this._setWidthHeight(w, h);
     return m_this;
   };
 
