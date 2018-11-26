@@ -8,7 +8,6 @@ var feature = require('./feature');
  * @property {geo.vectorFeature.styleSpec} [style] Style object with default
  *   style options.
  * @property {function|object} [origin={x: 0, y: 0, z: 0}] Origin accessor.
- * @property {function
  */
 
 /**
