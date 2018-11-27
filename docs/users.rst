@@ -128,7 +128,7 @@ documentation for each of the classes.
     instead and a warning sent to the console.
     `geo.gl.vglRenderer <https://opengeoscience.github.io/geojs/apidocs/geo.gl.vglRenderer.html>`_
     requires webGL support.
-    `geo.d3.d3Renderer <https://opengeoscience.github.io/geojs/apidocs/geo.d3.d3Renderer.html>`_
+    `geo.svg.svgRenderer <https://opengeoscience.github.io/geojs/apidocs/geo.svg.svgRenderer.html>`_
     requires the d3 library to be present.
 
 `geo.layer <https://opengeoscience.github.io/geojs/apidocs/geo.layer.html>`_

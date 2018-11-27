@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+### Changes
+- Rename the d3 renderer to the svg
+
 ## Version 0.19.0
 
 ### Features

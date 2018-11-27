@@ -1,4 +1,4 @@
-// Test geo.quadFeature, geo.canvas.quadFeature, geo.d3.quadFeature, and
+// Test geo.quadFeature, geo.canvas.quadFeature, geo.svg.quadFeature, and
 // geo.gl.quadFeature
 
 /* globals Image */
@@ -664,8 +664,8 @@ describe('geo.quadFeature', function () {
     });
   });
 
-  /* This is a basic integration test of geo.d3.quadFeature. */
-  describe('geo.d3.quadFeature', function () {
+  /* This is a basic integration test of geo.svg.quadFeature. */
+  describe('geo.svg.quadFeature', function () {
     var map, layer, quads;
     it('load preview image', load_preview_image);
     it('basic usage', function () {
@@ -675,7 +675,7 @@ describe('geo.quadFeature', function () {
         delete quad._cachedQuad;
       });
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       quads = layer.createFeature('quad', {style: testStyle, data: testQuads});
       buildTime = quads.buildTime().timestamp();
       /* Trigger rerendering */

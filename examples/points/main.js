@@ -5,7 +5,6 @@ $(function () {
   // Define a function we will use to generate points.
   function makePoints(data, layer, color) {
 
-    // The API for creating features is similar to d3's data API.
     // The data is an array of arbitrary objects.  Each object in
     // the array is assumed to be a "point".  You provide accessors
     // that return styles and positions.
@@ -73,7 +72,7 @@ $(function () {
   var svgLayer = map.createLayer(
     'feature',
     {
-      renderer: 'd3'
+      renderer: 'svg'
     }
   );
 

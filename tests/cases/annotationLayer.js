@@ -355,7 +355,7 @@ describe('geo.annotationLayer', function () {
        * some edge conditions */
       map = createMap();
       layer = map.createLayer('annotation', {
-        renderer: 'd3'
+        renderer: 'svg'
       });
       point = geo.annotation.pointAnnotation({
         layer: layer,

@@ -17,7 +17,7 @@ describe('geo.feature', function () {
     it('create function', function () {
       var map, layer, feat;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
 
       feat = geo.feature.create();
       expect(feat).toBeNull();
@@ -177,7 +177,7 @@ describe('geo.feature', function () {
     var map, layer, feat;
     it('pointSearch', function () {
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       feat = geo.feature({layer: layer, renderer: layer.renderer()});
       expect(feat.pointSearch()).toEqual({index: [], found: []});
     });
@@ -271,7 +271,7 @@ describe('geo.feature', function () {
     var map, layer, feat;
     it('style', function () {
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       feat = geo.feature({layer: layer, renderer: layer.renderer()});
       expect(feat.style()).toEqual({opacity: 1});
       expect(feat.style('opacity')).toBe(1);

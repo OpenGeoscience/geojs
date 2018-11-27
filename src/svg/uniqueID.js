@@ -4,7 +4,7 @@ var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
 /**
  * Get a random string to use as a div ID.
  *
- * @alias geo.d3.uniqueID
+ * @alias geo.svg.uniqueID
  * @returns {string} A random ID string.
  */
 var uniqueID = function () {

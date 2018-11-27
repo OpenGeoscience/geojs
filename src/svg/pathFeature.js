@@ -3,23 +3,23 @@ var registerFeature = require('../registry').registerFeature;
 var pathFeature = require('../pathFeature');
 
 /**
- * Create a new instance of class geo.d3.pathFeature.
+ * Create a new instance of class geo.svg.pathFeature.
  *
  * @class
- * @alias geo.d3.pathFeature
+ * @alias geo.svg.pathFeature
  * @extends geo.pathFeature
- * @extends geo.d3.object
+ * @extends geo.svg.object
  * @param {geo.pathFeature.spec} arg
- * @returns {geo.d3.pathFeature}
+ * @returns {geo.svg.pathFeature}
  */
-var d3_pathFeature = function (arg) {
+var svg_pathFeature = function (arg) {
   'use strict';
-  if (!(this instanceof d3_pathFeature)) {
-    return new d3_pathFeature(arg);
+  if (!(this instanceof svg_pathFeature)) {
+    return new svg_pathFeature(arg);
   }
 
   var $ = require('jquery');
-  var d3 = require('./d3Renderer').d3;
+  var d3 = require('./svgRenderer').d3;
   var object = require('./object');
   var timestamp = require('../timestamp');
 
@@ -70,9 +70,9 @@ var d3_pathFeature = function (arg) {
       d: diag
     };
 
-    m_style.id = m_this._d3id();
+    m_style.id = m_this._svgid();
     m_style.append = 'path';
-    m_style.classes = ['d3PathFeature'];
+    m_style.classes = ['svgPathFeature'];
     m_style.style = $.extend({
       fill: function () { return false; },
       fillColor: {r: 0, g: 0, b: 0}
@@ -105,8 +105,8 @@ var d3_pathFeature = function (arg) {
   return this;
 };
 
-inherit(d3_pathFeature, pathFeature);
+inherit(svg_pathFeature, pathFeature);
 
-registerFeature('d3', 'path', d3_pathFeature);
+registerFeature('svg', 'path', svg_pathFeature);
 
-module.exports = d3_pathFeature;
+module.exports = svg_pathFeature;

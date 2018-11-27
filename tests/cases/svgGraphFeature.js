@@ -1,10 +1,10 @@
-describe('d3 graph feature', function () {
+describe('svg graph feature', function () {
   var createMap = require('../test-utils').createMap;
   var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
   var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
   var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
-  describe('d3 graph feature', function () {
+  describe('svg graph feature', function () {
     'use strict';
 
     var map, layer, feature;
@@ -12,7 +12,7 @@ describe('d3 graph feature', function () {
     it('Setup map', function () {
       mockAnimationFrame();
       map = createMap({center: [0, 0], zoom: 3});
-      layer = map.createLayer('feature', {'renderer': 'd3'});
+      layer = map.createLayer('feature', {'renderer': 'svg'});
     });
 
     it('Add features to a layer', function () {

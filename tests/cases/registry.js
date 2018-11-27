@@ -11,18 +11,18 @@ describe('geo.registry', function () {
       expect(geo.rendererForFeatures()).toBe('vgl');
       expect(geo.rendererForFeatures(['point'])).toBe('vgl');
       expect(geo.rendererForFeatures(['heatmap'])).toBe('canvas');
-      expect(geo.rendererForFeatures(['point', 'graph'])).toBe('d3');
+      expect(geo.rendererForFeatures(['point', 'graph'])).toBe('svg');
       expect(geo.rendererForFeatures(['contour'])).toBe('vgl');
       expect(geo.rendererForFeatures(['contour', 'graph'])).toBe(false);
-      expect(geo.rendererForFeatures(['quad', 'graph'])).toBe('d3');
+      expect(geo.rendererForFeatures(['quad', 'graph'])).toBe('svg');
       expect(geo.rendererForFeatures([geo.quadFeature.capabilities.imageFull, 'graph'])).toBe(false);
-      expect(geo.rendererForFeatures([geo.quadFeature.capabilities.image, 'graph'])).toBe('d3');
+      expect(geo.rendererForFeatures([geo.quadFeature.capabilities.image, 'graph'])).toBe('svg');
       restoreVGLRenderer();
     });
     it('unsupported vgl renderer', function () {
       mockVGLRenderer(false);
       expect(geo.rendererForFeatures()).toBe('canvas');
-      expect(geo.rendererForFeatures(['point'])).toBe('d3');
+      expect(geo.rendererForFeatures(['point'])).toBe('svg');
       restoreVGLRenderer();
     });
     it('expose registries', function () {

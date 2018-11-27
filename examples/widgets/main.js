@@ -43,7 +43,7 @@ $(function () {
   map.createLayer('osm');
 
   // Plot points for the 3 cities
-  var layer = map.createLayer('feature', {'renderer' : 'd3'});
+  var layer = map.createLayer('feature', {features: ['point']});
 
   layer.createFeature('point')
     .data(coordinates)

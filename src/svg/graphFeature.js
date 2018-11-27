@@ -3,21 +3,21 @@ var registerFeature = require('../registry').registerFeature;
 var graphFeature = require('../graphFeature');
 
 /**
- * Create a new instance of d3.graphFeature.
+ * Create a new instance of svg.graphFeature.
  *
  * @class
- * @alias geo.d3.graphFeature
+ * @alias geo.svg.graphFeature
  * @extends geo.graphFeature
  * @param {geo.graphFeature.spec} arg Feature options.
  * @returns {geo.graphFeature}
  */
-var d3_graphFeature = function (arg) {
+var svg_graphFeature = function (arg) {
   'use strict';
 
   var m_this = this;
 
-  if (!(this instanceof d3_graphFeature)) {
-    return new d3_graphFeature(arg);
+  if (!(this instanceof svg_graphFeature)) {
+    return new svg_graphFeature(arg);
   }
   graphFeature.call(this, arg);
 
@@ -32,9 +32,9 @@ var d3_graphFeature = function (arg) {
         selection = {},
         node = m_this.nodeFeature(),
         links = m_this.linkFeatures();
-    selection.nodes = renderer.select(node._d3id());
+    selection.nodes = renderer.select(node._svgid());
     selection.links = links.map(function (link) {
-      return renderer.select(link._d3id());
+      return renderer.select(link._svgid());
     });
     return selection;
   };
@@ -42,8 +42,8 @@ var d3_graphFeature = function (arg) {
   return this;
 };
 
-inherit(d3_graphFeature, graphFeature);
+inherit(svg_graphFeature, graphFeature);
 
-registerFeature('d3', 'graph', d3_graphFeature);
+registerFeature('svg', 'graph', svg_graphFeature);
 
-module.exports = d3_graphFeature;
+module.exports = svg_graphFeature;

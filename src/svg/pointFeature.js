@@ -3,27 +3,27 @@ var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
 
 /**
- * Create a new instance of d3.pointFeature.
+ * Create a new instance of svg.pointFeature.
  *
  * @class
- * @alias geo.d3.pointFeature
+ * @alias geo.svg.pointFeature
  * @extends geo.pointFeature
- * @extends geo.d3.object
+ * @extends geo.svg.object
  * @param {geo.pointFeature.spec} arg
- * @returns {geo.d3.pointFeature}
+ * @returns {geo.svg.pointFeature}
  */
-var d3_pointFeature = function (arg) {
+var svg_pointFeature = function (arg) {
   'use strict';
-  if (!(this instanceof d3_pointFeature)) {
-    return new d3_pointFeature(arg);
+  if (!(this instanceof svg_pointFeature)) {
+    return new svg_pointFeature(arg);
   }
 
-  var d3_object = require('./object');
+  var svg_object = require('./object');
   var timestamp = require('../timestamp');
 
   arg = arg || {};
   pointFeature.call(this, arg);
-  d3_object.call(this);
+  svg_object.call(this);
 
   /**
    * @private
@@ -62,8 +62,8 @@ var d3_pointFeature = function (arg) {
     // default to empty data array
     if (!data) { data = []; }
 
-    // fill in d3 renderer style object defaults
-    m_style.id = m_this._d3id();
+    // fill in svg renderer style object defaults
+    m_style.id = m_this._svgid();
     m_style.data = data;
     m_style.append = 'circle';
     m_style.attributes = {
@@ -76,7 +76,7 @@ var d3_pointFeature = function (arg) {
       }
     };
     m_style.style = s_style;
-    m_style.classes = ['d3PointFeature'];
+    m_style.classes = ['svgPointFeature'];
     m_style.visible = m_this.visible;
 
     // pass to renderer to draw
@@ -106,12 +106,12 @@ var d3_pointFeature = function (arg) {
   return this;
 };
 
-inherit(d3_pointFeature, pointFeature);
+inherit(svg_pointFeature, pointFeature);
 
 var capabilities = {};
 capabilities[pointFeature.capabilities.stroke] = true;
 
 // Now register it
-registerFeature('d3', 'point', d3_pointFeature, capabilities);
+registerFeature('svg', 'point', svg_pointFeature, capabilities);
 
-module.exports = d3_pointFeature;
+module.exports = svg_pointFeature;

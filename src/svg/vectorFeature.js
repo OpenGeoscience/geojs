@@ -55,24 +55,24 @@ var markerConfigs = {
 };
 
 /**
- * Create a new instance of d3.vectorFeature.
+ * Create a new instance of svg.vectorFeature.
  *
  * @class
- * @alias geo.d3.vectorFeature
+ * @alias geo.svg.vectorFeature
  * @extends geo.vectorFeature
- * @extends geo.d3.object
+ * @extends geo.svg.object
  * @param {geo.vectorFeature.spec} arg Feature options.
  * @returns {geo.vectorFeature}
  */
-var d3_vectorFeature = function (arg) {
+var svg_vectorFeature = function (arg) {
   'use strict';
-  if (!(this instanceof d3_vectorFeature)) {
-    return new d3_vectorFeature(arg);
+  if (!(this instanceof svg_vectorFeature)) {
+    return new svg_vectorFeature(arg);
   }
 
   var object = require('./object');
   var timestamp = require('../timestamp');
-  var d3 = require('./d3Renderer').d3;
+  var d3 = require('./svgRenderer').d3;
 
   arg = arg || {};
   vectorFeature.call(this, arg);
@@ -97,7 +97,7 @@ var d3_vectorFeature = function (arg) {
    * @returns {string} The constructed ID.
    */
   function markerID(d, i, position) {
-    return m_this._d3id() + '_marker_' + i + '_' + position;
+    return m_this._svgid() + '_marker_' + i + '_' + position;
   }
 
   /**
@@ -112,13 +112,13 @@ var d3_vectorFeature = function (arg) {
   function updateMarkers(data, stroke, opacity, originStyle, endStyle) {
     //this allows for multiple vectorFeature in a layer
     var markerGroup = m_this.renderer()._definitions()
-      .selectAll('g.marker-group#' + m_this._d3id())
+      .selectAll('g.marker-group#' + m_this._svgid())
       .data(data.length ? [1] : []);
 
     markerGroup
       .enter()
       .append('g')
-      .attr('id', m_this._d3id)
+      .attr('id', m_this._svgid)
       .attr('class', 'marker-group');
 
     markerGroup.exit().remove();
@@ -224,8 +224,8 @@ var d3_vectorFeature = function (arg) {
       return scale / m_renderer.scaleFactor();
     }
 
-    // fill in d3 renderer style object defaults
-    m_style.id = m_this._d3id();
+    // fill in svg renderer style object defaults
+    m_style.id = m_this._svgid();
     m_style.data = data;
     m_style.append = 'line';
     m_style.attributes = {
@@ -256,7 +256,7 @@ var d3_vectorFeature = function (arg) {
       originStyle: s_style.originStyle,
       endStyle: s_style.endStyle
     };
-    m_style.classes = ['d3VectorFeature'];
+    m_style.classes = ['svgVectorFeature'];
     m_style.visible = m_this.visible;
 
     // Add markers to the defition list
@@ -307,10 +307,10 @@ var d3_vectorFeature = function (arg) {
   return this;
 };
 
-d3_vectorFeature.markerConfigs = markerConfigs;
+svg_vectorFeature.markerConfigs = markerConfigs;
 
-inherit(d3_vectorFeature, vectorFeature);
+inherit(svg_vectorFeature, vectorFeature);
 
 // Now register it
-registerFeature('d3', 'vector', d3_vectorFeature);
-module.exports = d3_vectorFeature;
+registerFeature('svg', 'vector', svg_vectorFeature);
+module.exports = svg_vectorFeature;

@@ -1,6 +1,6 @@
 var registerLayerAdjustment = require('../registry').registerLayerAdjustment;
 
-var d3_tileLayer = function () {
+var svg_tileLayer = function () {
   'use strict';
   var m_this = this,
       s_init = this._init,
@@ -90,5 +90,5 @@ var d3_tileLayer = function () {
   this._updateSubLayers = undefined;
 };
 
-registerLayerAdjustment('d3', 'tile', d3_tileLayer);
-module.exports = d3_tileLayer;
+registerLayerAdjustment('svg', 'tile', svg_tileLayer);
+module.exports = svg_tileLayer;

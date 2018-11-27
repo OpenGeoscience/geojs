@@ -1,4 +1,4 @@
-describe('d3Graph', function () {
+describe('svgGraph', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
 
@@ -25,7 +25,7 @@ describe('d3Graph', function () {
         c.y = c.lat;
       });
 
-      var layer = myMap.createLayer('feature', {'renderer' : 'd3'});
+      var layer = myMap.createLayer('feature', {'renderer' : 'svg'});
       layer.createFeature('graph')
           .data(citieslatlon)
           .style({
@@ -37,7 +37,7 @@ describe('d3Graph', function () {
           });
       myMap.draw();
 
-      imageTest.imageTest('d3Graph', null, 0.0015, done, myMap.onIdle, 0, 2);
+      imageTest.imageTest('svgGraph', null, 0.0015, done, myMap.onIdle, 0, 2);
     }, 10);  // just load 10 cities
   });
 });

@@ -284,7 +284,7 @@ function getStyleValue(val, defaultValue, isString) {
  * Show a GeoJS map with lines.
  *
  * @param {object} opts: options on how to render the lines.  Options include:
- *   renderer: one of 'vgl', 'canvas', or 'd3'.  Defaults to 'vgl'.
+ *   renderer: one of 'vgl', 'canvas', or 'svg'.  Defaults to 'vgl'.
  *   version: a GeoJS version to load from a CDN.  Defaults to 'current' which
  *      uses the local GeoJS.
  *   node: a jquery selector of a div to render the map into.  Defaults to
@@ -583,7 +583,7 @@ function mapboxglLinesTest(opts) {
  *   library: one of 'geojs', 'leaflet', 'mapbox', or 'mapboxgl'.  Defaults to
  *      'geojs'.
  *   version: a library version to load.  Varies by library.
- *   renderer: one of 'vgl', 'canvas', 'd3', 'svg'.  Varues by library.
+ *   renderer: one of 'vgl', 'canvas', 'svg'.  Varies by library.
  *   node: a jquery selector of a div to render the map into.  Defaults to
  *      '#map'.
  *   width: an optional width in pixels to set the node's size.

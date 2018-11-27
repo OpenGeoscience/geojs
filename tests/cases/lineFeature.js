@@ -1,4 +1,4 @@
-// Test geo.lineFeature, geo.d3.lineFeature, geo.canvas.lineFeature, and
+// Test geo.lineFeature, geo.svg.lineFeature, geo.canvas.lineFeature, and
 // geo.gl.lineFeature
 
 var $ = require('jquery');
@@ -50,7 +50,7 @@ describe('geo.lineFeature', function () {
     it('create function', function () {
       var map, layer, line;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       line = geo.lineFeature.create(layer);
       expect(line instanceof geo.lineFeature).toBe(true);
     });
@@ -92,7 +92,7 @@ describe('geo.lineFeature', function () {
     it('pointSearch', function () {
       var map, layer, line, pt, p, data = testLines;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       line = layer.createFeature('line', {selectionAPI: true});
       line.data(data)
           .line(function (item) {
@@ -175,7 +175,7 @@ describe('geo.lineFeature', function () {
     it('boxSearch', function () {
       var map, layer, line, idx, data = testLines;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       line = layer.createFeature('line', {selectionAPI: true});
       line.data(data)
           .line(function (item, itemIdx) {
@@ -253,13 +253,13 @@ describe('geo.lineFeature', function () {
     });
   });
 
-  /* This is a basic integration test of geo.d3.lineFeature. */
-  describe('geo.d3.lineFeature', function () {
+  /* This is a basic integration test of geo.svg.lineFeature. */
+  describe('geo.svg.lineFeature', function () {
     var map, layer, line;
     it('basic usage', function () {
       mockAnimationFrame();
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       line = layer.createFeature('line', {
         line: function (item) {
           return item.coord;

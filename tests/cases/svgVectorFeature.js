@@ -4,12 +4,12 @@ var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
 var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
 var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
-describe('d3 vector feature', function () {
+describe('svg vector feature', function () {
   'use strict';
 
   var map, layer, feature1;
 
-  it('Create a map with a d3 feature layer', function () {
+  it('Create a map with a svg feature layer', function () {
     mockAnimationFrame();
     map = createMap({
       center: [0, 0],
@@ -21,7 +21,7 @@ describe('d3 vector feature', function () {
     var cl = map.createLayer;
     map.createLayer = function (type, opts) {
       opts = opts || {};
-      opts.renderer = 'd3';
+      opts.renderer = 'svg';
       return cl.call(map, type, opts);
     };
 
@@ -32,7 +32,7 @@ describe('d3 vector feature', function () {
       return pt;
     };
 
-    layer = map.createLayer('feature', {'renderer': 'd3'});
+    layer = map.createLayer('feature', {'renderer': 'svg'});
   });
 
   it('Add features to a layer', function () {
@@ -62,7 +62,7 @@ describe('d3 vector feature', function () {
     vectorLines = d3.select('#map').selectAll('line');
     expect(vectorLines.size()).toBe(3);
 
-    featureGroup = d3.selectAll('g#' + feature1._d3id());
+    featureGroup = d3.selectAll('g#' + feature1._svgid());
     expect(featureGroup.size()).toBe(1);
 
     markers = d3.selectAll('marker');

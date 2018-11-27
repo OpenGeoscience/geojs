@@ -37,15 +37,15 @@ describe('points', function () {
     return feature;
   }
 
-  it('d3Points test', function (done) {
+  it('svgPoints test', function (done) {
     var mapOptions = {center: {x: -105.0, y: 40.0}};
     myMap = common.createOsmMap(mapOptions, {}, true);
     common.loadCitiesData(function (citieslatlon) {
-      addLayerAndFeature({'renderer': 'd3'}, citieslatlon);
+      addLayerAndFeature({'renderer': 'svg'}, citieslatlon);
 
       myMap.draw();
 
-      imageTest.imageTest('d3Points', null, 0.0015, done, myMap.onIdle, 0, 2);
+      imageTest.imageTest('svgPoints', null, 0.0015, done, myMap.onIdle, 0, 2);
     }, 30);  // only load 30 cities
   });
 

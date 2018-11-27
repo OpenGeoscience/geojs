@@ -1,4 +1,4 @@
-describe('d3StickyLayer', function () {
+describe('svgStickyLayer', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
   var geo = require('../test-utils').geo;
@@ -20,8 +20,8 @@ describe('d3StickyLayer', function () {
     var width = myMap.node().width(), height = myMap.node().height();
 
     // create two layers
-    var fixedLayer = myMap.createLayer('feature', {'renderer' : 'd3', 'sticky': false}),
-        movingLayer = myMap.createLayer('feature', {'renderer': 'd3', 'sticky': true}),
+    var fixedLayer = myMap.createLayer('feature', {'renderer' : 'svg', 'sticky': false}),
+        movingLayer = myMap.createLayer('feature', {'renderer': 'svg', 'sticky': true}),
         fixedSvg = fixedLayer.canvas(),
         movingSvg = movingLayer.canvas();
 
@@ -44,7 +44,7 @@ describe('d3StickyLayer', function () {
       .attr('r', 10)
       .style('fill', 'blue');
 
-    movingLayer.geoOn(geo.event.d3.rescale, function (arg) {
+    movingLayer.geoOn(geo.event.svg.rescale, function (arg) {
       scaledCircle.attr('r', 10 / arg.scale);
     });
 
@@ -57,6 +57,6 @@ describe('d3StickyLayer', function () {
     // the same size.  Specifically, the black and blue circles should be lower
     // than the red circle, and the black circle should be larger than the red
     // and blue circles
-    imageTest.imageTest('d3StickyLayer', null, 0.0015, done, myMap.onIdle, 0, 2);
+    imageTest.imageTest('svgStickyLayer', null, 0.0015, done, myMap.onIdle, 0, 2);
   });
 });

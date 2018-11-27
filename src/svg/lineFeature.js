@@ -6,19 +6,19 @@ var lineFeature = require('../lineFeature');
  * Create a new instance of class lineFeature.
  *
  * @class
- * @alias geo.d3.lineFeature
+ * @alias geo.svg.lineFeature
  * @extends geo.lineFeature
- * @extends geo.d3.object
+ * @extends geo.svg.object
  * @param {geo.lineFeature.spec} arg
- * @returns {geo.d3.lineFeature}
+ * @returns {geo.svg.lineFeature}
  */
-var d3_lineFeature = function (arg) {
+var svg_lineFeature = function (arg) {
   'use strict';
-  if (!(this instanceof d3_lineFeature)) {
-    return new d3_lineFeature(arg);
+  if (!(this instanceof svg_lineFeature)) {
+    return new svg_lineFeature(arg);
   }
 
-  var d3 = require('./d3Renderer').d3;
+  var d3 = require('./svgRenderer').d3;
   var object = require('./object');
   var timestamp = require('../timestamp');
   var util = require('../util');
@@ -95,8 +95,8 @@ var d3_lineFeature = function (arg) {
         attributes: {
           d: line
         },
-        id: m_this._d3id() + idx,
-        classes: ['d3LineFeature', 'd3SubLine-' + idx],
+        id: m_this._svgid() + idx,
+        classes: ['svgLineFeature', 'svgSubLine-' + idx],
         visible: m_this.visible,
         style: style
       };
@@ -104,7 +104,7 @@ var d3_lineFeature = function (arg) {
       m_renderer._drawFeatures(m_style);
     });
     for (i = data.length; i < m_maxIdx; i += 1) {
-      m_renderer._removeFeature(m_this._d3id() + i);
+      m_renderer._removeFeature(m_this._svgid() + i);
     }
     m_maxIdx = data.length;
 
@@ -132,13 +132,13 @@ var d3_lineFeature = function (arg) {
   return this;
 };
 
-inherit(d3_lineFeature, lineFeature);
+inherit(svg_lineFeature, lineFeature);
 
 // Now register it
 var capabilities = {};
 capabilities[lineFeature.capabilities.basic] = true;
 capabilities[lineFeature.capabilities.multicolor] = false;
 
-registerFeature('d3', 'line', d3_lineFeature, capabilities);
+registerFeature('svg', 'line', svg_lineFeature, capabilities);
 
-module.exports = d3_lineFeature;
+module.exports = svg_lineFeature;

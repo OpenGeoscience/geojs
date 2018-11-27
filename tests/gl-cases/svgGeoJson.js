@@ -1,4 +1,4 @@
-describe('d3GeoJSON', function () {
+describe('svgGeoJSON', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
   var geo = require('../test-utils').geo;
@@ -69,14 +69,14 @@ describe('d3GeoJSON', function () {
     myMap.exit();
   });
 
-  it('d3 GeoJSON test', function (done) {
+  it('svg GeoJSON test', function (done) {
     var mapOptions = {center: {x: -105.0, y: 40.0}, zoom: 3.5};
     myMap = common.createOsmMap(mapOptions, {}, true);
-    var layer = myMap.createLayer('feature', {'renderer': 'd3'});
+    var layer = myMap.createLayer('feature', {'renderer': 'svg'});
     var reader = geo.createFileReader('geojsonReader', {'layer': layer});
     reader.read(obj, function () {
       myMap.draw();
-      imageTest.imageTest('d3GeoJson', null, 0.0015, done, myMap.onIdle, 0, 2);
+      imageTest.imageTest('svgGeoJson', null, 0.0015, done, myMap.onIdle, 0, 2);
     });
   });
 });

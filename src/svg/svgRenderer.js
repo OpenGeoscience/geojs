@@ -3,10 +3,10 @@ var registerRenderer = require('../registry').registerRenderer;
 var renderer = require('../renderer');
 
 /**
- * Create a new instance of class d3Renderer.
+ * Create a new instance of class svgRenderer.
  *
  * @class
- * @alias geo.d3.renderer
+ * @alias geo.svg.renderer
  * @extends geo.renderer
  * @param {object} arg Options for the renderer.
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.
@@ -17,19 +17,19 @@ var renderer = require('../renderer');
  *   group.
  * @param {HTMLElement} [arg.d3Parent] If specified, the parent for any
  *   rendered objects; otherwise the renderer's layer's main node is used.
- * @returns {geo.d3.d3Renderer}
+ * @returns {geo.svg.svgRenderer}
  */
-var d3Renderer = function (arg) {
+var svgRenderer = function (arg) {
   'use strict';
 
-  var d3 = d3Renderer.d3;
+  var d3 = svgRenderer.d3;
   var object = require('./object');
   var util = require('../util');
   var geo_event = require('../event');
-  var d3Rescale = require('./rescale');
+  var svgRescale = require('./rescale');
 
-  if (!(this instanceof d3Renderer)) {
-    return new d3Renderer(arg);
+  if (!(this instanceof svgRenderer)) {
+    return new svgRenderer(arg);
   }
   renderer.call(this, arg);
 
@@ -53,7 +53,7 @@ var d3Renderer = function (arg) {
 
   /**
    * Set attributes to a d3 selection.
-   * @private
+   *
    * @param {d3Selector} select The d3 selector with the elements to change.
    * @param {object} attrs A map of attributes to set on the elements.
    */
@@ -68,7 +68,7 @@ var d3Renderer = function (arg) {
 
   /**
    * Meta functions for converting from geojs styles to d3.
-   * @private
+   *
    * @param {object|function} f The style value or function to convert.
    * @param {function} [g] An optional function that returns a boolean; if it
    *    returns false, the style is set to `'none'`.
@@ -94,7 +94,7 @@ var d3Renderer = function (arg) {
   /**
    * Return a function for converting a size in pixels to an appropriate
    * d3 scale.
-   * @private
+   *
    * @param {object|function} f The style value or function to convert.
    * @returns {function} A function for converting scale.
    */
@@ -107,7 +107,7 @@ var d3Renderer = function (arg) {
 
   /**
    * Set styles to a d3 selection. Ignores unknown style keys.
-   * @private
+   *
    * @param {d3Selector} select The d3 selector with the elements to change.
    * @param {object} styles Style object associated with a feature.
    */
@@ -186,7 +186,6 @@ var d3Renderer = function (arg) {
    * Get the svg group element associated with this renderer instance, or of a
    * group within the render instance.
    *
-   * @private
    * @param {string} [parentId] Optional parent ID name.
    * @returns {d3Selector} Selector with the d3 group.
    */
@@ -194,12 +193,11 @@ var d3Renderer = function (arg) {
     if (parentId) {
       return m_svg.select('.group-' + parentId);
     }
-    return m_svg.select('.group-' + m_this._d3id());
+    return m_svg.select('.group-' + m_this._svgid());
   }
 
   /**
    * Set the initial lat-lon coordinates of the map view.
-   * @private
    */
   function initCorners() {
     var layer = m_this.layer(),
@@ -275,6 +273,7 @@ var d3Renderer = function (arg) {
   /**
    * Convert from screen pixel coordinates to the local coordinate system
    * in the SVG group element taking into account the transform.
+   *
    * @private
    * @param {geo.screenPosition} pt The coordinates to convert.
    * @returns {geo.geoPosition} The converted coordinates.
@@ -299,6 +298,7 @@ var d3Renderer = function (arg) {
   /**
    * Convert from the local coordinate system in the SVG group element
    * to screen pixel coordinates.
+   *
    * @private
    * @param {geo.geoPosition} pt The coordinates to convert.
    * @returns {geo.screenPosition} The converted coordinates.
@@ -393,12 +393,12 @@ var d3Renderer = function (arg) {
           .attr('in', 'SourceGraphic');
 
       m_sticky = m_this.layer().sticky();
-      m_svg.attr('class', m_this._d3id());
+      m_svg.attr('class', m_this._svgid());
       m_svg.attr('width', m_this.layer().node().width());
       m_svg.attr('height', m_this.layer().node().height());
 
       if (!arg.widget) {
-        canvas.attr('class', 'group-' + m_this._d3id());
+        canvas.attr('class', 'group-' + m_this._svgid());
 
         m_this.canvas(canvas);
       } else {
@@ -412,10 +412,10 @@ var d3Renderer = function (arg) {
   /**
    * Get API used by the renderer.
    *
-   * @returns {string} 'd3'.
+   * @returns {string} 'svg'.
    */
   this.api = function () {
-    return 'd3';
+    return 'svg';
   };
 
   /**
@@ -442,7 +442,7 @@ var d3Renderer = function (arg) {
    * @param {number} w New width in pixels.
    * @param {number} h New height in pixels.
    * @returns {this}
-   * @fires geo.event.d3.rescale
+   * @fires geo.event.svg.rescale
    */
   this._resize = function (x, y, w, h) {
     if (!m_corners) {
@@ -452,7 +452,7 @@ var d3Renderer = function (arg) {
     m_svg.attr('height', h);
     m_this._setTransform();
     m_this._setWidthHeight(w, h);
-    m_this.layer().geoTrigger(d3Rescale, { scale: m_scale }, true);
+    m_this.layer().geoTrigger(svgRescale, { scale: m_scale }, true);
     return m_this;
   };
 
@@ -650,7 +650,7 @@ var d3Renderer = function (arg) {
   this.layer().geoOn(geo_event.zoom, function () {
     m_this._setTransform();
     m_this.__render();
-    m_this.layer().geoTrigger(d3Rescale, { scale: m_scale }, true);
+    m_this.layer().geoTrigger(svgRescale, { scale: m_scale }, true);
   });
 
   this.layer().geoOn(geo_event.resize, function (event) {
@@ -661,9 +661,11 @@ var d3Renderer = function (arg) {
   return this;
 };
 
-inherit(d3Renderer, renderer);
+inherit(svgRenderer, renderer);
 
-registerRenderer('d3', d3Renderer);
+registerRenderer('svg', svgRenderer);
+// Also register under an alternate name (alias for backwards compatibility)
+registerRenderer('d3', svgRenderer);
 
 /* Code for checking if the renderer is supported */
 
@@ -673,13 +675,13 @@ registerRenderer('d3', d3Renderer);
  *
  * @returns {boolean} true if available.
  */
-d3Renderer.supported = function () {
-  delete d3Renderer.d3;
+svgRenderer.supported = function () {
+  delete svgRenderer.d3;
   // webpack expects optional dependencies to be wrapped in a try-catch
   try {
-    d3Renderer.d3 = require('d3');
+    svgRenderer.d3 = require('d3');
   } catch (_error) {}
-  return d3Renderer.d3 !== undefined;
+  return svgRenderer.d3 !== undefined;
 };
 
 /**
@@ -688,10 +690,10 @@ d3Renderer.supported = function () {
  *
  * @returns {null} `null` for the null renderer.
  */
-d3Renderer.fallback = function () {
+svgRenderer.fallback = function () {
   return null;
 };
 
-d3Renderer.supported();  // cache reference to d3 if it is available
+svgRenderer.supported();  // cache reference to d3 if it is available
 
-module.exports = d3Renderer;
+module.exports = svgRenderer;

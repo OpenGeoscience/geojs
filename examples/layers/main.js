@@ -7,7 +7,7 @@ $(function () {
   // Create an svg layer and return a reference to its dom element.
   function getSvgLayer(map, opts) {
 
-    opts.renderer = 'd3';
+    opts.renderer = 'svg';
     var layer = map.createLayer('feature', opts);
 
     // The canvas is a d3 context to geojs managed svg element.

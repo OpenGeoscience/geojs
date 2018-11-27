@@ -1,4 +1,4 @@
-describe('d3Lines', function () {
+describe('svgLines', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
 
@@ -16,7 +16,7 @@ describe('d3Lines', function () {
     var mapOptions = {center: {x: -105.0, y: 40.0}};
     myMap = common.createOsmMap(mapOptions, {}, true);
     common.loadCitiesData(function (citieslatlon) {
-      var layer = myMap.createLayer('feature', {'renderer': 'd3'});
+      var layer = myMap.createLayer('feature', {'renderer': 'svg'});
       var n = citieslatlon.length / 2;
       var group1 = citieslatlon.filter(function (d, i) { return i < n; })
         .sort(function (d1, d2) {
@@ -45,7 +45,7 @@ describe('d3Lines', function () {
 
       myMap.draw();
 
-      imageTest.imageTest('d3Lines', null, 0.0015, done, myMap.onIdle, 0, 2);
+      imageTest.imageTest('svgLines', null, 0.0015, done, myMap.onIdle, 0, 2);
     });
   });
 });

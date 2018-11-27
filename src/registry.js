@@ -128,7 +128,7 @@ util.checkRenderer = function (name, noFallback) {
  *      or false if no valid renderer can be determined.
  */
 util.rendererForFeatures = function (featureList) {
-  var preferredRenderers = ['vgl', 'canvas', 'd3', null];
+  var preferredRenderers = ['vgl', 'canvas', 'svg', 'vtkjs', null];
 
   var renderer, ridx, feature, fidx, capability, available;
   for (ridx = 0; ridx < preferredRenderers.length; ridx += 1) {

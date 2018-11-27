@@ -1501,7 +1501,7 @@ describe('geo.annotation', function () {
       geo.gl.vglRenderer.supported = function () { return false; };
       expect(geo.rendererForAnnotations(['polygon'])).toBe(false);
       expect(console.warn.calledOnce).toBe(true);
-      expect(geo.rendererForAnnotations(['point'])).toBe('d3');
+      expect(geo.rendererForAnnotations(['point'])).toBe('svg');
       console.warn.restore();
     });
   });

@@ -6,19 +6,19 @@ var quadFeature = require('../quadFeature');
  * Create a new instance of class quadFeature.
  *
  * @class
- * @alias geo.d3.quadFeature
+ * @alias geo.svg.quadFeature
  * @param {geo.quadFeature.spec} arg Options object.
  * @extends geo.quadFeature
- * @returns {geo.d3.quadFeature}
+ * @returns {geo.svg.quadFeature}
  */
-var d3_quadFeature = function (arg) {
+var svg_quadFeature = function (arg) {
   'use strict';
-  if (!(this instanceof d3_quadFeature)) {
-    return new d3_quadFeature(arg);
+  if (!(this instanceof svg_quadFeature)) {
+    return new svg_quadFeature(arg);
   }
 
   var $ = require('jquery');
-  var d3 = require('./d3Renderer').d3;
+  var d3 = require('./svgRenderer').d3;
   var object = require('./object');
 
   quadFeature.call(this, arg);
@@ -53,7 +53,7 @@ var d3_quadFeature = function (arg) {
     });
 
     var feature = {
-      id: this._d3id(),
+      id: this._svgid(),
       data: data,
       dataIndex: function (d) {
         return d.quad.quadId;
@@ -182,7 +182,7 @@ var d3_quadFeature = function (arg) {
       onlyRenderNew: !this.style('previewColor') && !this.style('previewImage'),
       sortByZ: true,
       visible: m_this.visible,
-      classes: ['d3QuadFeature']
+      classes: ['svgQuadFeature']
     };
     renderer._drawFeatures(feature);
 
@@ -221,7 +221,7 @@ var d3_quadFeature = function (arg) {
   return this;
 };
 
-inherit(d3_quadFeature, quadFeature);
+inherit(svg_quadFeature, quadFeature);
 
 // Now register it
 var capabilities = {};
@@ -233,5 +233,5 @@ capabilities[quadFeature.capabilities.imageFull] = false;
 capabilities[quadFeature.capabilities.canvas] = false;
 capabilities[quadFeature.capabilities.video] = false;
 
-registerFeature('d3', 'quad', d3_quadFeature, capabilities);
-module.exports = d3_quadFeature;
+registerFeature('svg', 'quad', svg_quadFeature, capabilities);
+module.exports = svg_quadFeature;

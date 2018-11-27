@@ -1,10 +1,10 @@
 var geo_event = require('../event.js');
-geo_event.d3 = {
+geo_event.svg = {
   rescale: require('./rescale')
 };
 
 /**
- * @namespace geo.d3
+ * @namespace geo.svg
  */
 module.exports = {
   graphFeature: require('./graphFeature'),
@@ -13,7 +13,7 @@ module.exports = {
   pathFeature: require('./pathFeature'),
   pointFeature: require('./pointFeature'),
   quadFeature: require('./quadFeature'),
-  renderer: require('./d3Renderer'),
+  renderer: require('./svgRenderer'),
   tileLayer: require('./tileLayer'),
   uniqueID: require('./uniqueID'),
   vectorFeature: require('./vectorFeature')
