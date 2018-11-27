@@ -4,7 +4,7 @@
 
 ### Features
 - Feature selection API is now enabled automatically if any event handlers are bounds to the feature (#921)
-- Added a VTK.js renderer which supports a point feature (#893)
+- Added a VTK.js renderer which supports a point feature (#893, #953)
 
 ### Improvements
 - Coordinate transforms on flat arrays are now faster (#939)
@@ -12,13 +12,22 @@
 - All features have a `featureType` property (#931)
 - When changing geometry sizes, buffers are reallocated less (#941)
 - Initial rendering webGL features is somewhat faster (#943)
+- WebGL point and polygon features no longer clip by z coordinates (#963)
 
 ### Changes
 - Removed the dependency on the vgl module for the `object` and `timestamp` classes (#918)
 - CSS color names are obtained from an npm package rather than being defined in the util module (#936)
+- Updated several npm modules (#944)
+- Report the unmasked renderer used with webgl (#947)
+- Width and height are now in the base renderer class (#962)
 
 ### Bug Fixes
 - Fixed some minor issues with layers (#949)
+
+### Documentation
+- Improve documentation (#922, #928, #929, #930, #932, #948, #950, #951, #956, #960, #961)
+- Added a point cluster example (#957)
+- Editor tutorials keep history in browser (#926)
 
 ## Version 0.18.1
 

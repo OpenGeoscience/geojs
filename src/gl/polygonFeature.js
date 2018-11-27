@@ -141,7 +141,8 @@ var gl_polygonFeature = function (arg) {
           c = posFunc(outer[i], i, item, itemIndex);
           geometry[d3] = c.x;
           geometry[d3 + 1] = c.y;
-          geometry[d3 + 2] = c.z || 0;
+          // ignore the z values until we support them
+          geometry[d3 + 2] = 0;  // c.z || 0;
         }
         geometry = {vertices: geometry, dimensions: 3, holes: []};
         original = outer;
@@ -157,7 +158,8 @@ var gl_polygonFeature = function (arg) {
               c = posFunc(hole[i], i, item, itemIndex);
               geometry.vertices[d3] = c.x;
               geometry.vertices[d3 + 1] = c.y;
-              geometry.vertices[d3 + 2] = c.z || 0;
+              // ignore the z values until we support them
+              geometry.vertices[d3 + 2] = 0;  // c.z || 0;
             }
           });
         }
