@@ -87,8 +87,8 @@ $(function () {
     color: '#0000FF'
   }];
   if (query.canvas === 'true') {
-    // You can render a canvas on a quad, but only on the canvas and vgl
-    // renderers.  On the vgl renderer, it may not update when the quad's
+    // You can render a canvas on a quad, but only on the canvas and webgl
+    // renderers.  On the webgl renderer, it may not update when the quad's
     // canvas element is changed.
     var canvasElement = document.createElement('canvas');
     canvasElement.width = 640;

@@ -60,11 +60,11 @@ $(function () {
     }
   );
 
-  // Create a gl feature layer
-  var vglLayer = map.createLayer(
+  // Create a webgl feature layer
+  var webglLayer = map.createLayer(
     'feature',
     {
-      renderer: 'vgl'
+      renderer: 'webgl'
     }
   );
 
@@ -77,19 +77,19 @@ $(function () {
   );
 
   // Define unique colors for each layer
-  var vglColor = 'red';
+  var webglColor = 'red';
   var svgColor = 'blue';
 
-  // Generate some data for vgl
+  // Generate some data for webgl
   var data = d3.range(2).map(function (i) {
     return {
       x: -95,             // longitude
       y: 39.5 + 4.5 * i,  // latitude
-      c: vglColor,        // fill color
+      c: webglColor,      // fill color
       opacity: 0.1        // fill opacity
     };
   });
-  makePoints(data, vglLayer, vglColor);
+  makePoints(data, webglLayer, webglColor);
 
   // Generate some data for svg
   data = d3.range(2).map(function (i) {

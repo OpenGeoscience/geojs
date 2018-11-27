@@ -126,7 +126,7 @@ documentation for each of the classes.
     If a renderer is requested when creating a layer, and that renderer is not
     supported by the current installation, a fallback renderer may be used
     instead and a warning sent to the console.
-    `geo.gl.vglRenderer <https://opengeoscience.github.io/geojs/apidocs/geo.gl.vglRenderer.html>`_
+    `geo.webgl.webglRenderer <https://opengeoscience.github.io/geojs/apidocs/geo.webgl.webglRenderer.html>`_
     requires webGL support.
     `geo.svg.svgRenderer <https://opengeoscience.github.io/geojs/apidocs/geo.svg.svgRenderer.html>`_
     requires the d3 library to be present.
@@ -213,7 +213,7 @@ World coordinates
     in 3D graphics.  The world coordinates are a rescaled and translated version of the GCS coordinates so
     that the world coordinates of the current viewport is near ``1`` in each axis.  This is done to
     provide well conditioned transformation matrices that can be used acurately in contexts of limited precision
-    such as GL or CSS.  In order to achieve this, the world coordinate system is dynamic at run time
+    such as WebGL or CSS.  In order to achieve this, the world coordinate system is dynamic at run time
     and will change as the user pans and zooms the map.  By convention, the world coordinates are given
     relative to a dynamic "scale" and "origin".  Changes to these values trigger events on the map that
     allow layers and features to respond and update their views as necessary.

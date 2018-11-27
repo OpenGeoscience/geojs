@@ -1,6 +1,6 @@
 var $ = require('jquery');
 
-describe('glLinesSpeed', function () {
+describe('webglLinesSpeed', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
 

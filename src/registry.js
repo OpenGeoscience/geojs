@@ -128,7 +128,7 @@ util.checkRenderer = function (name, noFallback) {
  *      or false if no valid renderer can be determined.
  */
 util.rendererForFeatures = function (featureList) {
-  var preferredRenderers = ['vgl', 'canvas', 'svg', 'vtkjs', null];
+  var preferredRenderers = ['webgl', 'canvas', 'svg', 'vtkjs', null];
 
   var renderer, ridx, feature, fidx, capability, available;
   for (ridx = 0; ridx < preferredRenderers.length; ridx += 1) {
@@ -303,7 +303,7 @@ util.registerLayer = function (name, func, defaultFeatures) {
  *      registered.
  */
 util.createLayer = function (name, map, arg) {
-  // Default renderer is vgl
+  // Default renderer is webgl
   var options = {map: map},
       layer = null;
 

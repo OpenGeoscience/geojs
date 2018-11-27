@@ -7,15 +7,15 @@ var timestamp = require('../timestamp');
  * Create a new instance of class quadFeature.
  *
  * @class
- * @alias geo.gl.quadFeature
+ * @alias geo.webgl.quadFeature
  * @param {geo.quadFeature.spec} arg Options object.
  * @extends geo.quadFeature
- * @returns {geo.gl.quadFeature}
+ * @returns {geo.webgl.quadFeature}
  */
-var gl_quadFeature = function (arg) {
+var webgl_quadFeature = function (arg) {
   'use strict';
-  if (!(this instanceof gl_quadFeature)) {
-    return new gl_quadFeature(arg);
+  if (!(this instanceof webgl_quadFeature)) {
+    return new webgl_quadFeature(arg);
   }
   quadFeature.call(this, arg);
 
@@ -431,7 +431,7 @@ var gl_quadFeature = function (arg) {
   return this;
 };
 
-inherit(gl_quadFeature, quadFeature);
+inherit(webgl_quadFeature, quadFeature);
 
 // Now register it
 var capabilities = {};
@@ -443,5 +443,5 @@ capabilities[quadFeature.capabilities.imageFull] = true;
 capabilities[quadFeature.capabilities.canvas] = false;
 capabilities[quadFeature.capabilities.video] = false;
 
-registerFeature('vgl', 'quad', gl_quadFeature, capabilities);
-module.exports = gl_quadFeature;
+registerFeature('webgl', 'quad', webgl_quadFeature, capabilities);
+module.exports = webgl_quadFeature;

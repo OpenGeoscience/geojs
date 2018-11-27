@@ -1696,7 +1696,7 @@ var map = function (arg) {
       layer.node().children('canvas').each(function () {
         var canvasElem = $(this);
         defer = defer.then(function () {
-          if (layer.renderer().api() === 'vgl') {
+          if (layer.renderer().api() === 'webgl') {
             layer.renderer()._renderFrame();
           }
           drawLayerImageToContext(context, opacity, canvasElem, canvasElem[0]);

@@ -3,23 +3,23 @@ var registerRenderer = require('../registry').registerRenderer;
 var renderer = require('../renderer');
 
 /**
- * Create a new instance of class vglRenderer.
+ * Create a new instance of class webglRenderer.
  *
  * @class
- * @alias geo.gl.vglRenderer
+ * @alias geo.webgl.webglRenderer
  * @extends geo.renderer
  * @param {object} arg Options for the renderer.
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.
  * @param {HTMLElement} [arg.canvas] Canvas element associated with the
  *   renderer.
- * @param {object} [arg.options] Additional options for the vgl renderer.
- * @returns {geo.gl.vglRenderer}
+ * @param {object} [arg.options] Additional options for the webgl renderer.
+ * @returns {geo.webgl.webglRenderer}
  */
-var vglRenderer = function (arg) {
+var webglRenderer = function (arg) {
   'use strict';
 
-  if (!(this instanceof vglRenderer)) {
-    return new vglRenderer(arg);
+  if (!(this instanceof webglRenderer)) {
+    return new webglRenderer(arg);
   }
   arg = arg || {};
   renderer.call(this, arg);
@@ -50,10 +50,10 @@ var vglRenderer = function (arg) {
   /**
    * Get API used by the renderer.
    *
-   * @returns {string} `vgl`.
+   * @returns {string} `webgl`.
    */
   this.api = function () {
-    return 'vgl';
+    return 'webgl';
   };
 
   /**
@@ -297,21 +297,23 @@ var vglRenderer = function (arg) {
   return this;
 };
 
-inherit(vglRenderer, renderer);
+inherit(webglRenderer, renderer);
 
-registerRenderer('vgl', vglRenderer);
+registerRenderer('webgl', webglRenderer);
+// Also register under an alternate name (alias for backwards compatibility)
+registerRenderer('vgl', webglRenderer);
 
 /* Code for checking if the renderer is supported */
 
 var checkedWebGL;
 
 /**
- * Report if the vgl renderer is supported.  This is just a check if webGL is
+ * Report if the webgl renderer is supported.  This is just a check if webGL is
  * supported and available.
  *
  * @returns {boolean} true if available.
  */
-vglRenderer.supported = function () {
+webglRenderer.supported = function () {
   if (checkedWebGL === undefined) {
     /* This is extracted from what Modernizr uses. */
     var canvas, ctx, exts; // eslint-disable-line no-unused-vars
@@ -324,7 +326,7 @@ vglRenderer.supported = function () {
       exts = ctx.getSupportedExtensions();
       /* If available, store the unmasked renderer to aid in debugging. */
       if (exts.indexOf('WEBGL_debug_renderer_info') >= 0) {
-        vglRenderer._unmaskedRenderer = ctx.getParameter(ctx.getExtension(
+        webglRenderer._unmaskedRenderer = ctx.getParameter(ctx.getExtension(
           'WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL);
       }
       checkedWebGL = true;
@@ -340,13 +342,13 @@ vglRenderer.supported = function () {
 };
 
 /**
- * If the vgl renderer is not supported, supply the name of a renderer that
+ * If the webgl renderer is not supported, supply the name of a renderer that
  * should be used instead.  This asks for the null renderer.
  *
  * @returns {null} null for the null renderer.
  */
-vglRenderer.fallback = function () {
+webglRenderer.fallback = function () {
   return null;
 };
 
-module.exports = vglRenderer;
+module.exports = webglRenderer;

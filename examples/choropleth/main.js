@@ -32,7 +32,7 @@ $(function () {
   );
 
   // Create a feature layer.  We could either ask for a layer via a specific
-  // render {renderer: 'vgl'} or for a layer that supports our feature
+  // render {renderer: 'webgl'} or for a layer that supports our feature
   // {features: ['choropleth']}.
   var choroplethLayer = map.createLayer(
     'feature',

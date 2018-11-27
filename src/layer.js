@@ -608,7 +608,7 @@ layer.newLayerId = (function () {
  *    one kind of creatable layer
  * @property {object[]} [data=[]] The default data array to apply to each
  *    feature if none exists.
- * @property {string} [renderer='vgl'] The renderer to use.
+ * @property {string} [renderer='webgl'] The renderer to use.
  * @property {geo.feature.spec[]} [features=[]] Features to add to the layer.
  */
 
@@ -626,7 +626,7 @@ layer.create = function (map, spec) {
 
   spec.type = spec.type || 'feature';
 
-  spec.renderer = spec.renderer === undefined ? 'vgl' : spec.renderer;
+  spec.renderer = spec.renderer === undefined ? 'webgl' : spec.renderer;
   spec.renderer = checkRenderer(spec.renderer);
 
   if (!spec.renderer) {

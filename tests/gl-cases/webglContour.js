@@ -1,6 +1,6 @@
 var $ = require('jquery');
 
-describe('glContour', function () {
+describe('webglContour', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
 
@@ -27,7 +27,7 @@ describe('glContour', function () {
     var mapOptions = {center: {x: -157.965, y: 21.482}, zoom: 10};
     myMap = common.createOsmMap(mapOptions, {}, true);
 
-    var layer = myMap.createLayer('feature', {renderer: 'vgl'});
+    var layer = myMap.createLayer('feature', {renderer: 'webgl'});
     var url = '/data/' + (opts.url || 'oahu.json');
     $.getJSON(url, {format: 'json'}).done(function (data) {
 
@@ -112,12 +112,12 @@ describe('glContour', function () {
   }
 
   it('contours', function (done) {
-    testContour('glContour', {}, done);
+    testContour('webglContour', {}, done);
   });
 
   it('contours with options', function (done) {
     // geo from x0, specified min-max, set color range, smooth
-    testContour('glContourOptions', {
+    testContour('webglContourOptions', {
       url: 'oahu-dense.json',
       range: true,
       stepped: false
@@ -126,7 +126,7 @@ describe('glContour', function () {
 
   it('contours with nonlinear range', function (done) {
     // geo from x0, non-linear range
-    testContour('glContourRange', {
+    testContour('webglContourRange', {
       url: 'oahu-dense.json',
       range: 'nonlinear'
     }, done);
@@ -134,7 +134,7 @@ describe('glContour', function () {
 
   it('contours with iso range', function (done) {
     // geo from x0, iso-like range
-    testContour('glContourIso', {
+    testContour('webglContourIso', {
       url: 'oahu-dense.json',
       range: 'iso'
     }, done);

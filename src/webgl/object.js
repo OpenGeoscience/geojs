@@ -1,13 +1,13 @@
 /**
- * VGL specific subclass of object which rerenders when the object is drawn.
+ * WebGL specific subclass of object which rerenders when the object is drawn.
  *
  * @class
- * @alias geo.gl.object
+ * @alias geo.webgl.object
  * @extends geo.sceneObject
  * @param {object} arg Options for the object.
- * @returns {geo.gl.object}
+ * @returns {geo.webgl.object}
  */
-var gl_object = function (arg) {
+var webgl_object = function (arg) {
   'use strict';
 
   var object = require('../object');
@@ -15,7 +15,7 @@ var gl_object = function (arg) {
   // this is used to extend other geojs classes, so only generate
   // a new object when that is not the case... like if this === window
   if (!(this instanceof object)) {
-    return new gl_object(arg);
+    return new webgl_object(arg);
   }
 
   var m_this = this,
@@ -38,4 +38,4 @@ var gl_object = function (arg) {
   return this;
 };
 
-module.exports = gl_object;
+module.exports = webgl_object;

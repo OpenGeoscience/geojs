@@ -12,9 +12,9 @@ describe('osmLayer', function () {
     myMap.exit();
   });
 
-  it('vgl renderer', function (done) {
+  it('webgl renderer', function (done) {
     myMap = common.createOsmMap({}, {
-      renderer: 'vgl',
+      renderer: 'webgl',
       attribution: '&copy; <a href="http://some-unvisited-domain.org">OpenStreetMap</a> contributors'
     });
     myMap.draw();

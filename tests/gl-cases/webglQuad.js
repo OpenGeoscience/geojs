@@ -1,6 +1,6 @@
 /* globals Image */
 
-describe('glQuad', function () {
+describe('webglQuad', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
 
@@ -18,7 +18,7 @@ describe('glQuad', function () {
     var mapOptions = {center: {x: -83.0, y: 39}, zoom: 3.5};
     myMap = common.createOsmMap(mapOptions, {}, true);
 
-    var layer = myMap.createLayer('feature', {renderer: 'vgl'});
+    var layer = myMap.createLayer('feature', {renderer: 'webgl'});
     var quads = layer.createFeature('quad', {selectionAPI: true});
     var previewImage = new Image();
     previewImage.onload = function () {
@@ -117,7 +117,7 @@ describe('glQuad', function () {
 
       myMap.draw();
 
-      imageTest.imageTest('glQuad', null, 0.0015, done, myMap.onIdle, 0, 2);
+      imageTest.imageTest('webglQuad', null, 0.0015, done, myMap.onIdle, 0, 2);
     };
 
     previewImage.src = '/data/grid.jpg';

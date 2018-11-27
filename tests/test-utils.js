@@ -279,7 +279,7 @@ module.exports.getQuery = function () {
 
 /**
  * Destroy a map for testing.  This removes any existing node called '#map'.
- * It should be done if the VGL renderer was mocked before it is restored.
+ * It should be done if the webgl renderer was mocked before it is restored.
  */
 function destroyMap() {
   if ($('#map').data('data-geojs-map') && $.isFunction($('#map').data('data-geojs-map').exit)) {

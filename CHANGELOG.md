@@ -3,7 +3,8 @@
 ## Unreleased
 
 ### Changes
-- Rename the d3 renderer to the svg
+- Rename the d3 renderer to svg.  d3 still works as an alias
+- Rename the vgl renderer to webgl.  vgl still works as an alias
 
 ## Version 0.19.0
 

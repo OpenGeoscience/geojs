@@ -5,21 +5,21 @@ describe('Contour Feature', function () {
   var geo = require('../test-utils').geo;
   var createMap = require('../test-utils').createMap;
   var destroyMap = require('../test-utils').destroyMap;
-  var mockVGLRenderer = geo.util.mockVGLRenderer;
-  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+  var mockWebglRenderer = geo.util.mockWebglRenderer;
+  var restoreWebglRenderer = geo.util.restoreWebglRenderer;
 
   beforeEach(function () {
-    mockVGLRenderer();
+    mockWebglRenderer();
     map = createMap({
       'center': [0, 0],
       'zoom': 3
     }, {width: '500px', height: '300px'});
-    layer = map.createLayer('feature', {'renderer': 'vgl'});
+    layer = map.createLayer('feature', {'renderer': 'webgl'});
   });
 
   afterEach(function () {
     destroyMap();
-    restoreVGLRenderer();
+    restoreWebglRenderer();
   });
 
   describe('create', function () {

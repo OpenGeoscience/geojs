@@ -6,16 +6,16 @@ var choroplethFeature = require('../choroplethFeature');
  * Create a new instance of choroplethFeature.
  *
  * @class
- * @alias geo.gl.choroplethFeature
+ * @alias geo.webgl.choroplethFeature
  * @extends geo.choroplethFeature
  * @param {geo.choroplethFeature.spec} arg
- * @returns {geo.gl.choroplethFeature}
+ * @returns {geo.webgl.choroplethFeature}
  */
-var gl_choroplethFeature = function (arg) {
+var webgl_choroplethFeature = function (arg) {
   'use strict';
 
-  if (!(this instanceof gl_choroplethFeature)) {
-    return new gl_choroplethFeature(arg);
+  if (!(this instanceof webgl_choroplethFeature)) {
+    return new webgl_choroplethFeature(arg);
   }
   arg = arg || {};
   choroplethFeature.call(this, arg);
@@ -24,7 +24,7 @@ var gl_choroplethFeature = function (arg) {
    * @private
    */
   var m_this = this,
-      m_gl_polygons = null,
+      m_polygons = null,
       s_exit = this._exit,
       s_draw = this.draw,
       s_update = this._update;
@@ -36,9 +36,9 @@ var gl_choroplethFeature = function (arg) {
    */
   this.draw = function () {
     m_this._update();
-    if (m_gl_polygons) {
-      for (var idx = 0; idx < m_gl_polygons.length; idx += 1) {
-        m_gl_polygons[idx].draw();
+    if (m_polygons) {
+      for (var idx = 0; idx < m_polygons.length; idx += 1) {
+        m_polygons[idx].draw();
       }
     }
     s_draw();
@@ -52,8 +52,8 @@ var gl_choroplethFeature = function (arg) {
    */
   this._build = function () {
     m_this.buildTime().modified();
-    m_gl_polygons = m_this.createChoropleth();
-    return m_gl_polygons;
+    m_polygons = m_this.createChoropleth();
+    return m_polygons;
   };
 
   /**
@@ -74,12 +74,12 @@ var gl_choroplethFeature = function (arg) {
    * Destroy polygon sub-features.
    */
   this._wipePolygons = function () {
-    if (m_gl_polygons) {
-      m_gl_polygons.map(function (polygon) {
+    if (m_polygons) {
+      m_polygons.map(function (polygon) {
         return polygon._exit();
       });
     }
-    m_gl_polygons = null;
+    m_polygons = null;
   };
 
   /**
@@ -94,8 +94,8 @@ var gl_choroplethFeature = function (arg) {
   return this;
 };
 
-inherit(gl_choroplethFeature, choroplethFeature);
+inherit(webgl_choroplethFeature, choroplethFeature);
 
 // Now register it
-registerFeature('vgl', 'choropleth', gl_choroplethFeature);
-module.exports = gl_choroplethFeature;
+registerFeature('webgl', 'choropleth', webgl_choroplethFeature);
+module.exports = webgl_choroplethFeature;

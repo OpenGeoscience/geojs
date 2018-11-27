@@ -6,16 +6,16 @@ var contourFeature = require('../contourFeature');
  * Create a new instance of contourFeature.
  *
  * @class
- * @alias geo.gl.contourFeature
+ * @alias geo.webgl.contourFeature
  * @extends geo.contourFeature
  * @param {geo.contourFeature.spec} arg
- * @returns {geo.gl.contourFeature}
+ * @returns {geo.webgl.contourFeature}
  */
-var gl_contourFeature = function (arg) {
+var webgl_contourFeature = function (arg) {
   'use strict';
 
-  if (!(this instanceof gl_contourFeature)) {
-    return new gl_contourFeature(arg);
+  if (!(this instanceof webgl_contourFeature)) {
+    return new webgl_contourFeature(arg);
   }
   arg = arg || {};
   contourFeature.call(this, arg);
@@ -290,9 +290,9 @@ var gl_contourFeature = function (arg) {
   return this;
 };
 
-inherit(gl_contourFeature, contourFeature);
+inherit(webgl_contourFeature, contourFeature);
 
 // Now register it
-registerFeature('vgl', 'contour', gl_contourFeature);
+registerFeature('webgl', 'contour', webgl_contourFeature);
 
-module.exports = gl_contourFeature;
+module.exports = webgl_contourFeature;

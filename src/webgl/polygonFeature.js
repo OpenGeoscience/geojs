@@ -3,18 +3,18 @@ var registerFeature = require('../registry').registerFeature;
 var polygonFeature = require('../polygonFeature');
 
 /**
- * Create a new instance of gl.polygonFeature.
+ * Create a new instance of webgl.polygonFeature.
  *
  * @class
- * @alias geo.gl.polygonFeature
+ * @alias geo.webgl.polygonFeature
  * @extends geo.polygonFeature
  * @param {geo.polygonFeature.spec} arg
- * @returns {geo.gl.polygonFeature}
+ * @returns {geo.webgl.polygonFeature}
  */
-var gl_polygonFeature = function (arg) {
+var webgl_polygonFeature = function (arg) {
   'use strict';
-  if (!(this instanceof gl_polygonFeature)) {
-    return new gl_polygonFeature(arg);
+  if (!(this instanceof webgl_polygonFeature)) {
+    return new webgl_polygonFeature(arg);
   }
   arg = arg || {};
   polygonFeature.call(this, arg);
@@ -385,8 +385,8 @@ var gl_polygonFeature = function (arg) {
   return this;
 };
 
-inherit(gl_polygonFeature, polygonFeature);
+inherit(webgl_polygonFeature, polygonFeature);
 
 // Now register it
-registerFeature('vgl', 'polygon', gl_polygonFeature);
-module.exports = gl_polygonFeature;
+registerFeature('webgl', 'polygon', webgl_polygonFeature);
+module.exports = webgl_polygonFeature;

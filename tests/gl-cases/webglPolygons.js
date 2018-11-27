@@ -1,4 +1,4 @@
-describe('glPolygons', function () {
+describe('webglPolygons', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
   var geo = require('../test-utils').geo;
@@ -2446,7 +2446,7 @@ describe('glPolygons', function () {
       layer: layer
     }).read(JSON.stringify(data), function () {
       myMap.draw();
-      imageTest.imageTest('glMultiPolygons', null, 0.0015, done, myMap.onIdle, 0, 2);
+      imageTest.imageTest('webglMultiPolygons', null, 0.0015, done, myMap.onIdle, 0, 2);
     });
   });
 
@@ -2689,13 +2689,13 @@ describe('glPolygons', function () {
   it('polygons', function (done) {
     polygonMap();
     myMap.draw();
-    imageTest.imageTest('glPolygons', null, 0.0015, done, myMap.onIdle, 0, 2);
+    imageTest.imageTest('webglPolygons', null, 0.0015, done, myMap.onIdle, 0, 2);
   });
 
   it('polygons hover', function (done) {
     polygonMap();
     myMap.draw();
     myMap.interactor().simulateEvent('mousemove', {map: {x: 390, y: 200}});
-    imageTest.imageTest('glPolygonsHover', null, 0.0015, done, myMap.onIdle, 0, 2);
+    imageTest.imageTest('webglPolygonsHover', null, 0.0015, done, myMap.onIdle, 0, 2);
   });
 });

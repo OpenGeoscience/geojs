@@ -6,15 +6,15 @@ var isolineFeature = require('../isolineFeature');
  * Create a new instance of isolineFeature.
  *
  * @class
- * @alias geo.gl.isolineFeature
+ * @alias geo.webgl.isolineFeature
  * @extends geo.isolineFeature
  * @param {geo.isolineFeature.spec} arg
- * @returns {geo.gl.isolineFeature}
+ * @returns {geo.webgl.isolineFeature}
  */
-var gl_isolineFeature = function (arg) {
+var webgl_isolineFeature = function (arg) {
   'use strict';
-  if (!(this instanceof gl_isolineFeature)) {
-    return new gl_isolineFeature(arg);
+  if (!(this instanceof webgl_isolineFeature)) {
+    return new webgl_isolineFeature(arg);
   }
   arg = arg || {};
   isolineFeature.call(this, arg);
@@ -26,8 +26,8 @@ var gl_isolineFeature = function (arg) {
   return this;
 };
 
-inherit(gl_isolineFeature, isolineFeature);
+inherit(webgl_isolineFeature, isolineFeature);
 
 // Now register it
-registerFeature('vgl', 'isoline', gl_isolineFeature);
-module.exports = gl_isolineFeature;
+registerFeature('webgl', 'isoline', webgl_isolineFeature);
+module.exports = webgl_isolineFeature;

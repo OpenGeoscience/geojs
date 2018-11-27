@@ -5,8 +5,8 @@ describe('Isoline Feature', function () {
   var createMap = require('../test-utils').createMap;
   var destroyMap = require('../test-utils').destroyMap;
   var closeToEqual = require('../test-utils').closeToEqual;
-  var mockVGLRenderer = geo.util.mockVGLRenderer;
-  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+  var mockWebglRenderer = geo.util.mockWebglRenderer;
+  var restoreWebglRenderer = geo.util.restoreWebglRenderer;
   var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
   var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
   var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
@@ -35,20 +35,20 @@ describe('Isoline Feature', function () {
     [6, 7, 9], [10, 9, 7], [7, 8, 10], [11, 10, 8]];
 
   beforeEach(function () {
-    mockVGLRenderer();
+    mockWebglRenderer();
     mockAnimationFrame();
     map = createMap({
       'center': [2.5, 1.5],
       'zoom': 9
     }, {width: '500px', height: '300px'});
-    layer = map.createLayer('feature', {'renderer': 'vgl'});
+    layer = map.createLayer('feature', {'renderer': 'webgl'});
     canvasLayer = map.createLayer('feature', {'renderer': 'canvas'});
   });
 
   afterEach(function () {
     destroyMap();
     unmockAnimationFrame();
-    restoreVGLRenderer();
+    restoreWebglRenderer();
   });
 
   describe('create', function () {
@@ -100,7 +100,7 @@ describe('Isoline Feature', function () {
       expect(chains[0][7]).toEqual([4, 5]);
     });
     describe('_build', function () {
-      it('vgl', function () {
+      it('webgl', function () {
         var isoline = layer.createFeature('isoline', {
           isoline: {elements: squareElements}}).data(vertexList);
         expect(layer.features().length).toBe(1);

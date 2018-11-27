@@ -6,7 +6,7 @@ var renderer = require('../renderer');
  * Create a new instance of class vtkjsRenderer.
  *
  * @class
- * @alias geo.vtkjs.vglRenderer
+ * @alias geo.vtkjs.vtkjsRenderer
  * @extends geo.renderer
  * @param {object} arg Options for the renderer.
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.

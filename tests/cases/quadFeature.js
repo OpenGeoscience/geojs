@@ -1,5 +1,5 @@
 // Test geo.quadFeature, geo.canvas.quadFeature, geo.svg.quadFeature, and
-// geo.gl.quadFeature
+// geo.webgl.quadFeature
 
 /* globals Image */
 
@@ -7,8 +7,8 @@ var $ = require('jquery');
 var geo = require('../test-utils').geo;
 var createMap = require('../test-utils').createMap;
 var destroyMap = require('../test-utils').destroyMap;
-var mockVGLRenderer = geo.util.mockVGLRenderer;
-var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+var mockWebglRenderer = geo.util.mockWebglRenderer;
+var restoreWebglRenderer = geo.util.restoreWebglRenderer;
 var vgl = require('vgl');
 var waitForIt = require('../test-utils').waitForIt;
 var closeToArray = require('../test-utils').closeToArray;
@@ -153,14 +153,14 @@ describe('geo.quadFeature', function () {
 
   describe('create', function () {
     it('create function', function () {
-      mockVGLRenderer();
+      mockWebglRenderer();
       var map, layer, quad;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'vgl'});
+      layer = map.createLayer('feature', {renderer: 'webgl'});
       quad = geo.quadFeature.create(layer);
       expect(quad instanceof geo.quadFeature).toBe(true);
       destroyMap();
-      restoreVGLRenderer();
+      restoreWebglRenderer();
     });
   });
 
@@ -329,7 +329,7 @@ describe('geo.quadFeature', function () {
         layer = map.createLayer('feature', {renderer: null});
         quad = geo.quadFeature({layer: layer});
         /* init is not automatically called on the geo.quadFeature (it is on
-         * geo.gl.quadFeature). */
+         * geo.webgl.quadFeature). */
         quad._init({
           style: {color: '#FFFFFF'},
           position: pos
@@ -499,8 +499,8 @@ describe('geo.quadFeature', function () {
     });
   });
 
-  /* This is a basic integration test of geo.gl.quadFeature. */
-  describe('geo.gl.quadFeature', function () {
+  /* This is a basic integration test of geo.webgl.quadFeature. */
+  describe('geo.webgl.quadFeature', function () {
     var map, layer, quads, glCounts;
     it('load preview image', load_preview_image);
     it('basic usage', function () {
@@ -509,7 +509,7 @@ describe('geo.quadFeature', function () {
       $.each(testQuads, function (idx, quad) {
         delete quad._cachedQuad;
       });
-      mockVGLRenderer();
+      mockWebglRenderer();
       map = createMap();
       layer = map.createLayer('feature');
       quads = layer.createFeature('quad', {style: testStyle, data: testQuads});
@@ -569,7 +569,7 @@ describe('geo.quadFeature', function () {
       map.draw();
       expect(buildTime).toEqual(quads.buildTime().timestamp());
       destroyMap();
-      restoreVGLRenderer();
+      restoreWebglRenderer();
     });
   });
 

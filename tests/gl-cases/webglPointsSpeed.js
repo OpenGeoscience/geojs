@@ -1,6 +1,6 @@
 var $ = require('jquery');
 
-describe('glPointsSpeed', function () {
+describe('webglPointsSpeed', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
 
@@ -22,7 +22,7 @@ describe('glPointsSpeed', function () {
     var mapOptions = {center: {x: -105.0, y: 40.0}};
     myMap = common.createOsmMap(mapOptions, {}, true);
 
-    var layer = myMap.createLayer('feature', {renderer: 'vgl'});
+    var layer = myMap.createLayer('feature', {renderer: 'webgl'});
     var feature = layer.createFeature('point', {
       selectionAPI: false,
       dynamicDraw: true

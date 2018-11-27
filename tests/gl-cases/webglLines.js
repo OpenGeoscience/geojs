@@ -1,6 +1,6 @@
 var $ = require('jquery');
 
-describe('glLines', function () {
+describe('webglLines', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
 
@@ -83,14 +83,14 @@ describe('glLines', function () {
          .style(style);
     myMap.draw();
 
-    imageTest.imageTest('glLines', null, 0.0015, done, myMap.onIdle, 0, 2);
+    imageTest.imageTest('webglLines', null, 0.0015, done, myMap.onIdle, 0, 2);
   });
 
   it('lines with different options', function (done) {
     var mapOptions = {center: {x: -85.44956, y: 31.87798}, zoom: 9};
     myMap = common.createOsmMap(mapOptions, {}, true);
 
-    var layer = myMap.createLayer('feature', {renderer: 'vgl'});
+    var layer = myMap.createLayer('feature', {renderer: 'webgl'});
     var baseStyle = {
       antialiasing: 2,
       miterLimit: 5
@@ -140,7 +140,7 @@ describe('glLines', function () {
 
     myMap.draw();
 
-    imageTest.imageTest('glLinesOpts', null, 0.0015, done, myMap.onIdle, 0, 2);
+    imageTest.imageTest('webglLinesOpts', null, 0.0015, done, myMap.onIdle, 0, 2);
 
   }, 10000);
 });

@@ -11,12 +11,12 @@ var feature = require('./feature');
  *   style options.
  * @property {boolean|geo.pointFeature.clusteringSpec} [clustering=false]
  *   Enable point clustering.
- * @property {string} [primitiveShape='sprite'] For the gl renderer, select the
- *   primitive shape.  This is one of `'triangle'`, `'square'`, or `'sprite'`.
- *   `sprite` uses the least memory, `triangle` is fastest if the vertex shader
- *   is the bottleneck, and `square` is fastest if the fragment shader is the
- *   bottleneck.  `sprite` may not work for very large points.
- * @property {boolean} [dynamicDraw=false] For the gl renderer, if this is
+ * @property {string} [primitiveShape='sprite'] For the webgl renderer, select
+ *   the primitive shape.  This is one of `'triangle'`, `'square'`, or
+ *   `'sprite'`.  `sprite` uses the least memory, `triangle` is fastest if the
+ *   vertex shader is the bottleneck, and `square` is fastest if the fragment
+ *   shader is the bottleneck.  `sprite` may not work for very large points.
+ * @property {boolean} [dynamicDraw=false] For the webgl renderer, if this is
  *   truthy, webgl source buffers can be modifies and updated directly.
  */
 

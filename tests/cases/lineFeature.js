@@ -8,8 +8,8 @@ var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 var geo = require('../test-utils').geo;
 var createMap = require('../test-utils').createMap;
 var destroyMap = require('../test-utils').destroyMap;
-var mockVGLRenderer = geo.util.mockVGLRenderer;
-var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+var mockWebglRenderer = geo.util.mockWebglRenderer;
+var restoreWebglRenderer = geo.util.restoreWebglRenderer;
 var vgl = require('vgl');
 var waitForIt = require('../test-utils').waitForIt;
 var logCanvas2D = require('../test-utils').logCanvas2D;
@@ -222,7 +222,7 @@ describe('geo.lineFeature', function () {
         var map, layer, line, counts;
 
         map = createMap();
-        layer = map.createLayer('feature', {renderer: 'vgl'});
+        layer = map.createLayer('feature', {renderer: 'webgl'});
         line = geo.lineFeature({layer: layer});
         line._init();
         line.data(testLines).line(lineFunc);
@@ -334,14 +334,14 @@ describe('geo.lineFeature', function () {
     });
   });
 
-  /* This is a basic integration test of geo.gl.lineFeature. */
-  describe('geo.gl.lineFeature', function () {
+  /* This is a basic integration test of geo.webgl.lineFeature. */
+  describe('geo.webgl.lineFeature', function () {
     var map, layer, line, glCounts;
     it('basic usage', function () {
 
-      mockVGLRenderer();
+      mockWebglRenderer();
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'vgl'});
+      layer = map.createLayer('feature', {renderer: 'webgl'});
       line = layer.createFeature('line', {
         line: function (item) {
           return item.coord;
@@ -379,7 +379,7 @@ describe('geo.lineFeature', function () {
       line.data(testLines);
       map.draw();
       destroyMap();
-      restoreVGLRenderer();
+      restoreWebglRenderer();
     });
   });
 });

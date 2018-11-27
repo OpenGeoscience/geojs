@@ -1,6 +1,6 @@
 var registerLayerAdjustment = require('../registry').registerLayerAdjustment;
 
-var gl_tileLayer = function () {
+var webgl_tileLayer = function () {
   'use strict';
   var m_this = this,
       s_init = this._init,
@@ -98,6 +98,6 @@ var gl_tileLayer = function () {
   this._updateSubLayers = undefined;
 };
 
-registerLayerAdjustment('vgl', 'tile', gl_tileLayer);
+registerLayerAdjustment('webgl', 'tile', webgl_tileLayer);
 
-module.exports = gl_tileLayer;
+module.exports = webgl_tileLayer;

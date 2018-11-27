@@ -1,5 +1,5 @@
 /**
- * @namespace geo.gl
+ * @namespace geo.webgl
  */
 module.exports = {
   choroplethFeature: require('./choroplethFeature'),
@@ -10,5 +10,5 @@ module.exports = {
   polygonFeature: require('./polygonFeature'),
   quadFeature: require('./quadFeature'),
   tileLayer: require('./tileLayer'),
-  vglRenderer: require('./vglRenderer')
+  webglRenderer: require('./webglRenderer')
 };

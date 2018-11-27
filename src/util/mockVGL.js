@@ -3,22 +3,22 @@
 
 var $ = require('jquery');
 var vgl = require('vgl');
-var vglRenderer = require('../gl/vglRenderer');
+var webglRenderer = require('../webgl/webglRenderer');
 
 var _renderWindow, _supported;
 
 module.exports = {};
 
 /**
- * Replace vgl.renderer with a mocked version for testing in a non-webGL state.
- * Use restoreVGLRenderer to unmock.  Call vgl.mockCounts() to get the number
- * of times different webGL functions have been called.
+ * Replace webgl.renderer with a mocked version for testing in a non-webGL
+ * state.  Use restoreWebglRenderer to unmock.  Call vgl.mockCounts() to get
+ * the number of times different webGL functions have been called.
  *
- * @param {boolean} [supported=true] If false, then the vgl renderer will
+ * @param {boolean} [supported=true] If false, then the webgl renderer will
  *      indicate that this is an unsupported browser environment.
- * @alias geo.util.mockVGLRenderer
+ * @alias geo.util.mockWebglRenderer
  */
-module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
+module.exports.mockWebglRenderer = function mockWebglRenderer(supported) {
   'use strict';
   var vgl = require('vgl');
 
@@ -27,7 +27,7 @@ module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
   }
 
   if (vgl._mocked) {
-    throw new Error('VGL renderer already mocked');
+    throw new Error('webgl renderer already mocked');
   }
 
   var mockCounts = {};
@@ -169,8 +169,8 @@ module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
   };
   vgl.renderWindow = mockedRenderWindow;
 
-  _supported = vglRenderer.supported;
-  vglRenderer.supported = function () {
+  _supported = webglRenderer.supported;
+  webglRenderer.supported = function () {
     return !!supported;
   };
 
@@ -182,12 +182,12 @@ module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
 
 /**
  * Unmock the vgl renderer.
- * @alias geo.util.restoreVGLRenderer
+ * @alias geo.util.restoreWebglRenderer
  */
-module.exports.restoreVGLRenderer = function () {
+module.exports.restoreWebglRenderer = function () {
   if (vgl._mocked) {
     vgl.renderWindow = _renderWindow;
-    vglRenderer.supported = _supported;
+    webglRenderer.supported = _supported;
     delete vgl._mocked;
     delete vgl.mockCounts;
   }

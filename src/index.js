@@ -84,9 +84,9 @@ module.exports = $.extend({
   util: require('./util'),
   jQuery: $,
   canvas: require('./canvas'),
-  gl: require('./gl'),
   svg: require('./svg'),
   vtkjs: require('./vtkjs'),
+  webgl: require('./webgl'),
   gui: require('./ui')
 }, require('./registry'));
 

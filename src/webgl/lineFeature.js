@@ -37,15 +37,15 @@ var flagsDebug = {  // uses 1 bit
  * Create a new instance of lineFeature.
  *
  * @class
- * @alias geo.gl.lineFeature
+ * @alias geo.webgl.lineFeature
  * @extends geo.lineFeature
  * @param {geo.lineFeature.spec} arg
- * @returns {geo.gl.lineFeature}
+ * @returns {geo.webgl.lineFeature}
  */
-var gl_lineFeature = function (arg) {
+var webgl_lineFeature = function (arg) {
   'use strict';
-  if (!(this instanceof gl_lineFeature)) {
-    return new gl_lineFeature(arg);
+  if (!(this instanceof webgl_lineFeature)) {
+    return new webgl_lineFeature(arg);
   }
   arg = arg || {};
   lineFeature.call(this, arg);
@@ -803,13 +803,13 @@ var gl_lineFeature = function (arg) {
   return this;
 };
 
-inherit(gl_lineFeature, lineFeature);
+inherit(webgl_lineFeature, lineFeature);
 
 var capabilities = {};
 capabilities[lineFeature.capabilities.basic] = true;
 capabilities[lineFeature.capabilities.multicolor] = true;
 
 // Now register it
-registerFeature('vgl', 'line', gl_lineFeature, capabilities);
+registerFeature('webgl', 'line', webgl_lineFeature, capabilities);
 
-module.exports = gl_lineFeature;
+module.exports = webgl_lineFeature;

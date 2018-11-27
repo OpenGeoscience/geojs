@@ -27,7 +27,7 @@ var geo_event = require('./event');
  *   {@link geo.transform}.
  * @property {number} [bin=null] The bin number is used to determine the order
  *   of multiple features on the same layer.  It has no effect except on the
- *   vgl renderer.  A negative value hides the feature without stopping
+ *   webgl renderer.  A negative value hides the feature without stopping
  *   interaction with it.  Otherwise, more features with higher bin numbers are
  *   drawn above those with lower bin numbers.  If two features have the same
  *   bin number, their order relative to one another is indeterminate and may
@@ -675,7 +675,7 @@ var feature = function (arg) {
   /**
    * Get/Set bin of the feature.  The bin number is used to determine the order
    * of multiple features on the same layer.  It has no effect except on the
-   * vgl renderer.  A negative value hides the feature without stopping
+   * webgl renderer.  A negative value hides the feature without stopping
    * interaction with it.  Otherwise, features with higher bin numbers are
    * drawn above those with lower bin numbers.  If two features have the same
    * bin number, their order relative to one another is indeterminate and may

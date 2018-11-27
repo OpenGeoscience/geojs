@@ -6,8 +6,8 @@ describe('renderers', function () {
   var supported = true;
   var fallback = 'svg';
   var geo = require('../test-utils').geo;
-  var mockVGLRenderer = geo.util.mockVGLRenderer;
-  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+  var mockWebglRenderer = geo.util.mockWebglRenderer;
+  var restoreWebglRenderer = geo.util.restoreWebglRenderer;
 
   function create_simple_renderer() {
     var simpleRenderer = function (arg) {
@@ -79,13 +79,13 @@ describe('renderers', function () {
       delete __webpack_require__.c[require.resolveWeak('d3')];  // eslint-disable-line
       expect(geo.checkRenderer('svg')).toBe('svg');
 
-      mockVGLRenderer(false);
-      expect(geo.checkRenderer('vgl')).toBe(null);
-      restoreVGLRenderer();
+      mockWebglRenderer(false);
+      expect(geo.checkRenderer('webgl')).toBe(null);
+      restoreWebglRenderer();
 
-      mockVGLRenderer();
-      expect(geo.checkRenderer('vgl')).toBe('vgl');
-      restoreVGLRenderer();
+      mockWebglRenderer();
+      expect(geo.checkRenderer('webgl')).toBe('webgl');
+      restoreWebglRenderer();
 
       expect(geo.checkRenderer('unknown')).toBe(false);
     });

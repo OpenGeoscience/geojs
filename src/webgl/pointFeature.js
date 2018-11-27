@@ -4,18 +4,18 @@ var registerFeature = require('../registry').registerFeature;
 var pointFeature = require('../pointFeature');
 
 /**
- * Create a new instance of gl.pointFeature.
+ * Create a new instance of webgl.pointFeature.
  *
  * @class
- * @alias geo.gl.pointFeature
+ * @alias geo.webgl.pointFeature
  * @extends geo.pointFeature
  * @param {geo.pointFeature.spec} arg
- * @returns {geo.gl.pointFeature}
+ * @returns {geo.webgl.pointFeature}
  */
-var gl_pointFeature = function (arg) {
+var webgl_pointFeature = function (arg) {
   'use strict';
-  if (!(this instanceof gl_pointFeature)) {
-    return new gl_pointFeature(arg);
+  if (!(this instanceof webgl_pointFeature)) {
+    return new webgl_pointFeature(arg);
   }
   arg = arg || {};
   pointFeature.call(this, arg);
@@ -648,12 +648,12 @@ var gl_pointFeature = function (arg) {
   return this;
 };
 
-inherit(gl_pointFeature, pointFeature);
+inherit(webgl_pointFeature, pointFeature);
 
 var capabilities = {};
 capabilities[pointFeature.capabilities.stroke] = true;
 
 // Now register it
-registerFeature('vgl', 'point', gl_pointFeature, capabilities);
+registerFeature('webgl', 'point', webgl_pointFeature, capabilities);
 
-module.exports = gl_pointFeature;
+module.exports = webgl_pointFeature;
