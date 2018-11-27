@@ -1,7 +1,7 @@
 {
   "name": "geojs",
-  "version": "0.18.1",
-  "description": "JavaScript Geo visualization and Analysis Library",
+  "version": "0.19.0",
+  "description": "JavaScript Geo Visualization and Analysis Library",
   "homepage": "https://github.com/OpenGeoscience/geojs",
   "license": "Apache-2.0",
   "bugs": {
@@ -63,7 +63,7 @@
     "istanbul-combine": "^0.3.0",
     "istanbul-instrumenter-loader": "^3.0.1",
     "jaguarjs-jsdoc": "^1.0.2",
-    "jasmine-core": "^3.1.0",
+    "jasmine-core": "^3.1.0 <3.3.0",
     "js-yaml": "^3.10.0",
     "jsdoc": "^3.5",
     "jsdoc-autoprivate": "0.0.1",

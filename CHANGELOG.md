@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## Version 0.19.0
 
 ### Features
 - Feature selection API is now enabled automatically if any event handlers are bounds to the feature (#921)
