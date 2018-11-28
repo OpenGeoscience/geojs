@@ -46,7 +46,7 @@ var canvasRenderer = function (arg) {
    * @returns {string} 'canvas'.
    */
   this.api = function () {
-    return 'canvas';
+    return canvasRenderer.apiname;
   };
 
   /**
@@ -149,6 +149,7 @@ var canvasRenderer = function (arg) {
 
   return this;
 };
+canvasRenderer.apiname = 'canvas';
 
 inherit(canvasRenderer, renderer);
 

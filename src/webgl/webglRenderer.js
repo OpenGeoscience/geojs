@@ -53,7 +53,7 @@ var webglRenderer = function (arg) {
    * @returns {string} `webgl`.
    */
   this.api = function () {
-    return 'webgl';
+    return webglRenderer.apiname;
   };
 
   /**
@@ -296,6 +296,7 @@ var webglRenderer = function (arg) {
 
   return this;
 };
+webglRenderer.apiname = 'webgl';
 
 inherit(webglRenderer, renderer);
 

@@ -94,7 +94,7 @@ util.checkRenderer = function (name, noFallback) {
   if (renderers.hasOwnProperty(name)) {
     var ren = renderers[name];
     if (!ren.supported || ren.supported()) {
-      return name;
+      return ren.apiname || name;
     }
     if (!ren.fallback || noFallback) {
       return false;

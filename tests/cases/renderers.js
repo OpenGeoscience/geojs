@@ -64,6 +64,8 @@ describe('renderers', function () {
       expect(geo.checkRenderer(null)).toBe(null);
 
       expect(geo.checkRenderer('svg')).toBe('svg');
+      // check that an alias resolves to the preferred name
+      expect(geo.checkRenderer('d3')).toBe('svg');
 
       sinon.stub(geo.svg.renderer, 'supported').returns(false);
       expect(geo.checkRenderer('svg')).toBe(null);
@@ -85,6 +87,8 @@ describe('renderers', function () {
 
       mockWebglRenderer();
       expect(geo.checkRenderer('webgl')).toBe('webgl');
+      // check that an alias resolves to the preferred name
+      expect(geo.checkRenderer('vgl')).toBe('webgl');
       restoreWebglRenderer();
 
       expect(geo.checkRenderer('unknown')).toBe(false);

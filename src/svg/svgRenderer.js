@@ -415,7 +415,7 @@ var svgRenderer = function (arg) {
    * @returns {string} 'svg'.
    */
   this.api = function () {
-    return 'svg';
+    return svgRenderer.apiname;
   };
 
   /**
@@ -660,6 +660,7 @@ var svgRenderer = function (arg) {
   this._init(arg);
   return this;
 };
+svgRenderer.apiname = 'svg';
 
 inherit(svgRenderer, renderer);
 

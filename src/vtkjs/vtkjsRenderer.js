@@ -55,7 +55,7 @@ var vtkjsRenderer = function (arg) {
    * @returns {string} `vtkjs`.
    */
   this.api = function () {
-    return 'vtkjs';
+    return vtkjsRenderer.apiname;
   };
 
   /**
@@ -163,6 +163,7 @@ var vtkjsRenderer = function (arg) {
 
   return this;
 };
+vtkjsRenderer.apiname = 'vtkjs';
 
 inherit(vtkjsRenderer, renderer);
 
