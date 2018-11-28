@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Features
+- Layers that use webgl renderers automatically share contexts when possible.  Layers can switch renderers manually as well.  This largely avoids the limitation of number of webgl contexts in a browser.
+
 ### Changes
 - The point clustering radius value is now in display pixels (#983)
 

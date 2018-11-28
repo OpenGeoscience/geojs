@@ -44,7 +44,7 @@ describe('geo.feature', function () {
 
       feat = geo.feature({layer: layer});
       expect(feat.layer()).toBe(layer);
-      expect(feat.renderer()).toBe(null);
+      expect(feat.renderer()).toBe(layer.renderer());
     });
   });
   describe('Check private class methods', function () {

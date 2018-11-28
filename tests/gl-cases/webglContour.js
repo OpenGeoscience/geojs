@@ -122,7 +122,7 @@ describe('webglContour', function () {
       range: true,
       stepped: false
     }, done);
-  });
+  }, 30000);
 
   it('contours with nonlinear range', function (done) {
     // geo from x0, non-linear range
@@ -130,7 +130,7 @@ describe('webglContour', function () {
       url: 'oahu-dense.json',
       range: 'nonlinear'
     }, done);
-  });
+  }, 30000);
 
   it('contours with iso range', function (done) {
     // geo from x0, iso-like range
@@ -138,5 +138,5 @@ describe('webglContour', function () {
       url: 'oahu-dense.json',
       range: 'iso'
     }, done);
-  });
+  }, 30000);
 });

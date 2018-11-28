@@ -1761,13 +1761,13 @@ var map = function (arg) {
       layer.node().children('canvas').each(function () {
         var canvasElem = $(this);
         defer = defer.then(function () {
-          if (layer.renderer().api() === 'webgl') {
+          if (layer.renderer() && layer.renderer().api() === 'webgl') {
             layer.renderer()._renderFrame();
           }
           drawLayerImageToContext(context, opacity, canvasElem, canvasElem[0]);
         });
       });
-      if (layer.node().children().not('canvas').length || !layer.node().children().length) {
+      if ((layer.node().children().not('canvas').length || !layer.node().children().length) && (!layer.renderer() || layer.renderer().api() !== 'webgl')) {
         defer = defer.then(function () {
           return util.htmlToImage(layer.node(), 1).done(function (img) {
             drawLayerImageToContext(context, 1, $([]), img);

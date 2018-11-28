@@ -229,9 +229,9 @@ var webgl_pointFeature = function (arg) {
   }
 
   /**
-   * Return list of vgl actors used for rendering.
+   * List vgl actors.
    *
-   * @returns {vgl.actor[]}
+   * @returns {vgl.actor[]} The list of actors.
    */
   this.actors = function () {
     if (!m_actor) {

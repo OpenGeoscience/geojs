@@ -84,7 +84,7 @@ describe('webglLines', function () {
     myMap.draw();
 
     imageTest.imageTest('webglLines', null, 0.0015, done, myMap.onIdle, 0, 2);
-  });
+  }, 30000);
 
   it('lines with different options', function (done) {
     var mapOptions = {center: {x: -85.44956, y: 31.87798}, zoom: 9};
@@ -142,5 +142,5 @@ describe('webglLines', function () {
 
     imageTest.imageTest('webglLinesOpts', null, 0.0015, done, myMap.onIdle, 0, 2);
 
-  }, 10000);
+  }, 30000);
 });
