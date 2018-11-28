@@ -376,7 +376,8 @@ var quadFeature = function (arg) {
       quad = {
         idx: i,
         pos: pos,
-        opacity: opacity
+        opacity: opacity,
+        zOffset: d.zOffset
       };
       if (d.reference) {
         quad.reference = d.reference;

@@ -1532,6 +1532,73 @@ var map = function (arg) {
   this.layers = this.children;
 
   /**
+   * Comapare two layers by zIndex.  If the zIndex is the same, the order in
+   * the parent element is used.  If the two layers don't have the same parent
+   * (for instance, one layer isn't attached to the map), layers in the map
+   * are sorted below detached layers.
+   *
+   * @param {geo.layer} a First layer to compare.
+   * @param {geo.layer} b Second layer to compare.
+   * @returns {number} Positive if `a` is above `b`.
+   */
+  function layerZIndexSort(a, b) {
+    var az = a.zIndex(), bz = b.zIndex();
+    if (az !== bz) {
+      return az - bz;
+    }
+    var an = a.node()[0],
+        bn = b.node()[0],
+        ap = an && an.parentNode,
+        bp = bn && bn.parentNode;
+    if (ap && bp && ap === bp) {
+      var nodes = Array.from(ap.children),
+          ai = nodes.indexOf(an),
+          bi = nodes.indexOf(bn);
+      if (ai >= 0 && bi >= 0) {
+        return ai - bi;
+      }
+    }
+    return ap ? -1 : bp ? 1 : 0;
+  }
+
+  /**
+   * Get the layers contained in the map sorted by zIndex.  If two layers have
+   * the same zIndex, they are returned in creation order.
+   *
+   * @returns {geo.layer[]}
+   */
+  this.sortedLayers = function () {
+    return m_this.children().sort(layerZIndexSort);
+  };
+
+  /**
+   * Get a sorted list of {@link geo.sceneObject} including all children.  The
+   * list always includes specified objects.  Children immediately follow their
+   * parents.  Siblings may be separated by children of preceding siblings.
+   *
+   * @param {geo.sceneObject[]} [objects] A list of objects for which the
+   *    a combined list of dependents is generated.  If not specified, the
+   *    sorted list of layers is used.
+   * @returns {geo.sceneObject[]} A list of object and dependents.
+   */
+  this.listSceneObjects = function (objects) {
+    var objectList = [];
+    objects = objects || m_this.sortedLayers();
+    objects.forEach(function (object) {
+      if (objectList.indexOf(object) < 0) {
+        objectList.push(object);
+        if (object.children) {
+          var children = object.children();
+          if (children.length) {
+            objectList = objectList.concat(m_this.listSceneObjects(children));
+          }
+        }
+      }
+    });
+    return objectList;
+  };
+
+  /**
    * Update the attribution notice displayed on the bottom right corner of
    * the map.  The content of this notice is managed by individual layers.
    * This method queries all of the visible layers and joins the individual
@@ -1658,9 +1725,7 @@ var map = function (arg) {
              l.opacity() > 0 && (!l.visible || l.visible());
     });
     // sort layers by z-index
-    layers = layers.sort(
-      function (a, b) { return (a.zIndex() - b.zIndex()); }
-    );
+    layers = layers.sort(layerZIndexSort);
     // create a new canvas element
     var result = document.createElement('canvas');
     result.width = m_width;

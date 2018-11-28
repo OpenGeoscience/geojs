@@ -685,18 +685,24 @@ var feature = function (arg) {
    *    current bin number.  If `null`, the bin is dynamically computed based
    *    on order within the parent.  If children are nested, this may not be
    *    what is desired.
+   * @param {boolean} [actualValue] If truthy and `val` is undefined, return
+   *    the actual value of bin, rather than the dynamically computed value.
    * @returns {number|this} The current bin number or a reference to `this`.
    */
-  this.bin = function (val) {
+  this.bin = function (val, actualValue) {
     if (val === undefined) {
-      if (m_bin === null) {
+      if (m_bin === null && !actualValue) {
         var parent = m_this.parent(),
             idx = parent ? parent.children().indexOf(m_this) : -1;
         return idx >= 0 ? idx : 0;
       }
       return m_bin;
     } else {
-      m_bin = val;
+      if (util.isNonNullFinite(val)) {
+        m_bin = parseInt(val, 10);
+      } else {
+        m_bin = null;
+      }
       m_this.modified();
       return m_this;
     }

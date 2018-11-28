@@ -68,6 +68,7 @@ var layer = function (arg) {
   var timestamp = require('./timestamp');
   var renderer = require('./renderer');
   var createRenderer = require('./registry').createRenderer;
+  var adjustLayerForRenderer = require('./registry').adjustLayerForRenderer;
   var geo_event = require('./event');
 
   /**
@@ -149,8 +150,13 @@ var layer = function (arg) {
         }
       });
     }
-    m_zIndex = zIndex;
-    m_node.css('z-index', m_zIndex);
+    if (zIndex !== m_zIndex) {
+      m_zIndex = zIndex;
+      m_node.css('z-index', m_zIndex);
+      m_this.geoTrigger(geo_event.layerRemove, {
+        layer: m_this
+      });
+    }
     return m_this;
   };
 
@@ -312,7 +318,7 @@ var layer = function (arg) {
   };
 
   /**
-   * Get renderer for the layer.
+   * Get the renderer for the layer.
    *
    * @returns {geo.renderer} The renderer associated with the layer or `null`
    *    if there is no renderer.
@@ -322,13 +328,44 @@ var layer = function (arg) {
   };
 
   /**
+   * Get/Set the renderer for the layer.
+   *
+   * @param {boolean} [val] If specified, update the renderer value.
+   *    Otherwise, return the current instance.
+   * @returns {geo.renderer|this} The renderer associated with the layer,
+   *    `null`, or the current instance.
+   */
+  this._renderer = function (val) {
+    if (val === undefined) {
+      return m_renderer;
+    }
+    m_renderer = val;
+    return m_this;
+  };
+
+  /**
    * Get canvas of the layer.
    *
-   * @returns {HTMLCanvasElement} The canvas element associated with the
-   *    layer.
+   * @returns {HTMLCanvasElement} The canvas element associated with the layer.
    */
   this.canvas = function () {
     return m_canvas;
+  };
+
+  /**
+   * Get/set the canvas of the layer.
+   *
+   * @param {boolean} [val] If specified, update the canvas value.  Otherwise,
+   *    return the current instance.
+   * @returns {HTMLCanvasElement|this} The canvas element associated with the
+   *    layer or the current instance.
+   */
+  this._canvas = function (val) {
+    if (val === undefined) {
+      return m_canvas;
+    }
+    m_canvas = val;
+    return m_this;
   };
 
   /**
@@ -353,7 +390,7 @@ var layer = function (arg) {
    * Get/Set if the layer has been initialized.
    *
    * @param {boolean} [val] If specified, update the intialized value.
-   *    Otherwise, return it.
+   *    Otherwise, return the current instance.
    * @returns {boolean|this} Either the initialized value or this.
    */
   this.initialized = function (val) {
@@ -463,16 +500,16 @@ var layer = function (arg) {
     delete options.map;
 
     if (m_renderer) {
-      m_canvas = m_renderer.canvas();
+      m_this._canvas(m_renderer.canvas());
     } else if (m_rendererName === null) {
-      // if given a "null" renderer, then pass the map element as the canvas
-      m_renderer = null;
-      m_canvas = m_node;
+      // if given a "null" renderer, then pass the layer element as the canvas
+      m_this._renderer(null);
+      m_this._canvas(m_node);
     } else if (m_canvas) { // Share context if we have valid one
-      m_renderer = createRenderer(m_rendererName, m_this, m_canvas, options);
+      m_this._renderer(createRenderer(m_rendererName, m_this, m_canvas, options));
     } else {
-      m_renderer = createRenderer(m_rendererName, m_this, undefined, options);
-      m_canvas = m_renderer.canvas();
+      m_this._renderer(createRenderer(m_rendererName, m_this, undefined, options));
+      m_this._canvas(m_renderer.canvas());
     }
 
     m_node.toggleClass('active', m_this.active());
@@ -512,15 +549,15 @@ var layer = function (arg) {
     m_node.off();
     m_node.remove();
     arg = {};
-    m_canvas = null;
-    m_renderer = null;
+    m_this._canvas(null);
+    m_this._renderer(null);
     s_exit();
   };
 
   /**
    * Update layer.
    *
-   * This is a stub that should be subclasses.
+   * This is a stub that should be subclassed.
    * @returns {this}
    */
   this._update = function () {
@@ -568,6 +605,7 @@ var layer = function (arg) {
     m_node.attr('id', m_name);
   }
   m_this.opacity(m_opacity);
+  m_this.visible(m_visible);
 
   // set the z-index (this prevents duplication)
   if (arg.zIndex === undefined) {
@@ -580,6 +618,8 @@ var layer = function (arg) {
     arg.zIndex = maxZ + 1;
   }
   m_this.zIndex(arg.zIndex);
+
+  adjustLayerForRenderer('all', m_this);
 
   return m_this;
 };

@@ -34,7 +34,7 @@ var canvas_tileLayer = function () {
     quad.lr = m_this.fromLocal(m_this.fromLevel({
       x: bounds.right - to.x, y: bounds.bottom - to.y
     }, level), 0);
-    quad.ul.z = quad.ll.z = quad.ur.z = quad.lr.z = level * m_this._levelZIncrement;
+    quad.ul.z = quad.ll.z = quad.ur.z = quad.lr.z = level;
     m_nextTileId += 1;
     quad.id = m_nextTileId;
     tile.quadId = quad.id;

@@ -51,21 +51,25 @@ var webgl_quadFeature = function (arg) {
   var vertexShaderImageSource = [
     'attribute vec3 vertexPosition;',
     'attribute vec2 textureCoord;',
+    'uniform float zOffset;',
     'uniform mat4 modelViewMatrix;',
     'uniform mat4 projectionMatrix;',
     'varying highp vec2 iTextureCoord;',
     'void main(void) {',
     '  gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+    '  gl_Position.z += zOffset;',
     '  iTextureCoord = textureCoord;',
     '}'].join('\n');
   var vertexShaderColorSource = [
     'attribute vec3 vertexPosition;',
+    'uniform float zOffset;',
     'uniform vec3 vertexColor;',
     'uniform mat4 modelViewMatrix;',
     'uniform mat4 projectionMatrix;',
     'varying mediump vec3 iVertexColor;',
     'void main(void) {',
     '  gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+    '  gl_Position.z += zOffset;',
     '  iVertexColor = vertexColor;',
     '}'].join('\n');
 
@@ -196,6 +200,7 @@ var webgl_quadFeature = function (arg) {
       prog.addUniform(m_modelViewUniform);
       prog.addUniform(new vgl.projectionUniform('projectionMatrix'));
       prog.addUniform(new vgl.floatUniform('opacity', 1.0));
+      prog.addUniform(new vgl.floatUniform('zOffset', 0.0));
       unicrop = new vgl.uniform(vgl.GL.FLOAT_VEC2, 'crop');
       unicrop.set([1.0, 1.0]);
       prog.addUniform(unicrop);
@@ -236,6 +241,7 @@ var webgl_quadFeature = function (arg) {
       prog.addUniform(m_clrModelViewUniform);
       prog.addUniform(new vgl.projectionUniform('projectionMatrix'));
       prog.addUniform(new vgl.floatUniform('opacity', 1.0));
+      prog.addUniform(new vgl.floatUniform('zOffset', 0.0));
       prog.addUniform(new vgl.uniform(vgl.GL.FLOAT_VEC3, 'vertexColor'));
       context = m_this.renderer()._glContext();
       prog.addShader(vgl.getCachedShader(
@@ -304,7 +310,7 @@ var webgl_quadFeature = function (arg) {
     }
     mapper.s_render(renderState, true);
 
-    var context = renderState.m_context, opacity = 1, color;
+    var context = renderState.m_context, opacity, zOffset, color;
 
     context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.clrQuadsPosition);
     $.each(m_quads.clrQuads, function (idx, quad) {
@@ -312,6 +318,11 @@ var webgl_quadFeature = function (arg) {
         opacity = quad.opacity;
         context.uniform1fv(renderState.m_material.shaderProgram()
           .uniformLocation('opacity'), new Float32Array([opacity]));
+      }
+      if ((quad.zOffset || 0.0) !== zOffset) {
+        zOffset = quad.zOffset || 0.0;
+        context.uniform1fv(renderState.m_material.shaderProgram()
+          .uniformLocation('zOffset'), new Float32Array([zOffset]));
       }
       if (!color || color.r !== quad.color.r || color.g !== quad.color.g ||
           color.b !== quad.color.b) {
@@ -352,7 +363,7 @@ var webgl_quadFeature = function (arg) {
     mapper.s_render(renderState, true);
 
     var context = renderState.m_context,
-        opacity = 1,
+        opacity, zOffset,
         crop = {x: 1, y: 1}, quadcrop;
 
     context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
@@ -366,6 +377,11 @@ var webgl_quadFeature = function (arg) {
         opacity = quad.opacity;
         context.uniform1fv(renderState.m_material.shaderProgram()
           .uniformLocation('opacity'), new Float32Array([opacity]));
+      }
+      if ((quad.zOffset || 0.0) !== zOffset) {
+        zOffset = quad.zOffset || 0.0;
+        context.uniform1fv(renderState.m_material.shaderProgram()
+          .uniformLocation('zOffset'), new Float32Array([zOffset]));
       }
       quadcrop = quad.crop || {x: 1, y: 1};
       if (!crop || quadcrop.x !== crop.x || quadcrop.y !== crop.y) {
