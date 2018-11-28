@@ -38,8 +38,24 @@ var webgl_object = function (arg) {
   if (this.bin) {
     var s_bin = this.bin;
 
+    /**
+     * Get/Set bin of the feature.  The bin number is used to determine the
+     * order of multiple features on the same layer.  It has no effect except
+     * on the webgl renderer.  A negative value hides the feature without
+     * stopping interaction with it.  Otherwise, features with higher bin
+     * numbers are drawn above those with lower bin numbers.  If two features
+     * have the same bin number, their order relative to one another is
+     * indeterminate and may be unstable.
+     *
+     * @param {number} [val] The new bin number.  If `undefined`, return the
+     *    current bin number.  If `null`, the bin is dynamically computed based
+     *    on order within the parent.  If children are nested, this may not be
+     *    what is desired.
+     * @param {boolean} [actualValue] If truthy and `val` is undefined, return
+     *    the actual value of bin, rather than the dynamically computed value.
+     * @returns {number|this} The current bin number or a reference to `this`.
+     */
     this.bin = function (val, actualValue) {
-
       if (val === undefined && !actualValue && s_bin(undefined, true) === null) {
         var layer = m_this.layer && m_this.layer(),
             map = layer && layer.map && layer.map(),

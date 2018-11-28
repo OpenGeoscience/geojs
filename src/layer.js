@@ -254,7 +254,7 @@ var layer = function (arg) {
    * receive native mouse events.
    *
    * @param {boolean} [arg] If specified, the new `active` value.
-   * @returns {boolean|object}
+   * @returns {boolean|this}
    */
   this.active = function (arg) {
     if (arg === undefined) {
@@ -457,7 +457,7 @@ var layer = function (arg) {
     }
     if (m_visible !== val) {
       m_visible = val;
-      m_node.css('display', m_visible ? '' : 'none');
+      m_node.toggleClass('hidden', !m_visible);
       m_this.modified();
     }
     return m_this;
@@ -584,6 +584,8 @@ var layer = function (arg) {
 
   /**
    * Get or set the current layer opacity.  The opacity is in the range [0-1].
+   * An opacity of 0 is not the same as setting `visible(false)`, as
+   * interactions can still occurr with the layer.
    *
    * @param {number} [opacity] If specified, set the opacity.  Otherwise,
    *    return the opacity.
@@ -601,6 +603,7 @@ var layer = function (arg) {
   // Create top level div for the layer
   m_node = $(document.createElement('div'));
   m_node.addClass('geojs-layer');
+  m_node.attr('renderer', m_rendererName);
   if (m_name) {
     m_node.attr('id', m_name);
   }
