@@ -44,7 +44,7 @@ var featureLayer = function (arg) {
     var newFeature = registry.createFeature(
       featureName, m_this, m_this.renderer(), arg);
     if (newFeature) {
-      this.addFeature(newFeature);
+      m_this.addFeature(newFeature);
     } else {
       console.warn('Layer renderer (' + m_this.rendererName() + ') does not support feature type "' + featureName + '"');
     }
@@ -59,7 +59,7 @@ var featureLayer = function (arg) {
    */
   this.addFeature = function (feature) {
     /* try to remove the feature first so that we don't have two copies */
-    this.removeFeature(feature);
+    m_this.removeFeature(feature);
     m_this.addChild(feature);
     m_features.push(feature);
     m_this.dataTime().modified();
@@ -100,7 +100,7 @@ var featureLayer = function (arg) {
       if (m_features.indexOf(feature) >= 0) {
         feature._exit();
       }
-      this.removeFeature(feature);
+      m_this.removeFeature(feature);
     }
 
     return m_this;
@@ -126,11 +126,11 @@ var featureLayer = function (arg) {
       var i;
       for (i = 0; i < existing.length; i += 1) {
         if (val.indexOf(existing[i]) < 0 && m_features.indexOf(existing[i]) >= 0) {
-          this.deleteFeature(existing[i]);
+          m_this.deleteFeature(existing[i]);
         }
       }
       for (i = 0; i < val.length; i += 1) {
-        this.addFeature(val[i]);
+        m_this.addFeature(val[i]);
       }
       return m_this;
     }

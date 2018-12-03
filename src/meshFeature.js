@@ -463,8 +463,8 @@ var meshFeature = function (arg) {
       }
     }, arg.style || {});
 
-    this.mesh(arg.mesh || {});
-    this.style(style);
+    m_this.mesh(arg.mesh || {});
+    m_this.style(style);
   };
 
   return this;

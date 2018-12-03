@@ -37,10 +37,10 @@ var svg_quadFeature = function (arg) {
     if (!this.position()) {
       return;
     }
-    var renderer = this.renderer(),
+    var renderer = m_this.renderer(),
         map = renderer.layer().map();
 
-    m_quads = this._generateQuads();
+    m_quads = m_this._generateQuads();
 
     var data = [];
     $.each(m_quads.clrQuads, function (idx, quad) {
@@ -53,7 +53,7 @@ var svg_quadFeature = function (arg) {
     });
 
     var feature = {
-      id: this._svgid(),
+      id: m_this._svgid(),
       data: data,
       dataIndex: function (d) {
         return d.quad.quadId;
@@ -186,7 +186,7 @@ var svg_quadFeature = function (arg) {
     };
     renderer._drawFeatures(feature);
 
-    this.buildTime().modified();
+    m_this.buildTime().modified();
   };
 
   /**

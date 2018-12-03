@@ -206,7 +206,7 @@ var lineFeature = function (arg) {
         index: indices
       };
     }
-    this._updatePointSearchInfo();
+    m_this._updatePointSearchInfo();
     var map = m_this.layer().map(),
         scale = map.unitsPerPixel(map.zoom()),
         scale2 = scale * scale,

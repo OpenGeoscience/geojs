@@ -231,11 +231,11 @@ var isolineFeature = function (arg) {
         values,
         hasLabels = false,
         lines = [];
-    var mesh = this._createMesh({
+    var mesh = m_this._createMesh({
       used: usedFunc,
       value: valueFunc
     });
-    values = this._getValueList(mesh);
+    values = m_this._getValueList(mesh);
     if (!values.length) {
       return {};
     }

@@ -217,7 +217,7 @@ var map = function (arg) {
       }
       m_animationQueue = queue;
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -238,7 +238,7 @@ var map = function (arg) {
         $(window).on('resize', resizeSelf);
       }
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -719,7 +719,7 @@ var map = function (arg) {
       };
     }
     var bds = rotate_bounds_center(
-      {x: 0, y: 0}, {width: m_width, height: m_height}, this.rotation());
+      {x: 0, y: 0}, {width: m_width, height: m_height}, m_this.rotation());
     return {
       width: Math.abs(bds.right - bds.left),
       height: Math.abs(bds.top - bds.bottom)
@@ -1375,7 +1375,7 @@ var map = function (arg) {
     reset_minimum_zoom();
     m_this.zoom(m_zoom);
     m_this.pan({x: 0, y: 0});
-    return this;
+    return m_this;
   };
 
   /**
@@ -1814,7 +1814,7 @@ var map = function (arg) {
     /* The first entry is the reference to the window.requestAnimationFrame. */
     for (var i = 1; i < queue.length; i += 1) {
       try {
-        queue[i].apply(this, arguments);
+        queue[i].apply(m_this, arguments);
       } catch (err) {
         console.error(err);
       }

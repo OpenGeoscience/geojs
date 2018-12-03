@@ -158,7 +158,7 @@ var quadFeature = function (arg) {
         i, coordbasis;
     coordinate = transform.transformCoordinates(map.ingcs(), map.gcs(), coordinate);
     if (!m_quads) {
-      this._generateQuads();
+      m_this._generateQuads();
     }
     $.each([m_quads.clrQuads, m_quads.imgQuads, m_quads.vidQuads], function (idx, quadList) {
       quadList.forEach(function (quad, idx) {
@@ -437,7 +437,7 @@ var quadFeature = function (arg) {
                 defer.resolve();
               }
               if (prev_onload) {
-                return prev_onload.apply(this, arguments);
+                return prev_onload.apply(m_this, arguments);
               }
             };
             prev_onerror = image.onerror;
@@ -446,7 +446,7 @@ var quadFeature = function (arg) {
                 defer.reject();
               }
               if (prev_onerror) {
-                return prev_onerror.apply(this, arguments);
+                return prev_onerror.apply(m_this, arguments);
               }
             };
             if (defer) {
@@ -515,7 +515,7 @@ var quadFeature = function (arg) {
                 defer.resolve();
               }
               if (prev_onload) {
-                return prev_onload.apply(this, arguments);
+                return prev_onload.apply(m_this, arguments);
               }
             };
             prev_onerror = video.onerror;
@@ -524,7 +524,7 @@ var quadFeature = function (arg) {
                 defer.reject();
               }
               if (prev_onerror) {
-                return prev_onerror.apply(this, arguments);
+                return prev_onerror.apply(m_this, arguments);
               }
             };
             if (defer) {

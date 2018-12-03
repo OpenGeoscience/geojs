@@ -144,7 +144,7 @@ var layer = function (arg) {
       // layers up.  We do this in reverse order since, if two layers above
       // this one share a z-index, they will resolve to the layer insert order.
       _siblingLayers().reverse().forEach(function (child) {
-        if (child !== this && child.zIndex() === zIndex) {
+        if (child !== m_this && child.zIndex() === zIndex) {
           child.zIndex(zIndex + 1);
         }
       });
@@ -258,7 +258,7 @@ var layer = function (arg) {
       m_active = arg;
       m_node.toggleClass('active', m_active);
     }
-    return this;
+    return m_this;
   };
 
   /**

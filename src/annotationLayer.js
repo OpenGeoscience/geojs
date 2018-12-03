@@ -577,7 +577,7 @@ var annotationLayer = function (arg) {
       if (createAnnotation) {
         m_this.currentAnnotation = createAnnotation({
           state: geo_annotation.state.create,
-          layer: this
+          layer: m_this
         });
         m_this.addAnnotation(m_this.currentAnnotation, null);
         actions = m_this.currentAnnotation.actions(geo_annotation.state.create);
