@@ -21,6 +21,7 @@ html, body {
   width: 100%;
   height: calc(100% - 60px);
   overflow: hidden;
+  z-index: 0;
 }
 
 .gj-screenshot-link {
