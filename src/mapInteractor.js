@@ -805,7 +805,7 @@ var mapInteractor = function (args) {
     $.extend(m_options, opts);
 
     // reset event handlers for new options
-    this._connectEvents();
+    m_this._connectEvents();
     return m_this;
   };
 

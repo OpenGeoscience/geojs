@@ -38,7 +38,7 @@ var sceneObject = function (arg) {
     } else {
       s_addPromise(promise);
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -53,7 +53,7 @@ var sceneObject = function (arg) {
     } else {
       s_onIdle(handler);
     }
-    return this;
+    return m_this;
   };
 
   /**

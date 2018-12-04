@@ -143,7 +143,7 @@ var webglRenderer = function (arg) {
      * readding the animation frame request, but this doesn't work for if the
      * reschedule occurs during another animation frame callback (it then waits
      * until a subsequent frame). */
-    m_this.layer().map().scheduleAnimationFrame(this._renderFrame, true);
+    m_this.layer().map().scheduleAnimationFrame(m_this._renderFrame, true);
     return m_this;
   };
 
@@ -177,15 +177,15 @@ var webglRenderer = function (arg) {
    * Exit.
    */
   this._exit = function () {
-    m_this.layer().map().scheduleAnimationFrame(this._renderFrame, 'remove');
+    m_this.layer().map().scheduleAnimationFrame(m_this._renderFrame, 'remove');
     m_this.canvas().remove();
     if (m_viewer) {
       var renderState = new vgl.renderState();
       renderState.m_renderer = m_viewer;
-      renderState.m_context = this._glContext();
+      renderState.m_context = m_this._glContext();
       m_viewer.exit(renderState);
-      if (this._glContext() !== vgl.GL && this._glContext().getExtension('WEBGL_lose_context') && this._glContext().getExtension('WEBGL_lose_context').loseContext) {
-        this._glContext().getExtension('WEBGL_lose_context').loseContext();
+      if (m_this._glContext() !== vgl.GL && m_this._glContext().getExtension('WEBGL_lose_context') && m_this._glContext().getExtension('WEBGL_lose_context').loseContext) {
+        m_this._glContext().getExtension('WEBGL_lose_context').loseContext();
       }
     }
     // make sure we clear shaders associated with the generate context, too

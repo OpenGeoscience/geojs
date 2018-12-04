@@ -177,7 +177,7 @@ var webgl_quadFeature = function (arg) {
     if (!m_this.position()) {
       return;
     }
-    m_quads = this._generateQuads();
+    m_quads = m_this._generateQuads();
     /* Create an actor to render image quads */
     if (m_quads.imgQuads.length && !m_actor_image) {
       m_this.visible(false);

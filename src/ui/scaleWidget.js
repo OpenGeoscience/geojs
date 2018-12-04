@@ -276,7 +276,7 @@ var scaleWidget = function (arg) {
    * Update the widget upon panning.
    */
   this._update = function () {
-    this._render();
+    m_this._render();
   };
 
   /**

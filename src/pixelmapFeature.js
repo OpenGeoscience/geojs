@@ -202,11 +202,11 @@ var pixelmapFeature = function (arg) {
      * this a second time. */
     m_this.buildTime().modified();
     if (!m_srcImage) {
-      var src = this.style.get('url')();
+      var src = m_this.style.get('url')();
       if (util.isReadyImage(src)) {
         /* we have an already loaded image, so we can just use it. */
         m_srcImage = src;
-        this._computePixelmap();
+        m_this._computePixelmap();
       } else if (src) {
         var defer = $.Deferred(), prev_onload, prev_onerror;
         if (src instanceof Image) {
@@ -221,12 +221,12 @@ var pixelmapFeature = function (arg) {
           // Only set the crossOrigin parameter if this is going across origins.
           if (src.indexOf(':') >= 0 &&
               src.indexOf('/') === src.indexOf(':') + 1) {
-            m_srcImage.crossOrigin = this.style.get('crossDomain')() || 'anonymous';
+            m_srcImage.crossOrigin = m_this.style.get('crossDomain')() || 'anonymous';
           }
         }
         m_srcImage.onload = function () {
           if (prev_onload) {
-            prev_onload.apply(this, arguments);
+            prev_onload.apply(m_this, arguments);
           }
           /* Only use this image if our pixelmap hasn't changed since we
            * attached our handler */
@@ -238,18 +238,18 @@ var pixelmapFeature = function (arg) {
         };
         m_srcImage.onerror = function () {
           if (prev_onerror) {
-            prev_onerror.apply(this, arguments);
+            prev_onerror.apply(m_this, arguments);
           }
           defer.reject();
         };
-        defer.promise(this);
-        this.layer().addPromise(this);
+        defer.promise(m_this);
+        m_this.layer().addPromise(m_this);
         if (!(src instanceof Image)) {
           m_srcImage.src = src;
         }
       }
     } else if (m_info) {
-      this._computePixelmap();
+      m_this._computePixelmap();
     }
     return m_this;
   };

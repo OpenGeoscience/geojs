@@ -14,24 +14,24 @@ var canvas_tileLayer = function () {
     if (!m_quadFeature) {
       return;
     }
-    var bounds = this._tileBounds(tile),
+    var bounds = m_this._tileBounds(tile),
         level = tile.index.level || 0,
-        to = this._tileOffset(level),
-        crop = this.tileCropFromBounds(tile),
+        to = m_this._tileOffset(level),
+        crop = m_this.tileCropFromBounds(tile),
         quad = {};
     if (crop) {
       quad.crop = crop;
     }
-    quad.ul = this.fromLocal(this.fromLevel({
+    quad.ul = m_this.fromLocal(m_this.fromLevel({
       x: bounds.left - to.x, y: bounds.top - to.y
     }, level), 0);
-    quad.ll = this.fromLocal(this.fromLevel({
+    quad.ll = m_this.fromLocal(m_this.fromLevel({
       x: bounds.left - to.x, y: bounds.bottom - to.y
     }, level), 0);
-    quad.ur = this.fromLocal(this.fromLevel({
+    quad.ur = m_this.fromLocal(m_this.fromLevel({
       x: bounds.right - to.x, y: bounds.top - to.y
     }, level), 0);
-    quad.lr = this.fromLocal(this.fromLevel({
+    quad.lr = m_this.fromLocal(m_this.fromLevel({
       x: bounds.right - to.x, y: bounds.bottom - to.y
     }, level), 0);
     quad.ul.z = quad.ll.z = quad.ur.z = quad.lr.z = level * m_this._levelZIncrement;
@@ -75,7 +75,7 @@ var canvas_tileLayer = function () {
    */
   this._init = function () {
     s_init.apply(m_this, arguments);
-    m_quadFeature = this.createFeature('quad', {
+    m_quadFeature = m_this.createFeature('quad', {
       previewColor: m_this._options.previewColor,
       previewImage: m_this._options.previewImage
     });

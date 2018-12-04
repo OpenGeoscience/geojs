@@ -191,7 +191,7 @@ var heatmapFeature = function (arg) {
    * @returns {geo.heatmap}
    */
   this.gcsPosition = function () {
-    this._update();
+    m_this._update();
     return m_gcsPosition;
   };
 

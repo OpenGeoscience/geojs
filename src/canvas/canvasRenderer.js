@@ -103,7 +103,7 @@ var canvasRenderer = function (arg) {
    * @returns {this}
    */
   this._render = function () {
-    m_this.layer().map().scheduleAnimationFrame(this._renderFrame);
+    m_this.layer().map().scheduleAnimationFrame(m_this._renderFrame);
     return m_this;
   };
 

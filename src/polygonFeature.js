@@ -87,7 +87,7 @@ var polygonFeature = function (arg) {
     var ret = s_data(arg);
     if (arg !== undefined) {
       m_coordinates = getCoordinates();
-      this._checkForStroke();
+      m_this._checkForStroke();
     }
     return ret;
   };
@@ -285,9 +285,9 @@ var polygonFeature = function (arg) {
    *    specific style, or the current class instance.
    */
   this.style = function (arg1, arg2) {
-    var result = s_style.apply(this, arguments);
+    var result = s_style.apply(m_this, arguments);
     if (arg1 !== undefined && (typeof arg1 !== 'string' || arg2 !== undefined)) {
-      this._checkForStroke();
+      m_this._checkForStroke();
     }
     return result;
   };
@@ -354,12 +354,12 @@ var polygonFeature = function (arg) {
         } :
         linePolyStyle(polyStyle.strokeOpacity)
     });
-    var data = this.data(),
-        posVal = this.style('position');
+    var data = m_this.data(),
+        posVal = m_this.style('position');
     if (data !== m_lineFeature._lastData || posVal !== m_lineFeature._lastPosVal) {
       var lineData = [], i, polygon, loop,
-          posFunc = this.style.get('position'),
-          polyFunc = this.style.get('polygon');
+          posFunc = m_this.style.get('position'),
+          polyFunc = m_this.style.get('polygon');
 
       for (i = 0; i < data.length; i += 1) {
         polygon = polyFunc(data[i], i);
@@ -590,7 +590,7 @@ var polygonFeature = function (arg) {
     }
     m_this.style(style);
 
-    this._checkForStroke();
+    m_this._checkForStroke();
   };
 
   /* Don't call _init here -- let subclasses call it */

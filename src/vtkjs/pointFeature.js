@@ -68,7 +68,7 @@ var vtkjs_pointFeature = function (arg) {
     m_actor = vtkActor.newInstance();
     m_actor.setMapper(mapper);
     m_actor.getProperty().setAmbient(1);
-    this.renderer().contextRenderer().addActor(m_actor);
+    m_this.renderer().contextRenderer().addActor(m_actor);
   };
 
   /**
@@ -77,7 +77,7 @@ var vtkjs_pointFeature = function (arg) {
   this._init = function () {
     s_init.call(m_this, arg);
     m_this.renderer().contextRenderer().setLayer(1);
-    this._createPipeline();
+    m_this._createPipeline();
   };
 
   /**

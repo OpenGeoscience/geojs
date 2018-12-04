@@ -72,7 +72,7 @@ var colorLegendWidget = function (arg) {
       .attr('class', 'color-legend-popup');
 
     if (arg.categories) {
-      this.categories(arg.categories);
+      m_this.categories(arg.categories);
     }
   };
 
@@ -136,9 +136,9 @@ var colorLegendWidget = function (arg) {
     if (categories === undefined) {
       return m_categories;
     }
-    m_categories = this._prepareCategories(categories);
-    this._draw();
-    return this;
+    m_categories = m_this._prepareCategories(categories);
+    m_this._draw();
+    return m_this;
   };
 
   /**
@@ -148,9 +148,9 @@ var colorLegendWidget = function (arg) {
    * @returns {this} The current class instance.
    */
   this.addCategories = function (categories) {
-    m_categories = m_categories.concat(this._prepareCategories(categories));
-    this._draw();
-    return this;
+    m_categories = m_categories.concat(m_this._prepareCategories(categories));
+    m_this._draw();
+    return m_this;
   };
 
   /**
@@ -165,8 +165,8 @@ var colorLegendWidget = function (arg) {
     m_categories = m_categories.filter(function (category) {
       return categories.indexOf(category) === -1;
     });
-    this._draw();
-    return this;
+    m_this._draw();
+    return m_this;
   };
 
   /**
@@ -357,7 +357,7 @@ var colorLegendWidget = function (arg) {
     if (category.endAxisLabelOnly) {
       axis.tickValues([category.domain[0], category.domain[category.domain.length - 1]]);
     }
-    this._renderAxis(svg, axis);
+    m_this._renderAxis(svg, axis);
   };
 
   /**

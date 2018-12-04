@@ -51,10 +51,10 @@ var fetchQueue = function (options) {
    * @name geo.fetchQueue#size
    */
   Object.defineProperty(this, 'size', {
-    get: function () { return this._size; },
+    get: function () { return m_this._size; },
     set: function (n) {
-      this._size = n;
-      this.next_item();
+      m_this._size = n;
+      m_this.next_item();
     }
   });
 
@@ -64,7 +64,7 @@ var fetchQueue = function (options) {
    * @name geo.fetchQueue#length
    */
   Object.defineProperty(this, 'length', {
-    get: function () { return this._queue.length; }
+    get: function () { return m_this._queue.length; }
   });
 
   /**
@@ -73,7 +73,7 @@ var fetchQueue = function (options) {
    * @name geo.fetchQueue#processing
    */
   Object.defineProperty(this, 'processing', {
-    get: function () { return this._processing; }
+    get: function () { return m_this._processing; }
   });
 
   /**
@@ -82,9 +82,9 @@ var fetchQueue = function (options) {
    * @returns {this}
    */
   this.clear = function () {
-    this._queue = [];
-    this._processing = 0;
-    return this;
+    m_this._queue = [];
+    m_this._processing = 0;
+    return m_this;
   };
 
   /**
@@ -101,10 +101,10 @@ var fetchQueue = function (options) {
    */
   this.add = function (defer, callback, atEnd) {
     if (defer.__fetchQueue) {
-      var pos = $.inArray(defer, this._queue);
+      var pos = $.inArray(defer, m_this._queue);
       if (pos >= 0) {
-        this._queue.splice(pos, 1);
-        this._addToQueue(defer, atEnd);
+        m_this._queue.splice(pos, 1);
+        m_this._addToQueue(defer, atEnd);
         return defer;
       }
     }
@@ -114,7 +114,7 @@ var fetchQueue = function (options) {
       $.when(callback.call(defer)).always(process.resolve);
     }).fail(process.resolve);
     defer.__fetchQueue = wait;
-    this._addToQueue(defer, atEnd);
+    m_this._addToQueue(defer, atEnd);
     $.when(wait, process).always(function () {
       if (m_this._processing > 0) {
         m_this._processing -= 1;
@@ -135,18 +135,18 @@ var fetchQueue = function (options) {
    *  turned on.  If truthy, always add the item to the end of the queue.
    */
   this._addToQueue = function (defer, atEnd) {
-    defer.__fetchQueue._batch = this._batch;
+    defer.__fetchQueue._batch = m_this._batch;
     if (atEnd) {
-      this._queue.push(defer);
+      m_this._queue.push(defer);
     } else if (!this._batch) {
-      this._queue.unshift(defer);
+      m_this._queue.unshift(defer);
     } else {
-      for (var i = 0; i < this._queue.length; i += 1) {
-        if (this._queue[i].__fetchQueue._batch !== this._batch) {
+      for (var i = 0; i < m_this._queue.length; i += 1) {
+        if (m_this._queue[i].__fetchQueue._batch !== m_this._batch) {
           break;
         }
       }
-      this._queue.splice(i, 0, defer);
+      m_this._queue.splice(i, 0, defer);
     }
   };
 
@@ -157,7 +157,7 @@ var fetchQueue = function (options) {
    * @returns {number} -1 if not in the queue, or the position in the queue.
    */
   this.get = function (defer) {
-    return $.inArray(defer, this._queue);
+    return $.inArray(defer, m_this._queue);
   };
 
   /**
@@ -167,9 +167,9 @@ var fetchQueue = function (options) {
    * @returns {boolean} `true` if the object was removed.
    */
   this.remove = function (defer) {
-    var pos = $.inArray(defer, this._queue);
+    var pos = $.inArray(defer, m_this._queue);
     if (pos >= 0) {
-      this._queue.splice(pos, 1);
+      m_this._queue.splice(pos, 1);
       return true;
     }
     return false;
@@ -185,15 +185,15 @@ var fetchQueue = function (options) {
    */
   this.batch = function (start) {
     if (start === undefined) {
-      return this._batch;
+      return m_this._batch;
     }
     if (!start) {
-      this._batch = false;
+      m_this._batch = false;
     } else {
-      this._batch = m_next_batch;
+      m_this._batch = m_next_batch;
       m_next_batch += 1;
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -207,7 +207,7 @@ var fetchQueue = function (options) {
     m_this._innextitem = true;
     /* if the queue is greater than the track size, check each item to see
      * if it is still needed. */
-    if (m_this._queue.length > m_this._track && this._needed) {
+    if (m_this._queue.length > m_this._track && m_this._needed) {
       for (var i = m_this._queue.length - 1; i >= 0; i -= 1) {
         if (!m_this._needed(m_this._queue[i])) {
           var discard = m_this._queue.splice(i, 1)[0];

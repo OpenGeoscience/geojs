@@ -198,7 +198,8 @@ var tileLayer = function (arg) {
       s_visible = this.visible,
       m_lastTileSet = [],
       m_maxBounds = [],
-      m_exited;
+      m_exited,
+      m_this = this;
 
   // Space tile levels this far apart in z-buffer space.  This value doesn't
   // have any visual effect in parallel projections, but will slightly skew
@@ -231,8 +232,8 @@ var tileLayer = function (arg) {
     // smaller values will do needless computations.
     track: arg.cacheSize,
     needed: function (tile) {
-      return tile === this.cache.get(tile.toString(), true);
-    }.bind(this)
+      return tile === m_this.cache.get(tile.toString(), true);
+    }
   });
 
   var m_tileOffsetValues = {};
@@ -243,7 +244,7 @@ var tileLayer = function (arg) {
    * @name geo.tileLayer#options
    */
   Object.defineProperty(this, 'options', {get: function () {
-    return $.extend({}, this._options);
+    return $.extend({}, m_this._options);
   }});
 
   /**
@@ -252,7 +253,7 @@ var tileLayer = function (arg) {
    * @name geo.tileLayer#cache
    */
   Object.defineProperty(this, 'cache', {get: function () {
-    return this._cache;
+    return m_this._cache;
   }});
 
   /**
@@ -264,7 +265,7 @@ var tileLayer = function (arg) {
    * @name geo.tileLayer#activeTiles
    */
   Object.defineProperty(this, 'activeTiles', {get: function () {
-    return $.extend({}, this._activeTiles); // copy on output
+    return $.extend({}, m_this._activeTiles); // copy on output
   }});
 
   /**
@@ -276,8 +277,8 @@ var tileLayer = function (arg) {
    *     `{x: nx, y: ny}`.
    */
   this.tilesAtZoom = function (level) {
-    if (this._options.tilesAtZoom) {
-      return this._options.tilesAtZoom.call(this, level);
+    if (m_this._options.tilesAtZoom) {
+      return m_this._options.tilesAtZoom.call(m_this, level);
     }
     var s = Math.pow(2, level);
     return {x: s, y: s};
@@ -292,8 +293,8 @@ var tileLayer = function (arg) {
    *    level, or null if none specified (`{x: width, y: height}`).
    */
   this.tilesMaxBounds = function (level) {
-    if (this._options.tilesMaxBounds) {
-      return this._options.tilesMaxBounds.call(this, level);
+    if (m_this._options.tilesMaxBounds) {
+      return m_this._options.tilesMaxBounds.call(m_this, level);
     }
     return null;
   };
@@ -307,13 +308,13 @@ var tileLayer = function (arg) {
    *      which is the size in pixels for the tile.
    */
   this.tileCropFromBounds = function (tile) {
-    if (!this._options.tilesMaxBounds) {
+    if (!m_this._options.tilesMaxBounds) {
       return;
     }
     var level = tile.index.level,
-        bounds = this._tileBounds(tile);
+        bounds = m_this._tileBounds(tile);
     if (m_maxBounds[level] === undefined) {
-      m_maxBounds[level] = this.tilesMaxBounds(level) || null;
+      m_maxBounds[level] = m_this.tilesMaxBounds(level) || null;
     }
     if (m_maxBounds[level] && (bounds.right > m_maxBounds[level].x ||
         bounds.bottom > m_maxBounds[level].y)) {
@@ -339,16 +340,16 @@ var tileLayer = function (arg) {
    * @returns {boolean}
    */
   this.isValid = function (index) {
-    if (!(this._options.minLevel <= index.level &&
-         index.level <= this._options.maxLevel)) {
+    if (!(m_this._options.minLevel <= index.level &&
+         index.level <= m_this._options.maxLevel)) {
       return false;
     }
-    if (!(this._options.wrapX || (
-      0 <= index.x && index.x <= this.tilesAtZoom(index.level).x - 1))) {
+    if (!(m_this._options.wrapX || (
+      0 <= index.x && index.x <= m_this.tilesAtZoom(index.level).x - 1))) {
       return false;
     }
-    if (!(this._options.wrapY || (
-      0 <= index.y && index.y <= this.tilesAtZoom(index.level).y - 1))) {
+    if (!(m_this._options.wrapY || (
+      0 <= index.y && index.y <= m_this.tilesAtZoom(index.level).y - 1))) {
       return false;
     }
     return true;
@@ -365,8 +366,8 @@ var tileLayer = function (arg) {
    *   `{index: {x, y}, offset: {x, y}}`.
    */
   this._origin = function (level) {
-    var origin = this.toLevel(this.toLocal(this.map().origin()), level),
-        o = this._options,
+    var origin = m_this.toLevel(m_this.toLocal(m_this.map().origin()), level),
+        o = m_this._options,
         index, offset;
 
     // get the tile index
@@ -394,7 +395,7 @@ var tileLayer = function (arg) {
    *   `bottom`.
    */
   this._tileBounds = function (tile) {
-    var origin = this._origin(tile.index.level);
+    var origin = m_this._origin(tile.index.level);
     return tile.bounds(origin.index, origin.offset);
   };
 
@@ -409,22 +410,22 @@ var tileLayer = function (arg) {
    * @returns {object} The tile indices.  This has `x` and `y` properties.
    */
   this.tileAtPoint = function (point, level) {
-    var o = this._origin(level);
-    var map = this.map();
-    point = this.displayToLevel(map.gcsToDisplay(point, null), level);
+    var o = m_this._origin(level);
+    var map = m_this.map();
+    point = m_this.displayToLevel(map.gcsToDisplay(point, null), level);
     if (isNaN(point.x)) { point.x = 0; }
     if (isNaN(point.y)) { point.y = 0; }
-    var to = this._tileOffset(level);
+    var to = m_this._tileOffset(level);
     if (to) {
       point.x += to.x;
       point.y += to.y;
     }
     var tile = {
       x: Math.floor(
-        o.index.x + (o.offset.x + point.x) / this._options.tileWidth
+        o.index.x + (o.offset.x + point.x) / m_this._options.tileWidth
       ),
       y: Math.floor(
-        o.index.y + (o.offset.y + point.y) / this._options.tileHeight
+        o.index.y + (o.offset.y + point.y) / m_this._options.tileHeight
       )
     };
     return tile;
@@ -442,17 +443,17 @@ var tileLayer = function (arg) {
   this.gcsTileBounds = function (indexOrTile, gcs) {
     var tile = (indexOrTile.index ? indexOrTile : Tile({
       index: indexOrTile,
-      size: {x: this._options.tileWidth, y: this._options.tileHeight},
+      size: {x: m_this._options.tileWidth, y: m_this._options.tileHeight},
       url: ''
     }));
-    var to = this._tileOffset(tile.index.level),
+    var to = m_this._tileOffset(tile.index.level),
         bounds = tile.bounds({x: 0, y: 0}, to),
-        map = this.map(),
+        map = m_this.map(),
         unit = map.unitsPerPixel(tile.index.level);
     var coord = [{
-      x: bounds.left * unit, y: this._topDown() * bounds.top * unit
+      x: bounds.left * unit, y: m_this._topDown() * bounds.top * unit
     }, {
-      x: bounds.right * unit, y: this._topDown() * bounds.bottom * unit
+      x: bounds.right * unit, y: m_this._topDown() * bounds.bottom * unit
     }];
     gcs = (gcs === null ? map.gcs() : (
       gcs === undefined ? map.ingcs() : gcs));
@@ -486,11 +487,11 @@ var tileLayer = function (arg) {
     var urlParams = source || index;
     return Tile({
       index: index,
-      size: {x: this._options.tileWidth, y: this._options.tileHeight},
-      queue: this._queue,
-      url: this._options.url.call(
-        this, urlParams.x, urlParams.y, urlParams.level || 0,
-        this._options.subdomains)
+      size: {x: m_this._options.tileWidth, y: m_this._options.tileHeight},
+      queue: m_this._queue,
+      url: m_this._options.url.call(
+        m_this, urlParams.x, urlParams.y, urlParams.level || 0,
+        m_this._options.subdomains)
     });
   };
 
@@ -511,10 +512,10 @@ var tileLayer = function (arg) {
    * @returns {geo.tile}
    */
   this._getTileCached = function (index, source, delayPurge) {
-    var tile = this.cache.get(this._tileHash(index));
+    var tile = m_this.cache.get(m_this._tileHash(index));
     if (tile === null) {
-      tile = this._getTile(index, source);
-      this.cache.add(tile, this.remove.bind(this), delayPurge);
+      tile = m_this._getTile(index, source);
+      m_this.cache.add(tile, m_this.remove, delayPurge);
     }
     return tile;
   };
@@ -549,10 +550,10 @@ var tileLayer = function (arg) {
    */
   this._getTileRange = function (level, bounds) {
     var corners = [
-      this.tileAtPoint({x: bounds.left, y: bounds.top}, level),
-      this.tileAtPoint({x: bounds.right, y: bounds.top}, level),
-      this.tileAtPoint({x: bounds.left, y: bounds.bottom}, level),
-      this.tileAtPoint({x: bounds.right, y: bounds.bottom}, level)
+      m_this.tileAtPoint({x: bounds.left, y: bounds.top}, level),
+      m_this.tileAtPoint({x: bounds.right, y: bounds.top}, level),
+      m_this.tileAtPoint({x: bounds.left, y: bounds.bottom}, level),
+      m_this.tileAtPoint({x: bounds.right, y: bounds.bottom}, level)
     ];
     return {
       start: {
@@ -583,7 +584,7 @@ var tileLayer = function (arg) {
   this._getTiles = function (maxLevel, bounds, sorted, onlyIfChanged) {
     var i, j, tiles = [], index, nTilesLevel,
         start, end, indexRange, source, center, changed = false, old, level,
-        minLevel = (this._options.keepLower ? this._options.minLevel : maxLevel);
+        minLevel = (m_this._options.keepLower ? m_this._options.minLevel : maxLevel);
     if (maxLevel < minLevel) {
       maxLevel = minLevel;
     }
@@ -593,35 +594,35 @@ var tileLayer = function (arg) {
      * the sort order. */
     for (level = minLevel; level <= maxLevel; level += 1) {
       // get the tile range to fetch
-      indexRange = this._getTileRange(level, bounds);
+      indexRange = m_this._getTileRange(level, bounds);
       start = indexRange.start;
       end = indexRange.end;
-      // total number of tiles existing at this level
-      nTilesLevel = this.tilesAtZoom(level);
+      // total number of tiles existing at m_this level
+      nTilesLevel = m_this.tilesAtZoom(level);
 
-      if (!this._options.wrapX) {
+      if (!m_this._options.wrapX) {
         start.x = Math.min(Math.max(start.x, 0), nTilesLevel.x - 1);
         end.x = Math.min(Math.max(end.x, 0), nTilesLevel.x - 1);
-        if (level === minLevel && this._options.keepLower) {
+        if (level === minLevel && m_this._options.keepLower) {
           start.x = 0;
           end.x = nTilesLevel.x - 1;
         }
       }
-      if (!this._options.wrapY) {
+      if (!m_this._options.wrapY) {
         start.y = Math.min(Math.max(start.y, 0), nTilesLevel.y - 1);
         end.y = Math.min(Math.max(end.y, 0), nTilesLevel.y - 1);
-        if (level === minLevel && this._options.keepLower) {
+        if (level === minLevel && m_this._options.keepLower) {
           start.y = 0;
           end.y = nTilesLevel.y - 1;
         }
       }
       /* If we are reprojecting tiles, we need a check to not use all levels
        * if the number of tiles is excessive. */
-      if (this._options.gcs && this._options.gcs !== this.map().gcs() &&
+      if (m_this._options.gcs && m_this._options.gcs !== m_this.map().gcs() &&
           level !== minLevel &&
           (end.x + 1 - start.x) * (end.y + 1 - start.y) >
-          (this.map().size().width * this.map().size().height /
-          this._options.tileWidth / this._options.tileHeight) * 16) {
+          (m_this.map().size().width * m_this.map().size().height /
+          m_this._options.tileWidth / m_this._options.tileHeight) * 16) {
         break;
       }
 
@@ -630,13 +631,13 @@ var tileLayer = function (arg) {
         for (j = start.y; j <= end.y; j += 1) {
           index = {level: level, x: i, y: j};
           source = {level: level, x: i, y: j};
-          if (this._options.wrapX) {
+          if (m_this._options.wrapX) {
             source.x = modulo(source.x, nTilesLevel.x);
           }
-          if (this._options.wrapY) {
+          if (m_this._options.wrapY) {
             source.y = modulo(source.y, nTilesLevel.y);
           }
-          if (this.isValid(source)) {
+          if (m_this.isValid(source)) {
             if (onlyIfChanged && tiles.length < m_lastTileSet.length) {
               old = m_lastTileSet[tiles.length];
               changed = changed || (index.level !== old.level ||
@@ -669,21 +670,21 @@ var tileLayer = function (arg) {
       for (; numTiles >= 1; numTiles /= 2) {
         center.bottomLevel -= 1;
       }
-      tiles.sort(this._loadMetric(center));
+      tiles.sort(m_this._loadMetric(center));
       /* If we are using a fetch queue, start a new batch */
-      if (this._queue) {
-        this._queue.batch(true);
+      if (m_this._queue) {
+        m_this._queue.batch(true);
       }
     }
-    if (this.cache.size < tiles.length) {
+    if (m_this.cache.size < tiles.length) {
       console.log('Increasing cache size to ' + tiles.length);
-      this.cache.size = tiles.length;
+      m_this.cache.size = tiles.length;
     }
     /* Actually get the tiles. */
     for (i = 0; i < tiles.length; i += 1) {
-      tiles[i] = this._getTileCached(tiles[i].index, tiles[i].source, true);
+      tiles[i] = m_this._getTileCached(tiles[i].index, tiles[i].source, true);
     }
-    this.cache.purge(this.remove.bind(this));
+    m_this.cache.purge(m_this.remove);
     return tiles;
   };
 
@@ -696,7 +697,7 @@ var tileLayer = function (arg) {
    */
   this.prefetch = function (level, bounds) {
     var tiles;
-    tiles = this._getTiles(level, bounds, true);
+    tiles = m_this._getTiles(level, bounds, true);
     return $.when.apply($, tiles.map(function (tile) {
       return tile.fetch();
     }));
@@ -796,16 +797,16 @@ var tileLayer = function (arg) {
   this.drawTile = function (tile) {
     var hash = tile.toString();
 
-    if (this._activeTiles.hasOwnProperty(hash)) {
+    if (m_this._activeTiles.hasOwnProperty(hash)) {
       // the tile is already drawn, move it to the top
-      this._moveToTop(tile);
+      m_this._moveToTop(tile);
     } else {
       // pass to the rendering implementation
-      this._drawTile(tile);
+      m_this._drawTile(tile);
     }
 
     // add the tile to the active cache
-    this._activeTiles[hash] = tile;
+    m_this._activeTiles[hash] = tile;
   };
 
   /**
@@ -819,15 +820,15 @@ var tileLayer = function (arg) {
   this._drawTile = function (tile) {
     // Make sure this method is not called when there is
     // a renderer attached.
-    if (this.renderer() !== null) {
+    if (m_this.renderer() !== null) {
       throw new Error('This draw method is not valid on renderer managed layers.');
     }
 
     // get the layer node
     var level = tile.index.level,
-        div = $(this._getSubLayer(level)),
-        bounds = this._tileBounds(tile),
-        duration = this._options.animationDuration,
+        div = $(m_this._getSubLayer(level)),
+        bounds = m_this._tileBounds(tile),
+        duration = m_this._options.animationDuration,
         container = $('<div class="geo-tile-container"/>').attr(
           'tile-reference', tile.toString()),
         crop;
@@ -839,7 +840,7 @@ var tileLayer = function (arg) {
       top: (bounds.top - parseInt(div.attr('offsety') || 0, 10)) + 'px'
     });
 
-    crop = this.tileCropFromBounds(tile);
+    crop = m_this.tileCropFromBounds(tile);
     if (crop) {
       container.addClass('crop').css({
         width: crop.x + 'px',
@@ -859,8 +860,8 @@ var tileLayer = function (arg) {
     tile.catch(function () {
       // May want to do something special here later
       console.warn('Could not load tile at ' + tile.toString());
-      this._remove(tile);
-    }.bind(this));
+      m_this._remove(tile);
+    });
   };
 
   /**
@@ -871,13 +872,13 @@ var tileLayer = function (arg) {
    */
   this.remove = function (tile) {
     var hash = tile.toString();
-    var value = this._activeTiles[hash];
+    var value = m_this._activeTiles[hash];
 
     if (value instanceof Tile) {
-      this._remove(value);
+      m_this._remove(value);
     }
 
-    delete this._activeTiles[hash];
+    delete m_this._activeTiles[hash];
     return value;
   };
 
@@ -920,15 +921,15 @@ var tileLayer = function (arg) {
    *      `scale`, and `level` keys.
    */
   this._getViewBounds = function () {
-    var map = this.map(),
+    var map = m_this.map(),
         mapZoom = map.zoom(),
-        zoom = this._options.tileRounding(mapZoom),
+        zoom = m_this._options.tileRounding(mapZoom),
         scale = Math.pow(2, mapZoom - zoom),
         size = map.size();
-    var ul = this.displayToLevel({x: 0, y: 0}),
-        ur = this.displayToLevel({x: size.width, y: 0}),
-        ll = this.displayToLevel({x: 0, y: size.height}),
-        lr = this.displayToLevel({x: size.width, y: size.height});
+    var ul = m_this.displayToLevel({x: 0, y: 0}),
+        ur = m_this.displayToLevel({x: size.width, y: 0}),
+        ll = m_this.displayToLevel({x: 0, y: size.height}),
+        lr = m_this.displayToLevel({x: size.width, y: size.height});
     return {
       level: zoom,
       scale: scale,
@@ -955,23 +956,23 @@ var tileLayer = function (arg) {
     var tile, hash;
 
     // Don't purge tiles in an active update
-    if (this._updating) {
-      return this;
+    if (m_this._updating) {
+      return m_this;
     }
 
     // get the view bounds
     if (!bounds) {
-      bounds = this._getViewBounds();
+      bounds = m_this._getViewBounds();
     }
 
-    for (hash in this._activeTiles) {
+    for (hash in m_this._activeTiles) {
 
-      tile = this._activeTiles[hash];
-      if (this._canPurge(tile, bounds, zoom, doneLoading)) {
-        this.remove(tile);
+      tile = m_this._activeTiles[hash];
+      if (m_this._canPurge(tile, bounds, zoom, doneLoading)) {
+        m_this.remove(tile);
       }
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -982,14 +983,14 @@ var tileLayer = function (arg) {
   this.clear = function () {
     var tiles = [], tile;
 
-    // ignoring the warning here because this is a privately
+    // ignoring the warning here because m_this is a privately
     // controlled object with simple keys
-    for (tile in this._activeTiles) {
-      tiles.push(this.remove(tile));
+    for (tile in m_this._activeTiles) {
+      tiles.push(m_this.remove(tile));
     }
 
     // clear out the tile coverage tree
-    this._tileTree = {};
+    m_this._tileTree = {};
 
     m_lastTileSet = [];
 
@@ -1003,9 +1004,9 @@ var tileLayer = function (arg) {
    * @returns {this}
    */
   this.reset = function () {
-    this.clear();
-    this._cache.clear();
-    return this;
+    m_this.clear();
+    m_this._cache.clear();
+    return m_this;
   };
 
   /**
@@ -1018,11 +1019,11 @@ var tileLayer = function (arg) {
    * @returns {object} Local coordinates with `x` and `y`.
    */
   this.toLocal = function (pt, zoom) {
-    var map = this.map(),
+    var map = m_this.map(),
         unit = map.unitsPerPixel(zoom === undefined ? map.zoom() : zoom);
     return {
       x: pt.x / unit,
-      y: this._topDown() * pt.y / unit
+      y: m_this._topDown() * pt.y / unit
     };
   };
 
@@ -1038,11 +1039,11 @@ var tileLayer = function (arg) {
   this.fromLocal = function (pt, zoom) {
     // these need to always use the *layer* unitsPerPixel, or possibly
     // convert tile space using a transform
-    var map = this.map(),
+    var map = m_this.map(),
         unit = map.unitsPerPixel(zoom === undefined ? map.zoom() : zoom);
     return {
       x: pt.x * unit,
-      y: this._topDown() * pt.y * unit
+      y: m_this._topDown() * pt.y * unit
     };
   };
 
@@ -1052,7 +1053,7 @@ var tileLayer = function (arg) {
    * @returns {number} Either 1 to not invert y, or -1 to invert it.
    */
   this._topDown = function () {
-    return this._options.topDown ? 1 : -1;
+    return m_this._options.topDown ? 1 : -1;
   };
 
   /**
@@ -1063,16 +1064,16 @@ var tileLayer = function (arg) {
    * @returns {DOM} The layer's DOM element.
    */
   this._getSubLayer = function (level) {
-    if (!this.canvas()) {
+    if (!m_this.canvas()) {
       return;
     }
-    var node = this.canvas()
+    var node = m_this.canvas()
       .find('div[data-tile-layer=' + level.toFixed() + ']').get(0);
     if (!node) {
       node = $(
         '<div class=geo-tile-layer data-tile-layer="' + level.toFixed() + '"/>'
       ).get(0);
-      this.canvas().append(node);
+      m_this.canvas().append(node);
     }
     return node;
   };
@@ -1086,7 +1087,7 @@ var tileLayer = function (arg) {
    * @returns {object} The `x` and `y` offsets for the current level.
    */
   this._updateSubLayers = function (level, view) {
-    var canvas = this.canvas(),
+    var canvas = m_this.canvas(),
         lastlevel = parseInt(canvas.attr('lastlevel'), 10),
         lastx = parseInt(canvas.attr('lastoffsetx') || 0, 10),
         lasty = parseInt(canvas.attr('lastoffsety') || 0, 10);
@@ -1094,8 +1095,8 @@ var tileLayer = function (arg) {
         Math.abs(lasty - view.top) < 65536) {
       return {x: lastx, y: lasty};
     }
-    var map = this.map(),
-        to = this._tileOffset(level),
+    var map = m_this.map(),
+        to = m_this._tileOffset(level),
         x = parseInt((view.left + view.right - map.size().width) / 2 + to.x, 10),
         y = parseInt((view.top + view.bottom - map.size().height) / 2 + to.y, 10);
     canvas.find('.geo-tile-layer').each(function (idx, el) {
@@ -1134,23 +1135,23 @@ var tileLayer = function (arg) {
      * event */
     if (evt && evt.event && (evt.event.event === geo_event.zoom ||
         evt.event.event === geo_event.rotate)) {
-      return this;
+      return m_this;
     }
-    if (!this.visible()) {
-      return this;
+    if (!m_this.visible()) {
+      return m_this;
     }
-    var map = this.map(),
+    var map = m_this.map(),
         bounds = map.bounds(undefined, null),
         mapZoom = map.zoom(),
-        zoom = this._options.tileRounding(mapZoom),
+        zoom = m_this._options.tileRounding(mapZoom),
         tiles;
-    if (this._updateSubLayers) {
-      var view = this._getViewBounds();
+    if (m_this._updateSubLayers) {
+      var view = m_this._getViewBounds();
       // Update the transform for the local layer coordinates
-      var offset = this._updateSubLayers(zoom, view) || {x: 0, y: 0};
+      var offset = m_this._updateSubLayers(zoom, view) || {x: 0, y: 0};
 
-      var to = this._tileOffset(zoom);
-      if (this.renderer() === null) {
+      var to = m_this._tileOffset(zoom);
+      if (m_this.renderer() === null) {
         var scale = Math.pow(2, mapZoom - zoom),
             rotation = map.rotation(),
             rx = -to.x + -(view.left + view.right) / 2 + offset.x,
@@ -1158,7 +1159,7 @@ var tileLayer = function (arg) {
             dx = (rx + map.size().width / 2),
             dy = (ry + map.size().height / 2);
 
-        this.canvas().css({
+        m_this.canvas().css({
           'transform-origin': '' +
               -rx + 'px ' +
               -ry + 'px'
@@ -1168,12 +1169,12 @@ var tileLayer = function (arg) {
         if (rotation) {
           transform += 'rotate(' + (rotation * 180 / Math.PI) + 'deg)';
         }
-        this.canvas().css('transform', transform);
+        m_this.canvas().css('transform', transform);
       }
       /* Set some attributes that can be used by non-css based viewers.  This
        * doesn't include the map center, as that may need to be handled
        * differently from the view center. */
-      this.canvas().attr({
+      m_this.canvas().attr({
         scale: Math.pow(2, mapZoom - zoom),
         dx: -to.x + -(view.left + view.right) / 2,
         dy: -to.y + -(view.bottom + view.top) / 2,
@@ -1183,25 +1184,25 @@ var tileLayer = function (arg) {
       });
     }
 
-    tiles = this._getTiles(
+    tiles = m_this._getTiles(
       zoom, bounds, true, true
     );
 
     if (tiles === undefined) {
-      return this;
+      return m_this;
     }
 
     // reset the tile coverage tree
-    this._tileTree = {};
+    m_this._tileTree = {};
 
     tiles.forEach(function (tile) {
       if (tile.fetched()) {
         /* if we have already fetched the tile, we know we can just draw it,
          * as the bounds won't have changed since the call to _getTiles. */
-        this.drawTile(tile);
+        m_this.drawTile(tile);
 
         // mark the tile as covered
-        this._setTileTree(tile);
+        m_this._setTileTree(tile);
       } else {
         if (!tile._queued) {
           tile.then(function () {
@@ -1210,7 +1211,7 @@ var tileLayer = function (arg) {
                * happens when the layer is being deleted. */
               return;
             }
-            if (tile !== this.cache.get(tile.toString())) {
+            if (tile !== m_this.cache.get(tile.toString())) {
               /* If the tile has fallen out of the cache, don't draw it -- it
                * is untracked.  This may be an indication that a larger cache
                * should have been used. */
@@ -1219,42 +1220,42 @@ var tileLayer = function (arg) {
             /* Check if a tile is still desired.  Don't draw it if it
              * isn't. */
             var mapZoom = map.zoom(),
-                zoom = this._options.tileRounding(mapZoom),
-                view = this._getViewBounds();
-            if (this._canPurge(tile, view, zoom)) {
-              this.remove(tile);
+                zoom = m_this._options.tileRounding(mapZoom),
+                view = m_this._getViewBounds();
+            if (m_this._canPurge(tile, view, zoom)) {
+              m_this.remove(tile);
               return;
             }
 
-            this.drawTile(tile);
+            m_this.drawTile(tile);
 
             // mark the tile as covered
-            this._setTileTree(tile);
-          }.bind(this));
+            m_this._setTileTree(tile);
+          });
 
-          this.addPromise(tile);
+          m_this.addPromise(tile);
           tile._queued = true;
         } else {
           /* If we are using a fetch queue, tell the queue so this tile can
            * be reprioritized. */
-          var pos = this._queue ? this._queue.get(tile) : -1;
+          var pos = m_this._queue ? m_this._queue.get(tile) : -1;
           if (pos >= 0) {
-            this._queue.add(tile);
+            m_this._queue.add(tile);
           }
         }
       }
-    }.bind(this));
+    });
     // purge all old tiles when the new tiles are loaded (successfully or not)
     $.when.apply($, tiles)
       .done(// called on success and failure
         function () {
-          var map = this.map(),
+          var map = m_this.map(),
               mapZoom = map.zoom(),
-              zoom = this._options.tileRounding(mapZoom);
-          this._purge(zoom, true);
-        }.bind(this)
+              zoom = m_this._options.tileRounding(mapZoom);
+          m_this._purge(zoom, true);
+        }
       );
-    return this;
+    return m_this;
   };
 
   /**
@@ -1265,13 +1266,13 @@ var tileLayer = function (arg) {
    * @param {geo.tile} tile The tile to add.
    */
   this._setTileTree = function (tile) {
-    if (this._options.keepLower) {
+    if (m_this._options.keepLower) {
       return;
     }
     var index = tile.index;
-    this._tileTree[index.level] = this._tileTree[index.level] || {};
-    this._tileTree[index.level][index.x] = this._tileTree[index.level][index.x] || {};
-    this._tileTree[index.level][index.x][index.y] = tile;
+    m_this._tileTree[index.level] = m_this._tileTree[index.level] || {};
+    m_this._tileTree[index.level][index.x] = m_this._tileTree[index.level][index.x] || {};
+    m_this._tileTree[index.level][index.x][index.y] = tile;
   };
 
   /**
@@ -1285,7 +1286,7 @@ var tileLayer = function (arg) {
    */
   this._getTileTree = function (index) {
     return (
-      (this._tileTree[index.level] || {})[index.x] || {}
+      (m_this._tileTree[index.level] || {})[index.x] || {}
     )[index.y] || null;
   };
 
@@ -1308,7 +1309,7 @@ var tileLayer = function (arg) {
         tiles = [];
 
     // Check one level up
-    tiles = this._getTileTree({
+    tiles = m_this._getTileTree({
       level: level - 1,
       x: Math.floor(x / 2),
       y: Math.floor(y / 2)
@@ -1319,22 +1320,22 @@ var tileLayer = function (arg) {
 
     // Check one level down
     tiles = [
-      this._getTileTree({
+      m_this._getTileTree({
         level: level + 1,
         x: 2 * x,
         y: 2 * y
       }),
-      this._getTileTree({
+      m_this._getTileTree({
         level: level + 1,
         x: 2 * x + 1,
         y: 2 * y
       }),
-      this._getTileTree({
+      m_this._getTileTree({
         level: level + 1,
         x: 2 * x,
         y: 2 * y + 1
       }),
-      this._getTileTree({
+      m_this._getTileTree({
         level: level + 1,
         x: 2 * x + 1,
         y: 2 * y + 1
@@ -1358,7 +1359,7 @@ var tileLayer = function (arg) {
   this._outOfBounds = function (tile, bounds) {
     /* We may want to add an (n) tile edge buffer so we appear more
      * responsive */
-    var to = this._tileOffset(tile.index.level);
+    var to = m_this._tileOffset(tile.index.level);
     var scale = 1;
     if (tile.index.level !== bounds.level) {
       scale = Math.pow(2, (bounds.level || 0) - (tile.index.level || 0));
@@ -1384,27 +1385,27 @@ var tileLayer = function (arg) {
    * @returns {boolean}
    */
   this._canPurge = function (tile, bounds, zoom, doneLoading) {
-    if (this._options.keepLower) {
+    if (m_this._options.keepLower) {
       zoom = zoom || 0;
       if (zoom < tile.index.level &&
-          tile.index.level !== this._options.minLevel) {
+          tile.index.level !== m_this._options.minLevel) {
         return true;
       }
-      if (tile.index.level === this._options.minLevel &&
-          !this._options.wrapX && !this._options.wrapY) {
+      if (tile.index.level === m_this._options.minLevel &&
+          !m_this._options.wrapX && !m_this._options.wrapY) {
         return false;
       }
     } else {
       /* For tile layers that should only keep one layer, if loading is
        * finished, purge all but the current layer.  This is important for
        * semi-transparanet layers. */
-      if ((doneLoading || this._isCovered(tile)) &&
+      if ((doneLoading || m_this._isCovered(tile)) &&
           zoom !== tile.index.level) {
         return true;
       }
     }
     if (bounds) {
-      return this._outOfBounds(tile, bounds);
+      return m_this._outOfBounds(tile, bounds);
     }
     return false;
   };
@@ -1421,9 +1422,9 @@ var tileLayer = function (arg) {
    * @returns {object} The point in level coordinates with `x` and `y`.
    */
   this.displayToLevel = function (pt, zoom) {
-    var map = this.map(),
+    var map = m_this.map(),
         mapzoom = map.zoom(),
-        roundzoom = this._options.tileRounding(mapzoom),
+        roundzoom = m_this._options.tileRounding(mapzoom),
         unit = map.unitsPerPixel(zoom === undefined ? roundzoom : zoom),
         gcsPt;
     if (pt === undefined) {
@@ -1433,14 +1434,14 @@ var tileLayer = function (arg) {
     /* displayToGcs can fail under certain projections.  If this happens,
      * just return the origin. */
     try {
-      gcsPt = map.displayToGcs(pt, this._options.gcs || null);
+      gcsPt = map.displayToGcs(pt, m_this._options.gcs || null);
     } catch (err) {
       gcsPt = {x: 0, y: 0};
     }
     /* Reverse the y coordinate, since we expect the gcs coordinate system
      * to be right-handed and the level coordinate system to be
      * left-handed. */
-    var lvlPt = {x: gcsPt.x / unit, y: this._topDown() * gcsPt.y / unit};
+    var lvlPt = {x: gcsPt.x / unit, y: m_this._topDown() * gcsPt.y / unit};
     return lvlPt;
   };
 
@@ -1453,19 +1454,19 @@ var tileLayer = function (arg) {
    */
   this.url = function (url) {
     if (url === undefined) {
-      return this._options.originalUrl;
+      return m_this._options.originalUrl;
     }
-    if (url === this._options.originalUrl) {
-      return this;
+    if (url === m_this._options.originalUrl) {
+      return m_this;
     }
-    this._options.originalUrl = url;
+    m_this._options.originalUrl = url;
     if ($.type(url) === 'string') {
       url = m_tileUrlFromTemplate(url);
     }
-    this._options.url = url;
-    this.reset();
-    this.map().draw();
-    return this;
+    m_this._options.url = url;
+    m_this.reset();
+    m_this.map().draw();
+    return m_this;
   };
 
   /**
@@ -1477,7 +1478,7 @@ var tileLayer = function (arg) {
    */
   this.subdomains = function (subdomains) {
     if (subdomains === undefined) {
-      return this._options.subdomains;
+      return m_this._options.subdomains;
     }
     if (subdomains) {
       if ($.type(subdomains) === 'string') {
@@ -1487,11 +1488,11 @@ var tileLayer = function (arg) {
           subdomains = subdomains.split('');
         }
       }
-      this._options.subdomains = subdomains;
-      this.reset();
-      this.map().draw();
+      m_this._options.subdomains = subdomains;
+      m_this.reset();
+      m_this.map().draw();
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -1503,7 +1504,7 @@ var tileLayer = function (arg) {
    */
   this._tileOffset = function (level) {
     if (m_tileOffsetValues[level] === undefined) {
-      m_tileOffsetValues[level] = this._options.tileOffset(level);
+      m_tileOffsetValues[level] = m_this._options.tileOffset(level);
     }
     return m_tileOffsetValues[level];
   };
@@ -1520,14 +1521,14 @@ var tileLayer = function (arg) {
     if (val === undefined) {
       return s_visible();
     }
-    if (this.visible() !== val) {
+    if (m_this.visible() !== val) {
       s_visible(val);
 
       if (val) {
-        this._update();
+        m_this._update();
       }
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -1539,15 +1540,15 @@ var tileLayer = function (arg) {
     var sublayer;
 
     // call super method
-    s_init.apply(this, arguments);
+    s_init.apply(m_this, arguments);
 
-    if (this.renderer() === null) {
+    if (m_this.renderer() === null) {
       // Initialize sublayers in the correct order
-      for (sublayer = 0; sublayer <= this._options.maxLevel; sublayer += 1) {
-        this._getSubLayer(sublayer);
+      for (sublayer = 0; sublayer <= m_this._options.maxLevel; sublayer += 1) {
+        m_this._getSubLayer(sublayer);
       }
     }
-    return this;
+    return m_this;
   };
 
   /**
@@ -1556,11 +1557,11 @@ var tileLayer = function (arg) {
    * @returns {this}
    */
   this._exit = function () {
-    this.reset();
+    m_this.reset();
     // call super method
-    s_exit.apply(this, arguments);
+    s_exit.apply(m_this, arguments);
     m_exited = true;
-    return this;
+    return m_this;
   };
 
   adjustLayerForRenderer('tile', this);

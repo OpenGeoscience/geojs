@@ -307,7 +307,7 @@ var annotation = function (type, args) {
       m_state = arg;
       if (m_this.layer()) {
         m_this.layer().geoTrigger(geo_event.annotation.state, {
-          annotation: this
+          annotation: m_this
         });
       }
     }
@@ -481,7 +481,7 @@ var annotation = function (type, args) {
         annotation: m_this
       });
     }
-    return this;
+    return m_this;
   };
 
   /**

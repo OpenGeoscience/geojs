@@ -411,7 +411,7 @@ var geojsonReader = function (arg) {
 
       m_this._readObject(file, _done, progress);
     });
-    this.addPromise(promise);
+    m_this.addPromise(promise);
     return promise;
   };
 };

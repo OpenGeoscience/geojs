@@ -38,7 +38,7 @@ var canvas_quadFeature = function (arg) {
     if (!m_this.position()) {
       return;
     }
-    m_quads = this._generateQuads();
+    m_quads = m_this._generateQuads();
 
     if (m_quads.imgQuads) {
       m_quads.imgQuads.sort(function (a, b) {
@@ -214,8 +214,8 @@ var canvas_quadFeature = function (arg) {
    */
   this._renderOnCanvas = function (context, map) {
     if (m_quads) {
-      this._renderImageAndVideoQuads(context, map);
-      this._renderColorQuads(context, map);
+      m_this._renderImageAndVideoQuads(context, map);
+      m_this._renderColorQuads(context, map);
     }
   };
 

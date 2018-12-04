@@ -153,7 +153,7 @@ var widget = function (arg) {
    */
   this.position = function (pos, actualValue) {
     if (pos !== undefined) {
-      this.layer().geoOff(geo_event.pan, m_this.repositionEvent);
+      m_this.layer().geoOff(geo_event.pan, m_this.repositionEvent);
       var clearPosition = {};
       for (var attr in m_position) {
         if (m_position.hasOwnProperty(attr)) {
@@ -162,10 +162,10 @@ var widget = function (arg) {
       }
       m_position = pos;
       if (m_position.hasOwnProperty('x') && m_position.hasOwnProperty('y')) {
-        this.layer().geoOn(geo_event.pan, m_this.repositionEvent);
+        m_this.layer().geoOn(geo_event.pan, m_this.repositionEvent);
       }
-      this.reposition($.extend(clearPosition, m_this.position()));
-      return this;
+      m_this.reposition($.extend(clearPosition, m_this.position()));
+      return m_this;
     }
     if (m_position.hasOwnProperty('x') && m_position.hasOwnProperty('y') && !actualValue) {
       var position = m_this.layer().map().gcsToDisplay(m_position);
