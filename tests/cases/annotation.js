@@ -7,16 +7,16 @@ describe('geo.annotation', function () {
   var geo = require('../test-utils').geo;
   var createMap = require('../test-utils').createMap;
   var destroyMap = require('../test-utils').destroyMap;
-  var mockVGLRenderer = geo.util.mockVGLRenderer;
-  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+  var mockWebglRenderer = geo.util.mockWebglRenderer;
+  var restoreWebglRenderer = geo.util.restoreWebglRenderer;
 
   beforeEach(function () {
-    mockVGLRenderer();
+    mockWebglRenderer();
   });
 
   afterEach(function () {
     destroyMap();
-    restoreVGLRenderer();
+    restoreWebglRenderer();
   });
 
   /**
@@ -1495,13 +1495,13 @@ describe('geo.annotation', function () {
     });
     it('rendererForAnnotations', function () {
       sinon.stub(console, 'warn', function () {});
-      expect(geo.rendererForAnnotations(['polygon'])).toBe('vgl');
+      expect(geo.rendererForAnnotations(['polygon'])).toBe('webgl');
       expect(console.warn.calledOnce).toBe(false);
-      expect(geo.rendererForAnnotations(['point'])).toBe('vgl');
-      geo.gl.vglRenderer.supported = function () { return false; };
+      expect(geo.rendererForAnnotations(['point'])).toBe('webgl');
+      geo.webgl.webglRenderer.supported = function () { return false; };
       expect(geo.rendererForAnnotations(['polygon'])).toBe(false);
       expect(console.warn.calledOnce).toBe(true);
-      expect(geo.rendererForAnnotations(['point'])).toBe('d3');
+      expect(geo.rendererForAnnotations(['point'])).toBe('svg');
       console.warn.restore();
     });
   });

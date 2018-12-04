@@ -27,8 +27,8 @@
  *  maxBoundsTop: maximum bounds top value.
  *  opacity: a css opacity value (typically a float from 0 to 1).
  *  projection: 'parallel' or 'projection' for the camera projection.
- *  renderer: 'vgl' (default), 'canvas', 'd3', 'null', or 'html'.  This picks
- *      the renderer for map tiles.  null or html uses the html renderer.
+ *  renderer: 'webgl' (default), 'canvas', 'svg', 'null', or 'html'.  This
+ *      picks the renderer for map tiles.  null or html uses the html renderer.
  *      'default' uses the default renderer for the user's platform.
  *  round: 'round' (default), 'floor', 'ceil'.
  *  subdomains: a comma-separated string of subdomains to use in the {s} part

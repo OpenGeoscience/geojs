@@ -4,10 +4,10 @@ describe('renderers', function () {
   'use strict';
 
   var supported = true;
-  var fallback = 'd3';
+  var fallback = 'svg';
   var geo = require('../test-utils').geo;
-  var mockVGLRenderer = geo.util.mockVGLRenderer;
-  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+  var mockWebglRenderer = geo.util.mockWebglRenderer;
+  var restoreWebglRenderer = geo.util.restoreWebglRenderer;
 
   function create_simple_renderer() {
     var simpleRenderer = function (arg) {
@@ -48,10 +48,10 @@ describe('renderers', function () {
       expect(geo.checkRenderer('simple', true)).toBe('simple');
 
       supported = false;
-      expect(geo.checkRenderer('simple')).toBe('d3');
+      expect(geo.checkRenderer('simple')).toBe('svg');
       expect(console.warn.calledOnce).toBe(true);
       expect(console.warn.calledWith(
-        'simple renderer is unavailable, using d3 renderer instead'
+        'simple renderer is unavailable, using svg renderer instead'
       )).toBe(true);
       console.warn.reset();
 
@@ -63,29 +63,33 @@ describe('renderers', function () {
 
       expect(geo.checkRenderer(null)).toBe(null);
 
-      expect(geo.checkRenderer('d3')).toBe('d3');
+      expect(geo.checkRenderer('svg')).toBe('svg');
+      // check that an alias resolves to the preferred name
+      expect(geo.checkRenderer('d3')).toBe('svg');
 
-      sinon.stub(geo.d3.renderer, 'supported').returns(false);
-      expect(geo.checkRenderer('d3')).toBe(null);
-      geo.d3.renderer.supported.restore();
+      sinon.stub(geo.svg.renderer, 'supported').returns(false);
+      expect(geo.checkRenderer('svg')).toBe(null);
+      geo.svg.renderer.supported.restore();
 
-      expect(geo.checkRenderer('d3')).toBe('d3');
+      expect(geo.checkRenderer('svg')).toBe('svg');
 
       var oldd3 = __webpack_modules__[require.resolveWeak('d3')];  // eslint-disable-line
       __webpack_modules__[require.resolveWeak('d3')] = null;  // eslint-disable-line
       delete __webpack_require__.c[require.resolveWeak('d3')];  // eslint-disable-line
-      expect(geo.checkRenderer('d3')).toBe(null);
+      expect(geo.checkRenderer('svg')).toBe(null);
       __webpack_modules__[require.resolveWeak('d3')] = oldd3;  // eslint-disable-line
       delete __webpack_require__.c[require.resolveWeak('d3')];  // eslint-disable-line
-      expect(geo.checkRenderer('d3')).toBe('d3');
+      expect(geo.checkRenderer('svg')).toBe('svg');
 
-      mockVGLRenderer(false);
-      expect(geo.checkRenderer('vgl')).toBe(null);
-      restoreVGLRenderer();
+      mockWebglRenderer(false);
+      expect(geo.checkRenderer('webgl')).toBe(null);
+      restoreWebglRenderer();
 
-      mockVGLRenderer();
-      expect(geo.checkRenderer('vgl')).toBe('vgl');
-      restoreVGLRenderer();
+      mockWebglRenderer();
+      expect(geo.checkRenderer('webgl')).toBe('webgl');
+      // check that an alias resolves to the preferred name
+      expect(geo.checkRenderer('vgl')).toBe('webgl');
+      restoreWebglRenderer();
 
       expect(geo.checkRenderer('unknown')).toBe(false);
     });

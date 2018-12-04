@@ -11,8 +11,8 @@ describe('layerReorder', function () {
     myMap = common.createOsmMap(mapOptions, {url: '/testdata/white.jpg'});
 
     l1 = myMap.children()[0];
-    l2 = myMap.createLayer('feature', {renderer: 'vgl'});
-    l3 = myMap.createLayer('feature', {renderer: 'd3'});
+    l2 = myMap.createLayer('feature', {renderer: 'webgl'});
+    l3 = myMap.createLayer('feature', {renderer: 'svg'});
     layers = [l1, l2, l3];
 
     l2.createFeature('point')
@@ -78,7 +78,7 @@ describe('layerReorder', function () {
     myMap.draw();
 
     step1 = function () {
-      layers[2].moveUp(-1);  // d3 below vgl
+      layers[2].moveUp(-1);  // svg below webgl
       imageTest.imageTest('layerOrderUp2_-1', null, 0.0015, step2, myMap.onIdle, 0, 2);
     };
 
@@ -88,7 +88,7 @@ describe('layerReorder', function () {
     };
 
     step3 = function () {
-      layers[1].moveUp();  // vgl up one
+      layers[1].moveUp();  // webgl up one
       imageTest.imageTest('layerOrderUp1_1', null, 0.0015, done, myMap.onIdle, 0, 2);
     };
 
@@ -106,7 +106,7 @@ describe('layerReorder', function () {
     };
 
     step2 = function () {
-      layers[2].moveDown(1);  // d3 below vgl
+      layers[2].moveDown(1);  // svg below webgl
       imageTest.imageTest('layerOrderDown2_1', null, 0.0015, step3, myMap.onIdle, 0, 2);
     };
 

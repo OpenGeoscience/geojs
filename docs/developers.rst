@@ -39,7 +39,7 @@ Headless browser testing
 
 Geojs uses `PhantomJS <http://phantomjs.org/>`_ for headless browser
 testing of core utilities.  Unfortunately because PhantomJS does not
-support webgl at this time, so code paths requiring gl must be either
+support webgl at this time, so code paths requiring webgl must be either
 mocked or run in an environment such as xvfb.
 
 The headless unit tests should be placed in the ``tests/cases/``
@@ -53,7 +53,7 @@ so there is no need to rerun this command unless you add a new file.
 
 There are a number of utilities present in the file ``tests/test-utils.js``
 that developers can use to make better unit tests.  For example, a mocked
-vgl renderer can be used to hit code paths within gl rendered layers.  There
+vgl renderer can be used to hit code paths within webgl rendered layers.  There
 are also methods for mocking global methods like ``requestAnimationFrame``
 to test complex, asynchronous code paths in a stable and repeatable manner.
 The `Sinon <https://sinonjs.org/>`_ testing library is also available to

@@ -18,10 +18,10 @@ $(function () {
   // Add an OSM layer
   map.createLayer('osm');
 
-  // Add a feature layer with a D3 renderer.  We could, instead, ask for any
+  // Add a feature layer with an svg renderer.  We could, instead, ask for any
   // renderer that supports point features, like so:
   //  var features = map.createLayer('feature', {features: ['point']});
-  var features = map.createLayer('feature', {renderer: 'd3'});
+  var features = map.createLayer('feature', {renderer: 'svg'});
 
   var numberOfFeatures = 200;
 

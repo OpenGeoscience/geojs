@@ -35,7 +35,7 @@ describe('geo.layer', function () {
       expect(layer.initialized()).toBe(true);
       expect(layer.children().length).toBe(0);
 
-      layer = geo.layer.create(map, {renderer: 'd3', features: [{type: 'point'}]});
+      layer = geo.layer.create(map, {renderer: 'svg', features: [{type: 'point'}]});
       expect(layer instanceof geo.layer).toBe(true);
       expect(layer.initialized()).toBe(true);
       expect(layer.children().length).toBe(1);

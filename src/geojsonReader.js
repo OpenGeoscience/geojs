@@ -418,6 +418,6 @@ var geojsonReader = function (arg) {
 
 inherit(geojsonReader, fileReader);
 registerFileReader('geojsonReader', geojsonReader);
-// Also register under an alternate name
+// Also register under an alternate name (alias for backwards compatibility)
 registerFileReader('jsonReader', geojsonReader);
 module.exports = geojsonReader;

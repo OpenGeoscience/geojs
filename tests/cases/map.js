@@ -193,7 +193,7 @@ describe('geo.core.map', function () {
     });
     it('unitsPerPixel', function () {
       var m = createMap(), circEarth = 6378137 * Math.PI * 2;
-      m.createLayer('feature', {renderer: 'd3'});
+      m.createLayer('feature', {renderer: 'svg'});
       expect(m.unitsPerPixel()).toBeCloseTo(circEarth / 256);
       expect(m.unitsPerPixel(0)).toBeCloseTo(circEarth / 256);
       expect(m.unitsPerPixel(1)).toBeCloseTo(circEarth / 256 / 2);
@@ -401,9 +401,9 @@ describe('geo.core.map', function () {
       expect(m.fileReader('geojsonReader')).toBe(m);
       expect(m.fileReader()).not.toBe(null);
       expect(m.layers().length).toBe(layerCount + 1);
-      expect(m.layers()[m.layers().length - 1].renderer().api()).not.toBe('d3');
-      expect(m.fileReader('geojsonReader', {renderer: 'd3'})).toBe(m);
-      expect(m.layers()[m.layers().length - 1].renderer().api()).toBe('d3');
+      expect(m.layers()[m.layers().length - 1].renderer().api()).not.toBe('svg');
+      expect(m.fileReader('geojsonReader', {renderer: 'svg'})).toBe(m);
+      expect(m.layers()[m.layers().length - 1].renderer().api()).toBe('svg');
       var r = geo.createFileReader('geojsonReader', {layer: m.layers()[m.layers().length - 1]});
       expect(m.fileReader(r)).toBe(m);
       expect(m.fileReader()).toBe(r);
@@ -955,7 +955,7 @@ describe('geo.core.map', function () {
 
   describe('Public non-class methods', function () {
     it('geo.map.create', function () {
-      var layerSpec = {type: 'feature', renderer: 'd3', features: []};
+      var layerSpec = {type: 'feature', renderer: 'svg', features: []};
       var node = $('<div id="map-non-class-methods"/>').css({width: '500px', height: '500px'});
       $('#map-non-class-methods').remove();
       $('body').append(node);
@@ -999,7 +999,7 @@ describe('geo.core.map', function () {
     });
     it('drop', function () {
       var m = createMap();
-      m.fileReader('geojsonReader', {renderer: 'd3'});
+      m.fileReader('geojsonReader', {renderer: 'svg'});
       var evt = $.Event('drop');
       evt.originalEvent = new window.Event('drop');
       evt.originalEvent.dataTransfer = {files: [{

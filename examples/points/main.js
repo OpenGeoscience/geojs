@@ -5,7 +5,6 @@ $(function () {
   // Define a function we will use to generate points.
   function makePoints(data, layer, color) {
 
-    // The API for creating features is similar to d3's data API.
     // The data is an array of arbitrary objects.  Each object in
     // the array is assumed to be a "point".  You provide accessors
     // that return styles and positions.
@@ -61,11 +60,11 @@ $(function () {
     }
   );
 
-  // Create a gl feature layer
-  var vglLayer = map.createLayer(
+  // Create a webgl feature layer
+  var webglLayer = map.createLayer(
     'feature',
     {
-      renderer: 'vgl'
+      renderer: 'webgl'
     }
   );
 
@@ -73,24 +72,24 @@ $(function () {
   var svgLayer = map.createLayer(
     'feature',
     {
-      renderer: 'd3'
+      renderer: 'svg'
     }
   );
 
   // Define unique colors for each layer
-  var vglColor = 'red';
+  var webglColor = 'red';
   var svgColor = 'blue';
 
-  // Generate some data for vgl
+  // Generate some data for webgl
   var data = d3.range(2).map(function (i) {
     return {
       x: -95,             // longitude
       y: 39.5 + 4.5 * i,  // latitude
-      c: vglColor,        // fill color
+      c: webglColor,      // fill color
       opacity: 0.1        // fill opacity
     };
   });
-  makePoints(data, vglLayer, vglColor);
+  makePoints(data, webglLayer, webglColor);
 
   // Generate some data for svg
   data = d3.range(2).map(function (i) {

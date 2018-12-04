@@ -2,7 +2,6 @@
 
 import argparse
 import girder_client
-import md5
 import os
 import subprocess
 import time
@@ -81,13 +80,11 @@ def upload_baselines(args):
         stream=open(tarPath), size=tarSize, mimeType='application/tar+gzip')
     if args['verbose'] >= 1:
         print('Upload to file %s' % uploadedFile['_id'])
-    testDataPath = os.path.abspath('testing/test-data')
+    testDataPath = os.path.abspath('tests/external-data')
     if not os.path.isdir(testDataPath):
         raise Exception('Can\'t update test-data information.')
-    open(os.path.join(testDataPath, 'base-images.tgz.url'), 'w').write(
-        apiRoot + 'file/%s/download' % uploadedFile['_id'])
-    open(os.path.join(testDataPath, 'base-images.tgz.md5'), 'w').write(
-        md5.new(open(tarPath).read()).hexdigest())
+    sha512 = gc.getFile(uploadedFile['_id'])['sha512']
+    open(os.path.join(testDataPath, 'base-images.tgz.sha512'), 'w').write(sha512)
     if args['verbose'] >= 1:
         print('test-data references updated')
 

@@ -16,7 +16,7 @@ $(function () {
     'osm'
   );
 
-  // Create a gl feature layer
+  // Create a webgl feature layer
   var layer = map.createLayer(
     'feature', {features: ['vector']}
   );

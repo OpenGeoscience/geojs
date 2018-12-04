@@ -6,7 +6,7 @@ var renderer = require('../renderer');
  * Create a new instance of class vtkjsRenderer.
  *
  * @class
- * @alias geo.vtkjs.vglRenderer
+ * @alias geo.vtkjs.vtkjsRenderer
  * @extends geo.renderer
  * @param {object} arg Options for the renderer.
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.
@@ -55,7 +55,7 @@ var vtkjsRenderer = function (arg) {
    * @returns {string} `vtkjs`.
    */
   this.api = function () {
-    return 'vtkjs';
+    return vtkjsRenderer.apiname;
   };
 
   /**
@@ -163,6 +163,7 @@ var vtkjsRenderer = function (arg) {
 
   return this;
 };
+vtkjsRenderer.apiname = 'vtkjs';
 
 inherit(vtkjsRenderer, renderer);
 

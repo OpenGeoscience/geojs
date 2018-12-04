@@ -71,7 +71,7 @@ describe('geo.geojsonReader', function () {
       it('default', done => {
         var map, layer, reader;
         map = createMap();
-        layer = map.createLayer('feature', {renderer: 'd3'});
+        layer = map.createLayer('feature', {renderer: 'svg'});
         reader = geo.geojsonReader({'layer': layer});
         reader.read(obj).then(result => {
           expect(layer.features()[0].style.get('fillColor')(layer.features()[0].data()[0], 0)).toEqual({r: 1, g: 0x78 / 0xff, b: 0});
@@ -81,7 +81,7 @@ describe('geo.geojsonReader', function () {
       it('specified', done => {
         var map, layer, reader;
         map = createMap();
-        layer = map.createLayer('feature', {renderer: 'd3'});
+        layer = map.createLayer('feature', {renderer: 'svg'});
         reader = geo.geojsonReader({'layer': layer, pointStyle: {fillColor: 'lightblue'}});
         reader.read(obj).then(result => {
           expect(layer.features()[0].style.get('fillColor')(layer.features()[0].data()[0], 0)).toEqual({r: 0xad / 0xff, g: 0xd8 / 0xff, b: 0xe6 / 0xff});
@@ -91,7 +91,7 @@ describe('geo.geojsonReader', function () {
       it('from data', done => {
         var map, layer, reader;
         map = createMap();
-        layer = map.createLayer('feature', {renderer: 'd3'});
+        layer = map.createLayer('feature', {renderer: 'svg'});
         reader = geo.geojsonReader({'layer': layer, pointStyle: {fillColor: 'lightblue'}});
         obj.features[0].properties.fillColor = 'yellow';
         reader.read(obj).then(result => {
@@ -124,7 +124,7 @@ describe('geo.geojsonReader', function () {
       var map, layer, reader;
       it('bad object', done => {
         map = createMap();
-        layer = map.createLayer('feature', {renderer: 'd3'});
+        layer = map.createLayer('feature', {renderer: 'svg'});
         reader = geo.geojsonReader({'layer': layer});
 
         reader.read(['not geojson object']).catch(err => {
@@ -437,7 +437,7 @@ describe('geo.geojsonReader', function () {
 
   it('read from object', function (done) {
     var map = createMap({center: [0, 0], zoom: 3});
-    var layer = map.createLayer('feature', {renderer: 'd3'});
+    var layer = map.createLayer('feature', {renderer: 'svg'});
     var reader = geo.createFileReader('geojsonReader', {'layer': layer}),
         data, i;
 

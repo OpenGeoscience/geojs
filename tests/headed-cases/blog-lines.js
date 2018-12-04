@@ -58,7 +58,7 @@ describe('blog-lines example', function () {
     // remove previous contents to ensure we detect new contents
     base$ = $('iframe#map')[0].contentWindow.jQuery;
     base$('.geojs-map.ready').remove();
-    $('#map').attr('src', '/examples/blog-lines/index.html?renderer=vgl&data=roads&lines=10000&x=-73.7593015&y=42.8496799&zoom=13&strokeOpacity=1&strokeWidth=2&antialiasing=2&referenceLines=false');
+    $('#map').attr('src', '/examples/blog-lines/index.html?renderer=webgl&data=roads&lines=10000&x=-73.7593015&y=42.8496799&zoom=13&strokeOpacity=1&strokeWidth=2&antialiasing=2&referenceLines=false');
     // this permits a large delta to pass on CI.  It visually is rendered
     // correctly, though with seemingly different aliasing choices by the
     // renderer

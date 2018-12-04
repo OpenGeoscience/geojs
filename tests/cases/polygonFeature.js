@@ -1,11 +1,11 @@
-// Test geo.polygonFeature and geo.gl.polygonFeature
+// Test geo.polygonFeature and geo.webgl.polygonFeature
 
 var $ = require('jquery');
 var geo = require('../test-utils').geo;
 var createMap = require('../test-utils').createMap;
 var destroyMap = require('../test-utils').destroyMap;
-var mockVGLRenderer = geo.util.mockVGLRenderer;
-var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+var mockWebglRenderer = geo.util.mockWebglRenderer;
+var restoreWebglRenderer = geo.util.restoreWebglRenderer;
 var vgl = require('vgl');
 var waitForIt = require('../test-utils').waitForIt;
 // var closeToArray = require('../test-utils').closeToArray;
@@ -65,14 +65,14 @@ describe('geo.polygonFeature', function () {
 
   describe('create', function () {
     it('create function', function () {
-      mockVGLRenderer();
+      mockWebglRenderer();
       var map, layer, polygon;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'vgl'});
+      layer = map.createLayer('feature', {renderer: 'webgl'});
       polygon = geo.polygonFeature.create(layer);
       expect(polygon instanceof geo.polygonFeature).toBe(true);
       destroyMap();
-      restoreVGLRenderer();
+      restoreWebglRenderer();
     });
   });
 
@@ -126,10 +126,10 @@ describe('geo.polygonFeature', function () {
     });
 
     it('style', function () {
-      mockVGLRenderer();
+      mockWebglRenderer();
       map = createMap();
       // we have to use a valid renderer so that the stroke can be enabled.
-      layer = map.createLayer('feature', {renderer: 'vgl'});
+      layer = map.createLayer('feature', {renderer: 'webgl'});
       polygon = geo.polygonFeature({layer: layer});
       polygon._init();
       expect(polygon.style().stroke).toBe(false);
@@ -142,16 +142,16 @@ describe('geo.polygonFeature', function () {
       expect(polygon.dependentFeatures()).toEqual([]);
       map.deleteLayer(layer);
       destroyMap();
-      restoreVGLRenderer();
+      restoreWebglRenderer();
     });
   });
 
   describe('Public utility methods', function () {
     it('pointSearch', function () {
-      mockVGLRenderer();
+      mockWebglRenderer();
       var map, layer, polygon, data, pt;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'vgl'});
+      layer = map.createLayer('feature', {renderer: 'webgl'});
       polygon = geo.polygonFeature({layer: layer});
       polygon._init();
       data = testPolygons;
@@ -182,14 +182,14 @@ describe('geo.polygonFeature', function () {
       polygon.style({stroke: true, strokeWidth: 20});
       pt = polygon.pointSearch({x: 5, y: 2.499});
       expect(pt.index).toEqual([0]);
-      restoreVGLRenderer();
+      restoreWebglRenderer();
     });
 
     it('polygonCoordinates', function () {
-      mockVGLRenderer();
+      mockWebglRenderer();
       var map, layer, polygon;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'vgl'});
+      layer = map.createLayer('feature', {renderer: 'webgl'});
       polygon = geo.polygonFeature({layer: layer});
       polygon._init();
       polygon.data(testPolygons);
@@ -200,14 +200,14 @@ describe('geo.polygonFeature', function () {
       expect(result[1].outer.length).toBe(4);
       expect(result[1].inner.length).toBe(1);
       expect(result[1].inner[0].length).toBe(4);
-      restoreVGLRenderer();
+      restoreWebglRenderer();
     });
 
     it('mouseOverOrderClosestBorder', function () {
-      mockVGLRenderer();
+      mockWebglRenderer();
       var map, layer, polygon, data;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'vgl'});
+      layer = map.createLayer('feature', {renderer: 'webgl'});
       polygon = geo.polygonFeature({layer: layer});
       polygon._init();
       // define some overlapping polygons for testing
@@ -246,7 +246,7 @@ describe('geo.polygonFeature', function () {
       polygon.mouseOverOrderClosestBorder(evt);
       expect(evt.over.index).toEqual([0, 1]);
 
-      restoreVGLRenderer();
+      restoreWebglRenderer();
     });
 
     describe('rdpSimplifyData', function () {
@@ -273,11 +273,11 @@ describe('geo.polygonFeature', function () {
       }
 
       it('basic usage', function () {
-        mockVGLRenderer();
+        mockWebglRenderer();
         var map, layer, polygon, counts;
 
         map = createMap();
-        layer = map.createLayer('feature', {renderer: 'vgl'});
+        layer = map.createLayer('feature', {renderer: 'webgl'});
         polygon = geo.polygonFeature({layer: layer});
         polygon._init();
         polygon.data(testPolygons);
@@ -304,7 +304,7 @@ describe('geo.polygonFeature', function () {
         });
         counts = countPolygons(polygon.data().map(polygon.style.get('polygon')));
         expect(counts).toEqual({polygons: 5, holes: 3, vertices: 24});
-        restoreVGLRenderer();
+        restoreWebglRenderer();
       });
     });
   });
@@ -319,7 +319,7 @@ describe('geo.polygonFeature', function () {
         layer = map.createLayer('feature', {renderer: null});
         polygon = geo.polygonFeature({layer: layer});
         /* init is not automatically called on the geo.polygonFeature (it is on
-         * geo.gl.polygonFeature). */
+         * geo.webgl.polygonFeature). */
         polygon._init({
           style: {fillColor: '#FFFFFF'}
         });
@@ -328,12 +328,12 @@ describe('geo.polygonFeature', function () {
     });
   });
 
-  /* This is a basic integration test of geo.gl.polygonFeature. */
-  describe('geo.gl.polygonFeature', function () {
+  /* This is a basic integration test of geo.webgl.polygonFeature. */
+  describe('geo.webgl.polygonFeature', function () {
     var map, layer, polygons, glCounts, buildTime;
     it('basic usage', function () {
       stylesVisited.splice(0, stylesVisited.length);
-      mockVGLRenderer();
+      mockWebglRenderer();
       map = createMap();
       layer = map.createLayer('feature');
       polygons = layer.createFeature('polygon', {style: testStyle, data: testPolygons});
@@ -410,7 +410,7 @@ describe('geo.polygonFeature', function () {
       map.draw();
       expect(buildTime).toEqual(polygons.buildTime().timestamp());
       destroyMap();
-      restoreVGLRenderer();
+      restoreWebglRenderer();
     });
   });
 });

@@ -27,7 +27,7 @@ var svgWidget = function (arg) {
 
   widget.call(this, arg);
 
-  var d3Renderer = require('../d3/d3Renderer');
+  var svgRenderer = require('../svg/svgRenderer');
 
   var m_this = this,
       s_exit = this._exit,
@@ -69,8 +69,8 @@ var svgWidget = function (arg) {
 
   /**
    * Creates the canvas for the svg widget.
-   * This directly uses the {@link geo.d3.d3Renderer} as a helper to do all of
-   * the heavy lifting.
+   * This directly uses the {@link geo.svg.svgRenderer} as a helper to do all
+   * of the heavy lifting.
    *
    * @param {d3Selector} d3Parent The canvas's parent element.
    */
@@ -84,7 +84,7 @@ var svgWidget = function (arg) {
       rendererOpts.d3Parent = d3Parent;
     }
 
-    m_renderer = d3Renderer(rendererOpts);
+    m_renderer = svgRenderer(rendererOpts);
 
     // svg widgets manage their own sizes, so make the resize handler a no-op
     m_renderer._resize = function () {};

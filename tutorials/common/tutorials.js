@@ -129,10 +129,10 @@ function process_block(selector) {
     /* If any code block is marked as needing webgl and the current window has
      * a geojs element that reports that it doesn't support webgl, mock webgl.
      * This is expected to only happen in the automated tests. */
-    if (webgl && window.parent && window.parent !== window && window.geo && !window.geo.gl.vglRenderer.supported()) {
-      js = 'geo.util.mockVGLRenderer();\n' +
+    if (webgl && window.parent && window.parent !== window && window.geo && !window.geo.webgl.webglRenderer.supported()) {
+      js = 'geo.util.mockWebglRenderer();\n' +
            js +
-           '\ngeo.util.restoreVGLRenderer();\n';
+           '\ngeo.util.restoreWebglRenderer();\n';
     }
     /* If we are in a test environment, redirect the tutorial's console to the
      * test's parent window to make debugging easier. */

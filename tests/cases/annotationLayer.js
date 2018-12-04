@@ -6,16 +6,16 @@ describe('geo.annotationLayer', function () {
   var geo = require('../test-utils').geo;
   var createMap = require('../test-utils').createMap;
   var destroyMap = require('../test-utils').destroyMap;
-  var mockVGLRenderer = geo.util.mockVGLRenderer;
-  var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+  var mockWebglRenderer = geo.util.mockWebglRenderer;
+  var restoreWebglRenderer = geo.util.restoreWebglRenderer;
 
   beforeAll(function () {
-    mockVGLRenderer();
+    mockWebglRenderer();
   });
 
   afterAll(function () {
     destroyMap();
-    restoreVGLRenderer();
+    restoreWebglRenderer();
   });
 
   it('Test initialization.', function () {
@@ -355,7 +355,7 @@ describe('geo.annotationLayer', function () {
        * some edge conditions */
       map = createMap();
       layer = map.createLayer('annotation', {
-        renderer: 'd3'
+        renderer: 'svg'
       });
       point = geo.annotation.pointAnnotation({
         layer: layer,
@@ -660,7 +660,7 @@ describe('geo.annotationLayer', function () {
     });
     it('_geojsonFeatureToAnnotation', function () {
       map.deleteLayer(layer);
-      layer = map.createLayer('annotation');  /* use the vgl variant */
+      layer = map.createLayer('annotation');  /* use the webgl variant */
       /* This is tested through the layer.geojson function */
       var unknownFeature = {
         type: 'Feature',

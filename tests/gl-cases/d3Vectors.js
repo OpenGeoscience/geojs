@@ -1,4 +1,4 @@
-describe('d3Lines', function () {
+describe('svgLines', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
   var geo = require('../test-utils').geo;
@@ -18,7 +18,7 @@ describe('d3Lines', function () {
     var mapOptions = {center: {x: -105.0, y: 40.0}, zoom: 3.5};
     myMap = common.createOsmMap(mapOptions, {}, true);
     common.loadCitiesData(function (citieslatlon) {
-      var layer = myMap.createLayer('feature', {'renderer': 'd3'});
+      var layer = myMap.createLayer('feature', {'renderer': 'svg'});
 
       var color = d3.scale.category20().domain(d3.range(20));
 
@@ -44,7 +44,7 @@ describe('d3Lines', function () {
       layer.geoOn(geo.event.pan, setDelta);
       myMap.draw();
 
-      imageTest.imageTest('d3Vectors', null, 0.0015, done, myMap.onIdle, 0, 2);
+      imageTest.imageTest('svgVectors', null, 0.0015, done, myMap.onIdle, 0, 2);
     }, 30);
   });
 });

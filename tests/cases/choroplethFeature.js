@@ -1,10 +1,10 @@
-// Test geo.choroplethFeature and geo.gl.choroplethFeature
+// Test geo.choroplethFeature and geo.webgl.choroplethFeature
 
 var geo = require('../test-utils').geo;
 var createMap = require('../test-utils').createMap;
 var destroyMap = require('../test-utils').destroyMap;
-var mockVGLRenderer = geo.util.mockVGLRenderer;
-var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+var mockWebglRenderer = geo.util.mockWebglRenderer;
+var restoreWebglRenderer = geo.util.restoreWebglRenderer;
 
 describe('geo.choroplethFeature', function () {
   'use strict';
@@ -83,18 +83,18 @@ describe('geo.choroplethFeature', function () {
   }];
 
   beforeEach(function () {
-    mockVGLRenderer();
+    mockWebglRenderer();
   });
 
   afterEach(function () {
     destroyMap();
-    restoreVGLRenderer();
+    restoreWebglRenderer();
   });
 
   it('create function', function () {
     var map, layer, choropleth;
     map = createMap();
-    layer = map.createLayer('feature', {renderer: 'vgl'});
+    layer = map.createLayer('feature', {renderer: 'webgl'});
     choropleth = layer.createFeature('choropleth');
     expect(choropleth instanceof geo.choroplethFeature).toBe(true);
   });
@@ -102,7 +102,7 @@ describe('geo.choroplethFeature', function () {
   it('direct creation', function () {
     var map, layer, choropleth;
     map = createMap();
-    layer = map.createLayer('feature', {renderer: 'vgl'});
+    layer = map.createLayer('feature', {renderer: 'webgl'});
     choropleth = geo.choroplethFeature({layer: layer});
     expect(choropleth instanceof geo.choroplethFeature).toBe(true);
   });
@@ -113,7 +113,7 @@ describe('geo.choroplethFeature', function () {
     ];
 
     map = createMap();
-    layer = map.createLayer('feature', {renderer: 'vgl'});
+    layer = map.createLayer('feature', {renderer: 'webgl'});
 
     choropleth = layer.createFeature('choropleth')
                    .data(mpdata)

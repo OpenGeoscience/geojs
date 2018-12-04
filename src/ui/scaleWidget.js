@@ -71,7 +71,7 @@ var scaleWidget = function (arg) {
   var geo_event = require('../event');
   var transform = require('../transform');
   var util = require('../util');
-  var d3 = require('../d3/d3Renderer').d3;
+  var d3 = require('../svg/svgRenderer').d3;
 
   var m_this = this,
       s_exit = this._exit,

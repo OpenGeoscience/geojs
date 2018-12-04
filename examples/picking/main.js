@@ -20,11 +20,11 @@ $(function () {
   // Create an osm layer
   map.createLayer('osm');
 
-  // Create a gl feature layer
-  var vglLayer = map.createLayer(
+  // Create a webgl feature layer
+  var webglLayer = map.createLayer(
     'feature',
     {
-      renderer: 'vgl'
+      renderer: 'webgl'
     }
   );
 
@@ -32,7 +32,7 @@ $(function () {
   var svgLayer = map.createLayer(
     'feature',
     {
-      renderer: 'd3'
+      renderer: 'svg'
     }
   );
 
@@ -63,7 +63,7 @@ $(function () {
   }
 
   var color = d3.scale.category10();
-  vglLayer.createFeature('line', {selectionAPI: true})
+  webglLayer.createFeature('line', {selectionAPI: true})
     .data([window.randomPath(1000, 0.1, -88, 30), window.randomPath(500, 0.05, -110, 40)])
     .style({
       strokeColor: function (d, i, e, j) { return (j % 2) ? color(0) : color(1); },
@@ -89,6 +89,6 @@ $(function () {
     .geoOn(geo.event.feature.mouseclick, handleMouseClick)
     .geoOn(geo.event.feature.brushend, handleBrush);
 
-  vglLayer.draw();
+  webglLayer.draw();
   svgLayer.draw();
 });

@@ -22,7 +22,7 @@ describe('geo.featureLayer', function () {
       expect(layer instanceof geo.featureLayer).toBe(true);
       expect(layer.initialized()).toBe(false);
 
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       expect(layer instanceof geo.featureLayer).toBe(true);
       expect(layer.initialized()).toBe(true);
     });
@@ -48,7 +48,7 @@ describe('geo.featureLayer', function () {
       expect(layer.features().length).toBe(0);
     });
     it('_update', function () {
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       expect(layer._update()).toBe(layer);
       var feat = layer.createFeature('point');
       sinon.stub(feat, '_update', function () {});
@@ -60,7 +60,7 @@ describe('geo.featureLayer', function () {
     var map, layer, feat1, feat2, feat3;
     it('createFeature', function () {
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
 
       feat1 = layer.createFeature('point');
       expect(feat1).not.toBe(null);

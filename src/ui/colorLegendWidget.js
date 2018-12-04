@@ -1,9 +1,9 @@
-var d3 = require('../d3/d3Renderer').d3;
+var d3 = require('../svg/svgRenderer').d3;
 var domWidget = require('./domWidget');
 var inherit = require('../inherit');
 var registerWidget = require('../registry').registerWidget;
 var util = require('../util');
-var uniqueID = require('../d3/uniqueID');
+var uniqueID = require('../svg/uniqueID');
 
 require('./colorLegendWidget.styl');
 

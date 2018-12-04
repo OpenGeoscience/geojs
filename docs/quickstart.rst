@@ -43,13 +43,9 @@ by issue this command in your terminal. ::
     git clone https://github.com/OpenGeoscience/geojs.git
 
 This will put all of the source code in a new directory called
-``geojs``.  The GeoJS library is packaged together with another
-library `vgl`_.  Formally, this library was included as a git
-submodule.  Currently, vgl is downloaded from npm to integrate
-better with workflows used by web projects.
+``geojs``. 
 
 .. _GitHub repository: https://github.com/OpenGeoscience/geojs
-.. _vgl: https://github.com/OpenGeoscience/vgl
 
 Building the source
 -------------------

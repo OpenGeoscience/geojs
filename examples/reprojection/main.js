@@ -8,7 +8,7 @@ $(function () {
 
   // Most map tile servers use EPSG:3857 (Web Mercator).  Using a tile server
   // with a different projection works correctly in all renderers.  Using a
-  // different projection for the tiles and the map can work in the vgl
+  // different projection for the tiles and the map can work in the webgl
   // renderer, but may have problems as the tile density is not uniform or
   // regular.
   var gcsTable = {
@@ -152,7 +152,7 @@ $(function () {
     var tooltipElem = $(tooltip.canvas()).attr('id', 'tooltip').addClass(
       'hidden');
     // Create a layer with cities
-    var pointLayer = map.createLayer('feature', {renderer: 'vgl', zIndex: 1});
+    var pointLayer = map.createLayer('feature', {zIndex: 1});
     var pointFeature = pointLayer
       .createFeature('point', {
         selectionAPI: true,

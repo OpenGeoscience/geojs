@@ -1,4 +1,4 @@
-// Test geo.pointFeature, geo.d3.pointFeature, and geo.gl.pointFeature
+// Test geo.pointFeature, geo.svg.pointFeature, and geo.webgl.pointFeature
 
 var $ = require('jquery');
 var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
@@ -7,8 +7,8 @@ var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 var geo = require('../test-utils').geo;
 var createMap = require('../test-utils').createMap;
 var destroyMap = require('../test-utils').destroyMap;
-var mockVGLRenderer = geo.util.mockVGLRenderer;
-var restoreVGLRenderer = geo.util.restoreVGLRenderer;
+var mockWebglRenderer = geo.util.mockWebglRenderer;
+var restoreWebglRenderer = geo.util.restoreWebglRenderer;
 var vgl = require('vgl');
 var waitForIt = require('../test-utils').waitForIt;
 
@@ -28,7 +28,7 @@ describe('geo.pointFeature', function () {
     it('create function', function () {
       var map, layer, point;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       point = geo.pointFeature.create(layer);
       expect(point instanceof geo.pointFeature).toBe(true);
     });
@@ -97,7 +97,7 @@ describe('geo.pointFeature', function () {
     it('pointSearch', function () {
       var map, layer, point, pt, p, data = testPoints;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       point = layer.createFeature('point', {selectionAPI: true});
       point.data(data)
            .style({
@@ -155,7 +155,7 @@ describe('geo.pointFeature', function () {
     it('boxSearch', function () {
       var map, layer, point, data = testPoints, idx;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       point = layer.createFeature('point', {selectionAPI: true});
       point.data(data);
       idx = point.boxSearch({x: 19, y: 9}, {x: 26, y: 11});
@@ -171,7 +171,7 @@ describe('geo.pointFeature', function () {
     it('_clusterData', function () {
       var map, layer, point, data = testPoints, count = 0;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       point = layer.createFeature('point');
       point.data(data);
       var s_handleZoom = point._handleZoom;
@@ -193,7 +193,7 @@ describe('geo.pointFeature', function () {
     it('_handleZoom', function () {
       var map, layer, point, data = testPoints;
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       point = layer.createFeature('point');
       point.data(data);
       expect(point.data().length).toBe(data.length);
@@ -208,7 +208,7 @@ describe('geo.pointFeature', function () {
     it('_updateRangeTree', function () {
       var map, layer, point, data = testPoints.slice();
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       point = layer.createFeature('point');
       point.data(data);
       expect(point.pointSearch({x: 20, y: 10}).index.length).toBe(1);
@@ -229,13 +229,13 @@ describe('geo.pointFeature', function () {
     });
   });
 
-  /* This is a basic integration test of geo.d3.pointFeature. */
-  describe('geo.d3.pointFeature', function () {
+  /* This is a basic integration test of geo.svg.pointFeature. */
+  describe('geo.svg.pointFeature', function () {
     var map, layer, point;
     it('basic usage', function () {
       mockAnimationFrame();
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'd3'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
       point = layer.createFeature('point', {
         style: {
           strokeWidth: 2,
@@ -254,8 +254,8 @@ describe('geo.pointFeature', function () {
     });
   });
 
-  /* This is a basic integration test of geo.gl.pointFeature. */
-  describe('geo.gl.pointFeature', function () {
+  /* This is a basic integration test of geo.webgl.pointFeature. */
+  describe('geo.webgl.pointFeature', function () {
     var map, layer, point, point2, glCounts, i, count = 0;
     var array1 = new Array(testPoints.length),
         array2 = new Array(testPoints.length),
@@ -266,9 +266,9 @@ describe('geo.pointFeature', function () {
       array3[i] = {r: 0.5, g: 0.5, b: 0.5};
     }
     it('basic usage', function () {
-      mockVGLRenderer();
+      mockWebglRenderer();
       map = createMap();
-      layer = map.createLayer('feature', {renderer: 'vgl'});
+      layer = map.createLayer('feature', {renderer: 'webgl'});
       point = layer.createFeature('point', {
         style: {
           strokeWidth: 2,
@@ -334,7 +334,7 @@ describe('geo.pointFeature', function () {
       point.data(testPoints);
       map.draw();
       destroyMap();
-      restoreVGLRenderer();
+      restoreWebglRenderer();
     });
   });
 });
