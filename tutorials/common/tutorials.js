@@ -202,11 +202,14 @@ function process_block_debounce(selector, debounce) {
 /**
  * Run any default code blocks, then start listening for changes in code
  * blocks.
+ *
+ * @param {string} [initialStep] If specified, run this step instead of the
+ *      step(s) marked as initial.
  */
-function run_tutorial() {
+function run_tutorial(initialStep) {
   /* If any of the codeblocks is marked 'default', run them.  Do this in a
    * timeout so that other start up scripts can run */
-  $('.codeblock[initial="true"]').each(function (idx, elem) {
+  $(!initialStep ? '.codeblock[initial="true"]' : '.codeblock[step="' + initialStep + '"]').each(function (idx, elem) {
     run_block(elem);
   });
   /* Whenever a code block changes, run it with its parents */
@@ -356,7 +359,7 @@ function start_tutorial(useCodeMirror, alwaysKeep) {
     processBlockInfo.srcdocSupport = false;
   }
   start_keeper(alwaysKeep);
-  run_tutorial();
+  run_tutorial(utils.getQuery().initial);
 }
 
 module.exports = start_tutorial;
