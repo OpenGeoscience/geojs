@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Features
+- Polygon annotations can be drawn in the same continuous smooth manner as line annotations.
+
 ### Changes
 - Rename the d3 renderer to svg.  d3 still works as an alias (#965)
 - Rename the vgl renderer to webgl.  vgl still works as an alias (#965)
