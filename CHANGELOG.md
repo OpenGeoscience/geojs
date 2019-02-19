@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## Version 0.19.1
 
 ### Features
 - Polygon annotations can be drawn in the same continuous smooth manner as line annotations.
