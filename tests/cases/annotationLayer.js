@@ -68,7 +68,7 @@ describe('geo.annotationLayer', function () {
       expect(layer.mode()).toBe('polygon');
       expect(layer.annotations().length).toBe(1);
       expect(layer.annotations()[0].id()).not.toBe(id);
-      expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).toBeNull();
+      expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).not.toBeNull();
       expect(layer.mode('rectangle')).toBe(layer);
       expect(layer.mode()).toBe('rectangle');
       expect(map.interactor().hasAction(undefined, undefined, geo.annotation.actionOwner)).not.toBeNull();
