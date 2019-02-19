@@ -180,6 +180,9 @@ vtkjsRenderer.supported = function () {
   // webpack expects optional dependencies to be wrapped in a try-catch
   try {
     vtkjsRenderer.vtkjs = require('vtk.js');
+    if (!vtkjsRenderer.vtkjs.Rendering && window.vtk.Rendering) {
+      vtkjsRenderer.vtkjs = window.vtk;
+    }
   } catch (_error) {}
   return vtkjsRenderer.vtkjs !== undefined;
 };
