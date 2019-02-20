@@ -14,6 +14,10 @@ var transformCache = {};
  * simple behavior. */
 var maxTransformCacheSize = 10;
 
+/* A RegExp to detect if two transforms only different by the middle axis's
+ * direction. */
+var axisPattern = new RegExp('^(.* |)\\+axis=e(n|s)u(| .*)$');
+
 /**
  * This purpose of this class is to provide a generic interface for computing
  * coordinate transformationss.  The interface is taken from the proj4js,
@@ -458,16 +462,27 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
  * coordinates are an array of [x0, y0, z0, x1, y1, z1, ...].
  *
  * @param {string} srcPrj The source projection.
- * @param {string} tgtPrj The destination projection.
+ * @param {string} tgtPrj The destination projection.  This must not be the
+ *    same as the source projection.
  * @param {number[]} coordinates A flat array of values.
  * @returns {number[]} The transformed coordinates.
  */
 transform.transformCoordinatesFlatArray3 = function (srcPrj, tgtPrj, coordinates) {
   'use strict';
 
+  var i,
+      smatch = srcPrj.match(axisPattern),
+      tmatch = tgtPrj.match(axisPattern);
+  // if the two projections only differ in the middle axis
+  if (smatch && tmatch && smatch[1] === tmatch[1] && smatch[3] === tmatch[3]) {
+    for (i = coordinates.length - 3 + 1; i >= 0; i -= 3) {
+      coordinates[i] *= -1;
+    }
+    return coordinates;
+  }
   var src = proj4.Proj(srcPrj),
       tgt = proj4.Proj(tgtPrj),
-      i, projPoint, initPoint = {};
+      projPoint, initPoint = {};
   for (i = coordinates.length - 3; i >= 0; i -= 3) {
     initPoint.x = +coordinates[i];
     initPoint.y = +coordinates[i + 1];
