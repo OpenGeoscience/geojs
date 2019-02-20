@@ -1,9 +1,14 @@
 # Change Log
 
+## Unreleased
+
+### Improvements
+- Make fewer function calls when computing polygon strokes (#980)
+
 ## Version 0.19.1
 
 ### Features
-- Polygon annotations can be drawn in the same continuous smooth manner as line annotations.
+- Polygon annotations can be drawn in the same continuous smooth manner as line annotations. (#976)
 
 ### Changes
 - Rename the d3 renderer to svg.  d3 still works as an alias (#965)

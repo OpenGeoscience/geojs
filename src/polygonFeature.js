@@ -337,7 +337,17 @@ var polygonFeature = function (arg) {
       });
       m_this.dependentFeatures([m_lineFeature]);
     }
-    var polyStyle = m_this.style();
+    var polyStyle = m_this.style(),
+        strokeOpacity;
+    if (util.isFunction(polyStyle.stroke) || !polyStyle.stroke) {
+      var strokeFunc = m_this.style.get('stroke'),
+          strokeOpacityFunc = m_this.style.get('strokeOpacity');
+      strokeOpacity = function (d) {
+        return strokeFunc(d[2], d[3]) ? strokeOpacityFunc(d[0], d[1], d[2], d[3]) : 0;
+      };
+    } else {
+      strokeOpacity = linePolyStyle(polyStyle.strokeOpacity);
+    }
     m_lineFeature.style({
       antialiasing: linePolyStyle(polyStyle.antialiasing),
       closed: true,
@@ -348,11 +358,7 @@ var polygonFeature = function (arg) {
       strokeStyle: linePolyStyle(polyStyle.strokeStyle),
       strokeColor: linePolyStyle(polyStyle.strokeColor),
       strokeOffset: linePolyStyle(polyStyle.strokeOffset),
-      strokeOpacity: util.isFunction(polyStyle.stroke) || !polyStyle.stroke ?
-        function (d) {
-          return m_this.style.get('stroke')(d[2], d[3]) ? m_this.style.get('strokeOpacity')(d[0], d[1], d[2], d[3]) : 0;
-        } :
-        linePolyStyle(polyStyle.strokeOpacity)
+      strokeOpacity: strokeOpacity
     });
     var data = m_this.data(),
         posVal = m_this.style('position');
