@@ -4,6 +4,7 @@
 
 ### Improvements
 - Make fewer function calls when computing polygon strokes (#980)
+- Speed up coordinate transforms that only switch y-axis (#979)
 
 ## Version 0.19.1
 
