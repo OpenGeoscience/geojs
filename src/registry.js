@@ -240,7 +240,8 @@ util.createFeature = function (name, layer, renderer, arg) {
  * @alias geo.registerLayerAdjustment
  * @param {string} category The category for the adjustment; this is commonly
  *      the renderer name.
- * @param {string} name The name of the adjustement.
+ * @param {string} name The name of the adjustment; this is commonly the layer
+ *      type, or `'all'` for the base layer class.
  * @param {function} func The function to call when the adjustment is used.
  * @returns {object} if this layer adjustment replaces an existing one, this
  *      was the value that was replaced.  In this case, a warning is issued.
@@ -263,7 +264,7 @@ util.registerLayerAdjustment = function (category, name, func) {
  * that adjusts it.
  *
  * @alias geo.adjustLayerForRenderer
- * @param {string} name Name of the layer.
+ * @param {string} name Name of the layer or adjustment.
  * @param {object} layer Instantiated layer object.
  */
 util.adjustLayerForRenderer = function (name, layer) {

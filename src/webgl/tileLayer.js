@@ -1,15 +1,21 @@
 var registerLayerAdjustment = require('../registry').registerLayerAdjustment;
+var tileLayer = require('../tileLayer');
 
 var webgl_tileLayer = function () {
   'use strict';
   var m_this = this,
       s_init = this._init,
       s_exit = this._exit,
+      s_zIndex = this.zIndex,
       m_quadFeature,
       m_nextTileId = 0,
       m_tiles = [];
 
-  /* Add a tile to the list of quads */
+  /**
+   * Add a tile to the list of quads.
+   *
+   * @param {geo.tile} tile The tile to add and draw.
+   */
   this._drawTile = function (tile) {
     if (!m_quadFeature) {
       return;
@@ -18,7 +24,11 @@ var webgl_tileLayer = function () {
         level = tile.index.level || 0,
         to = m_this._tileOffset(level),
         crop = m_this.tileCropFromBounds(tile),
-        quad = {};
+        quad = {},
+        offset, upperTileLayers,
+        depthBits = m_this.renderer().contextRenderer().m_depthBits,
+        z = 0;  // this will change if tileLayers have topography
+
     if (crop) {
       quad.crop = {
         x: crop.x / m_this._options.tileWidth,
@@ -37,12 +47,27 @@ var webgl_tileLayer = function () {
     quad.lr = m_this.fromLocal(m_this.fromLevel({
       x: bounds.right - to.x, y: bounds.bottom - to.y
     }, level), 0);
-    /* Make sure our level increments are within the clipbounds and ordered so
-     * that lower levels are farther away that higher levels. */
-    var clipbounds = m_this.map().camera().clipbounds;
-    var z = level * m_this._levelZIncrement;
-    z = clipbounds.far + (clipbounds.near - clipbounds.far) * z;
     quad.ul.z = quad.ll.z = quad.ur.z = quad.lr.z = z;
+
+    /* Compute a zOffset per layer and level.  This ensures all tile levels in
+     * all tile layers are sorted with the earlier layers and lower levels on
+     * the bottom.  Ideally, don't change the z values, since the z-buffer may
+     * be expected to have the correct values, but by shifting each layer a
+     * small offset, the levels will appear in the correct order and avoid
+     * z-fighting.  The zOffset is applied *after* matrix transformations, and
+     * is in the webgl clip space of [0-1] with the resolution of the
+     * DEPTH_BITS. */
+    offset = m_this._options.keepLower ? m_this._options.maxLevel - level + 1 : 1;
+    upperTileLayers = m_this.map().listSceneObjects().filter(function (object) {
+      return object instanceof tileLayer;
+    });
+    upperTileLayers = upperTileLayers.slice(upperTileLayers.indexOf(m_this) + 1);
+    upperTileLayers.forEach(function (object) {
+      offset += object._options.keepLower ? object._options.maxLevel - object._options.minLevel + 1 : 1;
+    });
+    /* See the definition of `_zOffsetMultiple` for more details. */
+    quad.zOffset = offset * Math.pow(2, -depthBits) * tileLayer._zOffsetMultiple;
+
     m_nextTileId += 1;
     quad.id = m_nextTileId;
     tile.quadId = quad.id;
@@ -53,7 +78,11 @@ var webgl_tileLayer = function () {
     m_this.draw();
   };
 
-  /* Remove the tile feature. */
+  /**
+   * Remove a tile from the list of quads.   The quadFeature is redrawn.
+   *
+   * @param {geo.tile} tile The tile to remove.
+   */
   this._remove = function (tile) {
     if (tile.quadId !== undefined && m_quadFeature) {
       for (var i = 0; i < m_tiles.length; i += 1) {
@@ -66,6 +95,29 @@ var webgl_tileLayer = function () {
       m_quadFeature._update();
       m_this.draw();
     }
+  };
+
+  /**
+   * Get or set the z-index of the layer.  The z-index controls the display
+   * order of the layers in much the same way as the CSS z-index property.
+   *
+   * @param {number} [zIndex] The new z-index, or undefined to return the
+   *    current z-index.
+   * @param {boolean} [allowDuplicate] When setting the z index, if this is
+   *    truthy, allow other layers to have the same z-index.  Otherwise,
+   *    ensure that other layers have distinct z-indices from this one.
+   * @returns {number|this}
+   */
+  this.zIndex = function (zIndex, allowDuplicate) {
+    if (zIndex !== undefined) {
+      /* If the z-index has changed, clear the quads so they are composited in
+       * the correct order. */
+      m_this.clear();
+      if (m_quadFeature) {
+        m_quadFeature.modified();
+      }
+    }
+    return s_zIndex.apply(m_this, arguments);
   };
 
   /**
@@ -97,6 +149,11 @@ var webgl_tileLayer = function () {
   this._getSubLayer = function () {};
   this._updateSubLayers = undefined;
 };
+
+/* Use a multiple of the minimum z delta provided by DEPTH_BITS so that
+ * rounding won't accidentally merge two levels.  This may need to be higher
+ * if the tile layer is not flat to the camera. */
+tileLayer._zOffsetMultiple = 2;
 
 registerLayerAdjustment('webgl', 'tile', webgl_tileLayer);
 

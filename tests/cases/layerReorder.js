@@ -19,6 +19,7 @@ describe('Test the zIndex property of layers', function () {
     // check that the display order is the added order
     expect(l1.zIndex()).toBeLessThan(l2.zIndex());
     expect(l2.zIndex()).toBeLessThan(l3.zIndex());
+    expect(map.sortedLayers()).toEqual([l1, l2, l3]);
   });
 
   it('set via the constructor', function () {
@@ -30,6 +31,7 @@ describe('Test the zIndex property of layers', function () {
     expect(getZIndex(l1)).toBe(10);
     expect(getZIndex(l2)).toBe(11);
     expect(getZIndex(l3)).toBe(0);
+    expect(map.sortedLayers()).toEqual([l3, l1, l2]);
   });
 
   it('get/set via the zIndex method', function () {
@@ -41,6 +43,7 @@ describe('Test the zIndex property of layers', function () {
     expect(l1.zIndex()).toBe(10);
     expect(l2.zIndex()).toBe(11);
     expect(l3.zIndex()).toBe(0);
+    expect(map.sortedLayers()).toEqual([l3, l1, l2]);
 
     l1.zIndex(11);
     l2.zIndex(12);
@@ -49,6 +52,7 @@ describe('Test the zIndex property of layers', function () {
     expect(getZIndex(l1)).toBe(11);
     expect(getZIndex(l2)).toBe(12);
     expect(getZIndex(l3)).toBe(10);
+    expect(map.sortedLayers()).toEqual([l3, l1, l2]);
   });
 
   it('implicitly moves UI layer to top', function () {
@@ -60,6 +64,7 @@ describe('Test the zIndex property of layers', function () {
     expect(l2.zIndex()).toBeLessThan(l3.zIndex());
     expect(ui.zIndex()).toBeGreaterThan(l2.zIndex());
     expect(ui.zIndex()).toBeGreaterThan(l3.zIndex());
+    expect(map.sortedLayers()).toEqual([l2, l3, ui]);
   });
 });
 
@@ -194,6 +199,8 @@ describe('Test reordering layers', function () {
     layers[2].moveToTop();
     expect(layers.map(function (l) { return l.zIndex(); }))
       .toEqual([5, 15, 100, 0, 10, 11]);
+    expect(layers[0].map().sortedLayers()).toEqual([
+      layers[3], layers[0], layers[4], layers[5], layers[1], layers[2]]);
   });
 
   it('move the top layer to the bottom', function () {
@@ -216,5 +223,27 @@ describe('Test reordering layers', function () {
     layers[1].zIndex(11);
     expect(layers.map(function (l) { return l.zIndex(); }))
       .toEqual([12, 11, 0, 5, 14, 13]);
+  });
+
+  it('z-index can be forced to be identical', function () {
+    var layers = setup();
+
+    layers[1].zIndex(11, true);
+    expect(layers.map(function (l) { return l.zIndex(); }))
+      .toEqual([10, 11, 0, 5, 11, 15]);
+    expect(layers[0].map().sortedLayers()).toEqual([
+      layers[2], layers[3], layers[0], layers[1], layers[4], layers[5]]);
+  });
+
+  it('removed layer comes last', function () {
+    var layers = setup();
+
+    layers[3].zIndex(11, true);
+    // remove the layer from the DOM
+    layers[3].node()[0].parentNode.removeChild(layers[3].node()[0]);
+    expect(layers.map(function (l) { return l.zIndex(); }))
+      .toEqual([10, 100, 0, 11, 11, 15]);
+    expect(layers[0].map().sortedLayers()).toEqual([
+      layers[2], layers[0], layers[4], layers[3], layers[5], layers[1]]);
   });
 });

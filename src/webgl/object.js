@@ -35,6 +35,24 @@ var webgl_object = function (arg) {
     return m_this;
   };
 
+  if (this.bin) {
+    var s_bin = this.bin;
+
+    this.bin = function (val, actualValue) {
+
+      if (val === undefined && !actualValue && s_bin(undefined, true) === null) {
+        var layer = m_this.layer && m_this.layer(),
+            map = layer && layer.map && layer.map(),
+            objectList = (map && map.listSceneObjects()) || [],
+            pos = objectList.indexOf(m_this);
+        if (pos >= 0) {
+          return pos;
+        }
+      }
+      return s_bin.apply(m_this, arguments);
+    };
+  }
+
   return this;
 };
 

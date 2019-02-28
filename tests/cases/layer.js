@@ -144,6 +144,15 @@ describe('geo.layer', function () {
       layer2._init();
       expect(layer3.canvas()).not.toEqual(layer.canvas());
     });
+    it('_canvas', function () {
+      layer = geo.layer({map: map});
+      expect(layer._canvas()).toBe(null);
+      layer._init();
+      expect(layer._canvas()).not.toBe(null);
+      expect(layer._canvas()).toBe(layer.renderer().canvas());
+      expect(layer._canvas('abc')).toBe(layer);
+      expect(layer._canvas()).toBe('abc');
+    });
     it('dataTime', function () {
       expect(layer.dataTime() instanceof geo.timestamp).toBe(true);
     });
@@ -205,6 +214,14 @@ describe('geo.layer', function () {
       var layer3 = geo.layer({map: map});
       layer2._init();
       expect(layer3.renderer()).not.toEqual(layer.renderer());
+    });
+    it('_renderer', function () {
+      layer = geo.layer({map: map});
+      expect(layer._renderer()).toBe(null);
+      layer._init();
+      expect(layer._renderer() instanceof geo.renderer).toBe(true);
+      expect(layer._renderer('abc')).toBe(layer);
+      expect(layer._renderer()).toBe('abc');
     });
     it('rendererName', function () {
       layer = geo.layer({map: map, renderer: 'canvas'});
