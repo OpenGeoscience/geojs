@@ -201,11 +201,6 @@ var tileLayer = function (arg) {
       m_exited,
       m_this = this;
 
-  // Space tile levels this far apart in z-buffer space.  This value doesn't
-  // have any visual effect in parallel projections, but will slightly skew
-  // perspective projections.
-  this._levelZIncrement = 1e-5;
-
   // copy the options into a private variable
   this._options = $.extend(true, {}, arg);
 

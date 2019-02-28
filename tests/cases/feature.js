@@ -308,8 +308,21 @@ describe('geo.feature', function () {
     });
     it('bin', function () {
       expect(feat.bin()).toBe(0);
+      expect(feat.bin(undefined, true)).toBe(null);
       expect(feat.bin(5)).toBe(feat);
       expect(feat.bin()).toBe(5);
+      expect(feat.bin(undefined, true)).toBe(5);
+      expect(feat.bin(null)).toBe(feat);
+      expect(feat.bin()).toBe(0);
+      expect(feat.bin(undefined, true)).toBe(null);
+      expect(feat.bin(' 6')).toBe(feat);
+      expect(feat.bin()).toBe(6);
+      expect(feat.bin(NaN)).toBe(feat);
+      expect(feat.bin()).toBe(0);
+      expect(feat.bin('7e2')).toBe(feat);
+      expect(feat.bin()).toBe(7);
+      expect(feat.bin('Not a number')).toBe(feat);
+      expect(feat.bin()).toBe(0);
     });
     it('dataTime', function () {
       var ts = geo.timestamp();
@@ -392,6 +405,39 @@ describe('geo.feature', function () {
       expect(feat.ready).toBe(false);
       feat._init({});
       expect(feat.ready).toBe(true);
+    });
+  });
+
+  describe('webgl bin', function () {
+    var mockWebglRenderer = geo.util.mockWebglRenderer;
+    var restoreWebglRenderer = geo.util.restoreWebglRenderer;
+    var createMap = require('../test-utils').createMap;
+    var destroyMap = require('../test-utils').destroyMap;
+    var map;
+
+    beforeEach(function () {
+      mockWebglRenderer();
+      map = createMap();
+    });
+
+    afterEach(function () {
+      destroyMap();
+      restoreWebglRenderer();
+    });
+
+    it('bin', function () {
+      var layer1 = map.createLayer('feature', {renderer: 'webgl'}),
+          layer2 = map.createLayer('feature', {renderer: layer1.renderer()}),
+          feat1 = layer1.createFeature('point'),
+          feat2 = layer2.createFeature('point'),
+          feat3;
+      expect(feat1.bin(undefined, true)).toBe(null);
+      expect(feat1.bin()).toBe(1);
+      expect(feat2.bin()).toBe(3);
+      feat3 = layer1.createFeature('point');
+      expect(feat1.bin()).toBe(1);
+      expect(feat2.bin()).toBe(4);
+      expect(feat3.bin()).toBe(2);
     });
   });
 });
