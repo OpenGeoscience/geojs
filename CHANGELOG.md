@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## Version 0.19.2
 
 ### Improvements
 - Make fewer function calls when computing polygon strokes (#980)
