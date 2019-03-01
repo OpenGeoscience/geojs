@@ -24,6 +24,10 @@ var webgl_pointFeature = function (arg) {
   var transform = require('../transform');
   var util = require('../util');
   var object = require('./object');
+  var fragmentShaderPoly = require('./pointFeaturePoly.frag');
+  var fragmentShaderSprite = require('./pointFeatureSprite.frag');
+  var vertexShaderPoly = require('./pointFeaturePoly.vert');
+  var vertexShaderSprite = require('./pointFeatureSprite.vert');
 
   object.call(this);
 
@@ -45,157 +49,13 @@ var webgl_pointFeature = function (arg) {
       m_primitiveShape = 'sprite', // arg can change this, below
       s_init = this._init,
       s_update = this._update,
-      s_updateStyleFromArray = this.updateStyleFromArray,
-      vertexShaderSource = null,
-      fragmentShaderSource = null;
+      s_updateStyleFromArray = this.updateStyleFromArray;
 
   if (arg.primitiveShape === 'triangle' ||
       arg.primitiveShape === 'square' ||
       arg.primitiveShape === 'sprite') {
     m_primitiveShape = arg.primitiveShape;
   }
-
-  vertexShaderSource = [
-    '#ifdef GL_ES',
-    '  precision highp float;',
-    '#endif',
-    'attribute vec3 pos;',
-    'attribute float radius;',
-    'attribute vec3 fillColor;',
-    'attribute vec3 strokeColor;',
-    'attribute float fillOpacity;',
-    'attribute float strokeWidth;',
-    'attribute float strokeOpacity;',
-    'attribute float fill;',
-    'attribute float stroke;',
-    'uniform float pixelWidth;',
-    'uniform float aspect;',
-    'uniform mat4 modelViewMatrix;',
-    'uniform mat4 projectionMatrix;',
-    'varying vec4 fillColorVar;',
-    'varying vec4 strokeColorVar;',
-    'varying float radiusVar;',
-    'varying float strokeWidthVar;',
-    'varying float fillVar;',
-    'varying float strokeVar;'
-  ];
-
-  if (m_primitiveShape !== 'sprite') {
-    vertexShaderSource = vertexShaderSource.concat([
-      'attribute vec2 unit;',
-      'varying vec3 unitVar;'
-    ]);
-  }
-
-  vertexShaderSource.push.apply(vertexShaderSource, [
-    'void main(void)',
-    '{',
-    '  strokeWidthVar = strokeWidth;',
-    '  // No stroke or fill implies nothing to draw',
-    '  if (stroke < 1.0 || strokeWidth <= 0.0 || strokeOpacity <= 0.0) {',
-    '    strokeVar = 0.0;',
-    '    strokeWidthVar = 0.0;',
-    '  }',
-    '  else',
-    '    strokeVar = 1.0;',
-    '  if (fill < 1.0 || radius <= 0.0 || fillOpacity <= 0.0)',
-    '    fillVar = 0.0;',
-    '  else',
-    '    fillVar = 1.0;',
-    /* If the point has no visible pixels, skip doing computations on it. */
-    '  if (fillVar == 0.0 && strokeVar == 0.0) {',
-    '    gl_Position = vec4(2, 2, 0, 1);',
-    '    return;',
-    '  }',
-    '  fillColorVar = vec4 (fillColor, fillOpacity);',
-    '  strokeColorVar = vec4 (strokeColor, strokeOpacity);',
-    '  radiusVar = radius;'
-  ]);
-
-  if (m_primitiveShape === 'sprite') {
-    vertexShaderSource.push.apply(vertexShaderSource, [
-      '  gl_Position = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;',
-      '  gl_PointSize = 2.0 * (radius + strokeWidthVar); ',
-      '}'
-    ]);
-  } else {
-    vertexShaderSource.push.apply(vertexShaderSource, [
-      '  unitVar = vec3 (unit, 1.0);',
-      '  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;',
-      '  if (p.w != 0.0) {',
-      '    p = p / p.w;',
-      '  }',
-      '  p += (radius + strokeWidthVar) * ',
-      '       vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0);',
-      '  gl_Position = vec4(p.xyz, 1.0);',
-      '}'
-    ]);
-  }
-  vertexShaderSource = vertexShaderSource.join('\n');
-
-  fragmentShaderSource = [
-    '#ifdef GL_ES',
-    '  precision highp float;',
-    '#endif',
-    'uniform float aspect;',
-    'varying vec4 fillColorVar;',
-    'varying vec4 strokeColorVar;',
-    'varying float radiusVar;',
-    'varying float strokeWidthVar;',
-    'varying float fillVar;',
-    'varying float strokeVar;'
-  ];
-
-  if (m_primitiveShape !== 'sprite') {
-    fragmentShaderSource.push('varying vec3 unitVar;');
-  }
-
-  fragmentShaderSource.push.apply(fragmentShaderSource, [
-    'void main () {',
-    '  vec4 strokeColor, fillColor;',
-    '  float endStep;',
-    '  // No stroke or fill implies nothing to draw',
-    '  if (fillVar == 0.0 && strokeVar == 0.0)',
-    '    discard;'
-  ]);
-
-  if (m_primitiveShape === 'sprite') {
-    fragmentShaderSource.push(
-      '  float rad = 2.0 * length (gl_PointCoord - vec2(0.5));');
-  } else {
-    fragmentShaderSource.push(
-      '  float rad = length (unitVar.xy);');
-  }
-
-  fragmentShaderSource.push.apply(fragmentShaderSource, [
-    '  if (rad > 1.0)',
-    '    discard;',
-    '  // If there is no stroke, the fill region should transition to nothing',
-    '  if (strokeVar == 0.0) {',
-    '    strokeColor = vec4 (fillColorVar.rgb, 0.0);',
-    '    endStep = 1.0;',
-    '  } else {',
-    '    strokeColor = strokeColorVar;',
-    '    endStep = radiusVar / (radiusVar + strokeWidthVar);',
-    '  }',
-    '  // Likewise, if there is no fill, the stroke should transition to nothing',
-    '  if (fillVar == 0.0)',
-    '    fillColor = vec4 (strokeColor.rgb, 0.0);',
-    '  else',
-    '    fillColor = fillColorVar;',
-    '  // Distance to antialias over',
-    '  float antialiasDist = 3.0 / (2.0 * radiusVar);',
-    '  if (rad < endStep) {',
-    '    float step = smoothstep (endStep - antialiasDist, endStep, rad);',
-    '    gl_FragColor = mix (fillColor, strokeColor, step);',
-    '  } else {',
-    '    float step = smoothstep (1.0 - antialiasDist, 1.0, rad);',
-    '    gl_FragColor = mix (strokeColor, vec4 (strokeColor.rgb, 0.0), step);',
-    '  }',
-    '}'
-  ]);
-
-  fragmentShaderSource = fragmentShaderSource.join('\n');
 
   /**
    * Create the vertex shader for points.
@@ -204,7 +64,8 @@ var webgl_pointFeature = function (arg) {
    */
   function createVertexShader() {
     var shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
-    shader.setShaderSource(vertexShaderSource);
+    shader.setShaderSource(
+      m_primitiveShape === 'sprite' ? vertexShaderSprite : vertexShaderPoly);
     return shader;
   }
 
@@ -215,7 +76,8 @@ var webgl_pointFeature = function (arg) {
    */
   function createFragmentShader() {
     var shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
-    shader.setShaderSource(fragmentShaderSource);
+    shader.setShaderSource(
+      m_primitiveShape === 'sprite' ? fragmentShaderSprite : fragmentShaderPoly);
     return shader;
   }
 
