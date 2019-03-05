@@ -157,6 +157,8 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/base-images.tgz"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   # Make sure we have the data files.
   COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target data_files
+  # But remove the old baselines
+  COMMAND rm -rf "${ExternalData_BINARY_ROOT}/base-images"
   # Run the webglheadless test, asking to save all images
   COMMAND TEST_SAVE_IMAGE=all "${NPM_EXECUTABLE}" run glci
   # Build examples to make sure that they are available.
