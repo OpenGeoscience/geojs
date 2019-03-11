@@ -58,6 +58,7 @@ describe('geo.tileLayer', function () {
       size: get_set('size'),
       scale: get_set('scale'),
       zoom: get_set('zoom'),
+      rotation: get_set('rotation'),
       center: get_set('center'),
       origin: get_set('origin'),
       unitsPerPixel: function (zoom) {
@@ -713,6 +714,16 @@ describe('geo.tileLayer', function () {
           {level: 2, x: 1, y: 1}, 'EPSG:4269'), {
           left: 90, top: -66.51, right: 180, bottom: -85.05})).toBe(true);
       });
+    });
+    it('gcs', function () {
+      var l = geo.tileLayer({map: map(), url: function () { return '/testdata/white.jpg'; }, canvas: $('<div/>')});
+      // replace _getTiles so we don't have to actually compute things.
+      l._getTiles = function () {};
+      expect(l.gcs()).toBe(l.map().gcs());
+      expect(l.gcs('+proj=longlat')).toBe(l);
+      expect(l.gcs()).toBe('+proj=longlat');
+      expect(l.gcs(null)).toBe(l);
+      expect(l.gcs()).toBe(l.map().gcs());
     });
     describe('tileCropFromBounds and tilesMaxBounds', function () {
       var w = 5602, h = 4148,

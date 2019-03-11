@@ -684,6 +684,32 @@ var tileLayer = function (arg) {
   };
 
   /**
+   * Get or set the layer gcs.  This defaults to the map's gcs.
+   *
+   * @param {string} [arg] If `undefined`, return the current gcs.  Otherwise,
+   *    a new value for the gcs.  If `null`, use the map's gcs.
+   * @returns {string|this} A string used by {@link geo.transform}.
+   */
+  this.gcs = function (arg) {
+    if (arg === undefined) {
+      return m_this._options.gcs || m_this.map().gcs();
+    }
+    var previous = m_this.gcs();
+    if (arg === null) {
+      delete m_this._options.gcs;
+    } else {
+      m_this._options.gcs = arg;
+    }
+    if (m_this.gcs() !== previous) {
+      m_this.clear();
+      m_this.gcsFeatures(m_this.gcs());
+      m_this.modified();
+      m_this._update();
+    }
+    return m_this;
+  };
+
+  /**
    * Prefetches tiles up to a given zoom level around a given bounding box.
    *
    * @param {number} level The zoom level.
