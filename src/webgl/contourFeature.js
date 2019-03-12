@@ -24,6 +24,8 @@ var webgl_contourFeature = function (arg) {
   var transform = require('../transform');
   var util = require('../util');
   var object = require('./object');
+  var fragmentShader = require('./contourFeature.frag');
+  var vertexShader = require('./contourFeature.vert');
 
   object.call(this);
 
@@ -46,72 +48,14 @@ var webgl_contourFeature = function (arg) {
       s_update = this._update;
 
   function createVertexShader() {
-    var vertexShaderSource = [
-          '#ifdef GL_ES',
-          '  precision highp float;',
-          '#endif',
-          'attribute vec3 pos;',
-          'attribute float value;',
-          'attribute float opacity;',
-          'uniform mat4 modelViewMatrix;',
-          'uniform mat4 projectionMatrix;',
-          'varying float valueVar;',
-          'varying float opacityVar;',
-
-          'void main(void)',
-          '{',
-          /* Don't use z values; something is rotten in one of our matrices */
-          '  vec4 scrPos = projectionMatrix * modelViewMatrix * vec4(pos.xy, 0, 1);',
-          '  if (scrPos.w != 0.0) {',
-          '    scrPos = scrPos / scrPos.w;',
-          '  }',
-          '  valueVar = value;',
-          '  opacityVar = opacity;',
-          '  gl_Position = scrPos;',
-          '}'
-        ].join('\n'),
-        shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
-    shader.setShaderSource(vertexShaderSource);
+    var shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
+    shader.setShaderSource(vertexShader);
     return shader;
   }
 
   function createFragmentShader() {
-    var fragmentShaderSource = [
-          '#ifdef GL_ES',
-          '  precision highp float;',
-          '#endif',
-          'uniform vec4 minColor;',
-          'uniform vec4 maxColor;',
-          'uniform float steps;',
-          'uniform bool stepped;',
-          'uniform sampler2D sampler2d;',
-          'varying float valueVar;',
-          'varying float opacityVar;',
-          'void main () {',
-          '  vec4 clr;',
-          '  if (valueVar < 0.0) {',
-          '    clr = minColor;',
-          '  } else if (valueVar > steps) {',
-          '    clr = maxColor;',
-          '  } else {',
-          '    float step;',
-          '    if (stepped) {',
-          '      step = floor(valueVar) + 0.5;',
-          '      if (step > steps) {',
-          '        step = steps - 0.5;',
-          '      }',
-          '    } else {',
-          '      step = valueVar;',
-          '    }',
-          // our texture is padded on either end by a repeated value to ensure
-          // we interpolate smoothly at the ends.
-          '    clr = texture2D(sampler2d, vec2((step + 1.0) / (steps + 2.0), 0.0));',
-          '  }',
-          '  gl_FragColor = vec4(clr.rgb, clr.a * opacityVar);',
-          '}'
-        ].join('\n'),
-        shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
-    shader.setShaderSource(fragmentShaderSource);
+    var shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
+    shader.setShaderSource(fragmentShader);
     return shader;
   }
 

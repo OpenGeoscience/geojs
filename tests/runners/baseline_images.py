@@ -26,7 +26,7 @@ def generate_baselines(args):
         raise Exception('build path is not a directory')
     os.chdir(buildPath)
     if not os.path.exists(os.path.join(buildPath, 'CMakeFiles')):
-        cmd = ['cmake', '-D', 'FFHEADLESS_TESTS=ON', cwd]
+        cmd = ['cmake', cwd]
         if args['verbose'] >= 1:
             print('Running cmake: %s' % subprocess.list2cmdline(cmd))
         subprocess.check_call(cmd)

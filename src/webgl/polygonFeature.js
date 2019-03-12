@@ -24,6 +24,8 @@ var webgl_polygonFeature = function (arg) {
   var transform = require('../transform');
   var util = require('../util');
   var object = require('./object');
+  var fragmentShader = require('./polygonFeature.frag');
+  var vertexShader = require('./polygonFeature.vert');
 
   object.call(this);
 
@@ -42,41 +44,14 @@ var webgl_polygonFeature = function (arg) {
       m_updateAnimFrameRef;
 
   function createVertexShader() {
-    var vertexShaderSource = [
-          'attribute vec3 pos;',
-          'attribute vec3 fillColor;',
-          'attribute float fillOpacity;',
-          'uniform mat4 modelViewMatrix;',
-          'uniform mat4 projectionMatrix;',
-          'varying vec4 fillColorVar;',
-
-          'void main(void)',
-          '{',
-          '  vec4 clipPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
-          '  if (clipPos.w != 0.0) {',
-          '    clipPos = clipPos/clipPos.w;',
-          '  }',
-          '  fillColorVar = vec4(fillColor, fillOpacity);',
-          '  gl_Position = clipPos;',
-          '}'
-        ].join('\n'),
-        shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
-    shader.setShaderSource(vertexShaderSource);
+    var shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
+    shader.setShaderSource(vertexShader);
     return shader;
   }
 
   function createFragmentShader() {
-    var fragmentShaderSource = [
-          '#ifdef GL_ES',
-          '  precision highp float;',
-          '#endif',
-          'varying vec4 fillColorVar;',
-          'void main () {',
-          '  gl_FragColor = fillColorVar;',
-          '}'
-        ].join('\n'),
-        shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
-    shader.setShaderSource(fragmentShaderSource);
+    var shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
+    shader.setShaderSource(fragmentShader);
     return shader;
   }
 

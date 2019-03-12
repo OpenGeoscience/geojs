@@ -42,6 +42,9 @@ install:
   - npm install
   # Install for the website build
   - npm run setup-website
+  # Download and extract the glslangValidator tool
+  - curl -OL https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Release.zip
+  - unzip glslang-master-linux-Release.zip bin/glslangValidator
 
 before_script:
   - export DISPLAY=:99.0
@@ -50,6 +53,8 @@ script:
   - npm run build
   - npm run docs
   - mkdir -p _build
+  # Use the glslangValidator to validate all .frag and .vert files
+  - find . \( -name '*.frag' -o -name '*.vert' \) -exec bin/glslangValidator {} \+
   - ctest -S cmake/travis_build.cmake -VV || true
   - if [ -f _build/test_failed ] ; then false ; fi
   # Build the website to ensure that it will pass

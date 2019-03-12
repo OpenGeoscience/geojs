@@ -22,6 +22,10 @@ var webgl_quadFeature = function (arg) {
   var $ = require('jquery');
   var vgl = require('vgl');
   var object = require('./object');
+  var fragmentShaderImage = require('./quadFeatureImage.frag');
+  var vertexShaderImage = require('./quadFeatureImage.vert');
+  var fragmentShaderColor = require('./quadFeatureColor.frag');
+  var vertexShaderColor = require('./quadFeatureColor.vert');
 
   object.call(this);
 
@@ -35,43 +39,6 @@ var webgl_quadFeature = function (arg) {
       m_glCompileTimestamp = timestamp(),
       m_glColorCompileTimestamp = timestamp(),
       m_quads;
-  var fragmentShaderImageSource = [
-    'varying highp vec2 iTextureCoord;',
-    'uniform sampler2D sampler2d;',
-    'uniform mediump float opacity;',
-    'uniform highp vec2 crop;',
-    'void main(void) {',
-    '  mediump vec4 color = texture2D(sampler2d, iTextureCoord);',
-    '  if ((crop.s < 1.0 && iTextureCoord.s > crop.s) || (crop.t < 1.0 && 1.0 - iTextureCoord.t > crop.t)) {',
-    '    discard;',
-    '  }',
-    '  color.w *= opacity;',
-    '  gl_FragColor = color;',
-    '}'].join('\n');
-  var vertexShaderImageSource = [
-    'attribute vec3 vertexPosition;',
-    'attribute vec2 textureCoord;',
-    'uniform float zOffset;',
-    'uniform mat4 modelViewMatrix;',
-    'uniform mat4 projectionMatrix;',
-    'varying highp vec2 iTextureCoord;',
-    'void main(void) {',
-    '  gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-    '  gl_Position.z += zOffset;',
-    '  iTextureCoord = textureCoord;',
-    '}'].join('\n');
-  var vertexShaderColorSource = [
-    'attribute vec3 vertexPosition;',
-    'uniform float zOffset;',
-    'uniform vec3 vertexColor;',
-    'uniform mat4 modelViewMatrix;',
-    'uniform mat4 projectionMatrix;',
-    'varying mediump vec3 iVertexColor;',
-    'void main(void) {',
-    '  gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-    '  gl_Position.z += zOffset;',
-    '  iVertexColor = vertexColor;',
-    '}'].join('\n');
 
   /**
    * Allocate buffers that we need to control for image quads.  This mimics
@@ -101,11 +68,11 @@ var webgl_quadFeature = function (arg) {
           m_imgposbuf[idx * 12 + i] = quad.pos[i] - m_quads.origin[i % 3];
         }
       });
-      context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
+      context.bindBuffer(context.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
       if (newbuf) {
-        context.bufferData(vgl.GL.ARRAY_BUFFER, m_imgposbuf, vgl.GL.DYNAMIC_DRAW);
+        context.bufferData(context.ARRAY_BUFFER, m_imgposbuf, context.DYNAMIC_DRAW);
       } else {
-        context.bufferSubData(vgl.GL.ARRAY_BUFFER, 0, m_imgposbuf);
+        context.bufferSubData(context.ARRAY_BUFFER, 0, m_imgposbuf);
       }
     }
     m_glCompileTimestamp.modified();
@@ -139,11 +106,11 @@ var webgl_quadFeature = function (arg) {
           m_clrposbuf[idx * 12 + i] = quad.pos[i] - m_quads.origin[i % 3];
         }
       });
-      context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.clrQuadsPosition);
+      context.bindBuffer(context.ARRAY_BUFFER, m_glBuffers.clrQuadsPosition);
       if (newbuf) {
-        context.bufferData(vgl.GL.ARRAY_BUFFER, m_clrposbuf, vgl.GL.DYNAMIC_DRAW);
+        context.bufferData(context.ARRAY_BUFFER, m_clrposbuf, context.DYNAMIC_DRAW);
       } else {
-        context.bufferSubData(vgl.GL.ARRAY_BUFFER, 0, m_clrposbuf);
+        context.bufferSubData(context.ARRAY_BUFFER, 0, m_clrposbuf);
       }
     }
     m_glColorCompileTimestamp.modified();
@@ -201,14 +168,14 @@ var webgl_quadFeature = function (arg) {
       prog.addUniform(new vgl.projectionUniform('projectionMatrix'));
       prog.addUniform(new vgl.floatUniform('opacity', 1.0));
       prog.addUniform(new vgl.floatUniform('zOffset', 0.0));
-      unicrop = new vgl.uniform(vgl.GL.FLOAT_VEC2, 'crop');
+      context = m_this.renderer()._glContext();
+      unicrop = new vgl.uniform(context.FLOAT_VEC2, 'crop');
       unicrop.set([1.0, 1.0]);
       prog.addUniform(unicrop);
-      context = m_this.renderer()._glContext();
       prog.addShader(vgl.getCachedShader(
-        vgl.GL.VERTEX_SHADER, context, vertexShaderImageSource));
+        context.VERTEX_SHADER, context, vertexShaderImage));
       prog.addShader(vgl.getCachedShader(
-        vgl.GL.FRAGMENT_SHADER, context, fragmentShaderImageSource));
+        context.FRAGMENT_SHADER, context, fragmentShaderImage));
       mat.addAttribute(prog);
       mat.addAttribute(new vgl.blend());
       /* This is similar to vgl.planeSource */
@@ -242,11 +209,12 @@ var webgl_quadFeature = function (arg) {
       prog.addUniform(new vgl.projectionUniform('projectionMatrix'));
       prog.addUniform(new vgl.floatUniform('opacity', 1.0));
       prog.addUniform(new vgl.floatUniform('zOffset', 0.0));
-      prog.addUniform(new vgl.uniform(vgl.GL.FLOAT_VEC3, 'vertexColor'));
       context = m_this.renderer()._glContext();
+      prog.addUniform(new vgl.uniform(context.FLOAT_VEC3, 'vertexColor'));
       prog.addShader(vgl.getCachedShader(
-        vgl.GL.VERTEX_SHADER, context, vertexShaderColorSource));
-      prog.addShader(vgl.utils.createFragmentShader(context));
+        context.VERTEX_SHADER, context, vertexShaderColor));
+      prog.addShader(vgl.getCachedShader(
+        context.FRAGMENT_SHADER, context, fragmentShaderColor));
       mat.addAttribute(prog);
       mat.addAttribute(new vgl.blend());
       /* This is similar to vgl.planeSource */
@@ -312,7 +280,7 @@ var webgl_quadFeature = function (arg) {
 
     var context = renderState.m_context, opacity, zOffset, color;
 
-    context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.clrQuadsPosition);
+    context.bindBuffer(context.ARRAY_BUFFER, m_glBuffers.clrQuadsPosition);
     $.each(m_quads.clrQuads, function (idx, quad) {
       if (quad.opacity !== opacity) {
         opacity = quad.opacity;
@@ -332,14 +300,14 @@ var webgl_quadFeature = function (arg) {
           color.r, color.g, color.b]));
       }
 
-      context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.clrQuadsPosition);
+      context.bindBuffer(context.ARRAY_BUFFER, m_glBuffers.clrQuadsPosition);
       context.vertexAttribPointer(vgl.vertexAttributeKeys.Position, 3,
-                                  vgl.GL.FLOAT, false, 12, idx * 12 * 4);
+                                  context.FLOAT, false, 12, idx * 12 * 4);
       context.enableVertexAttribArray(vgl.vertexAttributeKeys.Position);
 
-      context.drawArrays(vgl.GL.TRIANGLE_STRIP, 0, 4);
+      context.drawArrays(context.TRIANGLE_STRIP, 0, 4);
     });
-    context.bindBuffer(vgl.GL.ARRAY_BUFFER, null);
+    context.bindBuffer(context.ARRAY_BUFFER, null);
     mapper.undoBindVertexData(renderState);
   };
 
@@ -366,7 +334,7 @@ var webgl_quadFeature = function (arg) {
         opacity, zOffset,
         crop = {x: 1, y: 1}, quadcrop;
 
-    context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
+    context.bindBuffer(context.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
     $.each(m_quads.imgQuads, function (idx, quad) {
       if (!quad.image) {
         return;
@@ -389,15 +357,15 @@ var webgl_quadFeature = function (arg) {
         context.uniform2fv(renderState.m_material.shaderProgram()
           .uniformLocation('crop'), new Float32Array([crop.x, crop.y]));
       }
-      context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
+      context.bindBuffer(context.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
       context.vertexAttribPointer(vgl.vertexAttributeKeys.Position, 3,
-                                  vgl.GL.FLOAT, false, 12, idx * 12 * 4);
+                                  context.FLOAT, false, 12, idx * 12 * 4);
       context.enableVertexAttribArray(vgl.vertexAttributeKeys.Position);
 
-      context.drawArrays(vgl.GL.TRIANGLE_STRIP, 0, 4);
+      context.drawArrays(context.TRIANGLE_STRIP, 0, 4);
       quad.texture.undoBind(renderState);
     });
-    context.bindBuffer(vgl.GL.ARRAY_BUFFER, null);
+    context.bindBuffer(context.ARRAY_BUFFER, null);
     mapper.undoBindVertexData(renderState);
   };
 

@@ -43,12 +43,9 @@ var feature = require('./feature');
  * Point clustering specification.
  *
  * @typedef {object} geo.pointFeature.clusteringSpec
- * @property {number} [radius=0.05] This is combined with the `width` and
- *   `height` to determine how close points need to be to each other to be
- *   clustered.
+ * @property {number} [radius=10] This is size in pixels that determines how
+ *   close points need to be to each other to be clustered.
  * @property {number} [maxZoom=18] Never cluster above this zoom level.
- * @property {number} [width=256]
- * @property {number} [height=256]
  */
 
 /**
@@ -129,12 +126,20 @@ var pointFeature = function (arg) {
     }
 
     // set clustering options to default if an options argument wasn't supplied
-    var opts = m_clustering === true ? {radius: 0.01} : m_clustering;
+    var opts = m_clustering === true ? {radius: 10} : m_clustering;
 
     // generate the cluster tree from the raw data
     var position = m_this.position();
-    m_clusterTree = new ClusterGroup(
-      opts, m_this.layer().width(), m_this.layer().height());
+
+    var map = m_this.layer().map(),
+        scrCenter = map.gcsToDisplay(map.center(undefined, null), null),
+        center = map.displayToGcs(scrCenter, m_this.gcs()),
+        offset = map.displayToGcs({x: scrCenter.x + opts.radius, y: scrCenter.y}, m_this.gcs()),
+        radiusInGcsAtZoom = Math.pow(Math.pow(offset.y - center.y, 2) + Math.pow(offset.x - center.x, 2), 0.5),
+        zoom = map.zoom(),
+        radiusInGcsAtZoom0 = radiusInGcsAtZoom * Math.pow(2, zoom);
+    opts = $.extend({}, opts, {radius: radiusInGcsAtZoom0});
+    m_clusterTree = new ClusterGroup(opts);
 
     m_allData.forEach(function (d, i) {
 
@@ -147,7 +152,7 @@ var pointFeature = function (arg) {
 
     // reset the last zoom state and trigger a redraw at the current zoom level
     m_lastZoom = null;
-    m_this._handleZoom(m_this.layer().map().zoom());
+    m_this._handleZoom(map.zoom());
   };
 
   /**

@@ -134,6 +134,11 @@ module.exports = {
         'css-loader'
       ]
     }, {
+      test: /\.(glsl|vs|fs|vert|frag)$/,
+      use: [
+        'shader-loader'
+      ]
+    }, {
       test: /vgl\.js$/,
       use: [
         'expose-loader?vgl',
