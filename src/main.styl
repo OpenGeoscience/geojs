@@ -33,9 +33,13 @@
     left 0
     top 0
     pointer-events none
-    &.active
+    &.active:not(.hidden)
       > *
         pointer-events auto
+    &.hidden
+      display none
+    &.hidden[renderer="webgl"]
+      display inherit
 
   .geo-tile-layer
     transform-origin 0px 0px

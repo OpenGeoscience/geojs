@@ -4,7 +4,29 @@ var webgl_layer = function () {
   'use strict';
 
   var m_this = this,
+      s_visible = this.visible,
       s_zIndex = this.zIndex;
+
+  /**
+   * Get/Set visibility of the layer.
+   *
+   * @param {boolean} [val] If specified, change the visibility.  Otherwise,
+   *    get it.
+   * @returns {boolean|this} either the visibility (if getting) or the layer
+   *    (if setting).
+   */
+  this.visible = function (val) {
+    if (val === undefined) {
+      return s_visible();
+    }
+    var origVal = s_visible(),
+        result = s_visible.apply(m_this, arguments);
+    if (origVal !== val && m_this.initialized()) {
+      m_this.map().scheduleAnimationFrame(m_this._update, true);
+      m_this.renderer()._render();
+    }
+    return result;
+  };
 
   /**
    * Get or set the z-index of the layer.  The z-index controls the display
@@ -19,7 +41,7 @@ var webgl_layer = function () {
    */
   this.zIndex = function (zIndex, allowDuplicate) {
     var result = s_zIndex.apply(m_this, arguments);
-    if (zIndex !== undefined) {
+    if (zIndex !== undefined && m_this.initialized()) {
       /* If the z-index has changed, schedule rerendering the layer. */
       m_this.map().scheduleAnimationFrame(m_this._update, true);
       m_this.renderer()._render();

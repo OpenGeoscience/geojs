@@ -6,6 +6,8 @@ var webgl_tileLayer = function () {
   var m_this = this,
       s_init = this._init,
       s_exit = this._exit,
+      s_update = this._update,
+      s_visible = this.visible,
       s_zIndex = this.zIndex,
       m_quadFeature,
       m_nextTileId = 0,
@@ -98,6 +100,26 @@ var webgl_tileLayer = function () {
   };
 
   /**
+   * Get/Set visibility of the layer.
+   *
+   * @param {boolean} [val] If specified, change the visibility, otherwise
+   *    return it.
+   * @returns {boolean|this} The current visibility or the layer.
+   */
+  this.visible = function (val) {
+    if (val === undefined) {
+      return s_visible();
+    }
+    if (m_this.visible() !== val) {
+      s_visible(val);
+      if (m_quadFeature) {
+        m_quadFeature.visible(m_quadFeature.visible(undefined, true), true);
+      }
+    }
+    return m_this;
+  };
+
+  /**
    * Get or set the z-index of the layer.  The z-index controls the display
    * order of the layers in much the same way as the CSS z-index property.
    *
@@ -118,6 +140,20 @@ var webgl_tileLayer = function () {
       }
     }
     return s_zIndex.apply(m_this, arguments);
+  };
+
+  /**
+   * Update layer.
+   *
+   * @param {object} request A value to pass to the parent class.
+   * @returns {this}
+   */
+  this._update = function (request) {
+    s_update.call(m_this, request);
+    if (m_quadFeature) {
+      m_quadFeature._update();
+    }
+    return m_this;
   };
 
   /**

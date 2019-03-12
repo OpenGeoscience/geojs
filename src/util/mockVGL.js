@@ -77,6 +77,7 @@ module.exports.mockWebglRenderer = function mockWebglRenderer(supported) {
     deleteProgram: noop('deleteProgram'),
     deleteShader: noop('deleteShader'),
     deleteTexture: noop('deleteTexture'),
+    detachShader: noop('detachShader'),
     depthFunc: noop('depthFunc'),
     disable: noop('disable'),
     disableVertexAttribArray: noop('disableVertexAttribArray'),

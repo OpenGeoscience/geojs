@@ -438,6 +438,27 @@ describe('geo.core.osmLayer', function () {
               vgl.mockCounts().uniform2fv >= (glCounts.uniform2fv || 0) + 9);
 
     });
+    it('test that tiles aren\'t loaded when not visible', function () {
+      glCounts = $.extend({}, vgl.mockCounts());
+      layer.visible(false);
+    });
+    waitForIt('map to draw after visible false', function () {
+      return vgl.mockCounts().clear >= glCounts.clear;
+    });
+    it('zoom in', function () {
+      glCounts = $.extend({}, vgl.mockCounts());
+      map.zoom(5);
+    });
+    waitForIt('map to draw after zoom', function () {
+      return vgl.mockCounts().clear >= glCounts.clear;
+    });
+    it('test that tiles load when visibility returns', function () {
+      expect(Object.keys(layer.activeTiles).length).toBe(21);
+      layer.visible(true);
+    });
+    waitForIt('map to draw after visible true', function () {
+      return Object.keys(layer.activeTiles).length === 25;
+    });
     it('destroy', destroy_map);
   });
 });
