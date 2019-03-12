@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+### Changes
+- The point clustering radius value is now in display pixels (#983)
+
 ## Version 0.19.2
 
 ### Improvements

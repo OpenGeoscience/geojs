@@ -4,7 +4,6 @@
  */
 
 var $ = require('jquery');
-var vgl = require('vgl');
 
 /**
  * This class manages a group of nearby points that are clustered as a
@@ -137,22 +136,18 @@ ClusterTree.prototype.coords = function () {
  * @class
  * @alias geo.util.ClusterGroup
  * @param {object} opts An options object
- * @param {number} width The width of the window; used for scaling.
- * @param {number} height The height of the window; used for scaling.
  * @param {number} maxZoom The maximimum zoom level to calculate.
- * @param {number} radius Proportional to the clustering radius in pixels.
+ * @param {number} radius Size of clustering at zoom 0 in point gcs.
  */
-function C(opts, width, height) {
+function C(opts) {
 
   var DistanceGrid = require('./distanceGrid');
 
   // store the options
   this._opts = $.extend({
     maxZoom: 18,
-    radius: 0.05
+    radius: 5
   }, opts);
-  this._opts.width = this._opts.width || width || 256;
-  this._opts.height = this._opts.height || height || 256;
 
   // generate the initial datastructures
   this._clusters = {}; // clusters at each zoom level
@@ -160,27 +155,12 @@ function C(opts, width, height) {
 
   var zoom, scl;
   for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
-    scl = this._scaleAtLevel(zoom, this._opts.width, this._opts.height);
+    scl = this._opts.radius * Math.pow(2, -zoom);
     this._clusters[zoom] = new DistanceGrid(scl);
     this._points[zoom] = new DistanceGrid(scl);
   }
   this._topClusterLevel = new ClusterTree(this, -1);
 }
-
-/**
- * Returns a characteristic distance scale at a particular zoom level.  This
- * scale is used to control the clustering radius.  When the renderer supports
- * it, this call should be replaced by a calculation involving the view port
- * size in point coordinates at a particular zoom level.
- * @private
- * @param {number} zoom The zoom level for the scale.
- * @param {number} width The viewport width.
- * @param {number} height The viewport height.
- * @returns {number} The scale for clustering the feature coordinates.
- */
-C.prototype._scaleAtLevel = function (zoom, width, height) {
-  return vgl.zoomToHeight(zoom, width, height) / 2 * this._opts.radius;
-};
 
 /**
  * Add a position to the cluster group.

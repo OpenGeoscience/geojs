@@ -164,7 +164,9 @@ injectStyle(pointFeature, 'fillColor', 'black');
 injectStyle(pointFeature, 'strokeOpacity', 1);
 injectStyle(pointFeature, 'strokeWidth', 1);
 injectStyle(pointFeature, 'fillOpacity', 0.5);
-pointFeature.clustering({radius: 0.012});
+// Setting the cluster radius to the cluster point style radius is usually
+// a good value.
+pointFeature.clustering({radius: 10});
 
 fetch_data();
 $('#controls').on('change', change_controls);
