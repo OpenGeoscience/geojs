@@ -150,7 +150,7 @@ module.exports.mockWebglRenderer = function mockWebglRenderer(supported) {
           wsize = m_this.windowSize(),
           wpos = m_this.windowPosition();
 
-      m_context = $.extend({}, default_context);
+      m_context = $.extend({}, vgl.GL, default_context);
 
       for (i = 0; i < renderers.length; i += 1) {
         if ((renderers[i].width() > wsize[0]) ||
