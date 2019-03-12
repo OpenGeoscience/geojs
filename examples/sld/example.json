@@ -5,7 +5,8 @@
   "about": {
     "text": "Rendering tiles from a WMS server by customizing the style."
   },
-  "tests": [{
+  "disabled": true,
+  "disable_tests": [{
     "description": "data is loaded from the WMS source",
     "idle": ["$('#map.geojs-map').data('data-geojs-map').onIdle"],
     "tests": [
