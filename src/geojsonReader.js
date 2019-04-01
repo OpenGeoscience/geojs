@@ -346,7 +346,9 @@ var geojsonReader = function (arg) {
               .style(
                 [{}].concat(Object.keys(m_options.pointStyle)).reduce(
                   (styleObj, key) => ({
-                    [key]: m_this._style(key, m_options.pointStyle[key]),
+                    [key]: points.some(d => d.properties && d.properties[key] !== undefined) ?
+                      m_this._style(key, m_options.pointStyle[key]) :
+                      m_options.pointStyle[key],
                     ...styleObj
                   }
                   ))
@@ -369,7 +371,9 @@ var geojsonReader = function (arg) {
               .style(
                 [{}].concat(Object.keys(m_options.lineStyle)).reduce(
                   (styleObj, key) => ({
-                    [key]: m_this._style(key, m_options.lineStyle[key]),
+                    [key]: lines.some(d => d.properties && d.properties[key] !== undefined) ?
+                      m_this._style(key, m_options.lineStyle[key]) :
+                      m_options.lineStyle[key],
                     ...styleObj
                   }
                   ))
@@ -395,7 +399,9 @@ var geojsonReader = function (arg) {
               .style(
                 [{}].concat(Object.keys(m_options.polygonStyle)).reduce(
                   (styleObj, key) => ({
-                    [key]: m_this._style(key, m_options.polygonStyle[key]),
+                    [key]: polygons.some(d => d.properties && d.properties[key] !== undefined) ?
+                      m_this._style(key, m_options.polygonStyle[key]) :
+                      m_options.polygonStyle[key],
                     ...styleObj
                   }
                   ))
