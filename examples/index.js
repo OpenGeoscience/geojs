@@ -7,6 +7,7 @@ require('bootswatch/flatly/bootstrap.css');
 require('bootstrap');
 
 // codemirror and plugins
+window.jsonlint = require('jsonlint-mod');
 require('codemirror/lib/codemirror.css');
 require('codemirror/addon/lint/lint.css');
 require('codemirror/addon/fold/foldgutter.css');

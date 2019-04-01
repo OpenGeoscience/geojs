@@ -6,6 +6,7 @@ require('codemirror/lib/codemirror.css');
 require('codemirror/addon/lint/lint.css');
 require('codemirror/addon/fold/foldgutter.css');
 
+window.jsonlint = require('jsonlint-mod');
 require('codemirror');
 require('codemirror/mode/javascript/javascript');
 require('codemirror/addon/lint/lint');
