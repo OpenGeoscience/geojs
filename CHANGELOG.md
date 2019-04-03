@@ -2,8 +2,14 @@
 
 ## Unreleased
 
+### Improvements
+- Support affine transforms in the proj4 string (#986)
+
 ### Changes
 - The point clustering radius value is now in display pixels (#983)
+
+### Bug Fixes
+- Fixed drawing partial fixed-scale canvas quads (#985)
 
 ## Version 0.19.2
 
