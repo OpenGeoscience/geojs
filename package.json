@@ -22,7 +22,7 @@
     "kdbush": "^3.0.0",
     "mousetrap": "^1.6.0",
     "proj4": "^2.4.4",
-    "vgl": "0.3.10"
+    "vgl": "0.3.11"
   },
   "optionalDependencies": {
     "d3": "^3.5.16",
