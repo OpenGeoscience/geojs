@@ -17,6 +17,14 @@ var rendererForAnnotations = require('./registry').rendererForAnnotations;
  *   to determine the renderer.  If a {@link geo.renderer} instance, the
  *   renderer is not recreated; not all renderers can be shared by multiple
  *   layers.
+ * @property {boolean} [autoshareRenderer=true] If truthy and the renderer
+ *   supports it, auto-share renderers between layers.  Currently, auto-sharing
+ *   can only occur for webgl renderers, and will only occur between adjacent
+ *   layers than have the same opacity.  Shared renderers has slightly
+ *   different behavior than non-shared renderers: changing z-index may result
+ *   in rerendering and be slightly slower; only one DOM canvas is used for all
+ *   shared renderers.  Some features have slight z-stacking differences in
+ *   shared versus non-shared renderers.
  * @property {HTMLElement} [canvas] If specified, use this canvas rather than
  *   a canvas associaied with the renderer directly.  Renderers may not support
  *   sharing a canvas.
@@ -87,6 +95,7 @@ var layer = function (arg) {
         arg.renderer instanceof renderer ? arg.renderer.api() : arg.renderer) : (
         arg.annotations ? rendererForAnnotations(arg.annotations) :
           rendererForFeatures(arg.features)),
+      m_autoshareRenderer = arg.autoshareRenderer === undefined ? true : arg.autoshareRenderer,
       m_dataTime = timestamp(),
       m_updateTime = timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
@@ -123,6 +132,15 @@ var layer = function (arg) {
    */
   this.rendererName = function () {
     return m_rendererName;
+  };
+
+  /**
+   * Get the setting of autoshareRenderer.
+   *
+   * @returns {boolean}
+   */
+  this.autoshareRenderer = function () {
+    return m_autoshareRenderer;
   };
 
   /**

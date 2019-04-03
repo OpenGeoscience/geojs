@@ -62,6 +62,10 @@ describe('Contour Feature', function () {
       expect(contour.contour.get('gridWidth')()).toBe(40);
       expect(contour.contour.get('gridHeight')()).toBe(5);
     });
+    it('actors', function () {
+      var contour = geo.webgl.contourFeature({layer: layer});
+      expect(contour.actors().length).toBe(1);
+    });
   });
 
   describe('Create contours', function () {

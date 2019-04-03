@@ -81,7 +81,7 @@ var canvas_quadFeature = function (arg) {
         }
       }
     });
-    if (render) {
+    if (render && m_this.renderer()) {
       m_this.renderer()._render();
     }
     if (changing) {
@@ -174,8 +174,8 @@ var canvas_quadFeature = function (arg) {
         if (!quad.crop) {
           context2d.drawImage(src, 0, 0);
         } else {
-          var cropx = Math.min(src.w, quad.crop.x),
-              cropy = Math.min(src.h, quad.crop.y);
+          var cropx = Math.min(w, quad.crop.x),
+              cropy = Math.min(h, quad.crop.y);
           if (cropx > 0 && cropy > 0) {
             context2d.drawImage(src, 0, 0, cropx, cropy, 0, 0, cropx, cropy);
           }

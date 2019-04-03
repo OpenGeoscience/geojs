@@ -1,11 +1,14 @@
 var proj4 = require('proj4');
+var vec3 = require('gl-vec3');
+var mat4 = require('gl-mat4');
+var util = require('./util');
+
 proj4 = proj4.__esModule ? proj4.default : proj4;
 /* Ensure all projections in proj4 are included. */
 var projections = require.context('proj4/projections', true, /.*\.js$/);
 projections.keys().forEach(function (key) {
   proj4.Proj.projections.add(projections(key));
 });
-var util = require('./util');
 
 var transformCache = {};
 /* Up to maxTransformCacheSize squared might be cached.  When the maximum cache
@@ -20,13 +23,13 @@ var axisPattern = new RegExp('^(.* |)\\+axis=e(n|s)u(| .*)$');
 
 /**
  * This purpose of this class is to provide a generic interface for computing
- * coordinate transformationss.  The interface is taken from the proj4js,
- * which also provides the geospatial projection implementation.  The
- * interface is intentionally simple to allow for custom, non-geospatial use
- * cases. For further details, see http://proj4js.org/
+ * coordinate transformations.  The interface is taken from proj4js, which also
+ * provides the geospatial projection implementation.  The interface is
+ * intentionally simple to allow for custom, non-geospatial use cases.  For
+ * further details, see http://proj4js.org/
  *
- * The default transforms lat/long coordinates into web mercator
- * for use with standard tile sets.
+ * The default transforms lat/long coordinates into web mercator for use with
+ * standard tile sets.
  *
  * This class is intended to be extended in the future to support 2.5 and 3
  * dimensional transformations.  The forward/inverse methods take optional
@@ -60,19 +63,87 @@ var transform = function (options) {
   }
 
   var m_this = this,
-      m_proj,   // The raw proj4js object
-      m_source, // The source projection
-      m_target; // The target projection
+      m_proj,              // The raw proj4js object
+      m_source,            // The source projection
+      m_target,            // The target projection
+      m_source_matrix,     // an additional transformation for the source
+      m_source_matrix_inv,
+      m_target_matrix,     // an additional transformation for the target
+      m_target_matrix_inv;
+
+  var AffineFactorPositions = {
+    s11: 0,
+    s12: 4,
+    s13: 8,
+    xoff: 12,
+    s21: 1,
+    s22: 5,
+    s23: 9,
+    yoff: 13,
+    s31: 2,
+    s32: 6,
+    s33: 10,
+    zoff: 14
+  };
+
+  /**
+   * Parse a projection string.  If the projection string includes any of
+   * +s[123][123]= or +[xyz]off=, those values are converted into a matrix and
+   * removed from the projection string.  This allows applying affine
+   * transforms as specified in Proj 6.0.0 to be used (excluding toff and
+   * tscale).  This could can be removed once proj4js supports the affine
+   * parameters.
+   *
+   * @param {string} value A proj4 string possibly with affine parameters.
+   * @returns {object} An object with a string value 'proj' and optional array
+   *    values 'matrix' and 'inverse' (either both or neither will be present).
+   *    The returned matrices are always 16-value arrays if present.  The proj
+   *    value is the proj4 string with the affine parameters removed.
+   */
+  function parse_projection(value) {
+    if (!/(^|\s)\+(s[1-3][1-3]|[xyz]off)=\S/.exec(value)) {
+      return {proj: value};
+    }
+    var mat = util.mat4AsArray(),
+        newvalue = [],
+        inv, result;
+    value.split(/(\s+)/).forEach((part) => {
+      var match = /^\+(s[1-3][1-3]|[xyz]off)=(.*)$/.exec(part);
+      if (!match) {
+        newvalue.push(part);
+      } else {
+        mat[AffineFactorPositions[match[1]]] = parseFloat(match[2]);
+      }
+    });
+    result = {
+      proj: newvalue.join(' '),
+      orig: value
+    };
+    inv = mat4.invert(util.mat4AsArray(), mat);
+    // only store if the matrix is invertable
+    if (inv) {
+      result.matrix = mat;
+      result.inverse = inv;
+    } else {
+      console.warn('Affine transform is not invertable and will not be used: ' + value);
+    }
+    return result;
+  }
 
   /**
    * Generate the internal proj4 object.
    * @private
    */
   function generate_proj4() {
-    m_proj = new proj4(
-      m_this.source(),
-      m_this.target()
-    );
+    var source_proj = parse_projection(m_this.source()),
+        target_proj = parse_projection(m_this.target()),
+        source = source_proj.proj,
+        target = target_proj.proj;
+    m_source_matrix = source_proj.matrix;
+    m_source_matrix_inv = source_proj.inverse;
+    m_target_matrix = target_proj.matrix;
+    m_target_matrix_inv = target_proj.inverse;
+    m_proj = new proj4(source, target);
   }
 
   /**
@@ -117,8 +188,16 @@ var transform = function (options) {
    * @returns {geo.geoPosition} A point object in the target coordinates.
    */
   this._forward = function (point) {
+    if (m_source_matrix) {
+      var mp = vec3.transformMat4(util.vec3AsArray(), [point.x, point.y, point.z || 0], m_source_matrix_inv);
+      point = {x: mp[0], y: mp[1], z: mp[2]};
+    }
     var pt = m_proj.forward(point);
     pt.z = point.z || 0;
+    if (m_target_matrix) {
+      var ip = vec3.transformMat4(util.vec3AsArray(), [pt.x, pt.y, pt.z], m_target_matrix);
+      pt = {x: ip[0], y: ip[1], z: ip[2]};
+    }
     return pt;
   };
 
@@ -130,8 +209,16 @@ var transform = function (options) {
    * @returns {geo.geoPosition} A point object in the source coordinates.
    */
   this._inverse = function (point) {
+    if (m_target_matrix) {
+      var mp = vec3.transformMat4(util.vec3AsArray(), [point.x, point.y, point.z || 0], m_target_matrix_inv);
+      point = {x: mp[0], y: mp[1], z: mp[2]};
+    }
     var pt = m_proj.inverse(point);
     pt.z = point.z || 0;
+    if (m_source_matrix) {
+      var ip = vec3.transformMat4(util.vec3AsArray(), [pt.x, pt.y, pt.z], m_source_matrix);
+      pt = {x: ip[0], y: ip[1], z: ip[2]};
+    }
     return pt;
   };
 

@@ -23,5 +23,5 @@ describe('ui', function () {
 
     myMap.draw();
     imageTest.imageTest('uiLayer', null, 0.0015, done, myMap.onIdle, 0, 2);
-  });
+  }, 30000);
 });
