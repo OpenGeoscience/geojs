@@ -118,6 +118,15 @@ describe('geo.featureLayer', function () {
       expect(layer.features().length).toBe(2);
       expect(layer.features()).toEqual([feat2, feat1]);
     });
+    it('gcsFeatures', function () {
+      expect(layer.gcsFeatures()).toBe(layer.map().ingcs());
+      layer.features()[0].gcs('+proj=longlat');
+      expect(layer.gcsFeatures()).toBe(undefined);
+      expect(layer.gcsFeatures('+proj=longlat')).toBe(layer);
+      expect(layer.gcsFeatures()).toBe('+proj=longlat');
+      expect(layer.gcsFeatures(null)).toBe(layer);
+      expect(layer.gcsFeatures()).toBe(layer.map().ingcs());
+    });
     it('visible', function () {
       expect(layer.visible()).toBe(true);
       expect(feat1.visible()).toBe(true);

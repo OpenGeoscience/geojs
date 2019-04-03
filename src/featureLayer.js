@@ -137,6 +137,38 @@ var featureLayer = function (arg) {
   };
 
   /**
+   * Get or set the gcs for all features.  For features, the default is usually
+   * the map's ingcs.
+   *
+   * @param {string?} [val] If `undefined`, return the current gcs.  If
+   *    `null`, use the map's interface gcs.  Otherwise, set a new value for
+   *    the gcs.  When getting the current gcs, if not all features have the
+   *    same gcs, `undefined` will be returned.
+   * @returns {string|this} A string used by {@link geo.transform}.  If the
+   *    map interface gcs is in use, that value will be returned.  If the gcs
+   *    is set, return the current class instance.
+   */
+  this.gcsFeatures = function (val) {
+    if (val === undefined) {
+      var gcs, mixed;
+      this.features().forEach((feature) => {
+        if (gcs === undefined) {
+          gcs = feature.gcs();
+        } else if (feature.gcs() !== gcs) {
+          mixed = true;
+        }
+      });
+      return mixed ? undefined : gcs;
+    }
+    m_this.features().forEach((feature) => {
+      if (feature.gcs() !== val) {
+        feature.gcs(val);
+      }
+    });
+    return m_this;
+  };
+
+  /**
    * Initialize.
    *
    * @returns {this}

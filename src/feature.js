@@ -33,8 +33,9 @@ var geo_event = require('./event');
  *   bin number, their order relative to one another is indeterminate and may
  *   be unstable.  A value of `null` will use the current position of the
  *   feature within its parent's list of children as the bin number.
- * @property {geo.renderer?} [renderer] A reference to the renderer used for
- *   the feature.
+ * @property {geo.renderer} [renderer] A reference to the renderer used for
+ *   the feature.  If `null` or unset or identical to `layer.renderer()`, the
+ *   layer's renderer is used.
  * @property {geo.feature.styleSpec} [style] An object that contains style
  *   values for the feature.
  */
@@ -120,7 +121,7 @@ var feature = function (arg) {
       m_gcs = arg.gcs,
       m_visible = arg.visible === undefined ? true : arg.visible,
       m_bin = arg.bin === undefined ? null : arg.bin,
-      m_renderer = arg.renderer === undefined ? null : arg.renderer,
+      m_renderer = arg.renderer === undefined || (m_layer && arg.renderer === m_layer.renderer()) ? null : arg.renderer,
       m_dataTime = timestamp(),
       m_buildTime = timestamp(),
       m_updateTime = timestamp(),
@@ -574,7 +575,7 @@ var feature = function (arg) {
    * @returns {geo.renderer} The renderer used to render the feature.
    */
   this.renderer = function () {
-    return m_renderer;
+    return m_renderer || (m_layer && m_layer.renderer());
   };
 
   /**
@@ -610,8 +611,8 @@ var feature = function (arg) {
     var map = m_layer.map();
     c = map.gcsToWorld(c, m_this.gcs());
     c = map.worldToDisplay(c);
-    if (m_renderer.baseToLocal) {
-      c = m_renderer.baseToLocal(c);
+    if (m_this.renderer().baseToLocal) {
+      c = m_this.renderer().baseToLocal(c);
     }
     return c;
   };

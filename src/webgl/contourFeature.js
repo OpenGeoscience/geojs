@@ -193,6 +193,15 @@ var webgl_contourFeature = function (arg) {
   };
 
   /**
+   * List vgl actors.
+   *
+   * @returns {vgl.actor[]} The list of actors.
+   */
+  this.actors = function () {
+    return m_actor ? [m_actor] : [];
+  };
+
+  /**
    * Build.
    */
   this._build = function () {

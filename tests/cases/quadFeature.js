@@ -529,6 +529,7 @@ describe('geo.quadFeature', function () {
       quads.data([testQuads[0], testQuads[1]]);
       map.draw();
       expect(buildTime).not.toEqual(quads.buildTime().timestamp());
+      expect(quads.actors().length).toBe(2);
     });
     waitForIt('next render gl B', function () {
       return vgl.mockCounts().activeTexture >= glCounts.activeTexture + 2 &&
@@ -541,6 +542,7 @@ describe('geo.quadFeature', function () {
       quads.data([testQuads[8], testQuads[9]]);
       map.draw();
       expect(buildTime).not.toEqual(quads.buildTime().timestamp());
+      expect(quads.actors().length).toBe(2);
     });
     waitForIt('next render gl C', function () {
       return vgl.mockCounts().activeTexture === glCounts.activeTexture &&
@@ -556,6 +558,7 @@ describe('geo.quadFeature', function () {
       }
       quads.data(data);
       map.draw();
+      expect(quads.actors().length).toBe(2);
     });
     waitForIt('next render gl D', function () {
       return vgl.mockCounts().deleteBuffer >= (glCounts.deleteBuffer || 0) + 2 &&

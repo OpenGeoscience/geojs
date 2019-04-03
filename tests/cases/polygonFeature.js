@@ -307,6 +307,16 @@ describe('geo.polygonFeature', function () {
         restoreWebglRenderer();
       });
     });
+    it('actors', function () {
+      mockWebglRenderer();
+      var map, layer, polygon;
+
+      map = createMap();
+      layer = map.createLayer('feature', {renderer: 'webgl'});
+      polygon = geo.webgl.polygonFeature({layer: layer});
+      expect(polygon.actors().length).toBe(1);
+      restoreWebglRenderer();
+    });
   });
 
   describe('Private utility methods', function () {
