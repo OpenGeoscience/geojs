@@ -429,4 +429,23 @@ describe('geo.transform', function () {
       )).toBeCloseTo(298340.559);
     });
   });
+
+  describe('proj4 with affine parameters', function () {
+    var source = '+proj=longlat +axis=enu',
+        target = '+proj=longlat +axis=enu +s11=1.046 +s12=0.0915 +s21=-0.0915 +s22=1.046 +xoff=-1054.2034 +yoff=-1160.01449';
+    it('transform', function () {
+      expect(closeToEqual(geo.transform.transformCoordinates(source, target, {x: 1, y: 2}), {x: -1052.974, y: -1158.014})).toBe(true);
+      expect(closeToEqual(geo.transform.transformCoordinates(target, source, {x: -1052.974, y: -1158.014}), {x: 1, y: 2})).toBe(true);
+    });
+    it('transform object forward', function () {
+      var proj = geo.transform({source: source, target: target});
+      expect(closeToEqual(proj.forward({x: 1, y: 2}), {x: -1052.974, y: -1158.014, z: 0})).toBe(true);
+      expect(closeToEqual(proj.inverse({x: -1052.974, y: -1158.014}), {x: 1, y: 2, z: 0})).toBe(true);
+    });
+    it('transform object inverse', function () {
+      var proj = geo.transform({source: target, target: source});
+      expect(closeToEqual(proj.inverse({x: 1, y: 2}), {x: -1052.974, y: -1158.014, z: 0})).toBe(true);
+      expect(closeToEqual(proj.forward({x: -1052.974, y: -1158.014}), {x: 1, y: 2, z: 0})).toBe(true);
+    });
+  });
 });

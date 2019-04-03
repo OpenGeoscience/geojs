@@ -23,5 +23,5 @@ describe('Pixel Alignment', function () {
     myMap.draw();
 
     imageTest.imageTest('pixelAlignment', null, 0, done, myMap.onIdle, 0, 2);
-  });
+  }, 30000);
 });
