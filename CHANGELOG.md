@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## Version 0.19.3
 
 ### Features
 - Layers that use webgl renderers automatically share contexts when possible.  Layers can switch renderers manually as well.  This largely avoids the limitation of number of webgl contexts in a browser.
