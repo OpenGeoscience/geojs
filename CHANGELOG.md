@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Improvements
+- Support affine transforms in the proj4 string (#986)
+
 ### Changes
 - The point clustering radius value is now in display pixels (#983)
 
