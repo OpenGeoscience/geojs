@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-### Improvements
+### Features
+- Layers that use webgl renderers automatically share contexts when possible.  Layers can switch renderers manually as well.  This largely avoids the limitation of number of webgl contexts in a browser.
 - Support affine transforms in the proj4 string (#986)
 
 ### Changes

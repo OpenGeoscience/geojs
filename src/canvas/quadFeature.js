@@ -81,7 +81,7 @@ var canvas_quadFeature = function (arg) {
         }
       }
     });
-    if (render) {
+    if (render && m_this.renderer()) {
       m_this.renderer()._render();
     }
     if (changing) {

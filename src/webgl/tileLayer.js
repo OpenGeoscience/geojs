@@ -157,9 +157,27 @@ var webgl_tileLayer = function () {
   };
 
   /**
-   * Clean up the layer.
+   * Cleanup.  This purges the texture and tile cache.
+   */
+  this._cleanup = function () {
+    var tile;
+    if (m_this.cache && m_this.cache._cache) {
+      for (var hash in m_this.cache._cache) {
+        tile = m_this.cache._cache[hash];
+        if (tile._image && tile._image._texture) {
+          delete tile._image._texture;
+        }
+      }
+      m_this.cache.clear();
+    }
+    m_this.clear();
+  };
+
+  /**
+   * Destroy.
    */
   this._exit = function () {
+    m_this._cleanup();
     m_this.deleteFeature(m_quadFeature);
     m_quadFeature = null;
     m_tiles = [];

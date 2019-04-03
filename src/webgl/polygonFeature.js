@@ -299,6 +299,15 @@ var webgl_polygonFeature = function (arg) {
   };
 
   /**
+   * List vgl actors.
+   *
+   * @returns {vgl.actor[]} The list of actors.
+   */
+  this.actors = function () {
+    return [m_actor];
+  };
+
+  /**
    * Build.
    *
    * @override

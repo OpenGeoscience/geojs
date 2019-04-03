@@ -11,7 +11,7 @@ describe('layerReorder', function () {
     myMap = common.createOsmMap(mapOptions, {url: '/testdata/white.jpg'});
 
     l1 = myMap.children()[0];
-    l2 = myMap.createLayer('feature', {renderer: 'webgl'});
+    l2 = myMap.createLayer('feature', {renderer: 'webgl', autoshareRenderer: false});
     l3 = myMap.createLayer('feature', {renderer: 'svg'});
     layers = [l1, l2, l3];
 
@@ -70,7 +70,7 @@ describe('layerReorder', function () {
     };
 
     step1();
-  });
+  }, 30000);
 
   it('layer move up', function (done) {
     var step1, step2, step3;
