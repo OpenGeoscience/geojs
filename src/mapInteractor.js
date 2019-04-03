@@ -73,7 +73,7 @@ var Mousetrap = require('mousetrap');
  * @property {object} [momentum] Enable momentum when panning and zooming.
  * @property {boolean} [momentum.enabled=true] Truthy to allow momentum.
  * @property {number} [momentum.maxSpeed=2.5] Maximum animation speed.
- * @property {number} [momentum.minSpeed=0.01] Animations top when they drop
+ * @property {number} [momentum.minSpeed=0.01] Animations stop when they drop
  *      below this speed.
  * @property {number} [momentum.stopTime=250] If the mouse hasn't moved in this
  *      many milliseconds, don't apply momentum.  The movement is a separate
