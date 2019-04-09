@@ -6,6 +6,32 @@ var feature = require('./feature');
  * Quad feature specification.
  *
  * @typedef {geo.feature.spec} geo.quadFeature.spec
+ * @property {object|function} [position] Position of the quad.  Default is
+ *   (data).  The position is an object which specifies the corners of the
+ *   quad: ll, lr, ur, ul.  At least two opposite corners must be specified.
+ *   The corners do not have to physically correspond to the order specified,
+ *   but rather correspond to that part of an image or video (if there is one).
+ *   If a corner is unspecified, it will use the x coordinate from one adjacent
+ *   corner, the y coordinate from the other adjacent corner, and the average
+ *   z value of those two corners.  For instance, if ul is unspecified, it is
+ *   {x: ll.x, y: ur.y}.  Note that each quad is rendered as a pair of
+ *   triangles: (ll, lr, ul) and (ur, ul, lr).  Nothing special is done for
+ *   quads that are not convex or quads that have substantially different
+ *   transformations for those two triangles.
+ * @property {boolean} [cacheQuads=true] If truthy, a set of internal
+ *   information is stored on each data item in the _cachedQuad attribute.  If
+ *   this is falsy, the data item is not altered.  If the data (positions,
+ *   opacity, etc.) of individual quads will change, set this to `false` or
+ *   call `cacheUpdate` on the data item or for all data.
+ * @property {geo.quadFeature.styleSpec} [style] Style object with default
+ *   style options.
+ */
+
+/**
+ * Style specification for a quad feature.
+ *
+ * @typedef {geo.feature.styleSpec} geo.quadFeature.styleSpec
+ * @extends geo.feature.styleSpec
  * @property {geo.geoColor|function} [color] Color for quads without images.
  *   Default is white (`{r: 1, g: 1, b: 1}`).
  * @property {number|function} [opacity=1] Opacity for the quads.
@@ -29,23 +55,6 @@ var feature = require('./feature');
  * @property {Image|string|function} [previewImage=null] If specified, an image
  *   to show on image quads while waiting for the quad-specific image to load.
  *   This will only be shown if it (the preview image) is already loaded.
- * @property {object|function} [position] Position of the quad.  Default is
- *   (data).  The position is an object which specifies the corners of the
- *   quad: ll, lr, ur, ul.  At least two opposite corners must be specified.
- *   The corners do not have to physically correspond to the order specified,
- *   but rather correspond to that part of an image or video (if there is one).
- *   If a corner is unspecified, it will use the x coordinate from one adjacent
- *   corner, the y coordinate from the other adjacent corner, and the average
- *   z value of those two corners.  For instance, if ul is unspecified, it is
- *   {x: ll.x, y: ur.y}.  Note that each quad is rendered as a pair of
- *   triangles: (ll, lr, ul) and (ur, ul, lr).  Nothing special is done for
- *   quads that are not convex or quads that have substantially different
- *   transformations for those two triangles.
- * @property {boolean} [cacheQuads=true] If truthy, a set of internal
- *   information is stored on each data item in the _cachedQuad attribute.  If
- *   this is falsy, the data item is not altered.  If the data (positions,
- *   opacity, etc.) of individual quads will change, set this to `false` or
- *   call `cacheUpdate` on the data item or for all data.
  */
 
 /**
