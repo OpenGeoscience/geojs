@@ -355,7 +355,7 @@ var map = function (arg) {
       var oldCenter = m_this.center(undefined, undefined);
       m_gcs = arg;
       reset_minimum_zoom();
-      var newZoom = fix_zoom(m_zoom);
+      var newZoom = m_this._fix_zoom(m_zoom);
       if (newZoom !== m_zoom) {
         m_this.zoom(newZoom);
       }
@@ -417,7 +417,7 @@ var map = function (arg) {
 
     /* The ignoreDiscreteZoom flag is intended to allow non-integer zoom values
      * during animation. */
-    val = fix_zoom(val, ignoreDiscreteZoom);
+    val = m_this._fix_zoom(val, ignoreDiscreteZoom);
     if (val === m_zoom) {
       return m_this;
     }
@@ -683,7 +683,7 @@ var map = function (arg) {
     m_height = arg.height || m_height;
 
     reset_minimum_zoom();
-    var newZoom = fix_zoom(m_zoom);
+    var newZoom = m_this._fix_zoom(m_zoom);
     if (newZoom !== m_zoom) {
       m_this.zoom(newZoom);
     }
@@ -1144,7 +1144,7 @@ var map = function (arg) {
       },
       end: {
         center: opts.center,
-        zoom: fix_zoom(opts.zoom),
+        zoom: m_this._fix_zoom(opts.zoom),
         rotation: fix_rotation(opts.rotation, undefined, true)
       },
       ease: opts.ease,
@@ -1205,7 +1205,7 @@ var map = function (arg) {
       if (time >= m_transition.end.time || next) {
         if (!next) {
           if (m_transition.end.center) {
-            var needZoom = m_zoom !== fix_zoom(m_transition.end.zoom);
+            var needZoom = m_zoom !== m_this._fix_zoom(m_transition.end.zoom);
             m_this.center(m_transition.end.center, null, needZoom, needZoom);
           }
           m_this.zoom(m_transition.end.zoom, m_transition.zoomOrigin);
@@ -1236,7 +1236,7 @@ var map = function (arg) {
       if (m_transition.zCoord) {
         p[2] = z2zoom(p[2]);
       }
-      if (fix_zoom(p[2], true) === m_zoom) {
+      if (m_this._fix_zoom(p[2], true) === m_zoom) {
         m_this.center({
           x: p[0],
           y: p[1]
@@ -1408,7 +1408,7 @@ var map = function (arg) {
     }
 
     // calculate the zoom to fit the bounds
-    zoom = fix_zoom(calculate_zoom(bounds, rotation));
+    zoom = m_this._fix_zoom(calculate_zoom(bounds, rotation));
 
     // clamp bounds if necessary
     bounds = fix_bounds(bounds, rotation);
@@ -1453,7 +1453,7 @@ var map = function (arg) {
 
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     // preprocess the arguments
-    zoom = fix_zoom(zoom, ignoreDiscreteZoom);
+    zoom = m_this._fix_zoom(zoom, ignoreDiscreteZoom);
     units = m_this.unitsPerPixel(zoom);
     center = m_this.gcsToWorld(center, null);
 
@@ -1847,6 +1847,33 @@ var map = function (arg) {
   };
 
   /**
+   * Return the nearest valid zoom level to the requested zoom.
+   * @param {number} zoom A zoom level to adjust to current settings
+   * @param {boolean} ignoreDiscreteZoom If `true`, ignore the `discreteZoom`
+   *    option when determining the new view.
+   * @returns {number} The zoom level clamped to the allowed zoom range and
+   *    with other settings applied.
+   * @private
+   */
+  this._fix_zoom = function (zoom, ignoreDiscreteZoom) {
+    zoom = Math.round(zoom * 1e6) / 1e6;
+    zoom = Math.max(
+      Math.min(
+        m_validZoomRange.max,
+        zoom
+      ),
+      m_validZoomRange.min
+    );
+    if (m_discreteZoom && !ignoreDiscreteZoom) {
+      zoom = Math.round(zoom);
+      if (zoom < m_validZoomRange.min) {
+        zoom = Math.ceil(m_validZoomRange.min);
+      }
+    }
+    return zoom;
+  };
+
+  /**
    * Draw a layer image to a canvas context.  The layer's opacity and transform
    * are applied.  This is used as part of making a screenshot.
    *
@@ -2034,33 +2061,6 @@ var map = function (arg) {
     } else {
       m_validZoomRange.min = m_validZoomRange.origMin;
     }
-  }
-
-  /**
-   * Return the nearest valid zoom level to the requested zoom.
-   * @param {number} zoom A zoom level to adjust to current settings
-   * @param {boolean} ignoreDiscreteZoom If `true`, ignore the `discreteZoom`
-   *    option when determining the new view.
-   * @returns {number} The zoom level clamped to the allowed zoom range and
-   *    with other settings applied.
-   * @private
-   */
-  function fix_zoom(zoom, ignoreDiscreteZoom) {
-    zoom = Math.round(zoom * 1e6) / 1e6;
-    zoom = Math.max(
-      Math.min(
-        m_validZoomRange.max,
-        zoom
-      ),
-      m_validZoomRange.min
-    );
-    if (m_discreteZoom && !ignoreDiscreteZoom) {
-      zoom = Math.round(zoom);
-      if (zoom < m_validZoomRange.min) {
-        zoom = Math.ceil(m_validZoomRange.min);
-      }
-    }
-    return zoom;
   }
 
   /**
@@ -2312,7 +2312,7 @@ var map = function (arg) {
 
   // Fix the zoom level (minimum and initial)
   this.zoomRange(arg, true);
-  m_zoom = fix_zoom(m_zoom);
+  m_zoom = this._fix_zoom(m_zoom);
   m_rotation = fix_rotation(m_rotation);
   // Now update to the correct center and zoom level
   this.center($.extend({}, arg.center || m_center), undefined);

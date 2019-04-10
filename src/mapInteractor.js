@@ -1603,31 +1603,36 @@ var mapInteractor = function (args) {
               zoom = startZoom + (targetZoom > startZoom ? 1 : -1);
             }
           }
-          map.transitionCancel('debounced_zoom.' + geo_action.zoom);
-          map.transition({
-            zoom: zoom,
-            zoomOrigin: origin,
-            duration: m_options.zoomAnimation.duration,
-            ease: m_options.zoomAnimation.ease,
-            done: function (status) {
-              status = status || {};
-              var zoomRE = new RegExp('\\.' + geo_action.zoom + '$');
-              if (!status.next && (!status.cancel ||
-                  ('' + status.source).search(zoomRE) < 0)) {
-                targetZoom = undefined;
+          zoom = Math.round(map._fix_zoom(zoom) * 1e6) / 1e6;
+          if (zoom !== map.zoom()) {
+            map.transitionCancel('debounced_zoom.' + geo_action.zoom);
+            map.transition({
+              zoom: zoom,
+              zoomOrigin: origin,
+              duration: m_options.zoomAnimation.duration,
+              ease: m_options.zoomAnimation.ease,
+              done: function (status) {
+                status = status || {};
+                var zoomRE = new RegExp('\\.' + geo_action.zoom + '$');
+                if (!status.next && (!status.cancel ||
+                    ('' + status.source).search(zoomRE) < 0)) {
+                  targetZoom = undefined;
+                }
+                /* If we were animating the zoom, if the zoom is continuous, just
+                 * stop where we are.  If using discrete zoom, we need to make
+                 * sure we end up discrete.  However, we don't want to do that if
+                 * the next action is further zooming. */
+                if (m_options.discreteZoom && status.cancel &&
+                    status.transition && status.transition.end &&
+                    ('' + status.source).search(zoomRE) < 0) {
+                  map.zoom(status.transition.end.zoom,
+                           status.transition.end.zoomOrigin);
+                }
               }
-              /* If we were animating the zoom, if the zoom is continuous, just
-               * stop where we are.  If using discrete zoom, we need to make
-               * sure we end up discrete.  However, we don't want to do that if
-               * the next action is further zooming. */
-              if (m_options.discreteZoom && status.cancel &&
-                  status.transition && status.transition.end &&
-                  ('' + status.source).search(zoomRE) < 0) {
-                map.zoom(status.transition.end.zoom,
-                         status.transition.end.zoomOrigin);
-              }
-            }
-          });
+            });
+          } else {
+            targetZoom = undefined;
+          }
         } else {
           zoom = deltaZ + map.zoom();
           if (m_options.discreteZoom) {

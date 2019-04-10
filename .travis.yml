@@ -8,8 +8,10 @@ node_js:
   - 8
 
 addons:
-  firefox: latest  # version 55.0 - 57.x have an issue with screenshots.
-  # firefox: 54.0.1
+  # version 55.0 - 57.x have an issue with screenshots.
+  # version 67.0 has an issue with touch events.
+  # firefox: latest
+  firefox: 66.0.5
   # We can change to a specific version of Chrome later.  Versions 68 - 70 have
   # an issue with webgl fallback rendering.
   chrome: stable
