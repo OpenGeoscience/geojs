@@ -456,15 +456,10 @@ var webgl_pointFeature = function (arg) {
    * @returns {this}
    */
   this._build = function () {
-
-    if (m_actor) {
-      m_this.renderer().contextRenderer().removeActor(m_actor);
-    }
-
     createGLPoints();
-
-    m_this.renderer().contextRenderer().addActor(m_actor);
-    m_this.renderer().contextRenderer().render();
+    if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
+      m_this.renderer().contextRenderer().addActor(m_actor);
+    }
     m_this.buildTime().modified();
     return m_this;
   };
