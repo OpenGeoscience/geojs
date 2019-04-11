@@ -1,5 +1,10 @@
 # Change Log
 
+## Version 0.19.4
+
+### Improvements
+- Speed up rebuilding webgl point features (#994)
+
 ## Version 0.19.3
 
 ### Features
