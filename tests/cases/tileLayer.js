@@ -441,6 +441,21 @@ describe('geo.tileLayer', function () {
       layer._update();
       expect(count).toBe(3);
     });
+    it('queueSize', function () {
+      var m = map(), layer;
+      opts.map = m;
+      layer = geo.tileLayer(opts);
+      expect(layer.queueSize).toBe(6);
+      expect(layer.initialQueueSize).toBe(0);
+      expect(layer._queue.size).toBe(6);
+      expect(layer._queue.initialSize).toBe(0);
+      layer.queueSize = 4;
+      expect(layer.queueSize).toBe(4);
+      expect(layer._queue.size).toBe(4);
+      layer.initialQueueSize = 1;
+      expect(layer.initialQueueSize).toBe(1);
+      expect(layer._queue.initialSize).toBe(1);
+    });
   });
   describe('Public utility methods', function () {
     describe('isValid', function () {

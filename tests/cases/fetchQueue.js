@@ -129,6 +129,46 @@ describe('geo.core.fetchQueue', function () {
       }, 0);
     });
 
+    it('initial queue size', function (done) {
+      var q = geo.fetchQueue({size: 4, initialSize: 3}), dlist = [];
+
+      expect(q.size).toBe(4);
+      expect(q.initialSize).toBe(3);
+      q.size = 2;
+      expect(q.size).toBe(2);
+      expect(q.initialSize).toBe(2);
+      q.initialSize = 1;
+      expect(q.size).toBe(2);
+      expect(q.initialSize).toBe(1);
+
+      for (var i = 0; i < 5; i += 1) {
+        dlist.push(make_deferred());
+        // add items at end of queue
+        q.add(dlist[i], dlist[i].process, true);
+      }
+      expect(q.length).toBe(4);
+      expect(q.processing).toBe(1);
+
+      // increasing the size shouldn't do anything
+      q.size = 3;
+      expect(q.size).toBe(3);
+      expect(q.length).toBe(4);
+      expect(q.processing).toBe(1);
+
+      dlist[0].defer.resolve();
+      window.setTimeout(function () { // wait for next time slice
+        expect(q.length).toBe(1);
+        expect(q.processing).toBe(3);
+
+        dlist[1].defer.resolve();
+        window.setTimeout(function () { // wait for next time slice
+          expect(q.length).toBe(0);
+          expect(q.processing).toBe(3);
+          done();
+        }, 0);
+      }, 0);
+    });
+
     it('queue removes and skips unneeded items', function (done) {
       var q = geo.fetchQueue({
         size: 2,
