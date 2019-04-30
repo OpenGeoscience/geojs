@@ -64,7 +64,7 @@ var imageTile = function (spec) {
   this.fetch = function () {
     var defer;
     if (!this._image) {
-      this._image = new Image(this.size.x, this.size.y);
+      this._image = new Image(this.right - this.left, this.bottom - this.top);
       // Only set the crossOrigin parameter if this is going across origins.
       if (this._cors && this._url.indexOf(':') >= 0 &&
           this._url.indexOf('/') === this._url.indexOf(':') + 1) {
