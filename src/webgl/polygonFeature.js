@@ -309,8 +309,6 @@ var webgl_polygonFeature = function (arg) {
 
   /**
    * Build.
-   *
-   * @override
    */
   this._build = function () {
     createGLPolygons(m_this.dataTime().timestamp() < m_this.buildTime().timestamp() && m_geometry);
