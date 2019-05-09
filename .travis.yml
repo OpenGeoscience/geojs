@@ -43,7 +43,7 @@ install:
   # Install for the website build
   - npm run setup-website
   # Download and extract the glslangValidator tool
-  - curl -OL https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Release.zip
+  - curl -OL https://github.com/KhronosGroup/glslang/releases/download/7.11.3214/glslang-master-linux-Release.zip
   - unzip glslang-master-linux-Release.zip bin/glslangValidator
 
 before_script:
