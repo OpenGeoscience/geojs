@@ -8,6 +8,9 @@
 ### Improvements
 - More response zooming via mouse wheel (#993)
 
+### Changes
+- Idle handlers no longer defer to scene-graph parents.  Parents still wait for all children to be idle
+
 ### Bug Fixes
 - Better handling of tiles with overlap (#997)
 
