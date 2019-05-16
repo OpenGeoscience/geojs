@@ -38,6 +38,7 @@ var fetchQueue = function (options) {
 
   options = options || {};
   this._size = options.size || 6;
+  this._initialSize = options.initialSize || 0;
   this._track = options.track || 600;
   this._needed = options.needed || null;
   this._batch = false;
@@ -54,6 +55,23 @@ var fetchQueue = function (options) {
     get: function () { return m_this._size; },
     set: function (n) {
       m_this._size = n;
+      if (m_this._initialSize > 1 && n < m_this._initialSize) {
+        m_this._initialSize = n;
+      }
+      m_this.next_item();
+    }
+  });
+
+  /**
+   * Get/set the initial maximum concurrent deferred object size.
+   * @property {number} size The initial maximum number of deferred objects.
+   *    `0` to use `size`.
+   * @name geo.fetchQueue#size
+   */
+  Object.defineProperty(this, 'initialSize', {
+    get: function () { return m_this._initialSize; },
+    set: function (n) {
+      m_this._initialSize = n;
       m_this.next_item();
     }
   });
@@ -119,6 +137,7 @@ var fetchQueue = function (options) {
       if (m_this._processing > 0) {
         m_this._processing -= 1;
       }
+      m_this._initialSize = 0;
       m_this.next_item();
     }).promise(defer);
     m_this.next_item();
@@ -217,7 +236,7 @@ var fetchQueue = function (options) {
         }
       }
     }
-    while (m_this._processing < m_this._size && m_this._queue.length) {
+    while (m_this._processing < (m_this._initialSize || m_this._size) && m_this._queue.length) {
       var defer = m_this._queue.shift();
       if (defer.__fetchQueue) {
         m_this._processing += 1;
