@@ -96,8 +96,8 @@ describe('geo.tile', function () {
       });
 
       expect(t.bottom).toEqual(12);
-      expect(t.left).toEqual(-1);
-      expect(t.top).toEqual(-2);
+      expect(t.left).toEqual(0);
+      expect(t.top).toEqual(0);
       expect(t.right).toEqual(11);
 
       t = geo.tile({

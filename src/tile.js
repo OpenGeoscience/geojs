@@ -165,6 +165,12 @@ var tile = function (spec) {
     right = left + this.size.x + this.overlap.x * 2;
     top = this.size.y * (this.index.y - index.y) - this.overlap.y - shift.y;
     bottom = top + this.size.y + this.overlap.y * 2;
+    if (this.overlap.x && this.index.x === index.x) {
+      left += this.overlap.x;
+    }
+    if (this.overlap.y && this.index.y === index.y) {
+      top += this.overlap.y;
+    }
     return {
       left: left,
       right: right,
@@ -191,7 +197,7 @@ var tile = function (spec) {
    */
   Object.defineProperty(this, 'top', {
     get: function () {
-      return this.size.y * this.index.y - this.overlap.y;
+      return this.size.y * this.index.y - (this.index.y ? this.overlap.y : 0);
     }
   });
 
@@ -202,7 +208,7 @@ var tile = function (spec) {
    */
   Object.defineProperty(this, 'left', {
     get: function () {
-      return this.size.x * this.index.x - this.overlap.x;
+      return this.size.x * this.index.x - (this.index.x ? this.overlap.x : 0);
     }
   });
 

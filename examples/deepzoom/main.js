@@ -11,8 +11,8 @@ var DeepZoom = function (arg) {
     return geo.imageTile({
       index: index,
       size: {
-        x: this._options.tileWidth + this._options.tileOverlap.x * 2,
-        y: this._options.tileHeight + this._options.tileOverlap.y * 2
+        x: this._options.tileWidth,
+        y: this._options.tileHeight
       },
       queue: this._queue,
       url: this._options.url(source || index),
@@ -30,6 +30,7 @@ var query = utils.getQuery();
 // You can specify a different Deep Zoom image via ?url=(url to dzi or xml)
 var dzi_url = query.url || 'https://mars.nasa.gov/msl/multimedia/deepzoom/images/PIA19818/dzc_output.xml';
 var dzi_base = dzi_url.split('.').slice(0, -1).join('.') + '_files';
+var dzi_query = dzi_url.indexOf('?') >= 0 ? dzi_url.substr(dzi_url.indexOf('?')) : '';
 
 // Read the Deep Zoom image information.
 $.get(dzi_url).then(function (dzi_info) {
@@ -60,7 +61,7 @@ $.get(dzi_url).then(function (dzi_info) {
       features: query.renderer ? undefined : ['quad.imageFixedScale'],
       // Specify a custom url for tiles.  Deep Zoom offsets the level by 8
       url: function (index) {
-        return dzi_base + '/' + (index.level + 8) + '/' + index.x + '_' + index.y + '.' + format;
+        return dzi_base + '/' + (index.level + 8) + '/' + index.x + '_' + index.y + '.' + format + dzi_query;
       },
       // Specify the tile overlap
       tileOverlap: {
