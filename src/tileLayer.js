@@ -18,6 +18,15 @@ var featureLayer = require('./featureLayer');
  *   zoom level.
  * @property {number} [cacheSize=400] The maximum number of tiles to cache.
  *   The default is 200 if keepLower is false.
+ * @property {number} [queueSize=6] The queue size.  Most browsers make at most
+ *   6 requests to any domain, so this should be no more than 6 times the
+ *   number of subdomains used.
+ * @property {number} [initialQueueSize=0] The initial queue size.  `0` to use
+ *   the queue size.  When querying a tile server that needs to load
+ *   information before serving the first time, having an initial queue size of
+ *   1 can reduce the load on the tile server.  After the initial queue of
+ *   tiles are loaded, the `queueSize` is used for all additional queries
+ *   unless the `initialQueueSize` is set again or the tile cache is reset.
  * @property {boolean} [keepLower=true] When truthy, keep lower zoom level
  *   tiles when showing high zoom level tiles.  This uses more memory but
  *   results in smoother transitions.
@@ -196,6 +205,8 @@ var tileLayer = function (arg) {
   var s_init = this._init,
       s_exit = this._exit,
       s_visible = this.visible,
+      m_queueSize = arg.queueSize || 6,
+      m_initialQueueSize = arg.initialQueueSize || 0,
       m_lastTileSet = [],
       m_maxBounds = [],
       m_exited,
@@ -221,7 +232,8 @@ var tileLayer = function (arg) {
   // initialize the tile fetch queue
   this._queue = fetchQueue({
     // this should probably be 6 * subdomains.length if subdomains are used
-    size: 6,
+    size: m_queueSize,
+    initialSize: m_initialQueueSize,
     // if track is the same as the cache size, then neither processing time
     // nor memory will be wasted.  Larger values will use more memory,
     // smaller values will do needless computations.
@@ -262,6 +274,33 @@ var tileLayer = function (arg) {
   Object.defineProperty(this, 'activeTiles', {get: function () {
     return $.extend({}, m_this._activeTiles); // copy on output
   }});
+
+  /**
+   * Get/set the queue size.
+   * @property {number} size The queue size.
+   * @name geo.tileLayer#queueSize
+   */
+  Object.defineProperty(this, 'queueSize', {
+    get: function () { return m_queueSize; },
+    set: function (n) {
+      m_queueSize = n;
+      m_this._queue.size = n;
+    }
+  });
+
+  /**
+   * Get/set the initial queue size.
+   * @property {number} size The initial queue size.  `0` to use the queue
+   *    size.
+   * @name geo.tileLayer#queueSize
+   */
+  Object.defineProperty(this, 'initialQueueSize', {
+    get: function () { return m_initialQueueSize; },
+    set: function (n) {
+      m_initialQueueSize = n || 0;
+      m_this._queue.initialSize = n || m_queueSize;
+    }
+  });
 
   /**
    * The number of tiles at the given zoom level.  The default implementation
@@ -1027,6 +1066,7 @@ var tileLayer = function (arg) {
   this.reset = function () {
     m_this.clear();
     m_this._cache.clear();
+    m_this._queue.initialSize = m_initialQueueSize;
     return m_this;
   };
 

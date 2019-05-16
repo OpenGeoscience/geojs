@@ -439,7 +439,7 @@ geo_event.feature = {
   mouseclick: 'geo_feature_mouseclick',
   /**
    * The event contains the `feature`, the `mouse` record, and `over`, the
-   * record of data elements that are unrder the mouse.
+   * record of data elements that are under the mouse.
    *
    * @event geo.event.feature.mouseclick_order
    * @type {geo.event.base}
