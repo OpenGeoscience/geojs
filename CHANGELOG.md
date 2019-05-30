@@ -1,5 +1,16 @@
 # Change Log
 
+## Unreleased
+
+### Features
+- Fetch queues can have an initial size different from their regular size (#1000)
+
+### Improvements
+- More response zooming via mouse wheel (#993)
+
+### Bug Fixes
+- Better handling of tiles with overlap (#997)
+
 ## Version 0.19.4
 
 ### Improvements
