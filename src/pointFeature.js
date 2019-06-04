@@ -231,7 +231,7 @@ var pointFeature = function (arg) {
    * data changes.
    */
   this._updateRangeTree = function () {
-    if (m_rangeTreeTime.timestamp() >= m_this.dataTime().timestamp()) {
+    if (m_rangeTreeTime.timestamp() >= m_this.dataTime().timestamp() && m_rangeTreeTime.timestamp() >= m_this.timestamp()) {
       return;
     }
     var pts, position,
@@ -274,6 +274,7 @@ var pointFeature = function (arg) {
     var min, max, data, idx = [], found = [], ifound = [], map, pt,
         fgcs = m_this.gcs(), // this feature's gcs
         corners,
+        fill = m_this.style.get('fill'),
         stroke = m_this.style.get('stroke'),
         strokeWidth = m_this.style.get('strokeWidth'),
         radius = m_this.style.get('radius');
@@ -314,11 +315,14 @@ var pointFeature = function (arg) {
     // Filter by circular region
     idx.forEach(function (i) {
       var d = data[i],
-          p = m_this.position()(d, i),
+          hasstroke = stroke(data[i], i);
+      if (!hasstroke && !fill(data[i], i)) {
+        return;
+      }
+      var p = m_this.position()(d, i),
           dx, dy, rad, rad2;
-
       rad = radius(data[i], i);
-      rad += stroke(data[i], i) ? strokeWidth(data[i], i) : 0;
+      rad += hasstroke ? strokeWidth(data[i], i) : 0;
       if (rad) {
         rad2 = rad * rad;
         p = map.gcsToDisplay(p, fgcs);

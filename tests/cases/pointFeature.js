@@ -129,9 +129,16 @@ describe('geo.pointFeature', function () {
       expect(pt.found.length).toBe(1);
       pt = point.pointSearch(map.displayToGcs({x: p.x, y: p.y + 4.05}));
       expect(pt.found.length).toBe(0);
-      /* We should match two coincident pointss */
+      /* We should match two coincident points */
       pt = point.pointSearch({x: 50, y: 10});
       expect(pt.found.length).toBe(2);
+      /* If a point has no fill or stroke, it won't be found. */
+      point.style({
+        fill: function (d, i) { return i !== 16; },
+        stroke: function (d, i) { return i !== 16; }
+      });
+      pt = point.pointSearch({x: 50, y: 10});
+      expect(pt.found.length).toBe(1);
       /* If we have zero-length data, we get no matches */
       point.data([]);
       pt = point.pointSearch({x: 22, y: 10});
