@@ -9,6 +9,7 @@ describe('Testing onIdle event handling', function () {
       var obj = geo.object(), called = false;
 
       expect(obj.idle).toBe(true);
+      expect(obj._promises).toBe(0);
       obj.onIdle(function () {
         called = true;
       });
@@ -21,11 +22,13 @@ describe('Testing onIdle event handling', function () {
 
       obj.addPromise(defer);
       expect(obj.idle).toBe(false);
+      expect(obj._promises).toBe(1);
       window.setTimeout(function () {
         var called = false;
         defer.resolve();
 
         expect(obj.idle).toBe(true);
+        expect(obj._promises).toBe(0);
         obj.onIdle(function () {
           called = true;
         });

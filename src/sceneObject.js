@@ -23,11 +23,10 @@ var sceneObject = function (arg) {
       m_children = [],
       s_exit = this._exit,
       s_trigger = this.geoTrigger,
-      s_addPromise = this.addPromise,
-      s_onIdle = this.onIdle;
+      s_addPromise = this.addPromise;
 
   /**
-   * Override object.addPromise to propagate up the scene tree.
+   * Add the promise here and also propagate up the scene tree.
    *
    * @param {Promise} promise A promise object.
    * @returns {this}
@@ -35,24 +34,8 @@ var sceneObject = function (arg) {
   this.addPromise = function (promise) {
     if (m_parent) {
       m_parent.addPromise(promise);
-    } else {
-      s_addPromise(promise);
     }
-    return m_this;
-  };
-
-  /**
-   * Override object.onIdle to propagate up the scene tree.
-   *
-   * @param {function} handler A function taking no arguments.
-   * @returns {this}
-   */
-  this.onIdle = function (handler) {
-    if (m_parent) {
-      m_parent.onIdle(handler);
-    } else {
-      s_onIdle(handler);
-    }
+    s_addPromise(promise);
     return m_this;
   };
 

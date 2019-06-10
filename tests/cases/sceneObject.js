@@ -231,18 +231,18 @@ describe('geo.sceneObject', function () {
     root.addChild(child2);
     child2.addChild(child3);
 
-    it('child defers to parent', function () {
+    it('child propagates to parent', function () {
       var defer = $.Deferred(),
           handlerRoot = new CallCounter(null),
           handler1 = new CallCounter(null),
           handler2 = new CallCounter(null),
           handler3 = new CallCounter(null);
 
-      function checkCallCount(count) {
-        expect(handlerRoot.ncalls).toBe(count);
-        expect(handler1.ncalls).toBe(count);
-        expect(handler2.ncalls).toBe(count);
-        expect(handler3.ncalls).toBe(count);
+      function checkCallCount(countr, count1, count2, count3) {
+        expect(handlerRoot.ncalls).toBe(countr);
+        expect(handler1.ncalls).toBe(count1);
+        expect(handler2.ncalls).toBe(count2);
+        expect(handler3.ncalls).toBe(count3);
       }
 
       child3.addPromise(defer);
@@ -251,27 +251,27 @@ describe('geo.sceneObject', function () {
       child2.onIdle(handler2.call);
       child3.onIdle(handler3.call);
 
-      checkCallCount(0);
+      checkCallCount(0, 1, 0, 0);
 
       defer.resolve();
 
-      checkCallCount(1);
+      checkCallCount(1, 1, 1, 1);
 
       defer = $.Deferred();
       child3.addPromise(defer);
 
-      checkCallCount(1);
+      checkCallCount(1, 1, 1, 1);
 
       defer.resolve();
 
-      checkCallCount(1);
+      checkCallCount(1, 1, 1, 1);
 
       root.onIdle(handlerRoot.call);
       child1.onIdle(handler1.call);
       child2.onIdle(handler2.call);
       child3.onIdle(handler3.call);
 
-      checkCallCount(2);
+      checkCallCount(2, 2, 2, 2);
     });
 
     it('aysnchronous events from multiple children', function (done) {
