@@ -30,6 +30,11 @@ var transform = require('./transform');
  *   each polygon has a uniform style (uniform fill color, fill opacity, stroke
  *   color, and stroke opacity).  Can vary by polygon.
  * @property {boolean|function} [closed=true] Ignored.  Always `true`.
+ * @property {number[]|function} [origin] Origin in map gcs coordinates used
+ *   for to ensure high precision drawing in this location.  When called as a
+ *   function, this is passed an array of items, each of which has a vertices
+ *   property that is a single continuous array in map gcs coordinates.  It
+ *   defaults to the first polygon's first vertex's position.
  */
 
 /**
@@ -583,7 +588,15 @@ var polygonFeature = function (arg) {
         strokeColor: {r: 0.0, g: 1.0, b: 1.0},
         strokeOpacity: 1.0,
         polygon: function (d) { return d; },
-        position: function (d) { return d; }
+        position: function (d) { return d; },
+        origin: (items) => {
+          for (let i = 0; i < items.length; i += 1) {
+            if (items[i].vertices.length >= 3) {
+              return items[i].vertices.slice(0, 3);
+            }
+          }
+          return [0, 0, 0];
+        }
       },
       arg.style === undefined ? {} : arg.style
     );

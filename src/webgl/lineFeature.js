@@ -75,6 +75,8 @@ var webgl_lineFeature = function (arg) {
       m_flagsUniform,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
       m_geometry,
+      m_origin,
+      m_modelViewUniform,
       s_init = this._init,
       s_update = this._update;
 
@@ -186,6 +188,16 @@ var webgl_lineFeature = function (arg) {
 
       position = transform.transformCoordinates(
         m_this.gcs(), m_this.layer().map().gcs(), position, 3);
+      m_origin = new Float32Array(m_this.style.get('origin')(position));
+      if (m_origin[0] || m_origin[1] || m_origin[2]) {
+        for (i = 0; i < position.length; i += 3) {
+          position[i] -= m_origin[0];
+          position[i + 1] -= m_origin[1];
+          position[i + 2] -= m_origin[2];
+        }
+      }
+      m_modelViewUniform.setOrigin(m_origin);
+
       len = numSegments * orderLen;
       posBuf = util.getGeomBuffer(geom, 'pos', len * 3);
       prevBuf = util.getGeomBuffer(geom, 'prev', len * 3);
@@ -381,7 +393,6 @@ var webgl_lineFeature = function (arg) {
         strkColorAttr = vgl.vertexAttribute('strokeColor'),
         strkOpacityAttr = vgl.vertexAttribute('strokeOpacity'),
         // Shader uniforms
-        mviUnif = new vgl.modelViewUniform('modelViewMatrix'),
         prjUnif = new vgl.projectionUniform('projectionMatrix'),
         geom = vgl.geometryData(),
         // Sources
@@ -402,6 +413,7 @@ var webgl_lineFeature = function (arg) {
           1, vgl.vertexAttributeKeysIndexed.Three, {name: 'strokeOpacity'}),
         // Primitive indices
         triangles = vgl.triangles();
+    m_modelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix');
 
     m_pixelWidthUnif = new vgl.floatUniform(
       'pixelWidth', 1.0 / m_this.renderer().width());
@@ -424,7 +436,7 @@ var webgl_lineFeature = function (arg) {
     prog.addVertexAttribute(farAttr, vgl.vertexAttributeKeysIndexed.Six);
     prog.addVertexAttribute(flagsAttr, vgl.vertexAttributeKeysIndexed.Seven);
 
-    prog.addUniform(mviUnif);
+    prog.addUniform(m_modelViewUniform);
     prog.addUniform(prjUnif);
     prog.addUniform(m_pixelWidthUnif);
     prog.addUniform(m_aspectUniform);
