@@ -54,6 +54,20 @@ var object = function () {
   });
 
   /**
+   * Private getter for the number of outstanding promises.
+   *
+   * @property {number} _promises The number of outstanding promises.  If this
+   *    is zero, the object is idle.
+   * @name geo.object#_promises
+   */
+  Object.defineProperty(this, '_promises', {
+    get: function () {
+      return m_promiseCount;
+    },
+    configurable: true
+  });
+
+  /**
    * Add a new promise object preventing idle event handlers from being called
    * until it is resolved.
    *
