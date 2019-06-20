@@ -559,7 +559,8 @@ var mapInteractor = function (args) {
    */
   this.hasTouchSupport = function () {
     return ('ontouchstart' in window) || // touch events
-           (window.Modernizr && window.Modernizr.touch) || // modernizr
+           (window.TouchEvent) ||
+           (window.DocumentTouch && document instanceof window.DocumentTouch) ||
            (navigator.msMaxTouchPoints || navigator.maxTouchPoints) > 1; // pointer events
   };
 
