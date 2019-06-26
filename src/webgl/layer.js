@@ -136,8 +136,6 @@ var webgl_layer = function () {
       map._updateAutoshareRenderers = function () {
         var layers = map.sortedLayers(),
             renderer,
-            used_canvases = [],
-            canvases = [],
             rerender_list = [],
             opacity;
         layers.forEach(function (layer) {
@@ -149,12 +147,10 @@ var webgl_layer = function () {
               rerender_list.push(layer.renderer());
             }
             renderer = layer.renderer();
-            used_canvases.push(renderer.canvas()[0]);
             opacity = layer.opacity();
           } else {
             if (layer.renderer() !== renderer) {
               rerender_list.push(layer.renderer());
-              canvases.push(layer.renderer().canvas()[0]);
               layer.switchRenderer(renderer, false);
               rerender_list.push(layer.renderer());
             }
@@ -169,15 +165,13 @@ var webgl_layer = function () {
         });
         layers.forEach(function (layer) {
           if (rerender_list.indexOf(layer.renderer()) >= 0) {
-            layer.renderer()._render();
+            layer.renderer()._renderFrame();
             rerender_list = rerender_list.filter((val) => val !== layer.renderer());
           }
         });
-        canvases.forEach(function (canvas) {
-          if (used_canvases.indexOf(canvas) < 0) {
-            canvas.remove();
-            used_canvases.push(canvas);
-          }
+        /* explicitly exit any renderers we no longer use */
+        rerender_list.forEach(function (renderer) {
+          renderer._exit();
         });
       };
 
