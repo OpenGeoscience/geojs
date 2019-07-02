@@ -195,11 +195,13 @@ var lineFeature = function (arg) {
    * the narrow end.
    *
    * @param {geo.geoPosition} p point to search for in map interface gcs.
-   * @returns {object} An object with `index`: a list of line indices, and
-   *    `found`: a list of quads that contain the specified coordinate.
+   * @returns {object} An object with `index`: a list of line indices, `found`:
+   *    a list of quads that contain the specified coordinate, and `extra`: am
+   *    object with keys that are line indices and values that are the first
+   *    segement index for which the line was matched.
    */
   this.pointSearch = function (p) {
-    var data = m_this.data(), indices = [], found = [];
+    var data = m_this.data(), indices = [], found = [], extra = {};
     if (!data || !data.length || !m_this.layer()) {
       return {
         found: found,
@@ -219,13 +221,15 @@ var lineFeature = function (arg) {
         if (util.distance2dToLineSquared(pt, record[j].u, record[j].v) <= record[j].r2 * scale2) {
           found.push(data[i]);
           indices.push(i);
+          extra[i] = j;
           break;
         }
       }
     }
     return {
       found: found,
-      index: indices
+      index: indices,
+      extra: extra
     };
   };
 
