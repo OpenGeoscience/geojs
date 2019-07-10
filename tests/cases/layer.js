@@ -323,12 +323,74 @@ describe('geo.webgl.layer', function () {
       restoreWebglRenderer();
     });
   });
-  describe('autoshareRenderer is true', function () {
+  describe('autoshareRenderer is true"', function () {
     var map, layer1, layer2, layer3;
     it('_init', function (done) {
       mockWebglRenderer();
       sinon.stub(console, 'log', function () {});
       map = createMap();
+      layer1 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/white.jpg'});
+      layer2 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/weather.png', keepLower: false});
+      layer3 = map.createLayer('feature', {renderer: 'webgl'});
+      layer3.createFeature('point', {}).data([{x: 2, y: 1}]);
+      map.onIdle(function () {
+        expect($('canvas', map.node()).length).toBe(1);
+        done();
+      });
+    });
+    it('visible', function () {
+      layer1.visible(false);
+      expect($('canvas', map.node()).length).toBe(1);
+      layer1.visible(true);
+      expect($('canvas', map.node()).length).toBe(1);
+      layer2.visible(false);
+      expect($('canvas', map.node()).length).toBe(1);
+      layer2.visible(true);
+      expect($('canvas', map.node()).length).toBe(1);
+    });
+    it('opacity', function () {
+      layer1.opacity(0.5);
+      expect($('canvas', map.node()).length).toBe(2);
+      layer2.opacity(0.5);
+      expect($('canvas', map.node()).length).toBe(3);
+      layer1.opacity(1);
+      expect($('canvas', map.node()).length).toBe(3);
+      layer2.opacity(1);
+      expect($('canvas', map.node()).length).toBe(1);
+    });
+    it('zIndex', function () {
+      expect($('canvas', layer1.node()).length).toBe(1);
+      expect($('canvas', layer2.node()).length).toBe(0);
+      expect($('canvas', layer3.node()).length).toBe(0);
+      layer1.moveUp();
+      expect($('canvas', map.node()).length).toBe(1);
+      expect($('canvas', layer1.node()).length).toBe(0);
+      expect($('canvas', layer2.node()).length).toBe(1);
+      expect($('canvas', layer3.node()).length).toBe(0);
+      layer1.moveUp();
+      expect($('canvas', map.node()).length).toBe(2);
+      expect($('canvas', layer1.node()).length).toBe(1);
+      expect($('canvas', layer2.node()).length).toBe(1);
+      expect($('canvas', layer3.node()).length).toBe(0);
+      layer1.moveToBottom();
+      expect($('canvas', map.node()).length).toBe(1);
+      expect($('canvas', layer1.node()).length).toBe(1);
+      expect($('canvas', layer2.node()).length).toBe(0);
+      expect($('canvas', layer3.node()).length).toBe(0);
+    });
+    it('cleanup', function () {
+      console.log.restore();
+      destroyMap();
+      restoreWebglRenderer();
+    });
+  });
+  describe('autoshareRenderer is "more"', function () {
+    var map, layer1, layer2, layer3;
+    it('_init', function (done) {
+      mockWebglRenderer();
+      sinon.stub(console, 'log', function () {});
+      map = createMap();
+      map.autoshareRenderer('more');
       layer1 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/white.jpg'});
       layer2 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/weather.png', keepLower: false});
       layer3 = map.createLayer('feature', {renderer: 'webgl'});
@@ -390,9 +452,9 @@ describe('geo.webgl.layer', function () {
       mockWebglRenderer();
       sinon.stub(console, 'log', function () {});
       map = createMap();
-      layer1 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/white.jpg'});
+      layer1 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/white.jpg', autoshareRenderer: 'more'});
       layer2 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/weather.png', keepLower: false, autoshareRenderer: false});
-      layer3 = map.createLayer('feature', {renderer: 'webgl'});
+      layer3 = map.createLayer('feature', {renderer: 'webgl', autoshareRenderer: 'more'});
       layer3.createFeature('point', {}).data([{x: 2, y: 1}]);
       map.onIdle(function () {
         expect($('canvas', map.node()).length).toBe(3);

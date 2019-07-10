@@ -56,6 +56,9 @@ var sceneObject = require('./sceneObject');
  *   maximum bounds in the vertical direction.
  * @property {boolean} [clampZoom=true] Prevent zooming out so that the map
  *   area is smaller than the window.
+ * @property {boolean|string} [autoshareRenderer] If specified, pass this value
+ *   to layers when they are created.  See
+ *   {@link geo.layer.spec#autoshareRenderer} for valid values.
  */
 
 /**
@@ -133,6 +136,7 @@ var map = function (arg) {
       m_clampZoom,
       m_animationQueue = arg.animationQueue || [],
       m_autoResize = arg.autoResize === undefined ? true : arg.autoResize,
+      m_autoshareRenderer = arg.autoshareRenderer,
       m_origin;
 
   /* Compute the maximum bounds on our map projection.  By default, x ranges
@@ -614,6 +618,9 @@ var map = function (arg) {
    */
   this.createLayer = function (layerName, arg) {
     arg = arg || {};
+    if (m_this.autoshareRenderer() !== undefined) {
+      arg = Object.assign({autoshareRenderer: m_this.autoshareRenderer()}, arg);
+    }
     var newLayer = registry.createLayer(
       layerName, m_this, arg);
 
@@ -1871,6 +1878,22 @@ var map = function (arg) {
       }
     }
     return zoom;
+  };
+
+  /**
+   * Get or set the setting of autoshareRenderer.
+   *
+   * @param {boolean|string|null} [arg] If specified, the new value for
+   *   autoshareRender that gets passed to created layers.  `null` will clear
+   *   the value.
+   * @returns {boolean|string|this}
+   */
+  this.autoshareRenderer = function (arg) {
+    if (arg === undefined) {
+      return m_autoshareRenderer;
+    }
+    m_autoshareRenderer = arg === null ? undefined : arg;
+    return m_this;
   };
 
   /**

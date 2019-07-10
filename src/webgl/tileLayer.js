@@ -3,6 +3,9 @@ var tileLayer = require('../tileLayer');
 
 var webgl_tileLayer = function () {
   'use strict';
+
+  var geo_event = require('../event');
+
   var m_this = this,
       s_init = this._init,
       s_exit = this._exit,
@@ -132,14 +135,26 @@ var webgl_tileLayer = function () {
    */
   this.zIndex = function (zIndex, allowDuplicate) {
     if (zIndex !== undefined) {
-      /* If the z-index has changed, clear the quads so they are composited in
-       * the correct order. */
-      m_this.clear();
-      if (m_quadFeature) {
-        m_quadFeature.modified();
-      }
+      this._clearQuads(true);
     }
     return s_zIndex.apply(m_this, arguments);
+  };
+
+  /**
+   * If the z-index has changed or layers are added or removed, clear the quads
+   * so they are composited in the correct order.
+   *
+   * @param {boolean} [noredraw] If truthy, don't redraw after clearing the
+   *    quads.
+   */
+  this._clearQuads = function (noredraw) {
+    m_this.clear();
+    if (m_quadFeature) {
+      m_quadFeature.modified();
+    }
+    if (noredraw !== true) {
+      this.draw();
+    }
   };
 
   /**
@@ -197,6 +212,10 @@ var webgl_tileLayer = function () {
     m_quadFeature.gcs(m_this._options.gcs || m_this.map().gcs());
     m_quadFeature.data(m_tiles);
     m_quadFeature._update();
+
+    var map = m_this.map();
+    map.geoOn(geo_event.layerAdd, this._clearQuads);
+    map.geoOn(geo_event.layerRemove, this._clearQuads);
   };
 
   /* These functions don't need to do anything. */

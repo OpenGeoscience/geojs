@@ -17,14 +17,17 @@ var rendererForAnnotations = require('./registry').rendererForAnnotations;
  *   to determine the renderer.  If a {@link geo.renderer} instance, the
  *   renderer is not recreated; not all renderers can be shared by multiple
  *   layers.
- * @property {boolean} [autoshareRenderer=true] If truthy and the renderer
- *   supports it, auto-share renderers between layers.  Currently, auto-sharing
- *   can only occur for webgl renderers, and will only occur between adjacent
- *   layers than have the same opacity.  Shared renderers has slightly
- *   different behavior than non-shared renderers: changing z-index may result
- *   in rerendering and be slightly slower; only one DOM canvas is used for all
- *   shared renderers.  Some features have slight z-stacking differences in
- *   shared versus non-shared renderers.
+ * @property {boolean|string} [autoshareRenderer=true] If truthy and the
+ *   renderer supports it, auto-share renderers between layers.  Currently,
+ *   auto-sharing can only occur for webgl renderers and adjacent layers.  If
+ *   `true`, sharing will only occur if the layers have the same opacity and it
+ *   is 1 or 0 and any tile layers are below non-tile layers.  If `"more"`,
+ *   sharing will occur for any adjacent layers that have the same opacity.
+ *   Shared renderers has slightly different behavior than non-shared
+ *   renderers: changing z-index may result in rerendering and be slightly
+ *   slower; only one DOM canvas is used for all shared renderers.  Some
+ *   features have slight z-stacking differences in shared versus non-shared
+ *   renderers.
  * @property {HTMLElement} [canvas] If specified, use this canvas rather than
  *   a canvas associaied with the renderer directly.  Renderers may not support
  *   sharing a canvas.
@@ -137,7 +140,7 @@ var layer = function (arg) {
   /**
    * Get the setting of autoshareRenderer.
    *
-   * @returns {boolean}
+   * @returns {boolean|string}
    */
   this.autoshareRenderer = function () {
     return m_autoshareRenderer;
