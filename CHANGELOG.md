@@ -4,15 +4,18 @@
 
 ### Features
 - Fetch queues can have an initial size different from their regular size (#1000)
+- Autoshare renderers now has three states, with the default being more likely to not change anythign visually (#1011)
 
 ### Improvements
 - More response zooming via mouse wheel (#993)
+- Explicitly exit retired renderers when autosharing renderers (#1007)
 
 ### Changes
-- Idle handlers no longer defer to scene-graph parents.  Parents still wait for all children to be idle
+- Idle handlers no longer defer to scene-graph parents.  Parents still wait for all children to be idle (#1001)
+- Better handling of tiles with overlap (#997)
 
 ### Bug Fixes
-- Better handling of tiles with overlap (#997)
+- Shared tile layers stack properly by clearing quads on layer addition and removal (#1010)
 
 ## Version 0.19.4
 
