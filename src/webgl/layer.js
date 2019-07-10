@@ -6,6 +6,7 @@ var webgl_layer = function () {
   var createRenderer = require('../registry').createRenderer;
   var geo_event = require('../event');
   var webglRenderer = require('./webglRenderer');
+  var tileLayer = require('../tileLayer');
 
   var m_this = this,
       s_init = this._init,
@@ -137,23 +138,28 @@ var webgl_layer = function () {
         var layers = map.sortedLayers(),
             renderer,
             rerender_list = [],
-            opacity;
+            opacity,
+            lowerTileLayers;
         layers.forEach(function (layer) {
-          if (!layer.autoshareRenderer() || !layer.renderer() || layer.renderer().api() !== webglRenderer.apiname) {
+          let autoshare = layer.autoshareRenderer(),
+              isTileLayer = layer instanceof tileLayer;
+          if (!autoshare || !layer.renderer() || layer.renderer().api() !== webglRenderer.apiname) {
             renderer = null;
-          } else if (!renderer || layer.opacity() !== opacity) {
+          } else if (!renderer || layer.opacity() !== opacity || (autoshare !== 'more' && ((layer.opacity() > 0 && layer.opacity() < 1) || (isTileLayer && !lowerTileLayers)))) {
             if (!layer.node()[0].contains(layer.renderer().canvas()[0])) {
               layer.switchRenderer(createRenderer(webglRenderer.apiname, layer), false);
               rerender_list.push(layer.renderer());
             }
             renderer = layer.renderer();
             opacity = layer.opacity();
+            lowerTileLayers = isTileLayer;
           } else {
             if (layer.renderer() !== renderer) {
               rerender_list.push(layer.renderer());
               layer.switchRenderer(renderer, false);
               rerender_list.push(layer.renderer());
             }
+            lowerTileLayers &= isTileLayer;
           }
         });
         layers.forEach(function (layer) {
