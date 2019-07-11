@@ -123,10 +123,12 @@ describe('geo.lineFeature', function () {
        * line, but not on an open line */
       pt = line.pointSearch({x: 31, y: 12.5});
       expect(pt.found.length).toBe(1);
+      expect(pt.extra[1]).toBe(2);
       pt = line.pointSearch({x: 31, y: 22.5});
       expect(pt.found.length).toBe(0);
       pt = line.pointSearch({x: 31, y: 32.5});
       expect(pt.found.length).toBe(1);
+      expect(pt.extra[3]).toBe(2);
       /* On a closed line, we should find a point between the first and last
        * point, but not between the first and a point that isn't the second or
        * last. */

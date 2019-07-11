@@ -155,8 +155,11 @@ var quadFeature = function (arg) {
    *
    * @param {geo.geoPosition} coordinate Coordinate in input gcs to check if it
    *    is located in any quad in map interface gcs.
-   * @returns {object} An object with `index`: a list of quad indices, and
-   *    `found`: a list of quads that contain the specified coordinate.
+   * @returns {object} An object with `index`: a list of quad indices, `found`:
+   *    a list of quads that contain the specified coordinate, and `extra`: an
+   *    object with keys that are quad indices and values that are objects with
+   *    `basis.x` and `basis.y`, values from 0 - 1 relative to interior of the
+   *    quad.
    */
   this.pointSearch = function (coordinate) {
     var found = [], indices = [], extra = {},
