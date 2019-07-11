@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## Version 0.19.5
 
 ### Features
 - Fetch queues can have an initial size different from their regular size (#1000)
