@@ -1695,7 +1695,9 @@ describe('mapInteractor', function () {
         interactor = geo.mapInteractor({map: map}),
         clickTriggered = 0;
 
-    expect(interactor.hasTouchSupport()).toBe(true);
+    if (!interactor.hasTouchSupport()) {
+      interactor.options({alwaysTouch: true});
+    }
 
     // check the pan event was called
     interactor.simulateEvent(
@@ -1859,7 +1861,9 @@ describe('Optional Dependencies', function () {
     var map = geo.map({node: '#mapNode1'}),
         interactor = map.interactor();
 
-    expect(interactor.hasTouchSupport()).toBe(true);
+    if (!interactor.hasTouchSupport()) {
+      interactor.options({alwaysTouch: true});
+    }
     expect(map.center().x).toBeCloseTo(0);
     // We shouldn't process pan touch events
     interactor.simulateEvent(
