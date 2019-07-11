@@ -37,6 +37,10 @@ var feature = require('./feature');
  * @property {geo.geoColor|function} [fillColor] Color to fill each point.
  * @property {number|function} [fillOpacity=1] Opacity for each point.  Opacity
  *   is on a [0-1] scale.
+ * @property {number[]|function} [origin] Origin in map gcs coordinates used
+ *   for to ensure high precision drawing in this location.  When called as a
+ *   function, this is passed the point positions as a single continuous array
+ *   in map gcs coordinates.  It defaults to the first point's position.
  */
 
 /**
@@ -312,6 +316,7 @@ var pointFeature = function (arg) {
     // Find points inside the bounding box
     idx = m_rangeTree.range(min.x, min.y, max.x, max.y);
 
+    idx.sort((a, b) => a - b);
     // Filter by circular region
     idx.forEach(function (i) {
       var d = data[i],
@@ -411,7 +416,8 @@ var pointFeature = function (arg) {
         fillColor: { r: 1.0, g: 0.839, b: 0.439 },
         fill: true,
         fillOpacity: 0.8,
-        position: function (d) { return d; }
+        position: function (d) { return d; },
+        origin: (p) => (p.length >= 3 ? p.slice(0, 3) : [0, 0, 0])
       },
       arg.style === undefined ? {} : arg.style
     );

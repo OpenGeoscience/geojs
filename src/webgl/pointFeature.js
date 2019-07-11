@@ -47,6 +47,8 @@ var webgl_pointFeature = function (arg) {
        * 'triangle' seems to be fastest on low-powered hardware, but 'square'
        * visits fewer fragments. */
       m_primitiveShape = 'sprite', // arg can change this, below
+      m_modelViewUniform,
+      m_origin,
       s_init = this._init,
       s_update = this._update,
       s_updateStyleFromArray = this.updateStyleFromArray;
@@ -167,6 +169,15 @@ var webgl_pointFeature = function (arg) {
     }
     position = transform.transformCoordinates(
       m_this.gcs(), m_this.layer().map().gcs(), position, 3);
+    m_origin = new Float32Array(m_this.style.get('origin')(position));
+    if (m_origin[0] || m_origin[1] || m_origin[2]) {
+      for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
+        position[i3] -= m_origin[0];
+        position[i3 + 1] -= m_origin[1];
+        position[i3 + 2] -= m_origin[2];
+      }
+    }
+    m_modelViewUniform.setOrigin(m_origin);
 
     posBuf = util.getGeomBuffer(geom, 'pos', vpf * numPts * 3);
 
@@ -363,7 +374,6 @@ var webgl_pointFeature = function (arg) {
         strokeAttr = vgl.vertexAttribute('stroke'),
         fillOpacityAttr = vgl.vertexAttribute('fillOpacity'),
         strokeOpacityAttr = vgl.vertexAttribute('strokeOpacity'),
-        modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
         projectionUniform = new vgl.projectionUniform('projectionMatrix'),
         mat = vgl.material(),
         blend = vgl.blend(),
@@ -388,6 +398,7 @@ var webgl_pointFeature = function (arg) {
         sourceStrokeOpacity = vgl.sourceDataAnyfv(
           1, vgl.vertexAttributeKeysIndexed.Nine, {'name': 'strokeOpacity'}),
         primitive = new vgl.triangles();
+    m_modelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix', m_origin);
 
     if (m_primitiveShape === 'sprite') {
       primitive = new vgl.points();
@@ -401,7 +412,6 @@ var webgl_pointFeature = function (arg) {
     s_init.call(m_this, arg);
     m_mapper = vgl.mapper({dynamicDraw: m_dynamicDraw});
 
-    // TODO: Right now this is ugly but we will fix it.
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
     if (m_primitiveShape !== 'sprite') {
       prog.addVertexAttribute(unitAttr, vgl.vertexAttributeKeysIndexed.One);
@@ -418,7 +428,7 @@ var webgl_pointFeature = function (arg) {
 
     prog.addUniform(m_pixelWidthUniform);
     prog.addUniform(m_aspectUniform);
-    prog.addUniform(modelViewUniform);
+    prog.addUniform(m_modelViewUniform);
     prog.addUniform(projectionUniform);
 
     prog.addShader(fragmentShader);

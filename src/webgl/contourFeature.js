@@ -44,6 +44,8 @@ var webgl_contourFeature = function (arg) {
       m_stepsUniform = null,
       m_steppedUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
+      m_origin,
+      m_modelViewUniform,
       s_init = this._init,
       s_update = this._update;
 
@@ -95,6 +97,16 @@ var webgl_contourFeature = function (arg) {
     m_texture.setColorTable(colorTable);
     contour.pos = transform.transformCoordinates(
       m_this.gcs(), m_this.layer().map().gcs(), contour.pos, 3);
+    m_origin = new Float32Array(m_this.style.get('origin')(contour.pos));
+    if (m_origin[0] || m_origin[1] || m_origin[2]) {
+      for (i = 0; i < contour.pos.length; i += 3) {
+        contour.pos[i] -= m_origin[0];
+        contour.pos[i + 1] -= m_origin[1];
+        contour.pos[i + 2] -= m_origin[2];
+      }
+    }
+    m_modelViewUniform.setOrigin(m_origin);
+
     posBuf = util.getGeomBuffer(geom, 'pos', numPts * 3);
     opacityBuf = util.getGeomBuffer(geom, 'opacity', numPts);
     valueBuf = util.getGeomBuffer(geom, 'value', numPts);
@@ -128,7 +140,6 @@ var webgl_contourFeature = function (arg) {
         mat = vgl.material(),
         tex = vgl.lookupTable(),
         geom = vgl.geometryData(),
-        modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
         projectionUniform = new vgl.projectionUniform('projectionMatrix'),
         samplerUniform = new vgl.uniform(vgl.GL.INT, 'sampler2d'),
         vertexShader = createVertexShader(),
@@ -142,6 +153,7 @@ var webgl_contourFeature = function (arg) {
         sourceOpacity = vgl.sourceDataAnyfv(
           1, vgl.vertexAttributeKeysIndexed.Two, {'name': 'opacity'}),
         primitive = new vgl.triangles();
+    m_modelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix');
 
     s_init.call(m_this, arg);
     m_mapper = vgl.mapper({dynamicDraw: m_dynamicDraw});
@@ -150,7 +162,7 @@ var webgl_contourFeature = function (arg) {
     prog.addVertexAttribute(valueAttr, vgl.vertexAttributeKeysIndexed.One);
     prog.addVertexAttribute(opacityAttr, vgl.vertexAttributeKeysIndexed.Two);
 
-    prog.addUniform(modelViewUniform);
+    prog.addUniform(m_modelViewUniform);
     prog.addUniform(projectionUniform);
     m_minColorUniform = new vgl.uniform(vgl.GL.FLOAT_VEC4, 'minColor');
     prog.addUniform(m_minColorUniform);

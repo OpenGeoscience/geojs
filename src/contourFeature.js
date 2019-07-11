@@ -28,6 +28,11 @@ var meshFeature = require('./meshFeature');
  *    that point won't be included in the results.
  * @property {number|function} [opacity=1] The opacity for the whole feature on
  *    a scale of 0 to 1.
+ * @property {number[]|function} [origin] Origin in map gcs coordinates used
+ *   for to ensure high precision drawing in this location.  When called as a
+ *   function, this is passed the vertex positions as a single continuous array
+ *   in map gcs coordinates.  It defaults to the first vertex used in the
+ *   contour.
  */
 
 /**
@@ -214,7 +219,8 @@ var contourFeature = function (arg) {
         opacity: 1.0,
         value: function (d, i) {
           return m_this.position()(d, i).z;
-        }
+        },
+        origin: (p) => (p.length >= 3 ? [p[0], p[1], 0] : [0, 0, 0])
       },
       arg.style === undefined ? {} : arg.style
     );

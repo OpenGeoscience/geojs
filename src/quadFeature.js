@@ -583,7 +583,7 @@ var quadFeature = function (arg) {
       clrQuads: clrQuads,
       imgQuads: imgQuads,
       vidQuads: vidQuads,
-      origin: origin
+      origin: new Float32Array(origin)
     };
     return m_quads;
   };

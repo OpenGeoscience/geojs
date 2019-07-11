@@ -50,6 +50,11 @@ var util = require('./util');
  *   visible gradient.  This is a single value that applies to all lines.
  * @property {string|function} [debug] If 'debug', render lines in debug mode.
  *   This is a single value that applies to all lines.
+ * @property {number[]|function} [origin] Origin in map gcs coordinates used
+ *   for to ensure high precision drawing in this location.  When called as a
+ *   function, this is passed the vertex positions as a single continuous array
+ *   in map gcs coordinates.  It defaults to the first line's first vertex's
+ *   position.
  */
 
 /**
@@ -353,7 +358,8 @@ var lineFeature = function (arg) {
         antialiasing: 2.0,
         closed: false,
         line: function (d) { return d; },
-        position: function (d) { return d; }
+        position: function (d) { return d; },
+        origin: (p) => (p.length >= 3 ? p.slice(0, 3) : [0, 0, 0])
       },
       arg.style === undefined ? {} : arg.style
     );

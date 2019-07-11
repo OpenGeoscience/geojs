@@ -38,6 +38,8 @@ var webgl_polygonFeature = function (arg) {
       m_mapper = vgl.mapper(),
       m_material = vgl.material(),
       m_geometry,
+      m_origin,
+      m_modelViewUniform,
       s_init = this._init,
       s_update = this._update,
       m_builtOnce,
@@ -167,6 +169,8 @@ var webgl_polygonFeature = function (arg) {
         geom.primitive(0).setIndices(indices);
       }
       m_geometry = {items: items, numPts: numPts};
+      m_origin = new Float32Array(m_this.style.get('origin')(items));
+      m_modelViewUniform.setOrigin(m_origin);
     } else {
       items = m_geometry.items;
       numPts = m_geometry.numPts;
@@ -214,9 +218,9 @@ var webgl_polygonFeature = function (arg) {
         } else {
           j = items[k].triangles[i] * 3;
           if (!onlyStyle) {
-            posBuf[d3] = vertices[j];
-            posBuf[d3 + 1] = vertices[j + 1];
-            posBuf[d3 + 2] = vertices[j + 2];
+            posBuf[d3] = vertices[j] - m_origin[0];
+            posBuf[d3 + 1] = vertices[j + 1] - m_origin[1];
+            posBuf[d3 + 2] = vertices[j + 2] - m_origin[2];
             indices[d] = i;
           }
           if (!uniform && fillColorVal === undefined) {
@@ -255,7 +259,6 @@ var webgl_polygonFeature = function (arg) {
         posAttr = vgl.vertexAttribute('pos'),
         fillColorAttr = vgl.vertexAttribute('fillColor'),
         fillOpacityAttr = vgl.vertexAttribute('fillOpacity'),
-        modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
         projectionUniform = new vgl.projectionUniform('projectionMatrix'),
         vertexShader = createVertexShader(),
         fragmentShader = createFragmentShader(),
@@ -267,12 +270,13 @@ var webgl_polygonFeature = function (arg) {
         sourceFillOpacity = vgl.sourceDataAnyfv(
           1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'fillOpacity'}),
         trianglePrimitive = vgl.triangles();
+    m_modelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix');
 
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
     prog.addVertexAttribute(fillColorAttr, vgl.vertexAttributeKeysIndexed.Two);
     prog.addVertexAttribute(fillOpacityAttr, vgl.vertexAttributeKeysIndexed.Three);
 
-    prog.addUniform(modelViewUniform);
+    prog.addUniform(m_modelViewUniform);
     prog.addUniform(projectionUniform);
 
     prog.addShader(fragmentShader);
