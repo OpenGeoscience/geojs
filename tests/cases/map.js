@@ -408,6 +408,18 @@ describe('geo.core.map', function () {
       expect(m.fileReader(r)).toBe(m);
       expect(m.fileReader()).toBe(r);
     });
+    it('autoshareRenderer', function () {
+      var m = createMap();
+      expect(m.autoshareRenderer()).toBe(undefined);
+      expect(m.autoshareRenderer(false)).toBe(m);
+      expect(m.autoshareRenderer()).toBe(false);
+      expect(m.autoshareRenderer(true)).toBe(m);
+      expect(m.autoshareRenderer()).toBe(true);
+      expect(m.autoshareRenderer(null)).toBe(m);
+      expect(m.autoshareRenderer()).toBe(undefined);
+      m = createMap({autoshareRenderer: 'more'});
+      expect(m.autoshareRenderer()).toBe('more');
+    });
   });
 
   describe('Public utility methods', function () {
