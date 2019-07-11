@@ -135,7 +135,7 @@ var webgl_tileLayer = function () {
    */
   this.zIndex = function (zIndex, allowDuplicate) {
     if (zIndex !== undefined) {
-      this._clearQuads(true);
+      m_this._clearQuads();
     }
     return s_zIndex.apply(m_this, arguments);
   };
@@ -144,16 +144,19 @@ var webgl_tileLayer = function () {
    * If the z-index has changed or layers are added or removed, clear the quads
    * so they are composited in the correct order.
    *
-   * @param {boolean} [noredraw] If truthy, don't redraw after clearing the
-   *    quads.
+   * @param {geo.event} [evt] If specified, the layer add or remove event that
+   *    triggered this.  If `undefined`, clear the quads but don't redraw.
    */
-  this._clearQuads = function (noredraw) {
+  this._clearQuads = function (evt) {
+    if (evt && (!evt.layer || !(evt.layer instanceof tileLayer))) {
+      return;
+    }
     m_this.clear();
     if (m_quadFeature) {
       m_quadFeature.modified();
     }
-    if (noredraw !== true) {
-      this.draw();
+    if (evt) {
+      m_this.draw();
     }
   };
 
@@ -214,8 +217,8 @@ var webgl_tileLayer = function () {
     m_quadFeature._update();
 
     var map = m_this.map();
-    map.geoOn(geo_event.layerAdd, this._clearQuads);
-    map.geoOn(geo_event.layerRemove, this._clearQuads);
+    map.geoOn(geo_event.layerAdd, m_this._clearQuads);
+    map.geoOn(geo_event.layerRemove, m_this._clearQuads);
   };
 
   /* These functions don't need to do anything. */
