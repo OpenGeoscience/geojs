@@ -348,6 +348,7 @@ geo_event.feature = {
    *    features that the mouse moves over simultaneously will have the same
    *    `eventID`.
    * @property {boolean} top True if this is the topmost data element.
+   * @property {geo.event} sourceEvent The underlying event that trigger this.
    */
   mousemove:  'geo_feature_mousemove',
   /**
@@ -365,6 +366,7 @@ geo_event.feature = {
    *    features that the mouse goes over simultaneously will have the same
    *    `eventID`.
    * @property {boolean} top True if this is the topmost data element.
+   * @property {geo.event} sourceEvent The underlying event that trigger this.
    */
   mouseover:  'geo_feature_mouseover',
   /**
@@ -375,10 +377,11 @@ geo_event.feature = {
    * @type {geo.event.base}
    * @property {geo.feature} feature The feature.
    * @property {geo.mouseState} mouse The mouse state.
-   * @proeprty {geo.feature.searchResult} over A list of feature components
+   * @property {geo.feature.searchResult} over A list of feature components
    *    that the mouse is over.
-   * @proeprty {number[]} The indices of the data components that the mouse
+   * @property {number[]} The indices of the data components that the mouse
    *    was over before this event.
+   * @property {geo.event} sourceEvent The underlying event that trigger this.
    */
   mouseover_order: 'geo_feature_mouseover_order',
   /**
@@ -397,6 +400,7 @@ geo_event.feature = {
    *    features that the mouse goes over simultaneously will have the same
    *    `eventID`.
    * @property {boolean} top True if this is the topmost data element.
+   * @property {geo.event} sourceEvent The underlying event that trigger this.
    */
   mouseout:   'geo_feature_mouseout',
   /**
@@ -408,6 +412,7 @@ geo_event.feature = {
    * @property {object} data The feature data the mouse is on.
    * @property {number} index The index of the feature data the mouse is on.
    * @property {geo.mouseState} mouse The mouse state.
+   * @property {geo.event} sourceEvent The underlying event that trigger this.
    */
   mouseon:    'geo_feature_mouseon',
   /**
@@ -419,6 +424,7 @@ geo_event.feature = {
    * @property {object} data The feature data the mouse is off.
    * @property {number} index The index of the feature data the mouse is off.
    * @property {geo.mouseState} mouse The mouse state.
+   * @property {geo.event} sourceEvent The underlying event that trigger this.
    */
   mouseoff:   'geo_feature_mouseoff',
   /**
@@ -435,6 +441,7 @@ geo_event.feature = {
    *    features that the mouse clicks simultaneously will have the same
    *    `eventID`.
    * @property {boolean} top True if this is the topmost data element.
+   * @property {geo.event} sourceEvent The underlying event that trigger this.
    */
   mouseclick: 'geo_feature_mouseclick',
   /**
@@ -445,8 +452,9 @@ geo_event.feature = {
    * @type {geo.event.base}
    * @property {geo.feature} feature The feature that was clicked.
    * @property {geo.mouseState} mouse The mouse state.
-   * @proeprty {geo.feature.searchResult} over A list of feature components
+   * @property {geo.feature.searchResult} over A list of feature components
    *    that the mouse is over.
+   * @property {geo.event} sourceEvent The underlying event that trigger this.
    */
   mouseclick_order: 'geo_feature_mouseclick_order',
   /**

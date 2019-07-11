@@ -212,6 +212,7 @@ var feature = function (arg) {
    * Private mousemove handler.  This uses `pointSearch` to determine which
    * features the mouse is over, then fires appropriate events.
    *
+   * @param {geo.event} evt The event that triggered this handler.
    * @fires geo.event.feature.mouseover_order
    * @fires geo.event.feature.mouseover
    * @fires geo.event.feature.mouseout
@@ -219,7 +220,7 @@ var feature = function (arg) {
    * @fires geo.event.feature.mouseoff
    * @fires geo.event.feature.mouseon
    */
-  this._handleMousemove = function () {
+  this._handleMousemove = function (evt) {
     var mouse = m_this.layer().map().interactor().mouse(),
         data = m_this.data(),
         over = m_this.pointSearch(mouse.geo),
@@ -241,7 +242,8 @@ var feature = function (arg) {
         feature: m_this,
         mouse: mouse,
         previous: m_selectedFeatures,
-        over: over
+        over: over,
+        sourceEvent: evt
       });
     }
 
@@ -267,7 +269,8 @@ var feature = function (arg) {
         extra: extra[i],
         mouse: mouse,
         eventID: feature.eventID,
-        top: idx === newFeatures.length - 1
+        top: idx === newFeatures.length - 1,
+        sourceEvent: evt
       }, true);
     });
 
@@ -279,7 +282,8 @@ var feature = function (arg) {
         index: i,
         mouse: mouse,
         eventID: feature.eventID,
-        top: idx === oldFeatures.length - 1
+        top: idx === oldFeatures.length - 1,
+        sourceEvent: evt
       }, true);
     });
 
@@ -292,7 +296,8 @@ var feature = function (arg) {
         extra: extra[i],
         mouse: mouse,
         eventID: feature.eventID,
-        top: idx === over.index.length - 1
+        top: idx === over.index.length - 1,
+        sourceEvent: evt
       }, true);
     });
 
@@ -310,7 +315,8 @@ var feature = function (arg) {
         m_this.geoTrigger(geo_event.feature.mouseoff, {
           data: data[lastTop],
           index: lastTop,
-          mouse: mouse
+          mouse: mouse,
+          sourceEvent: evt
         }, true);
       }
 
@@ -319,7 +325,8 @@ var feature = function (arg) {
           data: data[top],
           index: top,
           extra: extra[top],
-          mouse: mouse
+          mouse: mouse,
+          sourceEvent: evt
         }, true);
       }
     }
@@ -357,7 +364,8 @@ var feature = function (arg) {
       m_this.geoTrigger(geo_event.feature.mouseclick_order, {
         feature: m_this,
         mouse: mouse,
-        over: over
+        over: over,
+        sourceEvent: evt
       });
     }
     mouse.buttonsDown = evt.buttonsDown;
@@ -369,7 +377,8 @@ var feature = function (arg) {
         extra: extra[i],
         mouse: mouse,
         eventID: feature.eventID,
-        top: idx === over.index.length - 1
+        top: idx === over.index.length - 1,
+        sourceEvent: evt
       }, true);
     });
   };

@@ -4,7 +4,7 @@
 
 ### Features
 - Fetch queues can have an initial size different from their regular size (#1000)
-- Autoshare renderers now has three states, with the default being more likely to not change anythign visually (#1011)
+- Autoshare renderers now has three states, with the default being more likely to not change anything visually (#1011)
 
 ### Improvements
 - More response zooming via mouse wheel (#993)
@@ -12,6 +12,7 @@
 - If a point has no stroke or fill, don't return it from pointSearch (#1003)
 - WebGL point, line, polygon, and contour features use a localized origin for improved precision at high zoom levels.  This reduces panning jitter in zoom levels 19 and up (#1005)
 - When doing a point search on a line feature, report which line segment is found (#1008)
+- Include source event information in some feature events (#1009)
 
 ### Changes
 - Idle handlers no longer defer to scene-graph parents.  Parents still wait for all children to be idle (#1001)
