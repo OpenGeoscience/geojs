@@ -112,6 +112,8 @@ var polygonFeature = function (arg) {
    *    `outer` and `inner` if it has any coordinates, or is `undefined`.
    */
   function getCoordinates(data, posFunc, polyFunc) {
+    let fcs = m_this.gcs(),
+        mapgcs = m_this.layer().map().gcs();
     data = data || m_this.data();
     posFunc = posFunc || m_this.style.get('position');
     polyFunc = polyFunc || m_this.style.get('polygon');
@@ -120,7 +122,7 @@ var polygonFeature = function (arg) {
       if (!poly) {
         return;
       }
-      var outer, inner, range, coord, j, x, y;
+      var outer, inner, range, coord, j, x, y, mapouter, mapinner, maprange;
 
       coord = poly.outer || (Array.isArray(poly) ? poly : []);
       outer = new Array(coord.length);
@@ -128,6 +130,9 @@ var polygonFeature = function (arg) {
         outer[j] = posFunc.call(m_this, coord[j], j, d, i);
         x = outer[j].x || outer[j][0] || 0;
         y = outer[j].y || outer[j][1] || 0;
+        if (outer[j].x === undefined) {
+          outer[j] = {x: x, y: y};
+        }
         if (!j) {
           range = {min: {x: x, y: y}, max: {x: x, y: y}};
         } else {
@@ -142,13 +147,33 @@ var polygonFeature = function (arg) {
         var trans = new Array(coord.length);
         for (j = 0; j < coord.length; j += 1) {
           trans[j] = posFunc.call(m_this, coord[j], j, d, i);
+          if (trans[j].x === undefined) {
+            trans[j] = {x: trans[j].x || trans[j][0] || 0, y: trans[j].y || trans[j][1] || 0};
+          }
         }
         return trans;
       });
+      mapouter = transform.transformCoordinates(fcs, mapgcs, outer);
+      mapinner = inner.map(part => transform.transformCoordinates(fcs, mapgcs, part));
+      for (j = 0; j < mapouter.length; j += 1) {
+        x = mapouter[j].x;
+        y = mapouter[j].y;
+        if (!j) {
+          maprange = {min: {x: x, y: y}, max: {x: x, y: y}};
+        } else {
+          if (x < maprange.min.x) { maprange.min.x = x; }
+          if (y < maprange.min.y) { maprange.min.y = y; }
+          if (x > maprange.max.x) { maprange.max.x = x; }
+          if (y > maprange.max.y) { maprange.max.y = y; }
+        }
+      }
       return {
         outer: outer,
         inner: inner,
-        range: range
+        range: range,
+        mapouter: mapouter,
+        mapinner: mapinner,
+        maprange: maprange
       };
     });
     return coordinates;
@@ -243,13 +268,13 @@ var polygonFeature = function (arg) {
   this.pointSearch = function (coordinate) {
     var found = [], indices = [], irecord = {}, data = m_this.data(),
         map = m_this.layer().map(),
-        pt = transform.transformCoordinates(map.ingcs(), m_this.gcs(), coordinate);
+        pt = transform.transformCoordinates(map.ingcs(), map.gcs(), coordinate);
     m_coordinates.forEach(function (coord, i) {
       var inside = util.pointInPolygon(
         pt,
-        coord.outer,
-        coord.inner,
-        coord.range
+        coord.mapouter,
+        coord.mapinner,
+        coord.maprange
       );
       if (inside) {
         indices.push(i);
@@ -270,6 +295,114 @@ var polygonFeature = function (arg) {
     return {
       index: indices,
       found: found
+    };
+  };
+
+  /**
+   * Returns polygons that are contained in the given polygon.  This could fail
+   * to return polygons that are less than their stroke width outside of the
+   * specified polygon and whose vertices are not near the selected polygon.
+   *
+   * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
+   *    object with `outer` and optionally `inner` parameters.  All coordinates
+   *    are in map interface gcs.
+   * @param {object} [opts] Additional search options.
+   * @param {boolean} [opts.partial=false] If truthy, include polygons that are
+   *    partially in the polygon, otherwise only include polygons that are fully
+   *    within the region.
+   * @returns {object} An object with `index`: a list of polygon indices,
+   *    `found`: a list of polygons within the polygon, and `extra`: an object
+   *    with index keys containing an object with a `partial` key and a boolean
+   *    value to indicate if the polygon is on the specified polygon's border.
+   */
+  this.polygonSearch = function (poly, opts) {
+    var data = m_this.data(), indices = [], found = [], extra = {}, min, max,
+        origPoly = poly, irecord = {},
+        map = m_this.layer().map();
+    if (!poly.outer) {
+      poly = {outer: poly, inner: []};
+    }
+    if (!data || !data.length || poly.outer.length < 3) {
+      return {
+        found: found,
+        index: indices,
+        extra: extra
+      };
+    }
+    opts = opts || {};
+    opts.partial = opts.partial || false;
+    poly = {outer: transform.transformCoordinates(map.ingcs(), map.gcs(), poly.outer), inner: (poly.inner || []).map(inner => transform.transformCoordinates(map.ingcs(), map.gcs(), inner))};
+    poly.outer.forEach(p => {
+      if (!min) {
+        min = {x: p.x, y: p.y};
+        max = {x: p.x, y: p.y};
+      }
+      if (p.x < min.x) { min.x = p.x; }
+      if (p.x > max.x) { max.x = p.x; }
+      if (p.y < min.y) { min.y = p.y; }
+      if (p.y > max.y) { max.y = p.y; }
+    });
+    m_coordinates.forEach(function (coord, idx) {
+      if (!coord.mapouter.length || (coord.maprange &&
+          (coord.maprange.max.x < min.x || coord.maprange.min.x > max.x ||
+           coord.maprange.max.y < min.y || coord.maprange.min.y > max.y))) {
+        return;
+      }
+      let inside, partial;
+      // do something similar to the line's polygonSearch
+      for (let r = -1; r < coord.mapinner.length && !partial; r += 1) {
+        let record = r < 0 ? coord.mapouter : coord.mapinner[r];
+        for (let i = 0, len = record.length, j = len - 1; i < len; j = i, i += 1) {
+          let dist0 = util.distanceToPolygon2d(record[i], poly),
+              dist1 = util.distanceToPolygon2d(record[j], poly);
+          if (dist0 * dist1 < 0) {
+            partial = true;
+            break;
+          }
+          if (util.crossedLineSegmentPolygon2d(record[i], record[j], poly)) {
+            partial = true;
+            break;
+          }
+          if (dist0 > 0) {
+            inside = true;
+          }
+        }
+      }
+      // check if the selection polygon is inside of this polygon.  Any point
+      // is sufficient as otherwise the previous crossing test would have been
+      // triggered.
+      if (!inside && !partial && util.pointInPolygon(poly.outer[0], coord.mapouter, coord.mapinner, coord.maprange)) {
+        partial = true;
+      }
+      if ((!opts.partial && inside && !partial) || (opts.partial && (inside || partial))) {
+        indices.push(idx);
+        found.push(data[idx]);
+        extra[idx] = {
+          partial: partial
+        };
+        irecord[idx] = true;
+      }
+    });
+    if (m_lineFeature) {
+      var lineFound = m_lineFeature.polygonSearch(origPoly, opts);
+      lineFound.found.forEach(function (lineData, idx) {
+        if (lineData.length && lineData[0].length === 4) {
+          if (!irecord[lineData[0][3]]) {
+            indices.push(lineData[0][3]);
+            irecord[lineData[0][3]] = true;
+            found.push(data[lineData[0][3]]);
+            extra[lineFound.index[idx]] = {partial: false};
+          }
+          if (lineFound.extra[lineFound.index[idx]].partial) {
+            extra[lineData[0][3]].partial = true;
+          }
+        }
+      });
+    }
+    return {
+      found: found,
+      index: indices,
+      extra: extra
     };
   };
 

@@ -31,7 +31,7 @@ table tr>td:first-child {
   display: none;
 }
 #lines_list #info {
-  min-height: 3.6em;
+  min-height: 65px;
 }
 #main_list span {
   display: inline-block;

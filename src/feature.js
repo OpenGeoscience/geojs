@@ -2,6 +2,7 @@ var $ = require('jquery');
 var inherit = require('./inherit');
 var sceneObject = require('./sceneObject');
 var timestamp = require('./timestamp');
+var transform = require('./transform');
 var geo_event = require('./event');
 
 /**
@@ -192,8 +193,7 @@ var feature = function (arg) {
   };
 
   /**
-   * Search for features contained within a rectangilar region.  This should be
-   * defined in relevant subclasses.
+   * Search for features contained within a rectangular region.
    *
    * @param {geo.geoPosition} lowerLeft Lower-left corner in gcs coordinates.
    * @param {geo.geoPosition} upperRight Upper-right corner in gcs coordinates.
@@ -201,11 +201,35 @@ var feature = function (arg) {
    * @param {boolean} [opts.partial=false] If truthy, include features that are
    *    partially in the box, otherwise only include features that are fully
    *    within the region.
-   * @returns {number[]} A list of features indices that are in the box region.
+   * @returns {geo.feature.searchResult} An object with a list of features and
+   *    feature indices that are located at the specified point.
    */
   this.boxSearch = function (lowerLeft, upperRight, opts) {
+    return m_this.polygonSearch([
+      lowerLeft, {x: lowerLeft.x, y: upperRight.y},
+      upperRight, {x: upperRight.x, y: lowerLeft.y}], opts);
+  };
+
+  /**
+   * Search for features contained within a polygon.  This should be defined in
+   * relevant subclasses.
+   *
+   * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
+   *    object with `outer` and optionally `inner` parameters.  All coordinates
+   *    are in map interface gcs.
+   * @param {object} [opts] Additional search options.
+   * @param {boolean} [opts.partial=false] If truthy, include features that are
+   *    partially in the polygon, otherwise only include features that are
+   *    fully within the region.
+   * @returns {geo.feature.searchResult} An object with a list of features and
+   *    feature indices that are located at the specified point.
+   */
+  this.polygonSearch = function (poly, opts) {
     // base class method does nothing
-    return [];
+    return {
+      index: [],
+      found: []
+    };
   };
 
   /**
@@ -384,49 +408,57 @@ var feature = function (arg) {
   };
 
   /**
-   * Private brush handler.  This uses `boxSearch` to determine which features
-   * the brush includes, then fires appropriate events.
+   * Private brush handler.  This uses `polygonSearch` to determine which
+   * features the brush includes, then fires appropriate events.
    *
    * @param {geo.brushSelection} brush The current brush selection.
    * @fires geo.event.feature.brush
    */
   this._handleBrush = function (brush) {
-    var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
-        data = m_this.data();
+    let corners = [brush.gcs.lowerLeft, brush.gcs.lowerRight, brush.gcs.upperRight, brush.gcs.upperLeft];
+    if (m_this.layer()) {
+      let map = m_this.layer().map();
+      corners = transform.transformCoordinates(map.gcs(), map.ingcs(), corners);
+    }
+    let search = m_this.polygonSearch(corners);
 
     feature.eventID += 1;
-    idx.forEach(function (i, idx) {
+    search.index.forEach(function (idx, i) {
       m_this.geoTrigger(geo_event.feature.brush, {
-        data: data[i],
-        index: i,
+        data: search.found[i],
+        index: idx,
         mouse: brush.mouse,
         brush: brush,
         eventID: feature.eventID,
-        top: idx === idx.length - 1
+        top: i === search.index.length - 1
       }, true);
     });
   };
 
   /**
-   * Private brushend handler.  This uses `boxSearch` to determine which
+   * Private brushend handler.  This uses `polygonSearch` to determine which
    * features the brush includes, then fires appropriate events.
    *
    * @param {geo.brushSelection} brush The current brush selection.
    * @fires geo.event.feature.brushend
    */
   this._handleBrushend = function (brush) {
-    var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
-        data = m_this.data();
+    let corners = [brush.gcs.lowerLeft, brush.gcs.lowerRight, brush.gcs.upperRight, brush.gcs.upperLeft];
+    if (m_this.layer()) {
+      let map = m_this.layer().map();
+      corners = transform.transformCoordinates(map.gcs(), map.ingcs(), corners);
+    }
+    let search = m_this.polygonSearch(corners);
 
     feature.eventID += 1;
-    idx.forEach(function (i, idx) {
+    search.index.forEach(function (idx, i) {
       m_this.geoTrigger(geo_event.feature.brushend, {
-        data: data[i],
-        index: i,
+        data: search.found[i],
+        index: idx,
         mouse: brush.mouse,
         brush: brush,
         eventID: feature.eventID,
-        top: idx === idx.length - 1
+        top: i === search.index.length - 1
       }, true);
     });
   };

@@ -42,6 +42,7 @@ install:
   # travis moved to "npm ci", but that fails with canvas-prebuilt as it tries
   # to install it before node-pre-gyp
   - npm install
+  - npm list || true
   # Install for the website build
   - npm run setup-website
   # Download and extract the glslangValidator tool

@@ -1,5 +1,14 @@
 # Change Log
 
+## Unreleased
+
+### Features
+- Added a polygonSearch method to features
+
+### Changes
+- The feature boxSearch function now uses map input gcs coordinates consistently and returns results in the same format as pointSearch
+- The pointTo2DTriangleBasis utility function was renamed to pointToTriangleBasis2d
+
 ## Version 0.19.5
 
 ### Features

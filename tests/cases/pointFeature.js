@@ -160,17 +160,55 @@ describe('geo.pointFeature', function () {
       expect(pt.found.length).toBe(1);
     });
     it('boxSearch', function () {
-      var map, layer, point, data = testPoints, idx;
+      var map, layer, point, result;
       map = createMap();
       layer = map.createLayer('feature', {renderer: 'svg'});
       point = layer.createFeature('point', {selectionAPI: true});
-      point.data(data);
-      idx = point.boxSearch({x: 19, y: 9}, {x: 26, y: 11});
-      expect(idx).toEqual([0, 1]);
-      idx = point.boxSearch({x: 19, y: 9}, {x: 24, y: 11});
-      expect(idx).toEqual([0]);
-      idx = point.boxSearch({x: 19, y: 9}, {x: 18, y: 11});
-      expect(idx.length).toBe(0);
+      point.data(testPoints);
+      result = point.boxSearch({x: 19, y: 9}, {x: 26, y: 11});
+      expect(result.index).toEqual([0, 1]);
+      result = point.boxSearch({x: 19, y: 9}, {x: 24, y: 11});
+      expect(result.index).toEqual([0]);
+      result = point.boxSearch({x: 19, y: 9}, {x: 18, y: 11});
+      expect(result.index.length).toBe(0);
+    });
+    it('polygonSearch', function () {
+      var map, layer, point, result;
+      map = createMap();
+      layer = map.createLayer('feature', {renderer: 'svg'});
+      point = layer.createFeature('point', {selectionAPI: true});
+      point.data(testPoints)
+           .style({
+             strokeWidth: 2,
+             radius: function (d) {
+               return d.radius ? d.radius : 5;
+             }
+           });
+      result = point.polygonSearch([{x: 19, y: 9}, {x: 26, y: 9}, {x: 26, y: 11}, {x: 19, y: 11}]);
+      expect(result.index).toEqual([0, 1]);
+      result = point.polygonSearch([{x: 19, y: 10}, {x: 26, y: 10}]);
+      expect(result.index).toEqual([]);
+      result = point.polygonSearch([{x: 20, y: 9}, {x: 26, y: 9}, {x: 26, y: 11}, {x: 20, y: 11}]);
+      expect(result.index).toEqual([1]);
+      result = point.polygonSearch([{x: 20, y: 9}, {x: 26, y: 9}, {x: 26, y: 11}, {x: 20, y: 11}], {partial: true});
+      expect(result.index).toEqual([0, 1]);
+      result = point.polygonSearch([{x: 20.05, y: 9}, {x: 26, y: 9}, {x: 26, y: 11}, {x: 20.05, y: 11}], {partial: true});
+      expect(result.index).toEqual([0, 1]);
+      result = point.polygonSearch([{x: 20.05, y: 9}, {x: 26, y: 9}, {x: 26, y: 11}, {x: 20.05, y: 11}], {partial: 'center'});
+      expect(result.index).toEqual([1]);
+      result = point.polygonSearch({outer: [{x: 10, y: 0}, {x: 50, y: 0}, {x: 25, y: 50}]});
+      expect(result.index).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12]);
+      result = point.polygonSearch({outer: [{x: 10, y: 0}, {x: 50, y: 0}, {x: 25, y: 40}], inner: [[{x: 20, y: 5}, {x: 40, y: 5}, {x: 25, y: 30}]]});
+      expect(result.index).toEqual([0, 6, 7, 8, 11]);
+      /* If a point has no fill or stroke, it won't be found. */
+      result = point.polygonSearch([{x: 48, y: 8}, {x: 52, y: 8}, {x: 50, y: 12}]);
+      expect(result.index).toEqual([16, 17]);
+      point.style({
+        fill: function (d, i) { return i !== 16; },
+        stroke: function (d, i) { return i !== 16; }
+      });
+      result = point.polygonSearch([{x: 48, y: 8}, {x: 52, y: 8}, {x: 50, y: 12}]);
+      expect(result.index).toEqual([17]);
     });
   });
 

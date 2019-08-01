@@ -163,27 +163,37 @@ var lineFeature = function (arg) {
 
     data.forEach(function (d, index) {
       var closed = closedFunc(d, index),
-          last, lastr2, first, record = [];
+          last, lastr, lastr2, first, record = [], min, max;
 
       line(d, index).forEach(function (current, j) {
         var p = posFunc(current, j, d, index);
         if (gcs !== mapgcs) {
           p = transform.transformCoordinates(gcs, mapgcs, p);
         }
+        if (min === undefined) { min = {x: p.x, y: p.y}; }
+        if (max === undefined) { max = {x: p.x, y: p.y}; }
+        if (p.x < min.x) { min.x = p.x; }
+        if (p.x > max.x) { max.x = p.x; }
+        if (p.y < min.y) { min.y = p.y; }
+        if (p.y > max.y) { max.y = p.y; }
         var r = Math.ceil(widthFunc(current, j, d, index) / 2) + 2;
+        if (max.r === undefined || r > max.r) { max.r = r; }
         var r2 = r * r;
         if (last) {
-          record.push({u: p, v: last, r2: lastr2 > r2 ? lastr2 : r2});
+          record.push({u: p, v: last, r: lastr > r ? lastr : r, r2: lastr2 > r2 ? lastr2 : r2});
         }
         last = p;
+        lastr = r;
         lastr2 = r2;
         if (!first && closed) {
-          first = {p: p, r2: r2};
+          first = {p: p, r: r, r2: r2};
         }
       });
       if (closed && first && (last.x !== first.p.x || last.y !== first.p.y)) {
-        record.push({u: last, v: first.p, r2: lastr2 > first.r2 ? lastr2 : first.r2});
+        record.push({u: last, v: first.p, r: lastr > first.r ? lastr : first.r, r2: lastr2 > first.r2 ? lastr2 : first.r2});
       }
+      record.min = min;
+      record.max = max;
       m_pointSearchInfo.push(record);
     });
     return m_pointSearchInfo;
@@ -201,7 +211,7 @@ var lineFeature = function (arg) {
    *
    * @param {geo.geoPosition} p point to search for in map interface gcs.
    * @returns {object} An object with `index`: a list of line indices, `found`:
-   *    a list of quads that contain the specified coordinate, and `extra`: am
+   *    a list of quads that contain the specified coordinate, and `extra`: an
    *    object with keys that are line indices and values that are the first
    *    segement index for which the line was matched.
    */
@@ -210,7 +220,8 @@ var lineFeature = function (arg) {
     if (!data || !data.length || !m_this.layer()) {
       return {
         found: found,
-        index: indices
+        index: indices,
+        extra: extra
       };
     }
     m_this._updatePointSearchInfo();
@@ -239,45 +250,114 @@ var lineFeature = function (arg) {
   };
 
   /**
-   * Search for lines contained within a rectangilar region.
+   * Returns lines that are contained in the given polygon.
    *
-   * @param {geo.geoPosition} lowerLeft Lower-left corner in gcs coordinates.
-   * @param {geo.geoPosition} upperRight Upper-right corner in gcs coordinates.
+   * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
+   *    object with `outer` and optionally `inner` parameters.  All coordinates
+   *    are in map interface gcs.
    * @param {object} [opts] Additional search options.
    * @param {boolean} [opts.partial=false] If truthy, include lines that are
-   *    partially in the box, otherwise only include lines that are fully
+   *    partially in the polygon, otherwise only include lines that are fully
    *    within the region.
-   * @returns {number[]} A list of line indices that are in the box region.
+   * @returns {object} An object with `index`: a list of line indices,
+   *    `found`: a list of lines within the polygon, and `extra`: an object
+   *    with index keys containing an object with a `segment` key with a value
+   *    indicating one of the line segments that is inside the polygon and
+   *    `partial` key and a boolean value to indicate if the line is on the
+   *    polygon's border.
    */
-  this.boxSearch = function (lowerLeft, upperRight, opts) {
-    var pos = m_this.position(),
-        idx = [],
-        line = m_this.line();
-
+  this.polygonSearch = function (poly, opts) {
+    var data = m_this.data(), indices = [], found = [], extra = {}, min, max,
+        map = m_this.layer().map();
+    if (!poly.outer) {
+      poly = {outer: poly, inner: []};
+    }
+    if (!data || !data.length || poly.outer.length < 3) {
+      return {
+        found: found,
+        index: indices,
+        extra: extra
+      };
+    }
     opts = opts || {};
     opts.partial = opts.partial || false;
-    if (opts.partial) {
-      throw new Error('Unimplemented query method.');
-    }
-
-    m_this.data().forEach(function (d, i) {
-      var inside = true;
-      line(d, i).forEach(function (e, j) {
-        if (!inside) { return; }
-        var p = pos(e, j, d, i);
-        if (!(p.x >= lowerLeft.x &&
-              p.x <= upperRight.x &&
-              p.y >= lowerLeft.y &&
-              p.y <= upperRight.y)
-        ) {
-          inside = false;
-        }
-      });
-      if (inside) {
-        idx.push(i);
+    poly = {outer: transform.transformCoordinates(map.ingcs(), map.gcs(), poly.outer), inner: (poly.inner || []).map(inner => transform.transformCoordinates(map.ingcs(), map.gcs(), inner))};
+    poly.outer.forEach(p => {
+      if (!min) {
+        min = {x: p.x, y: p.y};
+        max = {x: p.x, y: p.y};
       }
+      if (p.x < min.x) { min.x = p.x; }
+      if (p.x > max.x) { max.x = p.x; }
+      if (p.y < min.y) { min.y = p.y; }
+      if (p.y > max.y) { max.y = p.y; }
     });
-    return idx;
+    m_this._updatePointSearchInfo();
+    let scale = map.unitsPerPixel(map.zoom()),
+        i, j, record, u, v, r;
+    for (i = 0; i < m_pointSearchInfo.length; i += 1) {
+      record = m_pointSearchInfo[i];
+      if (record.max.x < min.x - record.max.r * scale ||
+          record.min.x > max.x + record.max.r * scale ||
+          record.max.y < min.y - record.max.r * scale ||
+          record.min.y > max.y + record.max.r * scale) {
+        continue;
+      }
+      let inside, partial;
+      for (j = 0; j < record.length; j += 1) {
+        u = record[j].u;
+        v = record[j].v;
+        r = record[j].r;
+        if ((u.x < min.x - r * scale && v.x < min.x - r * scale) ||
+            (u.x > max.x + r * scale && v.x > max.x + r * scale) ||
+            (u.y < min.y - r * scale && v.y < min.y - r * scale) ||
+            (u.y > max.y + r * scale && v.y > max.y + r * scale)) {
+          continue;
+        }
+        let dist0 = util.distanceToPolygon2d(u, poly),
+            dist1 = util.distanceToPolygon2d(v, poly);
+        if ((dist0 > -r * scale && dist0 < r * scale) || (dist1 > -r * scale && dist1 < r & scale) || dist0 * dist1 < 0) {
+          partial = true;
+          break;
+        }
+        if (util.crossedLineSegmentPolygon2d(u, v, poly)) {
+          partial = true;
+          break;
+        }
+        // if a point of the polygon is near the line formed by u-v, this is
+        // also partial
+        let r2scaled = r * r * scale * scale;
+        for (let k = 0; k < poly.outer.length && !partial; k += 1) {
+          partial = util.distance2dToLineSquared(poly.outer[k], u, v) < r2scaled;
+        }
+        for (let k = 0; k < poly.inner.length && !partial; k += 1) {
+          for (let l = 0; l < poly.inner[k].length && !partial; l += 1) {
+            partial = util.distance2dToLineSquared(poly.inner[k][l], u, v) < r2scaled;
+          }
+        }
+        if (partial) {
+          break;
+        }
+        // if this isn't partial and the distance to the polygon is positive,
+        // it is inside
+        if (dist0 > 0) {
+          inside = true;
+        }
+      }
+      if ((!opts.partial && inside && !partial) || (opts.partial && (inside || partial))) {
+        indices.push(i);
+        found.push(data[i]);
+        extra[i] = {
+          partial: partial,
+          segment: j < m_pointSearchInfo[i].length ? j : 0
+        };
+      }
+    }
+    return {
+      found: found,
+      index: indices,
+      extra: extra
+    };
   };
 
   /**

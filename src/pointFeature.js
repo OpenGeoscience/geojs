@@ -347,28 +347,105 @@ var pointFeature = function (arg) {
   };
 
   /**
-   * Returns an array of datum indices that are contained in the given box.
+   * Returns an array of datum indices that are contained in the given polygon.
    * This does not take clustering into account.
    *
-   * @param {geo.geoPosition} lowerLeft Lower-left corner in gcs coordinates.
-   * @param {geo.geoPosition} upperRight Upper-right corner in gcs coordinates.
-   * @returns {number[]} A list of point indices that are in the box region.
+   * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
+   *    object with `outer` and optionally `inner` parameters.  All coordinates
+   *    are in map interface gcs.
+   * @param {object} [opts] Additional search options.
+   * @param {boolean} [opts.partial=false] If truthy, include points that are
+   *    partially in the polygon, otherwise only include points that are fully
+   *    within the region.  If 'center', only points whose centers are inside
+   *    the polygon are returned.
+   * @returns {object} An object with `index`: a list of point indices,
+   *    `found`: a list of points within the polygon, and `extra`: an object
+   *    with index keys containing an object with a `partial` key and a boolean
+   *    value to indicate if the point is on the polygon's border and a
+   *    `distance` key to indicate how far within the polygon the point is
+   *    located.
    */
-  this.boxSearch = function (lowerLeft, upperRight) {
-    var pos = m_this.position(),
-        idx = [];
-    // TODO: use the range tree
-    m_this.data().forEach(function (d, i) {
-      var p = pos(d, i);
-      if (p.x >= lowerLeft.x &&
-          p.x <= upperRight.x &&
-          p.y >= lowerLeft.y &&
-          p.y <= upperRight.y
-      ) {
-        idx.push(i);
+  this.polygonSearch = function (poly, opts) {
+    var fgcs = m_this.gcs(), // this feature's gcs
+        found = [],
+        ifound = [],
+        extra = {},
+        map = m_this.layer().map(),
+        data = m_this.data(),
+        fill = m_this.style.get('fill'),
+        stroke = m_this.style.get('stroke'),
+        strokeWidth = m_this.style.get('strokeWidth'),
+        radius = m_this.style.get('radius'),
+        idx, min, max, corners;
+    if (!poly.outer) {
+      poly = {outer: poly, inner: []};
+    }
+    if (poly.outer.length < 3 || !data || !data.length) {
+      return {
+        found: [],
+        index: [],
+        extra: {}
+      };
+    }
+    opts = opts || {};
+    opts.partial = opts.partial || false;
+    poly = {outer: map.gcsToDisplay(poly.outer), inner: (poly.inner || []).map(inner => map.gcsToDisplay(inner))};
+    poly.outer.forEach(p => {
+      if (!min) {
+        min = {x: p.x, y: p.y};
+        max = {x: p.x, y: p.y};
+      }
+      if (p.x < min.x) { min.x = p.x; }
+      if (p.x > max.x) { max.x = p.x; }
+      if (p.y < min.y) { min.y = p.y; }
+      if (p.y > max.y) { max.y = p.y; }
+    });
+    // We need to do this before we find corners, since the max radius is
+    // determined then
+    m_this._updateRangeTree();
+    corners = [
+      map.displayToGcs({x: min.x - m_maxRadius, y: min.y - m_maxRadius}, fgcs),
+      map.displayToGcs({x: max.x + m_maxRadius, y: min.y - m_maxRadius}, fgcs),
+      map.displayToGcs({x: max.x + m_maxRadius, y: max.y + m_maxRadius}, fgcs),
+      map.displayToGcs({x: min.x - m_maxRadius, y: max.y + m_maxRadius}, fgcs)
+    ];
+    min = {
+      x: Math.min(corners[0].x, corners[1].x, corners[2].x, corners[3].x),
+      y: Math.min(corners[0].y, corners[1].y, corners[2].y, corners[3].y)
+    };
+    max = {
+      x: Math.max(corners[0].x, corners[1].x, corners[2].x, corners[3].x),
+      y: Math.max(corners[0].y, corners[1].y, corners[2].y, corners[3].y)
+    };
+    // Find points inside the bounding box.  Only these could be in the polygon
+    idx = m_rangeTree.range(min.x, min.y, max.x, max.y);
+    // sort by index
+    idx.sort((a, b) => a - b);
+    // filter points within the polygon
+    idx.forEach(function (i) {
+      var d = data[i],
+          hasstroke = stroke(data[i], i);
+      if (!hasstroke && !fill(data[i], i)) {
+        return;
+      }
+      let p = m_this.position()(d, i);
+      let rad = radius(data[i], i);
+      rad += hasstroke ? strokeWidth(data[i], i) : 0;
+      if (rad) {
+        p = map.gcsToDisplay(p, fgcs);
+        let dist = util.distanceToPolygon2d(p, poly);
+        if (dist >= rad || (dist >= 0 && opts.partial === 'center') || (dist >= -rad && opts.partial && opts.partial !== 'center')) {
+          found.push(d);
+          ifound.push(i);
+          extra[i] = {partial: dist < rad, distance: dist};
+        }
       }
     });
-    return idx;
+    return {
+      found: found,
+      index: ifound,
+      extra: extra
+    };
   };
 
   /**

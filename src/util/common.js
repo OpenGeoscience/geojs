@@ -39,13 +39,14 @@ function setNumeric() {
  */
 var util = {
   /**
-   * Check if a point is inside of a polygon.
-   * Algorithm description:
-   *   http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-   * The point and polygon must be in the same coordinate system.
+   * Check if a point is inside of a polygon.  The point and polygon must be in
+   * the same coordinate system.  A point exactly on the edge is not considered
+   * inside.
    *
    * @param {geo.point2D} point The test point.
-   * @param {geo.point2D[]} outer The outer boundary of the polygon.
+   * @param {geo.point2D[]|geo.polygonObject} outer The outer boundary of the
+   *    polygon or a polygon object that has both the inner and outer
+   *    boundaries.
    * @param {Array.<geo.point2D[]>} [inner] A list of inner boundaries
    *    (holes).
    * @param {object} [range] If specified, this is the extent of the outer
@@ -59,35 +60,21 @@ var util = {
    * @memberof geo.util
    */
   pointInPolygon: function (point, outer, inner, range) {
-    var inside = false, n = outer.length, i, j;
-
-    if (range && range.min && range.max) {
-      if (point.x < range.min.x || point.y < range.min.y ||
-          point.x > range.max.x || point.y > range.max.y) {
-        return;
-      }
+    if (outer.outer) {
+      inner = outer.inner;
+      outer = outer.outer;
     }
-
-    if (n < 3) {
+    if (outer.length < 3) {
       // we need 3 coordinates for this to make sense
       return false;
     }
-
-    for (i = 0, j = n - 1; i < n; j = i, i += 1) {
-      if (((outer[i].y > point.y) !== (outer[j].y > point.y)) &&
-          (point.x < (outer[j].x - outer[i].x) *
-          (point.y - outer[i].y) / (outer[j].y - outer[i].y) + outer[i].x)) {
-        inside = !inside;
+    if (range && range.min && range.max) {
+      if (point.x < range.min.x || point.y < range.min.y ||
+          point.x > range.max.x || point.y > range.max.y) {
+        return false;
       }
     }
-
-    if (inner && inside) {
-      inner.forEach(function (hole) {
-        inside = inside && !util.pointInPolygon(point, hole);
-      });
-    }
-
-    return inside;
+    return util.distanceToPolygon2d(point, inner ? {outer: outer, inner: inner} : outer) > 0;
   },
 
   /**
@@ -105,7 +92,7 @@ var util = {
    *    if the triangle is degenerate.
    * @memberof geo.util
    */
-  pointTo2DTriangleBasis: function (point, vert0, vert1, vert2) {
+  pointToTriangleBasis2d: function (point, vert0, vert1, vert2) {
     var a = vert1.x - vert0.x,
         b = vert2.x - vert0.x,
         c = vert1.y - vert0.y,
@@ -267,6 +254,7 @@ var util = {
    * @param {number} end The end integer.
    * @param {number} [step=1] The step.
    * @returns {number[]} An array of integers.
+   * @memberof geo.util
    */
   range: function (start, end, step) {
     step = step || 1;
@@ -618,6 +606,7 @@ var util = {
    * @param {geo.geoPosition[]} coor An array of coordinates.
    * @returns {geo.geoPosition|undefined} The position for the center, or
    *    `undefined` if no such position exists.
+   * @memberof geo.util
    */
   centerFromPerimeter: function (coor) {
     var position, p0, p1, w, sumw, i;
@@ -665,6 +654,7 @@ var util = {
    * @param {geo.geoPosition} line1 One end of the line.
    * @param {geo.geoPosition} line2 The other end of the line.
    * @returns {number} The distance squared.
+   * @memberof geo.util
    */
   distance2dToLineSquared: function (pt, line1, line2) {
     var dx = line2.x - line1.x,
@@ -685,15 +675,82 @@ var util = {
   },
 
   /**
+   * Get the signed Euclidean 2D distance between a point and a polygon.  The
+   * distance is positive if the point is inside of the polygon.
+   *
+   * @param {geo.geoPosition} pt The point.
+   * @param {geo.polygonObject} poly The polygon.
+   * @returns {number} The signed distance.
+   * @memberof geo.util
+   */
+  distanceToPolygon2d: function (pt, poly) {
+    let outer = poly.outer || poly;
+    let inside = false,
+        minDistSq, distSq, dist;
+    for (let i = 0, len = outer.length, j = len - 1; i < len; j = i, i += 1) {
+      let p0 = outer[i],
+          p1 = outer[j];
+      if (((p0.y > pt.y) !== (p1.y > pt.y)) && (pt.x < (p1.x - p0.x) * (pt.y - p0.y) / (p1.y - p0.y) + p0.x)) {
+        inside = !inside;
+      }
+      distSq = util.distance2dToLineSquared(pt, p0, p1);
+      if (minDistSq === undefined || distSq < minDistSq) {
+        minDistSq = distSq;
+      }
+    }
+    if (poly.inner) {
+      poly.inner.forEach(inner => {
+        let innerDist = util.distanceToPolygon2d(pt, inner);
+        if (innerDist * innerDist < minDistSq) {
+          minDistSq = innerDist * innerDist;
+        }
+        if (innerDist > 0) {
+          inside = !inside;
+        }
+      });
+    }
+    dist = (inside ? 1 : -1) * Math.sqrt(minDistSq);
+    return dist;
+  },
+
+  /**
    * Get twice the signed area of a 2d triangle.
    *
    * @param {geo.geoPosition} pt1 A vertex.
    * @param {geo.geoPosition} pt2 A vertex.
    * @param {geo.geoPosition} pt3 A vertex.
    * @returns {number} Twice the signed area.
+   * @memberof geo.util
    */
   triangleTwiceSignedArea2d: function (pt1, pt2, pt3) {
     return (pt2.y - pt1.y) * (pt3.x - pt2.x) - (pt2.x - pt1.x) * (pt3.y - pt2.y);
+  },
+
+  /**
+   * Determine if a line segment crosses any line segments of a polygon.
+   *
+   * @param {geo.geoPosition} pt1 One endpoint of the line.
+   * @param {geo.geoPosition} pt2 The other endpoint of the line.
+   * @param {geo.polygonObject} poly The polygon.
+   * @returns {boolean} True if the segment cross any segment of the polygon.
+   * @memberof geo.util
+   */
+  crossedLineSegmentPolygon2d: function (pt1, pt2, poly) {
+    let outer = poly.outer || poly,
+        len = outer.length, i, j;
+    for (i = 0, j = len - 1; i < len; j = i, i += 1) {
+      if (util.crossedLineSegments2d(pt1, pt2, outer[i], outer[j])) {
+        return true;
+      }
+    }
+    if (poly.inner) {
+      for (i = 0; i < poly.inner.length; i += 1) {
+        if (util.crossedLineSegmentPolygon2d(pt1, pt2, poly.inner[i])) {
+          return true;
+        }
+      }
+    }
+    return false;
   },
 
   /**
@@ -706,6 +763,7 @@ var util = {
    * @param {geo.geoPosition} seg2pt1 One endpoint of the second segment.
    * @param {geo.geoPosition} seg2pt2 The other endpoint of the second segment.
    * @returns {boolean} True if the segments cross.
+   * @memberof geo.util
    */
   crossedLineSegments2d: function (seg1pt1, seg1pt2, seg2pt1, seg2pt2) {
     /* If the segments don't have any overlap in x or y, they can't cross */
@@ -749,6 +807,7 @@ var util = {
    *    line is a list of vertices.  The line segment is checked against each
    *    segment of each line in this list.
    * @returns {boolean} True if the segment crosses any line segment.
+   * @memberof geo.util
    */
   segmentCrossesLineList2d: function (pt1, pt2, lineList) {
     var result = lineList.some(function (line) {
@@ -783,6 +842,7 @@ var util = {
    *    vertices).  If self-crossing is prohibited, the resultant point set
    *    might not be as simplified as it could be.
    * @returns {geo.geoPosition[]} The new point set.
+   * @memberof geo.util
    */
   rdpLineSimplify: function (pts, tolerance, closed, noCrossLines) {
     if (pts.length <= 2 || tolerance < 0) {
@@ -855,6 +915,7 @@ var util = {
    *    be the smaller of the specified value and the computed value.
    * @returns {object} An object with `min` and `max`, both numbers.  If the
    *    array is empty, `undefined` may be returned for the `min` and `max`.
+   * @memberof geo.util
    */
   getMinMaxValues: function (values, min, max, limit) {
     if (values.length && (limit || !$.isNumeric(min) || !$.isNumeric(max))) {
@@ -881,6 +942,7 @@ var util = {
    *
    * @param {number} value A value in radians.
    * @returns {number} The wrapped value.
+   * @memberof geo.util
    */
   wrapAngle: function (value) {
     /* Module will only ensure that this is between [-2 PI, 2 PI). */
@@ -1038,6 +1100,7 @@ var util = {
    * check has been done before, it returns a boolean.
    *
    * @returns {boolean|jQuery.Deferred}
+   * @memberof geo.util
    */
   htmlToImageSupported: function () {
     if (m_htmlToImageSupport === undefined) {
@@ -1365,6 +1428,7 @@ var util = {
    *
    * @param {*} value The item to test.
    * @returns {boolean} True if the tested item is an object.
+   * @memberof geo.util
    */
   isObject: function (value) {
     var type = typeof value;

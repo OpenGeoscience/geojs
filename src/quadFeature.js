@@ -189,10 +189,10 @@ var quadFeature = function (arg) {
           /* If a point is in the quad (based on pointInPolygon, above), check
            * where in the quad it is located.  We want to output coordinates
            * where the upper-left is (0, 0) and the lower-right is (1, 1). */
-          coordbasis = util.pointTo2DTriangleBasis(
+          coordbasis = util.pointToTriangleBasis2d(
             coordinate, poly1[0], poly1[1], poly1[2]);
           if (!coordbasis || coordbasis.x + coordbasis.y > 1) {
-            coordbasis = util.pointTo2DTriangleBasis(
+            coordbasis = util.pointToTriangleBasis2d(
               coordinate, poly2[2], poly2[1], poly2[0]);
             if (coordbasis) {
               /* In the second triangle, (0, 0) is upper-right, (1, 0) is
