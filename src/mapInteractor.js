@@ -1067,7 +1067,7 @@ var mapInteractor = function (args) {
           m_selectionLayer = null;
         }
         m_selectionLayer = map.createLayer(
-          'feature', {features: [quadFeature.capabilities.color]});
+          'feature', {features: [quadFeature.capabilities.color], autoshareRenderer: false});
         m_selectionQuad = m_selectionLayer.createFeature(
           'quad', {gcs: map.gcs()});
         m_selectionQuad.style({

@@ -77,8 +77,8 @@ describe('geo.feature', function () {
       feat.pointSearch = function () {
         return points;
       };
-      feat.boxSearch = function () {
-        return box;
+      feat.polygonSearch = function () {
+        return {index: box, found: box};
       };
       points.index = [1];
       feat.geoOn(geo.event.feature.mouseover, function (evt) { events.mouseover = evt; });
@@ -145,14 +145,14 @@ describe('geo.feature', function () {
     it('_handleBrush', function () {
       box = [7, 8];
       events = {};
-      feat._handleBrush({gcs: {}});
+      feat._handleBrush({gcs: {lowerLeft: {x: 0, y: 0}, lowerRight: {x: 0, y: 0}, upperLeft: {x: 0, y: 0}, upperRight: {x: 0, y: 0}}});
       expect(Object.getOwnPropertyNames(events)).toEqual(['brush']);
       expect(events.brush.index).toEqual(8);
     });
     it('_handleBrushend', function () {
       box = [9];
       events = {};
-      feat._handleBrushend({gcs: {}});
+      feat._handleBrushend({gcs: {lowerLeft: {x: 0, y: 0}, lowerRight: {x: 0, y: 0}, upperLeft: {x: 0, y: 0}, upperRight: {x: 0, y: 0}}});
       expect(Object.getOwnPropertyNames(events)).toEqual(['brushend']);
       expect(events.brushend.index).toEqual(9);
     });
@@ -182,7 +182,10 @@ describe('geo.feature', function () {
       expect(feat.pointSearch()).toEqual({index: [], found: []});
     });
     it('boxSearch', function () {
-      expect(feat.boxSearch()).toEqual([]);
+      expect(feat.boxSearch({x: 0, y: 0}, {x: 0, y: 0})).toEqual({index: [], found: []});
+    });
+    it('polygonSearch', function () {
+      expect(feat.polygonSearch()).toEqual({index: [], found: []});
     });
     it('featureGcsToDisplay', function () {
       var pos = feat.featureGcsToDisplay({x: -24.6094, y: 13.0688});

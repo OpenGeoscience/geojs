@@ -184,6 +184,44 @@ describe('geo.polygonFeature', function () {
       expect(pt.index).toEqual([0]);
       restoreWebglRenderer();
     });
+    it('polygonSearch', function () {
+      mockWebglRenderer();
+      var map, layer, polygon, data, result;
+      map = createMap();
+      layer = map.createLayer('feature', {renderer: 'webgl'});
+      polygon = geo.polygonFeature({layer: layer});
+      polygon._init();
+      data = testPolygons;
+      polygon.data(data);
+      result = polygon.polygonSearch([{x: 19, y: -1}, {x: 41, y: -1}, {x: 41, y: 21}, {x: 19, y: 21}]);
+      expect(result.index).toEqual([1]);
+      result = polygon.polygonSearch([{x: 19, y: -1}, {x: 31, y: -1}, {x: 31, y: 21}, {x: 19, y: 21}]);
+      expect(result.index).toEqual([]);
+      result = polygon.polygonSearch([{x: 19, y: -1}, {x: 31, y: -1}, {x: 31, y: 21}, {x: 19, y: 21}], {partial: true});
+      expect(result.index).toEqual([1]);
+      result = polygon.polygonSearch([{x: 29, y: 9}, {x: 31, y: 9}, {x: 31, y: 11}, {x: 29, y: 31}]);
+      expect(result.index).toEqual([]);
+      result = polygon.polygonSearch([{x: 29, y: 9}, {x: 31, y: 9}, {x: 31, y: 11}, {x: 29, y: 31}], {partial: true});
+      expect(result.index).toEqual([1]);
+      result = polygon.polygonSearch([{x: 29, y: 10}, {x: 31, y: 10}], {partial: true});
+      expect(result.index).toEqual([]);
+      // selection entirely inside a polygon
+      result = polygon.polygonSearch([{x: 1, y: 1}, {x: 9, y: 5}, {x: 5, y: 9}]);
+      expect(result.index).toEqual([]);
+      result = polygon.polygonSearch([{x: 1, y: 1}, {x: 9, y: 5}, {x: 5, y: 9}], {partial: true});
+      expect(result.index).toEqual([0]);
+      // enable stroke and test very close, but outside, of an edge
+      polygon.style({stroke: true, strokeWidth: 20});
+      result = polygon.polygonSearch([{x: 5, y: 2.499}, {x: 6, y: 2}, {x: 5, y: 2}]);
+      expect(result.index).toEqual([]);
+      result = polygon.polygonSearch([{x: 5, y: 2.499}, {x: 6, y: 2}, {x: 5, y: 2}], {partial: true});
+      expect(result.index).toEqual([0]);
+      result = polygon.polygonSearch([{x: 5, y: 2.499}, {x: 5, y: 3}, {x: 4, y: 3}]);
+      expect(result.index).toEqual([]);
+      result = polygon.polygonSearch([{x: 5, y: 2.499}, {x: 5, y: 3}, {x: 4, y: 3}], {partial: true});
+      expect(result.index).toEqual([0]);
+      restoreWebglRenderer();
+    });
 
     it('polygonCoordinates', function () {
       mockWebglRenderer();

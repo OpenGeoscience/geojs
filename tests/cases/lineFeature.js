@@ -175,29 +175,56 @@ describe('geo.lineFeature', function () {
       line.style('strokeWidth', 5);
     });
     it('boxSearch', function () {
-      var map, layer, line, idx, data = testLines;
+      var map, layer, line, idx;
       map = createMap();
       layer = map.createLayer('feature', {renderer: 'svg'});
       line = layer.createFeature('line', {selectionAPI: true});
-      line.data(data)
+      line.data(testLines)
           .line(function (item, itemIdx) {
             return item.coord;
           });
-      /* The partial flag is intended to eventually return the lines that have
-       * any part of them in a region.  This hasn't been implemented yet. */
-      expect(function () {
-        line.boxSearch({}, {}, {partial: true});
-      }).toThrow(new Error('Unimplemented query method.'));
-      /* Otherwise, all points of the line are expected to be in the bounding
-       * box. */
-      idx = line.boxSearch({x: 19, y: 9}, {x: 26, y: 11});
+      idx = line.boxSearch({x: 19, y: 9}, {x: 26, y: 11}).index;
       expect(idx).toEqual([0]);
-      idx = line.boxSearch({x: 19, y: 9}, {x: 24, y: 11});
+      idx = line.boxSearch({x: 19, y: 9}, {x: 24, y: 11}).index;
       expect(idx.length).toBe(0);
-      idx = line.boxSearch({x: 29, y: 9}, {x: 36, y: 22});
+      idx = line.boxSearch({x: 29, y: 9}, {x: 36, y: 22}).index;
       expect(idx).toEqual([1]);
-      idx = line.boxSearch({x: 29, y: 9}, {x: 36, y: 26});
+      idx = line.boxSearch({x: 29, y: 9}, {x: 36, y: 26}).index;
       expect(idx).toEqual([1, 2]);
+    });
+    it('polygonSearch', function () {
+      var map, layer, line, result;
+      map = createMap();
+      layer = map.createLayer('feature', {renderer: 'svg'});
+      line = layer.createFeature('line', {selectionAPI: true});
+      line.data(testLines)
+          .line(function (item, itemIdx) {
+            return item.coord;
+          });
+      result = line.polygonSearch([{x: 16, y: 9}, {x: 36, y: 9}, {x: 36, y: 25}]);
+      expect(result.index).toEqual([0, 1]);
+      result = line.polygonSearch([{x: 16, y: 9}, {x: 36, y: 9}, {x: 36, y: 25}], {partial: true});
+      expect(result.index).toEqual([0, 1, 2]);
+      result = line.polygonSearch([{x: 31, y: 31}, {x: 34, y: 32}, {x: 32, y: 34}]);
+      expect(result.index).toEqual([]);
+      result = line.polygonSearch([{x: 29, y: 29}, {x: 36, y: 32}, {x: 32, y: 36}]);
+      expect(result.index).toEqual([3]);
+      result = line.polygonSearch({outer: [{x: 29, y: 29}, {x: 36, y: 32}, {x: 32, y: 36}], inner: [[{x: 31, y: 31}, {x: 34, y: 32}, {x: 32, y: 34}]]});
+      expect(result.index).toEqual([3]);
+      result = line.polygonSearch({outer: [{x: 29, y: 29}, {x: 36, y: 32}, {x: 32, y: 36}], inner: [[{x: 31, y: 31}, {x: 34, y: 32}, {x: 32, y: 35.5}]]});
+      expect(result.index).toEqual([]);
+      result = line.polygonSearch({outer: [{x: 29, y: 29}, {x: 36, y: 32}, {x: 32, y: 36}], inner: [[{x: 31, y: 31}, {x: 34, y: 32}, {x: 32, y: 35.5}]]}, {partial: true});
+      expect(result.index).toEqual([3]);
+      result = line.polygonSearch([{x: 29, y: 29}, {x: 36, y: 32}]);
+      expect(result.index).toEqual([]);
+      result = line.polygonSearch([{x: 46, y: 9}, {x: 36, y: 9}, {x: 36, y: 25}]);
+      expect(result.index).toEqual([]);
+      result = line.polygonSearch([{x: 22, y: 9}, {x: 24, y: 9}, {x: 23, y: 11}], {partial: true});
+      expect(result.index).toEqual([0]);
+      result = line.polygonSearch([{x: 30, y: 13}, {x: 35, y: 13}, {x: 32, y: 16}], {partial: true});
+      expect(result.index).toEqual([1]);
+      result = line.polygonSearch({outer: [{x: 25, y: 5}, {x: 40, y: 5}, {x: 32, y: 20}], inner: [[{x: 30, y: 13}, {x: 35, y: 13}, {x: 32, y: 16}]]}, {partial: true});
+      expect(result.index).toEqual([1]);
     });
 
     describe('rdpSimplifyData', function () {
