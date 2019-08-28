@@ -2,8 +2,14 @@
 
 ## Unreleased
 
+### Features
+- The osmLayer now has predefined `tileSources` that can be used with the `source` method or property to switch multiple parameters at once. (#1020)
+
 ### Improvements
 - Points with small radii or thin strokes are rendered better (#1021)
+
+### Changes
+- Switched the default tile server to Stamen Design's toner-lite. (#1020)
 
 ### Bug Fixes
 - Mouse wheel events didn't recompute gcs coordinates, so a wheel event without a previous move event coult list the wrong location (#1027)

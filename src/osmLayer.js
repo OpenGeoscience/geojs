@@ -11,9 +11,8 @@ var quadFeature = require('./quadFeature');
  * @extends {geo.tileLayer.spec}
  * @property {number} [mapOpacity] If specified, and `opacity` is not
  *   specified, use this as the layer opacity.
- * @property {string} [source] If specified and neither `url` nore `baseUrl`
- *   are specified, use the predefined tile source (see
- *   {@link geo.osmLayer.tileSources}).
+ * @property {string} [source] If specified, use the predefined tile source
+ *   (see {@link geo.osmLayer.tileSources}).
  */
 
 /**
@@ -34,15 +33,18 @@ var osmLayer = function (arg) {
   if (!(this instanceof osmLayer)) {
     return new osmLayer(arg);
   }
+  arg = arg || {};
   if (arg.mapOpacity !== undefined && arg.opacity === undefined) {
+    arg = $.extend({}, arg);
     arg.opacity = arg.mapOpacity;
   }
-  arg = $.extend(true, {}, this.constructor.defaults, arg || {});
-  if (arg.source && !arg.url && !arg.baseUrl) {
-    // if a source is used, it will override user-specified values for any of
-    // its defined fields (attribution, minLevel, maxLevel, subdomains).
-    $.extend(arg, osmLayer.tileSources[arg.source]);
-  }
+  arg = $.extend(
+    true,
+    {},
+    this.constructor.defaults,
+    osmLayer.tileSources[this.constructor.defaults.source] || {},
+    osmLayer.tileSources[arg.source] || {},
+    arg);
   tileLayer.call(this, arg);
 
   var m_this = this;
@@ -118,8 +120,16 @@ osmLayer.defaults = $.extend({}, tileLayer.defaults, {
     return {x: s, y: s};
   },
   url: '',
-  source: 'osm'
+  source: 'stamen-toner-lite'
 });
+
+/* Stamen's website (http://maps.stamen.com) as of 2019-08-28 says that the
+ * maps they host may be used free of charge.  For http access, use a url like
+ * http://{s}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png */
+let StamenAttribution = 'Map tiles by <a href="http://stamen.com">Stamen ' +
+  'Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">' +
+  'CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap' +
+  '</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.';
 
 /**
  * This is a list of known tile sources.  It can be added to via
@@ -129,6 +139,12 @@ osmLayer.defaults = $.extend({}, tileLayer.defaults, {
  * @type {object}
  */
 osmLayer.tileSources = {
+  'nationalmap-satellite': {
+    url: 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tile data from <a href="https://basemap.nationalmap.gov/">USGS</a>',
+    minLevel: 0,
+    maxLevel: 16
+  },
   osm: {
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: 'Tile data &copy; <a href="https://osm.org/copyright">' +
@@ -137,14 +153,39 @@ osmLayer.tileSources = {
     minLevel: 0,
     maxLevel: 19
   },
-  'stamen-toner-lite': {
-    url: 'http://{s}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png',
-    attribution: 'Tile design &copy; <a href="https://stamen.com">' +
-      'Stamen Design</a>.  Tile data &copy; ' +
-      '<a href="https://osm.org/copyright">OpenStreetMap</a> contributors',
+  'stamen-terrain': {
+    url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png',
+    attribution: StamenAttribution,
+    subdomains: 'abcd',
+    minLevel: 0,
+    maxLevel: 14
+  },
+  'stamen-terrain-background': {
+    url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}.png',
+    attribution: StamenAttribution,
+    subdomains: 'abcd',
+    minLevel: 0,
+    maxLevel: 14
+  },
+  'stamen-toner': {
+    url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
+    attribution: StamenAttribution,
     subdomains: 'abcd',
     minLevel: 0,
     maxLevel: 20
+  },
+  'stamen-toner-lite': {
+    url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png',
+    attribution: StamenAttribution,
+    subdomains: 'abcd',
+    minLevel: 0,
+    maxLevel: 20
+  },
+  'wikimedia': {
+    url: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
+    attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia maps</a> | Map data &copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+    minLevel: 0,
+    maxLevel: 19
   }
 };
 

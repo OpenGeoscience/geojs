@@ -14,8 +14,8 @@ block mainTutorial
       zoom: 14
     });
     var layer = map.createLayer('osm');
-  +codeblock_test('map has one osm layer from openstreetmap', [
+  +codeblock_test('map has one osm layer from a known tile source', [
       'map.layers().length === 1',
       'map.layers()[0] instanceof geo.osmLayer',
-      'layer.url().match(/openstreetmap/)'
+      'layer.url().match(/(openstreetmap|stamen)/)'
       ])

@@ -17,17 +17,7 @@ $(function () {
   });
 
   // Add the osm layer with a custom tile url
-  map.createLayer(
-    'osm',
-    {
-      url: 'http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png',
-      attribution: ['Map tiles by <a href="http://stamen.com">Stamen Design</a>,',
-        'under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>.',
-        'Data by <a href="https://openstreetmap.org">OpenStreetMap</a>, under',
-        '<a href="https://openstreetmap.org/copyright">ODbL</a>.'
-      ].join(' ')
-    }
-  );
+  map.createLayer('osm', {source: 'stamen-toner-lite'});
 
   // Create a layer to put the features in.  We could need point, line, and
   // polygon features, so ask for a layer that supports all of them.

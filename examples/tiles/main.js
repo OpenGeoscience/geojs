@@ -35,8 +35,9 @@
  *      of the url parameter.  If there are no commas in the string, each letter
  *      is used by itself (e.g., 'abc' is the same as 'a,b,c').
  *  unitsPerPixel: set the units per pixel at zoom level 0.
- *  url: url to use for the map files.  Placeholders are allowed.  Default is
- *      https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png .  Other useful
+ *  url: url or source to use for the map files.  Placeholders are allowed.
+ *    Exanples:
+ *      https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
  *      urls are are: /data/tilefancy.png
  *      http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png
  *  w: width of a tiled image (at max zoom).  If w and h are specified, a
@@ -108,9 +109,7 @@ $(function () {
     opacity: query.opacity || '1',
     /* Always use a larger cache so if keepLower is changed, we still have a
      * big enough cache. */
-    cacheSize: 600,
-    attribution: $('#url-list [value="' + $('#layer-url').val() + '"]').attr(
-      'credit')
+    cacheSize: 600
   };
   if (layerParams.renderer === 'null' || layerParams.renderer === 'html') {
     layerParams.renderer = null;
@@ -120,9 +119,11 @@ $(function () {
       springDisabled = {spring: {enabled: false}};
   // Allow a custom tile url, including subdomains.
   if (query.url) {
-    layerParams.url = query.url;
-  } else {
-    layerParams.url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    if (query.url.indexOf('/') >= 0) {
+      layerParams.url = query.url;
+    } else {
+      layerParams.source = query.url;
+    }
   }
   if (query.subdomains) {
     if (query.subdomains.indexOf(',') >= 0) {
@@ -320,9 +321,14 @@ $(function () {
       case 'url':
         var url = processedValue;
         layerParams[param] = processedValue;
-        osmLayer.url(url);
-        osmLayer.attribution($('#url-list [value="' + value + '"]').attr(
-          'credit'));
+        if (url.indexOf('/') >= 0) {
+          osmLayer.url(url);
+          osmLayer._options.maxLevel = query.maxLevel ? parseInt(query.maxLevel, 10) : 25;
+          osmLayer._options.minLevel = query.minLevel ? parseInt(query.minLevel, 10) : 0;
+
+        } else {
+          osmLayer.source(url);
+        }
         break;
       case 'x': case 'y':
         var coord = map.center();

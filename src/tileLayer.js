@@ -110,12 +110,12 @@ function m_getTileSubdomain(x, y, z, subdomains) {
  * @private.
  */
 function m_tileUrlFromTemplate(base) {
-  var xPattern = new RegExp(/\$?\{[xX]\}/),
-      yPattern = new RegExp(/\$?\{[yY]\}/),
-      zPattern = new RegExp(/\$?\{[zZ]\}/),
+  var xPattern = new RegExp(/\$?\{[xX]\}/g),
+      yPattern = new RegExp(/\$?\{[yY]\}/g),
+      zPattern = new RegExp(/\$?\{[zZ]\}/g),
       sPattern = new RegExp(/\$?\{(s|S|[sS]:[^{}]+|[^-{}]-[^-{}]|([^,{}]+,)+[^,{}]+)\}/);
   var url = base
-      .replace(sPattern, '{s}')
+      .replace(new RegExp(sPattern, 'g'), '{s}')
       .replace(xPattern, '{x}')
       .replace(yPattern, '{y}')
       .replace(zPattern, '{z}');
@@ -138,10 +138,10 @@ function m_tileUrlFromTemplate(base) {
 
   return function (x, y, z, subdomains) {
     return url
-      .replace('{s}', m_getTileSubdomain(x, y, z, urlSubdomains || subdomains))
-      .replace('{x}', x)
-      .replace('{y}', y)
-      .replace('{z}', z);
+      .replace(/\{s\}/g, m_getTileSubdomain(x, y, z, urlSubdomains || subdomains))
+      .replace(/\{x\}/g, x)
+      .replace(/\{y\}/g, y)
+      .replace(/\{z\}/g, z);
   };
 }
 

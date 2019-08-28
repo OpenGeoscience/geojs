@@ -54,13 +54,13 @@ block append mainContent
         option(value="5") 5&deg; increments
         option(value="1") 1&deg; increments
 
-    .form-group(title="The url used to fetch tiles.  Use {x}, {y}, {z}, and {s} for templating.")
+    .form-group(title="The url used to fetch tiles.  Use {x}, {y}, {z}, and {s} for templating.  Example: https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
       label(for="layer-url") Tile URL
-      input#layer-url.layerparam(param-name="url", list="url-list", placeholder="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+      input#layer-url.layerparam(param-name="url", list="url-list")
       datalist#url-list
-        option(value="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", credit="© OpenStreetMap contributors") OSM
-        option(value="../../data/tilefancy.png", credit="") Fancy Test Tile
-        option(value="http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", credit='Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="https://openstreetmap.org">OpenStreetMap</a>, under <a href="https://openstreetmap.org/copyright">ODbL</a>.') Toner Lite
+        option(value="stamen-toner-lite") Stamen Toner Lite
+        option(value="osm") OSM
+        option(value="../../data/tilefancy.png") Fancy Test Tile
     .form-group(title="The subdomains used to fetch tiles.  This can be a comma-separated list or a string of single-letter subdomains.")
       label(for="layer-subdomains") URL Subdomains
       input#layer-subdomains.layerparam(param-name="subdomains", placeholder="abc")
