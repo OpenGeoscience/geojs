@@ -2,26 +2,27 @@ describe('ui', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
 
-  var myMap;
+  var map;
 
   beforeEach(function () {
     imageTest.prepareImageTest();
   });
 
   afterEach(function () {
-    myMap.exit();
+    map.exit();
   });
 
   it('ui layers', function (done) {
-    myMap = common.createOsmMap({center: {x: -70, y: 40}}, {}, true);
+    map = common.createOsmMap({center: {x: -70, y: 40}}, {}, true);
 
-    myMap.createLayer('osm', {url: '/data/white.jpg'});
-    myMap.createLayer('ui').createWidget('slider');
-    myMap.createLayer('osm', {url: '/data/red.jpg'});
-    myMap.createLayer('ui').createWidget('slider');
-    myMap.createLayer('osm', {url: '/data/blue.jpg'});
+    // we should see two sliders on a solid blue background
+    map.createLayer('osm', {url: '/data/white.jpg'});
+    map.createLayer('ui').createWidget('slider');
+    map.createLayer('osm', {url: '/data/red.jpg'});
+    map.createLayer('ui').createWidget('slider', {position: {bottom: 0}});
+    map.createLayer('osm', {url: '/data/blue.jpg'});
 
-    myMap.draw();
-    imageTest.imageTest('uiLayer', null, 0.0015, done, myMap.onIdle, 0, 2);
+    map.draw();
+    imageTest.imageTest('uiLayer', null, 0.0015, done, map.onIdle, 0, 2);
   }, 30000);
 });

@@ -11,6 +11,9 @@ var quadFeature = require('./quadFeature');
  * @extends {geo.tileLayer.spec}
  * @property {number} [mapOpacity] If specified, and `opacity` is not
  *   specified, use this as the layer opacity.
+ * @property {string} [source] If specified and neither `url` nore `baseUrl`
+ *   are specified, use the predefined tile source (see
+ *   {@link geo.osmLayer.tileSources}).
  */
 
 /**
@@ -34,7 +37,15 @@ var osmLayer = function (arg) {
   if (arg.mapOpacity !== undefined && arg.opacity === undefined) {
     arg.opacity = arg.mapOpacity;
   }
+  arg = $.extend(true, {}, this.constructor.defaults, arg || {});
+  if (arg.source && !arg.url && !arg.baseUrl) {
+    // if a source is used, it will override user-specified values for any of
+    // its defined fields (attribution, minLevel, maxLevel, subdomains).
+    $.extend(arg, osmLayer.tileSources[arg.source]);
+  }
   tileLayer.call(this, arg);
+
+  var m_this = this;
 
   /* mapOpacity is just another name for the layer opacity. */
   this.mapOpacity = this.opacity;
@@ -58,16 +69,44 @@ var osmLayer = function (arg) {
     var urlParams = source || index;
     return imageTile({
       index: index,
-      size: {x: this._options.tileWidth, y: this._options.tileHeight},
-      queue: this._queue,
-      overlap: this._options.tileOverlap,
-      scale: this._options.tileScale,
-      url: this._options.url.call(
-        this, urlParams.x, urlParams.y, urlParams.level || 0,
-        this._options.subdomains),
-      crossDomain: this._options.crossDomain
+      size: {x: m_this._options.tileWidth, y: m_this._options.tileHeight},
+      queue: m_this._queue,
+      overlap: m_this._options.tileOverlap,
+      scale: m_this._options.tileScale,
+      url: m_this._options.url.call(
+        m_this, urlParams.x, urlParams.y, urlParams.level || 0,
+        m_this._options.subdomains),
+      crossDomain: m_this._options.crossDomain
     });
-  }.bind(this);
+  };
+
+  /**
+   * Get or set a defined tile source.  Tile sources are defined in
+   *  {@link geo.osmLayer.tileSources}.
+   *
+   * @param {string} [source] The name of a defined tile source or `undefined`
+   *    get the current named tile source, if any.
+   * @returns {string|undefined|this} Either the name of the current tile
+   *    source, if any.  Returns `this` when setting the source.
+   */
+  this.source = function (source) {
+    if (source === undefined) {
+      for (let key in osmLayer.tileSources) {
+        if (osmLayer.tileSources[key].url === m_this.url()) {
+          return key;
+        }
+      }
+      return;
+    }
+    if (osmLayer.tileSources[source]) {
+      m_this.url(osmLayer.tileSources[source].url);
+      m_this.subdomains(osmLayer.tileSources[source].subdomains || 'abc');
+      m_this.attribution(osmLayer.tileSources[source].attribution || '');
+      m_this._options.maxLevel = osmLayer.tileSources[source].maxLevel || 18;
+      m_this._options.minLevel = osmLayer.tileSources[source].minLevel || 0;
+    }
+    return m_this;
+  };
 };
 
 /**
@@ -78,10 +117,36 @@ osmLayer.defaults = $.extend({}, tileLayer.defaults, {
     var s = Math.pow(2, level - 1) * 256;
     return {x: s, y: s};
   },
-  url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  attribution: 'Tile data &copy; <a href="https://osm.org/copyright">' +
-    'OpenStreetMap</a> contributors'
+  url: '',
+  source: 'osm'
 });
+
+/**
+ * This is a list of known tile sources.  It can be added to via
+ * `geo.osmLayer.tilesource[<key>] = <object>`, where the object has `url`,
+ * `attribution`, `subdomains`, `minLevel`, and `maxLevel` defined.
+ *
+ * @type {object}
+ */
+osmLayer.tileSources = {
+  osm: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: 'Tile data &copy; <a href="https://osm.org/copyright">' +
+      'OpenStreetMap</a> contributors',
+    subdomains: 'abc',
+    minLevel: 0,
+    maxLevel: 19
+  },
+  'stamen-toner-lite': {
+    url: 'http://{s}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png',
+    attribution: 'Tile design &copy; <a href="https://stamen.com">' +
+      'Stamen Design</a>.  Tile data &copy; ' +
+      '<a href="https://osm.org/copyright">OpenStreetMap</a> contributors',
+    subdomains: 'abcd',
+    minLevel: 0,
+    maxLevel: 20
+  }
+};
 
 inherit(osmLayer, tileLayer);
 /* By default, ask to support image quads.  If the user needs full
