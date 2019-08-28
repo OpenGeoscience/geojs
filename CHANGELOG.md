@@ -3,7 +3,7 @@
 ## Version 0.19.6
 
 ### Features
-- Added a polygonSearch method to features
+- Added a polygonSearch method to features (#1014)
 
 ### Changes
 - The feature boxSearch function now uses map input gcs coordinates consistently and returns results in the same format as pointSearch (#1014)

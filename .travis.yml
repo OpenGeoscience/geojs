@@ -66,20 +66,16 @@ script:
 after_failure:
   # Upload test results.  First make them smaller with optipng.
   - pip install --user --upgrade girder-client requests[security]
-  - find _build/images -name '*-test.png' -exec optipng {} \+
-  - find _build/images -name '*-test.png' -exec python scripts/upload_test_images.py {} \+
+  - find _build/images -name '*-test.png' -exec optipng {} \+ || true
+  - find _build/images -name '*-test.png' -exec python scripts/upload_travis_results.py {} \+ || true
+  # Upload build artifacts
+  - find dist/built -type f -exec python scripts/upload_travis_results.py {} \+ || true
 
 after_success:
   - npm run codecov
-  # This was used to send build notes to an S3 bucket
-  # - pip install --user GitPython boto3
-  # - python $TRAVIS_BUILD_DIR/scripts/upload_notes.py --repo $TRAVIS_BUILD_DIR --upload $TRAVIS_BUILD_DIR/_build/build_notes.json
-
-# Use this for AWS credentials
-# env:
-#   global:
-#     - secure: JYWs3zJV09uAb7CvX32pADRYTH2XqSGvImNEI6zVFxJxs9r0JsGgyOTz4PPBgs3dv1OjVBXqxu4GD2ZBKeo0Ax13ZnBNVR/BacupBtIwXbxp/FG2lr+WBzE0YnEBhAF/mW5DEkNBWJyLSiBlxYA5QFAAHYwb/GOADl+Z9Qi2FIU=
-#     - secure: on13Ka+3jkLDCXxqzxuT+CY4sPM0Zxfbe9M2F3LE0yhN2ww5vaBKdbTrzEWa0TOlBkM2qQUPAFybjHXfHeRyKpZDlsssjogH8YO5qx4zFRP5ZB9ny39QAqBsfZTuXt2WmOTLEcXkByYXVH8my/8ZqZqofSeBZsZdeauzoLbr0R0=
+  # Upload build artifacts
+  - pip install --user --upgrade girder-client requests[security]
+  - find dist/built -type f -exec python scripts/upload_travis_results.py {} \+
 
 deploy:
   - provider: pages
