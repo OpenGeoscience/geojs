@@ -349,10 +349,12 @@ var webgl_pointFeature = function (arg) {
       }
       s_updateStyleFromArray(key, styleArray, false);
     });
-    if (m_this.visible() && needsRefresh) {
-      m_this.draw();
-    } else if (needsRender) {
-      m_this.renderer()._render();
+    if (refresh) {
+      if (m_this.visible() && needsRefresh) {
+        m_this.draw();
+      } else if (needsRender) {
+        m_this.renderer()._render();
+      }
     }
     return m_this;
   };

@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+### Improvements
+- Points with small radii or thin strokes are rendered better (#1021)
+
 ## Version 0.19.6
 
 ### Features
