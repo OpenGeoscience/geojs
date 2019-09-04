@@ -267,9 +267,9 @@ describe('geo.lineFeature', function () {
         line.rdpSimplifyData(testLines, 2, undefined, lineFunc);
         counts = countLines(line.data().map(line.style.get('line')));
         expect(counts).toEqual({lines: 8, vertices: 17});
-        line.rdpSimplifyData(testLines, 5, undefined, lineFunc);
+        line.rdpSimplifyData(testLines, 5.01, undefined, lineFunc);
         counts = countLines(line.data().map(line.style.get('line')));
-        expect(counts).toEqual({lines: 8, vertices: 11});
+        expect(counts).toEqual({lines: 8, vertices: 9});
         line.rdpSimplifyData(testLines, 20, undefined, lineFunc);
         counts = countLines(line.data().map(line.style.get('line')));
         expect(counts).toEqual({lines: 8, vertices: 0});

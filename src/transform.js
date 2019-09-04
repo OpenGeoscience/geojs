@@ -338,12 +338,23 @@ transform.lookup = function (projection) {
 transform.transformCoordinates = function (srcPrj, tgtPrj, coordinates, numberOfComponents) {
   'use strict';
 
-  if (srcPrj === tgtPrj) {
+  if (srcPrj === tgtPrj || (Array.isArray(coordinates) && !coordinates.length)) {
     return coordinates;
   }
 
   if (Array.isArray(coordinates) && coordinates.length >= 3 && numberOfComponents === 3 && !util.isObject(coordinates[0])) {
     return transform.transformCoordinatesFlatArray3(srcPrj, tgtPrj, coordinates);
+  }
+  if (Array.isArray(coordinates) && coordinates.length && util.isObject(coordinates[0]) && 'x' in coordinates[0] && 'y' in coordinates[0]) {
+    var smatch = srcPrj.match(axisPattern),
+        tmatch = tgtPrj.match(axisPattern);
+    // if the two projections only differ in the middle axis
+    if (smatch && tmatch && smatch[1] === tmatch[1] && smatch[3] === tmatch[3]) {
+      if ('z' in coordinates[0]) {
+        return coordinates.map(p => ({x: +p.x, y: -p.y, z: +p.z || 0}));
+      }
+      return coordinates.map(p => ({x: +p.x, y: -p.y}));
+    }
   }
   var trans = transform({source: srcPrj, target: tgtPrj}), output;
   if (util.isObject(coordinates) && 'x' in coordinates && 'y' in coordinates) {
