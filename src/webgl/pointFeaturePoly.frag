@@ -8,21 +8,19 @@ varying vec4 fillColorVar;
 varying vec4 strokeColorVar;
 varying float radiusVar;
 varying float strokeWidthVar;
-varying float fillVar;
-varying float strokeVar;
 varying vec3 unitVar;  // distinct for square/triangle
 
 void main () {
   vec4 strokeColor, fillColor;
   float endStep;
   // No stroke or fill implies nothing to draw
-  if (fillVar == 0.0 && strokeVar == 0.0)
+  if (fillColorVar.a == 0.0 && strokeColorVar.a == 0.0)
     discard;
   float rad = length(unitVar.xy); // distinct for square/triangle
   if (rad > 1.0)
     discard;
   // If there is no stroke, the fill region should transition to nothing
-  if (strokeVar == 0.0) {
+  if (strokeColorVar.a == 0.0) {
     strokeColor = vec4(fillColorVar.rgb, 0.0);
     endStep = 1.0;
   } else {
@@ -30,7 +28,7 @@ void main () {
     endStep = radiusVar / (radiusVar + strokeWidthVar);
   }
   // Likewise, if there is no fill, the stroke should transition to nothing
-  if (fillVar == 0.0)
+  if (fillColorVar.a == 0.0)
     fillColor = vec4(strokeColor.rgb, 0.0);
   else
     fillColor = fillColorVar;
