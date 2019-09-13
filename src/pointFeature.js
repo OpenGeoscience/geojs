@@ -17,7 +17,7 @@ var feature = require('./feature');
  *   vertex shader is the bottleneck, and `square` is fastest if the fragment
  *   shader is the bottleneck.  `sprite` may not work for very large points.
  * @property {boolean} [dynamicDraw=false] For the webgl renderer, if this is
- *   truthy, webgl source buffers can be modifies and updated directly.
+ *   truthy, webgl source buffers can be modified and updated directly.
  */
 
 /**
@@ -538,7 +538,7 @@ pointFeature.capabilities = {
   /* core feature name -- support in any manner */
   feature: 'point',
   /* support for stroke properties */
-  stroke: 'line.stroke'
+  stroke: 'point.stroke'
 };
 
 inherit(pointFeature, feature);
