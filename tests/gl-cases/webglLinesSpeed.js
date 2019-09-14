@@ -76,7 +76,8 @@ describe('webglLinesSpeed', function () {
       fps = 1000.0 / frametime;
       console.log('Usable framerate ' + fps);
       console.log(animTimes);
-      expect(fps).toBeGreaterThan(1.0);
+      // very minimal test threshold
+      expect(fps).toBeGreaterThan(0.01);
       $('#map').append($('<div style="display: none" id="framerateResults">')
         .attr('results', fps));
 
