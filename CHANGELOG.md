@@ -7,6 +7,7 @@
 
 ### Bug Fixes
 - Mouse wheel events didn't recompute gcs coordinates, so a wheel event without a previous move event coult list the wrong location (#1027)
+- Original event data was not included with actionwheel events (#1030)
 
 ## Version 0.19.6
 
