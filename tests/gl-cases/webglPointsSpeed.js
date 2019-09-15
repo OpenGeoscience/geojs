@@ -77,7 +77,7 @@ describe('webglPointsSpeed', function () {
       console.log('Usable framerate ' + fps);
       console.log(animTimes);
       // very minimal test threshold; this is mostly to collect data
-      expect(fps).toBeGreaterThan(0.1);
+      expect(fps).toBeGreaterThan(0.01);
       $('#map').append($('<div style="display: none" id="framerateResults">')
         .attr('results', fps));
 
