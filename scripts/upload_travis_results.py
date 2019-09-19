@@ -1,6 +1,7 @@
 from __future__ import print_function
 import girder_client
 import os
+import six
 import sys
 
 
@@ -26,7 +27,18 @@ def main():
     folder = gc.loadOrCreateFolder('Travis GeoJS', folder['_id'], 'folder')
 
     travis_build_number = os.environ.get('TRAVIS_BUILD_NUMBER')
-    folder = gc.loadOrCreateFolder(travis_build_number, folder['_id'], 'folder')
+    folderName = travis_build_number
+    if os.environ.get('TRAVIS_EVENT_TYPE') == 'pull_request':
+        folderName += ' PR #%s %s' % (
+            os.environ.get('TRAVIS_PULL_REQUEST'), os.environ.get('TRAVIS_PULL_REQUEST_BRANCH'))
+    elif os.environ.get('TRAVIS_BRANCH'):
+        folderName += ' ' + os.environ.get('TRAVIS_BRANCH')
+    # folder = gc.loadOrCreateFolder(folderName, folder['_id'], 'folder')
+    try:
+        folder = six.next(gc.listFolder(folder['_id'], 'folder', name=folderName))
+    except StopIteration:
+        folder = gc.createFolder(
+            folder['_id'], folderName, os.environ.get('TRAVIS_COMMIT_MESSAGE', ''))
 
     # If we have a build matrix, this could be of use
     # travis_job_number = os.environ.get('TRAVIS_JOB_NUMBER')
