@@ -1767,7 +1767,7 @@ var mapInteractor = function (args) {
             break;
         }
         m_this.map().geoTrigger(geo_event.actionwheel, {
-          state: m_this.state(), mouse: m_this.mouse(), event: evt});
+          state: m_this.state(), mouse: m_this.mouse(), eventData: evt});
       }
 
       // reset the queue
