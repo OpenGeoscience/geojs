@@ -461,4 +461,25 @@ describe('geo.core.osmLayer', function () {
     });
     it('destroy', destroy_map);
   });
+
+  describe('osmLayer', function () {
+    describe('Check class accessors', function () {
+      it('source', function () {
+        var map = create_map();
+        var layer = map.createLayer('osm', {renderer: null});
+        expect(layer.source()).toBe('stamen-toner-lite');
+        expect(layer._options.maxLevel).toBe(20);
+        expect(layer.source('osm')).toBe(layer);
+        expect(layer._options.maxLevel).toBe(19);
+        expect(layer.source()).toBe('osm');
+        layer = map.createLayer('osm', {renderer: null, url: '/data/tilefancy.png'});
+        expect(layer.source()).toBe(undefined);
+        expect(layer.source('stamen-toner-lite')).toBe(layer);
+        expect(layer.source()).toBe('stamen-toner-lite');
+        layer.url('/data/tilefancy.png');
+        expect(layer.source()).toBe(undefined);
+        destroy_map();
+      });
+    });
+  });
 });

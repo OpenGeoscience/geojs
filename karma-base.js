@@ -189,10 +189,10 @@ var notes_middleware = function (config) {
  */
 var osmtiles_middleware = function (config) {
   return function (request, response, next) {
-    var match = request.url.match(/.*https?:\/\/[a-c]\.tile.openstreetmap.org\/([0-9]+\/[0-9]+\/[0-9]+.png)$/);
+    var match = request.url.match(/.*https?:\/\/([a-c]\.tile.openstreetmap.org|.*-[a-d]\.a\.ssl\.fastly\.net\/[a-z-]+)\/([0-9]+\/[0-9]+\/[0-9]+.png)$/);
     /* Serve tiles if they have been proxied */
     if (match && request.method === 'GET') {
-      var imagePath = 'dist/data/tiles/' + match[1];
+      var imagePath = 'dist/data/tiles/' + match[2];
       var img = Buffer.from(fs.readFileSync(imagePath));
       response.setHeader('Content-Type', 'image/png');
       response.setHeader('Content-Length', img.length);

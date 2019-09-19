@@ -88,13 +88,12 @@ map = geo.map({
 });
 
 // Add the default osm layer
-map.createLayer('osm');
+map.createLayer('osm', {
+  source: query.map !== 'light' ? 'stamen-toner-lite' : 'osm',
+  opacity: query.map !== 'light' ? 0.25 : 1
+});
 
 if (query.map !== 'light') {
-  map.layers()[0]
-    .url('http://{s:abcd}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png')
-    .opacity(0.25)
-    .attribution('Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>');
   $('#map').addClass('dark');
 }
 // Make sure our attribution reports on the data source.
