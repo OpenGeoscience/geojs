@@ -5,6 +5,9 @@
 ### Improvements
 - Points with small radii or thin strokes are rendered better (#1021)
 
+### Bug Fixes
+- Mouse wheel events didn't recompute gcs coordinates, so a wheel event without a previous move event coult list the wrong location (#1027)
+
 ## Version 0.19.6
 
 ### Features

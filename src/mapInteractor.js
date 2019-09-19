@@ -816,6 +816,9 @@ var mapInteractor = function (args) {
    * @param {jQuery.Event} evt JQuery event with the mouse position.
    */
   this._getMousePosition = function (evt) {
+    if (evt.pageX === undefined || evt.pageY === undefined) {
+      return;
+    }
     var offset = $node.offset(), dt, t;
 
     t = (new Date()).valueOf();
@@ -849,6 +852,9 @@ var mapInteractor = function (args) {
    * @param {jQuery.Event} evt The event that trigger the mouse action.
    */
   this._getMouseButton = function (evt) {
+    if (evt.buttons === undefined && evt.which === undefined) {
+      return;
+    }
     for (var prop in m_mouse.buttons) {
       if (m_mouse.buttons.hasOwnProperty(prop)) {
         m_mouse.buttons[prop] = false;
@@ -1725,6 +1731,8 @@ var mapInteractor = function (args) {
       }
 
       // perform the map navigation event
+      m_this._getMousePosition(evt);
+      m_this._getMouseButton(evt);
       m_this._getMouseModifiers(evt);
 
       actionRecord = actionMatch({wheel: true}, m_mouse.modifiers,
