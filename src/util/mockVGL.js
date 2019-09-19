@@ -88,8 +88,10 @@ module.exports.mockWebglRenderer = function mockWebglRenderer(supported) {
     getExtension: incID('getExtension'),
     getParameter: function (key) {
       count('getParameter');
-      if (key === vgl.GL.DEPTH_BITS) {
-        return 16;
+      switch (key) {
+        case vgl.GL.ALIASED_POINT_SIZE_RANGE: return [1, 64];
+        case vgl.GL.DEPTH_BITS: return 16;
+        case vgl.GL.MAX_TEXTURE_SIZE: return 4096;
       }
     },
     getProgramParameter: function (id, key) {
@@ -174,6 +176,8 @@ module.exports.mockWebglRenderer = function mockWebglRenderer(supported) {
   webglRenderer.supported = function () {
     return !!supported;
   };
+  webglRenderer._maxTextureSize = 4096;
+  webglRenderer._maxPointSize = 64;
 
   vgl._mocked = true;
   vgl.mockCounts = function () {

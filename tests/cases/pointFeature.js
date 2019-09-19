@@ -330,13 +330,16 @@ describe('geo.pointFeature', function () {
       return vgl.mockCounts().createProgram >= (glCounts.createProgram || 0) + 1;
     });
     it('other primitive shapes', function () {
+      expect(point.primitiveShape()).toBe(geo.pointFeature.primitiveShapes.auto);
+      expect(point.primitiveShape(undefined, true)).toBe(geo.pointFeature.primitiveShapes.sprite);
       point2 = layer.createFeature('point', {
-        primitiveShape: 'triangle'
+        primitiveShape: geo.pointFeature.primitiveShapes.triangle
       }).data(testPoints);
+      expect(point2.primitiveShape()).toBe(geo.pointFeature.primitiveShapes.triangle);
       expect(point2.verticesPerFeature()).toBe(3);
       layer.deleteFeature(point2);
       point2 = layer.createFeature('point', {
-        primitiveShape: 'square'
+        primitiveShape: geo.pointFeature.primitiveShapes.square
       }).data(testPoints);
       expect(point2.verticesPerFeature()).toBe(6);
       glCounts = $.extend({}, vgl.mockCounts());
@@ -344,6 +347,24 @@ describe('geo.pointFeature', function () {
     });
     waitForIt('next render gl B', function () {
       return vgl.mockCounts().drawArrays >= (glCounts.drawArrays || 0) + 1;
+    });
+    it('change primitive shapes', function () {
+      expect(point2.primitiveShape(geo.pointFeature.primitiveShapes.auto)).toBe(point2);
+      point2.draw();
+      expect(point2.primitiveShape()).toBe(geo.pointFeature.primitiveShapes.auto);
+      expect(point2.primitiveShape(undefined, true)).toBe(geo.pointFeature.primitiveShapes.sprite);
+      point2.style('radius', 20000);
+      point2.draw();
+      expect(point2.primitiveShape()).toBe(geo.pointFeature.primitiveShapes.auto);
+      expect(point2.primitiveShape(undefined, true)).toBe(geo.pointFeature.primitiveShapes.triangle);
+      point2.style('radius', 20);
+      point2.draw();
+      expect(point2.primitiveShape()).toBe(geo.pointFeature.primitiveShapes.auto);
+      expect(point2.primitiveShape(undefined, true)).toBe(geo.pointFeature.primitiveShapes.sprite);
+      expect(point2.primitiveShape(geo.pointFeature.primitiveShapes.triangle)).toBe(point2);
+      point2.draw();
+      expect(point2.primitiveShape()).toBe(geo.pointFeature.primitiveShapes.triangle);
+      expect(point2.primitiveShape(undefined, true)).toBe(geo.pointFeature.primitiveShapes.triangle);
     });
     it('updateStyleFromArray single', function () {
       point.draw = function () {

@@ -330,6 +330,9 @@ webglRenderer.supported = function () {
         webglRenderer._unmaskedRenderer = ctx.getParameter(ctx.getExtension(
           'WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL);
       }
+      // store some parameters for convenience
+      webglRenderer._maxTextureSize = ctx.getParameter(ctx.MAX_TEXTURE_SIZE);
+      webglRenderer._maxPointSize = ctx.getParameter(ctx.ALIASED_POINT_SIZE_RANGE)[1];
       checkedWebGL = true;
     } catch (e) {
       console.warn('No webGL support');
