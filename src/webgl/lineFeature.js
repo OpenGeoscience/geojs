@@ -6,7 +6,17 @@ var MAX_MITER_LIMIT = 100;
 
 /* Flags are passed to the vertex shader in a float.  Since a 32-bit float has
  * 24 bits of mantissa, including the sign bit, a maximum of 23 bits of flags
- * can be passed in a float without loss or complication. */
+ * can be passed in a float without loss or complication.
+ *   The flags*Shift values are the bit offsets within the flag value.  The
+ * flags*Mult values are the bit-offset values converted to a multiplier (2
+ * raised to the offset value).  The overall flags value is composed of:
+ *  bits 0-1: vertex (corner, near, far) used by the shader to know where in
+ *            the geometry the vertex is used.
+ *       2-4: near cap/join style
+ *       5-7: far cap/join style
+ *       8-18: stroke offset as a signed value in the range [-1023,1023] which
+ *             maps to a floating-point stroke offset of [-1,1].
+ */
 /* vertex flags specify which direction a vertex needs to be offset */
 var flagsVertex = {  // uses 2 bits
   corner: 0,
@@ -136,6 +146,7 @@ var webgl_lineFeature = function (arg) {
         antialiasing = m_this.style.get('antialiasing')(data) || 0,
         order = m_this.featureVertices(), orderk0, prevkey, nextkey, offkey,
         orderLen = order.length,
+        // webgl buffers; see _init for details
         posBuf, prevBuf, nextBuf, farBuf, flagsBuf,
         fixedFlags = (flagsDebug[m_this.style.get('debug')(data) ? 'debug' : 'normal'] || 0),
         strokeWidthBuf, strokeColorBuf, strokeOpacityBuf,
