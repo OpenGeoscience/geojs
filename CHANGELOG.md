@@ -5,6 +5,9 @@
 ### Changes
 - Line segments with zero width or zero opacity won't be found by pointSearch or polygonSearch (#1041)
 
+### Features
+- Added a marker feature (#1035)
+
 ### Bug Fixes
 - Removed extra calls to sceneObject constructors (#1039)
 - Fixed an issue with rendering on hidden tabs in Chrome (#1042)

@@ -489,6 +489,7 @@ var pointFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
+      true,
       {},
       {
         radius: 5.0,

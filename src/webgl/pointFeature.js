@@ -25,6 +25,7 @@ var webgl_pointFeature = function (arg) {
   var transform = require('../transform');
   var util = require('../util');
   var object = require('./object');
+  var pointUtil = require('./pointUtil.js');
   var fragmentShaderPoly = require('./pointFeaturePoly.frag');
   var fragmentShaderSprite = require('./pointFeatureSprite.frag');
   var vertexShaderPoly = require('./pointFeaturePoly.vert');
@@ -42,22 +43,13 @@ var webgl_pointFeature = function (arg) {
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
-      m_primitiveShapeAuto = true,
-      m_primitiveShape = pointFeature.primitiveShapes.auto, // arg can change this, below
       m_modelViewUniform,
       m_origin,
       s_init = this._init,
       s_update = this._update,
       s_updateStyleFromArray = this.updateStyleFromArray;
 
-  if (pointFeature.primitiveShapes[arg.primitiveShape] !== undefined) {
-    m_primitiveShape = arg.primitiveShape;
-  }
-  m_primitiveShapeAuto = m_primitiveShape === pointFeature.primitiveShapes.auto;
-  if (m_primitiveShapeAuto) {
-    m_primitiveShape = pointFeature.primitiveShapes.sprite;
-    m_primitiveShapeAuto = true;
-  }
+  pointUtil(m_this, arg);
 
   /**
    * Create the vertex shader for points.
@@ -67,7 +59,7 @@ var webgl_pointFeature = function (arg) {
   function createVertexShader() {
     var shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(
-      m_primitiveShape === pointFeature.primitiveShapes.sprite ? vertexShaderSprite : vertexShaderPoly);
+      m_this._primitiveShape === pointFeature.primitiveShapes.sprite ? vertexShaderSprite : vertexShaderPoly);
     return shader;
   }
 
@@ -79,51 +71,8 @@ var webgl_pointFeature = function (arg) {
   function createFragmentShader() {
     var shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(
-      m_primitiveShape === pointFeature.primitiveShapes.sprite ? fragmentShaderSprite : fragmentShaderPoly);
+      m_this._primitiveShape === pointFeature.primitiveShapes.sprite ? fragmentShaderSprite : fragmentShaderPoly);
     return shader;
-  }
-
-  /**
-   * Given the current primitive shape and a basic size, return a set of
-   * vertices that can be used for a generic point.
-   *
-   * @param {number} x The base x coordinate.  Usually 0.
-   * @param {number} y The base y coordinate.  Usually 0.
-   * @param {number} w The base width.  Usually 1.
-   * @param {number} h The base height.  Usually 1.
-   * @returns {number[]} A flat array of vertices in the form of
-   *    `[x0, y0, x1, y1, ...]`.
-   */
-  function pointPolygon(x, y, w, h) {
-    var verts;
-    switch (m_primitiveShape) {
-      case pointFeature.primitiveShapes.triangle:
-        /* Use an equilateral triangle.  While this has 30% more area than a
-         * square, the reduction in vertices should help more than the
-         * processing the additional fragments. */
-        verts = [
-          x, y - h * 2,
-          x - w * Math.sqrt(3.0), y + h,
-          x + w * Math.sqrt(3.0), y + h
-        ];
-        break;
-      case pointFeature.primitiveShapes.square:
-        /* Use a surrounding square split diagonally into two triangles. */
-        verts = [
-          x - w, y + h,
-          x - w, y - h,
-          x + w, y + h,
-          x - w, y - h,
-          x + w, y - h,
-          x + w, y + h
-        ];
-        break;
-      default: // sprite
-        /* Point sprite uses only one vertex per point. */
-        verts = [x, y];
-        break;
-    }
-    return verts;
   }
 
   /**
@@ -135,7 +84,7 @@ var webgl_pointFeature = function (arg) {
   function createGLPoints(onlyStyle) {
     // unit and associated data is not used when drawing sprite
     var i, j, numPts = m_this.data().length,
-        unit = pointPolygon(0, 0, 1, 1),
+        unit = m_this._pointPolygon(0, 0, 1, 1),
         position = new Array(numPts * 3), posBuf, posVal, posFunc,
         unitBuf, indices,
         radius, radiusVal, radFunc,
@@ -205,7 +154,7 @@ var webgl_pointFeature = function (arg) {
     for (i = ivpf = ivpf3 = iunit = i3 = 0; i < numPts; i += 1, i3 += 3) {
       item = data[i];
       if (!onlyStyle) {
-        if (m_primitiveShape !== pointFeature.primitiveShapes.sprite) {
+        if (m_this._primitiveShape !== pointFeature.primitiveShapes.sprite) {
           for (j = 0; j < unit.length; j += 1, iunit += 1) {
             unitBuf[iunit] = unit[j];
           }
@@ -220,7 +169,7 @@ var webgl_pointFeature = function (arg) {
       fillVal = fillFunc(item, i) ? 1.0 : 0.0;
       fillOpacityVal = fillOpacityFunc(item, i);
       fillColorVal = fillColorFunc(item, i);
-      if (m_primitiveShapeAuto &&
+      if (m_this._primitiveShapeAuto &&
           ((fillVal && fillOpacityVal) || (strokeVal && strokeOpacityVal)) &&
           radiusVal + (strokeVal && strokeOpacityVal ? strokeWidthVal : 0) > maxr) {
         maxr = radiusVal + (strokeVal && strokeOpacityVal ? strokeWidthVal : 0);
@@ -246,11 +195,11 @@ var webgl_pointFeature = function (arg) {
       }
     }
 
-    if (m_primitiveShapeAuto &&
-        ((m_primitiveShape === pointFeature.primitiveShapes.sprite && maxr > webglRenderer._maxPointSize) ||
-         (m_primitiveShape !== pointFeature.primitiveShapes.sprite && maxr <= webglRenderer._maxPointSize))) {
+    if (m_this._primitiveShapeAuto &&
+        ((m_this._primitiveShape === pointFeature.primitiveShapes.sprite && maxr > webglRenderer._maxPointSize) ||
+         (m_this._primitiveShape !== pointFeature.primitiveShapes.sprite && maxr <= webglRenderer._maxPointSize))) {
       // Switch primitive
-      m_primitiveShape = maxr > webglRenderer._maxPointSize ? pointFeature.primitiveShapes.triangle : pointFeature.primitiveShapes.sprite;
+      m_this._primitiveShape = maxr > webglRenderer._maxPointSize ? pointFeature.primitiveShapes.triangle : pointFeature.primitiveShapes.sprite;
       m_this.renderer().contextRenderer().removeActor(m_actor);
       m_actor = null;
       m_this._init(true);
@@ -284,16 +233,6 @@ var webgl_pointFeature = function (arg) {
       return [];
     }
     return [m_actor];
-  };
-
-  /**
-   * Return the number of vertices used for each point.
-   *
-   * @returns {number}
-   */
-  this.verticesPerFeature = function () {
-    var unit = pointPolygon(0, 0, 1, 1);
-    return unit.length / 2;
   };
 
   /**
@@ -395,41 +334,6 @@ var webgl_pointFeature = function (arg) {
   };
 
   /**
-   * Get or set the primitiveShape.
-   *
-   * @param {geo.pointFeature.primitiveShapes} [primitiveShape] If specified,
-   *   the new primitive shape.
-   * @param {boolean} [currentShape] If truthy and getting the shape, return
-   *   the shape currently in use if the shape is set to `auto`.  If falsy,
-   *   return the specifiec primitiveShape, which may be `auto`.
-   * @returns {geo.pointFeature.primitiveShapes|this} The primitiveShape or
-   *   this instance of the feature.
-   */
-  this.primitiveShape = function (primitiveShape, currentShape) {
-    if (primitiveShape === undefined) {
-      return currentShape || !m_primitiveShapeAuto ? m_primitiveShape : pointFeature.primitiveShapes.auto;
-    }
-    if (pointFeature.primitiveShapes[primitiveShape] !== undefined) {
-      var update = false;
-      if (primitiveShape === pointFeature.primitiveShapes.auto) {
-        update = !m_primitiveShapeAuto;
-        m_primitiveShapeAuto = true;
-      } else {
-        update = m_primitiveShapeAuto || m_primitiveShape !== primitiveShape;
-        m_primitiveShapeAuto = false;
-        m_primitiveShape = primitiveShape;
-      }
-      if (update) {
-        m_this.renderer().contextRenderer().removeActor(m_actor);
-        m_actor = null;
-        m_this._init(true);
-        m_this.modified();
-      }
-    }
-    return m_this;
-  };
-
-  /**
    * Initialize.
    *
    * @param {boolean} [reinit] If truthy, skip the parent class's init method.
@@ -474,11 +378,12 @@ var webgl_pointFeature = function (arg) {
         primitive;
     m_modelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix', m_origin);
 
-    if (m_primitiveShape === pointFeature.primitiveShapes.sprite) {
+    if (m_this._primitiveShape === pointFeature.primitiveShapes.sprite) {
       primitive = new vgl.points();
     } else {
       primitive = new vgl.triangles();
     }
+    primitive.setIndices(new Uint16Array());
 
     m_pixelWidthUniform = new vgl.floatUniform(
       'pixelWidth', 2.0 / m_this.renderer().width());
@@ -491,7 +396,7 @@ var webgl_pointFeature = function (arg) {
     m_mapper = vgl.mapper({dynamicDraw: m_dynamicDraw});
 
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
-    if (m_primitiveShape !== pointFeature.primitiveShapes.sprite) {
+    if (m_this._primitiveShape !== pointFeature.primitiveShapes.sprite) {
       prog.addVertexAttribute(unitAttr, vgl.vertexAttributeKeysIndexed.One);
     }
 
