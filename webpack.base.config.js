@@ -135,9 +135,12 @@ module.exports = {
       ]
     }, {
       test: /\.(glsl|vs|fs|vert|frag)$/,
-      use: [
-        'shader-loader'
-      ]
+      use: [{
+        loader: 'shader-loader',
+        options: {
+          glsl: { chunkPath: 'src/webgl' }
+        }
+      }]
     }, {
       test: /vgl\.js$/,
       use: [
