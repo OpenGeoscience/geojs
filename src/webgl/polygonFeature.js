@@ -292,7 +292,7 @@ var webgl_polygonFeature = function (arg) {
     geom.addSource(sourceFillColor);
     geom.addSource(sourceFillOpacity);
     geom.addPrimitive(trianglePrimitive);
-    /* We don't need vgl to comptue bounds, so make the geo.computeBounds just
+    /* We don't need vgl to compute bounds, so make the geo.computeBounds just
      * set them to 0. */
     geom.computeBounds = function () {
       geom.setBounds(0, 0, 0, 0, 0, 0);

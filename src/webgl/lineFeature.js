@@ -463,7 +463,7 @@ var webgl_lineFeature = function (arg) {
     geom.addSource(strkOpacityData);
     geom.addSource(flagsData);
     geom.addPrimitive(triangles);
-    /* We don't need vgl to comptue bounds, so make the geo.computeBounds just
+    /* We don't need vgl to compute bounds, so make the geo.computeBounds just
      * set them to 0. */
     geom.computeBounds = function () {
       geom.setBounds(0, 0, 0, 0, 0, 0);
