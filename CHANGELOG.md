@@ -8,6 +8,7 @@
 ### Improvements
 - Points with small radii or thin strokes are rendered better (#1021)
 - When only updating point styles, don't recompute geometry transforms (#1022)
+- Optimized a transform code path for pixel coordinates (#1023)
 
 ### Changes
 - Switched the default tile server to Stamen Design's toner-lite. (#1020)
