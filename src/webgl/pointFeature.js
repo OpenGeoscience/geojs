@@ -128,8 +128,11 @@ var webgl_pointFeature = function (arg) {
 
   /**
    * Create and style the data needed to render the points.
+   *
+   * @param {boolean} onlyStyle if true, use the existing geoemtry and just
+   *    recalculate the style.
    */
-  function createGLPoints() {
+  function createGLPoints(onlyStyle) {
     // unit and associated data is not used when drawing sprite
     var i, j, numPts = m_this.data().length,
         unit = pointPolygon(0, 0, 1, 1),
@@ -158,31 +161,38 @@ var webgl_pointFeature = function (arg) {
     fillOpacityFunc = m_this.style.get('fillOpacity');
     fillColorFunc = m_this.style.get('fillColor');
 
-    /* It is more efficient to do a transform on a single array rather than on
-     * an array of arrays or an array of objects. */
-    for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
-      posVal = posFunc(data[i], i);
-      position[i3] = posVal.x;
-      position[i3 + 1] = posVal.y;
-      // ignore the z values until we support them
-      position[i3 + 2] = 0;  // posVal.z || 0;
-    }
-    position = transform.transformCoordinates(
-      m_this.gcs(), m_this.layer().map().gcs(), position, 3);
-    m_origin = new Float32Array(m_this.style.get('origin')(position));
-    if (m_origin[0] || m_origin[1] || m_origin[2]) {
+    if (!onlyStyle) {
+      /* It is more efficient to do a transform on a single array rather than on
+       * an array of arrays or an array of objects. */
       for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
-        position[i3] -= m_origin[0];
-        position[i3 + 1] -= m_origin[1];
-        position[i3 + 2] -= m_origin[2];
+        posVal = posFunc(data[i], i);
+        position[i3] = posVal.x;
+        position[i3 + 1] = posVal.y;
+        // ignore the z values until we support them
+        position[i3 + 2] = 0;  // posVal.z || 0;
       }
-    }
-    m_modelViewUniform.setOrigin(m_origin);
+      position = transform.transformCoordinates(
+        m_this.gcs(), m_this.layer().map().gcs(), position, 3);
+      m_origin = new Float32Array(m_this.style.get('origin')(position));
+      if (m_origin[0] || m_origin[1] || m_origin[2]) {
+        for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
+          position[i3] -= m_origin[0];
+          position[i3 + 1] -= m_origin[1];
+          position[i3 + 2] -= m_origin[2];
+        }
+      }
+      m_modelViewUniform.setOrigin(m_origin);
 
-    posBuf = util.getGeomBuffer(geom, 'pos', vpf * numPts * 3);
+      posBuf = util.getGeomBuffer(geom, 'pos', vpf * numPts * 3);
 
-    if (m_primitiveShape !== 'sprite') {
-      unitBuf = util.getGeomBuffer(geom, 'unit', vpf * numPts * 2);
+      if (m_primitiveShape !== 'sprite') {
+        unitBuf = util.getGeomBuffer(geom, 'unit', vpf * numPts * 2);
+      }
+      indices = geom.primitive(0).indices();
+      if (!(indices instanceof Uint16Array) || indices.length !== vpf * numPts) {
+        indices = new Uint16Array(vpf * numPts);
+        geom.primitive(0).setIndices(indices);
+      }
     }
 
     radius = util.getGeomBuffer(geom, 'radius', vpf * numPts);
@@ -193,17 +203,14 @@ var webgl_pointFeature = function (arg) {
     fill = util.getGeomBuffer(geom, 'fill', vpf * numPts);
     fillOpacity = util.getGeomBuffer(geom, 'fillOpacity', vpf * numPts);
     fillColor = util.getGeomBuffer(geom, 'fillColor', vpf * numPts * 3);
-    indices = geom.primitive(0).indices();
-    if (!(indices instanceof Uint16Array) || indices.length !== vpf * numPts) {
-      indices = new Uint16Array(vpf * numPts);
-      geom.primitive(0).setIndices(indices);
-    }
 
     for (i = ivpf = ivpf3 = iunit = i3 = 0; i < numPts; i += 1, i3 += 3) {
       item = data[i];
-      if (m_primitiveShape !== 'sprite') {
-        for (j = 0; j < unit.length; j += 1, iunit += 1) {
-          unitBuf[iunit] = unit[j];
+      if (!onlyStyle) {
+        if (m_primitiveShape !== 'sprite') {
+          for (j = 0; j < unit.length; j += 1, iunit += 1) {
+            unitBuf[iunit] = unit[j];
+          }
         }
       }
       /* We can ignore the indicies (they will all be zero) */
@@ -216,9 +223,11 @@ var webgl_pointFeature = function (arg) {
       fillOpacityVal = fillOpacityFunc(item, i);
       fillColorVal = fillColorFunc(item, i);
       for (j = 0; j < vpf; j += 1, ivpf += 1, ivpf3 += 3) {
-        posBuf[ivpf3] = position[i3];
-        posBuf[ivpf3 + 1] = position[i3 + 1];
-        posBuf[ivpf3 + 2] = position[i3 + 2];
+        if (!onlyStyle) {
+          posBuf[ivpf3] = position[i3];
+          posBuf[ivpf3 + 1] = position[i3 + 1];
+          posBuf[ivpf3 + 2] = position[i3 + 2];
+        }
         radius[ivpf] = radiusVal;
         stroke[ivpf] = strokeVal;
         strokeWidth[ivpf] = strokeWidthVal;
@@ -234,9 +243,20 @@ var webgl_pointFeature = function (arg) {
       }
     }
 
-    geom.boundsDirty(true);
-    m_mapper.modified();
-    m_mapper.boundsDirtyTimestamp().modified();
+    if (!onlyStyle) {
+      geom.boundsDirty(true);
+      m_mapper.modified();
+      m_mapper.boundsDirtyTimestamp().modified();
+    } else {
+      m_mapper.updateSourceBuffer('radius');
+      m_mapper.updateSourceBuffer('stroke');
+      m_mapper.updateSourceBuffer('strokeWidth');
+      m_mapper.updateSourceBuffer('strokeColor');
+      m_mapper.updateSourceBuffer('strokeOpacity');
+      m_mapper.updateSourceBuffer('fill');
+      m_mapper.updateSourceBuffer('fillColor');
+      m_mapper.updateSourceBuffer('fillOpacity');
+    }
   }
 
   /**
@@ -468,7 +488,7 @@ var webgl_pointFeature = function (arg) {
    * @returns {this}
    */
   this._build = function () {
-    createGLPoints();
+    createGLPoints(m_this.dataTime().timestamp() < m_this.buildTime().timestamp());
     if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
       m_this.renderer().contextRenderer().addActor(m_actor);
     }

@@ -20,31 +20,25 @@ varying vec4 fillColorVar;
 varying vec4 strokeColorVar;
 varying float radiusVar;
 varying float strokeWidthVar;
-varying float fillVar;
-varying float strokeVar;
 // non-sprite has ither definitions.
 
 void main(void)
 {
   strokeWidthVar = strokeWidth;
+  fillColorVar = vec4(fillColor, fillOpacity);
+  strokeColorVar = vec4(strokeColor, strokeOpacity);
   // No stroke or fill implies nothing to draw
   if (stroke < 1.0 || strokeWidth <= 0.0 || strokeOpacity <= 0.0) {
-    strokeVar = 0.0;
+    strokeColorVar.a = 0.0;
     strokeWidthVar = 0.0;
   }
-  else
-    strokeVar = 1.0;
   if (fill < 1.0 || radius <= 0.0 || fillOpacity <= 0.0)
-    fillVar = 0.0;
-  else
-    fillVar = 1.0;
+    fillColorVar.a = 0.0;
   /* If the point has no visible pixels, skip doing computations on it. */
-  if (fillVar == 0.0 && strokeVar == 0.0) {
+  if (fillColorVar.a == 0.0 && strokeColorVar.a == 0.0) {
     gl_Position = vec4(2, 2, 0, 1);
     return;
   }
-  fillColorVar = vec4 (fillColor, fillOpacity);
-  strokeColorVar = vec4 (strokeColor, strokeOpacity);
   radiusVar = radius;
   // for sprite
   gl_Position = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;

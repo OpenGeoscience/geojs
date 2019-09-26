@@ -372,6 +372,14 @@ describe('geo.pointFeature', function () {
       point.updateStyleFromArray('radius', array1, true);
       expect(count).toBe(2);
     });
+    it('modify and refresh', function () {
+      glCounts = $.extend({}, vgl.mockCounts());
+      point2.modified().draw();
+      expect(count).toBe(2);
+    });
+    waitForIt('next render gl E', function () {
+      return vgl.mockCounts().bufferSubData >= (glCounts.bufferSubData || 0) + 8;
+    });
     it('_exit', function () {
       expect(point.actors().length).toBe(1);
       layer.deleteFeature(point);
