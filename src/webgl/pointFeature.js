@@ -220,7 +220,9 @@ var webgl_pointFeature = function (arg) {
       fillVal = fillFunc(item, i) ? 1.0 : 0.0;
       fillOpacityVal = fillOpacityFunc(item, i);
       fillColorVal = fillColorFunc(item, i);
-      if (m_primitiveShapeAuto && ((fillVal && fillOpacityVal) || (strokeVal && strokeOpacityVal)) && radiusVal + (strokeVal && strokeOpacityVal ? strokeWidthVal : 0) > maxr) {
+      if (m_primitiveShapeAuto &&
+          ((fillVal && fillOpacityVal) || (strokeVal && strokeOpacityVal)) &&
+          radiusVal + (strokeVal && strokeOpacityVal ? strokeWidthVal : 0) > maxr) {
         maxr = radiusVal + (strokeVal && strokeOpacityVal ? strokeWidthVal : 0);
       }
       for (j = 0; j < vpf; j += 1, ivpf += 1, ivpf3 += 3) {
