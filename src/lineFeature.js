@@ -316,7 +316,8 @@ var lineFeature = function (arg) {
         i, j, record, u, v, r;
     for (i = 0; i < m_pointSearchInfo.length; i += 1) {
       record = m_pointSearchInfo[i];
-      if (record.max.x < min.x - record.max.r * scale ||
+      if (!record.max ||
+          record.max.x < min.x - record.max.r * scale ||
           record.min.x > max.x + record.max.r * scale ||
           record.max.y < min.y - record.max.r * scale ||
           record.min.y > max.y + record.max.r * scale) {

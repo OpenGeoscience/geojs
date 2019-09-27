@@ -12,5 +12,6 @@ module.exports = {
   polygonFeature: require('./polygonFeature'),
   quadFeature: require('./quadFeature'),
   tileLayer: require('./tileLayer'),
+  trackFeature: require('./trackFeature'),
   webglRenderer: require('./webglRenderer')
 };

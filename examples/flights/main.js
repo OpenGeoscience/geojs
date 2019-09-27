@@ -73,7 +73,6 @@ function draw(drawData) {
     }
     feature.data(data);
   }
-  // feature.draw();
   map.scheduleAnimationFrame(feature.draw);
 }
 
@@ -115,12 +114,12 @@ feature = layer.createFeature('line', {selectionAPI: canSelect})
   .style({
     strokeColor: function (d, i, l) {
       if (!hasScale) {
-        // d3 scales are slow
+        // d3 scales are slow; don't do:
         // return d3Scale(0);
         return scale[0];
       }
       var val = (l.v[i] - ranges.v.min) / ranges.v.range;
-      // d3 scales are slow
+      // d3 scales are slow, don't do:
       // return d3Scale(val);
       return val < 0 ? scale[0] : val > 1 ? scale[d3ScaleParts] : scale[Math.round(d3ScaleParts * val)];
     },
@@ -151,7 +150,7 @@ feature = layer.createFeature('line', {selectionAPI: canSelect})
       d.hover = false;
     });
     evt.data.hover = true;
-    console.log(evt.data.id);
+    console.log(evt.data.id, evt.data.callsign);
     this.modified();
     feature.draw();
   });
