@@ -412,7 +412,7 @@ describe('geo.polygonFeature', function () {
       polygons.draw();
     });
     waitForIt('next render gl B', function () {
-      return vgl.mockCounts().bufferData >= (glCounts.bufferData || 0) + 1 &&
+      return vgl.mockCounts().bufferSubData >= (glCounts.bufferSubData || 0) + 1 &&
              buildTime !== polygons.buildTime().timestamp();
     });
     it('update the style B', function () {
@@ -424,7 +424,7 @@ describe('geo.polygonFeature', function () {
       polygons.draw();
     });
     waitForIt('next render gl C', function () {
-      return vgl.mockCounts().bufferData >= (glCounts.bufferData || 0) + 1 &&
+      return vgl.mockCounts().bufferSubData >= (glCounts.bufferSubData || 0) + 1 &&
              buildTime !== polygons.buildTime().timestamp();
     });
     it('update the style C', function () {
@@ -436,7 +436,7 @@ describe('geo.polygonFeature', function () {
       polygons.draw();
     });
     waitForIt('next render gl D', function () {
-      return vgl.mockCounts().bufferData >= (glCounts.bufferData || 0) + 1 &&
+      return vgl.mockCounts().bufferSubData >= (glCounts.bufferSubData || 0) + 1 &&
              buildTime !== polygons.buildTime().timestamp();
     });
     it('poor data', function () {
