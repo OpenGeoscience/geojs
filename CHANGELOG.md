@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+### Bug Fixes
+- Removed extra calls to sceneObject constructors (#1039)
+
 ## Version 0.19.7
 
 ### Features

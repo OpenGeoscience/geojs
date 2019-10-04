@@ -1,6 +1,3 @@
-var inherit = require('../inherit');
-var sceneObject = require('../sceneObject');
-
 /**
  * SVG specific subclass of object which adds an id property for d3 selections
  * on groups of objects by class id.
@@ -22,7 +19,6 @@ var svg_object = function (arg) {
   if (!(this instanceof object)) {
     return new svg_object(arg);
   }
-  sceneObject.call(this);
 
   var m_id = 'svg-' + uniqueID(),
       s_exit = this._exit,
@@ -66,5 +62,4 @@ var svg_object = function (arg) {
   return this;
 };
 
-inherit(svg_object, sceneObject);
 module.exports = svg_object;
