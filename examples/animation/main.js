@@ -435,7 +435,7 @@ $(function () {
   map.createLayer('osm');
   layer = map.createLayer('feature', layerOptions);
   pointFeature = layer.createFeature('point', {
-    primitiveShape: query.primitive ? query.primitive : 'sprite'
+    primitiveShape: query.primitive ? query.primitive : geo.pointFeature.primitiveShapes.auto
   })
   .position(function (d) {
     return {x: d[2], y: d[1]};

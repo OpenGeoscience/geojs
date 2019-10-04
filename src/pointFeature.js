@@ -11,13 +11,19 @@ var feature = require('./feature');
  *   style options.
  * @property {boolean|geo.pointFeature.clusteringSpec} [clustering=false]
  *   Enable point clustering.
- * @property {string} [primitiveShape='sprite'] For the webgl renderer, select
- *   the primitive shape.  This is one of `'triangle'`, `'square'`, or
- *   `'sprite'`.  `sprite` uses the least memory, `triangle` is fastest if the
- *   vertex shader is the bottleneck, and `square` is fastest if the fragment
- *   shader is the bottleneck.  `sprite` may not work for very large points.
+ * @property {string} [primitiveShape='auto'] For the webgl renderer, select
+ *   the primitive shape.  This is one of `pointFeature.primitiveShapes`:
+ *   `'auto'`, `'sprite'`, `'triangle'`, or `'square'`.  `sprite` uses the
+ *   least memory but has a maximum size dependent on the GPU, `triangle` is
+ *   fastest if the vertex shader is the bottleneck, and `square` is fastest if
+ *   the fragment shader is the bottleneck.  `auto` will use `sprite` unless
+ *   the largest point exceeds the size that can be rendered via GL points, and
+ *   then it will switch to `triangle`.  The computation for `auto` uses some
+ *   time, so using a specific primitive could be faster.
  * @property {boolean} [dynamicDraw=false] For the webgl renderer, if this is
  *   truthy, webgl source buffers can be modified and updated directly.
+ *   truthy, webgl source buffers can be modified and updated directly.  This
+ *   is not strictly necessary, as it is just a recommendation for the GPU.
  */
 
 /**
@@ -539,6 +545,17 @@ pointFeature.capabilities = {
   feature: 'point',
   /* support for stroke properties */
   stroke: 'point.stroke'
+};
+
+/**
+ * Support primitive shapes
+ * @enum
+ */
+pointFeature.primitiveShapes = {
+  auto: 'auto',
+  sprite: 'sprite',
+  triangle: 'triangle',
+  square: 'square'
 };
 
 inherit(pointFeature, feature);
