@@ -1,6 +1,3 @@
-var inherit = require('../inherit');
-var sceneObject = require('../sceneObject');
-
 /**
  * Canvas specific subclass of object which rerenders when the object is drawn.
  * @class
@@ -19,7 +16,6 @@ var canvas_object = function (arg) {
   if (!(this instanceof object)) {
     return new canvas_object(arg);
   }
-  sceneObject.call(this);
 
   var m_this = this,
       s_draw = this.draw,
@@ -81,5 +77,4 @@ var canvas_object = function (arg) {
   return this;
 };
 
-inherit(canvas_object, sceneObject);
 module.exports = canvas_object;
