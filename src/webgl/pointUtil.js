@@ -102,7 +102,7 @@ function pointUtil(m_this, arg) {
       if (update) {
         m_this.renderer().contextRenderer().removeActor(m_this.actors()[0]);
         m_this._init(true);
-        m_this.modified();
+        m_this.dataTime().modified();
       }
     }
     return m_this;

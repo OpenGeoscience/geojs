@@ -18,7 +18,9 @@ var pointFeature = require('./pointFeature');
  * @typedef {geo.feature.styleSpec} geo.markerFeature.styleSpec
  * @extends geo.feature.styleSpec
  * @property {number|function} [radius=5] Radius of each marker in pixels.
- *   This includes the stroke width and the fill.
+ *   This includes the stroke width if `strokeOffset` is -1, excludes it if
+ *   `strokeOffset` is 1, and includes half the stroke width if `strokeOffset`
+ *    is 0.
  * @property {geo.geoColor|function} [strokeColor] Color to stroke each marker.
  * @property {number|function} [strokeOpacity=1] Opacity for each marker's
  *   stroke.  Opacity is on a [0-1] scale.  Set this or `strokeWidth` to zero
@@ -26,6 +28,9 @@ var pointFeature = require('./pointFeature');
  * @property {number|function} [strokeWidth=1.25] The weight of the marker's
  *   stroke in pixels.  Set this or `strokeOpacity` to zero to not have a
  *   stroke.
+ * @property {number|function} [strokeOffset=-1] The position of the stroke
+ *   compared to the radius.  This can only be -1, 0, or 1 (the sign of the
+ *   value is used).
  * @property {geo.geoColor|function} [fillColor] Color to fill each marker.
  * @property {number|function} [fillOpacity=1] Opacity for each marker.
  *   Opacity is on a [0-1] scale.  Set to zero to have no fill.
@@ -92,6 +97,7 @@ var markerFeature = function (arg) {
     var pts, position,
         radius = m_this.style.get('radius'),
         strokeWidth = m_this.style.get('strokeWidth'),
+        strokeOffset = m_this.style.get('strokeOffset'),
         scaleWithZoom = m_this.style.get('scaleWithZoom');
 
     position = m_this.position();
@@ -104,11 +110,17 @@ var markerFeature = function (arg) {
     pts = m_this.data().map(function (d, i) {
       var pt = position(d, i);
 
-      let r = radius(d, i), s = strokeWidth(d, i);
-      switch (scaleWithZoom(d, i)) {
+      let r = radius(d, i),
+          swz = scaleWithZoom(d, i),
+          s = strokeWidth(d, i),
+          so = Math.sign(strokeOffset(d, i));
+      let rwiths = r + s * (so + 1) / 2,  // radius with stroke
+          rwos = r + s * (so - 1) / 2;  // radius without stroke
+      swz = markerFeature.scaleMode[swz] || (swz >= 1 && swz <= 3 ? swz : 0);
+      switch (swz) {
         case markerFeature.scaleMode.stroke:
-          if (r - s > m_maxFixedRadius) {
-            m_maxFixedRadius = r - s;
+          if (rwos > m_maxFixedRadius) {
+            m_maxFixedRadius = rwos;
           }
           if (s > m_maxZoomStroke) {
             m_maxZoomStroke = s;
@@ -116,13 +128,13 @@ var markerFeature = function (arg) {
           break;
         case markerFeature.scaleMode.fill:
         case markerFeature.scaleMode.all:
-          if (r > m_maxZoomRadius) {
-            m_maxZoomRadius = r;
+          if (rwiths > m_maxZoomRadius) {
+            m_maxZoomRadius = rwiths;
           }
           break;
         default:
-          if (r > m_maxFixedRadius) {
-            m_maxFixedRadius = r;
+          if (rwiths > m_maxFixedRadius) {
+            m_maxFixedRadius = rwiths;
           }
           break;
       }
@@ -131,6 +143,19 @@ var markerFeature = function (arg) {
 
     m_rangeTree = new KDBush(pts);
     m_rangeTreeTime.modified();
+  };
+
+  /**
+   * Determine an approximate maximum radius based on the zoom factor.
+   *
+   * @param {number} zoom The zoom level.
+   * @returns {number} The maximum radius.  May be somewhat larger than the
+   *   actual maximum.
+   */
+  this._approximateMaxRadius = function (zoom) {
+    m_this._updateRangeTree();
+    let zoomFactor = Math.pow(2, zoom);
+    return Math.max(m_maxFixedRadius + m_maxZoomStroke * zoomFactor, m_maxZoomRadius * zoomFactor);
   };
 
   /**
@@ -146,6 +171,7 @@ var markerFeature = function (arg) {
         corners,
         radius = m_this.style.get('radius'),
         strokeWidth = m_this.style.get('strokeWidth'),
+        strokeOffset = m_this.style.get('strokeOffset'),
         scaleWithZoom = m_this.style.get('scaleWithZoom');
 
     data = m_this.data();
@@ -163,8 +189,8 @@ var markerFeature = function (arg) {
     var map = m_this.layer().map(),
         pt = map.gcsToDisplay(p),
         zoom = map.zoom(),
-        zfactor = Math.pow(2, zoom),
-        maxr = Math.max(m_maxFixedRadius + m_maxZoomStroke * zfactor, m_maxZoomRadius * zfactor);
+        zoomFactor = Math.pow(2, zoom),
+        maxr = this._approximateMaxRadius(zoom);
 
     // check all corners to make sure we handle rotations
     corners = [
@@ -191,18 +217,22 @@ var markerFeature = function (arg) {
       var d = data[i],
           rad = radius(data[i], i),
           swz = scaleWithZoom(data[i], i),
+          so = strokeOffset(data[i], i),
           s = swz ? strokeWidth(data[i], i) : 0;
+      var rwos = rad + s * (so - 1) / 2;  // radius without stroke
+      rad = rwos + s;
       var p = m_this.position()(d, i),
           dx, dy, rad2;
+      swz = markerFeature.scaleMode[swz] || (swz >= 1 && swz <= 3 ? swz : 0);
       switch (swz) {
         case markerFeature.scaleMode.fill:
-          rad = (rad - s) * zfactor + s;
+          rad = rwos * zoomFactor + s;
           break;
         case markerFeature.scaleMode.stroke:
-          rad = (rad - s) + s * zfactor;
+          rad = rwos + s * zoomFactor;
           break;
         case markerFeature.scaleMode.all:
-          rad *= zfactor;
+          rad *= zoomFactor;
           break;
       }
 
@@ -252,11 +282,12 @@ var markerFeature = function (arg) {
         data = m_this.data(),
         radius = m_this.style.get('radius'),
         strokeWidth = m_this.style.get('strokeWidth'),
+        strokeOffset = m_this.style.get('strokeOffset'),
         scaleWithZoom = m_this.style.get('scaleWithZoom'),
         idx, min, max, corners,
         zoom = map.zoom(),
-        zfactor = Math.pow(2, zoom),
-        maxr = Math.max(m_maxFixedRadius + m_maxZoomStroke * zfactor, m_maxZoomRadius * zfactor);
+        zoomFactor = Math.pow(2, zoom),
+        maxr = this._approximateMaxRadius(zoom);
 
     if (!poly.outer) {
       poly = {outer: poly, inner: []};
@@ -308,16 +339,20 @@ var markerFeature = function (arg) {
       let p = m_this.position()(d, i);
       let rad = radius(data[i], i),
           swz = scaleWithZoom(data[i], i),
+          so = strokeOffset(data[i], i),
           s = swz ? strokeWidth(data[i], i) : 0;
+      let rwos = rad + s * (so - 1) / 2;  // radius without stroke
+      swz = markerFeature.scaleMode[swz] || (swz >= 1 && swz <= 3 ? swz : 0);
+      rad = rwos + s;
       switch (swz) {
         case markerFeature.scaleMode.fill:
-          rad = (rad - s) * zfactor + s;
+          rad = rwos * zoomFactor + s;
           break;
         case markerFeature.scaleMode.stroke:
-          rad = (rad - s) + s * zfactor;
+          rad = rwos + s * zoomFactor;
           break;
         case markerFeature.scaleMode.all:
-          rad *= zfactor;
+          rad *= zoomFactor;
           break;
       }
       if (rad) {
@@ -353,6 +388,7 @@ var markerFeature = function (arg) {
           {
             radius: 6.25,
             strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
+            strokeOffset: -1.0,
             strokeOpacity: 1.0,
             strokeWidth: 1.25,
             fillColor: { r: 1.0, g: 0.839, b: 0.439 },

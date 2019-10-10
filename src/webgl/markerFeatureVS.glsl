@@ -36,6 +36,8 @@ float markerFeaturePrep(void)
   radiusVar = radius;
   strokeWidthVar = strokeWidth;
   int scaleMode = int(mod(symbol, 4.0));
+  float strokeOffset = mod(floor(symbol / 16.0), 4.0) - 1.0;
+  radiusVar += (strokeOffset + 1.0) / 2.0 * strokeWidthVar;
   if (scaleMode == 1) { // fill
     radiusVar = (radiusVar - strokeWidthVar) * exp2(zoom) + strokeWidthVar;
   } else if (scaleMode == 2) { // stroke

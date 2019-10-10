@@ -25,6 +25,7 @@ var webgl_markerFeature = function (arg) {
   var util = require('../util');
   var object = require('./object');
   var pointUtil = require('./pointUtil.js');
+  var geo_event = require('../event');
   var fragmentShaderPoly = require('./markerFeaturePoly.frag');
   var fragmentShaderSprite = require('./markerFeatureSprite.frag');
   var vertexShaderPoly = require('./markerFeaturePoly.vert');
@@ -104,7 +105,6 @@ var webgl_markerFeature = function (arg) {
         unit = m_this._pointPolygon(0, 0, 1, 1),
         position = new Array(numPts * 3), posBuf, posVal, posFunc,
         indices, unitBuf,
-        zoomFactor = Math.pow(2, m_this.renderer().map().zoom()),
         styleBuf = {}, styleVal = {}, styleFunc = {}, styleUni = {},
         styleKeys = {
           radius: 1,
@@ -112,6 +112,7 @@ var webgl_markerFeature = function (arg) {
           fillOpacity: 1,
           strokeColor: 3,
           strokeOpacity: 1,
+          strokeOffset: 0,
           strokeWidth: 1,
           symbol: 1,
           symbolValue: 1,
@@ -121,7 +122,7 @@ var webgl_markerFeature = function (arg) {
         },
         vpf = m_this.verticesPerFeature(),
         data = m_this.data(),
-        item, ivpf, ivpf3, iunit, i3, maxr = 0,
+        item, ivpf, ivpf3, iunit, i3,
         geom = m_mapper.geometryData();
 
     posFunc = m_this.position();
@@ -188,13 +189,10 @@ var webgl_markerFeature = function (arg) {
         styleVal.scaleWithZoom +
         (styleVal.rotateWithMap ? 4 : 0) +
         // bit 3 reserved
-        styleVal.symbol * 16);
+        ((Math.sign(styleVal.strokeOffset) + 1) * 16) +
+        styleVal.symbol * 64);
       if (styleVal.symbolValue && styleVal.symbol >= markerFeature.symbols.arrow && styleVal.symbol < markerFeature.symbols.arrow + markerFeature.symbols.arrowMax) {
         styleVal.symbolValue = packFloats(styleVal.symbolValue);
-      }
-      if (m_this._primitiveShapeAuto &&
-          (styleVal.scaleWithZoom ? styleVal.radius * zoomFactor : styleVal.radius) > maxr) {
-        maxr = styleVal.scaleWithZoom ? styleVal.radius * zoomFactor : styleVal.radius;
       }
       for (j = 0; j < vpf; j += 1, ivpf += 1, ivpf3 += 3) {
         if (!onlyStyle) {
@@ -218,16 +216,18 @@ var webgl_markerFeature = function (arg) {
       }
     }
 
-    if (m_this._primitiveShapeAuto &&
-        ((m_this._primitiveShape === markerFeature.primitiveShapes.sprite && maxr > webglRenderer._maxPointSize) ||
-         (m_this._primitiveShape !== markerFeature.primitiveShapes.sprite && maxr <= webglRenderer._maxPointSize))) {
-      // Switch primitive
-      m_this._primitiveShape = maxr > webglRenderer._maxPointSize ? markerFeature.primitiveShapes.triangle : markerFeature.primitiveShapes.sprite;
-      m_this.renderer().contextRenderer().removeActor(m_actor);
-      m_actor = null;
-      m_this._init(true);
-      createGLMarkers();
-      return;
+    if (m_this._primitiveShapeAuto) {
+      let maxr = m_this._approximateMaxRadius(m_this.renderer().map().zoom());
+      if ((m_this._primitiveShape === markerFeature.primitiveShapes.sprite && maxr > webglRenderer._maxPointSize) ||
+          (m_this._primitiveShape !== markerFeature.primitiveShapes.sprite && maxr <= webglRenderer._maxPointSize)) {
+        // Switch primitive
+        m_this._primitiveShape = maxr > webglRenderer._maxPointSize ? markerFeature.primitiveShapes.triangle : markerFeature.primitiveShapes.sprite;
+        m_this.renderer().contextRenderer().removeActor(m_actor);
+        m_actor = null;
+        m_this._init(true);
+        createGLMarkers();
+        return;
+      }
     }
 
     if (!onlyStyle) {
@@ -252,6 +252,24 @@ var webgl_markerFeature = function (arg) {
   };
 
   /**
+   * Handle zoom events for automatic primive shape adjustment.
+   *
+   * @param {number} zoom The new zoom level.
+   */
+  this._handleZoom = function (zoom) {
+    if (!m_this._primitiveShapeAuto || m_this._primitiveShape !== markerFeature.primitiveShapes.sprite) {
+      return;
+    }
+    if (m_this._approximateMaxRadius(zoom) > webglRenderer._maxPointSize) {
+      m_this._primitiveShape = markerFeature.primitiveShapes.triangle;
+      m_this.renderer().contextRenderer().removeActor(m_this.actors()[0]);
+      m_this._init(true);
+      m_this.dataTime().modified();
+      m_this.draw();
+    }
+  };
+
+  /**
    * Initialize.
    *
    * @param {boolean} [reinit] If truthy, skip the parent class's init method.
@@ -263,7 +281,7 @@ var webgl_markerFeature = function (arg) {
         mat = vgl.material(),
         blend = vgl.blend(),
         geom = vgl.geometryData(),
-        sourcePositions = vgl.sourceDataP3fv({'name': 'pos'}),
+        sourcePositions = vgl.sourceDataP3fv({name: 'pos'}),
         attr = {
           radius: 1,
           fillColor: 3,
@@ -301,10 +319,12 @@ var webgl_markerFeature = function (arg) {
       prog.addVertexAttribute(vgl.vertexAttribute(key), idx + 1);
       geom.addSource(vgl.sourceDataAnyfv(attr[key], idx + 1, {name: key}));
     });
+    m_uniforms = {};
     Object.keys(uniforms).forEach((key) => {
       m_uniforms[key] = new vgl.uniform(uniforms[key], key);
       prog.addUniform(m_uniforms[key]);
     });
+
     prog.addUniform(m_modelViewUniform);
     prog.addUniform(projectionUniform);
 
@@ -325,6 +345,11 @@ var webgl_markerFeature = function (arg) {
       geom.setBounds(0, 0, 0, 0, 0, 0);
     };
     m_mapper.setGeometryData(geom);
+    if (!reinit) {
+      m_this.geoOn(geo_event.zoom, function (evt) {
+        m_this._handleZoom(evt.zoomLevel);
+      });
+    }
   };
 
   /**
@@ -376,6 +401,7 @@ var webgl_markerFeature = function (arg) {
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
     m_actor = null;
+    m_uniforms = {};
     s_exit();
   };
 

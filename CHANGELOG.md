@@ -1,12 +1,14 @@
 # Change Log
 
+## Unreleased
+
+### Features
+- Added a marker feature (#1035)
+
 ## Version 0.19.8
 
 ### Changes
 - Line segments with zero width or zero opacity won't be found by pointSearch or polygonSearch (#1041)
-
-### Features
-- Added a marker feature (#1035)
 
 ### Bug Fixes
 - Removed extra calls to sceneObject constructors (#1039)

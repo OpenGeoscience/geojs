@@ -271,7 +271,7 @@ void markerFeatureFragment(vec2 pos) {
     pos = vec2(pos.x * cosr + pos.y * sinr, -pos.x * sinr + pos.y * cosr);
   }
 
-  int symbol = int(floor(symbolVar / 16.0));
+  int symbol = int(floor(symbolVar / 64.0));
   bool isimage = bool(mod(floor(symbolVar / 8.0), 2.0));
   vec4 fillColor, strokeColor;
   float endStep;

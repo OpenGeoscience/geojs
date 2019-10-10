@@ -131,6 +131,35 @@ describe('geo.markerFeature', function () {
     });
   });
 
+  describe('Private utility methods', function () {
+    it('_approximateMaxRadius', function () {
+      mockWebglRenderer();
+      var map, layer, marker;
+      map = createMap();
+      map.zoom(3);
+      layer = map.createLayer('feature', {renderer: 'webgl'});
+      marker = layer.createFeature('marker', {selectionAPI: true});
+      marker.data(testMarkers).style({
+        radius: function (d) { return d.radius || 5; },
+        strokeWidth: function (d) { return d.strokeWidth || 2; },
+        strokeOffset: function (d, i) { return i % 3 - 1; },
+        scaleWithZoom: function (d) { return d.scaleWithZoom; }
+      });
+      marker.draw();
+      expect(marker._approximateMaxRadius(map.zoom())).toBe(36);
+      map.zoom(5);
+      marker.draw();
+      expect(marker._approximateMaxRadius(map.zoom())).toBe(144);
+      map.zoom(6);
+      marker.draw();
+      expect(marker._approximateMaxRadius(map.zoom())).toBe(288);
+      marker.style('strokeOffset', -1).draw();
+      expect(marker._approximateMaxRadius(map.zoom())).toBe(160);
+      destroyMap();
+      restoreWebglRenderer();
+    });
+  });
+
   /* This is a basic integration test of geo.webgl.markerFeature. */
   describe('geo.webgl.markerFeature', function () {
     var map, layer, marker, marker2, glCounts;
@@ -148,14 +177,14 @@ describe('geo.markerFeature', function () {
       });
       glCounts = $.extend({}, vgl.mockCounts());
       marker.draw();
-      expect(marker.verticesPerFeature()).toBe(3);
+      expect(marker.verticesPerFeature()).toBe(1);
     });
     waitForIt('next render gl A', function () {
       return vgl.mockCounts().createProgram >= (glCounts.createProgram || 0) + 1;
     });
     it('other primitive shapes', function () {
       expect(marker.primitiveShape()).toBe(geo.markerFeature.primitiveShapes.auto);
-      expect(marker.primitiveShape(undefined, true)).toBe(geo.markerFeature.primitiveShapes.triangle);
+      expect(marker.primitiveShape(undefined, true)).toBe(geo.markerFeature.primitiveShapes.sprite);
       marker2 = layer.createFeature('marker', {
         primitiveShape: geo.markerFeature.primitiveShapes.triangle
       }).data(testMarkers);
