@@ -167,10 +167,10 @@ var annotation = function (type, args) {
   /**
    * Get or set the label of this annotation.
    *
-   * @param {string|null|undefined} arg If `undefined`, return the label,
+   * @param {string|null|undefined} [arg] If `undefined`, return the label,
    *    otherwise change it.  `null` to clear the label.
-   * @param {boolean} noFallback If not truthy and the label is `null`, return
-   *    the name, otherwise return the actual value for label.
+   * @param {boolean} [noFallback] If not truthy and the label is `null`,
+   *    return the name, otherwise return the actual value for label.
    * @returns {this|string} The current label or this annotation.
    */
   this.label = function (arg, noFallback) {
