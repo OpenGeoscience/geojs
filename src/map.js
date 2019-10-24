@@ -908,6 +908,49 @@ var map = function (arg) {
   };
 
   /**
+   * Trigger an event when the browser is hidden or unhidden.
+   *
+   * See {@link geo.map.trackBrowserHidden}.
+   */
+  function handleBrowserHidden() {
+    var hidden;
+
+    if (typeof document.hidden !== 'undefined') { // Opera 12.10 and Firefox 18 and later support
+      hidden = 'hidden';
+    } else if (typeof document.msHidden !== 'undefined') {
+      hidden = 'msHidden';
+    } else if (typeof document.webkitHidden !== 'undefined') {
+      hidden = 'webkitHidden';
+    }
+    m_this.geoTrigger(document[hidden] ? geo_event.hidden : geo_event.unhidden);
+  }
+
+  /**
+   * Track when the browser tab is hidden or unhidden.
+   *
+   * Based on
+   * https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
+   * as accessed on 2019-10-24.
+   *
+   * @param {boolean} [enable] If `false`, remove the event listener.
+   */
+  function trackBrowserHidden(enable) {
+    var visibilityChange;
+
+    if (typeof document.hidden !== 'undefined') { // Opera 12.10 and Firefox 18 and later support
+      visibilityChange = 'visibilitychange';
+    } else if (typeof document.msHidden !== 'undefined') {
+      visibilityChange = 'msvisibilitychange';
+    } else if (typeof document.webkitHidden !== 'undefined') {
+      visibilityChange = 'webkitvisibilitychange';
+    }
+    document.removeEventListener(visibilityChange, handleBrowserHidden);
+    if (enable !== false) {
+      document.addEventListener(visibilityChange, handleBrowserHidden);
+    }
+  }
+
+  /**
    * Initialize the map.
    *
    * @returns {this} The map object.
@@ -923,6 +966,8 @@ var map = function (arg) {
     }
     m_node.addClass('geojs-map');
     m_node.data('data-geojs-map', m_this);
+
+    trackBrowserHidden();
     return m_this;
   };
 
@@ -947,6 +992,7 @@ var map = function (arg) {
    * empties the associated DOM node.
    */
   this.exit = function () {
+    trackBrowserHidden(false);
     var i, layers = m_this.children();
     for (i = layers.length - 1; i >= 0; i -= 1) {
       layers[i]._exit();

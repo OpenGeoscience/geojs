@@ -116,6 +116,24 @@ geo_event.draw = 'geo_draw';
 geo_event.drawEnd = 'geo_drawEnd';
 
 /**
+ * Triggered when the map is shown (the browser tab is made visible)
+ *
+ * @event geo.event.unhidden
+ * @type {geo.event.base}
+ * @property {geo.map} target The current map.
+ */
+geo_event.unhidden = 'geo_unhidden';
+
+/**
+ * Triggered when the map is hidden (the browser tab is no longer visible)
+ *
+ * @event geo.event.hidden
+ * @type {geo.event.base}
+ * @property {geo.map} target The current map.
+ */
+geo_event.hidden = 'geo_hidden';
+
+/**
  * Triggered on every `mousemove` over the map's DOM element unless a click
  * might occur.  The event object extends {@link geo.mouseState}.
  *
