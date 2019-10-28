@@ -195,6 +195,9 @@ var webgl_tileLayer = function () {
    * Destroy.
    */
   this._exit = function () {
+    var map = m_this.map();
+    map.geoOff(geo_event.layerAdd, m_this._clearQuads);
+    map.geoOff(geo_event.layerRemove, m_this._clearQuads);
     m_this._cleanup();
     m_this.deleteFeature(m_quadFeature);
     m_quadFeature = null;
@@ -219,6 +222,13 @@ var webgl_tileLayer = function () {
     var map = m_this.map();
     map.geoOn(geo_event.layerAdd, m_this._clearQuads);
     map.geoOn(geo_event.layerRemove, m_this._clearQuads);
+
+    m_this.geoOn(geo_event.unhidden, () => {
+      m_this.map().scheduleAnimationFrame(() => {
+        m_this._clearQuads();
+        m_this.map().draw();
+      });
+    });
   };
 
   /* These functions don't need to do anything. */

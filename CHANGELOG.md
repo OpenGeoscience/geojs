@@ -4,6 +4,7 @@
 
 ### Bug Fixes
 - Removed extra calls to sceneObject constructors (#1039)
+- Fixed an issue with rendering on hidden tabs in Chrome (#1042)
 
 ## Version 0.19.7
 
@@ -15,13 +16,13 @@
 - When only updating point styles, don't recompute geometry transforms (#1022)
 - Optimized a transform code path for pixel coordinates (#1023)
 - WebGL point features automatically use the most memory-efficient primitive shape for the point sizes used based on the system's graphics capabilities (#1031)
-- Less data is transfered to the GPU when only styles have changed in webgl line or polygon features (#1016)
+- Less data is transferred to the GPU when only styles have changed in webgl line or polygon features (#1016)
 
 ### Changes
 - Switched the default tile server to Stamen Design's toner-lite (#1020)
 
 ### Bug Fixes
-- Mouse wheel events didn't recompute gcs coordinates, so a wheel event without a previous move event coult list the wrong location (#1027)
+- Mouse wheel events didn't recompute gcs coordinates, so a wheel event without a previous move event could list the wrong location (#1027)
 - Original event data was not included with actionwheel events (#1030)
 
 ## Version 0.19.6
