@@ -48,7 +48,7 @@ module.exports = {
   plugins: [
     /* webpack 3 */
     new UglifyJsPlugin({
-      include: /\.min\.js$/,
+      include: /(bundle|\.min)\.js$/,
       parallel: true,
       uglifyOptions: {
         compress: true,
