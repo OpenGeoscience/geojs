@@ -343,7 +343,11 @@ var webgl_lineFeature = function (arg) {
             strokeColorBuf[dest3] = v1.strokeColor.r;
             strokeColorBuf[dest3 + 1] = v1.strokeColor.g;
             strokeColorBuf[dest3 + 2] = v1.strokeColor.b;
-            strokeOpacityBuf[dest] = v1.strokeOpacity;
+            if ((v1.strokeOpacity <= 0 && v2.strokeOpacity <= 0) || (v1.strokeWidth <= 0 && v2.strokeWidth <= 0)) {
+              strokeOpacityBuf[dest] = -1;
+            } else {
+              strokeOpacityBuf[dest] = v1.strokeOpacity;
+            }
           }
         }
       }

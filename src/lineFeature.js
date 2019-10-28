@@ -163,7 +163,7 @@ var lineFeature = function (arg) {
 
     data.forEach(function (d, index) {
       var closed = closedFunc(d, index),
-          last, lastr, lastr2, first, record = [], min, max;
+          last, lasti, lastr, lastr2, first, record = [], min, max;
 
       line(d, index).forEach(function (current, j) {
         var p = posFunc(current, j, d, index);
@@ -180,17 +180,18 @@ var lineFeature = function (arg) {
         if (max.r === undefined || r > max.r) { max.r = r; }
         var r2 = r * r;
         if (last) {
-          record.push({u: p, v: last, r: lastr > r ? lastr : r, r2: lastr2 > r2 ? lastr2 : r2});
+          record.push({u: p, v: last, r: lastr > r ? lastr : r, r2: lastr2 > r2 ? lastr2 : r2, i: j, j: lasti});
         }
         last = p;
+        lasti = j;
         lastr = r;
         lastr2 = r2;
         if (!first && closed) {
-          first = {p: p, r: r, r2: r2};
+          first = {p: p, r: r, r2: r2, i: j};
         }
       });
       if (closed && first && (last.x !== first.p.x || last.y !== first.p.y)) {
-        record.push({u: last, v: first.p, r: lastr > first.r ? lastr : first.r, r2: lastr2 > first.r2 ? lastr2 : first.r2});
+        record.push({u: last, v: first.p, r: lastr > first.r ? lastr : first.r, r2: lastr2 > first.r2 ? lastr2 : first.r2, i: lasti, j: first.i});
       }
       record.min = min;
       record.max = max;
@@ -211,7 +212,7 @@ var lineFeature = function (arg) {
    *
    * @param {geo.geoPosition} p point to search for in map interface gcs.
    * @returns {object} An object with `index`: a list of line indices, `found`:
-   *    a list of quads that contain the specified coordinate, and `extra`: an
+   *    a list of lines that contain the specified coordinate, and `extra`: an
    *    object with keys that are line indices and values that are the first
    *    segement index for which the line was matched.
    */
@@ -229,16 +230,26 @@ var lineFeature = function (arg) {
         scale = map.unitsPerPixel(map.zoom()),
         scale2 = scale * scale,
         pt = transform.transformCoordinates(map.ingcs(), map.gcs(), p),
-        i, j, record;
+        strokeWidthFunc = m_this.style.get('strokeWidth'),
+        strokeOpacityFunc = m_this.style.get('strokeOpacity'),
+        lineFunc = m_this.line(),
+        line, i, j, record;
 
     for (i = 0; i < m_pointSearchInfo.length; i += 1) {
       record = m_pointSearchInfo[i];
+      line = null;
       for (j = 0; j < record.length; j += 1) {
         if (util.distance2dToLineSquared(pt, record[j].u, record[j].v) <= record[j].r2 * scale2) {
-          found.push(data[i]);
-          indices.push(i);
-          extra[i] = j;
-          break;
+          if (!line) {
+            line = lineFunc(data[i], i);
+          }
+          if ((strokeOpacityFunc(line[record[j].i], record[j].i, data[i], i) > 0 || strokeOpacityFunc(line[record[j].j], record[j].j, data[i], i) > 0) &&
+              (strokeWidthFunc(line[record[j].i], record[j].i, data[i], i) > 0 || strokeWidthFunc(line[record[j].j], record[j].j, data[i], i) > 0)) {
+            found.push(data[i]);
+            indices.push(i);
+            extra[i] = j;
+            break;
+          }
         }
       }
     }
@@ -268,7 +279,10 @@ var lineFeature = function (arg) {
    */
   this.polygonSearch = function (poly, opts) {
     var data = m_this.data(), indices = [], found = [], extra = {}, min, max,
-        map = m_this.layer().map();
+        map = m_this.layer().map(),
+        strokeWidthFunc = m_this.style.get('strokeWidth'),
+        strokeOpacityFunc = m_this.style.get('strokeOpacity'),
+        lineFunc = m_this.line();
     if (!poly.outer) {
       poly = {outer: poly, inner: []};
     }
@@ -303,7 +317,7 @@ var lineFeature = function (arg) {
           record.min.y > max.y + record.max.r * scale) {
         continue;
       }
-      let inside, partial;
+      let inside, partial, line;
       for (j = 0; j < record.length; j += 1) {
         u = record[j].u;
         v = record[j].v;
@@ -312,6 +326,13 @@ var lineFeature = function (arg) {
             (u.x > max.x + r * scale && v.x > max.x + r * scale) ||
             (u.y < min.y - r * scale && v.y < min.y - r * scale) ||
             (u.y > max.y + r * scale && v.y > max.y + r * scale)) {
+          continue;
+        }
+        if (!line) {
+          line = lineFunc(data[i], i);
+        }
+        if ((strokeOpacityFunc(line[record[j].i], record[j].i, data[i], i) <= 0 && strokeOpacityFunc(line[record[j].j], record[j].j, data[i], i) <= 0) ||
+            (strokeWidthFunc(line[record[j].i], record[j].i, data[i], i) <= 0 && strokeWidthFunc(line[record[j].j], record[j].j, data[i], i) <= 0)) {
           continue;
         }
         let dist0 = util.distanceToPolygon2d(u, poly),

@@ -43,6 +43,8 @@ describe('geo.lineFeature', function () {
     }, {
       coord: [{x: 70, y: 10}, {x: 75, y: 12}, {x: 72, y: 15}, {x: 70, y: 15}],
       closed: true
+    }, {
+      coord: [{x: 60, y: 20, width: 0}, {x: 65, y: 22, width: 0}, {x: 62, y: 25}]
     }
   ];
 
@@ -100,7 +102,7 @@ describe('geo.lineFeature', function () {
           })
           .style({
             strokeWidth: function (d) {
-              return d.width ? d.width : 5;
+              return d.width !== undefined ? d.width : 5;
             },
             closed: function (item) {
               return item.closed;
@@ -173,6 +175,12 @@ describe('geo.lineFeature', function () {
       }).toThrow(new Error('no width'));
       /* Stop throwing the exception */
       line.style('strokeWidth', 5);
+      /* Lines that are transparent shouldn't result in a hit. */
+      line.style('strokeOpacity', function (p, j, d, i) { return i === 3 ? 0 : 1; });
+      pt = line.pointSearch({x: 31, y: 12.5});
+      expect(pt.found.length).toBe(1);
+      pt = line.pointSearch({x: 31, y: 32.5});
+      expect(pt.found.length).toBe(0);
     });
     it('boxSearch', function () {
       var map, layer, line, idx;
@@ -200,6 +208,14 @@ describe('geo.lineFeature', function () {
       line.data(testLines)
           .line(function (item, itemIdx) {
             return item.coord;
+          })
+          .style({
+            strokeWidth: function (d) {
+              return d.width !== undefined ? d.width : 1;
+            },
+            closed: function (item) {
+              return item.closed;
+            }
           });
       result = line.polygonSearch([{x: 16, y: 9}, {x: 36, y: 9}, {x: 36, y: 25}]);
       expect(result.index).toEqual([0, 1]);
@@ -225,6 +241,14 @@ describe('geo.lineFeature', function () {
       expect(result.index).toEqual([1]);
       result = line.polygonSearch({outer: [{x: 25, y: 5}, {x: 40, y: 5}, {x: 32, y: 20}], inner: [[{x: 30, y: 13}, {x: 35, y: 13}, {x: 32, y: 16}]]}, {partial: true});
       expect(result.index).toEqual([1]);
+      result = line.polygonSearch([{x: 59, y: 19}, {x: 66, y: 22}, {x: 62, y: 26}]);
+      expect(result.index).toEqual([8]);
+      // test that lines with zero width aren't returned
+      result = line.polygonSearch([{x: 59, y: 19}, {x: 60, y: 21}, {x: 61, y: 19}], {partial: true});
+      expect(result.index).toEqual([]);
+      line.style({strokeWidth: 1});
+      result = line.polygonSearch([{x: 59, y: 19}, {x: 60, y: 21}, {x: 61, y: 19}], {partial: true});
+      expect(result.index).toEqual([8]);
     });
 
     describe('rdpSimplifyData', function () {
@@ -256,28 +280,28 @@ describe('geo.lineFeature', function () {
         line._init();
         line.data(testLines).line(lineFunc);
         counts = countLines(line.data().map(line.style.get('line')));
-        expect(counts).toEqual({lines: 8, vertices: 23});
+        expect(counts).toEqual({lines: 9, vertices: 26});
         line.rdpSimplifyData(testLines, undefined, undefined, lineFunc);
         counts = countLines(line.data().map(line.style.get('line')));
-        expect(counts).toEqual({lines: 8, vertices: 18});
+        expect(counts).toEqual({lines: 9, vertices: 21});
 
         // use pixel space for ease of picking tolerance values in tests
         map.gcs('+proj=longlat +axis=enu');
         map.ingcs('+proj=longlat +axis=esu');
         line.rdpSimplifyData(testLines, 2, undefined, lineFunc);
         counts = countLines(line.data().map(line.style.get('line')));
-        expect(counts).toEqual({lines: 8, vertices: 17});
+        expect(counts).toEqual({lines: 9, vertices: 20});
         line.rdpSimplifyData(testLines, 5.01, undefined, lineFunc);
         counts = countLines(line.data().map(line.style.get('line')));
-        expect(counts).toEqual({lines: 8, vertices: 9});
+        expect(counts).toEqual({lines: 9, vertices: 11});
         line.rdpSimplifyData(testLines, 20, undefined, lineFunc);
         counts = countLines(line.data().map(line.style.get('line')));
-        expect(counts).toEqual({lines: 8, vertices: 0});
+        expect(counts).toEqual({lines: 9, vertices: 0});
         line.rdpSimplifyData(testLines, 0.4, function (d) {
           return {x: d.x * 0.2, y: d.y * 0.2};
         }, lineFunc);
         counts = countLines(line.data().map(line.style.get('line')));
-        expect(counts).toEqual({lines: 8, vertices: 17});
+        expect(counts).toEqual({lines: 9, vertices: 20});
       });
     });
   });
@@ -295,7 +319,7 @@ describe('geo.lineFeature', function () {
         },
         style: {
           strokeWidth: function (d) {
-            return d.width ? d.width : 5;
+            return d.width !== undefined ? d.width : 5;
           },
           lineCap: function (d, i, line, idx) {
             return ['butt', 'round', 'square'][idx % 3];
@@ -311,7 +335,7 @@ describe('geo.lineFeature', function () {
       }).data(testLines);
       line.draw();
       stepAnimationFrame();
-      expect(layer.node().find('path').length).toBe(8);
+      expect(layer.node().find('path').length).toBe(9);
       var paths = layer.node().find('path');
       expect(paths.eq(0).css('stroke-linecap')).toBe('butt');
       expect(paths.eq(1).css('stroke-linecap')).toBe('round');
@@ -338,7 +362,7 @@ describe('geo.lineFeature', function () {
         },
         style: {
           strokeWidth: function (d) {
-            return d.width ? d.width : 5;
+            return d.width !== undefined ? d.width : 5;
           },
           lineCap: function (d, i, line, idx) {
             return ['butt', 'round', 'square'][idx % 3];
@@ -377,7 +401,7 @@ describe('geo.lineFeature', function () {
         },
         style: {
           strokeWidth: function (d) {
-            return d.width ? d.width : 5;
+            return d.width !== undefined ? d.width : 5;
           },
           lineCap: function (d, i, line, idx) {
             return ['butt', 'round', 'square'][idx % 3];
