@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## Version 0.19.8
 
 ### Changes
 - Line segments with zero width or zero opacity won't be found by pointSearch or polygonSearch (#1041)
