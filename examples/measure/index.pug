@@ -1,0 +1,211 @@
+extends ../common/index.pug
+
+block append mainContent
+  #controls
+    button#show(title='Show the control panel') Show
+    .form-group
+      label(for='basemap') Base map
+      select#basemap(param-name='basemap', placeholder='stamen-toner-lite')
+        option(value='stamen-toner-lite') Stamen Toner Lite
+        option(value='osm') OpenStreetMap
+        option(value='nationalmap-satellite') National Map Satellite
+        option(value='stamen-terrain') Stamen Terrain
+        option(value='stamen-terrain-background') Stamen Terrain Background
+        option(value='stamen-toner') Stamen Toner
+        option(value='wikimedia') Wikimedia
+        option(value='custom') Custom
+        option(value='false') None
+      button#hide(title='Hide the control panel') Hide
+      input#mapurl.hidden(param-name='mapurl')
+    .form-group.annotationtype(title='Select the type of annotation to add.')
+      .shortlabel Add
+      button#rectangle.lastused(next='polygon') Rectangle
+      button#polygon(next='point') Polygon
+      button#point(next='line') Point
+      button#line(next='rectangle') Line
+    .form-group(title='If enabled, left-click to add another annotation, and right-click to switch annotation type.  Otherwise, you must click a button above.')
+      label(for='clickmode') Click mode
+      select#clickmode(param-name='clickmode', placeholder='edit')
+        option(value='edit') Select and Edit
+        option(value='add') Add New
+        option(value='none') None
+    .form-group(title='If enabled, immediately after adding one annotation, you can add another without either left-clicking or selecting a button.')
+      label(for='keepadding') Keep adding annotations
+      input#keepadding(param-name='keepadding', type='checkbox', placeholder='false')
+    .form-group(title='If disabled, hide all annotation labels.')
+      label(for='showLabels') Show annotation labels
+      input#showLabels(param-name='labels', type='checkbox', placeholder='true')
+    .form-group
+      label(for='distunit') Distance
+      select#distunit(param-name='distunit', placeholder='decmiles')
+        option(value='none') None
+        option(value='decmiles') Miles
+        option(value='miles') Miles/Feet
+        option(value='si') SI
+      label(for='areaunit') Area
+      select#areaunit(param-name='areaunit', placeholder='decmiles')
+        option(value='none') None
+        option(value='decmiles') Miles
+        option(value='miles') Miles/Feet
+        option(value='acres') Acres
+        option(value='si') SI
+        option(value='hectares') Hectares
+    //- Add control to hide controls
+    .form-group#annotationheader
+      .shortlabel Created Annotations
+      span.entry-dist
+      a.entry-remove-all(action='remove-all', title='Delete all annotations') &#x2716;
+    .form-group
+      #annotationlist
+        .entry#sample
+          span.entry-left
+            span.entry-name Sample
+            span.entry-dist
+          a.entry-adjust(action='adjust', title='Modify geometry') &#x271c;
+          a.entry-edit(action='edit', title='Edit name and properties') &#x270e;
+          a.entry-remove(action='remove', title='Delete this annotation') &#x2716;
+    .form-group
+      textarea#geojson(type='textarea', rows=15, autocomplete='off',
+          autocorrect='off', autocapitalize='off', spellcheck='false')
+
+  #editdialog.modal.fade
+    .modal-dialog
+      form.modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal') &times;
+          h4.modal-title Edit Annotation
+        .modal-body
+          .row
+            .col-md-6
+              .form-group
+                label(for='edit-name') Name
+                input#edit-name(option='name')
+              .form-group
+                label(for='edit-description') Description
+                input#edit-description(option='description', type='textarea')
+              .form-group(annotation-types='point')
+                label(for='edit-radius') Radius
+                input#edit-radius(option='radius', format='positive')
+              .form-group(annotation-types='point', title='Set to "false" to disable, "true" to use the specified radius at the current zoom, or a zoom level to use the specified radius at that zoom level.')
+                label(for='edit-scaled') Scale with Zoom
+                input#edit-radius(option='scaled', format='booleanOrNumber')
+              .form-group(annotation-types='point polygon rectangle')
+                label(for='edit-fill') Fill
+                select#edit-stroke(option='fill', format='boolean')
+                  option(value='true') Yes
+                  option(value='false') No
+              .form-group(annotation-types='point polygon rectangle')
+                label(for='edit-fillColor') Fill Color
+                input#edit-fillColor(option='fillColor', format='color')
+              .form-group(annotation-types='point polygon rectangle')
+                label(for='edit-fillOpacity') Fill Opacity
+                input#edit-fillOpacity(option='fillOpacity', format='opacity')
+              .form-group(annotation-types='point polygon rectangle')
+                label(for='edit-stroke') Stroke
+                select#edit-stroke(option='stroke', format='boolean')
+                  option(value='true') Yes
+                  option(value='false') No
+              .form-group(annotation-types='point polygon rectangle line')
+                label(for='edit-strokeWidth') Stroke Width
+                input#edit-strokeWidth(option='strokeWidth', format='positive')
+              .form-group(annotation-types='point polygon rectangle line')
+                label(for='edit-strokeColor') Stroke Color
+                input#edit-strokeColor(option='strokeColor', format='color')
+              .form-group(annotation-types='point polygon rectangle line')
+                label(for='edit-strokeOpacity') Stroke Opacity
+                input#edit-strokeOpacity(option='strokeOpacity', format='opacity')
+              .form-group(annotation-types='line')
+                label(for='edit-closed') Closed
+                select#edit-closed(option='closed', format='boolean')
+                  option(value='true') Yes
+                  option(value='false') No
+              .form-group(annotation-types='line')
+                label(for='edit-lineCap') Line End Caps
+                select#edit-lineCap(option='lineCap', format='text')
+                  option(value='butt') Butt
+                  option(value='round') Round
+                  option(value='square') Square
+              .form-group(annotation-types='line')
+                label(for='edit-lineJoin') Line Joins
+                select#edit-lineJoin(option='lineJoin', format='text')
+                  option(value='miter') Miter
+                  option(value='bevel') Bevel
+                  option(value='round') Round
+                  option(value='miter-clip') Miter-Clip
+            .col-md-6
+              //- label
+              .form-group(title='The label defaults to the annotation name')
+                label(for='edit-label') Label
+                input#edit-label(option='label')
+              .form-group(annotation-types='all', title='The label will only be shown if both this and the global option are selected')
+                label(for='edit-showLabel') Show Label
+                select#edit-showLabel(option='showLabel', format='boolean', optiontype='option')
+                  option(value='true') Yes
+                  option(value='false') No
+              .form-group(annotation-types='all', title='This is of the form [italic|oblique] [small-caps] [bold|bolder|lighter|<weight>] [<stretch>] <size>[/<line height>] <family>')
+                label(for='edit-font') Font
+                input#edit-font(option='font', optiontype='label')
+              .form-group(annotation-types='all', title='This applies to both the filled text and the stroke')
+                label(for='edit-textOpacity') Label Opacity
+                input#edit-textOpacity(option='textOpacity', format='opacity', optiontype='label')
+              .form-group(annotation-types='all', title='The color of the filled text.  Use an rgba() form to specify opacity.')
+                label(for='edit-color') Fill Color
+                input#edit-color(option='color', format='color', optiontype='label')
+              .form-group(annotation-types='all', title='The color of a stroke around the text.  If used with Fill Color, this adds a perimeter half the Stroke Width outside of the text.  Use an rgba() form to specify opacity.')
+                label(for='edit-textStrokeColor') Stroke Color
+                input#edit-textStrokeColor(option='textStrokeColor', format='textStrokeColor', optiontype='label')
+              .form-group(annotation-types='all')
+                label(for='edit-textStrokeWidth') Stroke Width
+                input#edit-textStrokeWidth(option='textStrokeWidth', format='numberOrBlank', optiontype='label')
+              //- positioning
+              .form-group(annotation-types='all', title='Horizontal alignment')
+                label(for='edit-textAlign') Horizontal Align.
+                select#edit-textAlign(option='textAlign', format='text', optiontype='label')
+                  option(value='center') Center
+                  option(value='start') Start
+                  option(value='end') End
+                  option(value='left') Left
+                  option(value='right') Right
+              .form-group(annotation-types='all', title='Vertical alignment')
+                label(for='edit-textBaseline') Vertical Align.
+                select#edit-textAlign(option='textBaseline', format='text', optiontype='label')
+                  option(value='middle') Middle
+                  option(value='top') Top
+                  option(value='hanging') Hanging
+                  option(value='alphabetic') Alphabetic
+                  option(value='ideographic') Ideographic
+                  option(value='bottom') Bottom
+              .form-group(annotation-types='all')
+                label(for='edit-rotateWithMap') Rotate with Map
+                select#edit-rotateWithMap(option='rotateWithMap', format='boolean', optiontype='label')
+                  option(value='false') No
+                  option(value='true') Yes
+              .form-group(annotation-types='all')
+                label(for='edit-rotation') Rotation
+                input#edit-rotation(option='rotation', format='angle', optiontype='label')
+              .form-group(annotation-types='all', title='Set to "false" to disable, "true" to use the specified font size at the current zoom, or a zoom level to use the specified font size at that zoom level.')
+                label(for='edit-textScaled') Base Scale
+                input#edit-textScaled(option='textScaled', format='booleanOrNumber', optiontype='label')
+              .form-group(annotation-types='all', title='This is the x, y offset of the label in pixels from its default position before rotation and scale.  Example: "5, -4"')
+                label(for='edit-offset') Offset
+                input#edit-offset(option='offset', format='coordinate2', optiontype='label')
+              //- shadow options
+              .form-group(annotation-types='all')
+                label(for='edit-shadowColor') Shadow Color
+                input#edit-shadowColor(option='shadowColor', format='shadowColor', optiontype='label')
+              .form-group(annotation-types='all')
+                label(for='edit-shadowBlur') Shadow Blur
+                input#edit-shadowBlur(option='shadowBlur', format='numberOrBlank', optiontype='label')
+              .form-group(annotation-types='all', title='This is the x, y shadowOffset of the shadow in pixels from its default position before rotation.  Example: "5, -4"')
+                label(for='edit-shadowOffset') Shadow Offset
+                input#edit-shadowOffset(option='shadowOffset', format='coordinate2', optiontype='label')
+              .form-group(annotation-types='all', title='Enable to rotate the shadow absed on the label\'s rotation.')
+                label(for='edit-shadowRotate') Rotate Shadow
+                select#edit-shadowRotate(option='shadowRotate', format='boolean', optiontype='label')
+                  option(value='false') No
+                  option(value='true') Yes
+          .form-group
+            #edit-validation-error
+        .modal-footer
+          button.btn.btn-sm.btn-primary#edit-update(type='submit') Update
+          button.btn.btn-sm.btn-secondary(data-dismiss='modal') Cancel
