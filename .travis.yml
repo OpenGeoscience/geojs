@@ -53,11 +53,12 @@ before_script:
   - export DISPLAY=:99.0
 
 script:
+  # Use the glslangValidator to validate all .frag and .vert files
+  - find . \( -name '*.frag' \) -exec sh -c 'for n; do python scripts/preprocess_glsl.py "$n" | bin/glslangValidator --stdin -S frag || exit 1; done' sh {} \+
+  - find . \( -name '*.vert' \) -exec sh -c 'for n; do python scripts/preprocess_glsl.py "$n" | bin/glslangValidator --stdin -S vert || exit 1; done' sh {} \+
   - npm run build
   - npm run docs
   - mkdir -p _build
-  # Use the glslangValidator to validate all .frag and .vert files
-  - find . \( -name '*.frag' -o -name '*.vert' \) -exec bin/glslangValidator {} \+
   - ctest -S cmake/travis_build.cmake -VV || true
   - if [ -f _build/test_failed ] ; then false ; fi
   # Build the website to ensure that it will pass
