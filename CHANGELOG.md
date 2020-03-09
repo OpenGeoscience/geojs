@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+### Features
+- Added a marker feature (#1035)
+
 ## Version 0.19.8
 
 ### Changes

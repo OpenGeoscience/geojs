@@ -7,6 +7,7 @@ module.exports = {
   isolineFeature: require('./isolineFeature'),
   layer: require('./layer'),
   lineFeature: require('./lineFeature'),
+  markerFeature: require('./markerFeature'),
   pointFeature: require('./pointFeature'),
   polygonFeature: require('./polygonFeature'),
   quadFeature: require('./quadFeature'),
