@@ -403,7 +403,7 @@ geo_event.feature = {
    */
   mouseover_order: 'geo_feature_mouseover_order',
   /**
-   * The event is the feature version of {@link geo.event.mouseout}.a
+   * The event is the feature version of {@link geo.event.mouseout}.
    * This event is fired for each data component of a feature when the mouse is
    * no longer above it.
    *
