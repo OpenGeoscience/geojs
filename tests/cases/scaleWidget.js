@@ -56,7 +56,7 @@ describe('geo.gui.scaleWidget', function () {
       expect(result.pixels).toBe(150);
       result = widget._scaleValue(1.6e-5, 200);
       expect(result.value).toBe(1.5e-5);
-      expect(result.html).toBe('15 &mu;m');
+      expect(result.html).toBe('15 \u03BCm');
       expect(widget._scaleValue(1, 200, 'miles').html).toBe('3 ft');
       expect(widget._scaleValue(0.2, 200, 'miles').html).toBe('6 in');
       expect(widget._scaleValue(0.01, 200, 'miles').html).toBe('0.3 in');
@@ -130,6 +130,30 @@ describe('geo.gui.scaleWidget', function () {
       expect(widget.options('orientation')).toBe('top');
       expect(widget.options({orientation: 'right', maxWidth: 300})).toBe(widget);
       expect(widget.options('orientation')).toBe('right');
+    });
+  });
+
+  describe('Check class utility methods', function () {
+    it('formatUnit', function () {
+      var formatUnit = geo.gui.scaleWidget.formatUnit,
+          areaUnitsTable = geo.gui.scaleWidget.areaUnitsTable;
+      expect(formatUnit(3, 'si')).toBe('3 m');
+      expect(formatUnit(3e-4, 'si')).toBe('300 \u03BCm');
+      expect(formatUnit(3.4567, 'si')).toBe('3.46 m');
+      expect(formatUnit(3.4567)).toBe('3.46 m');
+      expect(formatUnit('3.4567', 'si')).toBe('3.46 m');
+      expect(formatUnit(3.4567, 'si', undefined, 2)).toBe('3.5 m');
+      expect(formatUnit(3.4567, 'si', undefined, 0)).toBe('3 m');
+      expect(formatUnit(3.4567, 'si', undefined, -2)).toBe('3.46 m');
+      expect(formatUnit(34567, 'si')).toBe('34.6 km');
+      expect(formatUnit(3.4567, 'si', areaUnitsTable)).toBe('3.46 m\xB2');
+      expect(formatUnit(null, 'si')).toBe(undefined);
+      expect(formatUnit(3e-100, 'si')).toBe(undefined);
+      expect(formatUnit(3.4567, 'nosuchunits')).toBe(undefined);
+      expect(formatUnit(3.4567, 'miles')).toBe('11.3 ft');
+      expect(formatUnit(3.4567e-3, 'miles')).toBe('0.136 in');
+      expect(formatUnit(3.4567e3, 'miles')).toBe('2.15 mi');
+      expect(formatUnit(3.4567e3, [{unit: 'NM', scale: 1852}])).toBe('1.87 NM');
     });
   });
 });

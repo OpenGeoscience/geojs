@@ -7,6 +7,7 @@
 - The mapInteractor cancelOnMove option can now take a movement threshold (#1058)
 - GCS can now be specified in pointSearch, boxSearch, and polygonSearch (#1051)
 - Added a track feature (#1040)
+- Added a geo.gui.scaleWidget.formatUnit utility function (#1048)
 
 ## Version 0.19.8
 

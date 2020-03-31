@@ -49,36 +49,6 @@ geo.osmLayer.tileSources['false'] = {
   url: '/data/white.jpg',
   attribution: ''
 };
-// Define a decimal miles unit
-geo.gui.scaleWidget.unitsTable['decmiles'] = [
-  {unit: 'mi', scale: 1609.344}
-];
-// Define area units
-var areaUnitsTable = {
-  si: [
-    {unit: 'nm\xB2', scale: 1e-18},
-    {unit: '\u03BCm\xB2', scale: 1e-12},
-    {unit: 'mm\xB2', scale: 1e-6},
-    {unit: 'm\xB2', scale: 1},
-    {unit: 'km\xB2', scale: 1e6}
-  ],
-  hectares: [
-    {unit: 'ha', scale: 1e4}
-  ],
-  decmiles: [
-    {unit: 'mi\xB2', scale: 1609.344 * 1609.344}
-  ],
-  miles: [
-    {unit: 'in\xB2', scale: 0.0254 * 0.0254},
-    {unit: 'ft\xB2', scale: 0.3048 * 0.3048},
-    {unit: 'mi\xB2', scale: 1609.344 * 1609.344}
-  ],
-  acres: [
-    {unit: 'pl', scale: 0.3048 * 0.3048 * 16.5 * 16.5},
-    {unit: 'rd', scale: 1609.344 * 1609.344 / 640 / 4},
-    {unit: 'ac', scale: 1609.344 * 1609.344 / 640}
-  ]
-};
 
 var map, mapLayer, layer, fromButtonSelect, fromGeojsonUpdate;
 
@@ -419,47 +389,6 @@ function annotationArea(annotation) {
 }
 
 /**
- * Format a unit with at least three siginfiicant figures.
- *
- * @param {number} val The value.  A valance or area in base units.
- * @param {string} unit The name of the unit system.
- * @param {object[]} [table] The table of the unit system.
- * @returns {string} A formatted string or `undefined`.
- */
-function formatUnit(val, unit, table) {
-  if (val === undefined || val === null) {
-    return;
-  }
-  table = table || geo.gui.scaleWidget.unitsTable;
-  if (!table || !table[unit]) {
-    return;
-  }
-  unit = table[unit];
-  let pos;
-  for (pos = 0; pos < unit.length - 1; pos += 1) {
-    if (val < unit[pos + 1].scale) {
-      break;
-    }
-  }
-  unit = unit[pos];
-  val /= unit.scale;
-  let digits = Math.max(0, -Math.ceil(Math.log10(val)) + 3);
-  if (digits > 10) {
-    return;
-  }
-  let result = val.toFixed(digits);
-  if (digits) {
-    while (result.substr(result.length - 1) === '0') {
-      result = result.substr(0, result.length - 1);
-    }
-    if (result.substr(result.length - 1) === '.') {
-      result = result.substr(0, result.length - 1);
-    }
-  }
-  return result + ' ' + unit.unit;
-}
-
-/**
  * Add the units to the name of the annotation if appropriate.
  *
  * @param {geo.annotation} annotation The annotation.
@@ -477,11 +406,11 @@ function modifyAnnotation(annotation) {
         area = annotationArea(annotation);
     var result = s_labelRecord();
     if (result) {
-      dist = formatUnit(dist, query.distunit || 'decmiles');
+      dist = geo.gui.scaleWidget.formatUnit(dist, query.distunit || 'decmiles');
       if (dist) {
         result.text += ' - ' + dist;
       }
-      area = formatUnit(area, query.areaunit || 'decmiles', areaUnitsTable);
+      area = geo.gui.scaleWidget.formatUnit(area, query.areaunit || 'decmiles', geo.gui.scaleWidget.areaUnitsTable);
       if (area) {
         result.text += ' - ' + area;
       }
@@ -527,20 +456,20 @@ function labelVertices(annotation, annotationIndex, labels) {
   pts.forEach((p, i) => {
     if (i) {
       labels.push({
-        text: formatUnit(tally[i], query.distunit || 'decmiles') || '',
+        text: geo.gui.scaleWidget.formatUnit(tally[i], query.distunit || 'decmiles') || '',
         position: p,
         style: Object.assign({}, style, {offset: {x: 12, y: 0}, textAlign: 'left'})
       });
     }
     if (i !== pts.length - 1) {
       labels.push({
-        text: formatUnit(tally[tally.length - 1] - tally[i], query.distunit || 'decmiles') || '',
+        text: geo.gui.scaleWidget.formatUnit(tally[tally.length - 1] - tally[i], query.distunit || 'decmiles') || '',
         position: p,
         style: Object.assign({}, style, {offset: {x: -12, y: 0}, textAlign: 'right'})
       });
       let p1 = {x: (pts[i + 1].x + p.x) / 2, y: (pts[i + 1].y + p.y) / 2};
       labels.push({
-        text: formatUnit(dist[i], query.distunit || 'decmiles') || '',
+        text: geo.gui.scaleWidget.formatUnit(dist[i], query.distunit || 'decmiles') || '',
         position: p1,
         style: Object.assign({}, style, {offset: {x: 10, y: 0}, textAlign: 'left'})
       });
@@ -582,8 +511,8 @@ function handleAnnotationChange(evt) {
         area = annotationArea(annotation);
     if (dist) { totaldist += dist; }
     if (area) { totalarea += area; }
-    dist = formatUnit(dist, query.distunit || 'decmiles') || '';
-    area = formatUnit(area, query.areaunit || 'decmiles', areaUnitsTable);
+    dist = geo.gui.scaleWidget.formatUnit(dist, query.distunit || 'decmiles') || '';
+    area = geo.gui.scaleWidget.formatUnit(area, query.areaunit || 'decmiles', geo.gui.scaleWidget.areaUnitsTable);
     if (area) {
       dist = (dist ? dist + ' - ' : '') + area;
     }
@@ -603,8 +532,8 @@ function handleAnnotationChange(evt) {
     entry.find('.entry-dist').text(dist);
     $('#annotationlist').append(entry);
   });
-  let dist = formatUnit(totaldist || undefined, query.distunit || 'decmiles') || '';
-  let area = formatUnit(totalarea || undefined, query.areaunit || 'decmiles', areaUnitsTable);
+  let dist = geo.gui.scaleWidget.formatUnit(totaldist || undefined, query.distunit || 'decmiles') || '';
+  let area = geo.gui.scaleWidget.formatUnit(totalarea || undefined, query.areaunit || 'decmiles', geo.gui.scaleWidget.areaUnitsTable);
   if (area) {
     dist = (dist ? dist + ' - ' : '') + area;
   }

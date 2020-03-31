@@ -267,7 +267,7 @@ var colorUtils = {
  * standard, `rgb` and `rgba` are aliases of each other, as are `hsl` and
  * `hsla`.
  * @name cssColorConversions
- * @property cssColorConversions
+ * @property cssColorConversions {geo.util.cssColorConversionRecord[]}
  * @memberof geo.util
  */
 colorUtils.cssColorConversions = [{
