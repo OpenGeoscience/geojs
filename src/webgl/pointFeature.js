@@ -321,7 +321,13 @@ var webgl_pointFeature = function (arg) {
       } else {
         needsRefresh = true;
       }
+      let mod = m_this.modified;
+      if (!needsRefresh) {
+        // don't allow modified to be adjusted if we don't need to refresh
+        m_this.modified = () => {};
+      }
       s_updateStyleFromArray(key, styleArray, false);
+      m_this.modified = mod;
     });
     if (refresh) {
       if (m_this.visible() && needsRefresh) {

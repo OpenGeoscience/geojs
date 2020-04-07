@@ -11,6 +11,7 @@
 
 ### Improvements
 - The pointInPolygon2D function is faster (#1052)
+- On markers, updateStyleFromArray optimizes certain updates and exposes a faster way to change symbol and symbol value (#1049)
 
 ## Version 0.19.8
 

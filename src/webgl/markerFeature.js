@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var markerFeature = require('../markerFeature');
@@ -44,7 +45,8 @@ var webgl_markerFeature = function (arg) {
       m_modelViewUniform,
       m_origin,
       s_init = this._init,
-      s_update = this._update;
+      s_update = this._update,
+      s_updateStyleFromArray = this.updateStyleFromArray;
 
   pointUtil(m_this, arg);
 
@@ -249,6 +251,111 @@ var webgl_markerFeature = function (arg) {
       return [];
     }
     return [m_actor];
+  };
+
+  /**
+   * Set style(s) from array(s).  For each style, the array should have one
+   * value per data item.  The values are not converted or validated.  Color
+   * values are {@link geo.geoColorObject} objects.  If invalid values are
+   * given the behavior is undefined.
+   *   For some feature styles, if the first entry of an array is itself an
+   * array, then each entry of the array is expected to be an array, and values
+   * are used from these subarrays.  This allows a style to apply, for
+   * instance, per vertex of a data item rather than per data item.
+   *
+   * For markers, there are two special keys: `symbolComputed` and
+   * `symbolValueComputed`.  If these keys are used, they are assumed to be
+   * processed values that can be set in the webgl buffer directly.  The style
+   * is NOT updated with these values, as they may not be directly applicable.
+   * Use `symbol` and `symbolValue` for a more expected behavior.
+   *
+   * @param {string|object} keyOrObject Either the name of a single style or
+   *    an object where the keys are the names of styles and the values are
+   *    each arrays.
+   * @param {array} styleArray If keyOrObject is a string, an array of values
+   *    for the style.  If keyOrObject is an object, this parameter is ignored.
+   * @param {boolean} [refresh=false] `true` to redraw the feature when it has
+   *    been updated.  If an object with styles is passed, the redraw is only
+   *    done once.
+   * @returns {this}
+   */
+  this.updateStyleFromArray = function (keyOrObject, styleArray, refresh) {
+    var bufferedKeys = {
+      fillColor: 3,
+      fillOpacity: 1,
+      radius: 1,
+      strokeColor: 3,
+      strokeOpacity: 1,
+      strokeWidth: 1,
+      symbolComputed: 1,
+      symbolValueComputed: 1
+    };
+    var needsRefresh, needsRender;
+    if (typeof keyOrObject === 'string') {
+      var obj = {};
+      obj[keyOrObject] = styleArray;
+      keyOrObject = obj;
+    }
+    $.each(keyOrObject, function (key, styleArray) {
+      if (m_this.visible() && m_actor && bufferedKeys[key] && !needsRefresh && !m_this.clustering()) {
+        var vpf, mapper, buffer, numPts, value, i, j, v, bpv, sbkey;
+        bpv = bufferedKeys[key];
+        numPts = m_this.data().length;
+        mapper = m_actor.mapper();
+        sbkey = key === 'symbolComputed' ? 'symbol' : key === 'symbolValueComputed' ? 'symbolValue' : key;
+        buffer = mapper.getSourceBuffer(sbkey);
+        vpf = m_this.verticesPerFeature();
+        if (!buffer || !numPts || numPts * vpf * bpv !== buffer.length) {
+          needsRefresh = true;
+        } else {
+          switch (bufferedKeys[key]) {
+            case 1:
+              for (i = 0, v = 0; i < numPts; i += 1) {
+                value = styleArray[i];
+                for (j = 0; j < vpf; j += 1, v += 1) {
+                  buffer[v] = value;
+                }
+              }
+              break;
+            case 3:
+              for (i = 0, v = 0; i < numPts; i += 1) {
+                value = styleArray[i];
+                for (j = 0; j < vpf; j += 1, v += 3) {
+                  buffer[v] = value.r;
+                  buffer[v + 1] = value.g;
+                  buffer[v + 2] = value.b;
+                }
+              }
+              break;
+          }
+          mapper.updateSourceBuffer(sbkey);
+          /* This could probably be even faster than calling _render after
+           * updating the buffer, if the context's buffer was bound and
+           * updated.  This would requiring knowing the webgl context and
+           * probably the source to buffer mapping. */
+          needsRender = true;
+        }
+      } else {
+        needsRefresh = true;
+      }
+      if (key === sbkey) {
+        let mod = m_this.modified;
+        if (!needsRefresh) {
+          // don't allow modified to be adjusted if we don't need to refresh
+          m_this.modified = () => {};
+        }
+        s_updateStyleFromArray(key, styleArray, false);
+        m_this.modified = mod;
+      }
+    });
+    if (refresh) {
+      if (m_this.visible() && needsRefresh) {
+        m_this.draw();
+      } else if (needsRender) {
+        m_this.renderer()._render();
+      }
+    }
+    return m_this;
   };
 
   /**
