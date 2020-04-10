@@ -154,21 +154,24 @@ var quadFeature = function (arg) {
    * given point.
    *
    * @param {geo.geoPosition} coordinate Coordinate in input gcs to check if it
-   *    is located in any quad in map interface gcs.
+   *    is located in any quad.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {object} An object with `index`: a list of quad indices, `found`:
    *    a list of quads that contain the specified coordinate, and `extra`: an
    *    object with keys that are quad indices and values that are objects with
    *    `basis.x` and `basis.y`, values from 0 - 1 relative to interior of the
    *    quad.
    */
-  this.pointSearch = function (coordinate) {
+  this.pointSearch = function (coordinate, gcs) {
     var found = [], indices = [], extra = {},
         poly1 = [{}, {}, {}, {}], poly2 = [{}, {}, {}, {}],
         order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1],
         data = m_this.data(),
         map = m_this.layer().map(),
         i, coordbasis;
-    coordinate = transform.transformCoordinates(map.ingcs(), map.gcs(), coordinate);
+    gcs = (gcs === null ? map.gcs() : (gcs === undefined ? map.ingcs() : gcs));
+    coordinate = transform.transformCoordinates(gcs, map.gcs(), coordinate);
     if (!m_quads) {
       m_this._generateQuads();
     }

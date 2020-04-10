@@ -210,13 +210,15 @@ var lineFeature = function (arg) {
    * width lines will have a greater selection region than their visual size at
    * the narrow end.
    *
-   * @param {geo.geoPosition} p point to search for in map interface gcs.
+   * @param {geo.geoPosition} p point to search for.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {object} An object with `index`: a list of line indices, `found`:
    *    a list of lines that contain the specified coordinate, and `extra`: an
    *    object with keys that are line indices and values that are the first
    *    segement index for which the line was matched.
    */
-  this.pointSearch = function (p) {
+  this.pointSearch = function (p, gcs) {
     var data = m_this.data(), indices = [], found = [], extra = {};
     if (!data || !data.length || !m_this.layer()) {
       return {
@@ -226,10 +228,11 @@ var lineFeature = function (arg) {
       };
     }
     m_this._updatePointSearchInfo();
-    var map = m_this.layer().map(),
-        scale = map.unitsPerPixel(map.zoom()),
+    var map = m_this.layer().map();
+    gcs = (gcs === null ? map.gcs() : (gcs === undefined ? map.ingcs() : gcs));
+    var scale = map.unitsPerPixel(map.zoom()),
         scale2 = scale * scale,
-        pt = transform.transformCoordinates(map.ingcs(), map.gcs(), p),
+        pt = transform.transformCoordinates(gcs, map.gcs(), p),
         strokeWidthFunc = m_this.style.get('strokeWidth'),
         strokeOpacityFunc = m_this.style.get('strokeOpacity'),
         lineFunc = m_this.line(),
@@ -264,12 +267,13 @@ var lineFeature = function (arg) {
    * Returns lines that are contained in the given polygon.
    *
    * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
-   *    object with `outer` and optionally `inner` parameters.  All coordinates
-   *    are in map interface gcs.
+   *    object with `outer` and optionally `inner` parameters.
    * @param {object} [opts] Additional search options.
    * @param {boolean} [opts.partial=false] If truthy, include lines that are
    *    partially in the polygon, otherwise only include lines that are fully
    *    within the region.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {object} An object with `index`: a list of line indices,
    *    `found`: a list of lines within the polygon, and `extra`: an object
    *    with index keys containing an object with a `segment` key with a value
@@ -277,12 +281,13 @@ var lineFeature = function (arg) {
    *    `partial` key and a boolean value to indicate if the line is on the
    *    polygon's border.
    */
-  this.polygonSearch = function (poly, opts) {
+  this.polygonSearch = function (poly, opts, gcs) {
     var data = m_this.data(), indices = [], found = [], extra = {}, min, max,
         map = m_this.layer().map(),
         strokeWidthFunc = m_this.style.get('strokeWidth'),
         strokeOpacityFunc = m_this.style.get('strokeOpacity'),
         lineFunc = m_this.line();
+    gcs = (gcs === null ? map.gcs() : (gcs === undefined ? map.ingcs() : gcs));
     if (!poly.outer) {
       poly = {outer: poly, inner: []};
     }
@@ -295,7 +300,7 @@ var lineFeature = function (arg) {
     }
     opts = opts || {};
     opts.partial = opts.partial || false;
-    poly = {outer: transform.transformCoordinates(map.ingcs(), map.gcs(), poly.outer), inner: (poly.inner || []).map(inner => transform.transformCoordinates(map.ingcs(), map.gcs(), inner))};
+    poly = {outer: transform.transformCoordinates(gcs, map.gcs(), poly.outer), inner: (poly.inner || []).map(inner => transform.transformCoordinates(gcs, map.gcs(), inner))};
     poly.outer.forEach(p => {
       if (!min) {
         min = {x: p.x, y: p.y};

@@ -161,11 +161,13 @@ var markerFeature = function (arg) {
   /**
    * Returns an array of datum indices that contain the given marker.
    *
-   * @param {geo.geoPosition} p marker to search for in map interface gcs.
+   * @param {geo.geoPosition} p marker to search for.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {object} An object with `index`: a list of marker indices, and
    *    `found`: a list of markers that contain the specified coordinate.
    */
-  this.pointSearch = function (p) {
+  this.pointSearch = function (p, gcs) {
     var min, max, data, idx = [], found = [], ifound = [],
         fgcs = m_this.gcs(), // this feature's gcs
         corners,
@@ -186,8 +188,9 @@ var markerFeature = function (arg) {
     // determined then
     m_this._updateRangeTree();
 
-    var map = m_this.layer().map(),
-        pt = map.gcsToDisplay(p),
+    var map = m_this.layer().map();
+    gcs = (gcs === null ? map.gcs() : (gcs === undefined ? map.ingcs() : gcs));
+    var pt = map.gcsToDisplay(p, gcs),
         zoom = map.zoom(),
         zoomFactor = Math.pow(2, zoom),
         maxr = this._approximateMaxRadius(zoom);
@@ -259,13 +262,14 @@ var markerFeature = function (arg) {
    * This does not take clustering into account.
    *
    * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
-   *    object with `outer` and optionally `inner` parameters.  All coordinates
-   *    are in map interface gcs.
+   *    object with `outer` and optionally `inner` parameters.
    * @param {object} [opts] Additional search options.
    * @param {boolean} [opts.partial=false] If truthy, include markers that are
    *    partially in the polygon, otherwise only include markers that are fully
    *    within the region.  If 'center', only markers whose centers are inside
    *    the polygon are returned.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {object} An object with `index`: a list of marker indices,
    *    `found`: a list of markers within the polygon, and `extra`: an object
    *    with index keys containing an object with a `partial` key and a boolean
@@ -273,7 +277,7 @@ var markerFeature = function (arg) {
    *    `distance` key to indicate how far within the polygon the marker is
    *    located.
    */
-  this.polygonSearch = function (poly, opts) {
+  this.polygonSearch = function (poly, opts, gcs) {
     var fgcs = m_this.gcs(), // this feature's gcs
         found = [],
         ifound = [],
@@ -289,6 +293,7 @@ var markerFeature = function (arg) {
         zoomFactor = Math.pow(2, zoom),
         maxr = this._approximateMaxRadius(zoom);
 
+    gcs = (gcs === null ? map.gcs() : (gcs === undefined ? map.ingcs() : gcs));
     if (!poly.outer) {
       poly = {outer: poly, inner: []};
     }
@@ -301,7 +306,7 @@ var markerFeature = function (arg) {
     }
     opts = opts || {};
     opts.partial = opts.partial || false;
-    poly = {outer: map.gcsToDisplay(poly.outer), inner: (poly.inner || []).map(inner => map.gcsToDisplay(inner))};
+    poly = {outer: map.gcsToDisplay(poly.outer, gcs), inner: (poly.inner || []).map(inner => map.gcsToDisplay(inner, gcs))};
     poly.outer.forEach(p => {
       if (!min) {
         min = {x: p.x, y: p.y};
