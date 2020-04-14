@@ -276,11 +276,13 @@ var pointFeature = function (arg) {
    * https://github.com/dotskapes/wigglemaps/blob/cf5bed3fbfe2c3e48d31799462a80c564be1fb60/src/query/PointQuerier.js
    * This does not take into account clustering.
    *
-   * @param {geo.geoPosition} p point to search for in map interface gcs.
+   * @param {geo.geoPosition} p point to search for.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {object} An object with `index`: a list of point indices, and
    *    `found`: a list of points that contain the specified coordinate.
    */
-  this.pointSearch = function (p) {
+  this.pointSearch = function (p, gcs) {
     var min, max, data, idx = [], found = [], ifound = [], map, pt,
         fgcs = m_this.gcs(), // this feature's gcs
         corners,
@@ -302,7 +304,7 @@ var pointFeature = function (arg) {
     m_this._updateRangeTree();
 
     map = m_this.layer().map();
-    pt = map.gcsToDisplay(p);
+    pt = map.gcsToDisplay(p, gcs);
     // check all corners to make sure we handle rotations
     corners = [
       map.displayToGcs({x: pt.x - m_maxRadius, y: pt.y - m_maxRadius}, fgcs),
@@ -357,13 +359,14 @@ var pointFeature = function (arg) {
    * This does not take clustering into account.
    *
    * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
-   *    object with `outer` and optionally `inner` parameters.  All coordinates
-   *    are in map interface gcs.
+   *    object with `outer` and optionally `inner` parameters.
    * @param {object} [opts] Additional search options.
    * @param {boolean} [opts.partial=false] If truthy, include points that are
    *    partially in the polygon, otherwise only include points that are fully
    *    within the region.  If 'center', only points whose centers are inside
    *    the polygon are returned.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {object} An object with `index`: a list of point indices,
    *    `found`: a list of points within the polygon, and `extra`: an object
    *    with index keys containing an object with a `partial` key and a boolean
@@ -371,7 +374,7 @@ var pointFeature = function (arg) {
    *    `distance` key to indicate how far within the polygon the point is
    *    located.
    */
-  this.polygonSearch = function (poly, opts) {
+  this.polygonSearch = function (poly, opts, gcs) {
     var fgcs = m_this.gcs(), // this feature's gcs
         found = [],
         ifound = [],
@@ -395,7 +398,7 @@ var pointFeature = function (arg) {
     }
     opts = opts || {};
     opts.partial = opts.partial || false;
-    poly = {outer: map.gcsToDisplay(poly.outer), inner: (poly.inner || []).map(inner => map.gcsToDisplay(inner))};
+    poly = {outer: map.gcsToDisplay(poly.outer, gcs), inner: (poly.inner || []).map(inner => map.gcsToDisplay(inner, gcs))};
     poly.outer.forEach(p => {
       if (!min) {
         min = {x: p.x, y: p.y};

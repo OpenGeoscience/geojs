@@ -260,15 +260,17 @@ var polygonFeature = function (arg) {
    * Point search method for selection api.  Returns markers containing the
    * given point.
    *
-   * @param {geo.geoPosition} coordinate point to search for in map interface
-   *    gcs.
+   * @param {geo.geoPosition} coordinate point to search for.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {object} An object with `index`: a list of polygon indices, and
    *    `found`: a list of polygons that contain the specified coordinate.
    */
-  this.pointSearch = function (coordinate) {
+  this.pointSearch = function (coordinate, gcs) {
     var found = [], indices = [], irecord = {}, data = m_this.data(),
-        map = m_this.layer().map(),
-        pt = transform.transformCoordinates(map.ingcs(), map.gcs(), coordinate);
+        map = m_this.layer().map();
+    gcs = (gcs === null ? map.gcs() : (gcs === undefined ? map.ingcs() : gcs));
+    var pt = transform.transformCoordinates(gcs, map.gcs(), coordinate);
     m_coordinates.forEach(function (coord, i) {
       var inside = util.pointInPolygon(
         pt,
@@ -304,21 +306,23 @@ var polygonFeature = function (arg) {
    * specified polygon and whose vertices are not near the selected polygon.
    *
    * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
-   *    object with `outer` and optionally `inner` parameters.  All coordinates
-   *    are in map interface gcs.
+   *    object with `outer` and optionally `inner` parameters.
    * @param {object} [opts] Additional search options.
    * @param {boolean} [opts.partial=false] If truthy, include polygons that are
    *    partially in the polygon, otherwise only include polygons that are fully
    *    within the region.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {object} An object with `index`: a list of polygon indices,
    *    `found`: a list of polygons within the polygon, and `extra`: an object
    *    with index keys containing an object with a `partial` key and a boolean
    *    value to indicate if the polygon is on the specified polygon's border.
    */
-  this.polygonSearch = function (poly, opts) {
+  this.polygonSearch = function (poly, opts, gcs) {
     var data = m_this.data(), indices = [], found = [], extra = {}, min, max,
         origPoly = poly, irecord = {},
         map = m_this.layer().map();
+    gcs = (gcs === null ? map.gcs() : (gcs === undefined ? map.ingcs() : gcs));
     if (!poly.outer) {
       poly = {outer: poly, inner: []};
     }
@@ -331,7 +335,7 @@ var polygonFeature = function (arg) {
     }
     opts = opts || {};
     opts.partial = opts.partial || false;
-    poly = {outer: transform.transformCoordinates(map.ingcs(), map.gcs(), poly.outer), inner: (poly.inner || []).map(inner => transform.transformCoordinates(map.ingcs(), map.gcs(), inner))};
+    poly = {outer: transform.transformCoordinates(gcs, map.gcs(), poly.outer), inner: (poly.inner || []).map(inner => transform.transformCoordinates(gcs, map.gcs(), inner))};
     poly.outer.forEach(p => {
       if (!min) {
         min = {x: p.x, y: p.y};

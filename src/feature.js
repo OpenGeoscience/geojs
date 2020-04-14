@@ -180,11 +180,13 @@ var feature = function (arg) {
    * Search for features containing the given point.  This should be defined in
    * relevant subclasses.
    *
-   * @param {geo.geoPosition} geo Coordinate in interface gcs.
+   * @param {geo.geoPosition} geo Coordinate.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {geo.feature.searchResult} An object with a list of features and
    *    feature indices that are located at the specified point.
    */
-  this.pointSearch = function (geo) {
+  this.pointSearch = function (geo, gcs) {
     // base class method does nothing
     return {
       index: [],
@@ -195,19 +197,21 @@ var feature = function (arg) {
   /**
    * Search for features contained within a rectangular region.
    *
-   * @param {geo.geoPosition} lowerLeft Lower-left corner in gcs coordinates.
-   * @param {geo.geoPosition} upperRight Upper-right corner in gcs coordinates.
+   * @param {geo.geoPosition} lowerLeft Lower-left corner.
+   * @param {geo.geoPosition} upperRight Upper-right corner.
    * @param {object} [opts] Additional search options.
    * @param {boolean} [opts.partial=false] If truthy, include features that are
    *    partially in the box, otherwise only include features that are fully
    *    within the region.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {geo.feature.searchResult} An object with a list of features and
    *    feature indices that are located at the specified point.
    */
-  this.boxSearch = function (lowerLeft, upperRight, opts) {
+  this.boxSearch = function (lowerLeft, upperRight, opts, gcs) {
     return m_this.polygonSearch([
       lowerLeft, {x: lowerLeft.x, y: upperRight.y},
-      upperRight, {x: upperRight.x, y: lowerLeft.y}], opts);
+      upperRight, {x: upperRight.x, y: lowerLeft.y}], opts, gcs);
   };
 
   /**
@@ -215,16 +219,17 @@ var feature = function (arg) {
    * relevant subclasses.
    *
    * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
-   *    object with `outer` and optionally `inner` parameters.  All coordinates
-   *    are in map interface gcs.
+   *    object with `outer` and optionally `inner` parameters.
    * @param {object} [opts] Additional search options.
    * @param {boolean} [opts.partial=false] If truthy, include features that are
    *    partially in the polygon, otherwise only include features that are
    *    fully within the region.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {geo.feature.searchResult} An object with a list of features and
    *    feature indices that are located at the specified point.
    */
-  this.polygonSearch = function (poly, opts) {
+  this.polygonSearch = function (poly, opts, gcs) {
     // base class method does nothing
     return {
       index: [],

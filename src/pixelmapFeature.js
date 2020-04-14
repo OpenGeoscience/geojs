@@ -165,13 +165,15 @@ var pixelmapFeature = function (arg) {
    * information from the quad to determine the pixelmap index value so that it
    * can be included in the `found` results.
    *
-   * @param {geo.geoPosition} geo Coordinate in interface gcs.
+   * @param {geo.geoPosition} geo Coordinate.
+   * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
+   *    the interface gcs, `null` to use the map gcs, or any other transform.
    * @returns {geo.feature.searchResult} An object with a list of features and
    *    feature indices that are located at the specified point.
    */
-  this.pointSearch = function (geo) {
+  this.pointSearch = function (geo, gcs) {
     if (m_quadFeature && m_info) {
-      var result = m_quadFeature.pointSearch(geo);
+      var result = m_quadFeature.pointSearch(geo, gcs);
       if (result.index.length === 1 && result.extra && result.extra[result.index[0]].basis) {
         var basis = result.extra[result.index[0]].basis, x, y, idx;
         x = Math.floor(basis.x * m_info.width);
