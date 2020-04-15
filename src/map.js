@@ -1727,6 +1727,9 @@ var map = function (arg) {
    * @param {boolean|null} [opts.attribution=null] If `null` or unspecified,
    *    include the attribution only if all layers are used.  If false, never
    *    include the attribution.  If `true`, always include it.
+   * @param {HTMLObject[]|string[]} [opts.html] A list of additional HTML
+   *    elements, selectors, or jQuery elements to render on top of the map.
+   *    These are rendered in order, with the last one topmost.
    * @returns {deferred} A jQuery Deferred object.  The done function receives
    *    either a data URL or an `HTMLCanvasElement` with the result.
    * @fires geo.event.screenshot.ready
@@ -1830,6 +1833,16 @@ var map = function (arg) {
     });
     if (opts.attribution) {
       m_this.node().find('.geo-attribution').each(function () {
+        var attrElem = $(this);
+        defer = defer.then(function () {
+          return util.htmlToImage(attrElem, 1).done(function (img) {
+            drawLayerImageToContext(context, 1, $([]), img);
+          });
+        });
+      });
+    }
+    if (opts.html) {
+      $(opts.html).each(function () {
         var attrElem = $(this);
         defer = defer.then(function () {
           return util.htmlToImage(attrElem, 1).done(function (img) {

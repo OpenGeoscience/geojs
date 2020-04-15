@@ -887,6 +887,13 @@ describe('geo.core.map', function () {
           done();
         });
       }, 10000);
+      /* Extra html */
+      it('screenshot with extra html', function (done) {
+        m.screenshot(null, undefined, undefined, {html: ['body']}).then(function (result) {
+          expect(result.substr(0, 22)).toBe('data:image/png;base64,');
+          done();
+        });
+      });
     }
     // end of non-PhantomJS tests
     if (isPhantomJS()) {
