@@ -39,8 +39,6 @@ before_install:
   - google-chrome --version
 
 install:
-  # travis moved to "npm ci", but that fails with canvas-prebuilt as it tries
-  # to install it before node-pre-gyp
   - npm install
   - npm list || true
   # Install for the website build
