@@ -4,6 +4,8 @@
 
 ### Features
 - Added a marker feature (#1035)
+- The mapInteractor cancelOnMove option can now take a movement threshold (#1058)
+- GCS can now be specified in pointSearch, boxSearch, and polygonSearch (#1051)
 
 ## Version 0.19.8
 
