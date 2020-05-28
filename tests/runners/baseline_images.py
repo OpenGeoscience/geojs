@@ -3,6 +3,7 @@
 import argparse
 import girder_client
 import os
+import shutil
 import subprocess
 import time
 
@@ -45,6 +46,13 @@ def generate_baselines(args):
     tarSize = os.path.getsize(tarPath)
     if args['verbose'] >= 1:
         print('Created baseline image tgz file, %d bytes' % tarSize)
+    if args.get('copy'):
+        name = 'Baseline Images %s.tgz' % time.strftime(
+            '%Y-%m-%d %H:%M:%S', time.localtime(os.path.getmtime(tarPath)))
+        copiedTarPath = os.path.join(buildPath, name)
+        shutil.copy2(tarPath, copiedTarPath)
+        if args['verbose'] >= 1:
+            print('Copied baseline image tgz file to %s' % copiedTarPath)
 
 
 def upload_baselines(args):
@@ -82,7 +90,7 @@ def upload_baselines(args):
         print('Upload to file %s' % uploadedFile['_id'])
     testDataPath = os.path.abspath('tests/external-data')
     if not os.path.isdir(testDataPath):
-        raise Exception('Can\'t update test-data information.')
+        raise Exception('Cannot update test-data information.')
     sha512 = gc.getFile(uploadedFile['_id'])['sha512']
     open(os.path.join(testDataPath, 'base-images.tgz.sha512'), 'w').write(sha512)
     if args['verbose'] >= 1:
@@ -100,24 +108,28 @@ if __name__ == '__main__':
         'images.  Only applies if the images are generated.')
     parser.add_argument(
         '--no-xvfb', dest='xvfb', action='store_false',
-        help='Don\'t use xvfb-run when generating baseline images.')
+        help='Do not use xvfb-run when generating baseline images.')
     parser.add_argument(
         '--generate', '-g', dest='make', action='store_true',
         help='Generate baseline images by running "ctest -C baseline_images '
         '-R baseline_images".')
     parser.add_argument(
         '--no-generate', dest='make', action='store_false',
-        help='Don\'t generate baseline images.')
+        help='Do not generate baseline images.')
     parser.add_argument(
         '--build', '-b', default='.',
         help='The build directory.  This is created if baseline images are '
         'generated and the directory does not exist.')
     parser.add_argument(
+        '--copy', '-c', dest='copy', action='store_true',
+        help='Copy base-images.tgz to a file that includes the date in its '
+        'name (Baseline Images <date>.tgz).')
+    parser.add_argument(
         '--upload', '-u', dest='upload', action='store_true',
         help='Upload base-images.tgz.')
     parser.add_argument(
         '--no-upload', dest='upload', action='store_false',
-        help='Don\'t upload the baseline image tarball.')
+        help='Do not upload the baseline image tarball.')
     parser.add_argument(
         '--dest', '-d', default='https://data.kitware.com',
         help='Destination for upload.  Must be a Girder server.  /api/v1 is '

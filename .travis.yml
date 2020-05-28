@@ -74,11 +74,13 @@ after_failure:
   # Generate a new set of baseline images, in case we decide the new results
   # are now correct
   - rm -r dist/data/base-images 2>/dev/null >/dev/null || true
-  - python tests/runners/baseline_images.py -gvb _build
-  - python scripts/upload_travis_results.py _build/base-images.tgz
+  - python tests/runners/baseline_images.py -cgvb _build
+  - find _build -name 'Baseline Images*.tgz' -exec python scripts/upload_travis_results.py {} \+ || true
 
 after_success:
-  - npm run codecov
+  # - find dist \( -name '*coverage*xml' -o -name 'lcov.info' \) -exec ls -al {} \+ || true
+  # - npm run codecov
+  - bash <(curl -s https://codecov.io/bash)
   # Upload build artifacts
   - pip install --user --upgrade girder-client requests[security] pyOpenSSL six
   - find dist/built -type f -exec python scripts/upload_travis_results.py {} \+
