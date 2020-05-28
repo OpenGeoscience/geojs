@@ -71,6 +71,11 @@ after_failure:
   - find _build/images -name '*-test.png' -exec python scripts/upload_travis_results.py {} \+ || true
   # Upload build artifacts
   - find dist/built -type f -exec python scripts/upload_travis_results.py {} \+ || true
+  # Generate a new set of baseline images, in case we decide the new results
+  # are now correct
+  - rm -r dist/data/base-images 2>/dev/null >/dev/null || true
+  - python tests/runners/baseline_images.py -gvb _build
+  - python scripts/upload_travis_results.py _build/base-images.tgz
 
 after_success:
   - npm run codecov
