@@ -34,6 +34,14 @@
  */
 
 var $ = require('jquery');
+/* jQuery 3.5 made a change that breaks some aspect of our library.  Until
+ * tutorials and examples upgrade to Bootstrap 4 and dependencies are checked,
+ * apply the recommended workaround (see https://jquery.com/upgrade-guide/3.5).
+ */
+var rxhtmlTag = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([a-z][^/\0>\x20\t\r\n\f]*)[^>]*)\/>/gi;
+$.htmlPrefilter = function (html) {
+  return html.replace(rxhtmlTag, '<$1></$2>');
+};
 
 require('./main.styl');
 
