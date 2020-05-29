@@ -15,6 +15,7 @@ module.exports = {
   quadFeature: require('./quadFeature'),
   renderer: require('./svgRenderer'),
   tileLayer: require('./tileLayer'),
+  trackFeature: require('./trackFeature'),
   uniqueID: require('./uniqueID'),
   vectorFeature: require('./vectorFeature')
 };

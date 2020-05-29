@@ -104,7 +104,7 @@ onmessage = function (evt) {
       });
     }
     // Process each aircraft state.
-    var id, state = {}, last;
+    var id, callsign, state = {}, last;
     data.states.forEach(function (record, idx) {
       // Only process the data if passes some basic checks.
       if (!record.length) {
@@ -122,6 +122,7 @@ onmessage = function (evt) {
         return;
       }
       id = record[rr.icao24];
+      callsign = record[rr.callsign].trim();
       state.time = data.time;
       state.lon = record[rr.longitude];
       state.lat = record[rr.latitude];
@@ -149,7 +150,7 @@ onmessage = function (evt) {
       }
       // Store data in arrays to reduce memory use.
       if (!flights[id]) {
-        flights[id] = {time: [], lon: [], lat: [], z: [], v: [], dir: [], id: id};
+        flights[id] = {time: [], lon: [], lat: [], z: [], v: [], dir: [], id: id, callsign: callsign};
       }
       ['time', 'lon', 'lat', 'z', 'v', 'dir'].forEach(function (key) {
         flights[id][key].push(state[key]);
@@ -169,6 +170,7 @@ onmessage = function (evt) {
           z: [flights[id].z[0] - 1e-6, flights[id].z[0]],
           v: [flights[id].v[0] - 1e-6, flights[id].v[0]],
           dir: [flights[id].dir[0], flights[id].dir[0]],
+          callsign: flights[id].callsign,
           id: flights[id].id
         });
       }

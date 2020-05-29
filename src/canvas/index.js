@@ -9,5 +9,6 @@ module.exports = {
   pixelmapFeature: require('./pixelmapFeature'),
   quadFeature: require('./quadFeature'),
   textFeature: require('./textFeature'),
-  tileLayer: require('./tileLayer')
+  tileLayer: require('./tileLayer'),
+  trackFeature: require('./trackFeature')
 };
