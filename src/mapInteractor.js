@@ -24,8 +24,9 @@ var Mousetrap = require('mousetrap');
  * @property {number} [click.duration=0] If a positive number, the mouse up
  *      event must occur within this time in milliseconds of the mouse down
  *      event for it to be considered a click.
- * @property {boolean} [click.cancelOnMove=true] If truthy, don't generate
- *      click events if the mouse moved at all.
+ * @property {boolean|number} [click.cancelOnMove=true] If true, don't generate
+ *      click events if the mouse moved at all.  If a positive number, the distance
+ *      at which to cancel click events when the mouse moves.
  * @property {object} [keyboard] An object describing which keyboard events are
  *      handled.
  * @property {object} [keyboard.actions] An object with different actions that
@@ -1229,10 +1230,19 @@ var mapInteractor = function (args) {
     m_this._getMouseModifiers(evt);
 
     /* Only cancel possible clicks on move if we actually moved */
-    if (m_options.click.cancelOnMove && (m_clickMaybe.x === undefined ||
-        m_mouse.page.x !== m_clickMaybe.x ||
-        m_mouse.page.y !== m_clickMaybe.y)) {
-      m_this._setClickMaybe(false);
+    if (m_options.click.cancelOnMove) {
+      if (m_clickMaybe.x === undefined || m_clickMaybe.y === undefined) {
+        m_this._setClickMaybe(false);
+      } else if (m_options.click.cancelOnMove === true &&
+                 (m_mouse.page.x !== m_clickMaybe.x ||
+                  m_mouse.page.y !== m_clickMaybe.y)) {
+        m_this._setClickMaybe(false);
+      } else {
+        const dist = Math.sqrt((m_mouse.page.x - m_clickMaybe.x) ** 2 + (m_mouse.page.y - m_clickMaybe.y) ** 2);
+        if (dist >= m_options.click.cancelOnMove) {
+          m_this._setClickMaybe(false);
+        }
+      }
     }
     if (m_clickMaybe) {
       return;

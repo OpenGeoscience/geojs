@@ -972,6 +972,93 @@ describe('mapInteractor', function () {
       });
       expect(triggered).toBe(1);
     });
+    it('not triggered by move distance greater than cancelOnMove then click', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: true,
+              cancelOnMove: 10,
+              duration: 0
+            },
+            throttle: false
+          }), triggered = 0;
+
+      map.geoOn(geo.event.mouseclick, function () {
+        triggered += 1;
+      });
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      interactor.simulateEvent('mousemove', {
+        map: {x: 30, y: 30},
+        button: 'left'
+      });
+      interactor.simulateEvent('mouseup', {
+        map: {x: 30, y: 30},
+        button: 'left'
+      });
+      expect(triggered).toBe(0);
+    });
+    it('triggered by move distance less than cancelOnMove then click', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: true,
+              cancelOnMove: 20,
+              duration: 0
+            },
+            throttle: false
+          }), triggered = 0;
+
+      map.geoOn(geo.event.mouseclick, function () {
+        triggered += 1;
+      });
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      interactor.simulateEvent('mousemove', {
+        map: {x: 30, y: 30},
+        button: 'left'
+      });
+      interactor.simulateEvent('mouseup', {
+        map: {x: 30, y: 30},
+        button: 'left'
+      });
+      expect(triggered).toBe(1);
+    });
+    it('triggered by move distance less than cancelOnMove then click with subpixel movements', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: true,
+              cancelOnMove: 0.5,
+              duration: 0
+            },
+            throttle: false
+          }), triggered = 0;
+
+      map.geoOn(geo.event.mouseclick, function () {
+        triggered += 1;
+      });
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      interactor.simulateEvent('mousemove', {
+        map: {x: 20.25, y: 20.25},
+        button: 'left'
+      });
+      interactor.simulateEvent('mouseup', {
+        map: {x: 20.25, y: 20.25},
+        button: 'left'
+      });
+      expect(triggered).toBe(1);
+    });
     it('not triggered by disabled button', function () {
       var map = mockedMap('#mapNode1'),
           interactor = geo.mapInteractor({
