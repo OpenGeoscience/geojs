@@ -24,7 +24,7 @@ var Mousetrap = require('mousetrap');
  * @property {number} [click.duration=0] If a positive number, the mouse up
  *      event must occur within this time in milliseconds of the mouse down
  *      event for it to be considered a click.
- * @property {boolean|number} [click.cancelOnMove=true] If truthy, don't generate
+ * @property {boolean|number} [click.cancelOnMove=true] If true, don't generate
  *      click events if the mouse moved at all.  If a positive number, the distance
  *      at which to cancel click events when the mouse moves.
  * @property {object} [keyboard] An object describing which keyboard events are
