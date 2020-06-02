@@ -53,6 +53,24 @@ require('./scaleWidget.styl');
  */
 
 /**
+ * For a unit table, the records are ordered smallest scale to largest scale.
+ * The smallest unit can be repeated to have different rounding behavior for
+ * values less than 1 and values greater than or equal to 1.
+ *
+ * @typedef {object} geo.gui.scaleWidget.unitTableRecord
+ * @property {string} unit The display name of the unit.
+ * @property {number} scale The size of the unit in base unit.
+ * @property {number} [basis=10] The number of units in the next greater unit
+ *    if not a power of 10.
+ * @property {object[]} [multiples] A list of multiplier values to round to
+ *    when rounding is used.  The list should probably include a multiple of 1.
+ *    Default is 1, 1.5, 2, 3, 5, 8.
+ * @property {number} multiples.multiple A factor to round to.
+ * @property {number} multiples.digit The number of digits to preserve when
+ *    rounding.
+ */
+
+/**
  * Create a new instance of class geo.gui.scaleWidget.
  *
  * @class
@@ -314,12 +332,21 @@ var scaleWidget = function (arg) {
 
 inherit(scaleWidget, svgWidget);
 
-/* The unitsTable has predefined unit sets.  Each entry is an array that must
- * be in ascending order. */
+/**
+ * The unitsTable has predefined unit sets for a base unit of one meter.  Each
+ * entry is an array that must be in ascending order.  Use unicode in strings,
+ * not html entities.  It makes it more reusable.
+ * @name unitsTable
+ * @property unitsTable {object} The key names are the names of unit systems,
+ *    such as `si`.
+ * @property unitsTable.unit {geo.gui.scaleWidget.unitTableRecord[]} A list of
+ *    units within the unit system from smallest to largest.
+ * @memberof geo.gui.scaleWidget
+ */
 scaleWidget.unitsTable = {
   si: [
     {unit: 'nm', scale: 1e-9},
-    {unit: '&mu;m', scale: 1e-6},
+    {unit: '\u03BCm', scale: 1e-6},
     {unit: 'mm', scale: 0.001},
     {unit: 'm', scale: 1},
     {unit: 'km', scale: 1000}
@@ -346,7 +373,97 @@ scaleWidget.unitsTable = {
     },
     {unit: 'ft', scale: 0.3048},
     {unit: 'mi', scale: 1609.344}
+  ],
+  decmiles: [ // decimal miles
+    {unit: 'mi', scale: 1609.344}
   ]
+};
+
+/**
+ * The areaUnitsTable has predefined unit sets for a base unit of one square
+ * meter.  Each entry is an array that must be in ascending order.  This table
+ * can be passed to formatUnit.
+ * @name areaUnitsTable
+ * @property areaUnitsTable {object} The key names are the names of unit
+ *    systems, such as `si`.
+ * @property areaUnitsTable.unit {geo.gui.scaleWidget.unitTableRecord[]} A list
+ *    of units within the unit system from smallest to largest.
+ * @memberof geo.gui.scaleWidget
+ */
+scaleWidget.areaUnitsTable = {
+  si: [
+    {unit: 'nm\xB2', scale: 1e-18},
+    {unit: '\u03BCm\xB2', scale: 1e-12},
+    {unit: 'mm\xB2', scale: 1e-6},
+    {unit: 'm\xB2', scale: 1},
+    {unit: 'km\xB2', scale: 1e6}
+  ],
+  hectares: [
+    {unit: 'ha', scale: 1e4}
+  ],
+  decmiles: [ // decimal square miles
+    {unit: 'mi\xB2', scale: 1609.344 * 1609.344}
+  ],
+  miles: [
+    {unit: 'in\xB2', scale: 0.0254 * 0.0254},
+    {unit: 'ft\xB2', scale: 0.3048 * 0.3048},
+    {unit: 'mi\xB2', scale: 1609.344 * 1609.344}
+  ],
+  acres: [
+    {unit: 'pl', scale: 0.3048 * 0.3048 * 16.5 * 16.5},
+    {unit: 'rd', scale: 1609.344 * 1609.344 / 640 / 4},
+    {unit: 'ac', scale: 1609.344 * 1609.344 / 640}
+  ]
+};
+
+/**
+ * Format a unit with a specified number of significant figures.  Given a value
+ * in base units, such as meters, this will return a string with appropriate
+ * units.  For instance, `formatUnit(0.345)` will return `345 mm`.
+ *
+ * @param {number} val The value.  A length or area in base units.  With the
+ *    default unit table, this is in meters.  With the `areaUnitsTable`, this
+ *    is square meters.
+ * @param {string|object[]} [unit='si'] The name of the unit system or a unit
+ *    table.
+ * @param {object} [table=unitTable] The table of the unit system.  Ignored if
+ *    `unit` is a unit table.
+ * @param {number} [digits=3] The minimum number of significant figures.
+ * @returns {string} A formatted string or `undefined`.
+ */
+scaleWidget.formatUnit = function (val, unit, table, digits) {
+  if (val === undefined || val === null) {
+    return;
+  }
+  if (!Array.isArray(unit)) {
+    table = table || scaleWidget.unitsTable;
+    if (!table || !table[unit || 'si']) {
+      return;
+    }
+    unit = table[unit || 'si'];
+  }
+  let pos;
+  for (pos = 0; pos < unit.length - 1; pos += 1) {
+    if (val < unit[pos + 1].scale) {
+      break;
+    }
+  }
+  unit = unit[pos];
+  val /= unit.scale;
+  digits = Math.max(0, -Math.ceil(Math.log10(val)) + (digits === undefined || digits < 0 ? 3 : digits));
+  if (digits > 10) {
+    return;
+  }
+  let result = val.toFixed(digits);
+  if (digits) {
+    while (result.substr(result.length - 1) === '0') {
+      result = result.substr(0, result.length - 1);
+    }
+    if (result.substr(result.length - 1) === '.') {
+      result = result.substr(0, result.length - 1);
+    }
+  }
+  return result + ' ' + unit.unit;
 };
 
 registerWidget('dom', 'scale', scaleWidget);
