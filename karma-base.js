@@ -362,7 +362,8 @@ module.exports = function (config) {
     ],
     client: {
       jasmine: {
-        random: false
+        random: false,
+        timeoutInterval: 30000
       }
     },
     webpack: {
