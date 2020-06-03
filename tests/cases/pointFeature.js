@@ -371,8 +371,10 @@ describe('geo.pointFeature', function () {
         count += 1;
       };
       glCounts = $.extend({}, vgl.mockCounts());
+      var t = point.timestamp();
       point.updateStyleFromArray('radius', array1, true);
       expect(count).toBe(0);
+      expect(point.timestamp()).toBe(t);
     });
     waitForIt('next render gl C', function () {
       return vgl.mockCounts().drawArrays >= (glCounts.drawArrays || 0) + 1;
@@ -390,8 +392,10 @@ describe('geo.pointFeature', function () {
       expect(count).toBe(1);
       // a different length array will trigger a slow draw, too.
       point.data(testPoints.slice(0, 18));
+      var t = point.timestamp();
       point.updateStyleFromArray('radius', array1, true);
       expect(count).toBe(2);
+      expect(point.timestamp()).toBeGreaterThan(t);
     });
     it('modify and refresh', function () {
       glCounts = $.extend({}, vgl.mockCounts());

@@ -162,7 +162,15 @@ describe('geo.markerFeature', function () {
 
   /* This is a basic integration test of geo.webgl.markerFeature. */
   describe('geo.webgl.markerFeature', function () {
-    var map, layer, marker, marker2, glCounts;
+    var map, layer, marker, marker2, glCounts, i, count = 0;
+    var array1 = new Array(testMarkers.length),
+        array2 = new Array(testMarkers.length),
+        array3 = new Array(testMarkers.length);
+    for (i = 0; i < testMarkers.length; i += 1) {
+      array1[i] = i + 1;
+      array2[i] = i % 2 ? true : false;
+      array3[i] = {r: 0.5, g: 0.5, b: 0.5};
+    }
     it('basic usage', function () {
       mockWebglRenderer();
       map = createMap();
@@ -218,6 +226,45 @@ describe('geo.markerFeature', function () {
       marker2.draw();
       expect(marker2.primitiveShape()).toBe(geo.markerFeature.primitiveShapes.triangle);
       expect(marker2.primitiveShape(undefined, true)).toBe(geo.markerFeature.primitiveShapes.triangle);
+    });
+    it('updateStyleFromArray single', function () {
+      marker.draw = function () {
+        count += 1;
+      };
+      glCounts = $.extend({}, vgl.mockCounts());
+      var t = marker.timestamp();
+      marker.updateStyleFromArray('radius', array1, true);
+      expect(count).toBe(0);
+      expect(marker.timestamp()).toBe(t);
+    });
+    waitForIt('next render gl C', function () {
+      return vgl.mockCounts().drawArrays >= (glCounts.drawArrays || 0) + 1;
+    });
+    it('updateStyleFromArray multiple', function () {
+      glCounts = $.extend({}, vgl.mockCounts());
+      marker.updateStyleFromArray({symbolComputed: array2, strokeColor: array3}, null, true);
+      expect(count).toBe(0);
+    });
+    waitForIt('next render gl D', function () {
+      return vgl.mockCounts().drawArrays >= (glCounts.drawArrays || 0) + 1;
+    });
+    it('updateStyleFromArray non-optimized', function () {
+      marker.updateStyleFromArray('unknown', array1, true);
+      expect(count).toBe(1);
+      // a different length array will trigger a slow draw, too.
+      marker.data(testMarkers.slice(0, 2));
+      var t = marker.timestamp();
+      marker.updateStyleFromArray('radius', array1, true);
+      expect(count).toBe(2);
+      expect(marker.timestamp()).toBeGreaterThan(t);
+    });
+    it('modify and refresh', function () {
+      glCounts = $.extend({}, vgl.mockCounts());
+      marker2.modified().draw();
+      expect(count).toBe(2);
+    });
+    waitForIt('next render gl E', function () {
+      return vgl.mockCounts().bufferSubData >= (glCounts.bufferSubData || 0) + 8;
     });
     it('_exit', function () {
       expect(marker.actors().length).toBe(1);
