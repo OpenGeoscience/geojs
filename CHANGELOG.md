@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## Version 0.20.0
 
 ### Features
 - Added a marker feature (#1035)
