@@ -9,6 +9,9 @@
 - Added a track feature (#1040)
 - Added a geo.gui.scaleWidget.formatUnit utility function (#1048)
 
+### Improvements
+- The pointInPolygon2D function is faster (#1052)
+
 ## Version 0.19.8
 
 ### Changes

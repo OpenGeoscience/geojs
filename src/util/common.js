@@ -74,7 +74,7 @@ var util = {
         return false;
       }
     }
-    return util.distanceToPolygon2d(point, inner ? {outer: outer, inner: inner} : outer) > 0;
+    return util.distanceToPolygon2d(point, inner ? {outer: outer, inner: inner} : outer, true) > 0;
   },
 
   /**
@@ -680,10 +680,12 @@ var util = {
    *
    * @param {geo.geoPosition} pt The point.
    * @param {geo.polygonObject} poly The polygon.
+   * @param {boolean} [onlySign] If truthy, only the sign of the answer is
+   *    significant.
    * @returns {number} The signed distance.
    * @memberof geo.util
    */
-  distanceToPolygon2d: function (pt, poly) {
+  distanceToPolygon2d: function (pt, poly, onlySign) {
     let outer = poly.outer || poly;
     let inside = false,
         minDistSq, distSq, dist;
@@ -693,14 +695,14 @@ var util = {
       if (((p0.y > pt.y) !== (p1.y > pt.y)) && (pt.x < (p1.x - p0.x) * (pt.y - p0.y) / (p1.y - p0.y) + p0.x)) {
         inside = !inside;
       }
-      distSq = util.distance2dToLineSquared(pt, p0, p1);
+      distSq = onlySign ? 1 : util.distance2dToLineSquared(pt, p0, p1);
       if (minDistSq === undefined || distSq < minDistSq) {
         minDistSq = distSq;
       }
     }
     if (poly.inner) {
       poly.inner.forEach(inner => {
-        let innerDist = util.distanceToPolygon2d(pt, inner);
+        let innerDist = util.distanceToPolygon2d(pt, inner, onlySign);
         if (innerDist * innerDist < minDistSq) {
           minDistSq = innerDist * innerDist;
         }
