@@ -25,9 +25,11 @@ describe('two maps', function () {
     map2.draw();
 
     var idle = function (callback) {
-      map1.onIdle(function () {
-        map2.onIdle(callback);
-      });
+      window.setTimeout(function () {
+        map1.onIdle(function () {
+          map2.onIdle(callback);
+        });
+      }, 100);
     };
 
     imageTest.imageTest('mapTwo', '#twomap', 0.0015, done, idle, 0, 2);
