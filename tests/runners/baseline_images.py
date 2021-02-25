@@ -85,7 +85,7 @@ def upload_baselines(args):
         '%Y-%m-%d %H:%M:%S', time.localtime(os.path.getmtime(tarPath)))
     uploadedFile = gc.uploadFile(
         parentId=args['folder'], parentType='folder', name=name,
-        stream=open(tarPath), size=tarSize, mimeType='application/tar+gzip')
+        stream=open(tarPath, 'rb'), size=tarSize, mimeType='application/tar+gzip')
     if args['verbose'] >= 1:
         print('Upload to file %s' % uploadedFile['_id'])
     testDataPath = os.path.abspath('tests/external-data')
