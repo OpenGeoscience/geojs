@@ -136,7 +136,7 @@ if __name__ == '__main__':  # noqa
         else:
             opts['help'] = True
     if opts.get('help'):
-        print """
+        print("""
 Regenerate thumbnails for examples and tutorials.
 
 Syntax: make_thumbnails.py --force --simulate --only=(substr) --all
@@ -155,7 +155,7 @@ Run in the root geojs directory.
  specified substring.
 --simulate or -s determines the size of thumbnails that would be created but
  doesn't make them.
-"""
+""")
         sys.exit(0)
     for inputdir in InputList:
         for root, dirs, files in os.walk(inputdir):

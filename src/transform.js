@@ -20,6 +20,7 @@ var maxTransformCacheSize = 10;
 /* A RegExp to detect if two transforms only different by the middle axis's
  * direction. */
 var axisPattern = new RegExp('^(.* |)\\+axis=e(n|s)u(| .*)$');
+var affinePattern = new RegExp(/(^|\s)\+(s[1-3][1-3]|[xyz]off)=\S/);
 
 /**
  * This purpose of this class is to provide a generic interface for computing
@@ -101,7 +102,7 @@ var transform = function (options) {
    *    value is the proj4 string with the affine parameters removed.
    */
   function parse_projection(value) {
-    if (!/(^|\s)\+(s[1-3][1-3]|[xyz]off)=\S/.exec(value)) {
+    if (!affinePattern.exec(value)) {
       return {proj: value};
     }
     var mat = util.mat4AsArray(),
@@ -342,7 +343,7 @@ transform.transformCoordinates = function (srcPrj, tgtPrj, coordinates, numberOf
     return coordinates;
   }
 
-  if (Array.isArray(coordinates) && coordinates.length >= 3 && numberOfComponents === 3 && !util.isObject(coordinates[0])) {
+  if (Array.isArray(coordinates) && coordinates.length >= 3 && numberOfComponents === 3 && !util.isObject(coordinates[0]) && !affinePattern.test(srcPrj) && !affinePattern.test(tgtPrj)) {
     return transform.transformCoordinatesFlatArray3(srcPrj, tgtPrj, coordinates);
   }
   if (Array.isArray(coordinates) && coordinates.length && util.isObject(coordinates[0]) && 'x' in coordinates[0] && 'y' in coordinates[0]) {
