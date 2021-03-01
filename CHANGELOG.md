@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased
+
+### Improvements
+- Screenshots now handle mix-blend-mode settings on top level divs (#1074)
+
+### Bug Fixes
+- Fixed an issue with affine transforms and polygons (#1073)
+
 ## Version 0.20.0
 
 ### Features

@@ -5,7 +5,7 @@ sudo: required
 dist: xenial
 
 node_js:
-  - 14
+  - 12
 
 addons:
   # version 55.0 - 57.x have an issue with screenshots.
