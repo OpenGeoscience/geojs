@@ -107,7 +107,7 @@ describe('webglContour', function () {
       }
       myMap.draw();
 
-      imageTest.imageTest(imageName, null, 0.0015, done, myMap.onIdle, 0, 2);
+      imageTest.imageTest(imageName, null, 0.0015, done, myMap.onIdle, 5000, 2);
     });
   }
 

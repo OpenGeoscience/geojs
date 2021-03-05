@@ -1820,13 +1820,13 @@ var map = function (arg) {
           if (layer.renderer() && layer.renderer().api() === 'webgl') {
             layer.renderer()._renderFrame();
           }
-          drawLayerImageToContext(context, opacity, canvasElem, canvasElem[0]);
+          drawLayerImageToContext(context, opacity, canvasElem, canvasElem[0], layer.node().css('mix-blend-mode'));
         });
       });
       if ((layer.node().children().not('canvas').length || !layer.node().children().length) && (!layer.renderer() || layer.renderer().api() !== 'webgl')) {
         defer = defer.then(function () {
           return util.htmlToImage(layer.node(), 1).done(function (img) {
-            drawLayerImageToContext(context, 1, $([]), img);
+            drawLayerImageToContext(context, 1, $([]), img, layer.node().css('mix-blend-mode'));
           });
         });
       }
@@ -1846,7 +1846,7 @@ var map = function (arg) {
         var attrElem = $(this);
         defer = defer.then(function () {
           return util.htmlToImage(attrElem, 1).done(function (img) {
-            drawLayerImageToContext(context, 1, $([]), img);
+            drawLayerImageToContext(context, 1, $([]), img, attrElem.css('mix-blend-mode'));
           });
         });
       });
@@ -1963,10 +1963,14 @@ var map = function (arg) {
    * @param {number} opacity The opacity in the range [0, 1].
    * @param {object} elem A jQuery element that might have a transform.
    * @param {HTMLImageObject} img The image or canvas to draw to the canvas.
+   * @param {string} [mixBlendMode] the mix-blend-mode used to add this layer.
    * @private
    */
-  function drawLayerImageToContext(context, opacity, elem, img) {
+  function drawLayerImageToContext(context, opacity, elem, img, mixBlendMode) {
     context.globalAlpha = opacity;
+    if (mixBlendMode) {
+      context.globalCompositeOperation = mixBlendMode;
+    }
     var transform = elem.css('transform');
     // if the canvas is being transformed, apply the same transformation
     if (transform && transform.substr(0, 7) === 'matrix(') {
@@ -1975,6 +1979,7 @@ var map = function (arg) {
       context.setTransform(1, 0, 0, 1, 0, 0);
     }
     context.drawImage(img, 0, 0);
+    context.globalCompositeOperation = 'source-over';
   }
 
   /**

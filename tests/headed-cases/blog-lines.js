@@ -46,13 +46,13 @@ describe('blog-lines example', function () {
 
   it('basic', function (done) {
     $('#map').attr('src', '/examples/blog-lines/index.html?mode=select');
-    imageTest.imageTest('exampleBlogLines', '#map', 0.0015, done, ready, 500, 2, '.leaflet-pane');
-  }, 10000);
+    imageTest.imageTest('exampleBlogLines', '#map', 0.0015, done, ready, 5000, 2, '.leaflet-pane');
+  }, 20000);
   it('round line cap', function (done) {
     $('#map')[0].contentWindow.scrollTo(0, 130);
     base$ = $('iframe#map')[0].contentWindow.jQuery;
     base$('#feature').val('linecap-round').trigger('change');
-    imageTest.imageTest('exampleBlogLinesRoundCap', '#map', 0.0015, done, ready, 500, 2, '.mapboxgl-canvas');
+    imageTest.imageTest('exampleBlogLinesRoundCap', '#map', 0.0015, done, ready, 5000, 2, '.mapboxgl-canvas');
   }, 20000);
   it('10,000 lines in geojs', function (done) {
     // remove previous contents to ensure we detect new contents
@@ -62,6 +62,6 @@ describe('blog-lines example', function () {
     // this permits a large delta to pass on CI.  It visually is rendered
     // correctly, though with seemingly different aliasing choices by the
     // renderer
-    imageTest.imageTest('exampleBlogLines10k', '#map', 0.04, done, null, 1000, 2, '.geojs-map.ready');
+    imageTest.imageTest('exampleBlogLines10k', '#map', 0.04, done, null, 5000, 2, '.geojs-map.ready');
   }, 10000);
 });

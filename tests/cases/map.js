@@ -827,7 +827,6 @@ describe('geo.core.map', function () {
       });
     });
     it('partial opacity', function (done) {
-      // making a layer transparent is as good as not asking for it
       layer2.opacity(0.5);
       m.screenshot().then(function (result) {
         expect(result).not.toEqual(ss.basic);
@@ -853,6 +852,23 @@ describe('geo.core.map', function () {
     // These tests won't work in PhantomJS.  See
     // https://bugs.webkit.org/show_bug.cgi?id=17352, also 29305 and 129172.
     if (!isPhantomJS()) {
+      it('mix-blend-mode multiply', function (done) {
+        layer2.node().css('mix-blend-mode', 'multiply');
+        m.screenshot().then(function (result) {
+          expect(result).not.toEqual(ss.basic);
+          expect(result).not.toEqual(ss.onelayer);
+          layer2.node().css('mix-blend-mode', 'initial');
+          done();
+        });
+      });
+      it('mix-blend-mode normal', function (done) {
+        layer2.node().css('mix-blend-mode', 'normal');
+        m.screenshot().then(function (result) {
+          expect(result).toEqual(ss.basic);
+          layer2.node().css('mix-blend-mode', 'initial');
+          done();
+        });
+      });
       it('layer background', function (done) {
         var layer3 = m.createLayer('ui');
         layer3.node().css('background-image', 'url(/data/tilefancy.png)');
