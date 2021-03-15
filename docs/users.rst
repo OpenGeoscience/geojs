@@ -23,9 +23,9 @@ under its standard name in global scope.
 Software conventions
 --------------------
 
-At it's core, GeoJS is an object oriented framework designed to be extended
+At its core, GeoJS is an object oriented framework designed to be extended
 and customized.  The inheritance mechanism used provides an isolated closure
-inside the constructor to maintain private methods and variables.  Prototypal
+inside the constructor to maintain private methods and variables.  Prototypical
 inheritance is performed by a helper method called ``geo.inherit``.  This
 method copies public methods declared on the parent class's prototype.  In general,
 classes inside GeoJS do not declare methods on the class prototype.  Instead,
@@ -189,7 +189,7 @@ Coordinate systems
 
 A major component of GeoJS's core library involves managing several coordinate systems that
 are used to keep layers aligned on the screen.  The following conventions are used in GeoJS's
-documentation and codebase when refering to coordinates:
+documentation and codebase when referring to coordinates:
 
 Latitude/longitude coordinates
     Expressed in degrees relative to the WGS84 datum as objects using keys ``x`` for longitude and ``y``
@@ -212,7 +212,7 @@ World coordinates
     These are the coordinates used internally as coordinates of the 3D scene in much the sense as defined
     in 3D graphics.  The world coordinates are a rescaled and translated version of the GCS coordinates so
     that the world coordinates of the current viewport is near ``1`` in each axis.  This is done to
-    provide well conditioned transformation matrices that can be used acurately in contexts of limited precision
+    provide well conditioned transformation matrices that can be used accurately in contexts of limited precision
     such as WebGL or CSS.  In order to achieve this, the world coordinate system is dynamic at run time
     and will change as the user pans and zooms the map.  By convention, the world coordinates are given
     relative to a dynamic "scale" and "origin".  Changes to these values trigger events on the map that
@@ -232,14 +232,14 @@ Feature coordinates
 Coordinate transformation methods
 ---------------------------------
 
-To facilitate uniform tranformation between the many coordinate systems used inside a map object,
+To facilitate uniform transformation between the many coordinate systems used inside a map object,
 there are many available transformation methods provided in the core API.  These methods vary
 from being useful to all users of the library to methods that are only relevant to developers
 interacting with low level renderers or wishing to optimize performance.  The following is a list
 of transform methods present in the library as well as example uses for them.
 
 ``geo.map.gcsToDisplay/displayToGcs(c, gcs)``
-    This is the most common tranformation method that converts from a geographic coordinate system into
+    This is the most common transformation method that converts from a geographic coordinate system into
     pixel coordinates on the map.  If no GCS is given, the method will assume the coordinate system of
     the map.  For example, to get the lat/lon of the point under the mouse you would get the pixel
     coordinates relative to the map's container and pass them to this method as ``c`` in
@@ -258,7 +258,7 @@ of transform methods present in the library as well as example uses for them.
 
 ``geo.camera.worldToDisplay/displayToWorld(c, width, height)``
     This converts between world space coordinates and display pixel coordinates given a viewport
-    size.  In addition to thse methods, the camera class provides access to the raw transformation
+    size.  In addition to these methods, the camera class provides access to the raw transformation
     matrices for layers that can make use of them directly.  For layers supporting CSS
     there is also a ``camera.css`` property that returns a CSS transform representing the current
     camera state.

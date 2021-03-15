@@ -14,7 +14,7 @@ The following software is required to build geojs from source:
 
 For testing and development, the following additional software is required:
 
-* `Python 2.7 <https://www.python.org/>`_
+* `Python 3 <https://www.python.org/>`_
 * `CMake <https://www.cmake.org/>`_
 
 In addition, the following python modules are recommended for development
