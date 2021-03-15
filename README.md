@@ -5,11 +5,8 @@
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.15459.svg)](https://dx.doi.org/10.5281/zenodo.15459)
 [![Gitter](https://badges.gitter.im/OpenGeoscience/geojs.svg)](https://gitter.im/OpenGeoscience/geojs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Primarily developed by [Kitware](https://www.kitware.com) and
-[Epidemico](https://epidemico.com/). GeoJS is intended to bridge the gap between
-[GIS](https://en.wikipedia.org/wiki/Geographic_information_system),
-[Geospatial Visualization](https://en.wikipedia.org/wiki/Geovisualization),
-[Scientific Visualization](https://en.wikipedia.org/wiki/Scientific_visualization) and
+GeoJS is intended to bridge the gap between
+[GIS](https://en.wikipedia.org/wiki/Geographic_information_system),[Scientific Visualization](https://en.wikipedia.org/wiki/Scientific_visualization), and
 [Infovis](https://en.wikipedia.org/wiki/Information_visualization).
 GeoJS is more than just a GIS library as users can create scientific plots
 such as vector and contour and can embed infovis plots using [D3.js](https://github.com/d3/d3).
