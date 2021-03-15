@@ -26,7 +26,7 @@ Additional features includes [Annotations](https://opengeoscience.github.io/geoj
 [Animated Transitions](https://opengeoscience.github.io/geojs/examples/transitions), and
 [Widgets](https://opengeoscience.github.io/geojs/examples/widgets).
 
-GeoJS can also be used for visualizing medical imagery. See [HistomicsTK](https://github.com/DigitalSlideArchive/HistomicsTK) for an example.
+GeoJS can also be used for visualizing medical imagery. See [Digital Slide Archive](https://digitalslidearchive.github.io/digital_slide_archive) for an example.
 
 Examples
 ========
@@ -50,8 +50,8 @@ if you have general questions or bug reports on GeoJS.
 
 Get Involved
 ============
-We are always open for collaboration. Kitware has been doing open source development
-for the last 20 year and understand and appreciate what it takes to develop open
+We are open for collaboration. Kitware has been doing open source development
+for the last 20 year and understands and appreciates what it takes to develop open
 source software.
 
 Related Efforts
