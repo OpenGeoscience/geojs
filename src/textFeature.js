@@ -158,7 +158,7 @@ var textFeature = function (arg) {
         rotation: 0,  /* in radians */
         rotateWithMap: false,
         textScaled: false,
-        position: function (d) { return d; },
+        position: (d) => Array.isArray(d) ? {x: d[0], y: d[1], z: d[2] || 0} : d,
         text: function (d) { return d.text; }
       },
       arg.style === undefined ? {} : arg.style

@@ -128,11 +128,8 @@ var polygonFeature = function (arg) {
       outer = new Array(coord.length);
       for (j = 0; j < coord.length; j += 1) {
         outer[j] = posFunc.call(m_this, coord[j], j, d, i);
-        x = outer[j].x || outer[j][0] || 0;
-        y = outer[j].y || outer[j][1] || 0;
-        if (outer[j].x === undefined) {
-          outer[j] = {x: x, y: y};
-        }
+        x = outer[j].x;
+        y = outer[j].y;
         if (!j) {
           range = {min: {x: x, y: y}, max: {x: x, y: y}};
         } else {
@@ -147,9 +144,6 @@ var polygonFeature = function (arg) {
         var trans = new Array(coord.length);
         for (j = 0; j < coord.length; j += 1) {
           trans[j] = posFunc.call(m_this, coord[j], j, d, i);
-          if (trans[j].x === undefined) {
-            trans[j] = {x: trans[j].x || trans[j][0] || 0, y: trans[j].y || trans[j][1] || 0};
-          }
         }
         return trans;
       });
@@ -725,7 +719,7 @@ var polygonFeature = function (arg) {
         strokeColor: {r: 0.0, g: 1.0, b: 1.0},
         strokeOpacity: 1.0,
         polygon: function (d) { return d; },
-        position: function (d) { return d; },
+        position: (d) => Array.isArray(d) ? {x: d[0], y: d[1], z: d[2] || 0} : d,
         origin: (items) => {
           for (let i = 0; i < items.length; i += 1) {
             if (items[i].vertices.length >= 3) {

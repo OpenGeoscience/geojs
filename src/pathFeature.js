@@ -84,7 +84,7 @@ var pathFeature = function (arg) {
       {
         strokeWidth: 1,
         strokeColor: {r: 1.0, g: 1.0, b: 1.0},
-        position: function (d) { return d; }
+        position: (d) => Array.isArray(d) ? {x: d[0], y: d[1], z: d[2] || 0} : d
       },
       arg.style === undefined ? {} : arg.style
     );

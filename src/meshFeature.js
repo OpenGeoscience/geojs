@@ -455,12 +455,7 @@ var meshFeature = function (arg) {
     /* Initialize from arguments */
     arg = arg || {};
     var style = $.extend({}, {
-      position: function (d) {
-        /* We could construct a new object and return
-         *  {x: d.x, y: d.y, z: d.z};
-         * but that isn't necessary. */
-        return d;
-      }
+      position: (d) => Array.isArray(d) ? {x: d[0], y: d[1], z: d[2] || 0} : d
     }, arg.style || {});
 
     m_this.mesh(arg.mesh || {});

@@ -465,7 +465,7 @@ var lineFeature = function (arg) {
         antialiasing: 2.0,
         closed: false,
         line: function (d) { return d; },
-        position: function (d) { return d; },
+        position: (d) => Array.isArray(d) ? {x: d[0], y: d[1], z: d[2] || 0} : d,
         origin: (p) => (p.length >= 3 ? p.slice(0, 3) : [0, 0, 0])
       },
       arg.style === undefined ? {} : arg.style
