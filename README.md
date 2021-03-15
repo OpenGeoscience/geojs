@@ -1,6 +1,6 @@
 ![GeoJS](https://opengeoscience.github.io/geojs/images/logo_256.png)
 
-[![Build Status](https://travis-ci.org/OpenGeoscience/geojs.svg?branch=master)](https://travis-ci.org/OpenGeoscience/geojs)
+[![Build Status](https://travis-ci.com/OpenGeoscience/geojs.svg?branch=master)](https://travis-ci.com/OpenGeoscience/geojs)
 [![codecov.io](https://codecov.io/github/OpenGeoscience/geojs/coverage.svg?branch=master)](https://codecov.io/github/OpenGeoscience/geojs?branch=master)
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.15459.svg)](https://dx.doi.org/10.5281/zenodo.15459)
 [![Gitter](https://badges.gitter.im/OpenGeoscience/geojs.svg)](https://gitter.im/OpenGeoscience/geojs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)

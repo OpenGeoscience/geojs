@@ -1,9 +1,10 @@
 # Change Log
 
-## Unreleased
+## Version 1.0.0
 
 ### Improvements
 - Screenshots now handle mix-blend-mode settings on top level divs (#1074)
+- More flexible default position accessors (#1066)
 
 ### Bug Fixes
 - Fixed an issue with affine transforms and polygons (#1073)
@@ -586,7 +587,7 @@ Migrating from the plane feature to the new quad feature provides major performa
 - @jbeezley
 - @manthey
 
-Huge thanks to all of the contributers, and the many others who tested, created issues, and gave feedback during the development of this release.
+Huge thanks to all of the contributors, and the many others who tested, created issues, and gave feedback during the development of this release.
 
 
 ## Version 0.5.0
