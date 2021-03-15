@@ -83,7 +83,7 @@
     "nib": "^1.1.2",
     "pako": "^1.0.11",
     "phantomjs-prebuilt": "^2.1.5",
-    "pug": "^2.0.3",
+    "pug": "^3.0.1",
     "pug-lint": "^2.4.0",
     "pug-loader": "^2.4.0",
     "raw-body": "^2.1.6",
