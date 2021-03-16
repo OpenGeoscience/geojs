@@ -5,11 +5,8 @@
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.15459.svg)](https://dx.doi.org/10.5281/zenodo.15459)
 [![Gitter](https://badges.gitter.im/OpenGeoscience/geojs.svg)](https://gitter.im/OpenGeoscience/geojs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Primarily developed by [Kitware](https://www.kitware.com) and
-[Epidemico](https://epidemico.com/). GeoJS is intended to bridge the gap between
-[GIS](https://en.wikipedia.org/wiki/Geographic_information_system),
-[Geospatial Visualization](https://en.wikipedia.org/wiki/Geovisualization),
-[Scientific Visualization](https://en.wikipedia.org/wiki/Scientific_visualization) and
+GeoJS is intended to bridge the gap between
+[GIS](https://en.wikipedia.org/wiki/Geographic_information_system),[Scientific Visualization](https://en.wikipedia.org/wiki/Scientific_visualization), and
 [Infovis](https://en.wikipedia.org/wiki/Information_visualization).
 GeoJS is more than just a GIS library as users can create scientific plots
 such as vector and contour and can embed infovis plots using [D3.js](https://github.com/d3/d3).
@@ -29,6 +26,7 @@ Additional features includes [Annotations](https://opengeoscience.github.io/geoj
 [Animated Transitions](https://opengeoscience.github.io/geojs/examples/transitions), and
 [Widgets](https://opengeoscience.github.io/geojs/examples/widgets).
 
+GeoJS can also be used for visualizing medical imagery. See [Digital Slide Archive](https://digitalslidearchive.github.io/digital_slide_archive) for an example.
 
 Examples
 ========
@@ -52,7 +50,11 @@ if you have general questions or bug reports on GeoJS.
 
 Get Involved
 ============
-GeoJS is developed to meet needs of developers and domain-specific researchers,
-and we are always open for collaboration. We have been doing open source development
-for the last 17 year and understand and appreciate what it takes to develop open
-source software. So fork GeoJS, do great things and let us know if we can help.
+We are open for collaboration. Kitware has been doing open source development
+for the last 20 year and understands and appreciates what it takes to develop open
+source software.
+
+Related Efforts
+===============
+GeoJS has been used in various Girder [girder] (https://github.com/girder) based applications such
+as [Dansfield-App](https://github.com/Kitware/Danesfield-App) and [DIVE] (https://github.com/Kitware/dive).
