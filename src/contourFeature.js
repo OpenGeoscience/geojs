@@ -40,6 +40,7 @@ var meshFeature = require('./meshFeature');
  * passed the {@link geo.meshFeature.meshInfo} object.
  *
  * @typedef {geo.meshFeature.meshSpec} geo.contourFeature.contourSpec
+ * @extends geo.meshFeature.meshSpec
  * @property {number} [min] Minimum contour value.  If unspecified, taken from
  *    the computed minimum of the `value` style.
  * @property {number} [max] Maximum contour value.  If unspecified, taken from
@@ -63,7 +64,8 @@ var meshFeature = require('./meshFeature');
  * @property {number[]} [rangeValues] An array used to map values to the
  *    `colorRange`.  By default, values are spaced linearly.  If specified, the
  *    entries must be increasing weakly monotonic, and there must be one more
- *    entry then the length of `colorRange`.
+ *    entry then the length of `colorRange` if the contour is stepped, or the
+ *    same length as the `colorRange` if unstepped.
  */
 
 /**
@@ -162,7 +164,9 @@ var contourFeature = function (arg) {
     minmax = util.getMinMaxValues(result.value, contour.get('min')(result), contour.get('max')(result));
     result.minValue = minmax.min;
     result.maxValue = minmax.max;
-    if (!rangeValues || rangeValues.length !== result.colorMap.length + 1) {
+    if (!rangeValues || !result.colorMap ||
+        (rangeValues.length !== result.colorMap.length + 1 && (
+          stepped || rangeValues.length !== result.colorMap.length))) {
       rangeValues = null;
     }
     if (rangeValues) {  /* ensure increasing monotonicity */
