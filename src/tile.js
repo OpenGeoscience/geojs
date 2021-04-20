@@ -145,7 +145,8 @@ var tile = function (spec) {
 
   /**
    * Return a unique string representation of the given tile useble as a hash
-   * key.
+   * key.  Possibly extend later to include url information to make caches
+   * aware of the tile source.
    *
    * @returns {string}
    */

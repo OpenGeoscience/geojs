@@ -63,6 +63,7 @@ module.exports = $.extend({
   imageTile: require('./imageTile'),
   isolineFeature: require('./isolineFeature'),
   geojsonReader: require('./geojsonReader'),
+  gridFeature: require('./gridFeature'),
   layer: require('./layer'),
   lineFeature: require('./lineFeature'),
   map: require('./map'),
