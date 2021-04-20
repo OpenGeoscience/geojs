@@ -2,22 +2,22 @@ var inherit = require('./inherit');
 var meshFeature = require('./meshFeature');
 
 /**
- * Contour feature specification.
+ * Grid feature specification.
  *
- * @typedef {geo.feature.spec} geo.contourFeature.spec
+ * @typedef {geo.feature.spec} geo.gridFeature.spec
  * @extends geo.feature.spec
  * @property {object[]} [data=[]] An array of arbitrary objects used to
  *    construct the feature.
- * @property {geo.contourFeature.styleSpec} [style] An object that contains
+ * @property {geo.gridFeature.styleSpec} [style] An object that contains
  *    style values for the feature.
- * @property {geo.contourFeature.contourSpec} [contour] The contour
- *    specification for the feature.
+ * @property {geo.gridFeature.gridSpec} [grid] The grid specification for the
+ *    feature.
  */
 
 /**
- * Style specification for a contour feature.
+ * Style specification for a grid feature.
  *
- * @typedef {geo.feature.styleSpec} geo.contourFeature.styleSpec
+ * @typedef {geo.feature.styleSpec} geo.gridFeature.styleSpec
  * @extends geo.feature.styleSpec
  * @property {geo.geoPosition|function} [position=data] The position of each
  *    data element.  This defaults to just using `x`, `y`, and `z` properties
@@ -33,18 +33,18 @@ var meshFeature = require('./meshFeature');
  *   for to ensure high precision drawing in this location.  When called as a
  *   function, this is passed the vertex positions as a single continuous array
  *   in map gcs coordinates.  It defaults to the first vertex used in the
- *   contour.
+ *   grid.
  */
 
 /**
- * Contour specification.  All of these properties can be functions, which get
+ * Grid specification.  All of these properties can be functions, which get
  * passed the {@link geo.meshFeature.meshInfo} object.
  *
- * @typedef {geo.meshFeature.meshSpec} geo.contourFeature.contourSpec
+ * @typedef {geo.meshFeature.meshSpec} geo.gridFeature.gridSpec
  * @extends geo.meshFeature.meshSpec
- * @property {number} [min] Minimum contour value.  If unspecified, taken from
+ * @property {number} [min] Minimum grid value.  If unspecified, taken from
  *    the computed minimum of the `value` style.
- * @property {number} [max] Maximum contour value.  If unspecified, taken from
+ * @property {number} [max] Maximum grid value.  If unspecified, taken from
  *    the computed maximum of the `value` style.
  * @property {geo.geoColor} [minColor='black'] Color used for any value below
  *    the minimum.
@@ -65,33 +65,32 @@ var meshFeature = require('./meshFeature');
  * @property {number[]} [rangeValues] An array used to map values to the
  *    `colorRange`.  By default, values are spaced linearly.  If specified, the
  *    entries must be increasing weakly monotonic, and there must be one more
- *    entry then the length of `colorRange` if the contour is stepped, or the
- *    same length as the `colorRange` if unstepped.
+ *    entry then the length of `colorRange`.
  */
 
 /**
- * Computed contour information.
+ * Computed grid information.
  *
- * @typedef {geo.meshFeature.meshColoredInfo} geo.contourFeature.contourInfo
+ * @typedef {geo.meshFeature.meshColoredInfo} geo.gridFeature.gridInfo
  * @extends geo.meshFeature.meshColoredInfo
  */
 
 /**
- * Create a new instance of class contourFeature.
+ * Create a new instance of class gridFeature.
  *
  * @class
- * @alias geo.contourFeature
+ * @alias geo.gridFeature
  * @extends geo.meshFeature
  *
- * @borrows geo.contourFeature#mesh as geo.contourFeature#contour
+ * @borrows geo.gridFeature#mesh as geo.gridFeature#grid
  *
- * @param {geo.contourFeature.spec} arg
- * @returns {geo.contourFeature}
+ * @param {geo.gridFeature.spec} arg
+ * @returns {geo.gridFeature}
  */
-var contourFeature = function (arg) {
+var gridFeature = function (arg) {
   'use strict';
-  if (!(this instanceof contourFeature)) {
-    return new contourFeature(arg);
+  if (!(this instanceof gridFeature)) {
+    return new gridFeature(arg);
   }
 
   var $ = require('jquery');
@@ -108,23 +107,23 @@ var contourFeature = function (arg) {
       s_init = this._init;
 
   /**
-   * Create a set of vertices, values at the vertices, and opacities at the
-   * vertices.  Create a set of triangles of indices into the vertex array.
-   * Create a color and opacity map corresponding to the values.
+   * Create a set of vertices and values and opacities inside triangles.
+   * Create a set of triangles of indices into the vertex array.  Create a
+   *  color and opacity map corresponding to the values.
    *
-   * @returns {geo.contourFeature.contourInfo} An object with the contour
+   * @returns {geo.gridFeature.gridInfo} An object with the grid
    *    information.
    */
-  this._createContours = function () {
-    return meshUtil.createColoredMesh(m_this, false);
+  this._createGrids = function () {
+    return meshUtil.createColoredMesh(m_this, true);
   };
 
-  this.contour = m_this.mesh;
+  this.grid = m_this.mesh;
 
   /**
    * Initialize.
    *
-   * @param {geo.contourFeature.spec} arg The contour feature specification.
+   * @param {geo.gridFeature.spec} arg The grid feature specification.
    */
   this._init = function (arg) {
     s_init.call(m_this, arg);
@@ -144,7 +143,7 @@ var contourFeature = function (arg) {
 
     m_this.style(defaultStyle);
 
-    m_this.contour($.extend({}, {
+    m_this.grid($.extend({}, {
       minColor: 'black',
       minOpacity: 0,
       maxColor: 'black',
@@ -161,9 +160,9 @@ var contourFeature = function (arg) {
         {r: 1, g: 0.472800903, b: 0.404551679},
         {r: 0.916482116, g: 0.236630659, b: 0.209939162}
       ]
-    }, arg.mesh || {}, arg.contour || {}));
+    }, arg.mesh || {}, arg.grid || {}));
 
-    if (arg.mesh || arg.contour) {
+    if (arg.mesh || arg.grid) {
       m_this.dataTime().modified();
     }
   };
@@ -172,53 +171,5 @@ var contourFeature = function (arg) {
   return this;
 };
 
-inherit(contourFeature, meshFeature);
-module.exports = contourFeature;
-
-/* Example:
-
-layer.createFeature('contour', {
-})
-.data(<array with w x h elements>)
-.position(function (d) {
-  return { x: <longitude>, y: <latitude>, z: <altitude>};
-})
-.style({
-  opacity: function (d) {
-    return <opacity of grid point>;
-  },
-  value: function (d) {            // defaults to position().z
-    return <contour value>;
-  }
-})
-.contour({
-  gridWidth: <width of grid>,
-  gridHeight: <height of grid>,
-  x0: <the x coordinate of the 0th point in the value array>,
-  y0: <the y coordinate of the 0th point in the value array>,
-  dx: <the distance in the x direction between the 0th and 1st point in the
-    value array>,
-  dy: <the distance in the y direction between the 0th and (gridWidth)th point
-    in the value array>,
-  wrapLongitude: <boolean (default true).  If true, AND the position array is
-    not used, assume the x coordinates is longitude and should be adjusted to
-    be within -180 to 180.  If the data spans 180 degrees, the points or
-    squares will be duplicated to ensure that the map is covered from -180 to
-    180 as appropriate.  Set this to false if using a non longitude x
-    coordinate.  This is ignored if the position array is used.>,
-  min: <optional minimum contour value, otherwise taken from style.value>,
-  max: <optional maximum contour value, otherwise taken from style.value>,
-  minColor: <color for any value below the minimum>,
-  minOpacity: <opacity for any value below the minimum>,
-  maxColor: <color for any value above the maximum>,
-  maxOpacity: <opacity for any value above the maximum>,
-  stepped: <boolean (default true).  If false, smooth transitions between
-    colors>,
-  colorRange: [<array of colors used for the contour>],
-  opacityRange: [<optional array of opacities used for the contour, expected to
-    be the same length as colorRange>],
-  rangeValues: [<if specified, instead of spacing the colors linearly, use this
-    spacing.  Must be increasing monotonic and one value longer than the length
-    of colorRange>]
-})
- */
+inherit(gridFeature, meshFeature);
+module.exports = gridFeature;
