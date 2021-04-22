@@ -6,6 +6,7 @@ var feature = require('./feature');
  * Quad feature specification.
  *
  * @typedef {geo.feature.spec} geo.quadFeature.spec
+ * @extends geo.feature.spec
  * @property {object|function} [position] Position of the quad.  Default is
  *   (data).  The position is an object which specifies the corners of the
  *   quad: ll, lr, ur, ul.  At least two opposite corners must be specified.

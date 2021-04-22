@@ -7,6 +7,7 @@ var transform = require('./transform');
  * Heatmap feature specification.
  *
  * @typedef {geo.feature.spec} geo.heatmapFeature.spec
+ * @extends geo.feature.spec
  * @property {geo.geoPosition|function} [position] Position of the data.
  *   Default is (data).
  * @property {function} [intensity] Scalar value of each data point.  The

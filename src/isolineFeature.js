@@ -7,6 +7,7 @@ var util = require('./util');
  * Isoline feature specification.
  *
  * @typedef {geo.feature.spec} geo.isolineFeature.spec
+ * @extend geo.feature.spec
  * @property {object[]} [data=[]] An array of arbitrary objects used to
  *    construct the feature.
  * @property {geo.isolineFeature.styleSpec} [style] An object that contains
@@ -54,6 +55,7 @@ var util = require('./util');
  * passed the {@link geo.meshFeature.meshInfo} object.
  *
  * @typedef {geo.meshFeature.meshSpec} geo.isolineFeature.isolineSpec
+ * @extends geo.meshFeature.meshSpec
  * @property {number} [min] Minimum isoline value.  If unspecified, taken from
  *    the computed minimum of the `value` style.
  * @property {number} [max] Maximum isoline value.  If unspecified, taken from

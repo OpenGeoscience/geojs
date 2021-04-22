@@ -65,6 +65,7 @@ var sceneObject = require('./sceneObject');
  * Specification used with `map.create`.
  *
  * @typedef {geo.map.spec} geo.map.createSpec
+ * @extends geo.map.spec
  * @property {object[]} [data=[]] The default data array to apply to each
  *      feature if none exists.
  * @property {geo.layer.spec[]} [layers=[]] Layers to create.

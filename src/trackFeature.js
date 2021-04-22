@@ -7,6 +7,7 @@ var util = require('./util');
  * Track feature specification.
  *
  * @typedef {geo.feature.spec} geo.trackFeature.spec
+ * @extends geo.feature.spec
  * @property {geo.geoPosition|function} [position] Position of the data.
  *   Default is (data).
  * @property {float|function} [time] Time of the data.  Default is `(data).t`.
