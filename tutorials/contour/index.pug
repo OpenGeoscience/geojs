@@ -17,7 +17,7 @@ block mainTutorial
   :markdown-it
     Then load some data.
     The data is grid data describing geospatial point elevation, a record of z value -9999 means there is no land data.
-    Since the data is relatively big, intead of adding inline data, we load asynchronously, and use [promise chain](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) to chain up the following steps.
+    Since the data is relatively big, instead of adding inline data, we load asynchronously, and use [promise chain](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) to chain up the following steps.
   +codeblock('javascript', 2, 1).
     var promise = Promise.resolve($.ajax({
       url: '../../data/oahu.json'
