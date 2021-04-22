@@ -8,6 +8,7 @@ var util = require('./util');
  * Line feature specification.
  *
  * @typedef {geo.feature.spec} geo.lineFeature.spec
+ * @extends geo.feature.spec
  * @property {geo.geoPosition|function} [position] Position of the data.
  *   Default is (data).
  * @property {object|function} [line] Lines from the data.  Default is (data).

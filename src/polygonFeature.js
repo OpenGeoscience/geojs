@@ -7,6 +7,7 @@ var transform = require('./transform');
  * Polygon feature specification.
  *
  * @typedef {geo.feature.spec} geo.polygonFeature.spec
+ * @extends geo.feature.spec
  * @property {geo.geoPosition|function} [position] Position of the data.
  *   Default is (data).
  * @property {geo.polygon|function} [polygon] Polygons from the data.  Default

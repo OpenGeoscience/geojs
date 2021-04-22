@@ -5,6 +5,7 @@ var feature = require('./feature');
  * Object specification for a text feature.
  *
  * @typedef {geo.feature.spec} geo.textFeature.spec
+ * @extends geo.feature.spec
  * @property {geo.geoPosition[]|function} [position] The position of each data
  *   element.  Defaults to the `x`, `y`, and `z` properties of the data
  *   element.

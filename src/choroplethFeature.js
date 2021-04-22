@@ -5,6 +5,7 @@ var feature = require('./feature');
  * Choropleth feature specification.
  *
  * @typedef {geo.feature.spec} geo.choroplethFeature.spec
+ * @extends geo.feature.spec
  * @property {geo.colorObject[]} [colorRange] Color lookup table.  Default is
  *   9-step color table.
  * @property {function} [scale] A scale converts a input domain into the

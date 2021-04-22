@@ -49,6 +49,7 @@ var geo_event = require('./event');
 
 /**
  * @typedef {geo.feature.spec} geo.feature.createSpec
+ * @extends geo.feature.spec
  * @property {string} type A supported feature type.
  * @property {object[]} [data=[]] An array of arbitrary objects used to
  *   construct the feature.  These objects (and their associated indices in the

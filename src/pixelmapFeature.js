@@ -8,6 +8,7 @@ var util = require('./util');
  * Pixelmap feature specification.
  *
  * @typedef {geo.feature.spec} geo.pixelmapFeature.spec
+ * @extends geo.feature.spec
  * @property {string|function|HTMLImageElement} [url] URL of a pixel map or an
  *   HTML Image element.  The rgb data is interpretted as an index of the form
  *   0xbbggrr.  The alpha channel is ignored.

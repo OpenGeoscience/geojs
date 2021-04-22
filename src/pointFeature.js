@@ -5,6 +5,7 @@ var feature = require('./feature');
  * Object specification for a point feature.
  *
  * @typedef {geo.feature.spec} geo.pointFeature.spec
+ * @extends geo.feature.spec
  * @property {geo.geoPosition|function} [position] Position of the data.
  *   Default is (data).
  * @property {geo.pointFeature.styleSpec} [style] Style object with default
