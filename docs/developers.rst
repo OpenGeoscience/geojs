@@ -22,17 +22,15 @@ checked against `ESLint <https://eslint.org/>`_ for uniform styling
 and strict for common errors patterns.  The style rules for geojs are
 located in the ``.eslintrc`` file in the root of the repository.  These
 tests are preformed automatically for every file added to the build; no
-additional configuration is required.  You can run a quick check of the
-code style outside of CMake by running ``npm run lint``.
+additional configuration is required.  You can check the code style
+by running ``npm run lint``.
 
 Code coverage
 -------------
 
-Code coverage information is generated automatically for all headless unit tests
-by Karma's test runner when running ``npm run test``.  The coverage information is
-submitted to `codecov <https://codecov.io/github/OpenGeoscience/geojs>`_ and
-`cdash <https://my.cdash.org/index.php?project=geojs>`_ after every
-successful Travis run.
+Code coverage information is generated automatically for all headless unit 
+tests by Karma's test runner when running ``npm run test``.  The coverage 
+information is submitted to `codecov <https://codecov.io/github/OpenGeoscience/geojs>`_ after every successful CI run.
 
 Headless browser testing
 ------------------------
@@ -67,19 +65,15 @@ Headless WebGL testing
 ----------------------
 
 To fully test code that uses WebGL, a browser with WebGL is required.
-If xvfb, osmesa, and Firefox are installed, some tests can be run in a virtual
-frame buffer that doesn't require a display.  May of these tests depend on
-additional data which can be downloaded by using CMake and running ctest.
+If xvfb, osmesa, and Firefox or Chrome are installed, some tests can be run in
+a virtual frame buffer that doesn't require a display.  May of these tests
+depend on additional data which can be downloaded by ``npm run get-data-files``.
 
 For example, running ::
 
-    cmake /path/to/geojs
-    make
-    xvfb-run -s '-ac -screen 0 1280x1024x24' ctest -VV -R ffheadless
+    npm run test-headed-xvfb
 
-will run the headless WebGL tests.  After the data for tests is downloaded,
-the tests can also be run via ``npm run test-webgl``, which assumes that
-``xvfb-run`` is available.
+will run the headless WebGL tests.
 
 The headless unit tests that require WebGL should be placed in the
 ``tests/gl-cases/`` directory.  When tests are run in a normal browser via
@@ -98,16 +92,7 @@ resemblejs, the default highlight color is pink).
 
 Unless an image comparison test fails, images are not automatically saved.  To
 save all images, add the environment variable ``TEST_SAVE_IMAGE=all`` to the
-test command or set this parameter in CMake.
-
-.. note::
-
-    Typically, CMake is used to build outside of the source tree.  This
-    means you would create a new directory somewhere and point cmake
-    to the geojs source directory.  You may need to rerun ``cmake`` and
-    ``make`` after making changes to your code for everything to
-    build correctly.  Try running ``ccmake /path/to/geojs`` for a full
-    list of configuration options.
+test command.
 
 Examples and tests that need to run in a standard browser should be tested by
 creating an entry in the ``tests/headed-cases/`` directory.  To run these tests

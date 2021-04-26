@@ -23,12 +23,11 @@ cache:
   directories:
     - node_modules
     - "$HOME/cache"
-    - "$TRAVIS_BUILD_DIR/_build/ExternalData"
+    - "$TRAVIS_BUILD_DIR/dist/data"
 
 before_install:
   # Start xvfb with a specific resolution and pixel depth
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x24"
-  - CACHE="${HOME}/cache" CMAKE_VERSION=3.5.0 CMAKE_SHORT_VERSION=3.5 source ./scripts/install_cmake.sh
   - npm install -g npm@latest
   # Prune the npm packages.  If this fails for any reason, just remove them all
   - npm prune || rm -r node_modules
@@ -43,37 +42,27 @@ install:
   - npm list || true
   # Install for the website build
   - npm run setup-website
-  # Download and extract the glslangValidator tool
-  - curl -OL https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Release.zip
-  - unzip glslang-master-linux-Release.zip bin/glslangValidator
 
 before_script:
   - export DISPLAY=:99.0
 
 script:
-  # Use the glslangValidator to validate all .frag and .vert files
-  - find . \( -name '*.frag' \) -exec sh -c 'for n; do python scripts/preprocess_glsl.py "$n" | bin/glslangValidator --stdin -S frag || exit 1; done' sh {} \+
-  - find . \( -name '*.vert' \) -exec sh -c 'for n; do python scripts/preprocess_glsl.py "$n" | bin/glslangValidator --stdin -S vert || exit 1; done' sh {} \+
-  - npm run build
-  - npm run docs
-  - mkdir -p _build
-  - ctest -S cmake/travis_build.cmake -VV || true
-  - if [ -f _build/test_failed ] ; then false ; fi
+  - npm run ci
   # Build the website to ensure that it will pass
-  - npm run build-website
+  - npm run ci-build-website
 
 after_failure:
   # Upload test results.  First make them smaller with optipng.
   - pip install --user --upgrade 'girder-client<3.1' requests[security] pyOpenSSL six
-  - find _build/images -name '*-test.png' -exec optipng {} \+ || true
-  - find _build/images -name '*-test.png' -exec python scripts/upload_travis_results.py {} \+ || true
+  - find images -name '*-test.png' -exec optipng {} \+ || true
+  - find images -name '*-test.png' -exec python scripts/upload_travis_results.py {} \+ || true
   # Upload build artifacts
   - find dist/built -type f -exec python scripts/upload_travis_results.py {} \+ || true
   # Generate a new set of baseline images, in case we decide the new results
   # are now correct
   - rm -r dist/data/base-images 2>/dev/null >/dev/null || true
-  - python tests/runners/baseline_images.py -cgvb _build
-  - find _build -name 'Baseline Images*.tgz' -exec python scripts/upload_travis_results.py {} \+ || true
+  - python tests/runners/baseline_images.py -cgvb images
+  - find images -name 'Baseline Images*.tgz' -exec python scripts/upload_travis_results.py {} \+ || true
 
 after_success:
   # - find dist \( -name '*coverage*xml' -o -name 'lcov.info' \) -exec ls -al {} \+ || true

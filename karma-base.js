@@ -2,17 +2,13 @@ var webpack_config = require('./webpack.base.config');
 var url = require('url');
 var fs = require('fs');
 var path = require('path');
-var notes_path = process.env.CTEST_NOTES_PATH || path.resolve('notes');
-var image_path = process.env.CTEST_IMAGE_PATH || path.resolve('images');
+var image_path = process.env.TEST_IMAGE_PATH || path.resolve('_build/images');
 var test_case = process.env.GEOJS_TEST_CASE || 'tests/all.js';
 var getRawBody = require('raw-body');
 
-// Create the notes directory, if it doesn't exist.
-if (!fs.existsSync(notes_path)) {
-  fs.mkdirSync(notes_path);
-}
+// Create the images directory, if it doesn't exist.
 if (!fs.existsSync(image_path)) {
-  fs.mkdirSync(image_path);
+  fs.mkdirSync(image_path, {recursive: true});
 }
 
 /**
@@ -112,41 +108,14 @@ function compareImage(name, image, threshold, callback) {
 }
 
 /**
- * Express style middleware to handle REST requests to `/notes` and
- * `/testImage` on the test server.
+ * Express style middleware to handle REST requests to `/testImage` on the test
+ * server.
  */
-var notes_middleware = function (config) {
-  var notes = {};
-
+var testimage_middleware = function (config) {
   return function (request, response, next) {
     var parsed = url.parse(request.url, true);
     var query = (parsed.query || {});
-    var key = query.key || 'default';
-    if (parsed.pathname === '/notes') {
-      if (request.method === 'PUT') {
-        return getRawBody(request, {encoding: 'utf-8'}).then(function (body) {
-          body = body.toString() || '{}';
-          notes[key] = JSON.parse(body);
-          fs.writeFileSync(path.resolve(notes_path, key) + '.json', body);
-          response.writeHead(200);
-          return response.end('{}');
-        }).catch(function (err) {
-          response.writeHead(500);
-          response.end(err.message);
-        });
-      } else if (request.method === 'POST' && query.length) {
-        fs.writeFileSync(query.path || 'notes.txt', JSON.stringify(notes));
-        response.writeHead(200);
-        return response.end('{}');
-      } else if (request.method === 'DELETE') {
-        notes = {};
-        response.writeHead(200);
-        return response.end('{}');
-      } else if (request.method === 'GET') {
-        response.writeHead(200);
-        return response.end(JSON.stringify(notes));
-      }
-    } else if (parsed.pathname === '/testImage') {
+    if (parsed.pathname === '/testImage') {
       if (request.method === 'PUT') {
         return getRawBody(request).then(function (body) {
           var name = query.name;
@@ -348,11 +317,11 @@ module.exports = function (config) {
     // We could suppress passing results
     // specReporter = {suppressPassed: true, suppressSkipped: true},
     middleware: [
-      'notes',
+      'testimage',
       'osmtiles'
     ],
     plugins: [
-      {'middleware:notes': ['factory', notes_middleware]},
+      {'middleware:testimage': ['factory', testimage_middleware]},
       {'middleware:osmtiles': ['factory', osmtiles_middleware]},
       'karma-*'
     ],

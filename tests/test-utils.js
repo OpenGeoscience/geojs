@@ -1,12 +1,11 @@
 /* These are functions we want available to jasmine tests. */
-/* exported waitForIt, closeToArray, closeToEqual, logCanvas2D, submitNote */
+/* exported waitForIt, closeToArray, closeToEqual, logCanvas2D */
 /* global CanvasRenderingContext2D */
 
 var $ = require('jquery');
 
 require('../src/polyfills');
 var geo = require('../src');
-var bowser = require('bowser');
 
 module.exports = {};
 
@@ -127,23 +126,6 @@ module.exports.logCanvas2D = function logCanvas2D(enable) {
   });
 
   window._canvasLog = log;
-};
-
-/**
- * Send data to be reported as part of the a build note.
- *
- * @param key: the key that this will be reported under.  This should be the
- *             name of the test.
- * @param note: the data to send.  This will be converted to JSON.
- */
-module.exports.submitNote = function submitNote(key, note) {
-  note.browser = bowser;
-  return $.ajax({
-    url: '/notes?key=' + encodeURIComponent(key),
-    data: JSON.stringify(note),
-    method: 'PUT',
-    contentType: 'application/json'
-  });
 };
 
 var origRequestAnimationFrame = window.requestAnimationFrame,
