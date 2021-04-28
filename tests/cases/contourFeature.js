@@ -275,5 +275,45 @@ describe('Contour Feature', function () {
       expect(result.elements.length).toBe(21); /* 7 tri. * 3 pts. */
       expect(result.pos.length).toBe(24); /* 8 distinct points * 3 coor. */
     });
+
+    it('stepped range and color', function () {
+      var contour1 = {
+        gridWidth: 7,
+        gridHeight: 2,
+        x0: -30,
+        y0: -30,
+        dx: 6,
+        dy: 6,
+        colorRange: ['red', 'black', 'blue'],
+        rangeValues: [0, 6, 12, 15],
+        values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+        stepped: true
+      };
+      var contour = layer.createFeature('contour', {
+        contour: contour1, style: {value: 0}}).data(contour1.values);
+      var result = contour._createContours();
+      expect(result.rangeValues.length).toBe(4);
+      expect(result.factor).toBe(0.2);
+    });
+
+    it('continuous range and color', function () {
+      var contour1 = {
+        gridWidth: 7,
+        gridHeight: 2,
+        x0: -30,
+        y0: -30,
+        dx: 6,
+        dy: 6,
+        colorRange: ['red', 'black', 'blue'],
+        rangeValues: [0, 6, 15],
+        values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+        stepped: false
+      };
+      var contour = layer.createFeature('contour', {
+        contour: contour1, style: {value: 0}}).data(contour1.values);
+      var result = contour._createContours();
+      expect(result.rangeValues.length).toBe(3);
+      expect(result.factor).toBe(0.2);
+    });
   });
 });

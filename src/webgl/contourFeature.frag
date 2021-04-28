@@ -25,7 +25,7 @@ void main () {
         step = steps - 0.5;
       }
     } else {
-      step = valueVar;
+      step = valueVar + 0.5;
     }
     // our texture is padded on either end by a repeated value to ensure
     // we interpolate smoothly at the ends.
