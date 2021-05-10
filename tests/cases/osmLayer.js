@@ -9,7 +9,6 @@ describe('geo.core.osmLayer', function () {
 
   var map;
   var waitForIt = require('../test-utils').waitForIt;
-  var submitNote = require('../test-utils').submitNote;
   // var logCanvas2D = require('../test-utils').logCanvas2D;
   var geo = require('../test-utils').geo;
   var createMap = require('../test-utils').createMap;
@@ -29,7 +28,7 @@ describe('geo.core.osmLayer', function () {
     restoreWebglRenderer();
   }
 
-  /* Run some performance tests and submit them as a build note.
+  /* Run some performance tests.
    *
    * @param mapinfo: an object that includes the map to test.
    * @param notekey: the key to use for the build note.
@@ -99,16 +98,10 @@ describe('geo.core.osmLayer', function () {
           done: done
         });
       });
-      it('report findings', function (done) {
+      it('check findings', function () {
         var timings = geo.util.timeReport('requestAnimationFrame');
-        // very minimal test threshold; this is mostly to collect data
+        // very minimal test threshold
         expect(timings.count).toBeGreaterThan(10);
-        timings = $.extend({}, timings);
-        delete timings.recentsub;
-        submitNote(notekey, timings).then(function () {
-          geo.util.timeRequestAnimationFrame(true);
-          done();
-        });
       });
     });
   }

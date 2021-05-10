@@ -4,33 +4,50 @@ Provisioning for Development
 
 .. _ubuntu-development:
 
-Ubuntu 18.04
--------------
+Ubuntu 20.04
+------------
 
-This shows how to set up a build and test environment in Ubuntu 18.04.
+This shows how to set up a build and test environment in Ubuntu 20.04.
 
-These instructions will probably work for any Ubuntu release from 18.04
-onward.  They assume a basic installation.
+These instructions will probably work for other Ubuntu releases.  They assume a
+basic installation.
 
 Add nodejs to the sources so it can be installed ::
 
-    wget -qO- https://deb.nodesource.com/setup_8.x | sudo bash -
+    wget -qO- https://deb.nodesource.com/setup_15.x | sudo bash -
 
 Install required packages (you may want to also include cmake-curses-gui for
 convenience in configuring CMake options) ::
 
     sudo apt-get install --yes \
-        cmake \
+        cpio \
         firefox-esr \
+        fonts-dejavu \
         git \
         imagemagick \
-        libjpeg-dev \
-        libpango1.0-dev \
         mesa-utils \
         nodejs \
-        python-pip \
+        optipng \
+        software-properties-common \
+        unzip \
         xauth \
-        xvfb
+        xvfb \
+        # these packages are needed for Chrome \
+        fonts-liberation \
+        libappindicator3-1 \
+        libasound2 \
+        libgbm1 \
+        libnspr4 \
+        libnss3 \
+        libxss1 \
+        libxtst6 \
+        xdg-utils 
+
+Install Chrome ::
+
+    export CHROME_SOURCE_URL=https://dl.google.com/dl/linux/direct/google-chrome-stable_current_amd64.deb && \
+    wget --no-verbose -O /tmp/$(basename $CHROME_SOURCE_URL) $CHROME_SOURCE_URL && \
+    dpkg -i /tmp/$(basename $CHROME_SOURCE_URL)
 
 Checkout the GeoJS source and change to the source directory ::
 
@@ -41,27 +58,14 @@ Install node modules ::
 
     npm install
 
-Build GeoJS and run some basic tests ::
+Build GeoJS and run all the tests ::
 
-    npm run build
-    npm run lint
-    npm run test
+    npm run ci-xvfb
 
-Note that some of the tests measure speed, and therefore may fail if you are
-running on slow hardware or in a limited virtual machine.
-
-Use CMake to create additional tests and make to download test data ::
-
-    cmake .
-    make
-
-Run the headless WebGL tests ::
-
-    ctest -VV -R headless
-
-Run all tests ::
-
-    xvfb-run -s '-ac -screen 0 1280x1024x24' ctest --output-on-failure
+Build the website ::
+ 
+    npm run setup-website
+    npm run build-website
 
 Install python packages ::
 

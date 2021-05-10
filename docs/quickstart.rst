@@ -15,7 +15,6 @@ The following software is required to build geojs from source:
 For testing and development, the following additional software is required:
 
 * `Python 3 <https://www.python.org/>`_
-* `CMake <https://www.cmake.org/>`_
 
 In addition, the following python modules are recommended for development
 and testing of geojs.
@@ -31,8 +30,7 @@ For testing WebGL in a headless environment, the additional packages are needed:
 * `Firefox <https://www.mozilla.org/firefox>`_
 
 For an example on how to install all packages for a specific OS, see
-:ref:`Ubuntu 14.04 Provisioning <ubuntu-development>`.
-
+:ref:`Ubuntu Provisioning <ubuntu-development>`.
 
 Getting the source code
 -----------------------

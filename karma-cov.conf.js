@@ -35,7 +35,7 @@ module.exports = function (config) {
       {type: 'cobertura', dir: 'dist/cobertura/', file: 'coverage.xml', subdir: subdir_name},
       {type: 'json', dir: 'dist/coverage/json/', subdir: subdir_name},
       {type: 'lcovonly', dir: 'dist/coverage/lcov', subdir: subdir_name},
-      {type: 'text'}
+      {type: 'text-summary'}
     ]
   };
   /* Alter our first webpack module rule which should just apply to src/*.js

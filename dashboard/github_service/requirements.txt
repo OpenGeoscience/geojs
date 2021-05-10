@@ -1,3 +1,0 @@
-tangelo
-requests
-pymongo
