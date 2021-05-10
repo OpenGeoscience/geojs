@@ -112,4 +112,4 @@ To make a new GeoJS release:
 - Tag the commit on GitHub with a tag of the form vX.Y.Z (e.g., v0.17.0).
 - After the release appears on GitHub, update the release notes with the changes since the last release.
 
-Tagging a commit on the master branch will trigger a build on travis-ci.com, at the end of which the new version will be published to npm and the build artifacts will be pushed to the tagged version on GitHub.
+Tagging a commit on the master branch will trigger a build on CI, at the end of which the new version will be published to npm and the build artifacts will be pushed to the tagged version on GitHub.
