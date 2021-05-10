@@ -3,7 +3,7 @@
 ## Version 1.0.1
 
 ### Improvements
-- Contours with continuous (unstepped) data can specify the same number of values in `rangeValues` and `colorRange`
+- Contours with continuous (unstepped) data can specify the same number of values in `rangeValues` and `colorRange` (#1079)
 
 ## Version 1.0.0
 
