@@ -18,11 +18,11 @@ def get_class_dict():
     r = re.compile(
         r'inherit\((?P<this>[^,)]+), (?P<super>[^,)]+)\)'
     )
-    
+
     classes = {}
     nodes = []
     for line in lines:
- 
+
         m = r.search(line)
         if m is None:
             continue
@@ -31,10 +31,10 @@ def get_class_dict():
 
         if m['super'] not in classes:
             classes[m['super']] = []
- 
+
         classes[m['super']].append(m['this'])
         nodes.append(m['this'])
- 
+
     return classes, nodes
 
 
