@@ -28,8 +28,8 @@ by running ``npm run lint``.
 Code coverage
 -------------
 
-Code coverage information is generated automatically for all headless unit 
-tests by Karma's test runner when running ``npm run test``.  The coverage 
+Code coverage information is generated automatically for all headless unit
+tests by Karma's test runner when running ``npm run test``.  The coverage
 information is submitted to `codecov <https://codecov.io/github/OpenGeoscience/geojs>`_ after every successful CI run.
 
 Headless browser testing
@@ -96,8 +96,8 @@ test command.
 
 Examples and tests that need to run in a standard browser should be tested by
 creating an entry in the ``tests/headed-cases/`` directory.  To run these tests
-in a normal browser, run ``npm run start`` and browse to 
-`<http://localhost:9876/debug.html?test=all>`_.  Since the browser's direct 
+in a normal browser, run ``npm run start`` and browse to
+`<http://localhost:9876/debug.html?test=all>`_.  Since the browser's direct
 screen output is used, the browser must be running on the same machine as the
 ``npm run start`` command.
 

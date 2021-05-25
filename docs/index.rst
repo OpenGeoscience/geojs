@@ -24,7 +24,6 @@ If you have any questions or comments, feel free to join us on our
     users
     developers
     provisioning
-    testingutils
     API Reference <https://opengeoscience.github.io/geojs/apidocs/geo.html>
 
 Indices and tables

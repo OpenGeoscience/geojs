@@ -41,7 +41,7 @@ by issue this command in your terminal. ::
     git clone https://github.com/OpenGeoscience/geojs.git
 
 This will put all of the source code in a new directory called
-``geojs``. 
+``geojs``.
 
 .. _GitHub repository: https://github.com/OpenGeoscience/geojs
 

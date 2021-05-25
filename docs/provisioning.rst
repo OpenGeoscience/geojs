@@ -40,7 +40,7 @@ Install required packages ::
         libnss3 \
         libxss1 \
         libxtst6 \
-        xdg-utils 
+        xdg-utils
 
 Install Chrome ::
 
@@ -62,7 +62,7 @@ Build GeoJS and run all the tests ::
     npm run ci-xvfb
 
 Build the website ::
- 
+
     npm run setup-website
     npm run build-website
 
