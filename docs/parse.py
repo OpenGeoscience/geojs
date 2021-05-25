@@ -7,7 +7,7 @@ from subprocess import check_output
 def get_class_dict():
     """Return a mapping from classname -> children"""
     lines = check_output(
-        ['git', 'grep', '-E', 'inherit\([^,)]+, [^,)]+\)'],
+        ['git', 'grep', '-E', r'inherit\([^,)]+, [^,)]+\)'],
         cwd=os.path.join(
             os.path.abspath(os.path.dirname(__file__)),
             '..',
@@ -16,7 +16,7 @@ def get_class_dict():
     ).split('\n')
 
     r = re.compile(
-        'inherit\((?P<this>[^,)]+), (?P<super>[^,)]+)\)'
+        r'inherit\((?P<this>[^,)]+), (?P<super>[^,)]+)\)'
     )
     
     classes = {}
@@ -41,4 +41,5 @@ def get_class_dict():
 def make_core(classes, nodes):
     pass
 
-print json.dumps(get_class_dict()[0], indent=2)
+
+print(json.dumps(get_class_dict()[0], indent=2))
