@@ -16,8 +16,7 @@ Add nodejs to the sources so it can be installed ::
 
     wget -qO- https://deb.nodesource.com/setup_15.x | sudo bash -
 
-Install required packages (you may want to also include cmake-curses-gui for
-convenience in configuring CMake options) ::
+Install required packages ::
 
     sudo apt-get install --yes \
         cpio \
