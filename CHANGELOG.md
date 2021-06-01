@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+### Improvements
+- The primary map div now has overflow hidden set on it (#1088)
+
 ## Version 1.0.1
 
 ### Improvements
