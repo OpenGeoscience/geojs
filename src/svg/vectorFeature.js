@@ -259,7 +259,7 @@ var svg_vectorFeature = function (arg) {
     m_style.classes = ['svgVectorFeature'];
     m_style.visible = m_this.visible;
 
-    // Add markers to the defition list
+    // Add markers to the definition list
     updateMarkers(data, s_style.strokeColor, s_style.strokeOpacity, s_style.originStyle, s_style.endStyle);
 
     // pass to renderer to draw
