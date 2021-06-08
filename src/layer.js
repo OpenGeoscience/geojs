@@ -410,7 +410,7 @@ var layer = function (arg) {
   /**
    * Get/Set if the layer has been initialized.
    *
-   * @param {boolean} [val] If specified, update the intialized value.
+   * @param {boolean} [val] If specified, update the initialized value.
    *    Otherwise, return the current instance.
    * @returns {boolean|this} Either the initialized value or this.
    */
@@ -448,9 +448,9 @@ var layer = function (arg) {
 
   /**
    * Get or set the attribution html content that will displayed with the
-   * layer.  By default, nothing will be displayed.  Note, this content
-   * is **not** html escaped, so care should be taken when renderering
-   * user provided content.
+   * layer.  By default, nothing will be displayed.  Note, this content is
+   * **not** html escaped, so care should be taken when rendering user provided
+   * content.
    *
    * @param {string?} arg An html fragment
    * @returns {string|this} Chainable as a setter
@@ -606,7 +606,7 @@ var layer = function (arg) {
   /**
    * Get or set the current layer opacity.  The opacity is in the range [0-1].
    * An opacity of 0 is not the same as setting `visible(false)`, as
-   * interactions can still occurr with the layer.
+   * interactions can still occur with the layer.
    *
    * @param {number} [opacity] If specified, set the opacity.  Otherwise,
    *    return the opacity.
