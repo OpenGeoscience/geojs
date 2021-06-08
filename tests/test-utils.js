@@ -156,7 +156,7 @@ module.exports.stepAnimationFrame = function (time) {
 
 /**
  * Allow stepping through animation frames.  Call unmockAnimationFrame to
- * retore the original animation frame behavior.
+ * restore the original animation frame behavior.
  */
 module.exports.mockAnimationFrame = function (mockDate) {
 

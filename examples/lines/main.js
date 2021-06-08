@@ -452,12 +452,12 @@ $(function () {
   var tooltip = uiLayer.createWidget('dom', {position: {x: 0, y: 0}});
   var tooltipElem = $(tooltip.canvas()).attr('id', 'tooltip').addClass(
     'hidden');
-  // Ceate a line feature
+  // Create a line feature
   lineFeature = layer.createFeature('line', lineOptions)
     .line(lineAccessor)
     .position(positionAccessor)
     // add hover events -- use mouseon and mouseoff, since we only show one
-    // tootip.  If we showed one tooltip per item we were over, use mouseover
+    // tooltip.  If we showed one tooltip per item we were over, use mouseover
     // and mouseout.
     .geoOn(geo.event.feature.mouseon, function (evt) {
       var text = (evt.data.name ? evt.data.name : '') +

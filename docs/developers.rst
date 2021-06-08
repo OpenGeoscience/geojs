@@ -21,7 +21,7 @@ All javascript source files included in the library for deployment are
 checked against `ESLint <https://eslint.org/>`_ for uniform styling
 and strict for common errors patterns.  The style rules for geojs are
 located in the ``.eslintrc`` file in the root of the repository.  These
-tests are preformed automatically for every file added to the build; no
+tests are performed automatically for every file added to the build; no
 additional configuration is required.  You can check the code style
 by running ``npm run lint``.
 

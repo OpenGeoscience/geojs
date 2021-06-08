@@ -27,7 +27,7 @@ void main () {
   float sinBCD = angles.w;
   // never render on the opposite side of a miter.  This uses a bit of
   // slop, via pow(smoothstep()) instead of step(), since there are
-  // precision issues in this calculation.  This doesn't wholy solve
+  // precision issues in this calculation.  This doesn't wholly solve
   // the precision issue; sometimes pixels are missed or double
   // rendered along the inside seam of a miter.
   if (nearMode >= 4) {

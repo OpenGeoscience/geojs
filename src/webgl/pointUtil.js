@@ -4,7 +4,7 @@ var pointFeature = require('../pointFeature');
  * Extend a point-like feature with additional functions.
  *
  * @param {this} m_this The point-like feature.
- * @param {object} [arg] Feature defintion object that might specify the
+ * @param {object} [arg] Feature definition object that might specify the
  *      primitive shape.
  */
 function pointUtil(m_this, arg) {

@@ -9,7 +9,7 @@ describe('geo.tileLayer', function () {
   var _tileLayer = geo.tileLayer;
 
   /*
-   * Use html rendering for all of these tests.  That is what is occuring
+   * Use html rendering for all of these tests.  That is what is occurring
    * in phantomjs in any case.  This also reduces the console pollution.
    * Renderer specific tests currently are handled in osmLayer.js.
    */

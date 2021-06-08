@@ -32,9 +32,9 @@ var transform = require('./transform');
  * @property {number} [style.radius=10] Radius of a point in pixels.
  * @property {number} [style.blurRadius=10] Blur radius for each point in
  *   pixels.
- * @property {boolean} [style.gaussian=true] If truthy, appoximate a gaussian
+ * @property {boolean} [style.gaussian=true] If truthy, approximate a gaussian
  *   distribution for each point using a multi-segment linear radial
- *   appoximation.  The total weight of the gaussian area is approximately the
+ *   approximation.  The total weight of the gaussian area is approximately the
  *   `9/16 r^2`.  The sum of `radius + blurRadius` is used as the radius for
  *   the gaussian distribution.
  */
@@ -246,7 +246,7 @@ var heatmapFeature = function (arg) {
   };
 
   /**
-   * Build the fetaure.
+   * Build the feature.
    *
    * @returns {this}
    */

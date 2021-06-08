@@ -86,8 +86,8 @@ var util = require('./util');
  *    with `(geo.isolineFeature.valueEntry, index)`.
  * @property {number|function} [labelOffset=0] Offset for labels along an
  *    isoline relative to where they would be placed by default on a scale of
- *    [-0.5, 0.5].  +/- 1 would move the text to the next repeated occurance of
- *    the label.  If a function, this is called with
+ *    [-0.5, 0.5].  +/- 1 would move the text to the next repeated occurrence
+ *    of the label.  If a function, this is called with
  *    `(geo.isolineFeature.valueEntry, index)`.
  * @property {number|function} [labelViewport=10000] If the main position of a
  *    label would be further than this many pixels from the current viewport,
@@ -312,7 +312,7 @@ var isolineFeature = function (arg) {
       }
     } else {
       if (!spacing) {
-        /* If no spacing is specfied, then this has a count with autofit.
+        /* If no spacing is specified, then this has a count with autofit.
          * Generate at least 2/3rds as many lines as the count, but it could be
          * 5/2 of that when adjusted to "nice values" (so between 2/3 and 5/3
          * of the specified count). */
@@ -364,7 +364,7 @@ var isolineFeature = function (arg) {
    * Add a new segment to a list of chains.  Each chain is a list of vertices,
    * each of which is an array of two values with the low/high mesh vertices
    * for that chain vertex.  There are then three possibilities:  (a) The
-   * segment forms a new chain that doesn't attch to an existing chain.  (b)
+   * segment forms a new chain that doesn't attach to an existing chain.  (b)
    * One endpoint of the segment matches the endpoint of an existing chain, and
    * it gets added to that chain.  (c) Both endpoints of the segment match
    * endpoints of two different chains, and those two chains are combined via

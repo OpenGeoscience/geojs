@@ -30,7 +30,7 @@ var feature = require('./feature');
  * @property {geo.geoPosition|function} [origin={x: 0, y: 0, z: 0}] The origin
  *   of the vector.  One end of the vector will be at this point.
  * @property {geo.geoPosition|function} [delta] The direction that the vector
- *   points in.  The length of the vector is dependant on this and the `scale`.
+ *   points in.  The length of the vector is dependent on this and the `scale`.
  * @property {number|function} [scale] The size of the vector relative to the
  *   delta.  If `null`, `undefined`, or `0`, this is `75 / <maximum length of
  *   any delta in x-y space>`.

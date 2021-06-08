@@ -516,7 +516,7 @@ var util = {
 
   /**
    * Return recommended defaults for map parameters and osm or tile layer
-   * paramaters where the expected intent is to use the map in pixel
+   * parameters where the expected intent is to use the map in pixel
    * coordinates (upper left is (0, 0), lower right is (`width`, `height`).
    *
    * @example <caption>The returned objects can be modified or
@@ -1376,7 +1376,7 @@ var util = {
           var track = m_timingData.requestAnimationFrame, recent;
           /* Some environments have unsynchronized performance and time
            * counters.  The nowDelta factor compensates for this.  For
-           * instance, our test enviornment has performance.now() values on
+           * instance, our test environment has performance.now() values on
            * the order of ~3000 and timestamps approximating epoch. */
           if (track.timestamp !== timestamp) {
             track.nowDelta = window.performance.now() - timestamp;

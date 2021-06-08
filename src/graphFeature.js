@@ -160,7 +160,7 @@ var graphFeature = function (arg) {
    * @param {function|array} [arg] If specified, the list of links or a
    *    function that returns the list of links.  If unspecified, return the
    *    existing value.
-   * @returns {fuction|this} Either a function that returns the list of links,
+   * @returns {function|this} Either a function that returns the list of links,
    *    or the feature.
    */
   this.links = function (arg) {

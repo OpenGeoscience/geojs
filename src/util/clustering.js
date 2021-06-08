@@ -136,7 +136,7 @@ ClusterTree.prototype.coords = function () {
  * @class
  * @alias geo.util.ClusterGroup
  * @param {object} opts An options object
- * @param {number} maxZoom The maximimum zoom level to calculate.
+ * @param {number} maxZoom The maximum zoom level to calculate.
  * @param {number} radius Size of clustering at zoom 0 in point gcs.
  */
 function C(opts) {

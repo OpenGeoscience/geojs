@@ -188,7 +188,7 @@ var camera = function (spec) {
 
   /**
    * Getter/setter for the render clipbounds.  Opposite bounds must have
-   * different values.  There are independant clipbounds for each projection
+   * different values.  There are independent clipbounds for each projection
    * (parallel and perspective); switching the projection will switch to the
    * clipbounds.  Individual values of the clipbounds can be set either via a
    * command like `camera.clipbounds = {near: 3, far: 1}` or

@@ -69,7 +69,7 @@ var webgl_polygonFeature = function (arg) {
    * Array.map is slower in Chrome that using a loop, so loops are used in
    * places that would be conceptually served by maps.
    *
-   * @param {boolean} onlyStyle if true, use the existing geoemtry and just
+   * @param {boolean} onlyStyle if true, use the existing geometry and just
    *    recalculate the style.
    */
   function createGLPolygons(onlyStyle) {

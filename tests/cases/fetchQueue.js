@@ -103,7 +103,7 @@ describe('geo.core.fetchQueue', function () {
       expect(q.length).toBe(2);
       expect(q.processing).toBe(3);
 
-      // but decresing it won't stop one
+      // but decreasing it won't stop one
       q.size = 1;
       expect(q.size).toBe(1);
       expect(q.length).toBe(2);

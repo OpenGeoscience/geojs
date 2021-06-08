@@ -10,7 +10,7 @@ var util = require('./util');
  * @typedef {geo.feature.spec} geo.pixelmapFeature.spec
  * @extends geo.feature.spec
  * @property {string|function|HTMLImageElement} [url] URL of a pixel map or an
- *   HTML Image element.  The rgb data is interpretted as an index of the form
+ *   HTML Image element.  The rgb data is interpreted as an index of the form
  *   0xbbggrr.  The alpha channel is ignored.
  * @property {geo.geoColor|function} [color] The color that should be used
  *   for each data element.  Data elements correspond to the indices in the
@@ -194,7 +194,7 @@ var pixelmapFeature = function (arg) {
   };
 
   /**
-   * Build.  Fetches the image if necesary.
+   * Build.  Fetches the image if necessary.
    *
    * @returns {this}
    */
@@ -302,7 +302,7 @@ var pixelmapFeature = function (arg) {
   /**
    * Given the loaded pixelmap image, create a canvas the size of the image.
    * Compute a color for each distinct index and recolor the canvas based on
-   * thise colors, then draw the resultant image as a quad.
+   * these colors, then draw the resultant image as a quad.
    *
    * @fires geo.event.pixelmap.prepared
    */
