@@ -1,0 +1,122 @@
+name: Build and test
+
+on:
+  push:
+  #  branches:
+  #    - master
+  pull_request:
+    branches:
+      - master
+  release:
+    types:
+      - created
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: 15.x
+    - uses: browser-actions/setup-firefox@latest
+    - run: sudo apt-get install --yes --no-install-recommends cpio optipng
+    - run: sudo apt-get remove --yes fonts-lato
+    - run: fc-list
+    - run: firefox --version
+    - run: google-chrome --version
+    - run: npm install
+    - run: npm run setup-website
+    - run: npm run ci-xvfb
+    - run: npm run ci-build-website
+
+    - name: Report coverage
+      run: |
+        pip3 install codecov
+        codecov
+
+    - name: On failure, create alternate baseline images in case the new behavior is correct
+      if: ${{ failure() }}
+      run: |
+        pip3 install girder_client
+        python3 tests/runners/baseline_images.py -cevb _build
+    - name: Upload test images on failure
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: images
+        path: |
+          _build/images
+          _build/Baseline*tgz
+    - name: Upload artifacts
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: |
+          dist/apidocs
+          dist/built
+    - name: Upload built website
+      if: ${{ success() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: website
+        path: |
+          website/public
+  deploy-website:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Import artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: website
+        path: website/public
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: website/public
+        force_orphan: true
+  deploy-releases:
+    if: ${{ startswith(github.ref, 'refs/tags/') }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Import artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: dist
+        path: dist
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        # name: "Version ${{ github.ref }}"
+        draft: false
+        prerelease: false
+        files: |
+          dist/built/geo.js
+          dist/built/geo.min.js
+          dist/built/geo.lean.js
+          dist/built/geo.lean.min.js
+  deploy-npm:
+    if: ${{ startswith(github.ref, 'refs/tags/') }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: 15.x
+    - name: Import artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: dist
+        path: dist
+    - uses: JS-DevTools/npm-publish@v1
+      with:
+        token: ${{ secrets.NPM_TOKEN }}
+        dry-run: true
