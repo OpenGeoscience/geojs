@@ -100,9 +100,9 @@ function m_getTileSubdomain(x, y, z, subdomains) {
  * Returns an OSM tile server formatting function from a standard format
  * string. Replaces `{s}`, `{z}`, `{x}`, and `{y}`.  These may be any case
  * and may be prefixed with `$` (e.g., `${X}` is the same as `{x}`).  The
- * subdomain can be specifed by a string of characters, listed as a range,
+ * subdomain can be specified by a string of characters, listed as a range,
  * or as a comma-separated list (e.g., `{s:abc}`, `{a-c}`, `{a,b,c}` are
- * all equivalent.  The comma-separated list can have subdimains that are of
+ * all equivalent.  The comma-separated list can have subdomains that are of
  * any length; the string and range both use one-character subdomains.
  *
  * @param {string} base The tile format string
@@ -188,7 +188,7 @@ var tileLayer = function (arg) {
     arg.subdomains = arg.subdomains.split('');
   }
   /* We used to call the url option baseUrl.  If a baseUrl is specified, use
-   * it instead of url, interpretting it as before. */
+   * it instead of url, interpreting it as before. */
   if (arg.baseUrl) {
     var url = arg.baseUrl;
     if (url && url.charAt(url.length - 1) !== '/') {

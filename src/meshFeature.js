@@ -15,7 +15,7 @@ var feature = require('./feature');
 
 /**
  * A mesh formed by a set of triangular or square elements or a
- * squarely-connected grid that is of rectangular extent.  The gird can be
+ * squarely-connected grid that is of rectangular extent.  The grid can be
  * regularly spaced or have arbitrary position coordinates for each node.  All
  * of these properties can be functions, which get passed `data`.
  *
@@ -92,7 +92,7 @@ var feature = require('./feature');
 
 /**
  * Create a new instance of class meshFeature.  This should be the parent of a
- * more useable feature class.
+ * more usable feature class.
  *
  * @class
  * @alias geo.meshFeature

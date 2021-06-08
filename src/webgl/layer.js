@@ -129,7 +129,7 @@ var webgl_layer = function () {
     if (!map._updateAutoshareRenderers) {
       /**
        * Update all webgl autoshareRenderer layers so that appropriate groups
-       * of layers share renderers.  Each group must (a) be continguous in
+       * of layers share renderers.  Each group must (a) be contiguous in
        * z-space (not separated by a non-autoshare layer or a non-webgl layer),
        * and (b) have the same opacity.  The lowest layer in each group will
        * contain the actual canvas and context.  This rerenders as needed.

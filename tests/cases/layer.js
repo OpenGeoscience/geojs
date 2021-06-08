@@ -77,7 +77,7 @@ describe('geo.layer', function () {
       map.pan({x: 0, y: 1});
       map.rotation(1);
       map.zoom(1);
-      expect(count).toBe(7);  // sie, rotation, zoom also trigger pan
+      expect(count).toBe(7);  // size, rotation, zoom also trigger pan
       map.removeChild(layer);
     });
     it('_init without events', function () {

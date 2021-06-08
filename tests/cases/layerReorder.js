@@ -120,12 +120,11 @@ describe('Test reordering layers', function () {
   }
 
   /**
-   * Make a test that runs a sequence of actions
-   * and validates that the zIndices are as expectd.
+   * Make a test that runs a sequence of actions and validates that the
+   * zIndices are as expected.
    *
-   * Also generates a test that asserts that the negative
-   * actions performed backwards results in the inverse
-   * operation.
+   * Also generates a test that asserts that the negative actions performed
+   * backwards results in the inverse operation.
    */
   function makeTests(actions, result) {
     return function () {

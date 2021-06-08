@@ -299,7 +299,7 @@ var colorLegendWidget = function (arg) {
   };
 
   /**
-   * Draw an individual continous type legend.
+   * Draw an individual continuous type legend.
    * @param {Element} svg svg element that the legend will be drawn
    * @param {number} width width of the svg element in pixel
    * @param {geo.gui.colorLegendWidget.category} category The continuous type legend category

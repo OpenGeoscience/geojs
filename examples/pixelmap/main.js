@@ -36,7 +36,7 @@ $(function () {
     url: pixelmapUrl,
     position: {ul: {x: -180, y: 71.471178}, lr: {x: -60, y: 13.759032}},
     color: function (d, idx) {
-      // Always set index 0 to transparent.  Other indicies are set based on
+      // Always set index 0 to transparent.  Other indices are set based on
       // the data value
       var color = {r: 0, g: 0, b: 0, a: 0};
       if (idx && d && d.value) {

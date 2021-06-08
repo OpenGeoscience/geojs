@@ -106,7 +106,7 @@ var canvas_heatmapFeature = function (arg) {
          *   from scipy.stats import norm
          *   for r in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
          *     opacity = norm.pdf(r, scale=0.3) / norm.pdf(0, scale=0.3)
-         * Usng a 10-interval approximation is accurate to within 0.5% of the
+         * Using a 10-interval approximation is accurate to within 0.5% of the
          * actual Gaussian magnitude.  Switching to a 20-interval approximation
          * would get within 0.1%, at which point there is more error from using
          * a Gaussian truncated at the radius than from the approximation.
@@ -432,7 +432,7 @@ var canvas_heatmapFeature = function (arg) {
       window.clearTimeout(m_heatMapPosition.timeout);
       m_heatMapPosition.timeout = undefined;
     }
-    /* This conditional can change if we compute the heatmap beyond the visable
+    /* This conditional can change if we compute the heatmap beyond the visible
      * viewport so that we don't have to update on pans as often.  If we are
      * close to where the heatmap was originally computed, don't bother
      * updating it. */

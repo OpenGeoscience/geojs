@@ -696,7 +696,7 @@ describe('geo.camera', function () {
     expect(c.valueOf()).toBe(c.transform);
   });
 
-  it('Camera string repesentation is its transform', function () {
+  it('Camera string representation is its transform', function () {
     var c = geo.camera();
     c.pan({x: 100, y: 5});
     c.zoom(5);

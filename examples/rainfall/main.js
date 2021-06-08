@@ -182,7 +182,7 @@ point = layer.createFeature('point', {
   style: {
     stroke: false,
     radius: function (d, i) {
-      // If this point doesn't have any data for the current year, dont' give
+      // If this point doesn't have any data for the current year, don't give
       // it a radius, either.  This prevents the tooltip from interacting with
       // it.
       return d === null || d === undefined ? 0 : 5;

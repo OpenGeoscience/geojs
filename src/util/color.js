@@ -7,13 +7,13 @@ var colorName = require('color-name');
  * A color value.  Although opacity can be specified, it is not always used.
  * When a string is specified, any of the following forms can be used:
  *   - CSS color name
- *   - `#rrggbb` The color specified in hexadecmial with each channel on a
+ *   - `#rrggbb` The color specified in hexadecimal with each channel on a
  *     scale between 0 and 255 (`ff`).  Case insensitive.
- *   - `#rrggbbaa` The color and opacity specified in hexadecmial with each
+ *   - `#rrggbbaa` The color and opacity specified in hexadecimal with each
  *     channel on a scale between 0 and 255 (`ff`).  Case insensitive.
- *   - `#rgb` The color specified in hexadecmial with each channel on a scale
+ *   - `#rgb` The color specified in hexadecimal with each channel on a scale
  *     between 0 and 15 (`f`).  Case insensitive.
- *   - `#rgba` The color and opacity specified in hexadecmial with each channel
+ *   - `#rgba` The color and opacity specified in hexadecimal with each channel
  *      on a scale between 0 and 15 (`f`).  Case insensitive.
  *   - `rgb(R, G, B)`, `rgb(R, G, B, A)`, `rgba(R, G, B)`, `rgba(R, G, B, A)`
  *     The color with the values of each color channel specified as numeric
@@ -27,7 +27,7 @@ var colorName = require('color-name');
  *     exponents.
  *   - `hsl(H, S, L)`, `hsl(H, S, L, A)`, `hsla(H, S, L)`, `hsla(H, S, L, A)`
  *     Hue, saturation, and lightness with optional alpha (opacity).  Hue is a
- *     number between 0 and 360 and is interpretted as degrees unless an angle
+ *     number between 0 and 360 and is interpreted as degrees unless an angle
  *     unit is specified.  CSS units of `deg`, `grad`, `rad`, and `turn` are
  *     supported.  Saturation and lightness are percentages between 0 and 100
  *     and *must* be followed by a percent `%` symbol.  The alpha (opacity)
@@ -75,7 +75,7 @@ var m_memoizeConvertColor = {maxCount: 1000, count: 0, memo: {}};
  * be returned quickly.  If the memoization table gets over a certain size,
  * just reset it.
  *
- * @param {geo.geoColor} origColor The origial color specification.
+ * @param {geo.geoColor} origColor The original color specification.
  * @param {geo.geoColorObject} resultColor The result of the conversion.
  * @returns {geo.geoColorObject} The `resultColor`.
  */
@@ -173,7 +173,7 @@ var colorUtils = {
    *
    * @param {geo.geoColor} [color] Any valid color input.  If an invalid value
    *    or no value is supplied, the `defaultColor` is used.
-   * @param {number} [opacity=1] A value from [0-1].  This is multipled with
+   * @param {number} [opacity=1] A value from [0-1].  This is multiplied with
    *    the opacity from `color`.
    * @param {geo.geoColorObject} [defaultColor={r: 0, g: 0, b: 0}] The color
    *    to use if an invalid color is supplied.

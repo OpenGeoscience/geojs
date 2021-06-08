@@ -322,7 +322,7 @@ var sliderWidget = function (arg) {
   };
 
   /**
-   * Update the slider widget state in reponse to map changes.  I.e. zoom
+   * Update the slider widget state in response to map changes.  I.e., zoom
    * range changes.
    *
    * @param {object} [obj] An object that can specify a zoom value.

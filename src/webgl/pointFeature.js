@@ -78,7 +78,7 @@ var webgl_pointFeature = function (arg) {
   /**
    * Create and style the data needed to render the points.
    *
-   * @param {boolean} onlyStyle if true, use the existing geoemtry and just
+   * @param {boolean} onlyStyle if true, use the existing geometry and just
    *    recalculate the style.
    */
   function createGLPoints(onlyStyle) {
@@ -160,7 +160,7 @@ var webgl_pointFeature = function (arg) {
           }
         }
       }
-      /* We can ignore the indicies (they will all be zero) */
+      /* We can ignore the indices (they will all be zero) */
       radiusVal = radFunc(item, i);
       strokeVal = strokeFunc(item, i) ? 1.0 : 0.0;
       strokeWidthVal = strokeWidthFunc(item, i);

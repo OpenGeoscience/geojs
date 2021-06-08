@@ -451,7 +451,7 @@ function leafletLinesTest(opts) {
   }
 
   // There is no direct support for miterlimit, but if the map is using SVG,
-  // we can manully set it.
+  // we can manually set it.
   $('svg path', node).attr('stroke-miterlimit', parseFloat(opts.miterLimit || 10));
 
   // return references to the various objects
@@ -495,7 +495,7 @@ function mapboxglLinesTest(opts) {
   var map = new mapboxgl.Map({
     container: opts.node[0],
     center: [opts.x || MapStart.x, opts.y || MapStart.y],
-    // mapboxgl uses a zoom levle that is 1 off from other libraries
+    // mapboxgl uses a zoom level that is 1 off from other libraries
     zoom: (opts.zoom || MapStart.zoom) - 1 - (opts.scale || 0),
     style: {version: 8, sources: {}, layers: []},
     bearingSnap: 0,

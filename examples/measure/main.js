@@ -68,7 +68,7 @@ if (query.lastannotation) {
 if (query.hide) {
   $('#controls').addClass('reduced');
 }
-// You can set the intiial annotations via a query parameter.  If the query
+// You can set the initial annotations via a query parameter.  If the query
 // parameter 'save=true' is specified, the query will be updated with the
 // geojson.  This can become too long for some browsers.
 var initialGeoJSON = query.geojson;

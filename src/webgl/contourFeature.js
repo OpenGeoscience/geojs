@@ -62,7 +62,7 @@ var webgl_contourFeature = function (arg) {
   }
 
   /* Create the contours.  This calls the base class to generate the geometry,
-   * color map, and other parameters.  The generated geoemtry is then loaded
+   * color map, and other parameters.  The generated geometry is then loaded
    * into the various gl uniforms and buffers.
    */
   function createGLContours() {

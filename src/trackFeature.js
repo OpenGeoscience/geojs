@@ -595,7 +595,7 @@ var trackFeature = function (arg) {
    *
    * @param {object} [val] An object with any of `startTime`, `endTime`, and
    *    `duration`.  A value of `undefined` won't change that field.  A value
-   *    of `null` uses the default.  If `val` is `undefined`, the existsing
+   *    of `null` uses the default.  If `val` is `undefined`, the existing
    *    settings are returned.
    * @returns {object|this} Either the instance or the current settings.  If
    *    the current settings, `start` and `end` are included with the
@@ -722,10 +722,10 @@ var trackFeature = function (arg) {
    * @returns {object} An object with `index`: a list of track indices, `found`:
    *    a list of tracks that contain the specified coordinate, `extra`: an
    *    object with keys that are track indices and values that are the first
-   *    segement index for which the track was matched, and `where`: an
-   *    object with keys that are track indices and values that are `past`,
-   *    `future`, or `marker` if the point was found in that part of the track,
-   *    or unset if the point was found in the current part of the track.
+   *    segment index for which the track was matched, and `where`: an object
+   *    with keys that are track indices and values that are `past`, `future`,
+   *    or `marker` if the point was found in that part of the track, or unset
+   *    if the point was found in the current part of the track.
    */
   this.pointSearch = function (p) {
     let result = m_lineFeatures.current.pointSearch(p),

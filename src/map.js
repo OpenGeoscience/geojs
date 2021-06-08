@@ -228,7 +228,7 @@ var map = function (arg) {
   /**
    * Get/set the autoResize flag.
    *
-   * @param {boolean} [autoResize] Truthy to automaticaly resize the map when
+   * @param {boolean} [autoResize] Truthy to automatically resize the map when
    *    the size of the browser window changes.
    * @returns {boolean|this} The current state of autoResize or the current map.
    */
@@ -1893,7 +1893,7 @@ var map = function (arg) {
    */
   this.scheduleAnimationFrame = function (callback, action) {
     if (!m_animationQueue.length) {
-      /* By refering to requestAnimationFrame as a property of window, versus
+      /* By referring to requestAnimationFrame as a property of window, versus
        * explicitly using window.requestAnimationFrame, we prevent the
        * stripping of 'window' off of the reference and allow our tests to
        * override this if needed. */
@@ -1984,7 +1984,7 @@ var map = function (arg) {
   }
 
   /**
-   * Sevice the callback during an animation frame.  This uses splice to modify
+   * Service the callback during an animation frame.  This uses splice to modify
    * the `animationQueue` to allow multiple map instances to share the queue.
    * @private
    */

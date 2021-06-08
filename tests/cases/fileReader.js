@@ -56,7 +56,7 @@ describe('geo.fileReader', function () {
       map = createMap();
       layer = map.createLayer('feature');
       reader = geo.fileReader({'layer': layer});
-      // The PhantomJS browser does't support `new File`, so use `new Blob`
+      // The PhantomJS browser doesn't support `new File`, so use `new Blob`
       file = new Blob(['This is ', 'a test'], {type: 'text/plain'});
       file.lastModifiedDate = new Date();
       file.name = 'test.txt';

@@ -120,7 +120,7 @@ var webgl_lineFeature = function (arg) {
   /**
    * Create and style the data needed to render the lines.
    *
-   * @param {boolean} onlyStyle if true, use the existing geoemtry and just
+   * @param {boolean} onlyStyle if true, use the existing geometry and just
    *    recalculate the style.
    */
   function createGLLines(onlyStyle) {

@@ -205,7 +205,7 @@ var lineFeature = function (arg) {
    * Returns an array of datum indices that contain the given point.  This is a
    * slow implementation with runtime order of the number of vertices.  A point
    * is considered on a line segment if it is close to the line or either end
-   * point.  Closeness is based on the maximum width of the line segement, and
+   * point.  Closeness is based on the maximum width of the line segment, and
    * is `ceil(maxwidth / 2) + 2` pixels.  This means that corner extensions
    * due to mitering may be outside of the selection area and that variable-
    * width lines will have a greater selection region than their visual size at
@@ -217,7 +217,7 @@ var lineFeature = function (arg) {
    * @returns {object} An object with `index`: a list of line indices, `found`:
    *    a list of lines that contain the specified coordinate, and `extra`: an
    *    object with keys that are line indices and values that are the first
-   *    segement index for which the line was matched.
+   *    segment index for which the line was matched.
    */
   this.pointSearch = function (p, gcs) {
     var data = m_this.data(), indices = [], found = [], extra = {};

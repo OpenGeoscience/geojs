@@ -369,7 +369,7 @@ var annotationLayer = function (arg) {
    * @param {string|geo.transform|null} [gcs2] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, `'display'` if the coordinates are
    *    already in display coordinates, or any other transform.
-   * @returns {number} the Euclidian distance between the two coordinates.
+   * @returns {number} the Euclidean distance between the two coordinates.
    */
   this.displayDistance = function (coord1, gcs1, coord2, gcs2) {
     var map = m_this.map();
@@ -391,7 +391,7 @@ var annotationLayer = function (arg) {
   /**
    * Add an annotation to the layer.  The annotation could be in any state.
    *
-   * @param {geo.annotation} annotation Te annotation to add.
+   * @param {geo.annotation} annotation The annotation to add.
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
    * @returns {this} The current layer.
@@ -425,7 +425,7 @@ var annotationLayer = function (arg) {
   /**
    * Remove an annotation from the layer.
    *
-   * @param {geo.annoation} annotation The annotation to remove.
+   * @param {geo.annotation} annotation The annotation to remove.
    * @param {boolean} update If `false`, don't update the layer after removing
    *    the annotation.
    * @returns {boolean} `true` if an annotation was removed.
@@ -480,7 +480,7 @@ var annotationLayer = function (arg) {
   /**
    * Get the list of annotations on the layer.
    *
-   * @returns {geo.annoation[]} An array of annotations.
+   * @returns {geo.annotation[]} An array of annotations.
    */
   this.annotations = function () {
     return m_annotations.slice();
@@ -605,7 +605,8 @@ var annotationLayer = function (arg) {
    * @param {boolean|string} [clear] If `true`, when adding annotations, first
    *    remove all existing objects.  If `'update'`, update existing
    *    annotations and remove annotations that no longer exist.  If falsy,
-   *    update existing annotations and leave annotations that have not chaged.
+   *    update existing annotations and leave annotations that have not
+   *    changed.
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
    * @param {boolean} [includeCrs] If truthy, include the coordinate system in
@@ -917,7 +918,7 @@ var annotationLayer = function (arg) {
     if (m_this.timestamp() > m_buildTime.timestamp()) {
       var labels = m_this.options('showLabels') ? [] : null,
           editable = m_this.options('clickToEdit') || m_this.mode() === m_this.modes.edit;
-      /* Interally, we have a set of feature levels (to provide z-index
+      /* Internally, we have a set of feature levels (to provide z-index
        * support), each of which can have data from multiple annotations.  We
        * clear the data on each of these features, then build it up from each
        * annotation.  Eventually, it may be necessary to optimize this and
