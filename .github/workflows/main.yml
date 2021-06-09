@@ -103,7 +103,7 @@ jobs:
           dist/built/geo.lean.js
           dist/built/geo.lean.min.js
   deploy-npm:
-    if: ${{ startswith(github.ref, 'refs/tags/') }}
+    # if: ${{ startswith(github.ref, 'refs/tags/') }}
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -111,12 +111,14 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         node-version: 15.x
+    - run: npm ci
     - name: Import artifacts
       uses: actions/download-artifact@v2
       with:
         name: dist
         path: dist
-    - uses: JS-DevTools/npm-publish@v1
-      with:
-        token: ${{ secrets.NPM_TOKEN }}
-        dry-run: true
+    - name: Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: npx semantic-release

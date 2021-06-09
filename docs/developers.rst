@@ -104,12 +104,8 @@ screen output is used, the browser must be running on the same machine as the
 Release Process
 ---------------
 
-To make a new GeoJS release:
+GeoJS is now using semantic-release.  Prefix the first line of commit messages with an appropriate prefix, such as ``fix``, ``perf``, ``feat``, ``docs``, ``ci``, ``refactor``, ``style``, ``test``, ``build``, or ``BREAKING CHANGE``.  See `<https://github.com/semantic-release/semantic-release/blob/master/CONTRIBUTING.md#type>`_ for details.
 
-- Update the version number in package.json.
-- Update the CHANGELOG.md file with changes since the last release
-- Commit to GitHub and merge to master
-- Tag the commit on GitHub with a tag of the form vX.Y.Z (e.g., v0.17.0).
-- After the release appears on GitHub, update the release notes with the changes since the last release.
+When the PR is merged to master, a new release will be made if appropriate.
 
-Tagging a commit on the master branch will trigger a build on CI, at the end of which the new version will be published to npm and the build artifacts will be pushed to the tagged version on GitHub.
+After the release appears on GitHub, update the ``CHANGELOG.md`` file to reflect these changes.
