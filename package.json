@@ -30,6 +30,7 @@
     "vtk.js": "^14.3.2"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^5.0.1",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
     "babel-plugin-istanbul": "^4.1.6",
@@ -110,14 +111,37 @@
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
       "@semantic-release/npm",
-      ["@semantic-release/github", {
-        "assets": [
-          {"path": "dist/built/geo.js", "label": "Full JS distribution"},
-          {"path": "dist/built/geo.min.js", "label": "Minified JS distribution"},
-          {"path": "dist/built/geo.lean.js", "label": "Lean JS distribution"},
-          {"path": "dist/built/geo.lean.min.js", "label": "Lean minified JS distribution"}
-        ]
-      }]
+      [
+        "@semantic-release/changelog",
+        {
+          "changelogFile": "CHANGELOG.md",
+          "changelogTitle": "# GeoJS Change Log"
+
+        }
+      ],
+      [
+        "@semantic-release/github",
+        {
+          "assets": [
+            {
+              "path": "dist/built/geo.js",
+              "label": "Full JS distribution (geo.js)"
+            },
+            {
+              "path": "dist/built/geo.min.js",
+              "label": "Minified JS distribution (geo.min.js)"
+            },
+            {
+              "path": "dist/built/geo.lean.js",
+              "label": "Lean JS distribution (geo.lean.js)"
+            },
+            {
+              "path": "dist/built/geo.lean.min.js",
+              "label": "Lean minified JS distribution (geo.lean.min.js)"
+            }
+          ]
+        }
+      ]
     ]
   },
   "scripts": {

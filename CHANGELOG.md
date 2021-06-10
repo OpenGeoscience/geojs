@@ -1,6 +1,6 @@
-# Change Log
+# GeoJS Change Log
 
-## Unreleased
+## Version 1.0.2
 
 ### Improvements
 - The primary map div now has overflow hidden set on it (#1088)
