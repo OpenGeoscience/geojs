@@ -105,6 +105,21 @@
     "webpack-merge": "^4.2.2",
     "webpack-serve": "^1.0.2"
   },
+  "release": {
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      ["@semantic-release/github", {
+        "assets": [
+          {"path": "dist/built/geo.js", "label": "Full JS distribution"},
+          {"path": "dist/built/geo.min.js", "label": "Minified JS distribution"},
+          {"path": "dist/built/geo.lean.js", "label": "Lean JS distribution"},
+          {"path": "dist/built/geo.lean.min.js", "label": "Lean minified JS distribution"}
+        ]
+      }]
+    ]
+  },
   "scripts": {
     "build": "webpack --config webpack.config.js && webpack --config webpack-lean.config.js",
     "build-examples": "node examples/build.js && webpack --config webpack-examples.config.js",
