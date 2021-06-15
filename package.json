@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/git": "^9.0.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
     "babel-plugin-istanbul": "^4.1.6",
@@ -116,7 +117,6 @@
         {
           "changelogFile": "CHANGELOG.md",
           "changelogTitle": "# GeoJS Change Log"
-
         }
       ],
       [
@@ -139,6 +139,14 @@
               "path": "dist/built/geo.lean.min.js",
               "label": "Lean minified JS distribution (geo.lean.min.js)"
             }
+          ]
+        }
+      ],
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "CHANGELOG.md"
           ]
         }
       ]
