@@ -79,31 +79,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: website/public
         force_orphan: true
-  deploy-releases:
-    if: ${{ startswith(github.ref, 'refs/tags/') }}
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Import artifacts
-      uses: actions/download-artifact@v2
-      with:
-        name: dist
-        path: dist
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        # name: "Version ${{ github.ref }}"
-        draft: false
-        prerelease: false
-        files: |
-          dist/built/geo.js
-          dist/built/geo.min.js
-          dist/built/geo.lean.js
-          dist/built/geo.lean.min.js
   deploy-npm:
-    # if: ${{ startswith(github.ref, 'refs/tags/') }}
     needs: build
     runs-on: ubuntu-latest
     steps:
