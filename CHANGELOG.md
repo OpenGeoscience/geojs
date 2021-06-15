@@ -1,5 +1,10 @@
 # GeoJS Change Log
 
+## Version 1.0.3
+
+### Bug Fixes
+- Have semantic release publish artifacts to the GitHub release (#1094)
+
 ## Version 1.0.2
 
 ### Improvements
