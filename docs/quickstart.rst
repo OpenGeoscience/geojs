@@ -67,7 +67,7 @@ Using the library
 -----------------
 
 The following html gives an example of including all of the necessary files
-and creating a basic full map using the `osmLayer` class.
+and creating a basic full map using the ``osmLayer`` class.
 
 .. code-block:: html
 
