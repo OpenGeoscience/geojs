@@ -197,7 +197,7 @@ var fetchQueue = function (options) {
   /**
    * Start a new batch or clear using batches.
    *
-   * @param {boolean} start Truthy too start a new batch, falsy to turn off
+   * @param {boolean} start Truthy to start a new batch, falsy to turn off
    *   using batches.  `undefined` to return the current state of batches.
    * @returns {number|boolean|this} `false` if batches are turned off, the
    *   batch number if turned on, or `this` if setting the batch.
