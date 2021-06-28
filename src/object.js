@@ -122,6 +122,28 @@ var object = function () {
   };
 
   /**
+   * Bind an event handler to this object that will fire once and then
+   * deregister itself.
+   *
+   * @param {string} event An event from {@link geo.event} or a user-defined
+   *   value.
+   * @param {function} handler A function that is called when `event` is
+   *   triggered.  The function is passed a {@link geo.event} object.
+   * @returns {function} The actual bound handler.  This is a wrapper around
+   *   the handler that was passed to the function.
+   */
+  this.geoOnce = function (event, handler) {
+    let wrapper;
+
+    wrapper = function (args) {
+      m_this.geoOff(event, wrapper);
+      handler.call(m_this, args);
+    };
+    m_this.geoOn(event, wrapper);
+    return wrapper;
+  };
+
+  /**
    * Report if an event handler is bound to this object.
    *
    * @param {string|string[]} event An event or list of events to check.

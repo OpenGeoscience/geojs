@@ -43,6 +43,35 @@ describe('geo.object', function () {
       expect(foo.ncalls).toBe(2);
     });
 
+    it('Make a single object with a once event handler', function () {
+      var obj = new geo.object(),
+          evtData = {},
+          foo = new CallCounter(evtData);
+
+      expect(obj.geoIsOn('testevent')).toBe(false);
+      let handler = obj.geoOnce('testevent', foo.call);
+      expect(obj.geoIsOn('testevent')).toBe(true);
+      expect(obj.geoIsOn('testevent', foo.call)).toBe(false);
+      expect(obj.geoIsOn('testevent', handler)).toBe(true);
+      obj.geoTrigger('anotherevent', evtData);
+      expect(foo.ncalls).toBe(0);
+      expect(obj.geoIsOn('testevent', handler)).toBe(true);
+
+      obj.geoTrigger('testevent', evtData);
+      expect(foo.ncalls).toBe(1);
+      expect(obj.geoIsOn('testevent', handler)).toBe(false);
+
+      obj.geoTrigger('testevent', evtData);
+      expect(foo.ncalls).toBe(1);
+
+      obj.geoTrigger('test', evtData);
+      expect(foo.ncalls).toBe(1);
+
+      expect(obj.geoIsOn('testevent')).toBe(false);
+      obj.geoTrigger('testevent', evtData);
+      expect(foo.ncalls).toBe(1);
+    });
+
     it('Make a single object with several handlers on one event', function () {
       var obj = new geo.object(),
           evtData = {},
