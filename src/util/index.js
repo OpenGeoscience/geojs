@@ -7,6 +7,7 @@ module.exports = Object.assign(
   /* These modules are added under separate names */
   {
     DistanceGrid: require('./distanceGrid'),
-    ClusterGroup: require('./clustering')
+    ClusterGroup: require('./clustering'),
+    mesh: require('./mesh')
   }
 );

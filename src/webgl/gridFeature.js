@@ -1,25 +1,25 @@
 var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
-var contourFeature = require('../contourFeature');
+var gridFeature = require('../gridFeature');
 
 /**
- * Create a new instance of contourFeature.
+ * Create a new instance of gridFeature.
  *
  * @class
- * @alias geo.webgl.contourFeature
- * @extends geo.contourFeature
+ * @alias geo.webgl.gridFeature
+ * @extends geo.gridFeature
  * @extends geo.webgl.meshColored
- * @param {geo.contourFeature.spec} arg
- * @returns {geo.webgl.contourFeature}
+ * @param {geo.gridFeature.spec} arg
+ * @returns {geo.webgl.gridFeature}
  */
-var webgl_contourFeature = function (arg) {
+var webgl_gridFeature = function (arg) {
   'use strict';
 
-  if (!(this instanceof webgl_contourFeature)) {
-    return new webgl_contourFeature(arg);
+  if (!(this instanceof webgl_gridFeature)) {
+    return new webgl_gridFeature(arg);
   }
   arg = arg || {};
-  contourFeature.call(this, arg);
+  gridFeature.call(this, arg);
 
   var meshColored = require('./meshColored');
   meshColored.call(this, arg);
@@ -34,7 +34,7 @@ var webgl_contourFeature = function (arg) {
       m_this.renderer().contextRenderer().removeActor(m_this.actors()[0]);
     }
 
-    m_this.createGLMeshColored(m_this._createContours());
+    m_this.createGLMeshColored(m_this._createGrids());
 
     m_this.renderer().contextRenderer().addActor(m_this.actors()[0]);
     m_this.buildTime().modified();
@@ -44,9 +44,9 @@ var webgl_contourFeature = function (arg) {
   return this;
 };
 
-inherit(webgl_contourFeature, contourFeature);
+inherit(webgl_gridFeature, gridFeature);
 
 // Now register it
-registerFeature('webgl', 'contour', webgl_contourFeature);
+registerFeature('webgl', 'grid', webgl_gridFeature);
 
-module.exports = webgl_contourFeature;
+module.exports = webgl_gridFeature;

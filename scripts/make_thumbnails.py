@@ -55,7 +55,7 @@ ImageCommandIgnoreNavbar = (
 
 
 def process_item(path, opts):
-    output = (open('/tmp/thumbnail.out', 'ab')
+    output = (open('/tmp/thumbnail.out', 'a')
               if opts.get('verbose', 0) >= 1 else open(os.devnull, 'w'))
     data = json.load(open(path))
     if data.get('disabled') and not opts.get('all'):
