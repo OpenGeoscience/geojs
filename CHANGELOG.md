@@ -1,5 +1,10 @@
 # GeoJS Change Log
 
+## Version 1.1.0
+
+### Features
+- Added a geoOnce handler for events (#1097)
+
 ## Version 1.0.3
 
 ### Bug Fixes
