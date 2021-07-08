@@ -17,10 +17,10 @@ var $ = require('jquery');
 
 /**
  * This class defines the raw interface for a "tile" on a map.  A tile is
- * defined as a rectangular section of a map.  The base implementation
- * is independent of the actual content of the tile, but assumes that
- * the content is loaded asynchronously via a url.  The tile object
- * has a promise-like interface.
+ * defined as a quadrilateral section of a map.  The base implementation is
+ * independent of the actual content of the tile, but assumes that the content
+ * is loaded asynchronously via a url.  The tile object has a promise-like
+ * interface.
  * @example
  * tile.then(function (data) {...}).catch(function (data) {...});
  *
@@ -48,6 +48,8 @@ var tile = function (spec) {
    * @property {object} index The tile index.
    * @property {number} index.x The tile x index.
    * @property {number} index.y The tile y index.
+   * @property {number} [index.level] The tile level index.
+   * @property {number} [index.reference] The tile reference index.
    * @name geo.tile#index
    */
   Object.defineProperty(this, 'index', {
@@ -143,13 +145,12 @@ var tile = function (spec) {
 
   /**
    * Return a unique string representation of the given tile useble as a hash
-   * key.  Possibly extend later to include url information to make caches
-   * aware of the tile source.
+   * key.
    *
    * @returns {string}
    */
   this.toString = function () {
-    return [this._index.level || 0, this._index.y, this._index.x].join('_');
+    return [this._index.level || 0, this._index.y, this._index.x, this._index.reference || 0].join('_');
   };
 
   /**

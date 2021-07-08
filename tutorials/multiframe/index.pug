@@ -124,6 +124,9 @@ block mainTutorial
       layerB = map.createLayer('osm', params.layer);
       // create a foreground layer for the current frame
       params.layer.url = `${baseUrl}0`;
+      // have the layers share a fetch queue.  Since both tile layers are from
+      // the same server, this prevents requests from getting backlogged.
+      params.layer.queue = layerB.queue;
       layerA = map.createLayer('osm', params.layer);
       layerA._frame = 0;
       // adjust the frame slider and listen to changes
