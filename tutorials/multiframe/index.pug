@@ -116,7 +116,9 @@ block mainTutorial
       // don't auto share the renderer.  We don't want a blink when we swap
       // which layer is on top.
       params.layer.autoshareRenderer = false;
-      // create a background layer for loading new frames
+      // create a background layer for loading new frames; start it with white
+      // tiles
+      params.layer.url = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVQI12P4DwABAQEAG7buVgAAAABJRU5ErkJggg==';
       layerB = map.createLayer('osm', params.layer);
       // create a foreground layer for the current frame
       params.layer.url = `${baseUrl}0`;
@@ -134,11 +136,6 @@ block mainTutorial
       // in the next tutorial block
       return map;
     });
-  +codeblock_test('map has two tile layers', [
-      'map.layers().length === 2',
-      'map.layers()[0] instanceof geo.osmLayer',
-      'map.layers()[1] instanceof geo.osmLayer'
-      ])
 
   :markdown-it
     As a contrasting example, if only one layer is used the image will blink
@@ -183,7 +180,3 @@ block mainTutorial
       framectl.setAttribute('title', `1 of ${tileinfo.frames.length}`);
       return map;
     });
-  +codeblock_test('map has one tile layer', [
-      'map.layers().length === 1',
-      'map.layers()[0] instanceof geo.osmLayer'
-      ])
