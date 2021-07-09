@@ -71,11 +71,13 @@ block mainTutorial
       }
       updating = true;
       // wait until all current tiles are loaded before loading more
-      map.onIdle(() => {
+      layerA.onIdle(() => {
         // load the new frame in the background layer
-        layerB._frame = frame;
-        layerB.url(`${baseUrl}${frame}`);
-        map.onIdle(() => {
+        if (frame !== layerB._frame) {
+          layerB._frame = frame;
+          layerB.url(`${baseUrl}${frame}`);
+        }
+        layerB.onIdle(() => {
           // once everything is loaded, check if we still need to swap layers
           updating = false;
           // the top layer is what we want so we don't have to do anything.
