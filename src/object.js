@@ -1,6 +1,8 @@
 var inherit = require('./inherit');
 var timestamp = require('./timestamp');
 
+var lastInternalId = 0;
+
 /**
  * Create a new instance of class object.
  *
@@ -18,6 +20,7 @@ var object = function () {
   var util = require('./util');
 
   var m_this = this,
+      m_internalId = ++lastInternalId,
       m_eventHandlers = {},
       m_idleHandlers = [],
       m_promiseCount = 0;
@@ -77,7 +80,10 @@ var object = function () {
   this.addPromise = function (promise) {
     // called on any resolution of the promise
     function onDone() {
-      m_promiseCount -= 1;
+      if (promise._geojsTracked && promise._geojsTracked[m_internalId]) {
+        m_promiseCount -= 1;
+        delete promise._geojsTracked[m_internalId];
+      }
       if (!m_promiseCount) {
         m_idleHandlers.splice(0, m_idleHandlers.length)
           .forEach(function (handler) {
@@ -85,11 +91,38 @@ var object = function () {
           });
       }
     }
-    m_promiseCount += 1;
+    if (!promise._geojsTracked) {
+      promise._geojsTracked = {};
+    }
+    if (!promise._geojsTracked[m_internalId]) {
+      promise._geojsTracked[m_internalId] = true;
+      m_promiseCount += 1;
+    }
     if (promise.always) {
       promise.always(onDone);
     } else {
       promise.then(onDone, onDone);
+    }
+    return m_this;
+  };
+
+  /**
+   * Mark a promise as no longer required to resolve before the idle state is
+   * reached.
+   *
+   * @param {Promise} promise A promise object.
+   * @returns {this}
+   */
+  this.removePromise = function (promise) {
+    if (promise._geojsTracked && promise._geojsTracked[m_internalId]) {
+      m_promiseCount -= 1;
+      delete promise._geojsTracked[m_internalId];
+      if (!m_promiseCount) {
+        m_idleHandlers.splice(0, m_idleHandlers.length)
+          .forEach(function (handler) {
+            handler();
+          });
+      }
     }
     return m_this;
   };
@@ -217,6 +250,8 @@ var object = function () {
       m_eventHandlers = {};
       m_idleHandlers = [];
       m_promiseCount = 0;
+      // assign a new id so that adding and removing promises behave properly
+      m_internalId = ++lastInternalId;
     }
     if (Array.isArray(event)) {
       event.forEach(function (e) {

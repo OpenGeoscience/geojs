@@ -311,5 +311,32 @@ describe('geo.sceneObject', function () {
       }, 50);
 
     });
+    it('removePromise', function () {
+      var defer = $.Deferred(),
+          handlerRoot = new CallCounter(null),
+          handler1 = new CallCounter(null),
+          handler2 = new CallCounter(null),
+          handler3 = new CallCounter(null);
+
+      function checkCallCount(countr, count1, count2, count3) {
+        expect(handlerRoot.ncalls).toBe(countr);
+        expect(handler1.ncalls).toBe(count1);
+        expect(handler2.ncalls).toBe(count2);
+        expect(handler3.ncalls).toBe(count3);
+      }
+
+      child3.addPromise(defer);
+      root.onIdle(handlerRoot.call);
+      child1.onIdle(handler1.call);
+      child2.onIdle(handler2.call);
+      child3.onIdle(handler3.call);
+
+      checkCallCount(0, 1, 0, 0);
+
+      child3.removePromise(defer);
+      checkCallCount(1, 1, 1, 1);
+
+      defer.resolve();
+    });
   });
 });
