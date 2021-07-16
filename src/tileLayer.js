@@ -291,6 +291,11 @@ var tileLayer = function (arg) {
   Object.defineProperty(this, 'queue', {
     get: function () { return m_this._queue; },
     set: function (queue) {
+      /* The queue's needed function determines if a tile is still needed. A
+       * tile in the queue is needed if it is needed by at least one layer that
+       * is using it.  _tileLayers tracks the layers that share the queue to
+       * allow walking through the layers and check if any layer needs a tile.
+       * When the queue is set, maintain the list of joined tile layers. */
       if (m_this._queue !== queue) {
         if (this._queue && this._queue._tileLayers && this._queue._tileLayers.indexOf(m_this) >= 0) {
           this._queue._tileLayers.splice(this._queue._tileLayers.indexOf(m_this), 1);
