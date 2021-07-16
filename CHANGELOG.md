@@ -1,5 +1,13 @@
 # GeoJS Change Log
 
+## Version 1.2.0
+
+### Features
+
+- Allow sharing queues between tile layers (#1100)
+- Allow removing promises from the idle monitor (#1101)
+- Improve when tile layers are idle (#1101)
+
 ## Version 1.1.0
 
 ### Features
