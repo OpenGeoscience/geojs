@@ -1,0 +1,177 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>GeoJS - Choropleth plot</title>
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+
+
+    <!-- Custom Fonts -->
+    
+<link rel="stylesheet" href="../../vendor/font-awesome/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+    <!-- Theme CSS -->
+    
+<link rel="stylesheet" href="../../css/agency.css">
+
+    
+<link rel="stylesheet" href="../../css/main.css">
+
+    
+<link rel="stylesheet" href="../../css/highlight.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js" integrity="sha384-0s5Pv64cNZJieYFkXYOTId2HMA2Lfb6q2nAcx2n0RTLUnCAoTTsS0nKEO27XyKcY" crossorigin="anonymous"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js" integrity="sha384-ZoaMbDF+4LeFxg6WdScQ9nnR1QC2MIRxA1O9KWEXQwns1G8UNyIEZIQidzb0T1fo" crossorigin="anonymous"></script>
+    <![endif]-->
+    
+    <!-- jQuery -->
+    
+<script src="../../vendor/jquery/jquery.min.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    
+<script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+    
+    <link rel="apple-touch-icon" sizes="57x57" href="../../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="../../favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body id="page-top" class="index">
+    <!-- Navigation -->
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top affix">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span><i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="../../index.html"><img class="navbar-logo" src="../../images/logo_transparent.png" /></a>
+            </div> 
+            
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="">
+                        <a href="../../">Welcome</a>
+                    </li>
+                    <li class="">
+                        <a href="../../tutorials/">Tutorials</a>
+                    </li>
+                    <li class=" active ">
+                        <a href="../">Examples</a>
+                    </li>
+                    <li>
+                        <a href="../../apidocs/">API Docs</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/OpenGeoscience/geojs">GitHub</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <div class="content-wrapper">
+        <!-- This will put script and link in the body, which has certain drawbacks, but it's relatively minor for the current use -->
+<script type="text/javascript" src="../../js/example.js"></script>
+<link rel="stylesheet" href="../../css/example.css">
+<script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
+<div class="page example">
+    
+    <div id="map"></div>
+    <div></div>
+    <div class="modal fade screenshot-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Screenshot</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="screenshot-result text-right">
+                        <img />
+                        <a download="screenshot.png">Download</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row source-screenshot">
+            <div class="col-md-4 col-md-offset-8 col-sm-6 col-sm-offset-6 col-xs-9 col-xs-offset-3">
+                <div class="row">
+                    <div class="col-xs-6">
+                        <a class="source" target="gj-docco-Choropleth plot" href="docs/main.html">Source code</a>
+                    </div>
+                    <div class="col-xs-6">
+                        <a class="screenshot" href="#">Take screenshot</a>
+                        <div class="screenshot-loading">...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row about">
+            <div class="col-md-12">
+                <p>This example shows how to add choropleth features to a map.  Choropleths color each region in a set of regions based on a scalar value for each region.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script type="text/javascript" src="main.js"></script>
+
+
+    </div>
+    
+    <!-- Theme JavaScript -->
+    
+<script src="../../js/agency.js"></script>
+
+
+</body>
+
+</html>

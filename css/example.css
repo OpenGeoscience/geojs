@@ -1,0 +1,36 @@
+@media (min-width: 768px) {
+  html, body {
+    height: 100%;
+    width: 100%; }
+  .content-wrapper {
+    height: 100%;
+    padding-top: 50px; }
+  .page.example {
+    height: 100%; }
+    .page.example #map {
+      width: 100%;
+      height: 87%;
+      overflow: hidden; }
+    .page.example .about {
+      padding-top: 10px; } }
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding-top: 50px; }
+  .page.example #map {
+    height: 70vh; }
+  .page.example .about {
+    padding: 25px 0 15px 0; } }
+
+.page.example .source-screenshot {
+  margin-top: 2px;
+  font-size: 13px;
+  text-align: right; }
+  .page.example .source-screenshot .source {
+    margin-right: 30px; }
+  .page.example .source-screenshot .screenshot-loading {
+    display: none;
+    text-align: center; }
+
+.page.example .screenshot-result img {
+  width: 100%; }

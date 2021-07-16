@@ -1,0 +1,14 @@
+html, body {
+  height: 100%;
+  width: 100%; }
+
+.content-wrapper {
+  height: 100%;
+  padding-top: 50px; }
+
+.page.tutorial {
+  height: 100%; }
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding-top: 50px; } }

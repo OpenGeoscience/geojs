@@ -1,0 +1,174 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>GeoJS - Map Scale</title>
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+
+
+    <!-- Custom Fonts -->
+    
+<link rel="stylesheet" href="../../vendor/font-awesome/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+    <!-- Theme CSS -->
+    
+<link rel="stylesheet" href="../../css/agency.css">
+
+    
+<link rel="stylesheet" href="../../css/main.css">
+
+    
+<link rel="stylesheet" href="../../css/highlight.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js" integrity="sha384-0s5Pv64cNZJieYFkXYOTId2HMA2Lfb6q2nAcx2n0RTLUnCAoTTsS0nKEO27XyKcY" crossorigin="anonymous"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js" integrity="sha384-ZoaMbDF+4LeFxg6WdScQ9nnR1QC2MIRxA1O9KWEXQwns1G8UNyIEZIQidzb0T1fo" crossorigin="anonymous"></script>
+    <![endif]-->
+    
+    <!-- jQuery -->
+    
+<script src="../../vendor/jquery/jquery.min.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    
+<script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+    
+    <link rel="apple-touch-icon" sizes="57x57" href="../../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="../../favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body id="page-top" class="index">
+    <!-- Navigation -->
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top affix">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span><i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="../../index.html"><img class="navbar-logo" src="../../images/logo_transparent.png" /></a>
+            </div> 
+            
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="">
+                        <a href="../../">Welcome</a>
+                    </li>
+                    <li class=" active ">
+                        <a href="../">Tutorials</a>
+                    </li>
+                    <li class="">
+                        <a href="../../examples/">Examples</a>
+                    </li>
+                    <li>
+                        <a href="../../apidocs/">API Docs</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/OpenGeoscience/geojs">GitHub</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <div class="content-wrapper">
+        <link rel="stylesheet" href="../../css/tutorial.css">
+<script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
+<div class="page tutorial">
+    <!-- include tutorial sources--><!-- Include tutorial specific files--><script type="text/javascript">$(start_tutorial);
+
+</script><!-- Add the default main content element--><div id="maincontent"><div id="tutorial"><h1>Tutorial - Map Scale</h1>
+<p>Create a map.  We increase the maximum amount you can zoom.</p>
+<p>Create a UI layer to hold the scale widget.</p>
+<div class="codeblock" format="javascript" step="1" stepname="Step 1" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">var map = geo.map({
+  node: '#map',
+  center: {x: 5.725, y: 45.175},
+  zoom: 8,
+  max: 20
+});
+map.createLayer('osm');
+var uiLayer = map.createLayer('ui');</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 1</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="map has two layers" data-tests="[&quot;map.layers().length === 2&quot;,&quot;map.layers()[0] instanceof geo.osmLayer&quot;,&quot;map.layers()[1] instanceof geo.gui.uiLayer&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>Add a basic scale in the upper-left corner.</p>
+<p>Since the default map uses a Mercator projection, if you zoom very far out
+and pan, you may notice the scale changing length.  The scale is calculated
+based on its position on the map within the current display.</p>
+<div class="codeblock" format="javascript" step="2" parentstep="1" initial="true" stepname="Step 2" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">uiLayer.createWidget('scale', {
+  position: {left: 10, top: 10}
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 2</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="map has a scale widget" data-tests="[&quot;uiLayer.children().length === 1&quot;,&quot;uiLayer.children()[0] instanceof geo.gui.scaleWidget&quot;,&quot;d3.select(uiLayer.children()[0].canvas()).select(\&quot;text\&quot;).html() === \&quot;80 km\&quot;&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>The scale can use U.S. Statute units instead of Système international.</p>
+<div class="codeblock" format="javascript" step="3" parentstep="1" stepname="Step 2-B" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">uiLayer.createWidget('scale', {
+  position: {left: 10, top: 10},
+  units: 'miles'
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 2-B</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="map has a scale widget" data-tests="[&quot;d3.select(uiLayer.children()[0].canvas()).select(\&quot;text\&quot;).html() === \&quot;50 mi\&quot;&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>Or, you can define a new set of units, such as nautical miles.  You can
+also change the orientation of the scale.</p>
+<div class="codeblock" format="javascript" step="4" parentstep="1" stepname="Step 2-C" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">uiLayer.createWidget('scale', {
+  position: {left: 10, top: 10},
+  orientation: 'right',
+  // 1 Nautical Mile = 1852 meters
+  units: [{unit: 'NM', scale: 1852}]
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 2-C</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="map has a scale widget" data-tests="[&quot;d3.select(uiLayer.children()[0].canvas()).select(\&quot;text\&quot;).html() === \&quot;30 NM\&quot;&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>With appropriate placement, you can have two scales that appear as a
+combined widget.</p>
+<div class="codeblock" format="javascript" step="5" parentstep="1" stepname="Step 2-D" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">uiLayer.createWidget('scale', {
+  position: {left: 10, bottom: 10},
+});
+// The default scale widget height is 20 pixels, and the default
+// strokeWidthe is 2.  If we offset the scale (20 - 2) pixels
+// above the previous one, the scale bars will overlap.
+uiLayer.createWidget('scale', {
+  position: {left: 10, bottom: 28},
+  orientation: 'top',
+  units: 'miles'
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 2-D</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="map has two scale widgets" data-tests="[&quot;uiLayer.children().length === 2&quot;,&quot;uiLayer.children()[0] instanceof geo.gui.scaleWidget&quot;,&quot;uiLayer.children()[1] instanceof geo.gui.scaleWidget&quot;,&quot;d3.select(uiLayer.children()[0].canvas()).select(\&quot;text\&quot;).html() === \&quot;80 km\&quot;&quot;,&quot;d3.select(uiLayer.children()[1].canvas()).select(\&quot;text\&quot;).html() === \&quot;50 mi\&quot;&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div></div><iframe id="workframe"></iframe></div>
+</div>
+    </div>
+    
+    <!-- Theme JavaScript -->
+    
+<script src="../../js/agency.js"></script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+.navbar-logo {
+  opacity: 0;
+  -webkit-transition: opacity 200ms;
+  -o-transition: opacity 200ms;
+  transition: opacity 200ms; }
+  .navbar-logo.zoomin {
+    opacity: 1; }
+
+.logo {
+  -webkit-transition: opacity 200ms;
+  -o-transition: opacity 200ms;
+  transition: opacity 200ms; }
+  .logo.zoomout {
+    opacity: 0; }

@@ -1,0 +1,17 @@
+extends ../common/index.pug
+
+block append mainContent
+  #controls
+    .form-group(title="The url used to fetch tiles.  Use {x}, {y}, {z}, and {s} for templating.  Example: https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+      label(for="layer-url") Tile URL
+      select#layer-url.layerparam(param-name="url", list="url-list")
+        option(value="stamen-toner-lite") Stamen Toner Lite
+        option(value="osm") OSM
+        option(value="../../data/tilefancy.png") Fancy Test Tile
+    .form-group(title="Web maps are most often rendered using a Mercator geographic coordinate system, but other projections can be used.  See spatialreference.org for more information on projections.")
+      label(for="map-gcs") Map GCS
+      select#map-gcs.mapparam(param-name="gcs", placeholder="EPSG:3857 - Web Mercator", reload="true")
+        option(value="EPSG:3857") EPSG:3857 - Web Mercator
+    .form-group(title="Show capital cities of the world.  Click on a city to center it.")
+      label(for="capitals") Show Capitals
+      input#capitals.mapparam(param-name="capitals", type="checkbox", placeholder="true", checked="checked")

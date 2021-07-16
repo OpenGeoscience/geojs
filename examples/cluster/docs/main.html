@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/* globals utils */</span>
+
+<span class="hljs-keyword">var</span> map = geo.map({
+  <span class="hljs-attr">node</span>: <span class="hljs-string">&#x27;#map&#x27;</span>,
+  <span class="hljs-attr">center</span>: {
+    <span class="hljs-attr">x</span>: <span class="hljs-number">-98</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-number">39</span>
+  },
+  <span class="hljs-attr">zoom</span>: <span class="hljs-number">3</span>
+});
+<span class="hljs-keyword">var</span> layer, pointFeature, points, datapoints;
+<span class="hljs-keyword">var</span> datarows; <span class="hljs-comment">// eslint-disable-line no-unused-vars</span>
+
+<span class="hljs-keyword">var</span> query = utils.getQuery();
+
+$.each(query, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">key, value</span>) </span>{
+  <span class="hljs-keyword">var</span> ctlvalue, ctlkey = key;
+  <span class="hljs-keyword">switch</span> (key) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;dataset&#x27;</span>:
+      ctlvalue = value ? value : <span class="hljs-string">&#x27;adderall&#x27;</span>;
+      <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;points&#x27;</span>:
+      <span class="hljs-keyword">if</span> (value.length) {
+        points = ctlvalue = <span class="hljs-built_in">parseInt</span>(value, <span class="hljs-number">10</span>);
+      }
+      <span class="hljs-keyword">break</span>;
+  }
+  <span class="hljs-keyword">if</span> (ctlvalue !== <span class="hljs-literal">undefined</span>) {
+    $(<span class="hljs-string">&#x27;#&#x27;</span> + ctlkey).val(ctlvalue);
+  }
+});
+
+<span class="hljs-comment">/**
+ * Based on the current controls, fetch a data set and show it as a clustered
+ * points.
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetch_data</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">var</span> dataset = $(<span class="hljs-string">&#x27;#dataset&#x27;</span>).val(),
+      url = <span class="hljs-string">&#x27;../../data/&#x27;</span> + $(<span class="hljs-string">&#x27;#dataset option:selected&#x27;</span>).attr(<span class="hljs-string">&#x27;url&#x27;</span>);
+  $.ajax(url, {
+    <span class="hljs-attr">success</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) </span>{
+      <span class="hljs-keyword">var</span> rows;
+      <span class="hljs-keyword">switch</span> (dataset) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;adderall&#x27;</span>:
+          rows = resp.split(<span class="hljs-regexp">/\r\n|\n|\r/</span>);
+          rows.splice(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+          rows = rows.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">r</span>) </span>{
+            <span class="hljs-keyword">var</span> fields = r.split(<span class="hljs-string">&#x27;,&#x27;</span>);
+            <span class="hljs-keyword">return</span> [fields[<span class="hljs-number">12</span>], fields[<span class="hljs-number">24</span>], fields[<span class="hljs-number">25</span>]].map(<span class="hljs-built_in">parseFloat</span>);
+          });
+          <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;cities&#x27;</span>:
+          rows = resp.split(<span class="hljs-regexp">/\r\n|\n|\r/</span>);
+          rows.splice(rows.length - <span class="hljs-number">1</span>, <span class="hljs-number">1</span>);
+          rows = rows.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">r</span>) </span>{
+            <span class="hljs-keyword">var</span> fields = r.split(<span class="hljs-string">&#x27;&quot;,&quot;&#x27;</span>);
+            <span class="hljs-keyword">return</span> [<span class="hljs-string">&#x27;&#x27;</span> + fields[<span class="hljs-number">0</span>].replace(<span class="hljs-regexp">/(^\s+|\s+$|^&quot;|&quot;$)/g</span>, <span class="hljs-string">&#x27;&#x27;</span>).length, fields[<span class="hljs-number">2</span>].replace(<span class="hljs-regexp">/(^\s+|\s+$|^&quot;|&quot;$)/g</span>, <span class="hljs-string">&#x27;&#x27;</span>), fields[<span class="hljs-number">3</span>].replace(<span class="hljs-regexp">/(^\s+|\s+$|^&quot;|&quot;$)/g</span>, <span class="hljs-string">&#x27;&#x27;</span>)].map(<span class="hljs-built_in">parseFloat</span>);
+          });
+          <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;earthquakes&#x27;</span>:
+          rows = resp;
+          <span class="hljs-keyword">break</span>;
+      }
+      datapoints = rows;
+      <span class="hljs-keyword">var</span> text = <span class="hljs-string">&#x27;Loaded: &#x27;</span> + datapoints.length;
+      $(<span class="hljs-string">&#x27;#points-loaded&#x27;</span>).text(text).attr(<span class="hljs-string">&#x27;title&#x27;</span>, text);
+      show_points(datapoints);
+    }
+  });
+}
+
+<span class="hljs-comment">/* Given a set of datapoints, optionally truncate or expand it, then show it
+ * as clustered points.
+ *
+ * @param {array} datapoints an array of points to show.
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show_points</span>(<span class="hljs-params">datapoints</span>) </span>{
+  datarows = <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">var</span> rows = datapoints;
+  <span class="hljs-keyword">var</span> maxrows = <span class="hljs-built_in">parseInt</span>(points, <span class="hljs-number">10</span>) || rows.length;
+  <span class="hljs-keyword">if</span> (rows.length &gt; maxrows) {
+    rows = rows.slice(<span class="hljs-number">0</span>, maxrows);
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (rows.length &lt; maxrows) {
+    rows = rows.slice();
+    <span class="hljs-keyword">while</span> (rows.length &lt; maxrows) {
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = rows.length - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span> &amp;&amp; rows.length &lt; maxrows; i -= <span class="hljs-number">1</span>) {
+        rows.push([
+          rows[i][<span class="hljs-number">0</span>] + <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>,
+          rows[i][<span class="hljs-number">1</span>] + <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>,
+          rows[i][<span class="hljs-number">2</span>] + <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>]);
+      }
+    }
+  }
+  pointFeature.data(rows);
+  datarows = rows;
+  pointFeature.draw();
+  <span class="hljs-keyword">var</span> text = <span class="hljs-string">&#x27;Shown: &#x27;</span> + rows.length;
+  $(<span class="hljs-string">&#x27;#points-shown&#x27;</span>).text(text).attr(<span class="hljs-string">&#x27;title&#x27;</span>, text);
+}
+
+<span class="hljs-comment">/**
+ * Handle changes to our controls.
+ *
+ * <span class="hljs-doctag">@param <span class="hljs-type">{object}</span> </span>evt jquery evt that triggered this call.
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">change_controls</span>(<span class="hljs-params">evt</span>) </span>{
+  <span class="hljs-keyword">var</span> ctl = $(evt.target),
+      param = ctl.attr(<span class="hljs-string">&#x27;id&#x27;</span>),
+      value = ctl.val();
+  <span class="hljs-keyword">if</span> (ctl.is(<span class="hljs-string">&#x27;[type=&quot;checkbox&quot;]&#x27;</span>)) {
+    value = ctl.is(<span class="hljs-string">&#x27;:checked&#x27;</span>) ? <span class="hljs-string">&#x27;true&#x27;</span> : <span class="hljs-string">&#x27;false&#x27;</span>;
+  }
+  <span class="hljs-keyword">if</span> (value === <span class="hljs-string">&#x27;&#x27;</span> &amp;&amp; ctl.attr(<span class="hljs-string">&#x27;placeholder&#x27;</span>)) {
+    value = ctl.attr(<span class="hljs-string">&#x27;placeholder&#x27;</span>);
+  }
+  <span class="hljs-keyword">if</span> (!param || value === query[param]) {
+    <span class="hljs-keyword">return</span>;
+  }
+  <span class="hljs-keyword">if</span> (ctl.closest(<span class="hljs-string">&#x27;table.gradient&#x27;</span>).length) {
+    param = <span class="hljs-string">&#x27;gradient&#x27;</span>;
+  }
+  <span class="hljs-keyword">switch</span> (param) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;dataset&#x27;</span>:
+      fetch_data();
+      <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;points&#x27;</span>:
+      points = <span class="hljs-built_in">parseInt</span>(value);
+      show_points(datapoints);
+      <span class="hljs-keyword">break</span>;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>update the url to reflect the changes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  query[param] = value;
+  <span class="hljs-keyword">if</span> (value === <span class="hljs-string">&#x27;&#x27;</span> || (ctl.attr(<span class="hljs-string">&#x27;placeholder&#x27;</span>) &amp;&amp;
+      value === ctl.attr(<span class="hljs-string">&#x27;placeholder&#x27;</span>))) {
+    <span class="hljs-keyword">delete</span> query[param];
+  }
+  utils.setQuery(query);
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">injectStyle</span>(<span class="hljs-params">feature, property, clusterStyle</span>) </span>{
+  <span class="hljs-keyword">var</span> styleFunc = feature.style.get(property);
+  feature.style(property, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+    <span class="hljs-keyword">if</span> (d.__cluster) {
+      <span class="hljs-keyword">return</span> clusterStyle;
+    }
+    <span class="hljs-keyword">return</span> styleFunc.apply(<span class="hljs-built_in">this</span>, <span class="hljs-built_in">arguments</span>);
+  });
+}
+
+map.createLayer(<span class="hljs-string">&#x27;osm&#x27;</span>);
+layer = map.createLayer(<span class="hljs-string">&#x27;feature&#x27;</span>, {
+  <span class="hljs-attr">renderer</span>: query.renderer ? (query.renderer === <span class="hljs-string">&#x27;html&#x27;</span> ? <span class="hljs-literal">null</span> : query.renderer) : <span class="hljs-literal">undefined</span>,
+  <span class="hljs-attr">features</span>: query.renderer ? <span class="hljs-literal">undefined</span> : [<span class="hljs-string">&#x27;point&#x27;</span>]
+});
+pointFeature = layer.createFeature(<span class="hljs-string">&#x27;point&#x27;</span>, {})
+  .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+    <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: d[<span class="hljs-number">2</span>], <span class="hljs-attr">y</span>: d[<span class="hljs-number">1</span>]};
+  });
+injectStyle(pointFeature, <span class="hljs-string">&#x27;radius&#x27;</span>, <span class="hljs-number">10</span>);
+injectStyle(pointFeature, <span class="hljs-string">&#x27;stroke&#x27;</span>, <span class="hljs-literal">true</span>);
+injectStyle(pointFeature, <span class="hljs-string">&#x27;fill&#x27;</span>, <span class="hljs-literal">true</span>);
+injectStyle(pointFeature, <span class="hljs-string">&#x27;strokeColor&#x27;</span>, <span class="hljs-string">&#x27;black&#x27;</span>);
+injectStyle(pointFeature, <span class="hljs-string">&#x27;fillColor&#x27;</span>, <span class="hljs-string">&#x27;black&#x27;</span>);
+injectStyle(pointFeature, <span class="hljs-string">&#x27;strokeOpacity&#x27;</span>, <span class="hljs-number">1</span>);
+injectStyle(pointFeature, <span class="hljs-string">&#x27;strokeWidth&#x27;</span>, <span class="hljs-number">1</span>);
+injectStyle(pointFeature, <span class="hljs-string">&#x27;fillOpacity&#x27;</span>, <span class="hljs-number">0.5</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Setting the cluster radius to the cluster point style radius is usually
+a good value.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>pointFeature.clustering({<span class="hljs-attr">radius</span>: <span class="hljs-number">10</span>});
+
+fetch_data();
+$(<span class="hljs-string">&#x27;#controls&#x27;</span>).on(<span class="hljs-string">&#x27;change&#x27;</span>, change_controls);</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+#controls {
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: absolute;
+  left: 10px;
+  top: 80px;
+  z-index: 1000;
+  border-radius: 5px;
+  border: 1px solid grey;
+  box-shadow: 1px 1px 3px black;
+  opacity: 0.5;
+  transition: opacity 250ms ease;
+  background: #CCC;
+  color: black;
+  padding: 4px;
+  font-size: 14px;
+  max-height: calc(100% - 100px);
+  min-width: 310px;
+}
+#controls:hover {
+  opacity: 1;
+}
+#controls .form-group {
+  margin-bottom: 0;
+}
+#controls label {
+  min-width: 160px;
+}
+#controls.no-controls {
+  display: none;
+}
+.annotationtype button.lastused {
+  color: #373a3c;
+  background-color: #e6e6e6;
+  border-color: #adadad;
+}
+.annotationtype button.active {
+  color: white;
+  background-color: #025aa5;
+  border-color: #01549b;
+}
+.shortlabel {
+  margin-bottom: 5px;
+  font-weight: bold;
+  display: inline-block;
+}
+#instructions .annotation {
+  display: none;
+  max-width: 300px;
+  font-size: 12px;
+  line-height: 1.42857em;
+  min-height: 2.85714em;
+}
+#instructions[annotation="polygon"] .annotation.polygon,
+#instructions[annotation="rectangle"] .annotation.rectangle,
+#instructions[annotation="point"] .annotation.point,
+#instructions[annotation="line"] .annotation.line,
+#instructions[annotation="none"] .annotation.none {
+  display: block;
+}
+#controls a {
+  color: #333;
+  cursor: pointer;
+}
+.entry span, .entry a {
+  display: inline-block;
+}
+.entry .entry-name {
+  width: 82%;
+}
+.entry a {
+  width: 6%;
+  text-align: right;
+}
+.entry .entry-edit {
+  font-weight: bold;
+}
+.entry-remove-all {
+  float: right;
+}
+#annotationheader, .entry#sample {
+  display: none;
+}
+#editdialog {
+  font-size: 14px;
+}
+#editdialog .form-group {
+  margin-bottom: 0px;
+}
+#editdialog #edit-update {
+  float: right;
+  margin-left: 10px;
+}
+#editdialog label {
+  min-width: 105px;
+}
+#editdialog #edit-validation-error {
+  color: red;
+  font-weight: bold;
+}
+#geojson {
+  width: 100%;
+  resize: vertical;
+}

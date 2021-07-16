@@ -1,0 +1,126 @@
+//-
+  A code block defines a user-editable block of code that can be run as a part
+  of a series of steps.  Parameters may be specified in the mixin function call
+  or as attributes of the mixin.
+
+  format: one of 'javascript', 'html', or 'css'
+  step: the step number.  These are used to chain code blocks together.  It can
+    be a string or a number.  Each code block should have a distinct step
+    value.
+  parentstep: the parent code block associated with this code block.  This
+    defaults to step - 1.  Use `null` to declare that the block has no parent
+    (this is automatic for step === 1).
+  initial: if true, run the code block after the page loads.
+  stepname: the name of the step to display on the page if it differs from the
+    string version of step.
+  target: the ID of the iframe element where the code will be executed.
+    Defaults to 'workframe'.  Only one chain of blocks in associated with a
+    target may be run at a time.
+
+  You can add additional attributes to the codeblock.  These include:
+
+  webgl: the associated test requires webgl to be present or mocked
+  htmlvideo: HTMLVideoElements are required, so don't test if they aren't
+    available
+mixin codeblock(format, step, parentstep, initial, stepname, target)
+  -
+    attributes.format = format || attributes.format || 'javascript';
+    attributes.step = step || attributes.step || 1;
+    attributes.parentstep = parentstep || attributes.parentstep || (parentstep !== null ? +attributes.step - 1 : null) || undefined;
+    attributes.initial = (initial || attributes.initial || false) ? 'true' : undefined;
+    attributes.stepname = stepname || attributes.stepname || ('Step ' + attributes.step);
+    attributes.target = target || attributes.target || 'workframe';
+  .codeblock&attributes(attributes)
+    .codeblock_entry
+      textarea(autocomplete='off', autocorrect='off', autocapitalize='off', spellcheck='false')
+        block
+    .codeblock_controls()
+      .codeblock_step #{attributes.stepname}
+      .codeblock_active Active
+      .codeblock_inactive Inactive
+      button.codeblock_run Run
+      button.codeblock_reset Reset
+
+//-
+  Tests for a the state of a target iframe after the most recent codeblock is
+  executed as the last block in a series.
+
+  description: a string describing the test.
+  tests: either a string or an array of strings of javascript code, each of
+    which is expected to evaluate to truthy if the test is successful and
+    falsy or throw an exception if it fails.
+  idleFuncs: one or a list of javascript strings that evaluate to functions or
+    promises.  If a function, the function is expected to take a function as a
+    parameter that is called when the tests are ready to run.
+mixin codeblock_test(description, tests, idleFuncs)
+  -
+    idleFuncs = idleFuncs || 'map.onIdle';
+    idleFuncs = Array.isArray(idleFuncs) ? idleFuncs : [idleFuncs];
+    tests = Array.isArray(tests) ? tests : [tests];
+  .codeblock_test(data-description=description, data-tests=tests, data-idleFuncs=idleFuncs)
+
+
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    link(rel="shortcut icon", href="data:image/x-icon;,", type="image/x-icon")
+    title GeoJS Tutorial - #{title}
+
+    // include the main bundle
+    script(type='text/javascript', src=bundle, charset='UTF-8')
+
+    // include tutorial sources
+    block tutorialHeader
+      // Include tutorial specific files
+      each css in tutorialCss
+        link(rel="stylesheet", href=css)
+      each src in tutorialJs
+        if(typeof src === "string")
+          script(type="text/javascript", src=src)
+        else
+          script&attributes(src)
+      if !tutorialJs.length
+        script(type="text/javascript").
+          $(start_tutorial);
+
+  body(class=hideNavbar ? undefined : 'navbar')
+    if !hideNavbar
+      // Add a navbar
+      nav.navbar.navbar-default(role="navigation")
+        .container-fluid
+          .navbar-header
+            button.navbar-toggle(type="button", data-toggle="collapse", data-target="gj-navbar-collapse")
+              span.sr-only Toggle navigation
+              span.icon-bar
+              span.icon-bar
+              span.icon-bar
+            a.navbar-brand(href="https://github.com/OpenGeoscience/geojs", target="gj-homepage") GeoJS
+
+          .collapse.navbar-collapse#gj-navbar-collapse
+            block headerButtons
+            ul.nav.navbar-nav.navbar-right
+              if !about.hidden
+                li
+                  a.gj-show-about-link(href="#", data-toggle="modal", data-target="#about-modal")
+                    | About
+
+      if !about.hidden
+        // Add an about modal dialog
+        .modal.fade#about-modal
+          .modal-dialog.modal-md
+            .modal-content
+              .modal-header
+                h4.modal-title !{about.title || title}
+              .modal-body
+                p.text-left !{about.text}
+                p.text-right © Kitware, Inc.
+              .modal-footer
+                button.btn.btn-primary(data-dismiss="modal", data-target="#about-modal") Close
+
+    // Add the default main content element
+    block mainContent
+      #maincontent
+        #tutorial
+          block mainTutorial
+        iframe#workframe

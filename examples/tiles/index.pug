@@ -1,0 +1,109 @@
+extends ../common/index.pug
+
+block append mainContent
+  #controls
+    .form-group(title="Tiles can be drawn using WebGL, Canvas, HTML, or SVG.  WebGL is generally the fastest and HTML the most compatible.")
+      label(for="map-renderer") Renderer
+      select#map-renderer.mapparam(param-name="renderer", placeholder="default")
+        option(value="default") Default
+        option(value="webgl") WebGL
+        option(value="canvas") Canvas
+        option(value="svg") SVG
+        option(value="html") HTML
+    .form-group(title="Clamp horizontal panning to the extent of the tiles.")
+      label(for="map-clampBoundsX") Clamp X Bounds
+      input#map-clampBoundsX.mapparam(param-name="clampBoundsX", type="checkbox", placeholder="false")
+    .form-group(title="Clamp vertical panning to the extent of the tiles.")
+      label(for="map-clampBoundsY") Clamp Y Bounds
+      input#map-clampBoundsY.mapparam(param-name="clampBoundsY", type="checkbox", placeholder="true", checked="checked")
+    .form-group(title="If clamping is turned off, spring back when the tiles are panned too far.")
+      label(for="mapinteractor-spring") Spring to Bounds
+      input#map-spring.mapparam(param-name="spring", type="checkbox", placeholder="false")
+    .form-group(title="The starting x coordinate.  Changing this will also pan the current view.")
+      label(for="map-x") Starting X
+      input#map-x.mapparam(param-name="x", placeholder="-98")
+    .form-group(title="The starting y coordinate.  Changing this will also pan the current view.")
+      label(for="map-y") Starting Y
+      input#map-y.mapparam(param-name="y", placeholder="39.5")
+    .form-group(title="Always fill at least one dimension of the window with the tiles.")
+      label(for="map-clampZoom") Clamp Zoom
+      input#map-clampZoom.mapparam(param-name="clampZoom", type="checkbox", placeholder="true", checked="checked")
+    .form-group(title="Only allow integer zoom levels.")
+      label(for="map-discrete") Discrete Zoom
+      input#map-discrete.mapparam(param-name="discrete", type="checkbox", placeholder="false")
+    .form-group(title="Animate zoom transitions.")
+      label(for="mapinteractor-clampZoom") Animate Zoom
+      input#map-animateZoom.mapparam(param-name="animateZoom", type="checkbox", placeholder="true", checked="checked")
+    .form-group(title="The lowest zoom level allowed.")
+      label(for="map-min") Minimum Zoom
+      input#map-min.mapparam(param-name="min", placeholder="0")
+    .form-group(title="The highest zoom level allowed.")
+      label(for="map-max") Maximum Zoom
+      input#map-max.mapparam(param-name="max", placeholder="16")
+    .form-group(title="The starting zoom level.  Changing this will also change the current zoom level.")
+      label(for="map-zoom") Starting Zoom
+      input#map-zoom.mapparam(param-name="zoom", placeholder="3")
+    .form-group(title="Allow the map to be rotated.")
+      label(for="map-allowRotation") Allow Rotation
+      select#map-allowRotation.mapparam(param-name="allowRotation", placeholder="true")
+        option(value="true") Yes
+        option(value="false") No
+        option(value="90") 90&deg; increments
+        option(value="30") 30&deg; increments
+        option(value="15") 15&deg; increments
+        option(value="5") 5&deg; increments
+        option(value="1") 1&deg; increments
+
+    .form-group(title="The url used to fetch tiles.  Use {x}, {y}, {z}, and {s} for templating.  Example: https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+      label(for="layer-url") Tile URL
+      input#layer-url.layerparam(param-name="url", list="url-list")
+      datalist#url-list
+        option(value="stamen-toner-lite") Stamen Toner Lite
+        option(value="osm") OSM
+        option(value="../../data/tilefancy.png") Fancy Test Tile
+    .form-group(title="The subdomains used to fetch tiles.  This can be a comma-separated list or a string of single-letter subdomains.")
+      label(for="layer-subdomains") URL Subdomains
+      input#layer-subdomains.layerparam(param-name="subdomains", placeholder="abc")
+    .form-group(title="Change the attribution text shown in the corner of the map.")
+      label(for="layer-attribution") Attribution
+      input#layer-attribution.layerparam(param-name="attribution", placeholder="Tile data copyright OpenStreetMap contributors")
+    .form-group(title="Wrap tiles horizontally.")
+      label(for="layer-wrapX") Wrap X
+      input#layer-wrapX.layerparam(param-name="wrapX", type="checkbox", placeholder="true", reload="true", checked="checked")
+    .form-group(title="Wrap tiles vertically.")
+      label(for="layer-wrapY") Wrap Y
+      input#layer-wrapY.layerparam(param-name="wrapY", type="checkbox", placeholder="false", reload="true")
+    .form-group(title="Include lower-level tiles.  If included, panning generally looks nicer since tiles already exist, but performance may be affected.")
+      label(for="layer-lower") Lower Tiles
+      input#layer-lower.layerparam(param-name="lower", type="checkbox", placeholder="true", reload="true", checked="checked")
+    .form-group(title="When at non-integer zoom levels, tiles can be shown with the closest match in pixel resolution or always at a higher or lower resolution.")
+      label(for="layer-round") Rounding
+      select#layer-round.layerparam(param-name="round", placeholder="round", reload="true")
+        option(value="round") Closest
+        option(value="ceil") Higher Resolution
+        option(value="floor") Lower Resolution
+    .form-group(title="Adjust the opacity of the entire tile layer [0.0-1.0].")
+      label(for="layer-opacity") Opacity
+      input#layer-opacity.layerparam(param-name="opacity", placeholder="1.0")
+
+    .form-group(title="The camera can use a parallel or perspective projection.  The difference is subtly unless the data has non-zero z-values.")
+      label(for="camera-projection") Camera Projection
+      select#camera-projection.cameraparam(param-name="projection", placeholder="parallel", reload="true")
+        option(value="parallel") Parallel
+        option(value="perspective") Perspective
+
+    .form-group(title="These options only affect the HTML renderer and are intended to help see how tiles are loaded and drawn.")
+      label(for="css-debug") HTML Debug
+      select#css-debug.cssparam(param-name="debug", placeholder="false")
+        option(value="false") Off
+        option(value="true") Labels
+        option(value="border") Borders
+        option(value="all") Labels and Borders
+    .form-group(title="Use a css transition to make HTML tiles fade in gradually.")
+      label(for="css-fade") HTML Fade-in
+      input#css-fade.cssparam(param-name="fade", type="checkbox", placeholder="false")
+
+  //- There are additional controls that could be implemented:
+    on the map object: gcs, ingcs, maxBounds, unitsPerPixel
+    on the tile layer object: maxLevel
+    pixel-coordinate systems for images, including setting image width and height

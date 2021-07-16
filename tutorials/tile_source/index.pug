@@ -1,0 +1,57 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Changing Tile Source
+    When a map is created with the default map tile layer, it defaults to using tiles from [maps.stamen.com]().
+
+  +codeblock('javascript', 1, undefined, true).
+    var map = geo.map({
+      node: "#map"
+    });
+    var layer = map.createLayer('osm');
+  +codeblock_test('map has one osm layer from stamen.com', [
+      'map.layers().length === 1',
+      'map.layers()[0] instanceof geo.osmLayer',
+      'layer.url().match(/toner-lite/)'
+      ])
+
+  :markdown-it
+    You can use a different tile source by changing the URL used by the tile layer.  You should also set the attribution.
+
+  +codeblock('javascript', 2).
+    layer.url('http://tile.stamen.com/terrain/{z}/{x}/{y}.png')
+    layer.attribution(
+      'Map tiles by <a href="http://stamen.com">Stamen Design</a>, ' +
+      'under <a href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>.  ' +
+      'Data by <a href="https://openstreetmap.org">OpenStreetMap</a>, ' +
+      'under <a href="https://openstreetmap.org/copyright">ODbL</a>.')
+  +codeblock_test('url is from stamen.com',
+      'layer.url().match(/terrain/)'
+      )
+
+  :markdown-it
+    We could have initially created the layer with a different tile server:
+
+  +codeblock('javascript', 3, null, false, 'Step 1-B').
+    var map = geo.map({
+      node: "#map"
+    });
+    var layer = map.createLayer('osm', {
+      url: 'http://tile.stamen.com/terrain/{z}/{x}/{y}.png',
+      attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="https://openstreetmap.org">OpenStreetMap</a>, under <a href="https://openstreetmap.org/copyright">ODbL</a>.'
+    });
+  +codeblock_test('map has one osm layer from stamen', [
+      'map.layers().length === 1',
+      'map.layers()[0] instanceof geo.osmLayer',
+      'layer.url().match(/terrain/)'
+      ])
+
+  :markdown-it
+    There are also predefined sources.  See `Object.keys(geo.osmLayer.tileSources)` for a list of sources.
+
+  +codeblock('javascript', 4, null, false, 'Step 1-C').
+    var map = geo.map({
+      node: "#map"
+    });
+    var layer = map.createLayer('osm', {source: 'osm'});

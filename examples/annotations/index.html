@@ -1,0 +1,179 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>GeoJS - Annotation Layer</title>
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+
+
+    <!-- Custom Fonts -->
+    
+<link rel="stylesheet" href="../../vendor/font-awesome/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+    <!-- Theme CSS -->
+    
+<link rel="stylesheet" href="../../css/agency.css">
+
+    
+<link rel="stylesheet" href="../../css/main.css">
+
+    
+<link rel="stylesheet" href="../../css/highlight.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js" integrity="sha384-0s5Pv64cNZJieYFkXYOTId2HMA2Lfb6q2nAcx2n0RTLUnCAoTTsS0nKEO27XyKcY" crossorigin="anonymous"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js" integrity="sha384-ZoaMbDF+4LeFxg6WdScQ9nnR1QC2MIRxA1O9KWEXQwns1G8UNyIEZIQidzb0T1fo" crossorigin="anonymous"></script>
+    <![endif]-->
+    
+    <!-- jQuery -->
+    
+<script src="../../vendor/jquery/jquery.min.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    
+<script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+    
+    <link rel="apple-touch-icon" sizes="57x57" href="../../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="../../favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body id="page-top" class="index">
+    <!-- Navigation -->
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top affix">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span><i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="../../index.html"><img class="navbar-logo" src="../../images/logo_transparent.png" /></a>
+            </div> 
+            
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="">
+                        <a href="../../">Welcome</a>
+                    </li>
+                    <li class="">
+                        <a href="../../tutorials/">Tutorials</a>
+                    </li>
+                    <li class=" active ">
+                        <a href="../">Examples</a>
+                    </li>
+                    <li>
+                        <a href="../../apidocs/">API Docs</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/OpenGeoscience/geojs">GitHub</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <div class="content-wrapper">
+        <!-- This will put script and link in the body, which has certain drawbacks, but it's relatively minor for the current use -->
+<script type="text/javascript" src="../../js/example.js"></script>
+<link rel="stylesheet" href="../../css/example.css">
+<script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
+<div class="page example">
+    
+        <link rel="stylesheet" href="main.css">
+    
+    <div id="map"></div>
+    <div><div id="controls"><div class="form-group annotationtype" title="Select the type of annotation to add."><div class="shortlabel">Add</div><button class="lastused" id="rectangle" next="polygon">Rectangle</button><button id="polygon" next="point">Polygon</button><button id="point" next="line">Point</button><button id="line" next="rectangle">Line</button></div><div class="form-group"><div id="instructions" annotation="none"><div class="annotation none"></div><div class="annotation polygon">Left-click points in the polygon.  Double click, right click, or click the starting point to close the polygon.</div><div class="annotation rectangle">Left click-and-drag or left click opposite corners to draw a rectangle.</div><div class="annotation point">Left click to create a point.</div><div class="annotation line">Left-click points in the line.  Double click, right click, or click the starting point to end the line.</div></div></div><div class="form-group" title="If enabled, left-click to add another annotation, and right-click to switch annotation type.  Otherwise, you must click a button above."><label for="clickmode">Click mode</label><select id="clickmode" param-name="clickmode" placeholder="edit"><option value="edit">Select and Edit</option><option value="add">Add New</option><option value="none">None</option></select></div><div class="form-group" title="If enabled, immediately after adding one annotation, you can add another without either left-clicking or selecting a button."><label for="keepadding">Keep adding annotations</label><input id="keepadding" param-name="keepadding" type="checkbox" placeholder="false"/></div><div class="form-group" title="If disabled, hide all annotation labels."><label for="showLabels">Show annotation labels</label><input id="showLabels" param-name="labels" type="checkbox" placeholder="true"/></div><div class="form-group" id="annotationheader"><div class="shortlabel">Created Annotations</div><a class="entry-remove-all" action="remove-all" title="Delete all annotations">&#x2716;</a></div><div class="form-group"><div id="annotationlist"><div class="entry" id="sample"><span class="entry-name">Sample</span><a class="entry-adjust" action="adjust" title="Modify geometry">&#x271c;</a><a class="entry-edit" action="edit" title="Edit name and properties">&#x270e;</a><a class="entry-remove" action="remove" title="Delete this annotation">&#x2716;</a></div></div></div><div class="form-group"><textarea id="geojson" type="textarea" rows="15" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div></div><div class="modal fade" id="editdialog"><div class="modal-dialog"><form class="modal-content"><div class="modal-header"><button class="close" type="button" data-dismiss="modal">&times;</button><h4 class="modal-title">Edit Annotation</h4></div><div class="modal-body"><div class="row"><div class="col-md-6"><div class="form-group"><label for="edit-name">Name</label><input id="edit-name" option="name"/></div><div class="form-group"><label for="edit-description">Description</label><input id="edit-description" option="description" type="textarea"/></div><div class="form-group" annotation-types="point"><label for="edit-radius">Radius</label><input id="edit-radius" option="radius" format="positive"/></div><div class="form-group" annotation-types="point" title="Set to &quot;false&quot; to disable, &quot;true&quot; to use the specified radius at the current zoom, or a zoom level to use the specified radius at that zoom level."><label for="edit-scaled">Scale with Zoom</label><input id="edit-scaled" option="scaled" format="booleanOrNumber"/></div><div class="form-group" annotation-types="point polygon rectangle"><label for="edit-fill">Fill</label><select id="edit-fill" option="fill" format="boolean"><option value="true">Yes</option><option value="false">No</option></select></div><div class="form-group" annotation-types="point polygon rectangle"><label for="edit-fillColor">Fill Color</label><input id="edit-fillColor" option="fillColor" format="color"/></div><div class="form-group" annotation-types="point polygon rectangle"><label for="edit-fillOpacity">Fill Opacity</label><input id="edit-fillOpacity" option="fillOpacity" format="opacity"/></div><div class="form-group" annotation-types="point polygon rectangle"><label for="edit-stroke">Stroke</label><select id="edit-stroke" option="stroke" format="boolean"><option value="true">Yes</option><option value="false">No</option></select></div><div class="form-group" annotation-types="point polygon rectangle line"><label for="edit-strokeWidth">Stroke Width</label><input id="edit-strokeWidth" option="strokeWidth" format="positive"/></div><div class="form-group" annotation-types="point polygon rectangle line"><label for="edit-strokeColor">Stroke Color</label><input id="edit-strokeColor" option="strokeColor" format="color"/></div><div class="form-group" annotation-types="point polygon rectangle line"><label for="edit-strokeOpacity">Stroke Opacity</label><input id="edit-strokeOpacity" option="strokeOpacity" format="opacity"/></div><div class="form-group" annotation-types="line"><label for="edit-closed">Closed</label><select id="edit-closed" option="closed" format="boolean"><option value="true">Yes</option><option value="false">No</option></select></div><div class="form-group" annotation-types="line"><label for="edit-lineCap">Line End Caps</label><select id="edit-lineCap" option="lineCap" format="text"><option value="butt">Butt</option><option value="round">Round</option><option value="square">Square</option></select></div><div class="form-group" annotation-types="line"><label for="edit-lineJoin">Line Joins</label><select id="edit-lineJoin" option="lineJoin" format="text"><option value="miter">Miter</option><option value="bevel">Bevel</option><option value="round">Round</option><option value="miter-clip">Miter-Clip</option></select></div></div><div class="col-md-6"><div class="form-group" title="The label defaults to the annotation name"><label for="edit-label">Label</label><input id="edit-label" option="label"/></div><div class="form-group" annotation-types="all" title="The label will only be shown if both this and the global option are selected"><label for="edit-showLabel">Show Label</label><select id="edit-showLabel" option="showLabel" format="boolean" optiontype="option"><option value="true">Yes</option><option value="false">No</option></select></div><div class="form-group" annotation-types="all" title="This is of the form [italic|oblique] [small-caps] [bold|bolder|lighter|&lt;weight&gt;] [&lt;stretch&gt;] &lt;size&gt;[/&lt;line height&gt;] &lt;family&gt;"><label for="edit-font">Font</label><input id="edit-font" option="font" optiontype="label"/></div><div class="form-group" annotation-types="all" title="This applies to both the filled text and the stroke"><label for="edit-textOpacity">Label Opacity</label><input id="edit-textOpacity" option="textOpacity" format="opacity" optiontype="label"/></div><div class="form-group" annotation-types="all" title="The color of the filled text.  Use an rgba() form to specify opacity."><label for="edit-color">Fill Color</label><input id="edit-color" option="color" format="color" optiontype="label"/></div><div class="form-group" annotation-types="all" title="The color of a stroke around the text.  If used with Fill Color, this adds a perimeter half the Stroke Width outside of the text.  Use an rgba() form to specify opacity."><label for="edit-textStrokeColor">Stroke Color</label><input id="edit-textStrokeColor" option="textStrokeColor" format="textStrokeColor" optiontype="label"/></div><div class="form-group" annotation-types="all"><label for="edit-textStrokeWidth">Stroke Width</label><input id="edit-textStrokeWidth" option="textStrokeWidth" format="numberOrBlank" optiontype="label"/></div><div class="form-group" annotation-types="all" title="Horizontal alignment"><label for="edit-textAlign">Horizontal Align.</label><select id="edit-textAlign" option="textAlign" format="text" optiontype="label"><option value="center">Center</option><option value="start">Start</option><option value="end">End</option><option value="left">Left</option><option value="right">Right</option></select></div><div class="form-group" annotation-types="all" title="Vertical alignment"><label for="edit-textBaseline">Vertical Align.</label><select id="edit-textBaseline" option="textBaseline" format="text" optiontype="label"><option value="middle">Middle</option><option value="top">Top</option><option value="hanging">Hanging</option><option value="alphabetic">Alphabetic</option><option value="ideographic">Ideographic</option><option value="bottom">Bottom</option></select></div><div class="form-group" annotation-types="all"><label for="edit-rotateWithMap">Rotate with Map</label><select id="edit-rotateWithMap" option="rotateWithMap" format="boolean" optiontype="label"><option value="false">No</option><option value="true">Yes</option></select></div><div class="form-group" annotation-types="all"><label for="edit-rotation">Rotation</label><input id="edit-rotation" option="rotation" format="angle" optiontype="label"/></div><div class="form-group" annotation-types="all" title="Set to &quot;false&quot; to disable, &quot;true&quot; to use the specified font size at the current zoom, or a zoom level to use the specified font size at that zoom level."><label for="edit-textScaled">Base Scale</label><input id="edit-textScaled" option="textScaled" format="booleanOrNumber" optiontype="label"/></div><div class="form-group" annotation-types="all" title="This is the x, y offset of the label in pixels from its default position before rotation and scale.  Example: &quot;5, -4&quot;"><label for="edit-offset">Offset</label><input id="edit-offset" option="offset" format="coordinate2" optiontype="label"/></div><div class="form-group" annotation-types="all"><label for="edit-shadowColor">Shadow Color</label><input id="edit-shadowColor" option="shadowColor" format="shadowColor" optiontype="label"/></div><div class="form-group" annotation-types="all"><label for="edit-shadowBlur">Shadow Blur</label><input id="edit-shadowBlur" option="shadowBlur" format="numberOrBlank" optiontype="label"/></div><div class="form-group" annotation-types="all" title="This is the x, y shadowOffset of the shadow in pixels from its default position before rotation.  Example: &quot;5, -4&quot;"><label for="edit-shadowOffset">Shadow Offset</label><input id="edit-shadowOffset" option="shadowOffset" format="coordinate2" optiontype="label"/></div><div class="form-group" annotation-types="all" title="Enable to rotate the shadow absed on the label's rotation."><label for="edit-shadowRotate">Rotate Shadow</label><select id="edit-shadowRotate" option="shadowRotate" format="boolean" optiontype="label"><option value="false">No</option><option value="true">Yes</option></select></div></div></div><div class="form-group"><div id="edit-validation-error"></div></div></div><div class="modal-footer"><button class="btn btn-sm btn-primary" id="edit-update" type="submit">Update</button><button class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button></div></form></div></div></div>
+    <div class="modal fade screenshot-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Screenshot</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="screenshot-result text-right">
+                        <img />
+                        <a download="screenshot.png">Download</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row source-screenshot">
+            <div class="col-md-4 col-md-offset-8 col-sm-6 col-sm-offset-6 col-xs-9 col-xs-offset-3">
+                <div class="row">
+                    <div class="col-xs-6">
+                        <a class="source" target="gj-docco-Annotation Layer" href="docs/main.html">Source code</a>
+                    </div>
+                    <div class="col-xs-6">
+                        <a class="screenshot" href="#">Take screenshot</a>
+                        <div class="screenshot-loading">...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row about">
+            <div class="col-md-12">
+                <p>This example shows how to add annotations, such as marked rectangles, to a map.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script type="text/javascript" src="main.js"></script>
+
+
+    </div>
+    
+    <!-- Theme JavaScript -->
+    
+<script src="../../js/agency.js"></script>
+
+
+</body>
+
+</html>

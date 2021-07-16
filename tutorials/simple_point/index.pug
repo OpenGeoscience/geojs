@@ -1,0 +1,78 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Simple Point
+    First, let's create our map and add a base map. Also, to keep it simple, we import our data inline.
+
+  +codeblock('javascript', 1).
+    var map = geo.map({
+      node: "#map",
+      center: { x: -97.67, y: 31.80 },
+      zoom: 4
+    });
+    map.createLayer('osm');
+
+    var cities = [
+      {lon: -74.0059413, lat: 40.7127837, name: "New York", population: 8405837},
+      {lon: -118.2436849, lat: 34.0522342, name: "Los Angeles", population: 3884307},
+      {lon: -87.6297982, lat: 41.8781136, name: "Chicago", population: 2718782},
+      {lon: -95.3698028, lat: 29.7604267, name: "Houston", population: 2195914},
+      {lon: -75.1652215, lat: 39.9525839, name: "Philadelphia", population: 1553165},
+      {lon: -112.0740373, lat: 33.4483771, name: "Phoenix", population: 1513367}
+    ];
+
+  :markdown-it
+    We create a layer first.
+
+  +codeblock('javascript', 2).
+    var layer = map.createLayer('feature', {features: ['point']});
+
+
+  :markdown-it
+    Then create point feature and set the data.
+
+  +codeblock('javascript', 3, undefined, true).
+    var feature = layer.createFeature('point')
+      .data(cities)
+      .position(function (city) {
+        return {
+          x: city.lon,
+          y: city.lat
+        };
+      })
+      .draw();
+
+  :markdown-it
+    We can also use GeoJSON and the GeoJSON reader to create the point feature.
+
+  +codeblock('javascript', 10, 2, false, 'Step 3-B').
+    var geojsonCities = {"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[-74.0059413,40.7127837]},"properties":{"name":"New York","population":"8405837"}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-118.2436849,34.0522342]},"properties":{"name":"Los Angeles","population":"3884307"}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-87.6297982,41.8781136]},"properties":{"name":"Chicago","population":"2718782"}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-95.3698028,29.7604267]},"properties":{"name":"Houston","population":"2195914"}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-75.1652215,39.9525839]},"properties":{"name":"Philadelphia","population":"1553165"}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-112.0740373,33.4483771]},"properties":{"name":"Phoenix","population":"1513367"}}]};
+
+    var reader = geo.createFileReader('geojsonReader', { 'layer': layer });
+    reader.read(geojsonCities, function (features) {
+      features[0].draw();
+      // Or we can draw the whole map
+      // map.draw();
+    });
+  +codeblock_test('map has a feature layer with six points', [
+    'map.layers().length === 2',
+    'map.layers()[1] instanceof geo.featureLayer',
+    'map.layers()[1].features()[0] instanceof geo.pointFeature',
+    'map.layers()[1].features()[0].data().length === 6'
+    ])
+
+  :markdown-it
+    We could change the style of our point feature.
+
+  +codeblock('javascript', 4, 3).
+    feature.style('fillColor', 'red')
+      .style({
+        'strokeColor': 'black',
+        'strokeWidth': 2
+      })
+      .draw();
+  +codeblock_test('point color changed', [
+    'map.layers()[1].features()[0].style().fillColor === "red"',
+    'map.layers()[1].features()[0].style().strokeColor === "black"'
+    ])

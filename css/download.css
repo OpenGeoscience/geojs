@@ -1,0 +1,15 @@
+.page.download h3 {
+  margin-bottom: 30px; }
+
+.page.download h4 {
+  margin-top: 20px; }
+
+.page.download .highlight table {
+  table-layout: fixed;
+  width: 100%; }
+
+.page.download pre {
+  border: none; }
+
+.page.download p {
+  font-size: 15px; }

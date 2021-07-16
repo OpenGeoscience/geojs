@@ -1,0 +1,272 @@
+extends ../common/index.pug
+
+block append mainContent
+  #lines_table
+    table(antialiasing=2)
+      tr
+        th(rowspan=2) Feature
+        th(colspan=3) GeoJS - Current
+        th(colspan=2) Leaflet
+        th(rowspan=2) Mapbox GL
+        th(colspan=2) GeoJS 0.10.5
+        th GeoJS - Current
+      tr
+        th WebGL
+        th Canvas 2D
+        th SVG
+        th Canvas 2D
+        th SVG
+        th WebGL
+        th SVG
+        th Debug WebGL
+      tr.option(option='basic')
+        th Basic Lines
+        td.geojs(rowspan=2, renderer='webgl')
+        td.geojs(rowspan=2, renderer='canvas')
+        td.geojs(rowspan=2, renderer='svg')
+        td.leaflet(rowspan=2, library='leaflet', renderer='canvas')
+        td.leaflet(rowspan=2, library='leaflet')
+        td.mapboxgl(rowspan=2, library='mapboxgl')
+        td.geojs(rowspan=2, renderer='vgl', version='0.10.5')
+        td.geojs(rowspan=2, renderer='d3', version='0.10.5')
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='basic')
+        td
+          p Lines with default options for each rendering method.
+      tr.option(option='color', strokeColor='yellow,black,red', strokeOpacity=1)
+        th Varying Color
+        td.geojs(rowspan=2, renderer='webgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='vgl', version='0.10.5')
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='color')
+        td
+          p Lines that vary by color from vertex to vertex, cycling through yellow, black, and red.
+          p On corners, the vertex color is at the far end of the miter.  There will probably always be a clear color step along the miter line.
+      tr.option(option='stroke', strokeOpacity='0.5,1')
+        th Varying Opacity
+        td.geojs(rowspan=2, renderer='webgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='vgl', version='0.10.5')
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='stroke')
+        td
+          p Lines that vary by opacity from vertex to vertex, cycling between 0.5 and 1.
+      tr.option(option='width', strokeWidth='9,12', link_strokeWidth='36,48')
+        th Varying Width
+        td.geojs(rowspan=2, renderer='webgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='vgl', version='0.10.5')
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='width')
+        td
+          p Lines that vary by width from vertex to vertex, alternating between 6 and 12 pixels.
+          p On corners, the width is virtually at the far end of the miter.
+      tr.option(option='offset', strokeOffset=-1)
+        th Stroke Offset
+        td.geojs(rowspan=2, renderer='webgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.mapboxgl(rowspan=2, library='mapboxgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='offset')
+        td
+          p Lines can be offset to one side or the other of center.  This can very from vertex to vertex, but is only shown offset all the way to the left here.
+          p Offset ranges from -1 (left) to +1 (right) along the direction of the stroke.  0 (default) is centered.
+      tr.option(option='linecap-round', lineCap='round')
+        th Round Line Cap
+        td.geojs(rowspan=2, renderer='webgl')
+        td.geojs(rowspan=2, renderer='canvas')
+        td.geojs(rowspan=2, renderer='svg')
+        td.leaflet(rowspan=2, library='leaflet', renderer='canvas')
+        td.leaflet(rowspan=2, library='leaflet')
+        td.mapboxgl(rowspan=2, library='mapboxgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='linecap-round')
+        td
+          p End caps can be 'butt' (default), 'round', or 'square'.
+          p In GeoJS's WebGL renderer, the end caps can vary by vertex (not shown).
+      tr.option(option='linecap-square', lineCap='square')
+        th Square Line Cap
+        td.geojs(rowspan=2, renderer='webgl')
+        td.geojs(rowspan=2, renderer='canvas')
+        td.geojs(rowspan=2, renderer='svg')
+        td.leaflet(rowspan=2, library='leaflet', renderer='canvas')
+        td.leaflet(rowspan=2, library='leaflet')
+        td.mapboxgl(rowspan=2, library='mapboxgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='linecap-square')
+        td
+          p End caps can be 'butt' (default), 'round', or 'square'.
+      tr.option(option='linejoin-bevel', lineJoin='bevel')
+        th Bevel Line Join
+        td.geojs(rowspan=2, renderer='webgl')
+        td.geojs(rowspan=2, renderer='canvas')
+        td.geojs(rowspan=2, renderer='svg')
+        td.leaflet(rowspan=2, library='leaflet', renderer='canvas')
+        td.leaflet(rowspan=2, library='leaflet')
+        td.mapboxgl(rowspan=2, library='mapboxgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='linejoin-bevel')
+        td
+          p Line joins can be 'miter' (default), 'bevel', 'round', or 'miter-clip'.
+          p In GeoJS's WebGL renderer, the joins can vary by vertex (not shown).
+      tr.option(option='linejoin-round', lineJoin='round')
+        th Round Line Join
+        td.geojs(rowspan=2, renderer='webgl')
+        td.geojs(rowspan=2, renderer='canvas')
+        td.geojs(rowspan=2, renderer='svg')
+        td.leaflet(rowspan=2, library='leaflet', renderer='canvas')
+        td.leaflet(rowspan=2, library='leaflet')
+        td.mapboxgl(rowspan=2, library='mapboxgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='linejoin-round')
+        td
+          p Line joins can be 'miter' (default), 'bevel', 'round', or 'miter-clip'.
+      tr.option(option='linejoin-miterclip', lineJoin='miter-clip', miterLimit=4)
+        th Miter-clip Line Join
+        td.geojs(rowspan=2, renderer='webgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='linejoin-miterclip')
+        td
+          p Line joins can be 'miter' (default), 'bevel', 'round', or 'miter-clip'.
+          p The miter-clip line join is part of a proposed path standard.  If the join exceeds the miter limit, it is beveled at that distance rather than right at the join.
+      tr.option(option='miterlimit', miterLimit=4)
+        th Miter Limit
+        td.geojs(rowspan=2, renderer='webgl')
+        td.geojs(rowspan=2, renderer='canvas')
+        td.geojs(rowspan=2, renderer='svg')
+        td.unsupported(rowspan=2)
+        td.leaflet(rowspan=2, library='leaflet')
+        td.mapboxgl(rowspan=2, library='mapboxgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='miterlimit')
+        td
+          p Use a miter limit of 4.  Other examples use a miter limit of 10 (except the miter-clip line join).
+          p Leaflet doesn't expose miter limit directly, but if SVG is used, the paths can be modified to change the miter limit.
+      tr.option(option='antialiasing0', antialiasing=0)
+        th Antialiasing of 0
+        td.geojs(rowspan=2, renderer='webgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.mapboxgl(rowspan=2, library='mapboxgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='antialiasing0')
+        td
+          p Antialiasing affects how the edges of lines are smoothed.  A value of 1 or 2 produces smooth results, 0 hard results, and large values generate a blurred outline.
+      tr.option(option='antialiasing1-4', antialiasing=6, link_antialiasing=24)
+        th Antialiasing of 1/2 the line width
+        td.geojs(rowspan=2, renderer='webgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.mapboxgl(rowspan=2, library='mapboxgl')
+        td.unsupported(rowspan=2)
+        td.unsupported(rowspan=2)
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='antialiasing1-4')
+        td
+          p Antialiasing affects how the edges of lines are smoothed.  A value of 1 or 2 produces smooth results, 0 hard results, and large values generate a blurred outline.
+      tr.option(option='thin-lines', strokeWidth=0.25, referenceLines='false')
+        th Thin Lines
+        td.geojs(rowspan=2, renderer='webgl')
+        td.geojs(rowspan=2, renderer='canvas')
+        td.geojs(rowspan=2, renderer='svg')
+        td.leaflet(rowspan=2, library='leaflet', renderer='canvas')
+        td.leaflet(rowspan=2, library='leaflet')
+        td.mapboxgl(rowspan=2, library='mapboxgl')
+        td.geojs(rowspan=2, renderer='vgl', version='0.10.5')
+        td.geojs(rowspan=2, renderer='d3', version='0.10.5')
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='thin-lines')
+        td
+          p Comparison of a line width of 0.25 pixels.  The reference lines are hidden.
+      tr.option(option='roads', data='roads', lines=10000, referenceLines='false', strokeWidth=2, strokeOpacity=1, x=-73.7593015, y=42.8496799, zoom=13)
+        th 10,000 Line Segments
+        td.geojs(rowspan=2, renderer='webgl')
+        td.geojs(rowspan=2, renderer='canvas')
+        td.geojs(rowspan=2, renderer='svg')
+        td.leaflet(rowspan=2, library='leaflet', renderer='canvas')
+        td.leaflet(rowspan=2, library='leaflet')
+        td.mapboxgl(rowspan=2, library='mapboxgl')
+        td.geojs(rowspan=2, renderer='vgl', version='0.10.5')
+        td.geojs(rowspan=2, renderer='d3', version='0.10.5')
+        td.geojs(rowspan=2, renderer='webgl', debug='true')
+      tr.option(option='roads')
+        td
+          p A modest number of line segments from a real-world sample.
+  #lines_list
+    b Compare line drawing between libraries, versions, and rendering methods
+    div
+      label(for='feature') Feature
+      select#feature
+    #info
+    #main_list
+      span
+        .title GeoJS - Current - WebGL
+        .entry
+      span
+        .title GeoJS - Current - Canvas
+        .entry
+      span
+        .title GeoJS - Current - SVG
+        .entry
+      span
+        .title Leaflet - 1.0.2 - Canvas
+        .entry
+      span
+        .title Leaflet - 1.0.2 - SVG
+        .entry
+      span
+        .title Mapbox GL - 0.28.0 - WebGL
+        .entry
+      span
+        .title GeoJS - 0.10.5 - WebGL
+        .entry
+      span
+        .title GeoJS - 0.10.5 - SVG
+        .entry
+      span
+        .title GeoJS - Current - Debug WebGL
+        .entry
