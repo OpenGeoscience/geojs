@@ -71,11 +71,13 @@ block mainTutorial
       }
       updating = true;
       // wait until all current tiles are loaded before loading more
-      map.onIdle(() => {
+      layerA.onIdle(() => {
         // load the new frame in the background layer
-        layerB._frame = frame;
-        layerB.url(`${baseUrl}${frame}`);
-        map.onIdle(() => {
+        if (frame !== layerB._frame) {
+          layerB._frame = frame;
+          layerB.url(`${baseUrl}${frame}`);
+        }
+        layerB.onIdle(() => {
           // once everything is loaded, check if we still need to swap layers
           updating = false;
           // the top layer is what we want so we don't have to do anything.
@@ -122,6 +124,9 @@ block mainTutorial
       layerB = map.createLayer('osm', params.layer);
       // create a foreground layer for the current frame
       params.layer.url = `${baseUrl}0`;
+      // have the layers share a fetch queue.  Since both tile layers are from
+      // the same server, this prevents requests from getting backlogged.
+      params.layer.queue = layerB.queue;
       layerA = map.createLayer('osm', params.layer);
       layerA._frame = 0;
       // adjust the frame slider and listen to changes

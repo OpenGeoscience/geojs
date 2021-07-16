@@ -256,7 +256,7 @@ describe('geo.core.osmLayer', function () {
         it('check null tiles and switch to svg', function () {
           positions = {};
           $.each($('[tile-reference]'), function () {
-            var ref = $(this).attr('tile-reference');
+            var ref = $(this).attr('tile-reference').split('_').slice(0, 3).join('_');
             positions[ref] = $(this)[0].getBoundingClientRect();
           });
           map.deleteLayer(layer);
@@ -268,7 +268,7 @@ describe('geo.core.osmLayer', function () {
         });
         it('compare tile offsets at angle ' + angle, function () {
           $.each($('image[reference]'), function () {
-            var ref = $(this).attr('reference');
+            var ref = $(this).attr('reference').split('_').slice(0, 3).join('_');
             /* Only check the top level */
             if (ref.indexOf('4_') === 0) {
               var offset = $(this)[0].getBoundingClientRect();

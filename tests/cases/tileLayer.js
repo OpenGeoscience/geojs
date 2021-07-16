@@ -456,6 +456,26 @@ describe('geo.tileLayer', function () {
       expect(layer.initialQueueSize).toBe(1);
       expect(layer._queue.initialSize).toBe(1);
     });
+    it('queue', function () {
+      var m = map(), layer;
+      opts.map = m;
+      layer = geo.tileLayer(opts);
+      expect(layer.queue._tileLayers.length).toBe(1);
+      var layer2 = geo.tileLayer(opts);
+      var origQueue = layer2.queue;
+      layer2.queue = layer.queue;
+      expect(layer.queue._tileLayers.length).toBe(2);
+      layer2.queue = origQueue;
+      expect(layer.queue._tileLayers.length).toBe(1);
+    });
+    it('reference', function () {
+      var m = map(), layer;
+      opts.map = m;
+      layer = geo.tileLayer(opts);
+      expect(layer.reference).toBe(layer.id() + '_0');
+      layer.reference = 'A';
+      expect(layer.reference).toBe(layer.id() + '_A');
+    });
   });
   describe('Public utility methods', function () {
     describe('isValid', function () {
