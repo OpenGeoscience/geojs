@@ -342,6 +342,7 @@ describe('geo.tileLayer', function () {
       tileHeight: 1024,
       cacheSize: 100,
       keepLower: true,
+      idleAfter: 'view',
       wrapX: false,
       wrapY: true,
       url: function () {},

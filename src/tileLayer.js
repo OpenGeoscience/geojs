@@ -72,6 +72,11 @@ var featureLayer = require('./featureLayer');
  *   bottom-up (the ingcs does not matter, only the gcs coordinate system).
  *   When falsy, this inverts the gcs y-coordinate when calculating local
  *   coordinates.
+ * @property {string} [idleAfter='view'] Consider the layer as idle once a
+ *   specific set of tiles is loaded.  'view' is when all tiles in view are
+ *   loaded.  'all' is when tiles in view and tiles that were once requested
+ *   have been loaded (this corresponds to having all network activity
+ *   finished).
  */
 
 /**
@@ -210,6 +215,7 @@ var tileLayer = function (arg) {
       m_queueSize = arg.queueSize || 6,
       m_initialQueueSize = arg.initialQueueSize || 0,
       m_lastTileSet = [],
+      m_promisedTiles = {},
       m_maxBounds = [],
       m_reference,
       m_exited,
@@ -1305,6 +1311,7 @@ var tileLayer = function (arg) {
 
     tiles.forEach(function (tile) {
       if (tile.fetched()) {
+        delete m_promisedTiles[tile.toString()];
         /* if we have already fetched the tile, we know we can just draw it,
          * as the bounds won't have changed since the call to _getTiles. */
         m_this.drawTile(tile);
@@ -1341,7 +1348,6 @@ var tileLayer = function (arg) {
             m_this._setTileTree(tile);
           });
 
-          m_this.addPromise(tile);
           tile._queued = true;
         } else {
           /* If we are using a fetch queue, tell the queue so this tile can
@@ -1351,6 +1357,8 @@ var tileLayer = function (arg) {
             m_this._queue.add(tile);
           }
         }
+        m_this.addPromise(tile);
+        m_promisedTiles[tile.toString()] = tile;
       }
     });
     // purge all old tiles when the new tiles are loaded (successfully or not)
@@ -1363,6 +1371,17 @@ var tileLayer = function (arg) {
           m_this._purge(zoom, true);
         }
       );
+    // for tiles that aren't in view, remove them from the list of tiles that
+    // are needed to be loaded to be considered idle.
+    if (m_this._options.idleAfter !== 'all') {
+      for (const hash in m_promisedTiles) {
+        const tile = m_promisedTiles[hash];
+        if (tiles.indexOf(tile) < 0) {
+          m_this.removePromise(tile);
+          delete m_promisedTiles[hash];
+        }
+      }
+    }
     return m_this;
   };
 
@@ -1506,7 +1525,7 @@ var tileLayer = function (arg) {
     } else {
       /* For tile layers that should only keep one layer, if loading is
        * finished, purge all but the current layer.  This is important for
-       * semi-transparanet layers. */
+       * semi-transparent layers. */
       if ((doneLoading || m_this._isCovered(tile)) &&
           zoom !== tile.index.level) {
         return true;
@@ -1699,6 +1718,7 @@ tileLayer.defaults = {
   tilesMaxBounds: null,
   topDown: false,
   keepLower: true,
+  idleAfter: 'view',
   // cacheSize: 400,  // set depending on keepLower
   tileRounding: Math.round,
   attribution: '',

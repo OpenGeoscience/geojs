@@ -23,7 +23,8 @@ var sceneObject = function (arg) {
       m_children = [],
       s_exit = this._exit,
       s_trigger = this.geoTrigger,
-      s_addPromise = this.addPromise;
+      s_addPromise = this.addPromise,
+      s_removePromise = this.removePromise;
 
   /**
    * Add the promise here and also propagate up the scene tree.
@@ -36,6 +37,20 @@ var sceneObject = function (arg) {
       m_parent.addPromise(promise);
     }
     s_addPromise(promise);
+    return m_this;
+  };
+
+  /**
+   * Remove the promise here and also propagate up the scene tree.
+   *
+   * @param {Promise} promise A promise object.
+   * @returns {this}
+   */
+  this.removePromise = function (promise) {
+    if (m_parent) {
+      m_parent.removePromise(promise);
+    }
+    s_removePromise(promise);
     return m_this;
   };
 
