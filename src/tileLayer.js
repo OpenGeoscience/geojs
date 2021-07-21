@@ -43,9 +43,9 @@ var featureLayer = require('./featureLayer');
  *   If this is a string, a template url with {x}, {y}, {z}, and {s} as
  *   template variables.  {s} picks one of the subdomains parameter and may
  *   contain a comma-separated list of subdomains.
- * @property {string|list} [subdomain="abc"] Subdomains to use in template url
- *   strings.  If a string, this is converted to a list before being passed to
- *   a url function.
+ * @property {string|string[]} [subdomain="abc"] Subdomains to use in template
+ *   url strings.  If a string, this is converted to a list before being passed
+ *   to a url function.
  * @property {string} [baseUrl=null]  If defined, use the old-style base url
  *   instead of the url parameter.  This is functionally the same as using a
  *   url of `baseUrl/{z}/{x}/{y}.(imageFormat || png)`.  If the specified
