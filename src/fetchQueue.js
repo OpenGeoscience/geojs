@@ -66,7 +66,7 @@ var fetchQueue = function (options) {
    * Get/set the initial maximum concurrent deferred object size.
    * @property {number} initialSize The initial maximum number of deferred
    *    objects.  `0` to use `size`.
-   * @name geo.fetchQueue#size
+   * @name geo.fetchQueue#initialSize
    */
   Object.defineProperty(this, 'initialSize', {
     get: function () { return m_this._initialSize; },
