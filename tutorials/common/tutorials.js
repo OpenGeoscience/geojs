@@ -100,7 +100,8 @@ function process_block(selector) {
       code[format].push('');
     }
     val = $('.CodeMirror', block).length ? $('.CodeMirror', block)[0].CodeMirror.getValue() : $('textarea', block).val();
-    code[format][step] = val.trim();
+    val = val.trim().replace(/ [ ]*\n/g, '\n');
+    code[format][step] = val;
   });
   $.each(code, function (key, list) {
     var processed = '';
@@ -283,7 +284,8 @@ function start_keeper(alwaysKeep) {
             defaultSrc = $('textarea', block).attr('defaultvalue'),
             key = 'src' + (block.attr('step') !== '1' ? block.attr('step') : '');
 
-        var src = $('.CodeMirror', block).length ? $('.CodeMirror', block)[0].CodeMirror.getValue() : $('textarea', block).val().trim();
+        var src = $('.CodeMirror', block).length ? $('.CodeMirror', block)[0].CodeMirror.getValue() : $('textarea', block).val();
+        src = src.trim().replace(/ [ ]*\n/g, '\n');
         if (src !== defaultSrc) {
           var comp = btoa(pako.deflate(src, {to: 'string', level: 9, raw: true}));
           /* instead of using regular base64, convert /, +, and = to ., -, and _
