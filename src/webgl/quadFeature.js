@@ -158,7 +158,7 @@ var webgl_quadFeature = function (arg) {
    * Build this feature.
    */
   this._build = function () {
-    var mapper, mat, prog, srctex, unicrop, geom, context;
+    var mapper, mat, prog, srctex, unicrop, unicropsource, geom, context;
 
     if (!m_this.position()) {
       return;
@@ -187,6 +187,9 @@ var webgl_quadFeature = function (arg) {
       unicrop = new vgl.uniform(context.FLOAT_VEC2, 'crop');
       unicrop.set([1.0, 1.0]);
       prog.addUniform(unicrop);
+      unicropsource = new vgl.uniform(context.FLOAT_VEC4, 'cropsource');
+      unicropsource.set([0.0, 0.0, 0.0, 0.0]);
+      prog.addUniform(unicropsource);
       prog.addShader(vgl.getCachedShader(
         context.VERTEX_SHADER, context, vertexShaderImage));
       prog.addShader(vgl.getCachedShader(
@@ -348,7 +351,9 @@ var webgl_quadFeature = function (arg) {
 
     var context = renderState.m_context,
         opacity, zOffset,
-        crop = {x: 1, y: 1}, quadcrop;
+        crop = {x: 1, y: 1}, quadcrop,
+        cropsrc = {x0: 0, y0: 0, x1: 1, y1: 1}, quadcropsrc,
+        w, h, quadw, quadh;
 
     context.bindBuffer(context.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
     $.each(m_quads.imgQuads, function (idx, quad) {
@@ -371,7 +376,18 @@ var webgl_quadFeature = function (arg) {
       if (!crop || quadcrop.x !== crop.x || quadcrop.y !== crop.y) {
         crop = quadcrop;
         context.uniform2fv(renderState.m_material.shaderProgram()
-          .uniformLocation('crop'), new Float32Array([crop.x, crop.y]));
+          .uniformLocation('crop'), new Float32Array([crop.x || 1, crop.y || 1]));
+      }
+      w = quad.image.width;
+      h = quad.image.height;
+      quadcropsrc = quad.crop || {left: 0, top: 0, right: w, bottom: h};
+      if (!cropsrc || quadcropsrc.left !== cropsrc.left || quadcropsrc.top !== cropsrc.top || quadcropsrc.right !== cropsrc.right || quadcropsrc.bottom !== cropsrc.bottom || quadw !== w || quadh !== h) {
+        cropsrc = quadcropsrc;
+        quadw = w;
+        quadh = h;
+        context.uniform4fv(renderState.m_material.shaderProgram()
+          .uniformLocation('cropsource'), new Float32Array([
+          cropsrc.left / w, cropsrc.top / h, cropsrc.right / w, cropsrc.bottom / h]));
       }
       context.bindBuffer(context.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
       context.vertexAttribPointer(vgl.vertexAttributeKeys.Position, 3,
