@@ -3,16 +3,26 @@ var inherit = require('./inherit');
 var feature = require('./feature');
 
 /**
+ * Quad position specification
+ *
+ * @typedef {object} geo.quadFeature.position
+ * @property {geo.geoPosition} [ul] Upper left coordinate.
+ * @property {geo.geoPosition} [ur] Upper right coordinate.
+ * @property {geo.geoPosition} [ll] Lower left coordinate.
+ * @property {geo.geoPosition} [lr] Lower right coordinate.
+ */
+
+/**
  * Quad feature specification.
  *
  * @typedef {geo.feature.spec} geo.quadFeature.spec
  * @extends geo.feature.spec
- * @property {object|function} [position] Position of the quad.  Default is
- *   (data).  The position is an object which specifies the corners of the
- *   quad: ll, lr, ur, ul.  At least two opposite corners must be specified.
- *   The corners do not have to physically correspond to the order specified,
- *   but rather correspond to that part of an image or video (if there is one).
- *   If a corner is unspecified, it will use the x coordinate from one adjacent
+ * @property {geo.quadFeature.position|function} [position] Position of the
+ *   quad.  Default is (data).  The position specifies the corners of the quad:
+ *   ll, lr, ur, ul.  At least two opposite corners must be specified.   The
+ *   corners do not have to physically correspond to the order specified, but
+ *   rather correspond to that part of an image or video (if there is one).  If
+ *   a corner is unspecified, it will use the x coordinate from one adjacent
  *   corner, the y coordinate from the other adjacent corner, and the average
  *   z value of those two corners.  For instance, if ul is unspecified, it is
  *   {x: ll.x, y: ur.y}.  Note that each quad is rendered as a pair of
