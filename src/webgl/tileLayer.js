@@ -168,9 +168,7 @@ var webgl_tileLayer = function () {
    */
   this._update = function (request) {
     s_update.call(m_this, request);
-    if (m_quadFeature) {
-      m_quadFeature._update();
-    }
+    m_this._addBaseQuadToTiles(m_quadFeature, m_tiles);
     return m_this;
   };
 
