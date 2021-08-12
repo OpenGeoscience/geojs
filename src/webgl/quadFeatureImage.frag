@@ -13,4 +13,3 @@ void main(void) {
   color.w *= opacity;
   gl_FragColor = color;
 }
-

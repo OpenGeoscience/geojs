@@ -10,6 +10,17 @@ var feature = require('./feature');
  * @property {geo.geoPosition} [ur] Upper right coordinate.
  * @property {geo.geoPosition} [ll] Lower left coordinate.
  * @property {geo.geoPosition} [lr] Lower right coordinate.
+ * @property {object} [crop] Image tile crop size in image pixels.  Areas
+ *   beyond the width ``x`` and height ``y`` are transparent. ``left``,
+ *   ``top``, ``right``, ``bottom`` extract a specific part of the image tile
+ *   as the source and expand it to fill the conceptual space before any crop
+ *   width and height are applied.
+ * @property {number} [crop.x] Width of image after crop.
+ * @property {number} [crop.y] Height of image after crop.
+ * @property {number} [crop.left] Left coordinate of image source.
+ * @property {number} [crop.top] Top coordinate of image source.
+ * @property {number} [crop.right] Right coordinate of image source.
+ * @property {number} [crop.bottom] Bottom coordinate of image source.
  */
 
 /**

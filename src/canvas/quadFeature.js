@@ -174,10 +174,17 @@ var canvas_quadFeature = function (arg) {
         if (!quad.crop) {
           context2d.drawImage(src, 0, 0);
         } else {
-          var cropx = Math.min(w, quad.crop.x),
-              cropy = Math.min(h, quad.crop.y);
-          if (cropx > 0 && cropy > 0) {
-            context2d.drawImage(src, 0, 0, cropx, cropy, 0, 0, cropx, cropy);
+          const cropw = Math.min(w, quad.crop.x || w),
+              croph = Math.min(h, quad.crop.y || h),
+              cropx0 = Math.max(0, quad.crop.left || 0),
+              cropy0 = Math.max(0, quad.crop.top || 0),
+              cropx1 = Math.min(w, quad.crop.right || w),
+              cropy1 = Math.min(h, quad.crop.bottom || h);
+          if (w && h && cropw > 0 && croph > 0 && cropx1 > cropx0 && cropy1 > cropy0) {
+            context2d.drawImage(
+              src,
+              cropx0, cropy0, Math.floor((cropx1 - cropx0) * cropw / w), Math.floor((cropy1 - cropy0) * croph / h),
+              0, 0, cropw, croph);
           }
         }
       });

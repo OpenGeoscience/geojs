@@ -1,4 +1,4 @@
-/* globals $, geo, utils */
+/* globals utils */
 
 var quadDebug = {};
 
@@ -85,6 +85,11 @@ $(function () {
     ur: {x: -138, y: 39},
     opacity: 0.25,
     color: '#0000FF'
+  }, {
+    ll: {x: -88, y: 49},
+    ur: {x: -58, y: 63},
+    image: 'flower1.jpg',
+    crop: {left: 10, right: 240, top: 20, bottom: 260}
   }];
   if (query.canvas === 'true') {
     // You can render a canvas on a quad, but only on the canvas and webgl
