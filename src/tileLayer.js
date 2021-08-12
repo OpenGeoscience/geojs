@@ -77,6 +77,10 @@ var featureLayer = require('./featureLayer');
  *   loaded.  'all' is when tiles in view and tiles that were once requested
  *   have been loaded (this corresponds to having all network activity
  *   finished).
+ * @property {object} [baseQuad] A quad feature element to draw before below
+ *   any tile layers.  If specified, this uses the quad defaults, so this is a
+ *   ``geo.quadFeature.position`` object with, typically, an ``image`` property
+ *   added to it.  The quad positions are in the map gcs coordinates.
  */
 
 /**
@@ -219,6 +223,7 @@ var tileLayer = function (arg) {
       m_maxBounds = [],
       m_reference,
       m_exited,
+      m_lastBaseQuad,
       m_this = this;
 
   // copy the options into a private variable
@@ -1656,6 +1661,41 @@ var tileLayer = function (arg) {
       }
     }
     return m_this;
+  };
+
+  /**
+   * Get/set the baseQuad.
+   *
+   * @property {object} [baseQuad] A quad feature element to draw before below
+   *   any tile layers.  If specified, this uses the quad defaults, so this is
+   *   a ``geo.quadFeature.position`` object with, typically, an ``image``
+   *   property added to it.  The quad positions are in the map gcs
+   *   coordinates.
+   * @name geo.tileLayer.baseQuad
+   */
+  Object.defineProperty(this, 'baseQuad', {
+    get: function () { return m_this._options.baseQuad; },
+    set: function (baseQuad) {
+      m_this._options.baseQuad = baseQuad;
+      m_this._update();
+    }
+  });
+
+  this._addBaseQuadToTiles = function (quadFeature, tiles) {
+    if (quadFeature) {
+      if (this.baseQuad !== m_lastBaseQuad) {
+        if (m_lastBaseQuad) {
+          tiles.splice(0, 1);
+        }
+        m_lastBaseQuad = this.baseQuad;
+        if (m_lastBaseQuad) {
+          tiles.splice(0, 0, this.baseQuad);
+          quadFeature.cacheUpdate(0);
+        }
+        quadFeature.data(tiles);
+      }
+      quadFeature._update();
+    }
   };
 
   /**

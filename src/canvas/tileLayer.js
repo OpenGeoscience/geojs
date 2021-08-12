@@ -5,6 +5,7 @@ var canvas_tileLayer = function () {
   var m_this = this,
       s_init = this._init,
       s_exit = this._exit,
+      s_update = this._update,
       m_quadFeature,
       m_nextTileId = 0,
       m_tiles = [];
@@ -58,6 +59,18 @@ var canvas_tileLayer = function () {
       m_quadFeature._update();
       m_this.draw();
     }
+  };
+
+  /**
+   * Update layer.
+   *
+   * @param {object} request A value to pass to the parent class.
+   * @returns {this}
+   */
+  this._update = function (request) {
+    s_update.call(m_this, request);
+    m_this._addBaseQuadToTiles(m_quadFeature, m_tiles);
+    return m_this;
   };
 
   /**

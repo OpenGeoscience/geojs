@@ -383,6 +383,14 @@ describe('geo.core.osmLayer', function () {
       // function is called with eight parameters in some instances
       return Object.keys(layer.activeTiles).length === 21;
     });
+    it('baseQuad', function () {
+      expect(layer.baseQuad).toBe(undefined);
+      var quad = {ul: {x: 0, y: 0}, lr: {x: 10, y: 10}, image: '/testdata/white.jpg'};
+      layer.baseQuad = quad;
+      expect(layer.baseQuad).toBe(quad);
+      layer.baseQuad = undefined;
+      expect(layer.baseQuad).toBe(undefined);
+    });
     it('destroy', destroy_map);
   });
 

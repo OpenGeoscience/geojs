@@ -477,6 +477,14 @@ describe('geo.tileLayer', function () {
       layer.reference = 'A';
       expect(layer.reference).toBe(layer.id() + '_A');
     });
+    it('baseQuad', function () {
+      var m = map(), layer;
+      opts.map = m;
+      layer = geo.tileLayer(opts);
+      expect(layer.baseQuad).toBe(undefined);
+      // we don't test setting it here, as we have too much mocked to carry
+      // through.  The setting test is done in the osmLayer tests.
+    });
   });
   describe('Public utility methods', function () {
     describe('isValid', function () {
