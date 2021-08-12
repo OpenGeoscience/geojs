@@ -1,5 +1,12 @@
 # GeoJS Change Log
 
+## Version 1.3.0
+
+### Features
+
+- Add an optional baseQuad to the tileLayer (#1105)
+- Support cropping quads (#1104)
+
 ## Version 1.2.0
 
 ### Features
