@@ -1,6 +1,12 @@
 # GeoJS Change Log
 
+## Version 1.4.0
+
+### Features
+
 ## Version 1.3.0
+
+- Add a gridFeature (#1082)
 
 ### Features
 
