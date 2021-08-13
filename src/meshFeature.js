@@ -5,6 +5,7 @@ var feature = require('./feature');
  * Mesh feature specification.
  *
  * @typedef {geo.feature.spec} geo.meshFeature.spec
+ * @extends geo.feature.spec
  * @property {object[]} [data=[]] An array of arbitrary objects used to
  *    construct the feature.
  * @property {geo.feature.styleSpec} [style] An object that contains style
@@ -80,6 +81,10 @@ var feature = require('./feature');
  *      For `triangle`, each element stands alone.
  * @property {number[]} elements A packed array of indices into the `pos` array
  *      defining the elements.  Each sequential three values forms a triangle.
+ * @property {number[]} elementIndex An array that has one value for each
+ *      triplet of values in the `elements` array.  The value is the 0-based
+ *      index of the element that can be used to correspond it to element-based
+ *      parameters.
  * @property {number[]} index An array that references which data index is
  *      associated with each vertex.
  * @property {number[]} pos A packed array of coordinates in the interface gcs
@@ -214,7 +219,7 @@ var meshFeature = function (arg) {
   /**
    * Create a set of vertices and elements from a mesh specification.
    *
-   * This currently takes a set of `vertexValueFuncs` to detemrine which
+   * This currently takes a set of `vertexValueFuncs` to determine which
    * vertices are used (shown) and values at those vertices.  It could be
    * extended with `elementValueFuncs`.
    *
@@ -225,10 +230,18 @@ var meshFeature = function (arg) {
    *    function is passed `(data[idx], idx)` and if it returns a falsy value
    *    for a data point, the vertex associated with that data point is removed
    *    from the resultant mesh.
+   * @param {object} [elementValueFuncs] A dictionary where the keys are the
+   *    names of properties to include in the results and the values are
+   *    functions that are evaluated at each element with the arguments
+   *    `(data[idx], idx)`.  If a key is named `used`, then its function is
+   *    passed `(data[idx], idx)` and if it returns a falsy value for a data
+   *    point, the triangle or square associated with that data point is
+   *    removed from the resultant mesh.
    * @returns {geo.meshFeature.meshInfo} An object with the mesh information.
    */
-  this._createMesh = function (vertexValueFuncs) {
+  this._createMesh = function (vertexValueFuncs, elementValueFuncs) {
     vertexValueFuncs = vertexValueFuncs || {};
+    elementValueFuncs = elementValueFuncs || {};
     var i, i3, j, k, idx, numPts, usedPts, usePos, item, key,
         data = m_this.data(),
         posFunc = m_this.position(), posVal,
@@ -241,16 +254,23 @@ var meshFeature = function (arg) {
         y0 = m_this.mesh.get('y0')(data),
         dx = m_this.mesh.get('dx')(data),
         dy = m_this.mesh.get('dy')(data),
-        calcX, skipColumn, x, origI, /* used for wrapping */
+        calcX, calcCol, skipColumn, x, origI, /* used for wrapping */
         gridWorig = gridW,  /* can be different when wrapping */
         result = {
           shape: 'square',
-          elements: []
+          elements: [],
+          elementIndex: []
         };
     /* If we are using a grid, calculate the elements and positions. */
     if (!elements) {
-      if (gridW * gridH > data.length) {
-        gridH = Math.floor(data.length / gridW);
+      if (Object.keys(vertexValueFuncs).length) {
+        if (gridW * gridH > data.length) {
+          gridH = Math.floor(data.length / gridW);
+        }
+      } else if (Object.keys(elementValueFuncs).length) {
+        if ((gridW - 1) * (gridH - 1) > data.length) {
+          gridH = Math.floor(data.length / (gridW - 1)) + 1;
+        }
       }
       /* If we are not using the position values (we are using x0, y0, dx, dy),
        * and wrapLongitude is turned on, and the position spans 180 degrees,
@@ -262,6 +282,7 @@ var meshFeature = function (arg) {
           x0 + dx * (gridW - 1) < -180 || x0 + dx * (gridW - 1) > 180) &&
           dx > -180 && dx < 180 && dx * (gridW - 1) < 360 + 1e-4) {
         calcX = [];
+        calcCol = [];
         for (i = 0; i < gridW; i += 1) {
           x = x0 + i * dx;
           while (x < -180) { x += 360; }
@@ -270,13 +291,18 @@ var meshFeature = function (arg) {
             if (x > calcX[calcX.length - 1]) {
               calcX.push(x - 360);
               calcX.push(calcX[calcX.length - 2] + 360);
+              calcCol.push(i);
+              calcCol.push(i + 1);
             } else {
               calcX.push(x + 360);
               calcX.push(calcX[calcX.length - 2] - 360);
+              calcCol.push(i);
+              calcCol.push(i + 1);
             }
             skipColumn = i;
           }
           calcX.push(x);
+          calcCol.push(i);
         }
         gridW += 2;
         if (Math.abs(Math.abs(gridWorig * dx) - 360) < 0.01) {
@@ -285,6 +311,7 @@ var meshFeature = function (arg) {
           while (x < -180) { x += 360; }
           while (x > 180) { x -= 360; }
           calcX.push(x);
+          calcCol.push(0);
         }
       }
       /* Calculate the value for point */
@@ -312,6 +339,8 @@ var meshFeature = function (arg) {
             result.elements.push(idx + gridW + 1);
             result.elements.push(idx + gridW);
             result.elements.push(idx + 1);
+            result.elementIndex.push(j * (gridW - 1) + (calcCol ? calcCol[i] : i));
+            result.elementIndex.push(j * (gridW - 1) + (calcCol ? calcCol[i] : i));
           }
         }
       }
@@ -330,15 +359,19 @@ var meshFeature = function (arg) {
             result.elements.push(elements[i][2]);
             result.elements.push(elements[i][3]);
             result.elements.push(elements[i][1]);
+            result.elementIndex.push(i);
+            result.elementIndex.push(i);
           }
         } else {
-          for (i = 0; i < elements.length - 3; i += 4) {
+          for (i = j = 0; i < elements.length - 3; i += 4, j += 1) {
             result.elements.push(elements[i]);
             result.elements.push(elements[i + 1]);
             result.elements.push(elements[i + 3]);
             result.elements.push(elements[i + 2]);
             result.elements.push(elements[i + 3]);
             result.elements.push(elements[i + 1]);
+            result.elementIndex.push(j);
+            result.elementIndex.push(j);
           }
         }
       } else {
@@ -348,19 +381,50 @@ var meshFeature = function (arg) {
             result.elements.push(elements[i][0]);
             result.elements.push(elements[i][1]);
             result.elements.push(elements[i][2]);
+            result.elementIndex.push(i);
           }
         } else {
           result.elements = elements.slice(0, elements.length - (elements.length % 3));
+          for (i = j = 0; i < elements.length - 2; i += 3, j += 1) {
+            result.elementIndex.push(j);
+          }
         }
       }
       numPts = data.length;
       usePos = true;
     }
+    /* If we have an `elementValueFuncs.used` function, remove any unused
+     * elements.  Unused vertices are removed later. */
     result.verticesPerElement = result.shape === 'triangle' ? 3 : 6;
+    var vpe = result.verticesPerElement;
+    if (elementValueFuncs.used) {
+      var used = new Array(result.elementIndex[result.elementIndex.length - 1] + 1);
+      for (i = 0; i < used.length; i += 1) {
+        used[i] = elementValueFuncs.used(data[i], i);
+      }
+      for (i = 0; i < result.elementIndex.length; i += 1) {
+        if (!used[result.elementIndex[i]]) {
+          break;
+        }
+      }
+      if (i < result.elementIndex.length) {
+        for (j = i; i < result.elementIndex.length; i += 1) {
+          if (used[result.elementIndex[i]]) {
+            result.elementIndex[j] = result.elementIndex[i];
+            for (k = 0; k < 3; k += 1) {
+              result.elements[j * 3 + k] = result.elements[i * 3 + k];
+            }
+            j += 1;
+          }
+        }
+        result.elements.splice(j * 3);
+        result.elementIndex.splice(j);
+      }
+    }
     /* If we have a `vertexValueFuncs.used` function, remove any unused
      * vertices.  Then, remove any elements that have a vertex that can't be
      * used.  This could leave vertices that are unused by any element, but
-     * removing those is expensive so it is not done. */
+     * they are removed later. */
     if (vertexValueFuncs.used) {
       for (i = 0; i < numPts; i += 1) {
         idx = result.index ? result.index[i] : i;
@@ -370,8 +434,7 @@ var meshFeature = function (arg) {
       }
       if (i !== numPts) {
         usedPts = i;
-        var remap = new Array(numPts),
-            vpe = result.verticesPerElement;
+        var remap = new Array(numPts);
         for (j = 0; j < usedPts; j += 1) {
           remap[j] = j;
         }
@@ -401,12 +464,36 @@ var meshFeature = function (arg) {
             result.elements[k + j] = remap[result.elements[i + j]];
           }
           if (j === vpe) {
+            result.elementIndex[Math.floor(k / 3)] = result.elementIndex[Math.floor(i / 3)];
+            if (vpe === 6) {
+              result.elementIndex[Math.floor(k / 3) + 1] = result.elementIndex[Math.floor(i / 3) + 1];
+            }
             k += vpe;
           }
         }
         result.elements.splice(k);
+        result.elementIndex.splice(Math.floor(k / 3));
         numPts = usedPts;
       }
+    }
+    /* Remove unused vertices -- this could be disabled to save time.  It
+     * cannot be applied if skipColumn is defined, as in that case some
+     * vertices are used multiple times but with different coordinates.  We
+     * could also do this when vertexValueFuncs.used is used, but that usually
+     * has a much smaller reduction in values and isn't worth the time. */
+    if (elementValueFuncs.used && skipColumn === undefined) {
+      var vertexMap = new Array(numPts);
+      var oldindex = result.index;
+      result.index = [];
+      for (i = 0; i < result.elements.length; i += 1) {
+        k = result.elements[i];
+        if (vertexMap[k] === undefined) {
+          vertexMap[k] = result.index.length;
+          result.index.push(oldindex ? oldindex[k] : k);
+        }
+        result.elements[i] = vertexMap[k];
+      }
+      numPts = result.index.length;
     }
     /* Get point locations and store them in a packed array */
     result.pos = new Array(numPts * 3);
@@ -436,6 +523,17 @@ var meshFeature = function (arg) {
       for (key in vertexValueFuncs) {
         if (key !== 'used' && vertexValueFuncs.hasOwnProperty(key)) {
           result[key][i] = vertexValueFuncs[key](item, idx, posVal);
+        }
+      }
+    }
+    for (key in elementValueFuncs) {
+      if (key !== 'used' && elementValueFuncs.hasOwnProperty(key)) {
+        var func = elementValueFuncs[key];
+        result[key] = new Array(result.elementIndex.length);
+        for (i = 0; i < result.elementIndex.length; i += 1) {
+          idx = result.elementIndex[i];
+          item = data[idx];
+          result[key][i] = func(item, idx);
         }
       }
     }
