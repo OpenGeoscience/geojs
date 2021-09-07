@@ -1,5 +1,11 @@
 # GeoJS Change Log
 
+## Version 1.4.1
+
+### Improvements
+
+- Add a continuousCloseProximity option to annotations (#1106)
+
 ## Version 1.4.0
 
 ### Features

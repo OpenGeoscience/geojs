@@ -1367,6 +1367,16 @@ describe('geo.annotation', function () {
       // the same point count
       expect(ann.processAction(evt)).toBe(true);
       expect(ann.options('vertices').length).toBe(4);
+      // test up near the end of the line
+      var evt = {
+        state: {action: geo.geo_action.annotation_line},
+        mouse: {
+          map: vertices[0],
+          mapgcs: map.displayToGcs(vertices[0], null)
+        },
+        event: geo.event.actionup
+      };
+      expect(ann.processAction(evt)).toBe('done');
     });
     it('processEditAction', function () {
       var map = createMap(),
