@@ -1157,7 +1157,7 @@ function continuousVerticesProcessAction(m_this, evt, name) {
       update = true;
     }
     if ((ccp || ccp === 0) && evt.event === geo_event.actionup &&
-        (cpp === true || layer.displayDistance(vertices[0], null, evt.mouse.map, 'display') <= cpp)) {
+        (ccp === true || layer.displayDistance(vertices[0], null, evt.mouse.map, 'display') <= cpp)) {
       if (vertices.length < 3 + (name === 'polygon' ? 1 : 0)) {
         return 'remove';
       }
