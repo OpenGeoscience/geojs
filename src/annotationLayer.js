@@ -24,6 +24,10 @@ var textFeature = require('./textFeature');
  * @property {number} [continuousPointColinearity=1.0deg] The minimum angle
  *   between a series of three points when dragging to not interpret them as
  *   colinear.  Only applies if `continuousPointProximity` is not `false`.
+ * @property {number} [continuousCloseProximity=10] The minimum distance in
+ *   display coordinates (pixels) to close a polygon or end drawing a line when
+ *   dragging to create an annotation.  `false` never closes at the end of a
+ *   drag.  `true` is effectively infinite.
  * @property {number} [finalPointProximity=10] The maximum distance in display
  *   coordinates (pixels) between the starting point and the mouse coordinates
  *   to signal closing a polygon.  A value of 0 requires an exact match.  A
@@ -133,6 +137,7 @@ var annotationLayer = function (arg) {
     // in radians, minimum angle between continuous points to interpret them as
     // being coliner
     continuousPointColinearity: 1.0 * Math.PI / 180,
+    continuousCloseProximity: 10, // in pixels, 0 is exact
     finalPointProximity: 10,  // in pixels, 0 is exact
     showLabels: true,
     clickToEdit: false

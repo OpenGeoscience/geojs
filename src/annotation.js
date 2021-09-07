@@ -1129,8 +1129,10 @@ function continuousVerticesProcessAction(m_this, evt, name) {
   }
   var cpp = layer.options('continuousPointProximity');
   var cpc = layer.options('continuousPointColinearity');
+  var ccp = layer.options('continuousCloseProximity');
   if (cpp || cpp === 0) {
     var vertices = m_this.options('vertices');
+    var update = false;
     if (!vertices.length) {
       vertices.push(evt.mouse.mapgcs);
       vertices.push(evt.mouse.mapgcs);
@@ -1152,8 +1154,18 @@ function continuousVerticesProcessAction(m_this, evt, name) {
       }
       vertices[vertices.length - 1] = evt.mouse.mapgcs;
       vertices.push(evt.mouse.mapgcs);
-      return true;
+      update = true;
     }
+    if ((ccp || ccp === 0) && evt.event === geo_event.actionup &&
+        (ccp === true || layer.displayDistance(vertices[0], null, evt.mouse.map, 'display') <= cpp)) {
+      if (vertices.length < 3 + (name === 'polygon' ? 1 : 0)) {
+        return 'remove';
+      }
+      vertices.pop();
+      m_this.state(annotationState.done);
+      return 'done';
+    }
+    return update;
   }
 }
 
@@ -1731,8 +1743,8 @@ var polygonAnnotation = function (args) {
             end = true;
           }
         } else if (vertices.length >= 2 && layer.displayDistance(
-          vertices[0], null, evt.map, 'display') <=
-          layer.options('finalPointProximity')) {
+                   vertices[0], null, evt.map, 'display') <=
+                   layer.options('finalPointProximity')) {
           end = true;
         } else {
           vertices[vertices.length - 1] = evt.mapgcs;
