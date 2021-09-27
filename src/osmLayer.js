@@ -145,14 +145,14 @@ osmLayer.tileSources = {
   'dark-matter-with-labels': {
     url: ' https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
-    name: 'Dark Matter With Labels',
+    name: 'Carto Dark Matter With Labels',
     minLevel: 0,
     maxLevel: 18
   },
   'dark-matter-without-labels': {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/dark_nolabels/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
-    name: 'Dark Matter Without Labels',
+    name: 'Carto Dark Matter Without Labels',
     minLevel: 0,
     maxLevel: 18
   },
@@ -175,14 +175,14 @@ osmLayer.tileSources = {
   'positron-with-labels': {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
-    name:'Positron With Labels',
+    name:'Carto Positron With Labels',
     minLevel: 0,
     maxLevel: 18
   },
   'positron-without-labels': {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
-    name:'Positron Without Labels',
+    name:'Carto Positron Without Labels',
     minLevel: 0,
     maxLevel: 18
   },
@@ -221,14 +221,14 @@ osmLayer.tileSources = {
   'voyager-with-labels': {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
-    name:'Voyager With Labels',
+    name:'Carto Voyager With Labels',
     minLevel: 0,
     maxLevel: 18
   },
   'voyager-without-layers': {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
-    name:'Voyager Without Layers',
+    name:'Carto Voyager Without Layers',
     minLevel: 0,
     maxLevel: 18
   },
