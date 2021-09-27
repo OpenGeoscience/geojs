@@ -132,7 +132,7 @@ let StamenAttribution = 'Map tiles by <a href="http://stamen.com">Stamen ' +
   '</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.';
 
 /* Per Carto's website regarding basemap attribution: https://carto.com/help/working-with-data/attribution/#basemaps */
-let CartoAttribution = '<a href="https://carto.com"> Carto</a> ' + 'Contributors <a href="https://www.openstreetmap.org/"> OpenStreetMap</a>'
+let CartoAttribution = '<a href="https://carto.com"> Carto</a> ' + 'Contributors <a href="https://www.openstreetmap.org/"> OpenStreetMap</a>';
 
 /**
  * This is a list of known tile sources.  It can be added to via
@@ -142,21 +142,24 @@ let CartoAttribution = '<a href="https://carto.com"> Carto</a> ' + 'Contributors
  * @type {object}
  */
 osmLayer.tileSources = {
-  'darkMatter-with-labels': {
+  'dark-matter-with-labels': {
     url: ' https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
+    name: 'Dark Matter With Labels',
     minLevel: 0,
     maxLevel: 18
   },
-  'darkMatter-without-labels': {
+  'dark-matter-without-labels': {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/dark_nolabels/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
+    name: 'Dark Matter Without Labels',
     minLevel: 0,
     maxLevel: 18
   },
   'nationalmap-satellite': {
     url: 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}',
     attribution: 'Tile data from <a href="https://basemap.nationalmap.gov/">USGS</a>',
+    name:'National Map Satellite',
     minLevel: 0,
     maxLevel: 16
   },
@@ -164,6 +167,7 @@ osmLayer.tileSources = {
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: 'Tile data &copy; <a href="https://osm.org/copyright">' +
       'OpenStreetMap</a> contributors',
+    name:'OpenStreetMap',
     subdomains: 'abc',
     minLevel: 0,
     maxLevel: 19
@@ -171,18 +175,21 @@ osmLayer.tileSources = {
   'positron-with-labels': {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
+    name:'Positron With Labels',
     minLevel: 0,
     maxLevel: 18
   },
   'positron-without-labels': {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
+    name:'Positron Without Labels',
     minLevel: 0,
     maxLevel: 18
   },
   'stamen-terrain': {
     url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png',
     attribution: StamenAttribution,
+    name:'Stamen Terrain',
     subdomains: 'abcd',
     minLevel: 0,
     maxLevel: 14
@@ -190,6 +197,7 @@ osmLayer.tileSources = {
   'stamen-terrain-background': {
     url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}.png',
     attribution: StamenAttribution,
+    name:'Stamen Terrain Background',
     subdomains: 'abcd',
     minLevel: 0,
     maxLevel: 14
@@ -197,6 +205,7 @@ osmLayer.tileSources = {
   'stamen-toner': {
     url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
     attribution: StamenAttribution,
+    name:'Stamen Toner',
     subdomains: 'abcd',
     minLevel: 0,
     maxLevel: 20
@@ -204,6 +213,7 @@ osmLayer.tileSources = {
   'stamen-toner-lite': {
     url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png',
     attribution: StamenAttribution,
+    name:'Stamen Toner Lite',
     subdomains: 'abcd',
     minLevel: 0,
     maxLevel: 20
@@ -211,18 +221,21 @@ osmLayer.tileSources = {
   'voyager-with-labels': {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
+    name:'Voyager With Labels',
     minLevel: 0,
     maxLevel: 18
   },
   'voyager-without-layers': {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
+    name:'Voyager Without Layers',
     minLevel: 0,
     maxLevel: 18
   },
   'wikimedia': {
     url: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
     attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia maps</a> | Map data &copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+    name:'Wikimedia',
     minLevel: 0,
     maxLevel: 19
   }

@@ -6,15 +6,7 @@ block append mainContent
     .form-group
       label(for='basemap') Base map
       select#basemap(param-name='basemap', placeholder='stamen-toner-lite')
-        option(value='stamen-toner-lite') Stamen Toner Lite
-        option(value='osm') OpenStreetMap
-        option(value='nationalmap-satellite') National Map Satellite
-        option(value='stamen-terrain') Stamen Terrain
-        option(value='stamen-terrain-background') Stamen Terrain Background
-        option(value='stamen-toner') Stamen Toner
-        option(value='wikimedia') Wikimedia
         option(value='custom') Custom
-        option(value='false') None
       button#hide(title='Hide the control panel') Hide
       input#mapurl.hidden(param-name='mapurl')
     .form-group.annotationtype(title='Select the type of annotation to add.')
