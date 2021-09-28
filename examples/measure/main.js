@@ -47,8 +47,18 @@ if (query.extra) {
 // Add a blank tile for removing the map
 geo.osmLayer.tileSources['false'] = {
   url: '/data/white.jpg',
-  attribution: ''
+  attribution: '',
+  name: 'None'
 };
+
+// Fill select drop down
+var options = geo.osmLayer.tileSources;
+for (const option in options) {
+  var newOption = document.createElement('option');
+  newOption.value = option;
+  newOption.text = options[option].name ? options[option].name : option;
+  document.getElementById('basemap').appendChild(newOption);
+}
 
 var map, mapLayer, layer, fromButtonSelect, fromGeojsonUpdate;
 
