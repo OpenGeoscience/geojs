@@ -30,9 +30,9 @@ if (query.extra) {
     attribution: '<a href="https://www.microsoft.com/maps/product/terms.html">Microsoft</a> Virtual Earth',
     subdomains: '0123',
     minLevel: 1,
-    maxLevel: 19
+    maxLevel: 19,
+    name: 'Bing Satellite'
   };
-  $('#basemap option[value="custom"]').before('<option value="bing-satellite">Bing Satellite</option>');
   // This requires that you have an appropriate Esri ArcGIS license to use.  It
   // is possible that its use might be allowed in certain uses via
   // https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9
@@ -40,9 +40,9 @@ if (query.extra) {
     url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.png',
     attribution: '<a href="https://www.esri.com/en-us/search/?q=world%20imagery">Esri World Imagery</a>',
     minLevel: 0,
-    maxLevel: 19
+    maxLevel: 19,
+    name: 'ArcGIS Satellite'
   };
-  $('#basemap option[value="custom"]').before('<option value="arcgis-satellite">ArcGIS Satellite</option>');
 }
 // Add a blank tile for removing the map
 geo.osmLayer.tileSources['false'] = {
