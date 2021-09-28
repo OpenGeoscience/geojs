@@ -4,6 +4,12 @@
 
 ### Improvements
 
+- Added more tile sources to the default list (#1107)
+
+## Version 1.4.1
+
+### Improvements
+
 - Add a continuousCloseProximity option to annotations (#1106)
 
 ## Version 1.4.0

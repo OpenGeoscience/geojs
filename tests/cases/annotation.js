@@ -1368,7 +1368,7 @@ describe('geo.annotation', function () {
       expect(ann.processAction(evt)).toBe(true);
       expect(ann.options('vertices').length).toBe(4);
       // test up near the end of the line
-      var evt = {
+      evt = {
         state: {action: geo.geo_action.annotation_line},
         mouse: {
           map: vertices[0],

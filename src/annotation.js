@@ -1743,8 +1743,8 @@ var polygonAnnotation = function (args) {
             end = true;
           }
         } else if (vertices.length >= 2 && layer.displayDistance(
-                   vertices[0], null, evt.map, 'display') <=
-                   layer.options('finalPointProximity')) {
+          vertices[0], null, evt.map, 'display') <=
+          layer.options('finalPointProximity')) {
           end = true;
         } else {
           vertices[vertices.length - 1] = evt.mapgcs;
