@@ -1,6 +1,12 @@
 # GeoJS Change Log
 
-## Version 1.4.1
+## Version 1.4.3
+
+### Changes
+
+- Removed wikimedia from the map source list (#1109)
+
+## Version 1.4.2
 
 ### Improvements
 

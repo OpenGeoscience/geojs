@@ -231,13 +231,6 @@ osmLayer.tileSources = {
     name:'Carto Voyager Without Layers',
     minLevel: 0,
     maxLevel: 18
-  },
-  'wikimedia': {
-    url: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
-    attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia maps</a> | Map data &copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap contributors</a>',
-    name:'Wikimedia',
-    minLevel: 0,
-    maxLevel: 19
   }
 };
 
