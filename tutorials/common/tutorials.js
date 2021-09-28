@@ -13,7 +13,7 @@ var processBlockInfo = {
     '<html>\n' +
     '<head>\n' +
     /* We could also load from the CDN:
-     *   https://cdnjs.cloudflare.com/ajax/libs/geojs/0.12.2/geo.min.js
+     *   https://cdnjs.cloudflare.com/ajax/libs/geojs/1.4.2/geo.min.js
      * or the non-minified versions to make debug easier. */
     '  <script type="text/javascript" src="../../built/geo.min.js"></script>\n' +
     '</head>\n' +
