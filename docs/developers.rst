@@ -104,7 +104,7 @@ screen output is used, the browser must be running on the same machine as the
 Release Process
 ---------------
 
-GeoJS is now using semantic-release.  Prefix the first line of commit messages with an appropriate prefix, such as ``fix``, ``perf``, ``feat``, ``docs``, ``ci``, ``refactor``, ``style``, ``test``, ``build``, or ``BREAKING CHANGE``.  See `<https://github.com/semantic-release/semantic-release/blob/master/CONTRIBUTING.md#type>`_ for details.
+GeoJS uses semantic-release.  Prefix the first line of commit messages with an appropriate prefix, such as ``fix``, ``perf``, ``feat``, ``docs``, ``ci``, ``refactor``, ``style``, ``test``, ``build``, or ``BREAKING CHANGE``.  See `<https://github.com/semantic-release/semantic-release/blob/master/CONTRIBUTING.md#type>`_ for details.
 
 When the PR is merged to master, a new release will be made if appropriate.
 
