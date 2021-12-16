@@ -70,6 +70,7 @@ Install python packages ::
 
     pip install --user girder-client
 
-Generate new baseline images for the WebGL tests ::
+Remove old baseline and generate new baseline images for the WebGL tests ::
 
-    python test/baseline_images.py --xvfb --generate --upload --verbose
+    rm -r dist/data/base-images
+    python tests/runners/baseline_images.py --xvfb --generate --upload --verbose _build
