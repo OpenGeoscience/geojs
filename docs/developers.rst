@@ -81,7 +81,7 @@ The headless unit tests that require WebGL should be placed in the
 
 Many of these tests compare against a baseline image.  If a test is changed or
 added, new baselines can be generated and optionally uploaded via the script
-built into ``test/baseline_images.py``.
+built into ``tests/runners/baseline_images.py``.
 
 If a test fails, the specific test will be reported by the test runner, and the
 base and test images are saved in the ``images`` subdirectory of the build

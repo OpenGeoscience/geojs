@@ -1,5 +1,7 @@
 import os
 
+import PIL.Image
+
 list = """
 8: 04 01 2017 09:23:23.812:WARN [web-server]: 404: /base/dist/data/tiles/8/75/94.png
 8: 04 01 2017 09:23:23.837:WARN [web-server]: 404: /base/dist/data/tiles/9/150/188.png
@@ -28,9 +30,9 @@ for line in list.split('\n'):
     parts = line.split('dist/data/tiles')
     if len(parts) < 2:
         continue
-    tile = parts[1].strip('\'').strip()
-    # url = 'http://a.tile.openstreetmap.org' + tile
-    url = 'https://stamen-tiles-a.a.ssl.fastly.net/toner-lite ' + tile
+    tile = parts[1].strip("'").strip()
+    url = 'http://a.tile.openstreetmap.org' + tile
+    # url = 'https://stamen-tiles-a.a.ssl.fastly.net/toner-lite ' + tile
     path = 'dist/data/tiles' + tile
     try:
         os.makedirs(os.path.dirname(path))
@@ -38,6 +40,7 @@ for line in list.split('\n'):
         pass
     print(tile)
     os.system('curl -s -o ' + path + ' ' + url)
+    PIL.Image.open(path)
 os.chdir('dist/data/tiles')
 os.unlink('../tiles.tgz')
 os.system('tar -zcvf ../tiles.tgz *')
