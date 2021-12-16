@@ -85,6 +85,7 @@ module.exports.mockWebglRenderer = function mockWebglRenderer(supported) {
     enable: noop('enable'),
     enableVertexAttribArray: noop('enableVertexAttribArray'),
     finish: noop('finish'),
+    getError: noop('getError'),
     getExtension: incID('getExtension'),
     getParameter: function (key) {
       count('getParameter');
