@@ -361,7 +361,9 @@ var webgl_quadFeature = function (arg) {
         return;
       }
       quad.texture.bind(renderState);
-
+      if (context.getError() === context.OUT_OF_MEMORY) {
+        console.log('Insufficient GPU memory for texture');
+      }
       if (quad.opacity !== opacity) {
         opacity = quad.opacity;
         context.uniform1fv(renderState.m_material.shaderProgram()
