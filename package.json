@@ -37,7 +37,6 @@
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
-    "body-parser": "^1.19.0",
     "bootstrap": "^3.4.1",
     "bootswatch": "^3.4.1",
     "codemirror": "^5.54.0",
@@ -51,7 +50,6 @@
     "eslint-plugin-node": "^7.0.1",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "exports-loader": "^0.7.0",
     "expose-loader": "^0.7.5",
     "express": "^4.17.1",
     "file-loader": "^2.0.0",
@@ -86,7 +84,7 @@
     "phantomjs-prebuilt": "^2.1.5",
     "pug": "^3.0.1",
     "pug-lint": "^2.4.0",
-    "pug-loader": "^2.4.0",
+    "pug-load": "^3.0.0",
     "raw-body": "^2.1.6",
     "resemblejs": "^3.2.4",
     "semantic-release": "^17.4.3",
@@ -102,9 +100,7 @@
     "uglifyjs-webpack-plugin": "^1.2.5",
     "url-loader": "^1.1.2",
     "webpack": "^3.12.0",
-    "webpack-cli": "^2.1.3",
-    "webpack-merge": "^4.2.2",
-    "webpack-serve": "^1.0.2"
+    "webpack-merge": "^4.2.2"
   },
   "release": {
     "plugins": [

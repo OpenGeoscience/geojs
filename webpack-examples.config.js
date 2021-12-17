@@ -6,7 +6,7 @@ var base = require('./webpack.config');
 
 var rules = base.module.rules.concat([{
   test: /\.pug$/,
-  use: ['pug-loader']
+  use: ['pug-load']
 }, {
   test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
   use: ['url-loader?limit=10000&mimetype=application/font-woff']
