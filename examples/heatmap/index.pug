@@ -46,6 +46,9 @@ block append mainContent
     .form-group(title="Use either a Gaussian distribution or a solid circle with a blurred edge for each point.  If a Gaussian is used, the total radius is the sume of the radius and blur radius values.")
       label(for="gaussian") Gaussian Points
       input#gaussian(type="checkbox", placeholder="true", checked="checked")
+    .form-group(title="If true, scale the point size with zoom.  In this case, the radius is specified in pixels a zoom-level 0.")
+      label(for="scaleWithZoom") Scale With Zoom
+      input#scaleWithZoom(type="checkbox", placeholder="false")
     .form-group(title="Color Gradient.  Entries with intensities of 0 and 1 are needed to form a valid color gradient.")
       label Color Gradient
       table.gradient
