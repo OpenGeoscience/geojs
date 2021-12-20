@@ -1,5 +1,16 @@
 # GeoJS Change Log
 
+## Version 1.5.0
+
+### Features
+
+- Add scaleWithZoom option to heatmaps ([#1125](../../pull/1125))
+
+### Improvements
+
+- Automatically adjust heatmap update delay ([#1124](../../pull/1124))
+- Log if we can't allocate texture memory([#1116](../../pull/1116))
+
 ## Version 1.4.3
 
 ### Changes
