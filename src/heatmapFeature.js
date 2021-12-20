@@ -19,8 +19,11 @@ var transform = require('./transform');
  * @property {number} [minIntensity=null] Minimum intensity of the data.
  *   Minimum intensity must be a positive real number and is used to normalize
  *   all intensities within a dataset.  If `null`, it is computed.
- * @property {number} [updateDelay=1000] Delay in milliseconds after a zoom,
- *   rotate, or pan event before recomputing the heatmap.
+ * @property {number} [updateDelay=-1] Delay in milliseconds after a zoom,
+ *   rotate, or pan event before recomputing the heatmap.  If 0, this is double
+ *   the last render time.  If negative, it is roughly the last render time
+ *   plus the absolute value of the specified number of refresh intervals.
+ *   compute a delay based on the last heatmap render time.
  * @property {boolean|number|'auto'} [binned='auto'] If `true` or a number,
  *   spatially bin data as part of producing the heatmap.  If falsy, each
  *   datapoint stands on its own.  If `'auto'`, bin data if there are more data
@@ -76,7 +79,7 @@ var heatmapFeature = function (arg) {
   m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
   m_minIntensity = arg.minIntensity !== undefined ? arg.minIntensity : null;
   m_binned = arg.binned !== undefined ? arg.binned : 'auto';
-  m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
+  m_updateDelay = (arg.updateDelay || arg.updateDelay === 0) ? parseInt(arg.updateDelay, 10) : -1;
 
   /**
    * Get/Set maxIntensity.
@@ -121,7 +124,9 @@ var heatmapFeature = function (arg) {
    *
    * @param {number} [val] If not specified, return the current update delay.
    *    If specified, this is the delay in milliseconds after a zoom, rotate,
-   *    or pan event before recomputing the heatmap.
+   *    or pan event before recomputing the heatmap.  If 0, this is double the
+   *    last render time.  If negative, it is roughly the last render time plus
+   *    the absolute value of the specified number of refresh intervals.
    * @returns {number|this}
    */
   this.updateDelay = function (val) {

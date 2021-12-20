@@ -39,6 +39,7 @@ var canvas_heatmapFeature = function (arg) {
       m_heatMapTransform,
       s_init = this._init,
       s_update = this._update,
+      m_lastRenderDuration,
       m_renderTime = timestamp();
 
   /**
@@ -298,6 +299,7 @@ var canvas_heatmapFeature = function (arg) {
   this._renderOnCanvas = function (context2d, map) {
 
     if (m_renderTime.timestamp() < m_this.buildTime().timestamp()) {
+      let starttime = Date.now();
       var data = m_this.data() || [],
           radius = m_this.style('radius') + m_this.style('blurRadius'),
           binned = m_this.binned(),
@@ -350,6 +352,7 @@ var canvas_heatmapFeature = function (arg) {
       };
       m_renderTime.modified();
       layer.renderer().clearCanvas(false);
+      m_lastRenderDuration = Date.now() - starttime;
     }
 
     return m_this;
@@ -440,6 +443,14 @@ var canvas_heatmapFeature = function (arg) {
         parseFloat((rotation - m_heatMapPosition.rotation).toFixed(4)) !== 0 ||
         parseFloat(origin.x.toFixed(1)) !== 0 ||
         parseFloat(origin.y.toFixed(1)) !== 0) {
+      let delay = m_this.updateDelay();
+      if (delay < 0 && m_lastRenderDuration) {
+        delay = m_lastRenderDuration - Math.floor(1000 / 60 * delay);
+      } else if (m_lastRenderDuration) {
+        delay = m_lastRenderDuration * 2;
+      } else {
+        delay = 100;
+      }
       m_heatMapPosition.timeout = window.setTimeout(function () {
         m_heatMapPosition.timeout = undefined;
         m_this.buildTime().modified();

@@ -29,7 +29,7 @@ describe('canvas heatmap', function () {
     });
 
     it('Add feature to a layer', function () {
-      feature1 = layer.createFeature('heatmap')
+      feature1 = layer.createFeature('heatmap', {updateDelay: 1000})
         .data(testData)
         .intensity(function (d) {
           return d[0];
@@ -204,7 +204,7 @@ describe('canvas heatmap', function () {
       });
       it('updateDelay', function () {
         var heatmap = heatmapFeature({layer: layer});
-        expect(heatmap.updateDelay()).toBe(1000);
+        expect(heatmap.updateDelay()).toBe(-1);
         expect(heatmap.updateDelay(40)).toBe(heatmap);
         expect(heatmap.updateDelay()).toBe(40);
         heatmap = heatmapFeature({layer: layer, updateDelay: 50});
