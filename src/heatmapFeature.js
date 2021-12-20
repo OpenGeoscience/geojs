@@ -19,8 +19,11 @@ var transform = require('./transform');
  * @property {number} [minIntensity=null] Minimum intensity of the data.
  *   Minimum intensity must be a positive real number and is used to normalize
  *   all intensities within a dataset.  If `null`, it is computed.
- * @property {number} [updateDelay=1000] Delay in milliseconds after a zoom,
- *   rotate, or pan event before recomputing the heatmap.
+ * @property {number} [updateDelay=-1] Delay in milliseconds after a zoom,
+ *   rotate, or pan event before recomputing the heatmap.  If 0, this is double
+ *   the last render time.  If negative, it is roughly the last render time
+ *   plus the absolute value of the specified number of refresh intervals.
+ *   compute a delay based on the last heatmap render time.
  * @property {boolean|number|'auto'} [binned='auto'] If `true` or a number,
  *   spatially bin data as part of producing the heatmap.  If falsy, each
  *   datapoint stands on its own.  If `'auto'`, bin data if there are more data
@@ -37,6 +40,11 @@ var transform = require('./transform');
  *   approximation.  The total weight of the gaussian area is approximately the
  *   `9/16 r^2`.  The sum of `radius + blurRadius` is used as the radius for
  *   the gaussian distribution.
+ * @property {boolean} [scaleWithZoom=false] If truthy, the value for radius
+ *   and blurRadius scale with zoom.  In this case, the values for radius and
+ *   blurRadius are the values at zoom-level zero.  If the scaled radius is
+ *   less than 0.5 or more than 8192 screen pixels, the heatmap will not
+ *   render.
  */
 
 /**
@@ -76,7 +84,7 @@ var heatmapFeature = function (arg) {
   m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
   m_minIntensity = arg.minIntensity !== undefined ? arg.minIntensity : null;
   m_binned = arg.binned !== undefined ? arg.binned : 'auto';
-  m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
+  m_updateDelay = (arg.updateDelay || arg.updateDelay === 0) ? parseInt(arg.updateDelay, 10) : -1;
 
   /**
    * Get/Set maxIntensity.
@@ -121,7 +129,9 @@ var heatmapFeature = function (arg) {
    *
    * @param {number} [val] If not specified, return the current update delay.
    *    If specified, this is the delay in milliseconds after a zoom, rotate,
-   *    or pan event before recomputing the heatmap.
+   *    or pan event before recomputing the heatmap.  If 0, this is double the
+   *    last render time.  If negative, it is roughly the last render time plus
+   *    the absolute value of the specified number of refresh intervals.
    * @returns {number|this}
    */
   this.updateDelay = function (val) {
@@ -233,7 +243,8 @@ var heatmapFeature = function (arg) {
           0.25: {r: 0, g: 0, b: 1, a: 0.5},
           0.5:  {r: 0, g: 1, b: 1, a: 0.6},
           0.75: {r: 1, g: 1, b: 0, a: 0.7},
-          1:    {r: 1, g: 0, b: 0, a: 0.8}}
+          1:    {r: 1, g: 0, b: 0, a: 0.8}},
+        scaleWithZoom: false
       },
       arg.style === undefined ? {} : arg.style
     );
