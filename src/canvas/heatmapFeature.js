@@ -73,15 +73,22 @@ var canvas_heatmapFeature = function (arg) {
   };
 
   /**
-   * Create circle for each data point.
+   * Create a circle to render at each data point.
    *
    * @returns {this}
    */
   this._createCircle = function () {
-    var circle, ctx, r, r2, blur, gaussian;
+    var circle, ctx, r, r2, blur, gaussian, scale;
     r = m_this.style('radius');
     blur = m_this.style('blurRadius');
     gaussian = m_this.style('gaussian');
+    scale = m_this.style('scaleWithZoom');
+    if (scale) {
+      let zoom = this.layer().map().zoom();
+      scale = Math.pow(2, zoom);
+      r *= scale;
+      blur *= scale;
+    }
     if (!m_this._circle || m_this._circle.gaussian !== gaussian ||
         m_this._circle.radius !== r || m_this._circle.blurRadius !== blur) {
       circle = m_this._circle = document.createElement('canvas');
@@ -307,9 +314,12 @@ var canvas_heatmapFeature = function (arg) {
           layer = m_this.layer(),
           mapSize = map.size();
 
+      if (m_this.style('scaleWithZoom')) {
+        radius *= Math.pow(2, map.zoom());
+      }
       /* Determine if we should bin the data */
       if (binned === true || binned === 'auto') {
-        binned = Math.max(Math.floor(radius / 8), 3);
+        binned = Math.max(Math.floor(radius / 8), Math.max(1.5, Math.min(3, radius / 2.5)));
         if (m_this.binned() === 'auto') {
           var numbins = (Math.ceil((mapSize.width + radius * 2) / binned) *
                          Math.ceil((mapSize.height + radius * 2) / binned));
@@ -327,20 +337,22 @@ var canvas_heatmapFeature = function (arg) {
       context2d.setTransform(1, 0, 0, 1, 0, 0);
       context2d.clearRect(0, 0, mapSize.width, mapSize.height);
       m_heatMapTransform = '';
-      map.scheduleAnimationFrame(m_this._setTransform, false);
-      layer.canvas().css({transform: ''});
+      if (radius > 0.5 && radius < 8192) {
+        map.scheduleAnimationFrame(m_this._setTransform, false);
+        layer.canvas().css({transform: ''});
 
-      m_this._createCircle();
-      m_this._computeGradient();
-      if (!binned) {
-        m_this._renderPoints(context2d, map, data, radius);
-      } else {
-        m_this._renderBinnedData(context2d, map, data, radius, binned);
+        m_this._createCircle();
+        m_this._computeGradient();
+        if (!binned) {
+          m_this._renderPoints(context2d, map, data, radius);
+        } else {
+          m_this._renderBinnedData(context2d, map, data, radius, binned);
+        }
+        canvas = layer.canvas()[0];
+        pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
+        m_this._colorize(pixelArray.data, m_this._grad);
+        context2d.putImageData(pixelArray, 0, 0);
       }
-      canvas = layer.canvas()[0];
-      pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
-      m_this._colorize(pixelArray.data, m_this._grad);
-      context2d.putImageData(pixelArray, 0, 0);
 
       m_heatMapPosition = {
         zoom: map.zoom(),

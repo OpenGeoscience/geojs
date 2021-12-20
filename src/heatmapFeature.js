@@ -40,6 +40,11 @@ var transform = require('./transform');
  *   approximation.  The total weight of the gaussian area is approximately the
  *   `9/16 r^2`.  The sum of `radius + blurRadius` is used as the radius for
  *   the gaussian distribution.
+ * @property {boolean} [scaleWithZoom=false] If truthy, the value for radius
+ *   and blurRadius scale with zoom.  In this case, the values for radius and
+ *   blurRadius are the values at zoom-level zero.  If the scaled radius is
+ *   less than 0.5 or more than 8192 screen pixels, the heatmap will not
+ *   render.
  */
 
 /**
@@ -238,7 +243,8 @@ var heatmapFeature = function (arg) {
           0.25: {r: 0, g: 0, b: 1, a: 0.5},
           0.5:  {r: 0, g: 1, b: 1, a: 0.6},
           0.75: {r: 1, g: 1, b: 0, a: 0.7},
-          1:    {r: 1, g: 0, b: 0, a: 0.8}}
+          1:    {r: 1, g: 0, b: 0, a: 0.8}},
+        scaleWithZoom: false
       },
       arg.style === undefined ? {} : arg.style
     );

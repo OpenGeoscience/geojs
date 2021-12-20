@@ -52,6 +52,7 @@ $(function () {
         ctlvalue = value ? value : 'adderall';
         break;
       case 'gaussian':
+      case 'scaleWithZoom':
         ctlvalue = value === 'true';
         heatmapOptions.style[key] = value;
         break;
@@ -100,7 +101,6 @@ $(function () {
           heatmapOptions[key] = ctlvalue = parseInt(value, 10);
         }
         break;
-      // add gaussian and binning when they are added as features
     }
     if (ctlvalue !== undefined) {
       $('#' + ctlkey).val(ctlvalue);
@@ -229,6 +229,7 @@ $(function () {
         fetch_data();
         break;
       case 'gaussian':
+      case 'scaleWithZoom':
         heatmapOptions.style[param] = processedValue;
         heatmap.style(param, processedValue);
         heatmap.draw();
