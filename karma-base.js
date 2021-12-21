@@ -222,9 +222,10 @@ var FirefoxPrefs = {
   'media.gmp-manager.url': ''
 };
 
-module.exports = function (config) {
-  webpack_config.plugins.push(function () {
-    this.plugin('done', function (stats) {
+/* If webpack of a test fails, stop rather than run some tests */
+class KarmaWarningsToErrorsWebpackPlugin {
+  apply(compiler) {
+    compiler.hooks.done.tap('KarmaWarningsToErrorsWebpackPlugin', (stats) => {
       if (stats.compilation.warnings.length) {
         // Log each of the warnings
         stats.compilation.warnings.forEach(function (warning) {
@@ -240,7 +241,12 @@ module.exports = function (config) {
         }];
       }
     });
-  });
+  }
+}
+
+module.exports = function (config) {
+  /* If webpack of a test fails, stop rather than run some tests */
+  webpack_config.plugins.push(new KarmaWarningsToErrorsWebpackPlugin());
   var newConfig = {
     autoWatch: false,
     files: [
@@ -312,12 +318,16 @@ module.exports = function (config) {
         }, FirefoxPrefs)
       }
     },
+    browserDisconnectTimeout: 30000,
+    browserDisconnectTolerance: 3,
     browserNoActivityTimeout: 300000,
     reporters: [
       'spec',  // we had used the 'progress' reporter in the past.
       'kjhtml'
     ],
-    // We could suppress passing results
+    /* enable for testing */
+    // logLevel: config.LOG_DEBUG,
+    /* We could suppress passing results */
     // specReporter = {suppressPassed: true, suppressSkipped: true},
     middleware: [
       'testimage',
@@ -330,7 +340,7 @@ module.exports = function (config) {
     ],
     preprocessors: {},
     frameworks: [
-      'jasmine', 'sinon'
+      'jasmine', 'sinon', 'webpack'
     ],
     client: {
       jasmine: {
@@ -339,9 +349,7 @@ module.exports = function (config) {
       }
     },
     webpack: {
-      /* webpack 4
-      mode: 'production',
-       */
+      mode: 'development',
       performance: {hints: false},
       cache: true,
       devtool: 'inline-source-map',

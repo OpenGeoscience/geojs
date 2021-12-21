@@ -1,7 +1,6 @@
 /* eslint-disable camelcase */
 
 var $ = require('jquery');
-var vgl = require('vgl');
 var webglRenderer = require('../webgl/webglRenderer');
 
 var _renderWindow, _supported;
@@ -190,6 +189,8 @@ module.exports.mockWebglRenderer = function mockWebglRenderer(supported) {
  * @alias geo.util.restoreWebglRenderer
  */
 module.exports.restoreWebglRenderer = function () {
+  var vgl = require('vgl');
+
   if (vgl._mocked) {
     vgl.renderWindow = _renderWindow;
     webglRenderer.supported = _supported;

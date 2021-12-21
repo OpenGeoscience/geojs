@@ -75,10 +75,10 @@ describe('renderers', function () {
 
       var oldd3 = __webpack_modules__[require.resolveWeak('d3')];  // eslint-disable-line
       __webpack_modules__[require.resolveWeak('d3')] = null;  // eslint-disable-line
-      delete __webpack_require__.c[require.resolveWeak('d3')];  // eslint-disable-line
+      delete require.cache[require.resolveWeak('d3')];  // eslint-disable-line
       expect(geo.checkRenderer('svg')).toBe(null);
       __webpack_modules__[require.resolveWeak('d3')] = oldd3;  // eslint-disable-line
-      delete __webpack_require__.c[require.resolveWeak('d3')];  // eslint-disable-line
+      delete require.cache[require.resolveWeak('d3')];  // eslint-disable-line
       expect(geo.checkRenderer('svg')).toBe('svg');
 
       mockWebglRenderer(false);
