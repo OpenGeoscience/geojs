@@ -12,22 +12,28 @@ examples.forEach(function (json) {
   // make docco documentation in:
   //   dist/examples/<name>/docs/
   if (json.main) {
-    docco({
+    const options = {
       args: [json.main],
       output: path.resolve(json.output, 'docs'),
       layout: 'classic'
-    }, function () {
+    };
+    // docco 0.8.1 requires this weirdness
+    options.opts = () => options;
+    docco(options, function () {
       // simplify the docco output to reduce the output size by
       // removing the unnecessary public/ directory
       fs.removeSync(path.resolve(json.output, 'docs', 'public'));
     });
   }
   (json.docJs || []).forEach(function (name) {
-    docco({
+    const options = {
       args: [path.resolve(json.dir, name)],
       output: path.resolve(json.output, 'docs'),
       layout: 'classic'
-    }, function () {
+    };
+    // docco 0.8.1 requires this weirdness
+    options.opts = () => options;
+    docco(options, function () {
       // simplify the docco output to reduce the output size by
       // removing the unnecessary public/ directory
       fs.removeSync(path.resolve(json.output, 'docs', 'public'));
