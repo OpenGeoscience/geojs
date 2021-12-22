@@ -93,7 +93,7 @@ var osmLayer = function (arg) {
    */
   this.source = function (source) {
     if (source === undefined) {
-      for (let key in osmLayer.tileSources) {
+      for (const key in osmLayer.tileSources) {
         if (osmLayer.tileSources[key].url === m_this.url()) {
           return key;
         }
@@ -126,13 +126,13 @@ osmLayer.defaults = $.extend({}, tileLayer.defaults, {
 /* Stamen's website (http://maps.stamen.com) as of 2019-08-28 says that the
  * maps they host may be used free of charge.  For http access, use a url like
  * http://{s}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png */
-let StamenAttribution = 'Map tiles by <a href="http://stamen.com">Stamen ' +
+const StamenAttribution = 'Map tiles by <a href="http://stamen.com">Stamen ' +
   'Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">' +
   'CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap' +
   '</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.';
 
 /* Per Carto's website regarding basemap attribution: https://carto.com/help/working-with-data/attribution/#basemaps */
-let CartoAttribution = '<a href="https://carto.com"> Carto</a> ' + 'Contributors <a href="https://www.openstreetmap.org/"> OpenStreetMap</a>';
+const CartoAttribution = '<a href="https://carto.com"> Carto</a> ' + 'Contributors <a href="https://www.openstreetmap.org/"> OpenStreetMap</a>';
 
 /**
  * This is a list of known tile sources.  It can be added to via

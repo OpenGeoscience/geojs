@@ -319,25 +319,25 @@ var trackFeature = function (arg) {
     });
     if (hasMarker && !m_markerFeature) {
       if (!(registry.registries.features[m_this.layer().rendererName()] || {}).marker) {
-        let renderer = registry.rendererForFeatures(['marker']);
+        const renderer = registry.rendererForFeatures(['marker']);
         m_markerLayer = registry.createLayer('feature', m_this.layer().map(), {renderer: renderer});
         m_this.layer().addChild(m_markerLayer);
         m_this.layer().node().append(m_markerLayer.node());
       }
       m_markerFeature = (m_markerLayer || m_this.layer()).createFeature('marker');
-      let df = m_this.dependentFeatures();
+      const df = m_this.dependentFeatures();
       df.push(m_markerFeature);
       m_this.dependentFeatures(df);
     }
     if (hasText && !m_textFeature) {
       if (!(registry.registries.features[m_this.layer().rendererName()] || {}).text) {
-        let renderer = registry.rendererForFeatures(['text']);
+        const renderer = registry.rendererForFeatures(['text']);
         m_textLayer = registry.createLayer('feature', m_this.layer().map(), {renderer: renderer});
         m_this.layer().addChild(m_textLayer);
         m_this.layer().node().append(m_textLayer.node());
       }
       m_textFeature = (m_textLayer || m_this.layer()).createFeature('text');
-      let df = m_this.dependentFeatures();
+      const df = m_this.dependentFeatures();
       df.push(m_textFeature);
       m_this.dependentFeatures(df);
     }
@@ -348,7 +348,7 @@ var trackFeature = function (arg) {
         .gcs(m_this.gcs())
         .data(data)
         .position(m_this._headPosition);
-      let radiusFunc = m_markerFeature.style.get('radius');
+      const radiusFunc = m_markerFeature.style.get('radius');
       m_markerFeature.style('radius', (d, i) => {
         if (m_tracks.text[i] || m_tracks.startPosition[i].posidx < 0) {
           return 0;
@@ -728,7 +728,7 @@ var trackFeature = function (arg) {
    *    if the point was found in the current part of the track.
    */
   this.pointSearch = function (p) {
-    let result = m_lineFeatures.current.pointSearch(p),
+    const result = m_lineFeatures.current.pointSearch(p),
         past = m_lineFeatures.past.pointSearch(p),
         future = m_lineFeatures.future.pointSearch(p),
         marker = m_markerFeature ? m_markerFeature.pointSearch(p) : {index: []};
@@ -759,7 +759,7 @@ var trackFeature = function (arg) {
    *    the current part of the track.
    */
   this.polygonSearch = function (poly, opts) {
-    let result = m_lineFeatures.current.polygonSearch(poly, opts),
+    const result = m_lineFeatures.current.polygonSearch(poly, opts),
         past = m_lineFeatures.past.polygonSearch(poly, opts),
         future = m_lineFeatures.future.polygonSearch(poly, opts),
         marker = m_markerFeature ? m_markerFeature.polygonSearch(poly, opts) : {index: []};

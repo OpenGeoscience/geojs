@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-/* eslint-disable underscore/prefer-constant */
 
 var $ = require('jquery');
 var vgl = require('vgl');

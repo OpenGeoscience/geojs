@@ -209,8 +209,8 @@ var choroplethFeature = function (arg) {
     newFeature
       .polygon(function (d) {
         return {
-          'outer': d.coordinates[0],
-          'inner': d.coordinates[1] // undefined but ok
+          outer: d.coordinates[0],
+          inner: d.coordinates[1] // undefined but ok
         };
       })
       .position(function (d) {
@@ -220,7 +220,7 @@ var choroplethFeature = function (arg) {
         };
       })
       .style({
-        'fillColor': fillColor
+        fillColor: fillColor
       });
 
     return newFeature;

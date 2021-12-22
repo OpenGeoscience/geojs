@@ -49,7 +49,7 @@ describe('geo.object', function () {
           foo = new CallCounter(evtData);
 
       expect(obj.geoIsOn('testevent')).toBe(false);
-      let handler = obj.geoOnce('testevent', foo.call);
+      const handler = obj.geoOnce('testevent', foo.call);
       expect(obj.geoIsOn('testevent')).toBe(true);
       expect(obj.geoIsOn('testevent', foo.call)).toBe(false);
       expect(obj.geoIsOn('testevent', handler)).toBe(true);

@@ -321,7 +321,7 @@ var webgl_pointFeature = function (arg) {
       } else {
         needsRefresh = true;
       }
-      let mod = m_this.modified;
+      const mod = m_this.modified;
       if (!needsRefresh) {
         // don't allow modified to be adjusted if we don't need to refresh
         m_this.modified = () => {};
@@ -362,25 +362,25 @@ var webgl_pointFeature = function (arg) {
         mat = vgl.material(),
         blend = vgl.blend(),
         geom = vgl.geometryData(),
-        sourcePositions = vgl.sourceDataP3fv({'name': 'pos'}),
+        sourcePositions = vgl.sourceDataP3fv({name: 'pos'}),
         sourceUnits = vgl.sourceDataAnyfv(
-          2, vgl.vertexAttributeKeysIndexed.One, {'name': 'unit'}),
+          2, vgl.vertexAttributeKeysIndexed.One, {name: 'unit'}),
         sourceRadius = vgl.sourceDataAnyfv(
-          1, vgl.vertexAttributeKeysIndexed.Two, {'name': 'radius'}),
+          1, vgl.vertexAttributeKeysIndexed.Two, {name: 'radius'}),
         sourceStrokeWidth = vgl.sourceDataAnyfv(
-          1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'strokeWidth'}),
+          1, vgl.vertexAttributeKeysIndexed.Three, {name: 'strokeWidth'}),
         sourceFillColor = vgl.sourceDataAnyfv(
-          3, vgl.vertexAttributeKeysIndexed.Four, {'name': 'fillColor'}),
+          3, vgl.vertexAttributeKeysIndexed.Four, {name: 'fillColor'}),
         sourceFill = vgl.sourceDataAnyfv(
-          1, vgl.vertexAttributeKeysIndexed.Five, {'name': 'fill'}),
+          1, vgl.vertexAttributeKeysIndexed.Five, {name: 'fill'}),
         sourceStrokeColor = vgl.sourceDataAnyfv(
-          3, vgl.vertexAttributeKeysIndexed.Six, {'name': 'strokeColor'}),
+          3, vgl.vertexAttributeKeysIndexed.Six, {name: 'strokeColor'}),
         sourceStroke = vgl.sourceDataAnyfv(
-          1, vgl.vertexAttributeKeysIndexed.Seven, {'name': 'stroke'}),
+          1, vgl.vertexAttributeKeysIndexed.Seven, {name: 'stroke'}),
         sourceAlpha = vgl.sourceDataAnyfv(
-          1, vgl.vertexAttributeKeysIndexed.Eight, {'name': 'fillOpacity'}),
+          1, vgl.vertexAttributeKeysIndexed.Eight, {name: 'fillOpacity'}),
         sourceStrokeOpacity = vgl.sourceDataAnyfv(
-          1, vgl.vertexAttributeKeysIndexed.Nine, {'name': 'strokeOpacity'}),
+          1, vgl.vertexAttributeKeysIndexed.Nine, {name: 'strokeOpacity'}),
         primitive;
     m_modelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix', m_origin);
 

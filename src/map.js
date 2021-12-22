@@ -214,7 +214,7 @@ var map = function (arg) {
          * existing requestAnimationFrame.  By using a property of window,
          * tests can override this if needed. */
         if (queue.length && queue[0] !== m_animationQueue[0]) {
-          window['cancelAnimationFrame'](m_animationQueue[0]);
+          window['cancelAnimationFrame'](m_animationQueue[0]); // eslint-disable-line dot-notation
         }
         for (var i = queue.length ? 1 : 0; i < m_animationQueue.length; i += 1) {
           queue.push(m_animationQueue[i]);
@@ -1897,7 +1897,7 @@ var map = function (arg) {
        * explicitly using window.requestAnimationFrame, we prevent the
        * stripping of 'window' off of the reference and allow our tests to
        * override this if needed. */
-      m_animationQueue.push(window['requestAnimationFrame'](processAnimationFrame));
+      m_animationQueue.push(window['requestAnimationFrame'](processAnimationFrame)); // eslint-disable-line dot-notation
     }
     var pos = m_animationQueue.indexOf(callback, 1);
     if (pos >= 0) {

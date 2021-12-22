@@ -4,10 +4,10 @@ describe('svgGeoJSON', function () {
   var geo = require('../test-utils').geo;
 
   var obj = {
-    'features': [{
-      'geometry': {
-        'type': 'LineString',
-        'coordinates': [
+    features: [{
+      geometry: {
+        type: 'LineString',
+        coordinates: [
           [-101.744384765625, 39.32155002466662],
           [-101.5521240234375, 39.330048552942415],
           [-101.40380859375, 39.330048552942415],
@@ -36,27 +36,27 @@ describe('svgGeoJSON', function () {
           [-97.635498046875, 38.87392853923629]
         ]
       },
-      'properties': {
-        'strokeColor': {'r': 0, 'g': 1, 'b': 0},
-        'strokeWidth': 3,
-        'fill': false
+      properties: {
+        strokeColor: {r: 0, g: 1, b: 0},
+        strokeWidth: 3,
+        fill: false
       },
-      'type': 'Feature'
+      type: 'Feature'
     }, {
-      'type': 'Feature',
-      'geometry': {
-        'type': 'Point',
-        'coordinates': [-80.83775386582222, 35.24980190252168]
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [-80.83775386582222, 35.24980190252168]
       },
-      'properties': {
-        'name': 'DOUBLE OAKS CENTER',
-        'address': '1326 WOODWARD AV',
-        'radius': 10,
-        'fillColor': 'red',
-        'stroke': false
+      properties: {
+        name: 'DOUBLE OAKS CENTER',
+        address: '1326 WOODWARD AV',
+        radius: 10,
+        fillColor: 'red',
+        stroke: false
       }
     }],
-    'type': 'FeatureCollection'
+    type: 'FeatureCollection'
   };
 
   var myMap;
@@ -72,8 +72,8 @@ describe('svgGeoJSON', function () {
   it('svg GeoJSON test', function (done) {
     var mapOptions = {center: {x: -105.0, y: 40.0}, zoom: 3.5};
     myMap = common.createOsmMap(mapOptions, {}, true);
-    var layer = myMap.createLayer('feature', {'renderer': 'svg'});
-    var reader = geo.createFileReader('geojsonReader', {'layer': layer});
+    var layer = myMap.createLayer('feature', {renderer: 'svg'});
+    var reader = geo.createFileReader('geojsonReader', {layer: layer});
     reader.read(obj, function () {
       myMap.draw();
       imageTest.imageTest('svgGeoJson', null, 0.0015, done, myMap.onIdle, 0, 2);

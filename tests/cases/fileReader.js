@@ -11,7 +11,7 @@ describe('geo.fileReader', function () {
       var map, layer, reader;
       map = createMap();
       layer = map.createLayer('feature');
-      reader = geo.fileReader({'layer': layer});
+      reader = geo.fileReader({layer: layer});
       expect(reader instanceof geo.fileReader).toBe(true);
       expect(function () {
         geo.fileReader();
@@ -24,7 +24,7 @@ describe('geo.fileReader', function () {
       var map, layer, reader;
       map = createMap();
       layer = map.createLayer('feature');
-      reader = geo.fileReader({'layer': layer});
+      reader = geo.fileReader({layer: layer});
       expect(reader.layer()).toBe(layer);
     });
   });
@@ -34,7 +34,7 @@ describe('geo.fileReader', function () {
       var map, layer, reader;
       map = createMap();
       layer = map.createLayer('feature');
-      reader = geo.fileReader({'layer': layer});
+      reader = geo.fileReader({layer: layer});
       // the default canRead implementation returns false
       expect(reader.canRead('')).toBe(false);
     });
@@ -42,7 +42,7 @@ describe('geo.fileReader', function () {
       var map, layer, reader;
       map = createMap();
       layer = map.createLayer('feature');
-      reader = geo.fileReader({'layer': layer});
+      reader = geo.fileReader({layer: layer});
       expect(reader.read('', function (result) {
         expect(result).toBe(false);
         done();
@@ -55,7 +55,7 @@ describe('geo.fileReader', function () {
       var map, layer, reader, file, progress;
       map = createMap();
       layer = map.createLayer('feature');
-      reader = geo.fileReader({'layer': layer});
+      reader = geo.fileReader({layer: layer});
       // The PhantomJS browser doesn't support `new File`, so use `new Blob`
       file = new Blob(['This is ', 'a test'], {type: 'text/plain'});
       file.lastModifiedDate = new Date();

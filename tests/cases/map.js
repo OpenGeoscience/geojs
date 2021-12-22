@@ -93,7 +93,7 @@ describe('geo.core.map', function () {
   describe('Check class accessors', function () {
     it('clampBounds', function () {
       var m = createMap();
-      var axes = {'X': false, 'Y': true};
+      var axes = {X: false, Y: true};
       $.each(axes, function (axis, defaultSetting) {
         var func = m['clampBounds' + axis];
         expect(func()).toBe(defaultSetting);

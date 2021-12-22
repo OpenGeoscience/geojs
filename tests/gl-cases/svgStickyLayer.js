@@ -20,8 +20,8 @@ describe('svgStickyLayer', function () {
     var width = myMap.node().width(), height = myMap.node().height();
 
     // create two layers
-    var fixedLayer = myMap.createLayer('feature', {'renderer' : 'svg', 'sticky': false}),
-        movingLayer = myMap.createLayer('feature', {'renderer': 'svg', 'sticky': true}),
+    var fixedLayer = myMap.createLayer('feature', {renderer: 'svg', sticky: false}),
+        movingLayer = myMap.createLayer('feature', {renderer: 'svg', sticky: true}),
         fixedSvg = fixedLayer.canvas(),
         movingSvg = movingLayer.canvas();
 

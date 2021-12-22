@@ -12,7 +12,7 @@ describe('path feature', function () {
   beforeEach(function () {
     mockAnimationFrame();
     map = createMap();
-    layer = map.createLayer('feature', {'features': ['path']});
+    layer = map.createLayer('feature', {features: ['path']});
   });
 
   afterEach(function () {

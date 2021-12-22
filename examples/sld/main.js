@@ -157,9 +157,9 @@ var utility = {
     ));
     $('StyledLayerDescriptor', xml)
       .attr({
-        'version': '1.0.0',
+        version: '1.0.0',
         'xsi:schemaLocation': 'http://www.opengis.net/sld StyledLayerDescriptor.xsd',
-        'xmlns': 'http://www.opengis.net/sld',
+        xmlns: 'http://www.opengis.net/sld',
         'xmlns:ogc': 'http://www.opengis.net/ogc',
         'xmlns:xlink': 'http://www.w3.org/1999/xlink',
         'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance'
@@ -200,7 +200,7 @@ var utility = {
       $(xml)
         .find('ColorMap')
         .attr({
-          'type': 'intervals'
+          type: 'intervals'
         });
     }
 
@@ -230,19 +230,19 @@ var utility = {
         bb.right + ',' + bb.top;
       // Set the WMS server parameters
       var params = {
-        'SERVICE': 'WMS',
-        'VERSION': '1.3.0',
-        'REQUEST': 'GetMap',
-        'LAYERS': layer_name, // US Elevation
-        'STYLES': '',
-        'BBOX': bbox_mercator,
-        'WIDTH': 256, //Use 256x256 tiles
-        'HEIGHT': 256,
-        'FORMAT': 'image/png',
-        'TRANSPARENT': true,
-        'SRS': projection,
-        'TILED': true,
-        'SLD_BODY': sld
+        SERVICE: 'WMS',
+        VERSION: '1.3.0',
+        REQUEST: 'GetMap',
+        LAYERS: layer_name, // US Elevation
+        STYLES: '',
+        BBOX: bbox_mercator,
+        WIDTH: 256, //Use 256x256 tiles
+        HEIGHT: 256,
+        FORMAT: 'image/png',
+        TRANSPARENT: true,
+        SRS: projection,
+        TILED: true,
+        SLD_BODY: sld
       };
       // OpenGeo Demo Web Map Service
       return baseUrl + (baseUrl.indexOf('?') >= 0 ? '&' : '?') + $.param(params);

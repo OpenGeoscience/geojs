@@ -111,11 +111,11 @@ var markerFeature = function (arg) {
     pts = m_this.data().map(function (d, i) {
       var pt = position(d, i);
 
-      let r = radius(d, i),
-          swz = scaleWithZoom(d, i),
+      let swz = scaleWithZoom(d, i);
+      const r = radius(d, i),
           s = strokeWidth(d, i),
           so = Math.sign(strokeOffset(d, i));
-      let rwiths = r + s * (so + 1) / 2,  // radius with stroke
+      const rwiths = r + s * (so + 1) / 2,  // radius with stroke
           rwos = r + s * (so - 1) / 2;  // radius without stroke
       swz = markerFeature.scaleMode[swz] || (swz >= 1 && swz <= 3 ? swz : 0);
       switch (swz) {
@@ -155,7 +155,7 @@ var markerFeature = function (arg) {
    */
   this._approximateMaxRadius = function (zoom) {
     m_this._updateRangeTree();
-    let zoomFactor = Math.pow(2, zoom);
+    const zoomFactor = Math.pow(2, zoom);
     return Math.max(m_maxFixedRadius + m_maxZoomStroke * zoomFactor, m_maxZoomRadius * zoomFactor);
   };
 
@@ -344,10 +344,10 @@ var markerFeature = function (arg) {
       var d = data[i];
       let p = m_this.position()(d, i);
       let rad = radius(data[i], i),
-          swz = scaleWithZoom(data[i], i),
-          so = strokeOffset(data[i], i),
+          swz = scaleWithZoom(data[i], i);
+      const so = strokeOffset(data[i], i),
           s = swz ? strokeWidth(data[i], i) : 0;
-      let rwos = rad + s * (so - 1) / 2;  // radius without stroke
+      const rwos = rad + s * (so - 1) / 2;  // radius without stroke
       swz = markerFeature.scaleMode[swz] || (swz >= 1 && swz <= 3 ? swz : 0);
       rad = rwos + s;
       switch (swz) {
@@ -363,7 +363,7 @@ var markerFeature = function (arg) {
       }
       if (rad) {
         p = map.gcsToDisplay(p, fgcs);
-        let dist = util.distanceToPolygon2d(p, poly);
+        const dist = util.distanceToPolygon2d(p, poly);
         if (dist >= rad || (dist >= 0 && opts.partial === 'center') || (dist >= -rad && opts.partial && opts.partial !== 'center')) {
           found.push(d);
           ifound.push(i);

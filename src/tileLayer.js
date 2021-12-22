@@ -121,10 +121,10 @@ function m_getTileSubdomain(x, y, z, subdomains) {
  * @private.
  */
 function m_tileUrlFromTemplate(base) {
-  var xPattern = new RegExp(/\$?\{[xX]\}/g),
-      yPattern = new RegExp(/\$?\{[yY]\}/g),
-      zPattern = new RegExp(/\$?\{[zZ]\}/g),
-      sPattern = new RegExp(/\$?\{(s|S|[sS]:[^{}]+|[^-{}]-[^-{}]|([^,{}]+,)+[^,{}]+)\}/);
+  var xPattern = /\$?\{[xX]\}/g,
+      yPattern = /\$?\{[yY]\}/g,
+      zPattern = /\$?\{[zZ]\}/g,
+      sPattern = /\$?\{(s|S|[sS]:[^{}]+|[^-{}]-[^-{}]|([^,{}]+,)+[^,{}]+)\}/;
   var url = base
       .replace(new RegExp(sPattern, 'g'), '{s}')
       .replace(xPattern, '{x}')

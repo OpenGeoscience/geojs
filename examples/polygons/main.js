@@ -67,7 +67,7 @@ $.getJSON(query.url || '../../data/land_polygons.json').done(function (data) {
       }
       evt.data.hover = evt.eventID;
       if (evt.top) {
-        let data = this.data();
+        const data = this.data();
         for (let i = 0; i < data.length; i += 1) {
           if (data[i].hover && data[i].hover !== evt.eventID) {
             data[i].hover = false;

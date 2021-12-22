@@ -872,13 +872,13 @@ var isolineFeature = function (arg) {
  */
 isolineFeature.rotationFunction = function (mode, map) {
   var functionList = {
-    'higher': function (d) {
+    higher: function (d) {
       return d.rotation;
     },
-    'lower': function (d) {
+    lower: function (d) {
       return d.rotation + Math.PI;
     },
-    'map': function (d) {
+    map: function (d) {
       var r = d.rotation,
           rt = util.wrapAngle(r, true);
       if (rt > Math.PI / 2 || rt < -Math.PI / 2) {
@@ -886,7 +886,7 @@ isolineFeature.rotationFunction = function (mode, map) {
       }
       return r;
     },
-    'screen': function (d) {
+    screen: function (d) {
       var r = d.rotation,
           rt = util.wrapAngle(r + map.rotation(), true);
       if (rt > Math.PI / 2 || rt < -Math.PI / 2) {

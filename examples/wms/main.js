@@ -22,18 +22,18 @@ $(function () {
 
       // Set the WMS server parameters
       var params = {
-        'SERVICE': 'WMS',
-        'VERSION': '1.3.0',
-        'REQUEST': 'GetMap',
-        'LAYERS': 'topp:states',  // US Population
-        'STYLES': '',
-        'BBOX': bbox_mercator,
-        'WIDTH': 256, //Use 256x256 tiles
-        'HEIGHT': 256,
-        'FORMAT': 'image/png',
-        'TRANSPARENT': true,
-        'SRS': projection,
-        'TILED': true
+        SERVICE: 'WMS',
+        VERSION: '1.3.0',
+        REQUEST: 'GetMap',
+        LAYERS: 'topp:states',  // US Population
+        STYLES: '',
+        BBOX: bbox_mercator,
+        WIDTH: 256, //Use 256x256 tiles
+        HEIGHT: 256,
+        FORMAT: 'image/png',
+        TRANSPARENT: true,
+        SRS: projection,
+        TILED: true
       };
 
       // OpenGeo Demo Web Map Service

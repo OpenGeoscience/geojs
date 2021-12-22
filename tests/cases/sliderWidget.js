@@ -10,11 +10,11 @@ xdescribe('zoom slider', function () {
 
   beforeEach(function () {
     map = createMap({
-      'center': [0, 0],
-      'zoom': 2,
-      'clampZoom': false,
-      'clampBoundsX': false,
-      'clampBoundsY': false
+      center: [0, 0],
+      zoom: 2,
+      clampZoom: false,
+      clampBoundsX: false,
+      clampBoundsY: false
     }, {width: '500px', height: '400px'});
     map.createLayer('ui').createWidget('slider');
     map.draw();

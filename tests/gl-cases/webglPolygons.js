@@ -2452,8 +2452,8 @@ describe('webglPolygons', function () {
 
   function polygonMap() {
     var states = [{
-      'type': 'Polygon',
-      'coordinates': [[
+      type: 'Polygon',
+      coordinates: [[
         [-84.32281494140625, 34.9895035675793],
         [-84.29122924804688, 35.21981940793435],
         [-84.24041748046875, 35.25459097465022],

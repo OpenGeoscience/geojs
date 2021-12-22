@@ -59,7 +59,7 @@ $(function () {
     }
     var val = data[evt.index].value;
     if (evt.mouse.buttonsDown.left) {
-      var cycle = {'D': 'R', 'R': '', '': 'D'};
+      var cycle = {D: 'R', R: '', '': 'D'};
       val = cycle[cycle[val] !== undefined ? val : ''];
     } else if (evt.mouse.buttonsDown.right) {
       val = '';

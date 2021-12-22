@@ -140,11 +140,11 @@ var webgl_meshColored = function (arg) {
         posAttr = vgl.vertexAttribute('pos'),
         valueAttr = vgl.vertexAttribute('value'),
         opacityAttr = vgl.vertexAttribute('opacity'),
-        sourcePositions = vgl.sourceDataP3fv({'name': 'pos'}),
+        sourcePositions = vgl.sourceDataP3fv({name: 'pos'}),
         sourceValues = vgl.sourceDataAnyfv(
-          1, vgl.vertexAttributeKeysIndexed.One, {'name': 'value'}),
+          1, vgl.vertexAttributeKeysIndexed.One, {name: 'value'}),
         sourceOpacity = vgl.sourceDataAnyfv(
-          1, vgl.vertexAttributeKeysIndexed.Two, {'name': 'opacity'}),
+          1, vgl.vertexAttributeKeysIndexed.Two, {name: 'opacity'}),
         primitive = new vgl.triangles();
     m_modelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix');
 

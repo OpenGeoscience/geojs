@@ -251,11 +251,11 @@ var legendWidget = function (arg) {
       .attr('rx', 3)
       .attr('ry', 3)
       .style({
-        'stroke': 'black',
+        stroke: 'black',
         'stroke-width': '1.5px',
-        'fill': 'white',
+        fill: 'white',
         'fill-opacity': 0.75,
-        'display': 'none'
+        display: 'none'
       });
     m_group.on('mousedown', function () {
       d3.event.stopPropagation();

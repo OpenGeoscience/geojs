@@ -166,9 +166,7 @@ var object = function () {
    *   the handler that was passed to the function.
    */
   this.geoOnce = function (event, handler) {
-    let wrapper;
-
-    wrapper = function (args) {
+    const wrapper = function (args) {
       m_this.geoOff(event, wrapper);
       handler.call(m_this, args);
     };

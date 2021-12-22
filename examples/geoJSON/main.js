@@ -29,7 +29,7 @@ $(function () {
   map.draw();
 
   // Initialize the json reader.
-  var reader = geo.createFileReader('geojsonReader', {'layer': layer});
+  var reader = geo.createFileReader('geojsonReader', {layer: layer});
 
   // At this point we could just attach the reader to the map like
   // this:
