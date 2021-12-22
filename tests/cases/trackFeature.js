@@ -138,13 +138,13 @@ describe('geo.trackFeature', function () {
         .time(function (d, i, t, j) { return d; })
         .style('text', function (d, i) { return i % 2 ? testTracks[i].id : undefined; });
       track._build();
-      sinon.stub(layer.features()[1], 'modified', function () {});
+      sinon.stub(layer.features()[1], 'modified').callsFake(function () {});
       track.modified();
       expect(layer.features()[1].modified.calledOnce).toBe(true);
       layer.features()[1].modified.restore();
     });
     it('draw', function () {
-      sinon.stub(layer.features()[1], 'draw', function () {});
+      sinon.stub(layer.features()[1], 'draw').callsFake(function () {});
       track.draw();
       expect(layer.features()[1].draw.calledOnce).toBe(true);
       layer.features()[1].draw.restore();

@@ -7,7 +7,7 @@ describe('geo.featureLayer', function () {
   'use strict';
 
   beforeEach(function () {
-    sinon.stub(console, 'log', function () {});
+    sinon.stub(console, 'log').callsFake(function () {});
   });
   afterEach(function () {
     console.log.restore();
@@ -51,7 +51,7 @@ describe('geo.featureLayer', function () {
       layer = map.createLayer('feature', {renderer: 'svg'});
       expect(layer._update()).toBe(layer);
       var feat = layer.createFeature('point');
-      sinon.stub(feat, '_update', function () {});
+      sinon.stub(feat, '_update').callsFake(function () {});
       expect(layer._update()).toBe(layer);
       expect(feat._update.calledOnce).toBe(true);
     });
@@ -86,15 +86,15 @@ describe('geo.featureLayer', function () {
       expect(layer.features().length).toBe(2);
       layer.removeFeature(feat3);
       expect(layer.features().length).toBe(2);
-      sinon.stub(feat2, '_exit', function () {});
+      sinon.stub(feat2, '_exit').callsFake(function () {});
       layer.removeFeature(feat2);
       expect(layer.features().length).toBe(1);
       expect(feat2._exit.calledOnce).toBe(false);
       feat2._exit.restore();
     });
     it('deleteFeature', function () {
-      sinon.stub(feat1, '_exit', function () {});
-      sinon.stub(feat2, '_exit', function () {});
+      sinon.stub(feat1, '_exit').callsFake(function () {});
+      sinon.stub(feat2, '_exit').callsFake(function () {});
       layer.deleteFeature(feat2);
       expect(layer.features().length).toBe(1);
       expect(feat2._exit.calledOnce).toBe(false);
@@ -165,7 +165,7 @@ describe('geo.featureLayer', function () {
       expect(layer.node().hasClass('active')).toBe(true);
     });
     it('draw', function () {
-      sinon.stub(feat1, 'draw', function () {});
+      sinon.stub(feat1, 'draw').callsFake(function () {});
       expect(layer.draw()).toBe(layer);
       expect(feat1.draw.calledOnce).toBe(true);
     });

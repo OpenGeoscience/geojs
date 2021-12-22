@@ -51,7 +51,7 @@ describe('examples', function () {
       describe('Test ' + exampleName, function () {
         /* Load the example in the test iframe */
         beforeEach(function (done) {
-          sinon.stub(console, 'warn', function () {});
+          sinon.stub(console, 'warn').callsFake(function () {});
           $('#map').one('load', function () {
             /* allow logging to percolate through to our test environment */
             $('iframe#map')[0].contentWindow.console = console;

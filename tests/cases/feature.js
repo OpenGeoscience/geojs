@@ -7,7 +7,7 @@ describe('geo.feature', function () {
   'use strict';
 
   beforeEach(function () {
-    sinon.stub(console, 'warn', function () {});
+    sinon.stub(console, 'warn').callsFake(function () {});
   });
   afterEach(function () {
     console.warn.restore();

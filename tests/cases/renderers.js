@@ -33,7 +33,7 @@ describe('renderers', function () {
 
   describe('basic functions', function () {
     beforeEach(function () {
-      sinon.stub(console, 'warn', function () {});
+      sinon.stub(console, 'warn').callsFake(function () {});
     });
     afterEach(function () {
       console.warn.restore();

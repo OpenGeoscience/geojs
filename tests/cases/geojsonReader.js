@@ -111,7 +111,7 @@ describe('geo.geojsonReader', function () {
       expect(reader.canRead('')).toBe(false);
       expect(reader.canRead(['not a geojson object'])).toBe(false);
       expect(reader.canRead(obj)).toBe(true);
-      // The PhantomJS browser don't support `new File`, so use `new Blob`
+      // This could be changed to `new File`
       file = new Blob([JSON.stringify(obj)], {type: 'text/plain'});
       file.lastModifiedDate = new Date();
       file.name = 'test.txt';

@@ -35,10 +35,10 @@ information is submitted to `codecov <https://codecov.io/github/OpenGeoscience/g
 Headless browser testing
 ------------------------
 
-Geojs uses `PhantomJS <http://phantomjs.org/>`_ for headless browser
-testing of core utilities.  Unfortunately because PhantomJS does not
-support webgl at this time, so code paths requiring webgl must be either
-mocked or run in an environment such as xvfb.
+Geojs uses headless Chrome and Firefox for headless browser testing of core
+utilities.  If the headless mode does not support webgl at this time, code
+paths requiring webgl must be either mocked or run in an environment such as
+xvfb.
 
 The headless unit tests should be placed in the ``tests/cases/``
 directory.  All javascript files in this directory will be detected

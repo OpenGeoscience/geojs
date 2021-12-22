@@ -16,7 +16,7 @@ describe('canvas heatmap', function () {
           [0.2, 42.2776, -83.7409]];
     var clock;
     beforeEach(function () {
-      clock = sinon.useFakeTimers();
+      clock = sinon.useFakeTimers({now: Date.now(), toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval']});
     });
     afterEach(function () {
       clock.restore();

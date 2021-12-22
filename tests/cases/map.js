@@ -6,7 +6,6 @@ describe('geo.core.map', function () {
   var $ = require('jquery');
   var geo = require('../test-utils').geo;
   var createMap = require('../test-utils').createMap;
-  var isPhantomJS = require('../test-utils').isPhantomJS;
   var closeToEqual = require('../test-utils').closeToEqual;
   var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
   var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
@@ -225,7 +224,7 @@ describe('geo.core.map', function () {
     });
     it('animationQueue with bad callback', function () {
       mockAnimationFrame();
-      var error = sinon.stub(console, 'error', function () {}),
+      var error = sinon.stub(console, 'error').callsFake(function () {}),
           m = createMap(),
           called = 0,
           start = Date.now();
@@ -849,98 +848,64 @@ describe('geo.core.map', function () {
         done();
       });
     });
-    // These tests won't work in PhantomJS.  See
-    // https://bugs.webkit.org/show_bug.cgi?id=17352, also 29305 and 129172.
-    if (!isPhantomJS()) {
-      it('mix-blend-mode multiply', function (done) {
-        layer2.node().css('mix-blend-mode', 'multiply');
-        m.screenshot().then(function (result) {
-          expect(result).not.toEqual(ss.basic);
-          expect(result).not.toEqual(ss.onelayer);
-          layer2.node().css('mix-blend-mode', 'initial');
-          done();
-        });
+    it('mix-blend-mode multiply', function (done) {
+      layer2.node().css('mix-blend-mode', 'multiply');
+      m.screenshot().then(function (result) {
+        expect(result).not.toEqual(ss.basic);
+        expect(result).not.toEqual(ss.onelayer);
+        layer2.node().css('mix-blend-mode', 'initial');
+        done();
       });
-      it('mix-blend-mode normal', function (done) {
-        layer2.node().css('mix-blend-mode', 'normal');
-        m.screenshot().then(function (result) {
-          expect(result).toEqual(ss.basic);
-          layer2.node().css('mix-blend-mode', 'initial');
-          done();
-        });
+    });
+    it('mix-blend-mode normal', function (done) {
+      layer2.node().css('mix-blend-mode', 'normal');
+      m.screenshot().then(function (result) {
+        expect(result).toEqual(ss.basic);
+        layer2.node().css('mix-blend-mode', 'initial');
+        done();
       });
-      it('layer background', function (done) {
-        var layer3 = m.createLayer('ui');
-        layer3.node().css('background-image', 'url(/data/tilefancy.png)');
-        m.screenshot().then(function (result) {
-          expect(result).not.toEqual(ss.basic);
-          expect(result).not.toEqual(ss.nobackground);
-          m.deleteLayer(layer3);
-          done();
-        });
-      }, 10000);
-      it('layer css background', function (done) {
-        geo.jQuery('head').append('<link rel="stylesheet" href="/testdata/test.css" type="text/css"/>');
-        var layer3 = m.createLayer('ui');
-        layer3.node().addClass('image-background');
-        layer3.opacity(0.5);
-        m.screenshot().then(function (result) {
-          expect(result).not.toEqual(ss.basic);
-          expect(result).not.toEqual(ss.nobackground);
-          m.deleteLayer(layer3);
-          done();
-        });
-      }, 10000);
-      it('layer missing css background', function (done) {
-        geo.jQuery('head').append('<link rel="stylesheet" href="/testdata/nosuchfile.css" type="text/css"/>');
-        var layer3 = m.createLayer('ui');
-        layer3.node().addClass('image-background');
-        layer3.opacity(0.5);
-        m.screenshot().then(function (result) {
-          expect(result).not.toEqual(ss.basic);
-          expect(result).not.toEqual(ss.nobackground);
-          m.deleteLayer(layer3);
-          done();
-        });
-      }, 10000);
-      /* Extra html */
-      it('screenshot with extra html', function (done) {
-        m.screenshot(null, undefined, undefined, {html: ['body']}).then(function (result) {
-          expect(result.substr(0, 22)).toBe('data:image/png;base64,');
-          done();
-        });
+    });
+    it('layer background', function (done) {
+      var layer3 = m.createLayer('ui');
+      layer3.node().css('background-image', 'url(/data/tilefancy.png)');
+      m.screenshot().then(function (result) {
+        expect(result).not.toEqual(ss.basic);
+        expect(result).not.toEqual(ss.nobackground);
+        m.deleteLayer(layer3);
+        done();
       });
-    }
-    // end of non-PhantomJS tests
-    if (isPhantomJS()) {
-      it('no html to image warning', function (done) {
-        var layer3 = m.createLayer('ui');
-        layer3.node().css('background-image', 'url(/data/tilefancy.png)');
-        var warn = sinon.stub(console, 'warn', function () {});
-        m.screenshot().then(function (result) {
-          expect(warn.calledOnce).toBe(true);
-          expect(result).toEqual(ss.basic);
-          m.deleteLayer(layer3);
-          console.warn.restore();
-          done();
-        });
-      }, 10000);
-      it('warnings on html to image failures', function (done) {
-        var layer3 = m.createLayer('ui');
-        layer3.node().css('background-image', 'url(/data/tilefancy.png)');
-        var warn = sinon.stub(console, 'warn', function () {});
-        sinon.stub(geo.util, 'htmlToImageSupported', function () { return true; });
-        m.screenshot().fail(function () {
-          expect(warn.calledOnce).toBe(true);
-          expect(warn.calledWith('Failed to convert screenshot to output')).toBe(true);
-          m.deleteLayer(layer3);
-          geo.util.htmlToImageSupported.restore();
-          console.warn.restore();
-          done();
-        });
-      }, 10000);
-    }
-    // end of PhantomJS tests
+    }, 10000);
+    it('layer css background', function (done) {
+      geo.jQuery('head').append('<link rel="stylesheet" href="/testdata/test.css" type="text/css"/>');
+      var layer3 = m.createLayer('ui');
+      layer3.node().addClass('image-background');
+      layer3.opacity(0.5);
+      m.screenshot().then(function (result) {
+        expect(result).not.toEqual(ss.basic);
+        expect(result).not.toEqual(ss.nobackground);
+        m.deleteLayer(layer3);
+        done();
+      });
+    }, 10000);
+    it('layer missing css background', function (done) {
+      geo.jQuery('head').append('<link rel="stylesheet" href="/testdata/nosuchfile.css" type="text/css"/>');
+      var layer3 = m.createLayer('ui');
+      layer3.node().addClass('image-background');
+      layer3.opacity(0.5);
+      m.screenshot().then(function (result) {
+        expect(result).not.toEqual(ss.basic);
+        expect(result).not.toEqual(ss.nobackground);
+        m.deleteLayer(layer3);
+        done();
+      });
+    }, 10000);
+    /* Extra html */
+    it('screenshot with extra html', function (done) {
+      m.screenshot(null, undefined, undefined, {html: ['body']}).then(function (result) {
+        expect(result.substr(0, 22)).toBe('data:image/png;base64,');
+        done();
+      });
+    });
     it('layers in a different order', function (done) {
       m.screenshot([layer2, layer1]).then(function (result) {
         // the order doesn't matter
@@ -1000,7 +965,7 @@ describe('geo.core.map', function () {
       m.exit();
       node.remove();
 
-      var warn = sinon.stub(console, 'warn', function () {});
+      var warn = sinon.stub(console, 'warn').callsFake(function () {});
       expect(geo.map.create({})).toBe(null);
       expect(warn.calledTwice).toBe(true);
       expect(warn.calledWith('map creation requires a node')).toBe(true);

@@ -18,7 +18,7 @@ describe('tutorials', function () {
     describe('Test ' + tutorialName, function () {
       /* Load the tutorial in the test iframe */
       beforeEach(function (done) {
-        sinon.stub(console, 'warn', function () {});
+        sinon.stub(console, 'warn').callsFake(function () {});
         $('#map').one('load', function () { window.setTimeout(done, 1); });
         $('#map').attr('src', '/tutorials/' + tutorialName + '/index.html');
       }, 150000);

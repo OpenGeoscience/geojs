@@ -262,7 +262,7 @@ module.exports = function (config) {
       '/built/': '/base/dist/built/'
     },
     browsers: [
-      'PhantomJS'
+      'ChromeHeadlessTouch'
     ],
     customLaunchers: {
       ChromeHeadlessTouch: {

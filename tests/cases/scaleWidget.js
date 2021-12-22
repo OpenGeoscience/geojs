@@ -92,7 +92,7 @@ describe('geo.gui.scaleWidget', function () {
       map.gcs('EPSG:3857').ingcs('EPSG:4326');
       widget.options('scale', 1);
       // Test with bad distance
-      sinon.stub(console, 'warn', function () {});
+      sinon.stub(console, 'warn').callsFake(function () {});
       widget.options('distance', function () { return NaN; });
       expect(console.warn.calledOnce).toBe(true);
       console.warn.restore();
@@ -107,7 +107,7 @@ describe('geo.gui.scaleWidget', function () {
       map = createMap();
       layer = map.createLayer('ui');
       widget = layer.createWidget('scale');
-      sinon.stub(widget, '_render', function () {});
+      sinon.stub(widget, '_render').callsFake(function () {});
       map.pan({x: 5, y: 0});
       expect(widget._render.calledOnce).toBe(true);
     });

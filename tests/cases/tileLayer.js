@@ -8,10 +8,8 @@ describe('geo.tileLayer', function () {
   var closeToEqual = require('../test-utils').closeToEqual;
   var _tileLayer = geo.tileLayer;
 
-  /*
-   * Use html rendering for all of these tests.  That is what is occurring
-   * in phantomjs in any case.  This also reduces the console pollution.
-   * Renderer specific tests currently are handled in osmLayer.js.
+  /* Use html rendering for all of these tests.  Renderer specific tests
+   * currently are handled in osmLayer.js.
    */
   beforeEach(function () {
     geo.tileLayer = function (opts) {
@@ -657,7 +655,7 @@ describe('geo.tileLayer', function () {
     });
     describe('cacheSize', function () {
       beforeEach(function () {
-        sinon.stub(console, 'log', function () {});
+        sinon.stub(console, 'log').callsFake(function () {});
       });
       afterEach(function () {
         console.log.restore();
@@ -1529,7 +1527,7 @@ describe('geo.tileLayer', function () {
       it('invalid tile url', function (done) {
         var server = sinon.fakeServer.create();
         var spy = sinon.spy();
-        sinon.stub(console, 'warn', function () {});
+        sinon.stub(console, 'warn').callsFake(function () {});
 
         var l = layer_html({url: function () { return 'not a valid url'; }}), t;
         t = l._getTileCached({x: 0, y: 0, level: 0});

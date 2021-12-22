@@ -103,7 +103,7 @@ describe('geo.annotation', function () {
       expect(ann.coordinates()).toEqual([]);
 
       // check that reusing an annotationId throws a warning
-      sinon.stub(console, 'warn', function () {});
+      sinon.stub(console, 'warn').callsFake(function () {});
       params.annotationId = 10;
       ann = geo.annotation.annotation('test2', params);
       layer.addAnnotation(ann);
@@ -1458,7 +1458,7 @@ describe('geo.annotation', function () {
     });
     it('registerAnnotation', function () {
       var func = function () { newshapeCount += 1; return 'newshape return'; };
-      sinon.stub(console, 'warn', function () {});
+      sinon.stub(console, 'warn').callsFake(function () {});
       expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(false);
       expect(geo.registerAnnotation('newshape', func)).toBe(undefined);
       expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(true);
@@ -1469,7 +1469,7 @@ describe('geo.annotation', function () {
       console.warn.restore();
     });
     it('createAnnotation', function () {
-      sinon.stub(console, 'warn', function () {});
+      sinon.stub(console, 'warn').callsFake(function () {});
       expect(geo.createAnnotation('unknown')).toBe(undefined);
       expect(console.warn.calledOnce).toBe(true);
       console.warn.restore();
@@ -1504,7 +1504,7 @@ describe('geo.annotation', function () {
       expect($.inArray('point', features) >= 0).toBe(false);
     });
     it('rendererForAnnotations', function () {
-      sinon.stub(console, 'warn', function () {});
+      sinon.stub(console, 'warn').callsFake(function () {});
       expect(geo.rendererForAnnotations(['polygon'])).toBe('webgl');
       expect(console.warn.calledOnce).toBe(false);
       expect(geo.rendererForAnnotations(['point'])).toBe('webgl');
