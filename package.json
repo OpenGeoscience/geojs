@@ -41,7 +41,7 @@
     "codemirror": "^5.65.0",
     "colorbrewer": "1.3.0",
     "css-loader": "^0.28.11",
-    "docco": "^0.7.0",
+    "docco": "^0.9.1",
     "eslint": "^8.5.0",
     "eslint-config-semistandard": "^16.0.0",
     "eslint-config-standard": "^16.0.3",
