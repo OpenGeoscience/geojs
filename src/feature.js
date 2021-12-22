@@ -423,10 +423,10 @@ var feature = function (arg) {
   this._handleBrush = function (brush) {
     let corners = [brush.gcs.lowerLeft, brush.gcs.lowerRight, brush.gcs.upperRight, brush.gcs.upperLeft];
     if (m_this.layer()) {
-      let map = m_this.layer().map();
+      const map = m_this.layer().map();
       corners = transform.transformCoordinates(map.gcs(), map.ingcs(), corners);
     }
-    let search = m_this.polygonSearch(corners);
+    const search = m_this.polygonSearch(corners);
 
     feature.eventID += 1;
     search.index.forEach(function (idx, i) {
@@ -451,10 +451,10 @@ var feature = function (arg) {
   this._handleBrushend = function (brush) {
     let corners = [brush.gcs.lowerLeft, brush.gcs.lowerRight, brush.gcs.upperRight, brush.gcs.upperLeft];
     if (m_this.layer()) {
-      let map = m_this.layer().map();
+      const map = m_this.layer().map();
       corners = transform.transformCoordinates(map.gcs(), map.ingcs(), corners);
     }
-    let search = m_this.polygonSearch(corners);
+    const search = m_this.polygonSearch(corners);
 
     feature.eventID += 1;
     search.index.forEach(function (idx, i) {

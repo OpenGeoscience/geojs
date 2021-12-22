@@ -91,19 +91,19 @@ var annotationLayer = function (arg) {
       m_keyHandler;
 
   var geojsonStyleProperties = {
-    'closed': {dataType: 'boolean', keys: ['closed', 'close']},
-    'fill': {dataType: 'boolean', keys: ['fill']},
-    'fillColor': {dataType: 'color', keys: ['fillColor', 'fill-color', 'marker-color', 'fill']},
-    'fillOpacity': {dataType: 'opacity', keys: ['fillOpacity', 'fill-opacity']},
-    'lineCap': {dataType: 'text', keys: ['lineCap', 'line-cap']},
-    'lineJoin': {dataType: 'text', keys: ['lineJoin', 'line-join']},
-    'radius': {dataType: 'positive', keys: ['radius']},
-    'scaled': {dataType: 'booleanOrNumber', keys: ['scaled']},
-    'stroke': {dataType: 'boolean', keys: ['stroke']},
-    'strokeColor': {dataType: 'color', keys: ['strokeColor', 'stroke-color', 'stroke']},
-    'strokeOffset': {dataType: 'number', keys: ['strokeOffset', 'stroke-offset']},
-    'strokeOpacity': {dataType: 'opacity', keys: ['strokeOpacity', 'stroke-opacity']},
-    'strokeWidth': {dataType: 'positive', keys: ['strokeWidth', 'stroke-width']}
+    closed: {dataType: 'boolean', keys: ['closed', 'close']},
+    fill: {dataType: 'boolean', keys: ['fill']},
+    fillColor: {dataType: 'color', keys: ['fillColor', 'fill-color', 'marker-color', 'fill']},
+    fillOpacity: {dataType: 'opacity', keys: ['fillOpacity', 'fill-opacity']},
+    lineCap: {dataType: 'text', keys: ['lineCap', 'line-cap']},
+    lineJoin: {dataType: 'text', keys: ['lineJoin', 'line-join']},
+    radius: {dataType: 'positive', keys: ['radius']},
+    scaled: {dataType: 'booleanOrNumber', keys: ['scaled']},
+    stroke: {dataType: 'boolean', keys: ['stroke']},
+    strokeColor: {dataType: 'color', keys: ['strokeColor', 'stroke-color', 'stroke']},
+    strokeOffset: {dataType: 'number', keys: ['strokeOffset', 'stroke-offset']},
+    strokeOpacity: {dataType: 'opacity', keys: ['strokeOpacity', 'stroke-opacity']},
+    strokeWidth: {dataType: 'positive', keys: ['strokeWidth', 'stroke-width']}
   };
   var textFeatureDataTypes = {
     offset: 'coordinate2',

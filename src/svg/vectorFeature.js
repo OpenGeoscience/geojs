@@ -157,7 +157,7 @@ var svg_vectorFeature = function (arg) {
       .each(function (d) {
         var marker = d3.select(this);
         var markerData = d.head ? markerConfigs[endStyle(d.data, d.dataIndex)] : markerConfigs[originStyle(d.data, d.dataIndex)];
-        Object.keys(markerData.attrs).map(function (attrName) {
+        Object.keys(markerData.attrs).forEach(function (attrName) {
           marker.attr(attrName, markerData.attrs[attrName]);
         });
       })

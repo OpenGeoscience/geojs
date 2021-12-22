@@ -141,7 +141,7 @@ var webgl_layer = function () {
             opacity,
             lowerTileLayers;
         layers.forEach(function (layer) {
-          let autoshare = layer.autoshareRenderer(),
+          const autoshare = layer.autoshareRenderer(),
               isTileLayer = layer instanceof tileLayer;
           if (!autoshare || !layer.renderer() || layer.renderer().api() !== webglRenderer.apiname) {
             renderer = null;

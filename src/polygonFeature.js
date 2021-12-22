@@ -113,7 +113,7 @@ var polygonFeature = function (arg) {
    *    `outer` and `inner` if it has any coordinates, or is `undefined`.
    */
   function getCoordinates(data, posFunc, polyFunc) {
-    let fcs = m_this.gcs(),
+    const fcs = m_this.gcs(),
         mapgcs = m_this.layer().map().gcs();
     data = data || m_this.data();
     posFunc = posFunc || m_this.style.get('position');
@@ -121,7 +121,7 @@ var polygonFeature = function (arg) {
     var coordinates = data.map(function (d, i) {
       var poly = polyFunc(d, i);
       if (!poly) {
-        return;
+        return undefined;
       }
       var outer, inner, range, coord, j, x, y, mapouter, mapinner, maprange;
 
@@ -350,9 +350,9 @@ var polygonFeature = function (arg) {
       let inside, partial;
       // do something similar to the line's polygonSearch
       for (let r = -1; r < coord.mapinner.length && !partial; r += 1) {
-        let record = r < 0 ? coord.mapouter : coord.mapinner[r];
+        const record = r < 0 ? coord.mapouter : coord.mapinner[r];
         for (let i = 0, len = record.length, j = len - 1; i < len; j = i, i += 1) {
-          let dist0 = util.distanceToPolygon2d(record[i], poly),
+          const dist0 = util.distanceToPolygon2d(record[i], poly),
               dist1 = util.distanceToPolygon2d(record[j], poly);
           if (dist0 * dist1 < 0) {
             partial = true;

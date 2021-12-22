@@ -11,10 +11,10 @@ describe('Contour Feature', function () {
   beforeEach(function () {
     mockWebglRenderer();
     map = createMap({
-      'center': [0, 0],
-      'zoom': 3
+      center: [0, 0],
+      zoom: 3
     }, {width: '500px', height: '300px'});
-    layer = map.createLayer('feature', {'renderer': 'webgl'});
+    layer = map.createLayer('feature', {renderer: 'webgl'});
   });
 
   afterEach(function () {

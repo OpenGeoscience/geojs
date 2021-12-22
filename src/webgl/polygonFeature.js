@@ -267,11 +267,11 @@ var webgl_polygonFeature = function (arg) {
         fragmentShader = createFragmentShader(),
         blend = vgl.blend(),
         geom = vgl.geometryData(),
-        sourcePositions = vgl.sourceDataP3fv({'name': 'pos'}),
+        sourcePositions = vgl.sourceDataP3fv({name: 'pos'}),
         sourceFillColor = vgl.sourceDataAnyfv(
-          3, vgl.vertexAttributeKeysIndexed.Two, {'name': 'fillColor'}),
+          3, vgl.vertexAttributeKeysIndexed.Two, {name: 'fillColor'}),
         sourceFillOpacity = vgl.sourceDataAnyfv(
-          1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'fillOpacity'}),
+          1, vgl.vertexAttributeKeysIndexed.Three, {name: 'fillOpacity'}),
         trianglePrimitive = vgl.triangles();
     m_modelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix');
 

@@ -109,10 +109,10 @@ var colorLegendWidget = function (arg) {
       var legendSvg = legendContainer
         .append('svg')
         .attr({
-          'class': 'svg',
-          'width': width,
-          'height': '40px',
-          'viewBox': -margin + ' 0 ' + width + ' 40'
+          class: 'svg',
+          width: width,
+          height: '40px',
+          viewBox: -margin + ' 0 ' + width + ' 40'
         });
 
       if (category.type === 'discrete') {
@@ -402,9 +402,9 @@ var colorLegendWidget = function (arg) {
     m_this.popup
       .style({
         // If the popup will be longer or almost longer than the container
-        'left': offset[0] - (offset[0] +
+        left: offset[0] - (offset[0] +
           popupWidth - containerWidth > -10 ? popupWidth : 0) + 'px',
-        'top': (offset[1] - 22) + 'px'
+        top: (offset[1] - 22) + 'px'
       })
       .transition()
       .duration(200)

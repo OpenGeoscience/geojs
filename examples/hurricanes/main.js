@@ -313,16 +313,16 @@ $(function () {
         return d;
       })
       .style({
-        'strokeColor': function (d) {
+        strokeColor: function (d) {
           return cscale(d.c);
         },
-        'strokeWidth': function (d, i, l, pos) {
+        strokeWidth: function (d, i, l, pos) {
           if (data[pos].hover) {
             return 5;
           }
           return 1.5;
         },
-        'strokeOpacity': function (d, i, l, pos) {
+        strokeOpacity: function (d, i, l, pos) {
           if (data[pos].hover) {
             return 1;
           }

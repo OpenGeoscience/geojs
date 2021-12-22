@@ -5,8 +5,8 @@ describe('DiscreteZoom and ParallelProjection', function () {
 
   function makeMap() {
     var map = createMap({
-      'center': [0, 0],
-      'zoom': 3,
+      center: [0, 0],
+      zoom: 3,
       discreteZoom: true
     });
     map.draw();

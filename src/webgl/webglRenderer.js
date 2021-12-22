@@ -271,8 +271,7 @@ var webglRenderer = function (arg) {
 
   // Connect to pan event.  This is sufficient, as all zooms and rotations also
   // produce a pan
-  m_this.layer().geoOn(geo_event.pan, function (evt) {
-    void (evt);
+  m_this.layer().geoOn(geo_event.pan, function (_evt) {
     m_updateCamera = true;
   });
 

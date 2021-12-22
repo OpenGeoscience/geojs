@@ -25,7 +25,7 @@ describe('svgGraph', function () {
         c.y = c.lat;
       });
 
-      var layer = myMap.createLayer('feature', {'renderer' : 'svg'});
+      var layer = myMap.createLayer('feature', {renderer: 'svg'});
       layer.createFeature('graph')
           .data(citieslatlon)
           .style({

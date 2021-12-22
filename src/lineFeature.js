@@ -313,8 +313,8 @@ var lineFeature = function (arg) {
       if (p.y > max.y) { max.y = p.y; }
     });
     m_this._updatePointSearchInfo();
-    let scale = map.unitsPerPixel(map.zoom()),
-        i, j, record, u, v, r;
+    const scale = map.unitsPerPixel(map.zoom());
+    let i, j, record, u, v, r;
     for (i = 0; i < m_pointSearchInfo.length; i += 1) {
       record = m_pointSearchInfo[i];
       if (!record.max ||
@@ -342,7 +342,7 @@ var lineFeature = function (arg) {
             (strokeWidthFunc(line[record[j].i], record[j].i, data[i], i) <= 0 && strokeWidthFunc(line[record[j].j], record[j].j, data[i], i) <= 0)) {
           continue;
         }
-        let dist0 = util.distanceToPolygon2d(u, poly),
+        const dist0 = util.distanceToPolygon2d(u, poly),
             dist1 = util.distanceToPolygon2d(v, poly);
         if ((dist0 > -r * scale && dist0 < r * scale) || (dist1 > -r * scale && dist1 < r & scale) || dist0 * dist1 < 0) {
           partial = true;
@@ -354,7 +354,7 @@ var lineFeature = function (arg) {
         }
         // if a point of the polygon is near the line formed by u-v, this is
         // also partial
-        let r2scaled = r * r * scale * scale;
+        const r2scaled = r * r * scale * scale;
         for (let k = 0; k < poly.outer.length && !partial; k += 1) {
           partial = util.distance2dToLineSquared(poly.outer[k], u, v) < r2scaled;
         }

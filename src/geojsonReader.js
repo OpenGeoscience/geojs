@@ -324,7 +324,8 @@ var geojsonReader = function (arg) {
           reject(new Error('Failed to parse GeoJSON'));
           return;
         }
-        let features, allFeatures = [], points, lines, polygons, feature;
+        let features, feature;
+        const allFeatures = [];
 
         try {
           features = m_this._featureArray(object);
@@ -334,7 +335,7 @@ var geojsonReader = function (arg) {
         }
 
         // process points
-        points = features.filter(f => f.geometry.type === 'Point');
+        const points = features.filter(f => f.geometry.type === 'Point');
         if (points.length) {
           feature = m_this.layer().createFeature('point');
           if (feature) {
@@ -358,7 +359,7 @@ var geojsonReader = function (arg) {
         }
 
         // process lines
-        lines = features.filter(f => f.geometry.type === 'LineString');
+        const lines = features.filter(f => f.geometry.type === 'LineString');
         if (lines.length) {
           feature = m_this.layer().createFeature('line');
           if (feature) {
@@ -383,7 +384,7 @@ var geojsonReader = function (arg) {
         }
 
         // process polygons
-        polygons = features.filter(f => f.geometry.type === 'Polygon');
+        const polygons = features.filter(f => f.geometry.type === 'Polygon');
         if (polygons.length) {
           feature = m_this.layer().createFeature('polygon');
           if (feature) {

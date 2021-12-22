@@ -53,17 +53,17 @@ describe('geo.geojsonReader', function () {
       var map, layer, reader;
       map = createMap();
       layer = map.createLayer('feature');
-      reader = geo.geojsonReader({'layer': layer});
+      reader = geo.geojsonReader({layer: layer});
       expect(reader instanceof geo.geojsonReader).toBe(true);
     });
     it('create by name', () => {
       var map, layer, reader;
       map = createMap();
       layer = map.createLayer('feature');
-      reader = geo.createFileReader('geojsonReader', {'layer': layer});
+      reader = geo.createFileReader('geojsonReader', {layer: layer});
       expect(reader instanceof geo.geojsonReader).toBe(true);
       // create by old name
-      reader = geo.createFileReader('jsonReader', {'layer': layer});
+      reader = geo.createFileReader('jsonReader', {layer: layer});
       expect(reader instanceof geo.geojsonReader).toBe(true);
     });
 
@@ -72,7 +72,7 @@ describe('geo.geojsonReader', function () {
         var map, layer, reader;
         map = createMap();
         layer = map.createLayer('feature', {renderer: 'svg'});
-        reader = geo.geojsonReader({'layer': layer});
+        reader = geo.geojsonReader({layer: layer});
         reader.read(obj).then(result => {
           expect(layer.features()[0].style.get('fillColor')(layer.features()[0].data()[0], 0)).toEqual({r: 1, g: 0x78 / 0xff, b: 0});
           done();
@@ -82,7 +82,7 @@ describe('geo.geojsonReader', function () {
         var map, layer, reader;
         map = createMap();
         layer = map.createLayer('feature', {renderer: 'svg'});
-        reader = geo.geojsonReader({'layer': layer, pointStyle: {fillColor: 'lightblue'}});
+        reader = geo.geojsonReader({layer: layer, pointStyle: {fillColor: 'lightblue'}});
         reader.read(obj).then(result => {
           expect(layer.features()[0].style.get('fillColor')(layer.features()[0].data()[0], 0)).toEqual({r: 0xad / 0xff, g: 0xd8 / 0xff, b: 0xe6 / 0xff});
           done();
@@ -92,7 +92,7 @@ describe('geo.geojsonReader', function () {
         var map, layer, reader;
         map = createMap();
         layer = map.createLayer('feature', {renderer: 'svg'});
-        reader = geo.geojsonReader({'layer': layer, pointStyle: {fillColor: 'lightblue'}});
+        reader = geo.geojsonReader({layer: layer, pointStyle: {fillColor: 'lightblue'}});
         obj.features[0].properties.fillColor = 'yellow';
         reader.read(obj).then(result => {
           expect(layer.features()[0].style.get('fillColor')(layer.features()[0].data()[0], 0)).toEqual({r: 1, g: 1, b: 0});
@@ -107,7 +107,7 @@ describe('geo.geojsonReader', function () {
       var map, layer, reader, file;
       map = createMap();
       layer = map.createLayer('feature');
-      reader = geo.geojsonReader({'layer': layer});
+      reader = geo.geojsonReader({layer: layer});
       expect(reader.canRead('')).toBe(false);
       expect(reader.canRead(['not a geojson object'])).toBe(false);
       expect(reader.canRead(obj)).toBe(true);
@@ -125,7 +125,7 @@ describe('geo.geojsonReader', function () {
       it('bad object', done => {
         map = createMap();
         layer = map.createLayer('feature', {renderer: 'svg'});
-        reader = geo.geojsonReader({'layer': layer});
+        reader = geo.geojsonReader({layer: layer});
 
         reader.read(['not geojson object']).catch(err => {
           expect(!!err.message.match(/Invalid json type/)).toBe(true);
@@ -182,7 +182,7 @@ describe('geo.geojsonReader', function () {
       map = createMap({center: [0, 0], zoom: 3});
       layer = map.createLayer('feature');
       sinon.stub(layer, 'createFeature');
-      reader = geo.createFileReader('geojsonReader', {'layer': layer});
+      reader = geo.createFileReader('geojsonReader', {layer: layer});
     });
     afterEach(function () {
       layer.createFeature.restore();
@@ -438,7 +438,7 @@ describe('geo.geojsonReader', function () {
   it('read from object', function (done) {
     var map = createMap({center: [0, 0], zoom: 3});
     var layer = map.createLayer('feature', {renderer: 'svg'});
-    var reader = geo.createFileReader('geojsonReader', {'layer': layer}),
+    var reader = geo.createFileReader('geojsonReader', {layer: layer}),
         data, i;
 
     expect(reader.canRead(obj)).toBe(true);

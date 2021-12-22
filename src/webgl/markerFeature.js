@@ -129,7 +129,7 @@ var webgl_markerFeature = function (arg) {
 
     posFunc = m_this.position();
 
-    for (let key in styleKeys) {
+    for (const key in styleKeys) {
       styleFunc[key] = m_this.style.get(key);
       if (!util.isFunction(m_this.style(key))) {
         styleUni[key] = styleFunc[key]();
@@ -183,7 +183,7 @@ var webgl_markerFeature = function (arg) {
         }
       }
       // unrolling this would speed it up
-      for (let key in styleKeys) {
+      for (const key in styleKeys) {
         styleVal[key] = styleUni[key] === undefined ? styleFunc[key](item, i) : styleUni[key];
       }
       styleVal.scaleWithZoom = markerFeature.scaleMode[styleVal.scaleWithZoom] || (styleVal.scaleWithZoom >= 1 && styleVal.scaleWithZoom <= 3 ? styleVal.scaleWithZoom : 0);
@@ -219,7 +219,7 @@ var webgl_markerFeature = function (arg) {
     }
 
     if (m_this._primitiveShapeAuto) {
-      let maxr = m_this._approximateMaxRadius(m_this.renderer().map().zoom());
+      const maxr = m_this._approximateMaxRadius(m_this.renderer().map().zoom());
       if ((m_this._primitiveShape === markerFeature.primitiveShapes.sprite && maxr > webglRenderer._maxPointSize) ||
           (m_this._primitiveShape !== markerFeature.primitiveShapes.sprite && maxr <= webglRenderer._maxPointSize)) {
         // Switch primitive
@@ -339,7 +339,7 @@ var webgl_markerFeature = function (arg) {
         needsRefresh = true;
       }
       if (key === sbkey) {
-        let mod = m_this.modified;
+        const mod = m_this.modified;
         if (!needsRefresh) {
           // don't allow modified to be adjusted if we don't need to refresh
           m_this.modified = () => {};

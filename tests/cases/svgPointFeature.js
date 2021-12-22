@@ -12,7 +12,7 @@ describe('svg point feature', function () {
     it('Setup map', function () {
       mockAnimationFrame();
       map = createMap({center: [0, 0], zoom: 3}, {width: '800px', height: '600px'});
-      layer = map.createLayer('feature', {'renderer': 'svg'});
+      layer = map.createLayer('feature', {renderer: 'svg'});
     });
 
     it('Add features to a layer', function () {

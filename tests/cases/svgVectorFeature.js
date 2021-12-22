@@ -32,7 +32,7 @@ describe('svg vector feature', function () {
       return pt;
     };
 
-    layer = map.createLayer('feature', {'renderer': 'svg'});
+    layer = map.createLayer('feature', {renderer: 'svg'});
   });
 
   it('Add features to a layer', function () {

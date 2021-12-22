@@ -443,7 +443,7 @@ var pointFeature = function (arg) {
       rad += hasstroke ? strokeWidth(data[i], i) : 0;
       if (rad) {
         p = map.gcsToDisplay(p, fgcs);
-        let dist = util.distanceToPolygon2d(p, poly);
+        const dist = util.distanceToPolygon2d(p, poly);
         if (dist >= rad || (dist >= 0 && opts.partial === 'center') || (dist >= -rad && opts.partial && opts.partial !== 'center')) {
           found.push(d);
           ifound.push(i);

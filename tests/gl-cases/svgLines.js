@@ -16,7 +16,7 @@ describe('svgLines', function () {
     var mapOptions = {center: {x: -105.0, y: 40.0}};
     myMap = common.createOsmMap(mapOptions, {}, true);
     common.loadCitiesData(function (citieslatlon) {
-      var layer = myMap.createLayer('feature', {'renderer': 'svg'});
+      var layer = myMap.createLayer('feature', {renderer: 'svg'});
       var n = citieslatlon.length / 2;
       var group1 = citieslatlon.filter(function (d, i) { return i < n; })
         .sort(function (d1, d2) {

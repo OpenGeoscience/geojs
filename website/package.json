@@ -15,7 +15,7 @@
     "hexo-server": "^2.0.0"
   },
   "devDependencies": {
-    "ejs-lint": "^1.1.0",
+    "ejs-lint": "^1.2.1",
     "hexo-cli": "^4.2.0"
   }
 }

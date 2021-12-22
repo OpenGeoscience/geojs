@@ -18,7 +18,7 @@ describe('svgLines', function () {
     var mapOptions = {center: {x: -105.0, y: 40.0}, zoom: 3.5};
     myMap = common.createOsmMap(mapOptions, {}, true);
     common.loadCitiesData(function (citieslatlon) {
-      var layer = myMap.createLayer('feature', {'renderer': 'svg'});
+      var layer = myMap.createLayer('feature', {renderer: 'svg'});
 
       var color = d3.scale.category20().domain(d3.range(20));
 

@@ -131,7 +131,7 @@ var sliderWidget = function (arg) {
       .attr('cy', m_yscale(0.0) - m_width + 2)
       .attr('r', (m_width - 2) / 2)
       .style({
-        'cursor': 'pointer'
+        cursor: 'pointer'
       })
       .on('click', function () {
         var z = map.zoom();
@@ -171,7 +171,7 @@ var sliderWidget = function (arg) {
       .attr('cy', m_yscale(1.0) + m_width - 2)
       .attr('r', (m_width - 2) / 2)
       .style({
-        'cursor': 'pointer'
+        cursor: 'pointer'
       })
       .on('click', function () {
         var z = map.zoom();
@@ -237,7 +237,7 @@ var sliderWidget = function (arg) {
       .attr('width', m_width / 3)
       .attr('height', m_height - m_width * 3)
       .style({
-        'cursor': 'pointer'
+        cursor: 'pointer'
       })
       .on('click', function () {
         respond(d3.event, true);
@@ -257,7 +257,7 @@ var sliderWidget = function (arg) {
       .attr('width', m_width)
       .attr('height', m_nubSize)
       .style({
-        'cursor': 'pointer'
+        cursor: 'pointer'
       })
       .on('mousedown', function () {
         d3.select(document).on('mousemove.geo.slider', function () {

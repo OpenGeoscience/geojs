@@ -135,7 +135,7 @@ describe('mapInteractor', function () {
       return 'EPSG:3857';
     };
     map.scheduleAnimationFrame = function (callback) {
-      return window['requestAnimationFrame'](callback);
+      return window.requestAnimationFrame(callback);
     };
     return map;
   }
@@ -1732,17 +1732,17 @@ describe('mapInteractor', function () {
     cancel = false;
     // test a variety of keyboard events
     var keyTests = {
-      '1': {zoom: 0},
-      '2': {zoom: 3},
-      'plus': {zoomDelta: 0.05},
+      1: {zoom: 0},
+      2: {zoom: 3},
+      plus: {zoomDelta: 0.05},
       '-': {zoomDelta: -0.05},
-      '0': {rotation: 0},
+      0: {rotation: 0},
       '>': {rotationDelta: -1 * Math.PI / 180},
       '<': {rotationDelta: 1 * Math.PI / 180},
-      'up': {panY: 1},
-      'down': {panY: -1},
-      'left': {panX: 1},
-      'right': {panX: -1}
+      up: {panY: 1},
+      down: {panY: -1},
+      left: {panX: 1},
+      right: {panX: -1}
     };
     for (var key in keyTests) {
       if (keyTests.hasOwnProperty(key)) {

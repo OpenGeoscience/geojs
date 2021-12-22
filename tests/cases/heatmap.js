@@ -25,7 +25,7 @@ describe('canvas heatmap', function () {
     it('Setup map', function () {
       mockAnimationFrame();
       map = createMap({center: [0, 0], zoom: 3}, {width: '800px', height: '600px'});
-      layer = map.createLayer('feature', {'renderer': 'canvas'});
+      layer = map.createLayer('feature', {renderer: 'canvas'});
     });
 
     it('Add feature to a layer', function () {
@@ -193,7 +193,7 @@ describe('canvas heatmap', function () {
 
     it('Setup map', function () {
       map = createMap({center: [0, 0], zoom: 3});
-      layer = map.createLayer('feature', {'renderer': 'canvas'});
+      layer = map.createLayer('feature', {renderer: 'canvas'});
       for (var i = 0; i < 100; i += 1) {
         data.push({a: i % 10, b: i % 9, c: i % 8});
       }

@@ -1,5 +1,4 @@
 var webpack_config = require('./webpack.base.config');
-var url = require('url');
 var fs = require('fs');
 var path = require('path');
 var image_path = process.env.TEST_IMAGE_PATH || path.resolve('_build/images');
@@ -113,7 +112,11 @@ function compareImage(name, image, threshold, callback) {
  */
 var testimage_middleware = function (config) {
   return function (request, response, next) {
-    var parsed = url.parse(request.url, true);
+    const requestURL = new URL(request.url, 'http://nowhere.com');
+    const parsed = {
+      pathname: requestURL.pathname,
+      query: Object.fromEntries(requestURL.searchParams)
+    };
     var query = (parsed.query || {});
     if (parsed.pathname === '/testImage') {
       if (request.method === 'PUT') {

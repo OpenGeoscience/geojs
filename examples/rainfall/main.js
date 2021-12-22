@@ -199,7 +199,7 @@ point = layer.createFeature('point', {
     tooltipElem.hide();
   } else {
     tooltip.position(posFunc(evt.data, evt.index));
-    tooltipElem.attr({'stationdata': evt.data, 'stationindex': evt.index});
+    tooltipElem.attr({stationdata: evt.data, stationindex: evt.index});
     tooltipElem.text(tooltipTextFunc(evt.data, evt.index));
 
     tooltipElem.show();

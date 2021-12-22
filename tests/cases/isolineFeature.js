@@ -38,11 +38,11 @@ describe('Isoline Feature', function () {
     mockWebglRenderer();
     mockAnimationFrame();
     map = createMap({
-      'center': [2.5, 1.5],
-      'zoom': 9
+      center: [2.5, 1.5],
+      zoom: 9
     }, {width: '500px', height: '300px'});
-    layer = map.createLayer('feature', {'renderer': 'webgl'});
-    canvasLayer = map.createLayer('feature', {'renderer': 'canvas'});
+    layer = map.createLayer('feature', {renderer: 'webgl'});
+    canvasLayer = map.createLayer('feature', {renderer: 'canvas'});
   });
 
   afterEach(function () {

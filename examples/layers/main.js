@@ -23,7 +23,7 @@ $(function () {
     // The sticky option keeps the element fixed relative
     // to the map, which is the default behavior.
     var sticky = (type !== 'fixed');
-    obj = getSvgLayer(map, {'sticky': sticky});
+    obj = getSvgLayer(map, {sticky: sticky});
 
     layer = obj.layer;
     svg = obj.svg;

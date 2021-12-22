@@ -191,7 +191,7 @@ describe('geo.trackFeature', function () {
       expect(track.style('strokeOpacity', undefined, 'currentStyle')).toBe(1);
     });
     it('track', function () {
-      let oldfunc = track.track();
+      const oldfunc = track.track();
       expect(track.track()({t: 'x'})).toBe('x');
       expect(track.track(function (d) { return d; })).toBe(track);
       expect(track.track()('y')).toBe('y');
@@ -200,7 +200,7 @@ describe('geo.trackFeature', function () {
       expect(track2.track()('z')).toBe('z');
     });
     it('position', function () {
-      let oldfunc = track.position();
+      const oldfunc = track.position();
       expect(track.position()(0, 0, 0, 0).x).toBe(-75.0789);
       expect(track.position(function (d) { return d; })).toBe(track);
       expect(track.position()('y')).toBe('y');
@@ -209,7 +209,7 @@ describe('geo.trackFeature', function () {
       expect(track2.position()('z')).toBe('z');
     });
     it('time', function () {
-      let oldfunc = track.time();
+      const oldfunc = track.time();
       expect(track.time()('x')).toBe('x');
       expect(track.time(function (d) { return d + 'a'; })).toBe(track);
       expect(track.time()('y')).toBe('ya');

@@ -8,7 +8,7 @@ var buildUtils = require('../examples/build-utils');
 fs.ensureDirSync('website/source/tutorials');
 var tutorials = buildUtils.getList('tutorials', 'tutorial', path.resolve('website', 'source'));
 
-tutorials.map(function (json) {
+tutorials.forEach(function (json) {
   var pugTemplate = fs.readFileSync(path.relative('.', path.resolve(json.dir, 'index.pug')), 'utf8');
   pugTemplate = pugTemplate.replace('extends ../common/index.pug', 'extends ../common/index-website.pug');
 

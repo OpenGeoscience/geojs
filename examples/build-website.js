@@ -8,7 +8,7 @@ var buildUtils = require('./build-utils');
 // generate the examples
 fs.ensureDirSync('website/source/examples');
 var examples = buildUtils.getList('examples', 'example', path.resolve('website', 'source'));
-examples.map(function (json) {
+examples.forEach(function (json) {
   // make docco documentation in:
   //   dist/examples/<name>/docs/
   if (json.main) {

@@ -84,7 +84,7 @@ var canvas_heatmapFeature = function (arg) {
     gaussian = m_this.style('gaussian');
     scale = m_this.style('scaleWithZoom');
     if (scale) {
-      let zoom = this.layer().map().zoom();
+      const zoom = this.layer().map().zoom();
       scale = Math.pow(2, zoom);
       r *= scale;
       blur *= scale;
@@ -306,7 +306,7 @@ var canvas_heatmapFeature = function (arg) {
   this._renderOnCanvas = function (context2d, map) {
 
     if (m_renderTime.timestamp() < m_this.buildTime().timestamp()) {
-      let starttime = Date.now();
+      const starttime = Date.now();
       var data = m_this.data() || [],
           radius = m_this.style('radius') + m_this.style('blurRadius'),
           binned = m_this.binned(),

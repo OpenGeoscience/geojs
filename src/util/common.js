@@ -686,11 +686,11 @@ var util = {
    * @memberof geo.util
    */
   distanceToPolygon2d: function (pt, poly, onlySign) {
-    let outer = poly.outer || poly;
+    const outer = poly.outer || poly;
     let inside = false,
-        minDistSq, distSq, dist;
+        minDistSq, distSq;
     for (let i = 0, len = outer.length, j = len - 1; i < len; j = i, i += 1) {
-      let p0 = outer[i],
+      const p0 = outer[i],
           p1 = outer[j];
       if (((p0.y > pt.y) !== (p1.y > pt.y)) && (pt.x < (p1.x - p0.x) * (pt.y - p0.y) / (p1.y - p0.y) + p0.x)) {
         inside = !inside;
@@ -702,7 +702,7 @@ var util = {
     }
     if (poly.inner) {
       poly.inner.forEach(inner => {
-        let innerDist = util.distanceToPolygon2d(pt, inner, onlySign);
+        const innerDist = util.distanceToPolygon2d(pt, inner, onlySign);
         if (innerDist * innerDist < minDistSq) {
           minDistSq = innerDist * innerDist;
         }
@@ -711,7 +711,7 @@ var util = {
         }
       });
     }
-    dist = (inside ? 1 : -1) * Math.sqrt(minDistSq);
+    const dist = (inside ? 1 : -1) * Math.sqrt(minDistSq);
     return dist;
   },
 
@@ -738,8 +738,8 @@ var util = {
    * @memberof geo.util
    */
   crossedLineSegmentPolygon2d: function (pt1, pt2, poly) {
-    let outer = poly.outer || poly,
-        len = outer.length, i, j;
+    const outer = poly.outer || poly, len = outer.length;
+    let i, j;
     for (i = 0, j = len - 1; i < len; j = i, i += 1) {
       if (util.crossedLineSegments2d(pt1, pt2, outer[i], outer[j])) {
         return true;
@@ -817,6 +817,7 @@ var util = {
         if (idx) {
           return util.crossedLineSegments2d(pt1, pt2, line[idx - 1], linePt);
         }
+        return false;
       });
     });
     return result;
@@ -1166,7 +1167,7 @@ var util = {
         /* Create a containing div with the parent's class and id (so css
          * will be used), but override size and background. */
         container = $('<div>').attr({
-          'class': parent.attr('class'),
+          class: parent.attr('class'),
           id: parent.attr('id')
         }).css({
           width: '100%',

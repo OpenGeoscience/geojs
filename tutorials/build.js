@@ -8,7 +8,7 @@ var buildUtils = require('../examples/build-utils');
 fs.ensureDirSync('dist/tutorials');
 var tutorials = buildUtils.getList('tutorials', 'tutorial', 'dist');
 
-tutorials.map(function (json) {
+tutorials.forEach(function (json) {
   var fn = pug.compileFile(path.relative('.', path.resolve(json.dir, 'index.pug')), {pretty: true});
   fs.writeFileSync(path.resolve(json.output, 'index.html'), fn(json));
 });

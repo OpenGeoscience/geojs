@@ -20,7 +20,7 @@ if (query.extra) {
       s = s[modulo(x + y + z, s.length)];
       let tile = '';
       for (; z > 0; z -= 1) {
-        let d = (x % 2) + (y % 2) * 2;
+        const d = (x % 2) + (y % 2) * 2;
         tile = '' + d + tile;
         x = Math.floor(x / 2);
         y = Math.floor(y / 2);
@@ -45,7 +45,7 @@ if (query.extra) {
   };
 }
 // Add a blank tile for removing the map
-geo.osmLayer.tileSources['false'] = {
+geo.osmLayer.tileSources.false = {
   url: '/data/white.jpg',
   attribution: '',
   name: 'None'
@@ -119,7 +119,7 @@ layer = map.createLayer('annotation', {
 });
 // We have to hook the internal _updateLabels method so we can label vertices
 // during editing.
-let s__updateLabels = layer._updateLabels;
+const s__updateLabels = layer._updateLabels;
 layer._updateLabels = (labels) => {
   layer.annotations().forEach((annotation, idx) => {
     if ([geo.annotation.state.create, geo.annotation.state.edit].indexOf(annotation.state()) >= 0) {
@@ -159,7 +159,7 @@ if (query.lastused || query.active) {
 if (initialGeoJSON) {
   layer.geojson(initialGeoJSON, true);
   if (query.x === undefined || query.y === undefined) {
-    let range = {};
+    const range = {};
     layer.annotations().forEach(a => {
       a.coordinates().forEach(pt => {
         if (range.left === undefined || pt.x < range.left) {
@@ -354,9 +354,9 @@ function handleModeChange(evt) {
  * @returns {number} The length in meters or `undefined`.
  */
 function annotationLength(annotation) {
-  let dist = 0,
-      gcs = annotation.layer().map().ingcs(),
-      pts = annotation.coordinates(gcs);
+  let dist = 0;
+  const gcs = annotation.layer().map().ingcs();
+  let pts = annotation.coordinates(gcs);
   if (pts.length < 2) {
     return;
   }
@@ -365,7 +365,7 @@ function annotationLength(annotation) {
     pts.push(pts[0]);
   }
   for (let i = 0; i < pts.length - 1; i += 1) {
-    let partial = geo.transform.vincentyDistance(pts[i], pts[i + 1], gcs);
+    const partial = geo.transform.vincentyDistance(pts[i], pts[i + 1], gcs);
     if (partial) {
       dist += partial.distance;
     }
@@ -389,7 +389,7 @@ function annotationArea(annotation) {
   // By using an equal-area projection centered at one of the vertices, the
   // area calculation can be done with a simple formula.  For polygons with
   // long edges, this won't be accurate, however.
-  let gcs = `+proj=laea +lat_0=${pts[0].y} +lon_0=${pts[0].x} +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs`;
+  const gcs = `+proj=laea +lat_0=${pts[0].y} +lon_0=${pts[0].x} +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs`;
   pts = annotation.coordinates(gcs).slice();
   pts.push(pts[0]);
   for (let i = 0; i < pts.length - 1; i += 1) {
@@ -441,7 +441,7 @@ function modifyAnnotation(annotation) {
  * @param {object[]} labels The labels data array to extend.
  */
 function labelVertices(annotation, annotationIndex, labels) {
-  let gcs = annotation.layer().map().gcs(),
+  const gcs = annotation.layer().map().gcs(),
       pts = annotation.coordinates(gcs).slice();
   for (let i = 1; i < pts.length; i += 1) {
     if (pts[i].x === pts[i - 1].x && pts[i].y === pts[i - 1].y) {
@@ -457,7 +457,7 @@ function labelVertices(annotation, annotationIndex, labels) {
   var style = labels[annotationIndex].style || {};
   var dist = [], tally = [0];
   for (let i = 0; i < pts.length - 1; i += 1) {
-    let value = geo.transform.vincentyDistance(pts[i], pts[i + 1], gcs);
+    const value = geo.transform.vincentyDistance(pts[i], pts[i + 1], gcs);
     dist.push(value ? value.distance : 0);
   }
   dist.forEach((d, i) => {
@@ -477,7 +477,7 @@ function labelVertices(annotation, annotationIndex, labels) {
         position: p,
         style: Object.assign({}, style, {offset: {x: -12, y: 0}, textAlign: 'right'})
       });
-      let p1 = {x: (pts[i + 1].x + p.x) / 2, y: (pts[i + 1].y + p.y) / 2};
+      const p1 = {x: (pts[i + 1].x + p.x) / 2, y: (pts[i + 1].y + p.y) / 2};
       labels.push({
         text: geo.gui.scaleWidget.formatUnit(dist[i], query.distunit || 'decmiles') || '',
         position: p1,
@@ -543,7 +543,7 @@ function handleAnnotationChange(evt) {
     $('#annotationlist').append(entry);
   });
   let dist = geo.gui.scaleWidget.formatUnit(totaldist || undefined, query.distunit || 'decmiles') || '';
-  let area = geo.gui.scaleWidget.formatUnit(totalarea || undefined, query.areaunit || 'decmiles', geo.gui.scaleWidget.areaUnitsTable);
+  const area = geo.gui.scaleWidget.formatUnit(totalarea || undefined, query.areaunit || 'decmiles', geo.gui.scaleWidget.areaUnitsTable);
   if (area) {
     dist = (dist ? dist + ' - ' : '') + area;
   }

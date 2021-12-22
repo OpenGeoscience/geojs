@@ -112,9 +112,9 @@ var throttle = function (delay, no_trailing, callback, accumulator, debounce_mod
     }
 
     // Clear any existing timeout.
-    void (
-      timeout_id && clearTimeout(timeout_id)
-    );
+    if (timeout_id) {
+      clearTimeout(timeout_id);
+    }
 
     if (debounce_mode === undefined && elapsed > delay) {
       // In throttle mode, if `delay` time has been exceeded, execute

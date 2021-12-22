@@ -24,12 +24,12 @@ describe('geo.util.convertColor', function () {
     '#fff2': {r: 1, g: 1, b: 1, a: 2 / 15},
     '#26b3': {r: 2 / 15, g: 6 / 15, b: 11 / 15, a: 3 / 15},
     // css color names
-    'red': {r: 1, g: 0, b: 0},
-    'green': {r: 0, g: 128 / 255, b: 0},
-    'blue': {r: 0, g: 0, b: 1},
-    'steelblue': {r: 70 / 255, g: 130 / 255, b: 180 / 255},
-    'SteelBlue': {r: 70 / 255, g: 130 / 255, b: 180 / 255},
-    'STEELBLUE': {r: 70 / 255, g: 130 / 255, b: 180 / 255},
+    red: {r: 1, g: 0, b: 0},
+    green: {r: 0, g: 128 / 255, b: 0},
+    blue: {r: 0, g: 0, b: 1},
+    steelblue: {r: 70 / 255, g: 130 / 255, b: 180 / 255},
+    SteelBlue: {r: 70 / 255, g: 130 / 255, b: 180 / 255},
+    STEELBLUE: {r: 70 / 255, g: 130 / 255, b: 180 / 255},
     // rgb() and rgba()
     'rgb(18, 86, 171)': {r: 18 / 255, g: 86 / 255, b: 171 / 255},
     'rgb(18 86 171)': {r: 18 / 255, g: 86 / 255, b: 171 / 255},
@@ -57,10 +57,10 @@ describe('geo.util.convertColor', function () {
     'hsl(207 44% 49%)': {r: 0.2744, g: 0.51156, b: 0.7056},
     'hsl(207 100% 50%)': {r: 0, g: 0.55, b: 1},
     // transparent
-    'transparent': {r: 0, g: 0, b: 0, a: 0},
-    'TRANSPARENT': {r: 0, g: 0, b: 0, a: 0},
+    transparent: {r: 0, g: 0, b: 0, a: 0},
+    TRANSPARENT: {r: 0, g: 0, b: 0, a: 0},
     // unknown strings
-    'none': 'none'
+    none: 'none'
   };
 
   describe('From strings', function () {

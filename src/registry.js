@@ -216,7 +216,7 @@ util.registerFeature = function (category, name, func, capabilities) {
  */
 util.createFeature = function (name, layer, renderer, arg) {
   var category = renderer.api(),
-      options = {'layer': layer, 'renderer': renderer};
+      options = {layer: layer, renderer: renderer};
   if (category in features && name in features[category]) {
     if (arg !== undefined) {
       $.extend(true, options, arg);
