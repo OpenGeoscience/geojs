@@ -228,21 +228,21 @@ var trackFeature = function (arg) {
       if (d.posidx1 === undefined) {
         pos = m_tracks.positionFunc(tracks[i][d.posidx], d.posidx, tracks[i], i);
       } else {
-        pos0 = trans.forward(m_tracks.positionFunc(tracks[i][d.posidx0], d.posidx0, tracks[i], i));
-        pos1 = trans.forward(m_tracks.positionFunc(tracks[i][d.posidx1], d.posidx1, tracks[i], i));
+        pos0 = trans.forward(m_tracks.positionFunc(tracks[i][d.posidx0], d.posidx0, tracks[i], i), true);
+        pos1 = trans.forward(m_tracks.positionFunc(tracks[i][d.posidx1], d.posidx1, tracks[i], i), true);
         pos = trans.inverse({
           x: pos0.x * d.factor0 + pos1.x * d.factor1,
           y: pos0.y * d.factor0 + pos1.y * d.factor1,
           z: (pos0.z || 0) * d.factor0 + (pos1.z || 0) * d.factor1
-        });
+        }, true);
       }
       d.x = pos.x;
       d.y = pos.y;
       d.z = pos.z || 0;
       if (calcAngle) {
         if (d.posidx1 === undefined) {
-          pos0 = trans.forward(d.angidx0 === d.posidx ? pos : m_tracks.positionFunc(tracks[i][d.angidx0], d.angidx0, tracks[i], i));
-          pos1 = trans.forward(d.angidx1 === d.posidx ? pos : m_tracks.positionFunc(tracks[i][d.angidx1], d.angidx1, tracks[i], i));
+          pos0 = trans.forward(d.angidx0 === d.posidx ? pos : m_tracks.positionFunc(tracks[i][d.angidx0], d.angidx0, tracks[i], i), true);
+          pos1 = trans.forward(d.angidx1 === d.posidx ? pos : m_tracks.positionFunc(tracks[i][d.angidx1], d.angidx1, tracks[i], i), true);
         }
         d.angle = Math.atan2(pos1.y - pos0.y, pos1.x - pos0.x);
       }

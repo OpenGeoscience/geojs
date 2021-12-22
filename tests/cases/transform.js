@@ -37,24 +37,24 @@ describe('geo.transform', function () {
       function test_point(pt) {
         var pt1 = $.extend({}, pt[0]), pt2 = $.extend({}, pt[1]);
         it(str(pt[0]) + ' -> ' + str(pt[1]), function () {
-          expect(r2(proj.forward(pt1), pt[1])).toBeLessThan(tgt_unit);
+          expect(r2(proj.forward(pt1), pt[1], true)).toBeLessThan(tgt_unit);
         });
         it(str(pt[0]) + ' <- ' + str(pt[1]), function () {
-          expect(r2(pt[0], proj.inverse(pt2))).toBeLessThan(src_unit);
+          expect(r2(pt[0], proj.inverse(pt2, true))).toBeLessThan(src_unit);
         });
       }
 
       pts.forEach(test_point);
       it('Array of points ( forward )', function () {
         var a = pts.map(function (d) { return $.extend({}, d[0]); }),
-            c = proj.forward(a);
+            c = proj.forward(a, true);
         pts.forEach(function (d, i) {
           expect(r2(d[1], c[i])).toBeLessThan(tgt_unit);
         });
       });
       it('Array of points ( inverse )', function () {
         var a = pts.map(function (d) { return $.extend({}, d[1]); }),
-            c = proj.inverse(a);
+            c = proj.inverse(a, true);
         pts.forEach(function (d, i) {
           expect(r2(d[0], c[i])).toBeLessThan(src_unit);
         });
@@ -116,7 +116,7 @@ describe('geo.transform', function () {
       expect(geo.transform.defs.hasOwnProperty('my projection')).toBe(true);
       var p = geo.transform({source: 'EPSG:4326', target: 'my projection'});
 
-      expect(p.forward({x: 10, y: -10, z: 0})).toEqual({x: 10, y: -10, z: 0});
+      expect(p.forward({x: 10, y: -10, z: 0}, true)).toEqual({x: 10, y: -10, z: 0});
     });
 
     it('lookup', function (done) {
@@ -439,13 +439,13 @@ describe('geo.transform', function () {
     });
     it('transform object forward', function () {
       var proj = geo.transform({source: source, target: target});
-      expect(closeToEqual(proj.forward({x: 1, y: 2}), {x: -1052.974, y: -1158.014, z: 0})).toBe(true);
-      expect(closeToEqual(proj.inverse({x: -1052.974, y: -1158.014}), {x: 1, y: 2, z: 0})).toBe(true);
+      expect(closeToEqual(proj.forward({x: 1, y: 2}, true), {x: -1052.974, y: -1158.014, z: 0})).toBe(true);
+      expect(closeToEqual(proj.inverse({x: -1052.974, y: -1158.014}, true), {x: 1, y: 2, z: 0})).toBe(true);
     });
     it('transform object inverse', function () {
       var proj = geo.transform({source: target, target: source});
-      expect(closeToEqual(proj.inverse({x: 1, y: 2}), {x: -1052.974, y: -1158.014, z: 0})).toBe(true);
-      expect(closeToEqual(proj.forward({x: -1052.974, y: -1158.014}), {x: 1, y: 2, z: 0})).toBe(true);
+      expect(closeToEqual(proj.inverse({x: 1, y: 2}, true), {x: -1052.974, y: -1158.014, z: 0})).toBe(true);
+      expect(closeToEqual(proj.forward({x: -1052.974, y: -1158.014}, true), {x: 1, y: 2, z: 0})).toBe(true);
     });
   });
 });
