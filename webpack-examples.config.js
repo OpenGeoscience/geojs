@@ -23,9 +23,6 @@ var rules = base.module.rules.concat([{
   test: require.resolve('codemirror'),
   use: ['expose-loader?CodeMirror']
 }, {
-  test: require.resolve('colorbrewer'),
-  use: ['expose-loader?colorbrewer']
-}, {
   test: /bootstrap.css$/,
   use: [StringReplacePlugin.replace({
     replacements: [{
