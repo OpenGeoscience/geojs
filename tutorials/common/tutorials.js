@@ -248,7 +248,7 @@ function fill_codeblocks(query) {
         /* Strip out white space and pluses, then convert ., -, and _ to /, +,
          * =.  By removing whitespace, the url is more robust against email
          * handling.  The others keep things short. */
-        var src = atob(query[key].replace(/(\s|\+)/g, '').replace(/\./g, '/').replace(/-/g, '+').replace(/_/g, '='));
+        let src = query[key].replace(/(\s|\+)/g, '').replace(/\./g, '/').replace(/-/g, '+').replace(/_/g, '=');
         src = pako.inflate(src, {to: 'string', raw: true});
         if ($('.CodeMirror', block).length) {
           $('.CodeMirror', block)[0].CodeMirror.setValue(src);
@@ -287,7 +287,8 @@ function start_keeper(alwaysKeep) {
         var src = $('.CodeMirror', block).length ? $('.CodeMirror', block)[0].CodeMirror.getValue() : $('textarea', block).val();
         src = src.trim().replace(/ [ ]*\n/g, '\n');
         if (src !== defaultSrc) {
-          var comp = btoa(pako.deflate(src, {to: 'string', level: 9, raw: true}));
+          let comp = pako.deflate(src, {to: 'string', level: 9, raw: true});
+          comp = btoa(String.fromCharCode.apply(null, comp));
           /* instead of using regular base64, convert /, +, and = to ., -, and _
            * so that they don't need to be escaped on the url.  This reduces the
            * average length of the url by 6 percent. */
