@@ -234,7 +234,7 @@ describe('geo.object', function () {
     });
 
     it('Test a non-function handler', function () {
-      sinon.stub(console, 'warn', function () {});
+      sinon.stub(console, 'warn').callsFake(function () {});
       var obj = new geo.object(),
           evtData = {},
           handler = new CallCounter(evtData);
@@ -248,7 +248,7 @@ describe('geo.object', function () {
     });
 
     it('Test a handler that has an error', function () {
-      sinon.stub(console, 'warn', function () {});
+      sinon.stub(console, 'warn').callsFake(function () {});
       var obj = new geo.object(),
           evtData = {},
           handler = new CallCounter(evtData);

@@ -288,12 +288,3 @@ module.exports.createMap = function (opts, css) {
   opts.node = node;
   return geo.map(opts);
 };
-
-/**
- * Return true if the browser is probably PhantomJS.
- *
- * @returns {boolean}
- */
-module.exports.isPhantomJS = function () {
-  return window.navigator.userAgent.indexOf('PhantomJS') >= 0;
-};

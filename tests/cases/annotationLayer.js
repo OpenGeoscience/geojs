@@ -345,7 +345,7 @@ describe('geo.annotationLayer', function () {
     var map, layer, point, rect, rect2, editActionEvent = 0;
 
     beforeAll(function () {
-      sinon.stub(console, 'warn', function () {});
+      sinon.stub(console, 'warn').callsFake(function () {});
     });
     afterAll(function () {
       console.warn.restore();

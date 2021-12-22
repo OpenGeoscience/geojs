@@ -582,7 +582,7 @@ transform.transformCoordinatesFlatArray3 = function (srcPrj, tgtPrj, coordinates
   var src = proj4.Proj(srcPrj),
       tgt = proj4.Proj(tgtPrj),
       projPoint, initPoint = {};
-  let trans = new proj4(src, tgt);
+  const trans = new proj4(src, tgt);
   for (i = coordinates.length - 3; i >= 0; i -= 3) {
     initPoint.x = +coordinates[i];
     initPoint.y = +coordinates[i + 1];

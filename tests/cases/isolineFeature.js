@@ -439,8 +439,8 @@ describe('Isoline Feature', function () {
       var isoline = layer.createFeature('isoline', {
         isoline: {elements: squareElements}}).data(vertexList);
       isoline._build();
-      sinon.stub(layer.features()[1], 'draw', function () {});
-      sinon.stub(layer.children()[2].features()[0], 'draw', function () {});
+      sinon.stub(layer.features()[1], 'draw').callsFake(function () {});
+      sinon.stub(layer.children()[2].features()[0], 'draw').callsFake(function () {});
       isoline.draw();
       expect(layer.features()[1].draw.calledOnce).toBe(true);
       expect(layer.children()[2].features()[0].draw.calledOnce).toBe(true);
@@ -483,8 +483,8 @@ describe('Isoline Feature', function () {
       var isoline = layer.createFeature('isoline', {
         isoline: {elements: squareElements}}).data(vertexList);
       isoline._build();
-      sinon.stub(layer.features()[1], 'modified', function () {});
-      sinon.stub(layer.children()[2].features()[0], 'modified', function () {});
+      sinon.stub(layer.features()[1], 'modified').callsFake(function () {});
+      sinon.stub(layer.children()[2].features()[0], 'modified').callsFake(function () {});
       isoline.modified();
       expect(layer.features()[1].modified.calledOnce).toBe(true);
       expect(layer.children()[2].features()[0].modified.calledOnce).toBe(true);

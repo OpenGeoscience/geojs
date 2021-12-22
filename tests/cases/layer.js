@@ -11,7 +11,7 @@ describe('geo.layer', function () {
   'use strict';
 
   beforeEach(function () {
-    sinon.stub(console, 'log', function () {});
+    sinon.stub(console, 'log').callsFake(function () {});
   });
   afterEach(function () {
     console.log.restore();
@@ -44,12 +44,12 @@ describe('geo.layer', function () {
       expect(layer.initialized()).toBe(true);
       expect(layer.children().length).toBe(1);
 
-      warn = sinon.stub(console, 'warn', function () {});
+      warn = sinon.stub(console, 'warn').callsFake(function () {});
       layer = geo.layer.create(map, {renderer: 'notarenderer'});
       expect(warn.calledOnce).toBe(true);
       console.warn.restore();
 
-      warn = sinon.stub(console, 'warn', function () {});
+      warn = sinon.stub(console, 'warn').callsFake(function () {});
       layer = geo.layer.create(map, {type: 'notalayertype', renderer: 'canvas'});
       expect(warn.calledOnce).toBe(true);
       console.warn.restore();
@@ -278,7 +278,7 @@ describe('geo.webgl.layer', function () {
     var map, layer1, layer2, layer3;
     it('_init', function (done) {
       mockWebglRenderer();
-      sinon.stub(console, 'log', function () {});
+      sinon.stub(console, 'log').callsFake(function () {});
       map = createMap();
       layer1 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/white.jpg', autoshareRenderer: false});
       layer2 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/weather.png', keepLower: false, autoshareRenderer: false});
@@ -327,7 +327,7 @@ describe('geo.webgl.layer', function () {
     var map, layer1, layer2, layer3;
     it('_init', function (done) {
       mockWebglRenderer();
-      sinon.stub(console, 'log', function () {});
+      sinon.stub(console, 'log').callsFake(function () {});
       map = createMap();
       layer1 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/white.jpg'});
       layer2 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/weather.png', keepLower: false});
@@ -388,7 +388,7 @@ describe('geo.webgl.layer', function () {
     var map, layer1, layer2, layer3;
     it('_init', function (done) {
       mockWebglRenderer();
-      sinon.stub(console, 'log', function () {});
+      sinon.stub(console, 'log').callsFake(function () {});
       map = createMap();
       map.autoshareRenderer('more');
       layer1 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/white.jpg'});
@@ -450,7 +450,7 @@ describe('geo.webgl.layer', function () {
     var map, layer1, layer2, layer3;
     it('_init', function (done) {
       mockWebglRenderer();
-      sinon.stub(console, 'log', function () {});
+      sinon.stub(console, 'log').callsFake(function () {});
       map = createMap();
       layer1 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/white.jpg', autoshareRenderer: 'more'});
       layer2 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/weather.png', keepLower: false, autoshareRenderer: false});
@@ -491,7 +491,7 @@ describe('geo.webgl.layer', function () {
     var map, layer1, layer2, layer3;
     it('_init', function (done) {
       mockWebglRenderer();
-      sinon.stub(console, 'log', function () {});
+      sinon.stub(console, 'log').callsFake(function () {});
       map = createMap();
       layer1 = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/white.jpg', autoshareRenderer: false});
       layer2 = map.createLayer('osm', {url: '/testdata/weather.png', keepLower: false, autoshareRenderer: false, renderer: layer1.renderer()});

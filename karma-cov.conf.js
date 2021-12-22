@@ -5,8 +5,8 @@
  * Return URL friendly browser string
  */
 function browser(b) {
-  /* The browser string starts with the basic browser name (Firefox, PhantomJS,
-   * etc.  Split on the first space or dash to isolate this name. */
+  /* The browser string starts with the basic browser name (Firefox, Chrome,
+   * etc.).  Split on the first space or dash to isolate this name. */
   return b.toLowerCase().split(/[ /-]/)[0];
 }
 
