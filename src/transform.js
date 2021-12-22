@@ -193,7 +193,7 @@ var transform = function (options) {
       var mp = vec3.transformMat4(util.vec3AsArray(), [point.x, point.y, point.z || 0], m_source_matrix_inv);
       point = {x: mp[0], y: mp[1], z: mp[2]};
     }
-    var pt = m_proj.forward(point);
+    var pt = m_proj.forward(point, true);
     pt.z = point.z || 0;
     if (m_target_matrix) {
       var ip = vec3.transformMat4(util.vec3AsArray(), [pt.x, pt.y, pt.z], m_target_matrix);
@@ -214,7 +214,7 @@ var transform = function (options) {
       var mp = vec3.transformMat4(util.vec3AsArray(), [point.x, point.y, point.z || 0], m_target_matrix_inv);
       point = {x: mp[0], y: mp[1], z: mp[2]};
     }
-    var pt = m_proj.inverse(point);
+    var pt = m_proj.inverse(point, true);
     pt.z = point.z || 0;
     if (m_source_matrix) {
       var ip = vec3.transformMat4(util.vec3AsArray(), [pt.x, pt.y, pt.z], m_source_matrix);
@@ -359,7 +359,7 @@ transform.transformCoordinates = function (srcPrj, tgtPrj, coordinates, numberOf
   }
   var trans = transform({source: srcPrj, target: tgtPrj}), output;
   if (util.isObject(coordinates) && 'x' in coordinates && 'y' in coordinates) {
-    output = trans.forward({x: +coordinates.x, y: +coordinates.y, z: +coordinates.z || 0});
+    output = trans.forward({x: +coordinates.x, y: +coordinates.y, z: +coordinates.z || 0}, true);
     if ('z' in coordinates) {
       return output;
     }
@@ -368,7 +368,7 @@ transform.transformCoordinates = function (srcPrj, tgtPrj, coordinates, numberOf
   if (Array.isArray(coordinates) && coordinates.length === 1 &&
       util.isObject(coordinates[0]) && 'x' in coordinates[0] &&
       'y' in coordinates[0]) {
-    output = trans.forward({x: +coordinates[0].x, y: +coordinates[0].y, z: +coordinates[0].z || 0});
+    output = trans.forward({x: +coordinates[0].x, y: +coordinates[0].y, z: +coordinates[0].z || 0}, true);
     if ('z' in coordinates[0]) {
       return [output];
     }
@@ -549,7 +549,7 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
     initPoint.x = xAcc(i);
     initPoint.y = yAcc(i);
     initPoint.z = zAcc(i);
-    projPoint = trans.forward(initPoint);
+    projPoint = trans.forward(initPoint, true);
     writer(i, projPoint.x, projPoint.y, projPoint.z);
   }
   return output;
@@ -582,11 +582,12 @@ transform.transformCoordinatesFlatArray3 = function (srcPrj, tgtPrj, coordinates
   var src = proj4.Proj(srcPrj),
       tgt = proj4.Proj(tgtPrj),
       projPoint, initPoint = {};
+  let trans = new proj4(src, tgt);
   for (i = coordinates.length - 3; i >= 0; i -= 3) {
     initPoint.x = +coordinates[i];
     initPoint.y = +coordinates[i + 1];
     initPoint.z = +(coordinates[i + 2] || 0.0);
-    projPoint = proj4.transform(src, tgt, initPoint);
+    projPoint = trans.forward(initPoint, true);
     coordinates[i] = projPoint.x;
     coordinates[i + 1] = projPoint.y;
     coordinates[i + 2] = projPoint.z === undefined ? initPoint.z : projPoint.z;
