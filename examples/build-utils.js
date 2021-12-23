@@ -86,7 +86,7 @@ function writeYamlList(dir, filename, records) {
   }
   fs.writeFileSync(
     path.resolve(dir, filename),
-    yaml.safeDump(records.filter(function (t) {
+    yaml.dump(records.filter(function (t) {
       return !t.disabled;
     }).map(function (t) {
       return {
