@@ -47,7 +47,7 @@ var util = require('./util');
  * @property {object[]} mappedColors This has one entry for each distinct index
  *    value.  Each entry has `first` and `last` with the first and last pixel
  *    locations where that index occurs.  Note that last is the inclusive value
- *    of the location (so its maximum possible value is `size -1`).
+ *    of the location (so its maximum possible value is `size - 1`).
  */
 
 /**
