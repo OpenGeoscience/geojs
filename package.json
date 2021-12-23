@@ -52,7 +52,7 @@
     "expose-loader": "^0.7.5",
     "express": "^4.17.2",
     "file-loader": "^2.0.0",
-    "forever": "^0.15.2",
+    "forever": "^4.0.1",
     "fs-extra": "^7.0.0",
     "glob": "^7.2.0",
     "glslang-validator-prebuilt": "0.0.6",
