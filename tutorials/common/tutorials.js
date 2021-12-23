@@ -249,7 +249,7 @@ function fill_codeblocks(query) {
          * =.  By removing whitespace, the url is more robust against email
          * handling.  The others keep things short. */
         let src = query[key].replace(/(\s|\+)/g, '').replace(/\./g, '/').replace(/-/g, '+').replace(/_/g, '=');
-        src = new Uint8Array(atob(src).split("").map((c) => c.charCodeAt(0)));
+        src = new Uint8Array(atob(src).split('').map((c) => c.charCodeAt(0)));
         src = pako.inflate(src, {to: 'string', raw: true});
         if ($('.CodeMirror', block).length) {
           $('.CodeMirror', block)[0].CodeMirror.setValue(src);
