@@ -39,7 +39,7 @@
     "bootstrap": "^3.4.1",
     "bootswatch": "^3.4.1",
     "codemirror": "^5.65.0",
-    "colorbrewer": "1.5.1",
+    "colorbrewer": "^1.5.1",
     "css-loader": "^0.28.11",
     "docco": "^0.9.1",
     "eslint": "^8.5.0",
