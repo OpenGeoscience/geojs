@@ -49,13 +49,13 @@ var transform = function (options) {
   if (!(this instanceof transform)) {
     options = options || {};
     if (!(options.source in transformCache)) {
-      if (Object.size(transformCache) >= maxTransformCacheSize) {
+      if (Object.keys(transformCache).length >= maxTransformCacheSize) {
         transformCache = {};
       }
       transformCache[options.source] = {};
     }
     if (!(options.target in transformCache[options.source])) {
-      if (Object.size(transformCache[options.source]) >= maxTransformCacheSize) {
+      if (Object.keys(transformCache[options.source]).length >= maxTransformCacheSize) {
         transformCache[options.source] = {};
       }
       transformCache[options.source][options.target] = new transform(options);
