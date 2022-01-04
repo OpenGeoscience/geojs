@@ -1,12 +1,9 @@
-var path = require('path');
-var webpack = require('webpack');
+const path = require('path');
 var exec = require('child_process').execSync;
-var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-var sha = '';
+var webpack = require('webpack');
+var TerserPlugin = require('terser-webpack-plugin');
 
-if (!exec) {
-  console.warn('Node 0.12 or greater is required for detecting the git hash.');
-}
+var sha = '';
 
 try {
   sha = exec('git rev-parse HEAD', {cwd: __dirname}).toString().trim();
@@ -20,15 +17,13 @@ var define_plugin = new webpack.DefinePlugin({
 });
 
 module.exports = {
-  /* webpack 4
   mode: 'production',
-   */
   performance: {hints: false},
   cache: true,
   devtool: 'source-map',
   context: path.join(__dirname, 'src'),
   output: {
-    path: path.join(__dirname, 'dist', 'built'),
+    path: path.resolve(__dirname, 'dist', 'built'),
     publicPath: 'dist/built',
     filename: '[name].js',
     library: 'geo',
@@ -46,57 +41,22 @@ module.exports = {
     }
   },
   plugins: [
-    /* webpack 3 */
-    new UglifyJsPlugin({
-      include: /(bundle|\.min)\.js$/,
-      parallel: true,
-      uglifyOptions: {
-        compress: true,
-        comments: /@(license|copyright)/
-      },
-      sourceMap: true
-    }),
-    /* end webpack 3 */
     define_plugin
   ],
-  /* webpack 4
   optimization: {
     minimizer: [
-      new UglifyJsPlugin({
+      new TerserPlugin({
         include: /\.min\.js$/,
-        parallel: true,
-        uglifyOptions: {
-          compress: true,
-          comments: /@(license|copyright)/
-        },
-        sourceMap: true
+        extractComments: false,
+        parallel: true
       })
     ]
   },
-  */
   module: {
     rules: [{
-      /* The first rule only includes src/*.js so that it can conveniently be
-       * modified for istanbul instrumentation */
       test: /\.js$/,
       include: path.resolve('src'),
-      exclude: path.resolve('src/polyfills.js'),
-      use: [{
-        loader: 'babel-loader',
-        options: {
-          plugins: [require('babel-plugin-transform-object-rest-spread')],
-          presets: [[
-            'env', {
-              targets: {
-                browsers: ['defaults'],
-                uglify: true
-              },
-              useBuiltIns: 'usage'
-            }
-          ]],
-          cacheDirectory: true
-        }
-      }]
+      use: ['babel-loader']
     }, {
       test: /\.js$/,
       include: [
@@ -104,22 +64,7 @@ module.exports = {
         path.resolve('examples'),
         path.resolve('tutorials')
       ],
-      use: [{
-        loader: 'babel-loader',
-        options: {
-          plugins: [require('babel-plugin-transform-object-rest-spread')],
-          presets: [[
-            'env', {
-              targets: {
-                browsers: ['defaults'],
-                uglify: true
-              },
-              useBuiltIns: 'usage'
-            }
-          ]],
-          cacheDirectory: true
-        }
-      }]
+      use: ['babel-loader']
     }, {
       test: /\.styl$/,
       use: [
@@ -142,11 +87,28 @@ module.exports = {
         }
       }]
     }, {
+      // vgl expects jQuery, gl-vec3/4, gl-mat4 to be in the global name space
       test: /vgl\.js$/,
-      use: [
-        'expose-loader?vgl',
-        'imports-loader?mat4=gl-mat4,vec4=gl-vec4,vec3=gl-vec3,$=jquery'
-      ]
+      use: [{
+        loader: 'expose-loader',
+        options: {
+          exposes: {
+            globalName: 'vgl',
+            override: true
+          }
+        }
+      }, {
+        loader: 'imports-loader',
+        options: {
+          type: 'commonjs',
+          imports: [
+            'single gl-mat4 mat4',
+            'single gl-vec4 vec4',
+            'single gl-vec3 vec3',
+            'single jquery $'
+          ]
+        }
+      }]
     }]
   }
 };

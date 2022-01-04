@@ -1,4 +1,5 @@
 const StringReplacePlugin = require('string-replace-webpack-plugin');
+var TerserPlugin = require('terser-webpack-plugin');
 
 var path = require('path');
 
@@ -8,20 +9,14 @@ var rules = base.module.rules.concat([{
   test: /\.pug$/,
   use: ['pug-load']
 }, {
-  test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
-  use: ['url-loader?limit=10000&mimetype=application/font-woff']
-}, {
-  test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-  use: ['url-loader?limit=10000&mimetype=application/octet-stream']
-}, {
-  test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-  use: ['file-loader']
-}, {
-  test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-  use: ['url-loader?limit=10000&mimetype=image/svg+xml']
+  test: /\.(woff|woff2|eot|ttf|svg)(\?v=\d+\.\d+\.\d+)?$/,
+  type: 'asset/inline'
 }, {
   test: require.resolve('codemirror'),
-  use: ['expose-loader?CodeMirror']
+  use: [{
+    loader: 'expose-loader',
+    options: {exposes: 'CodeMirror'}
+  }]
 }, {
   test: /bootstrap.css$/,
   use: [StringReplacePlugin.replace({
@@ -36,16 +31,13 @@ var plugins = base.plugins;
 plugins.push(new StringReplacePlugin());
 
 var resolve = {
-  extensions: ['.js', '.css', '.pug'],
+  extensions: ['.js', '.css', '.pug', '...'],
   alias: base.resolve.alias
 };
 
 module.exports = {
-  /* webpack 4
   mode: 'production',
-   */
   performance: {hints: false},
-  cache: true,
   devtool: 'source-map',
   context: path.join(__dirname),
   entry: {
@@ -55,6 +47,14 @@ module.exports = {
     path: path.join(__dirname, 'dist', 'examples'),
     publicPath: '/examples/',
     filename: '[name].js'
+  },
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        extractComments: false,
+        parallel: true
+      })
+    ]
   },
   module: {
     rules: rules

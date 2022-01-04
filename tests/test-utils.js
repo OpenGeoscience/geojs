@@ -4,7 +4,6 @@
 
 var $ = require('jquery');
 
-require('../src/polyfills');
 var geo = require('../src');
 
 module.exports = {};
