@@ -718,6 +718,9 @@ var mapInteractor = function (args) {
       var Hammer;
       try {
         Hammer = require('hammerjs');
+        if (!Hammer || !Hammer.Manager) {
+          Hammer = undefined;
+        }
       } catch (_error) {}
       if (Hammer !== undefined) {
         var recog = [],

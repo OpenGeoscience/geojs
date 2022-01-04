@@ -184,6 +184,9 @@ vtkjsRenderer.supported = function () {
   if ((!vtkjsRenderer.vtkjs || !vtkjsRenderer.vtkjs.Rendering) && window.vtk && window.vtk.Rendering) {
     vtkjsRenderer.vtkjs = window.vtk;
   }
+  if (!vtkjsRenderer.vtkjs || !vtkjsRenderer.vtkjs.Rendering) {
+    vtkjsRenderer.vtkjs = undefined;
+  }
   return vtkjsRenderer.vtkjs !== undefined;
 };
 
