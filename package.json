@@ -58,7 +58,7 @@
     "istanbul-combine": "^0.3.0",
     "istanbul-instrumenter-loader": "^3.0.1",
     "jaguarjs-jsdoc": "^1.0.2",
-    "jasmine-core": "3.10.1",
+    "jasmine-core": "^4.0.0",
     "js-yaml": "^4.1.0",
     "jsdoc": "^3.6.7",
     "jsdoc-autoprivate": "0.0.1",

@@ -779,7 +779,7 @@ describe('geo.core.map', function () {
 
       m.draw();
       // make sure that drawing has occurred
-      window.requestAnimationFrame(done);
+      window.requestAnimationFrame(() => done());
     });
     // all screen shots are in separate it blocks to make them more consistent
     it('basic', function (done) {
