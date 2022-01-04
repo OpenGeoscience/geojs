@@ -1,5 +1,15 @@
 # GeoJS Change Log
 
+## Version 1.6.0
+
+### Changes
+
+- Switch to webpack v5 and update build tooling ([#1132](../../issues/1132))
+
+### Bug Fixes
+
+- Harden checking for optional dependencies ([#1143](../../pull/1143))
+
 ## Version 1.5.0
 
 ### Features
