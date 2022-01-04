@@ -681,6 +681,9 @@ svgRenderer.supported = function () {
   // webpack expects optional dependencies to be wrapped in a try-catch
   try {
     svgRenderer.d3 = require('d3');
+    if (!svgRenderer.d3 || !svgRenderer.d3.rgb) {
+      svgRenderer.d3 = undefined;
+    }
   } catch (_error) {}
   return svgRenderer.d3 !== undefined;
 };
