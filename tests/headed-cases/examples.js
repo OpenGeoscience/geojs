@@ -136,7 +136,7 @@ describe('examples', function () {
               });
               subtestDeferreds.push(subtestDefer);
             });
-            ex$.when.apply(ex$, subtestDeferreds).then(done);
+            ex$.when.apply(ex$, subtestDeferreds).then(() => done());
           }, function () {
             fail(desc + ' -> idle functions were rejected');
           });

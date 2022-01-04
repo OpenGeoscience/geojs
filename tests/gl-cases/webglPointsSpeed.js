@@ -81,7 +81,7 @@ describe('webglPointsSpeed', function () {
       $('#map').append($('<div style="display: none" id="framerateResults">')
         .attr('results', fps));
 
-      myMap.onIdle(done);
+      myMap.onIdle(() => done());
     }
 
     function loadTest() {

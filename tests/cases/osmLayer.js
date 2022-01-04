@@ -43,7 +43,7 @@ describe('geo.core.osmLayer', function () {
         map.transition({
           center: {x: -0.1275, y: 51.5072},
           duration: 500,
-          done: done
+          done: () => done()
         });
       });
       it('next animation', function (done) {
@@ -53,7 +53,7 @@ describe('geo.core.osmLayer', function () {
           ease: function (t) {
             return Math.pow(2.0, -10.0 * t) * Math.sin((t - 0.075) * (2.0 * Math.PI) / 0.3) + 1.0;
           },
-          done: done
+          done: () => done()
         });
       });
       it('next animation', function (done) {
@@ -77,7 +77,7 @@ describe('geo.core.osmLayer', function () {
             t -= 2.625 / r;
             return s * t * t + 0.984375;
           },
-          done: done
+          done: () => done()
         });
       });
       it('next animation', function (done) {
@@ -87,7 +87,7 @@ describe('geo.core.osmLayer', function () {
           ease: function (t) {
             return Math.pow(2.0, -10.0 * t) * Math.sin((t - 0.075) * (2.0 * Math.PI) / 0.3) + 1.0;
           },
-          done: done
+          done: () => done()
         });
       });
       it('next animation', function (done) {
@@ -95,7 +95,7 @@ describe('geo.core.osmLayer', function () {
           center: {x: 19.0514, y: 47.4925},
           rotation: Math.PI * 2,
           duration: 500,
-          done: done
+          done: () => done()
         });
       });
       it('check findings', function () {
