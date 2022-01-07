@@ -40,6 +40,7 @@ module.exports = {
       mousetrap: 'mousetrap/mousetrap.js'
     }
   },
+  target: ['web', 'es5'],
   plugins: [
     define_plugin
   ],
@@ -56,7 +57,14 @@ module.exports = {
     rules: [{
       test: /\.js$/,
       include: path.resolve('src'),
-      use: ['babel-loader']
+      use: [{
+        loader: 'babel-loader',
+        options: {
+          presets: [['@babel/preset-env', {
+            targets: 'defaults, PhantomJS 2.1'
+          }]]
+        }
+      }]
     }, {
       test: /\.js$/,
       include: [
