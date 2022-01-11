@@ -25,7 +25,7 @@ jobs:
     - run: fc-list
     - run: firefox --version
     - run: google-chrome --version
-    - run: npm install
+    - run: npm ci
     - run: npm run setup-website
     - run: npm run ci-xvfb
     - run: npm run ci-build-website
