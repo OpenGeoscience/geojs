@@ -41,7 +41,7 @@ module.exports = function (config) {
   /* Alter our first webpack module rule which should just apply to src/*.js
    * files. */
   karma_config.webpack.module.rules[0].use.push({
-    loader: 'istanbul-instrumenter-loader',
+    loader: '@jsdevtools/coverage-istanbul-loader',
     options: {esModules: true}
   });
 
