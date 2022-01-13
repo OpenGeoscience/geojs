@@ -158,7 +158,7 @@ var webgl_quadFeature = function (arg) {
    * Build this feature.
    */
   this._build = function () {
-    var mapper, mat, prog, srctex, unicrop, unicropsource, geom, context;
+    var mapper, mat, prog, srctex, unicrop, unicropsource, geom, context, sampler2d;
 
     if (!m_this.position()) {
       return;
@@ -183,6 +183,10 @@ var webgl_quadFeature = function (arg) {
       prog.addUniform(new vgl.projectionUniform('projectionMatrix'));
       prog.addUniform(new vgl.floatUniform('opacity', 1.0));
       prog.addUniform(new vgl.floatUniform('zOffset', 0.0));
+      /* Use texture unit 0 */
+      sampler2d = new vgl.uniform(vgl.GL.INT, 'sampler2d');
+      sampler2d.set(0);
+      prog.addUniform(sampler2d);
       context = m_this.renderer()._glContext();
       unicrop = new vgl.uniform(context.FLOAT_VEC2, 'crop');
       unicrop.set([1.0, 1.0]);
@@ -194,6 +198,9 @@ var webgl_quadFeature = function (arg) {
         context.VERTEX_SHADER, context, vertexShaderImage));
       prog.addShader(vgl.getCachedShader(
         context.FRAGMENT_SHADER, context, fragmentShaderImage));
+      if (m_this._hookBuild) {
+        m_this._hookBuild(prog);
+      }
       mat.addAttribute(prog);
       mat.addAttribute(new vgl.blend());
       /* This is similar to vgl.planeSource */
@@ -355,6 +362,9 @@ var webgl_quadFeature = function (arg) {
         cropsrc = {x0: 0, y0: 0, x1: 1, y1: 1}, quadcropsrc,
         w, h, quadw, quadh;
 
+    if (m_this._hookRenderImageQuads) {
+      m_this._hookRenderImageQuads(renderState, m_quads.imgQuads);
+    }
     context.bindBuffer(context.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
     $.each(m_quads.imgQuads, function (idx, quad) {
       if (!quad.image) {
@@ -448,6 +458,27 @@ var webgl_quadFeature = function (arg) {
       m_this._updateTextures();
     }
     m_this.modified();
+  };
+
+  /**
+   * Set the image or color vertex or fragment shader.
+   *
+   * @param {string} shaderType One of `image_vertex`, `image_fragment`,
+   *   `color_vertex`, or `color_fragment`.
+   * @param {string} shaderCode The shader program.
+   * @returns {this} The class instance on success, undefined in an unknown
+   *    shaderType was specified.
+   */
+  this.setShader = function (shaderType, shaderCode) {
+    switch (shaderType) {
+      case 'image_vertex': vertexShaderImage = shaderCode; break;
+      case 'image_fragment': fragmentShaderImage = shaderCode; break;
+      case 'color_vertex': vertexShaderColor = shaderCode; break;
+      case 'color_fragment': fragmentShaderColor = shaderCode; break;
+      default:
+        return;
+    }
+    return m_this;
   };
 
   /**
