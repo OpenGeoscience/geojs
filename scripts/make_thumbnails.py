@@ -23,7 +23,7 @@ InitialDelay = 15  # in seconds
 MaxDelay = 30  # in seconds
 Quality = 90
 OutputFile = 'thumb.jpg'
-InputList = ["examples", "tutorials"]
+InputList = ['examples', 'tutorials']
 BrowserCommand = [
     'xvfb-run', '-s', '-ac -screen 0 %dx%dx24' % (
         OriginalSize[0] + ExtraSpace, OriginalSize[1] + ExtraSpace + NavbarHeight),

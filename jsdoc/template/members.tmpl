@@ -18,7 +18,7 @@ if (data.type && data.type.names) {
             <?js= data.attribs + (data.scope === 'static' ? longname : name)  + typeSignature ?>
         </h4>
     </div>
-    
+
     <?js if (data.summary) { ?>
     <p class="summary"><?js= summary ?></p>
     <?js } ?>
@@ -29,9 +29,9 @@ if (data.type && data.type.names) {
         <?js= data.description ?>
     </div>
     <?js } ?>
-    
+
     <?js= this.partial('details.tmpl', data) ?>
-    
+
     <?js if (data.examples && examples.length) { ?>
         <h5>Example<?js= examples.length > 1? 's':'' ?></h5>
         <?js= this.partial('examples.tmpl', examples) ?>

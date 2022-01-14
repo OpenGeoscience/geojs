@@ -6,4 +6,3 @@ var fs = require('hexo-fs');
 hexo.extend.helper.register('fileExists', function(path) {
     return fs.existsSync(path);
 });
-
