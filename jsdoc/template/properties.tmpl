@@ -44,28 +44,28 @@
 		<?js if (props.hasName) {?>
 		<th>Name</th>
 		<?js } ?>
-		
+
 		<th>Type</th>
-		
+
 		<?js if (props.hasAttributes) {?>
 		<th>Argument</th>
 		<?js } ?>
-		
+
 		<?js if (props.hasDefault) {?>
 		<th>Default</th>
 		<?js } ?>
-		
+
 		<th class="last">Description</th>
 	</tr>
 	</thead>
-	
+
 	<tbody>
 	<?js
         var self = this;
 	    props.forEach(function(prop) {
 	        if (!prop) { return; }
 	?>
-	
+
         <tr>
             <?js if (props.hasName) {?>
                 <td class="name">
@@ -102,7 +102,7 @@
                 <h6>Properties</h6><?js= self.partial('properties.tmpl', prop.subprops) ?>
             <?js } ?></td>
         </tr>
-	
+
 	<?js }); ?>
 	</tbody>
 </table>

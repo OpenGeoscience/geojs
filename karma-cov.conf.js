@@ -13,7 +13,7 @@ function browser(b) {
 function subdir_name(b) {
   var subdir = browser(b);
   if (process.env.GEOJS_TEST_CASE) {
-    /* Use thes test case and as part of the name so that different tests end
+    /* Use the test case and as part of the name so that different tests end
      * up in different coverage directories.  Get the last element of the path
      * without the extension from the test case for this purpose. */
     var parts = /^(.+\/)*(([^/]+)\.[^/.]*|[^/.]+)$/.exec(process.env.GEOJS_TEST_CASE);

@@ -12,4 +12,3 @@ void main(void) {
   gl_Position.z += zOffset;
   iVertexColor = vertexColor;
 }
-

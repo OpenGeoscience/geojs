@@ -9,13 +9,13 @@
 }
 .main .subsection-title {
   margin-top: inherit;
-}  
+}
 .main h2.subsection-title {
   font-size: 20px;
   margin-top: 30px;
   border-top: 3px double #e1e1e1;
   padding-top: 20px;
-}    
+}
 :target {
   background-color: #ff8;
 }
