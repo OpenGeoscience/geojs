@@ -363,6 +363,8 @@ module.exports = function (config) {
       stats: 'errors-only'
     }
   };
+  /* Suppress a babel warning */
+  newConfig.webpack.module.rules[0].use[0].options.compact = false;
   newConfig.preprocessors[test_case] = ['webpack', 'sourcemap'];
   return newConfig;
 };

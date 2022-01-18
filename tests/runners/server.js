@@ -13,7 +13,8 @@ var express = require('express'),
     port = 30100,
     build = false,
     dist = false,
-    website = false;
+    website = false,
+    websub = false;
 
 process.argv.forEach(function (val, idx) {
   if (skip) {
@@ -36,6 +37,8 @@ process.argv.forEach(function (val, idx) {
     port = parseInt(val.substr(7), 10);
   } else if (val === '--website' || val === '--web' || val === '-w') {
     website = true;
+  } else if (val === '--websub') {
+    websub = true;
   } else {
     help = true;
   }
@@ -48,13 +51,17 @@ if (help) {
     '--host (host) : default 0.0.0.0\n' +
     '--port (port) : default 30100\n' +
     '--website : serve website directory (if this and dist are specified,\n' +
-    '   dist is located as dist/)\n');
+    '   dist is located as dist/)\n' +
+    '--websub : serve website as website/\n');
   process.exit(1);
 }
 
 if (!website) {
   if (!build || dist) {
     app.use(express.static('dist'));
+  }
+  if (websub) {
+    app.use('/website', express.static('website/public'));
   }
 } else {
   if (dist) {
