@@ -28,6 +28,7 @@ var webgl_pixelmapFeature = function (arg) {
   const fragmentShader = require('./pixelmapFeature.frag');
 
   var m_quadFeature,
+      m_quadFeatureInit,
       s_exit = this._exit,
       m_lookupTable,
       m_this = this;
@@ -117,6 +118,9 @@ var webgl_pixelmapFeature = function (arg) {
         gcs: m_this.gcs(),
         visible: m_this.visible(undefined, true)
       });
+      m_quadFeatureInit = false;
+    }
+    if (!m_quadFeatureInit) {
       m_this.dependentFeatures([m_quadFeature]);
       m_quadFeature.setShader('image_fragment', fragmentShader);
       m_quadFeature._hookBuild = (prog) => {
@@ -138,11 +142,14 @@ var webgl_pixelmapFeature = function (arg) {
         });
         m_lookupTable.bind(renderState, quads);
       };
-      m_quadFeature.style({
-        image: m_this.m_srcImage,
-        position: m_this.style.get('position')})
-      .data([{}])
-      .draw();
+      if (m_quadFeatureInit === false) {
+        m_quadFeature.style({
+          image: m_this.m_srcImage,
+          position: m_this.style.get('position')})
+        .data([{}])
+        .draw();
+      }
+      m_quadFeatureInit = true;
     }
   };
 
@@ -161,6 +168,9 @@ var webgl_pixelmapFeature = function (arg) {
     return m_this;
   };
 
+  if (arg.quadFeature) {
+    m_quadFeature = arg.quadFeature;
+  }
   this._init(arg);
   return this;
 };
@@ -168,5 +178,8 @@ var webgl_pixelmapFeature = function (arg) {
 inherit(webgl_pixelmapFeature, pixelmapFeature);
 
 // Now register it
-registerFeature('webgl', 'pixelmap', webgl_pixelmapFeature);
+var capabilities = {};
+capabilities[pixelmapFeature.capabilities.lookup] = true;
+
+registerFeature('webgl', 'pixelmap', webgl_pixelmapFeature, capabilities);
 module.exports = webgl_pixelmapFeature;

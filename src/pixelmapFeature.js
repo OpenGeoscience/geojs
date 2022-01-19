@@ -282,6 +282,10 @@ var pixelmapFeature = function (arg) {
     }
     m_this.style(style);
     m_this.dataTime().modified();
+    if (arg.quadFeature) {
+      m_this.m_srcImage = true;
+      m_this._computePixelmap();
+    }
 
     return m_this;
   };
@@ -307,7 +311,9 @@ pixelmapFeature.create = function (layer, spec) {
 
 pixelmapFeature.capabilities = {
   /* core feature name -- support in any manner */
-  feature: 'pixelmap'
+  feature: 'pixelmap',
+  /* support for image-based lookup */
+  lookup: 'pixelmap.lookup'
 };
 
 inherit(pixelmapFeature, feature);
