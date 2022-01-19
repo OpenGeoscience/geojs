@@ -19,12 +19,12 @@ var rules = base.module.rules.concat([{
   }]
 }, {
   test: /bootstrap.css$/,
-  use: StringReplacePlugin.replace({
+  use: [StringReplacePlugin.replace({
     replacements: [{
       pattern: /@import.*fonts.googleapis.com\/css\?family=Lato[^;]*;/g,
       replacement: () => '@import url(../../typeface-lato/index.css);'
     }]
-  })
+  })]
 }]);
 
 var plugins = base.plugins;

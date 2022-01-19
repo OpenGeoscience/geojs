@@ -51,6 +51,8 @@ module.exports = {
   optimization: {
     minimizer: [
       new TerserPlugin({
+        // uncomment out to avoid minimizing for testing
+        // exclude: '**/*',
         extractComments: false,
         parallel: true
       })
