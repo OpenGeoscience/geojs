@@ -473,6 +473,7 @@ describe('geo.core.osmLayer', function () {
         expect(layer.source('osm')).toBe(layer);
         expect(layer._options.maxLevel).toBe(19);
         expect(layer.source()).toBe('osm');
+        expect(layer.name()).toBe('');
         layer = map.createLayer('osm', {renderer: null, url: '/data/tilefancy.png'});
         expect(layer.source()).toBe(undefined);
         expect(layer.source('stamen-toner-lite')).toBe(layer);

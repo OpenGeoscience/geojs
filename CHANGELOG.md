@@ -1,5 +1,17 @@
 # GeoJS Change Log
 
+## Version 1.6.2
+
+### Bug Fixes
+
+- Do not name osm layers based on the tile source ([#1154](../../pull/1154))
+
+## Version 1.6.1
+
+### Changes
+
+- Build for older browsers ([#1145](../../issues/1145))
+
 ## Version 1.6.0
 
 ### Changes

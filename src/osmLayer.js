@@ -44,6 +44,8 @@ var osmLayer = function (arg) {
     this.constructor.defaults,
     osmLayer.tileSources[this.constructor.defaults.source] || {},
     osmLayer.tileSources[arg.source] || {},
+    // don't name the layer based on the source
+    {name: ''},
     arg);
   tileLayer.call(this, arg);
 
