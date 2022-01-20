@@ -15,6 +15,9 @@ var pixelmapFeature = require('./pixelmapFeature');
  *   pixel map. If an index is larger than the number of data elements, it will
  *   be transparent.  If there is more data than there are indices, it is
  *   ignored.
+ * @property {object} [style] An optional style object that could contain
+ *   `color` or other style values.
+ * @property {array} [data] A new data array.
  */
 
 /**
@@ -26,7 +29,7 @@ var pixelmapFeature = require('./pixelmapFeature');
  * @alias geo.pixelmapLayer
  * @extends geo.tileLayer
  *
- * @param {geo.tileLayer.spec} [arg] Specification for the layer.
+ * @param {geo.pixelmapLayer.spec} [arg] Specification for the layer.
  */
 var pixelmapLayer = function (arg) {
 
@@ -104,21 +107,13 @@ var pixelmapLayer = function (arg) {
       m_pixelmapFeature.dataTime().modified();
       return s_dataTimeModified();
     };
-    const s_modified = m_this.modified;
-    m_this.modified = () => {
-      m_pixelmapFeature.modified();
-      return s_modified();
-    };
-    const s_geoOn = m_this.geoOn;
-    const s_geoOff = m_this.geoOff;
-    m_this.geoOn = (event, handler) => {
-      m_pixelmapFeature.geoOn(event, handler);
-      return s_geoOn(event, handler);
-    };
-    m_this.geoOff = (event, handler) => {
-      m_pixelmapFeature.geoOff(event, handler);
-      return s_geoOff(event, handler);
-    };
+    ['modified', 'geoOn', 'geoOff', 'geoOnce'].forEach((funcName) => {
+      const superFunc = m_this[funcName];
+      m_this[funcName] = function () {
+        m_pixelmapFeature[funcName].apply(this, arguments);
+        return superFunc.apply(this, arguments);
+      };
+    });
     return m_this;
   };
 

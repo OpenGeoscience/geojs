@@ -47,25 +47,28 @@ var webgl_pixelmapFeature = function (arg) {
   this.pointSearch = function (geo, gcs) {
     if (m_quadFeature && m_this.m_info) {
       let result = m_quadFeature.pointSearch(geo, gcs);
-      if (result.index.length === 1 &&
-          result.extra && result.extra[result.index[0]].basis &&
-          result.extra[result.index[0]]._quad &&
-          result.extra[result.index[0]]._quad.image) {
-        const img = result.extra[result.index[0]]._quad.image;
-        const basis = result.extra[result.index[0]].basis;
-        const x = Math.floor(basis.x * img.width);
-        const y = Math.floor(basis.y * img.height);
-        const canvas = document.createElement('canvas');
-        canvas.width = canvas.height = 1;
-        const context = canvas.getContext('2d');
-        context.drawImage(img, x, y, 1, 1, 0, 0, 1, 1);
-        const pixel = context.getImageData(0, 0, 1, 1).data;
-        const idx = pixel[0] + pixel[1] * 256 + pixel[2] * 256 * 256;
-        result = {
-          index: [idx],
-          found: [m_this.data()[idx]]
-        };
-        return result;
+      // use the last index by preference, since for tile layers, this is the
+      // topmosttile
+      let idxIdx = result.index.length - 1;
+      for (; idxIdx >= 0; idxIdx -= 1) {
+        if (result.extra[result.index[idxIdx]]._quad &&
+            result.extra[result.index[idxIdx]]._quad.image) {
+          const img = result.extra[result.index[idxIdx]]._quad.image;
+          const basis = result.extra[result.index[idxIdx]].basis;
+          const x = Math.floor(basis.x * img.width);
+          const y = Math.floor(basis.y * img.height);
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 1;
+          const context = canvas.getContext('2d');
+          context.drawImage(img, x, y, 1, 1, 0, 0, 1, 1);
+          const pixel = context.getImageData(0, 0, 1, 1).data;
+          const idx = pixel[0] + pixel[1] * 256 + pixel[2] * 256 * 256;
+          result = {
+            index: [idx],
+            found: [m_this.data()[idx]]
+          };
+          return result;
+        }
       }
     }
     return {index: [], found: []};

@@ -676,7 +676,7 @@ var tileLayer = function (arg) {
   this._getTiles = function (maxLevel, bounds, sorted, onlyIfChanged) {
     var i, j, tiles = [], index, nTilesLevel,
         start, end, indexRange, source, center, changed = false, old, level,
-        minLevel = (m_this._options.keepLower ? m_this._options.minLevel : maxLevel);
+        minLevel = (m_this._options.keepLower ? m_this._options.minLevel : Math.max(maxLevel, m_this._options.minLevel));
     if (maxLevel < minLevel) {
       maxLevel = minLevel;
     }
@@ -1532,7 +1532,8 @@ var tileLayer = function (arg) {
        * finished, purge all but the current layer.  This is important for
        * semi-transparent layers. */
       if ((doneLoading || m_this._isCovered(tile)) &&
-          zoom !== tile.index.level) {
+          zoom !== tile.index.level &&
+          (zoom >= m_this._options.minLevel || tile.index.level !== m_this._options.minLevel)) {
         return true;
       }
     }
