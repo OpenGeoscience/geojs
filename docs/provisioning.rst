@@ -19,7 +19,6 @@ Add nodejs to the sources so it can be installed ::
 Install required packages ::
 
     sudo apt-get install --yes \
-        cpio \
         firefox-esr \
         fonts-dejavu \
         git \
