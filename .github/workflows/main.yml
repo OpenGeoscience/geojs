@@ -20,7 +20,7 @@ jobs:
       with:
         node-version: '14'
     - uses: browser-actions/setup-firefox@latest
-    - run: sudo apt-get install --yes --no-install-recommends cpio optipng
+    - run: sudo apt-get install --yes --no-install-recommends optipng
     - run: sudo apt-get remove --yes fonts-lato
     - run: fc-list
     - run: firefox --version
