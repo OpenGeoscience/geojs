@@ -27,7 +27,7 @@
   "optionalDependencies": {
     "d3": "^3.5.17",
     "hammerjs": "^2.0.8",
-    "vtk.js": "^21.6.1"
+    "vtk.js": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.16.5",
