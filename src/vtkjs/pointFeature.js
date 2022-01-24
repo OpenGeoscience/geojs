@@ -76,7 +76,7 @@ var vtkjs_pointFeature = function (arg) {
    */
   this._init = function () {
     s_init.call(m_this, arg);
-    m_this.renderer().contextRenderer().setLayer(1);
+    m_this.renderer().contextRenderer().setLayer(0);
     m_this._createPipeline();
   };
 
