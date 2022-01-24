@@ -54,6 +54,21 @@ describe('webglPixelmapLayer', function () {
     createPixelmap({style: undefined, color: 'black'});
     expect(layer.style.get('color')(0, 0)).toEqual({r: 0, b: 0, g: 0});
   });
+  it('indexModified', function (done) {
+    createPixelmap();
+    expect(layer.indexModified()).toBe(undefined);
+    layer.indexModified(2);
+    expect(layer.indexModified()).toEqual([2, 2]);
+    layer.indexModified(4);
+    expect(layer.indexModified()).toEqual([2, 4]);
+    layer.indexModified(1, 3);
+    expect(layer.indexModified()).toEqual([1, 4]);
+    layer.indexModified(undefined, 'clear');
+    expect(layer.indexModified()).toBe(undefined);
+    layer.indexModified(2);
+    layer.draw();
+    map.onIdle(done);
+  });
   it('geoOn and geoOff', function (done) {
     createPixelmap();
     var click = false;

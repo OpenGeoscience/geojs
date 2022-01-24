@@ -53,6 +53,7 @@ var pixelmapFeature = function (arg) {
    */
   var m_this = this,
       s_update = this._update,
+      m_modifiedIndexRange,
       s_init = this._init;
 
   this.featureType = 'pixelmap';
@@ -116,6 +117,42 @@ var pixelmapFeature = function (arg) {
   };
 
   /**
+   * Mark that an index's data value (and hence its color) has changed without
+   * marking all of the data array as changed.  If this function is called
+   * without any parameters, it clears the tracked changes.
+   *
+   * @param {integer} [idx] The lowest data index that has changed.  If
+   *    `undefined`, return the current tracked changed range.
+   * @param {integer|'clear'} [idx2] If an index was specified in `idx` and
+   *    this is specified, the highest index (inclusive) that has changed.  If
+   *    returning the tracked changed range and this is `clear`, clear the
+   *    tracked range.
+   * @returns {this|integer[]} When returning a range, this is the lowest and
+   *    highest index values that have changed (inclusive), so their range is
+   *    `[0, data.length)`.
+   */
+  this.indexModified = function (idx, idx2) {
+    if (idx === undefined) {
+      const range = m_modifiedIndexRange;
+      if (idx2 === 'clear') {
+        m_modifiedIndexRange = undefined;
+      }
+      return range;
+    }
+    m_this.modified();
+    if (m_modifiedIndexRange === undefined) {
+      m_modifiedIndexRange = [idx, idx];
+    }
+    if (idx < m_modifiedIndexRange[0]) {
+      m_modifiedIndexRange[0] = idx;
+    }
+    if ((idx2 || idx) > m_modifiedIndexRange[1]) {
+      m_modifiedIndexRange[1] = (idx2 || idx);
+    }
+    return m_this;
+  };
+
+  /**
    * Update.
    *
    * @returns {this}
@@ -173,7 +210,6 @@ var pixelmapFeature = function (arg) {
      * drawing a quad, which can trigger a full layer update, which in turn
      * checks if this feature is built.  Setting the build time avoids calling
      * this a second time. */
-    m_this.buildTime().modified();
     if (!m_this.m_srcImage) {
       var src = m_this.style.get('url')();
       if (util.isReadyImage(src)) {
@@ -224,6 +260,7 @@ var pixelmapFeature = function (arg) {
     } else if (m_this.m_info) {
       m_this._computePixelmap();
     }
+    m_this.buildTime().modified();
     return m_this;
   };
 

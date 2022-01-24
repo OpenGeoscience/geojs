@@ -371,7 +371,9 @@ var webgl_quadFeature = function (arg) {
         return;
       }
       quad.texture.bind(renderState);
-      if (context.getError() === context.OUT_OF_MEMORY) {
+      // only check if the context is out of memory when using modestly large
+      // textures.  The check is slow.
+      if ((quad.image.width > 4096 || quad.image.height > 4096 || quad.image.width * quad.image.height > 4194304) && context.getError() === context.OUT_OF_MEMORY) {
         console.log('Insufficient GPU memory for texture');
       }
       if (quad.opacity !== opacity) {

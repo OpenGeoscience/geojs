@@ -102,6 +102,7 @@ var pixelmapLayer = function (arg) {
     }
     m_this.style = m_pixelmapFeature.style;
     m_this.data = m_pixelmapFeature.data;
+    m_this.indexModified = m_pixelmapFeature.indexModified;
     const s_dataTimeModified = m_this.dataTime().modified;
     m_this.dataTime().modified = () => {
       m_pixelmapFeature.dataTime().modified();

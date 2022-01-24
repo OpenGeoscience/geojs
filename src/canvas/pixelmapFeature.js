@@ -135,11 +135,13 @@ var canvas_pixelmapFeature = function (arg) {
         updateFirst, updateLast = -1, update, prepared;
 
     if (!m_this.m_info) {
+      m_this.indexModified(undefined, 'clear');
       if (!m_this._preparePixelmap()) {
         return;
       }
       prepared = true;
     }
+    m_this.indexModified(undefined, 'clear');
     mappedColors = m_this.m_info.mappedColors;
     updateFirst = m_this.m_info.area;
     for (idx in mappedColors) {

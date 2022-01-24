@@ -75,6 +75,19 @@ block mainTutorial
     coloring so that superpixels start transparent with yellow edges and cycle
     through red, green, and blue as they are selected.
 
+    When changing a value in the data array, we need to inform the pixelmap
+    that it is changed.  This could be done a variety of ways:
+
+    - `pixelmap.data(data)` - this marks the entire data set as changed and
+      will require recomputing the most values.
+
+    - `pixelmap.modified()` - this states that the style has changed in some
+      way, but without more specificifity, all of the colors are rechecked.
+
+    - `pixelmap.indexModified(lowIndex, highIndex)` - this states that only a
+      small number of indicies' colors have changed, allowing the most
+      efficient update.
+
   +codeblock('javascript', 3, 2).
     pixelmap.style('color', (d, i) => {
       switch (d) {
@@ -91,9 +104,9 @@ block mainTutorial
       var data = pixelmap.data();
       // change the value of the superpixel and its border
       data[index] = data[index + 1] = (data[index] + 1) % 4;
-      // since we changed the data directory, just tell the layer that it has
-      // been modified and to redraw.
-      pixelmap.modified().draw();
+      // since we changed the data directly, tell the layer that it has been
+      // modified and to redraw.  Use `indexModified` for efficiency.
+      pixelmap.indexModified(index, index + 1).draw();
     });
 
   :markdown-it
@@ -121,11 +134,11 @@ block mainTutorial
       if (newValue === undefined) {
         data[index] = data[index + 1] = (data[index] + 1) % 4;
         newValue = data[index];
-        pixelmap.modified().draw();
+        pixelmap.indexModified(index, index + 1).draw();
       }
       // if we are moving and things have changed, update
       if (data[index] !== newValue) {
         data[index] = data[index + 1] = newValue;
-        pixelmap.modified().draw();
+        pixelmap.indexModified(index, index + 1).draw();
       }
     });

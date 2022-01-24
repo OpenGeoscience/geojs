@@ -82,34 +82,49 @@ var webgl_pixelmapFeature = function (arg) {
     var data = m_this.data() || [],
         colorFunc = m_this.style.get('color');
 
+    let indexRange = m_this.indexModified(undefined, 'clear');
+    let fullUpdate = m_this.dataTime().timestamp() >= m_this.buildTime().timestamp() || indexRange === undefined;
     if (!m_lookupTable) {
       m_lookupTable = lookupTable2D();
       m_lookupTable.setTextureUnit(1);
+      fullUpdate = true;
     }
     let clrLen = Math.max(1, data.length);
     const maxWidth = m_lookupTable.maxWidth();
     if (clrLen > maxWidth && clrLen % maxWidth) {
       clrLen += maxWidth - (clrLen % maxWidth);
     }
-    const colors = new Uint8Array(clrLen * 4);
-    data.forEach((d, i) => {
+
+    let colors;
+    if (!fullUpdate) {
+      colors = m_lookupTable.colorTable();
+      fullUpdate = colors.length !== clrLen * 4;
+      indexRange[0] = Math.max(0, indexRange[0]);
+      indexRange[1] = Math.min(data.length, indexRange[1] + 1);
+    }
+    if (fullUpdate) {
+      colors = new Uint8Array(clrLen * 4);
+      indexRange = [0, data.length];
+    }
+    for (let i = indexRange[0]; i < indexRange[1]; i += 1) {
+      const d = data[i];
       const color = util.convertColor(colorFunc.call(m_this, d, i));
       colors[i * 4] = color.r * 255;
       colors[i * 4 + 1] = color.g * 255;
       colors[i * 4 + 2] = color.b * 255;
       colors[i * 4 + 3] = color.a === undefined ? 255 : (color.a * 255);
-    });
+    }
     m_this.m_info = {colors: colors};
     // check if colors haven't changed
     var oldcolors = m_lookupTable.colorTable();
     if (oldcolors && oldcolors.length === colors.length) {
-      let idx = 0;
-      for (; idx < colors.length; idx += 1) {
+      let idx = indexRange[0] * 4;
+      for (; idx < indexRange[1] * 4; idx += 1) {
         if (colors[idx] !== oldcolors[idx]) {
           break;
         }
       }
-      if (idx === colors.length) {
+      if (idx === indexRange[1] * 4) {
         return;
       }
     }
