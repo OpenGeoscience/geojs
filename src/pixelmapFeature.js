@@ -121,13 +121,13 @@ var pixelmapFeature = function (arg) {
    * marking all of the data array as changed.  If this function is called
    * without any parameters, it clears the tracked changes.
    *
-   * @param {integer} [idx] The lowest data index that has changed.  If
+   * @param {number} [idx] The lowest data index that has changed.  If
    *    `undefined`, return the current tracked changed range.
-   * @param {integer|'clear'} [idx2] If an index was specified in `idx` and
+   * @param {number|'clear'} [idx2] If an index was specified in `idx` and
    *    this is specified, the highest index (inclusive) that has changed.  If
    *    returning the tracked changed range and this is `clear`, clear the
    *    tracked range.
-   * @returns {this|integer[]} When returning a range, this is the lowest and
+   * @returns {this|number[]} When returning a range, this is the lowest and
    *    highest index values that have changed (inclusive), so their range is
    *    `[0, data.length)`.
    */

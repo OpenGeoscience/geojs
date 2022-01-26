@@ -10,8 +10,8 @@ var util = require('../util');
  * @typedef {object} geo.pixelmapFeature.info
  * @property {number} width The width of the source image.
  * @property {number} height The width of the source image.
- * @property {context} context The HTMLCanvasElement context used for handling
- *    the pixelmap.
+ * @property {CanvasRenderingContext2D} context The HTMLCanvasElement context
+ *    used for handling the pixelmap.
  * @property {ImageData} imageData The context's image data.
  * @property {number[]} indices An array, one per pixel, of the index value in
  *    the image.  This decodes the pixel value to the corresponding integer.

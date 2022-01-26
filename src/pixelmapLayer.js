@@ -18,6 +18,8 @@ var pixelmapFeature = require('./pixelmapFeature');
  * @property {object} [style] An optional style object that could contain
  *   `color` or other style values.
  * @property {array} [data] A new data array.
+ * @property {string} [crossDomain='anonymous'] Image CORS attribute.  This is
+ *   used for the `crossorigin` property when loading images.
  */
 
 /**
