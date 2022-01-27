@@ -1,6 +1,6 @@
-================================
-Welcome to GeoJS's documentation
-================================
+=====
+GeoJS
+=====
 
 GeoJS is a flexible library for all kinds of geospatial and 2-D visualizations
 from traditional point markers to 3D climatological simulations.  It is
@@ -13,9 +13,7 @@ WebGL features and even through active layers.
 
 See the growing list of `examples <https://opengeoscience.github.io/geojs/examples/index.html>`_
 for a live demonstration of GeoJS's features or go to our Github
-`repository <https://github.com/OpenGeoscience/geojs>`_ to start hacking.
-If you have any questions or comments, feel free to join us on our
-`mailing list <https://public.kitware.com/mailman/listinfo/geojs-users>`_.
+`repository <https://github.com/OpenGeoscience/geojs>`_ to start experimenting.
 
 .. toctree::
     :maxdepth: 2
@@ -25,9 +23,3 @@ If you have any questions or comments, feel free to join us on our
     developers
     provisioning
     API Reference <https://opengeoscience.github.io/geojs/apidocs/geo.html>
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`

@@ -862,7 +862,7 @@ var camera = function (spec) {
 
 /**
  * Supported projection types.
- * @enum
+ * @enum {boolean}
  */
 camera.projection = {
   perspective: true,
@@ -872,7 +872,7 @@ camera.projection = {
 /**
  * Default camera clipping bounds.  Some features and renderers may rely on the
  * far clip value being more positive than the near clip value.
- * @enum
+ * @enum {number}
  */
 camera.clipbounds = {
   perspective: {

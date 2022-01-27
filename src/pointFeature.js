@@ -554,7 +554,7 @@ pointFeature.capabilities = {
 
 /**
  * Support primitive shapes
- * @enum
+ * @enum {string}
  */
 pointFeature.primitiveShapes = {
   auto: 'auto',

@@ -234,3 +234,5 @@
  *
  * @typedef {geo.polygonFlat|geo.polygonObject} geo.polygon
  */
+
+module.exports = {};

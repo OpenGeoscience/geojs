@@ -319,6 +319,7 @@ webglRenderer.supported = function () {
     var canvas, ctx, exts; // eslint-disable-line no-unused-vars
     try {
       canvas = document.createElement('canvas');
+      /** @type {WebGLRenderingContext} */
       ctx = (canvas.getContext('webgl') ||
              canvas.getContext('experimental-webgl'));
       /* getSupportExtensions will throw an exception if the context isn't
