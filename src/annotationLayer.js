@@ -399,11 +399,13 @@ var annotationLayer = function (arg) {
    * @param {geo.annotation} annotation The annotation to add.
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
+   * @param {boolean} update If `false`, don't update the layer after adding
+   *    the annotation.
    * @returns {this} The current layer.
    * @fires geo.event.annotation.add_before
    * @fires geo.event.annotation.add
    */
-  this.addAnnotation = function (annotation, gcs) {
+  this.addAnnotation = function (annotation, gcs, update) {
     var pos = $.inArray(annotation, m_annotations);
     if (pos < 0) {
       m_this.geoTrigger(geo_event.annotation.add_before, {
@@ -418,8 +420,10 @@ var annotationLayer = function (arg) {
         annotation._coordinates(transform.transformCoordinates(
           gcs, map.gcs(), annotation._coordinates()));
       }
-      m_this.modified();
-      m_this.draw();
+      if (update !== false) {
+        m_this.modified();
+        m_this.draw();
+      }
       m_this.geoTrigger(geo_event.annotation.add, {
         annotation: annotation
       });

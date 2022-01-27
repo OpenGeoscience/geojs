@@ -201,6 +201,16 @@ describe('geo.annotationLayer', function () {
       expect(removeAnnotationEvent).toBe(3);
       expect(layer.annotations().length).toBe(1);
     });
+    it('addAnnotation update flag', function () {
+      layer.removeAllAnnotations();
+      let mod = layer.timestamp();
+      layer.addAnnotation(poly);
+      expect(layer.timestamp()).not.toEqual(mod);
+      layer.removeAllAnnotations();
+      mod = layer.timestamp();
+      layer.addAnnotation(poly, undefined, false);
+      expect(layer.timestamp()).toEqual(mod);
+    });
     it('geojson', function () {
       layer.removeAllAnnotations();
       layer.addAnnotation(poly);
