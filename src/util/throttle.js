@@ -43,7 +43,7 @@
  *    unspecified, callback will be executed one final time after the last
  *    throttled-function call. (After the throttled-function has not been
  *    called for `delay` milliseconds, the internal counter is reset)
- * @param {function} callback A function to be executed after `delay`
+ * @param {function} [callback] A function to be executed after `delay`
  *    milliseconds. The `this` context and all arguments are passed through,
  *    as-is, to `callback` when the throttled-function is executed.
  * @param {function} [accumulator] A function to be executed (synchronously)

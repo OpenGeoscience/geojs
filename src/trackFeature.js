@@ -10,24 +10,24 @@ var util = require('./util');
  * @extends geo.feature.spec
  * @property {geo.geoPosition|function} [position] Position of the data.
  *   Default is (data).
- * @property {float|function} [time] Time of the data.  Default is `(data).t`.
+ * @property {number|function} [time] Time of the data.  Default is `(data).t`.
  * @property {object|function} [track] Tracks from the data.  Default is
  *   (data).  Typically, the data is an array of tracks, each of which is an
  *   array of points, each of which has a position and time.  The position and
  *   time functions are called for each point as `position(trackPoint,
  *   pointIndex, trackEntry, trackEntryIndex)`.
- * @property {float|null} [startTime=null] Start time.  Used for styling.  If
+ * @property {number|null} [startTime=null] Start time.  Used for styling.  If
  *   `null`, this is the duration before the end time if `duration` is not
  *  `null` and the minimum time in any track if `duration` is `null`.
- * @property {float} [endTime=null] End time.  Used for styling and position of
- *   the track head.  If `null` and either of `startTime` or `duration` are
+ * @property {number} [endTime=null] End time.  Used for styling and position
+ *   of the track head.  If `null` and either of `startTime` or `duration` are
  *   `null`, this is the maximum time in any track.
- * @property {float} [duration=null] Duration between start and end times.
+ * @property {number} [duration=null] Duration between start and end times.
  *   Ignored if both start and end times are specified.
- * @property {float|function} [text] Text to use for the head of the track.  If
- *   specified, the track head is rendered as text.  If `undefined` a marker is
- *   used instead.  If `null` or an empty string (`''`), neither a marker nor
- *   text is used.
+ * @property {number|function} [text] Text to use for the head of the track.
+ *   If specified, the track head is rendered as text.  If `undefined` a marker
+ *   is used instead.  If `null` or an empty string (`''`), neither a marker
+ *   nor text is used.
  * @property {geo.trackFeature.styleSpec} [style] Style object with default
  *   style options.
  * @property {geo.lineFeature.styleSpec} [pastStyle] Style object with
@@ -168,7 +168,7 @@ var trackFeature = function (arg) {
    * Calculate an interpolated position given a time.  If the time is outside
    * the range of a track, the first or last point is returned.
    *
-   * @param {float} time The time to compute a position array for.
+   * @param {number} time The time to compute a position array for.
    * @param {string|geo.transform|null} [gcs] `undefined` to use the feature
    *    gcs, `null` to use the map gcs, or any other transform.  This transform
    *    is used for the interpolation; the results are still in feature gcs.
@@ -571,11 +571,11 @@ var trackFeature = function (arg) {
   /**
    * Get/Set time accessor.
    *
-   * @param {float} [val] If not specified, return the current time accessor.
+   * @param {number} [val] If not specified, return the current time accessor.
    *    If specified, use this for the time accessor and return `this`.  If a
    *    function is given, this is called with `(vertexElement, vertexIndex,
    *    dataElement, dataIndex)`.
-   * @returns {float|function|this} The current time or this feature.
+   * @returns {number|function|this} The current time or this feature.
    */
   this.time = function (val) {
     if (val === undefined) {
@@ -636,8 +636,8 @@ var trackFeature = function (arg) {
   /**
    * Get or set the start time.
    *
-   * @param {float|null} [val] If specified, the new start time.
-   * @returns {float|null|this} If set, the instance.  Otherwise, the current
+   * @param {number|null} [val] If specified, the new start time.
+   * @returns {number|null|this} If set, the instance.  Otherwise, the current
    *    start time value.
    */
   this.startTime = function (val) {
@@ -654,8 +654,8 @@ var trackFeature = function (arg) {
   /**
    * Get or set the end time.
    *
-   * @param {float|null} [val] If specified, the new end time.
-   * @returns {float|null|this} If set, the instance.  Otherwise, the current
+   * @param {number|null} [val] If specified, the new end time.
+   * @returns {number|null|this} If set, the instance.  Otherwise, the current
    *    end time value.
    */
   this.endTime = function (val) {
@@ -672,8 +672,8 @@ var trackFeature = function (arg) {
   /**
    * Get or set the duration.
    *
-   * @param {float|null} [val] If specified, the new duration.
-   * @returns {float|null|this} If set, the instance.  Otherwise, the current
+   * @param {number|null} [val] If specified, the new duration.
+   * @returns {number|null|this} If set, the instance.  Otherwise, the current
    *    duration.
    */
   this.duration = function (val) {

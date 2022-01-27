@@ -11,7 +11,8 @@ var tile = require('./tile');
  * @property {object} [size] The size of each tile.
  * @property {number} [size.x=256] Width in pixels.
  * @property {number} [size.y=256] Height in pixels.
- * @property {string} [crossDomain='anonymous'] Image CORS attribute.
+ * @property {string} [crossDomain='anonymous'] Image CORS attribute.  This is
+ *   used for the `crossorigin` property when loading images.
  */
 
 /**

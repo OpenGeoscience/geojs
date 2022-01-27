@@ -2037,26 +2037,26 @@ var mapInteractor = function (args) {
    *    map in pixels relative to the map's div.
    * @param {geo.screenPosition} [options.center] The position of a touch
    *    event center relative to the window.
-   * @param {string} [button] One of `left`, `middle`, or `right` for mouse
-   *    events.
-   * @param {string} [modifiers] A space-separated list of metakeys that are
-   *    down on mouse events.
-   * @param {geo.screenPosition} [wheelDelta] The amount the wheel moved in
-   *    both directions for wheel events.  One step is often 20 units of
-   *    vement.
-   * @param {number} [wheelMode] The wheel delta mode.  See
+   * @param {string} [options.button] One of `left`, `middle`, or `right` for
+   *    mouse events.
+   * @param {string} [options.modifiers] A space-separated list of metakeys
+   *    that are down on mouse events.
+   * @param {geo.screenPosition} [options.wheelDelta] The amount the wheel
+   *    moved in both directions for wheel events.  One step is often 20 units
+   *    of movement.
+   * @param {number} [options.wheelMode] The wheel delta mode.  See
    *    https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent .
-   * @param {boolean} [touch] `truthy` if this is a touch event.
-   * @param {number} [rotation] Touch event rotation in degrees.
-   * @param {number} [scale] Touch event scale.  Initial events should have a
-   *    scale of 1; subsequent events should increase or decrease this to
-   *    simulate spread and pinch actions.
-   * @param {number[]} [pointers] A list of pointer numbers involved in a
-   *    touch event.  Pointers are number from one up, so `[1]` is the first
+   * @param {boolean} [options.touch] `truthy` if this is a touch event.
+   * @param {number} [options.rotation] Touch event rotation in degrees.
+   * @param {number} [options.scale] Touch event scale.  Initial events should
+   *    have a scale of 1; subsequent events should increase or decrease this
+   *    to simulate spread and pinch actions.
+   * @param {number[]} [options.pointers] A list of pointer numbers involved in
+   *    a touch event.  Pointers are number from one up, so `[1]` is the first
    *    touch point, `[1, 2]` are two touch points, and `[2]` is when the first
    *    point was released but the second is still touching.
-   * @param {string} [pointerType] `mouse` if this is a mouse action rather
-   *    than a touch action.
+   * @param {string} [options.pointerType] `mouse` if this is a mouse action
+   *    rather than a touch action.
    * @returns {mapInteractor}
    */
   this.simulateEvent = function (type, options) {

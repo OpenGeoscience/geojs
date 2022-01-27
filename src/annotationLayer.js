@@ -399,7 +399,7 @@ var annotationLayer = function (arg) {
    * @param {geo.annotation} annotation The annotation to add.
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
-   * @param {boolean} update If `false`, don't update the layer after adding
+   * @param {boolean} [update] If `false`, don't update the layer after adding
    *    the annotation.
    * @returns {this} The current layer.
    * @fires geo.event.annotation.add_before
@@ -435,7 +435,7 @@ var annotationLayer = function (arg) {
    * Remove an annotation from the layer.
    *
    * @param {geo.annotation} annotation The annotation to remove.
-   * @param {boolean} update If `false`, don't update the layer after removing
+   * @param {boolean} [update] If `false`, don't update the layer after removing
    *    the annotation.
    * @returns {boolean} `true` if an annotation was removed.
    * @fires geo.event.annotation.remove
@@ -607,7 +607,7 @@ var annotationLayer = function (arg) {
    * Return the current set of annotations as a geojson object.  Alternately,
    * add a set of annotations from a geojson object.
    *
-   * @param {string|objectFile} [geojson] If present, add annotations based on
+   * @param {string|object|File} [geojson] If present, add annotations based on
    *    the given geojson object.  If `undefined`, return the current
    *    annotations as geojson.  This may be a JSON string, a javascript
    *    object, or a File object.

@@ -38,9 +38,10 @@ var domRenderer = function (arg) {
   /**
    * Initialize.
    *
+   * @param {object} [arg] Optional arguments.
    * @returns {this}
    */
-  this._init = function () {
+  this._init = function (arg) {
     var layer = m_this.layer().node();
 
     if (!m_this.canvas() && layer && layer.length) {

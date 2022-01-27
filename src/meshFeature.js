@@ -21,7 +21,7 @@ var feature = require('./feature');
  * of these properties can be functions, which get passed `data`.
  *
  * @typedef {object} geo.meshFeature.meshSpec
- * @property {number[]|array.<number[]>} [elements] If specified, a list of
+ * @property {number[]|Array.<number[]>} [elements] If specified, a list of
  *      indices into the data array that form elements.  If this is an array of
  *      arrays, each subarray must have at least either 3 values for triangular
  *      elements or 4 values for square elements.  If this is a single array,

@@ -55,7 +55,7 @@ var tileCache = function (options) {
    * Remove a tile from the cache.
    *
    * @param {string|geo.tile} tile The tile or its hash.
-   * @returns {booliean} `true` if a tile was removed.
+   * @returns {boolean} `true` if a tile was removed.
    */
   this.remove = function (tile) {
     var hash = typeof tile === 'string' ? tile : tile.toString();

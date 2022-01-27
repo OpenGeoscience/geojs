@@ -657,7 +657,7 @@ var isolineFeature = function (arg) {
    * the generated labels.  The viewport calculation is conservative, as the
    * map could be rotated, changed size, or have other modifications.
    *
-   * @returns {exit}
+   * @returns {this}
    */
   this._updateLabelPositions = function () {
     var last = m_lastLabelPositions;

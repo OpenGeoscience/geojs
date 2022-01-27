@@ -109,7 +109,7 @@ var featureLayer = function (arg) {
   /**
    * Get/Set drawables.
    *
-   * @param {geo.feature[]} val A list of features, or unspecified to return
+   * @param {geo.feature[]} [val] A list of features, or unspecified to return
    *    the current feature list.  If a list is provided, features are added or
    *    removed as needed.
    * @returns {geo.feature[]|this} The current features associated with the

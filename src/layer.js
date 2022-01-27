@@ -291,7 +291,7 @@ var layer = function (arg) {
   /**
    * Get root node of the layer.
    *
-   * @returns {div}
+   * @returns {HTMLDivElement}
    */
   this.node = function () {
     return m_node;
@@ -579,9 +579,11 @@ var layer = function (arg) {
    * Update layer.
    *
    * This is a stub that should be subclassed.
+   *
+   * @param {object} [arg] An object, possibly with an ``event`` key and value.
    * @returns {this}
    */
-  this._update = function () {
+  this._update = function (arg) {
     return m_this;
   };
 

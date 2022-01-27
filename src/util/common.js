@@ -128,7 +128,7 @@ var util = {
    * Check if an object an HTMLVideoElement element that is loaded.
    *
    * @param {object} vid An object that might be an HTMLVideoElement.
-   * @param {boolean} [allowFailedVideo] If `true`, an viedo element that has
+   * @param {boolean} [allowFailedVideo] If `true`, an video element that has
    *     a source and has failed to load is also considered 'ready' in the
    *     sense that it isn't expected to change to a better state.
    * @returns {boolean} `true` if this is a video that is ready.
@@ -525,7 +525,7 @@ var util = {
    * var map = geo.map($.extend(results.map, {clampZoom: false}));
    * map.createLayer('osm', results.layer);
    *
-   * @param {string} [node] DOM selector for the map container.
+   * @param {string?} node DOM selector for the map container.
    * @param {number} width Width of the whole map contents in pixels.
    * @param {number} height Height of the whole map contents in pixels.
    * @param {number} [tileWidth] If an osm or tile layer is going to be used,
@@ -967,7 +967,7 @@ var util = {
    */
   escapeUnicodeHTML: function (text) {
     return text.replace(/./g, function (k) {
-      var code = k.charCodeAt();
+      var code = k.charCodeAt(0);
       if (code < 127) {
         return k;
       }
@@ -1026,7 +1026,7 @@ var util = {
    * stored as local base64 urls.
    *
    * @param {string} css The css to parse for urls.
-   * @param {jQuery.selector|DOMElement} styleElem The element that receivs
+   * @param {jQuery.selector|HTMLElement} styleElem The element that receives
    *    the css text after dereferencing or the DOM element that has style
    *    that will be updated.
    * @param {jQuery.Deferred} styleDefer A Deferred to resolve once

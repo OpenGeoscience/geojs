@@ -60,7 +60,7 @@ util.registerRenderer = function (name, func) {
  * @param {geo.layer} layer The layer associated with the renderer.
  * @param {HTMLCanvasElement} [canvas] A canvas object to share between
  *      renderers.
- * @param {object} options Options for the new renderer.
+ * @param {object} [options] Options for the new renderer.
  * @returns {geo.renderer|null} The new renderer or null if no such name is
  *      registered.
  */
@@ -83,7 +83,7 @@ util.createRenderer = function (name, layer, canvas, options) {
  *
  * @alias geo.checkRenderer
  * @param {string|null} name Name of the desired renderer.
- * @param {boolean} noFallback If truthy, don't recommend a fallback.
+ * @param {boolean} [noFallback] If truthy, don't recommend a fallback.
  * @returns {string|null|false} The name of the renderer that should be used
  *      or false if no valid renderer can be determined.
  */
