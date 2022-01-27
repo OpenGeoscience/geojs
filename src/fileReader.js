@@ -6,7 +6,7 @@ var object = require('./object');
  * Object specification for a fileReader.
  *
  * @typedef {object} geo.fileReader.spec
- * @property {geo.featureLayer} layer The target feature layer.
+ * @property {geo.featureLayer} [layer] The target feature layer.
  */
 
 /**
@@ -15,7 +15,7 @@ var object = require('./object');
  * @class
  * @alias geo.fileReader
  * @extends geo.object
- * @param {geo.fileReader.spec} arg
+ * @param {geo.fileReader.spec} [arg]
  * @returns {geo.fileReader}
  */
 var fileReader = function (arg) {

@@ -145,7 +145,7 @@ var annotation = function (type, args) {
   /**
    * Get or set the name of this annotation.
    *
-   * @param {string|undefined} arg If `undefined`, return the name, otherwise
+   * @param {string|undefined} [arg] If `undefined`, return the name, otherwise
    *    change it.  When setting the name, the value is trimmed of
    *    whitespace.  The name will not be changed to an empty string.
    * @returns {this|string} The current name or this annotation.
@@ -293,7 +293,7 @@ var annotation = function (type, args) {
   /**
    * Get or set the state of this annotation.
    *
-   * @param {string|undefined} arg If `undefined`, return the state,
+   * @param {string|undefined} [arg] If `undefined`, return the state,
    *    otherwise change it.  This should be one of the
    *    {@link geo.annotation.state} values.
    * @returns {this|string} The current state or this annotation.
@@ -352,7 +352,7 @@ var annotation = function (type, args) {
    *    `'remove'` if the annotation should be removed, falsy to not update
    *    anything.
    */
-  this.processAction = function () {
+  this.processAction = function (evt) {
     return undefined;
   };
 
@@ -1081,8 +1081,8 @@ var annotation = function (type, args) {
  *
  * @param {object} m_this The current annotation instance.
  * @param {function} s_actions The parent actions method.
- * @param {string} [state] The state to return actions for.  Defaults to
- *    the current state.
+ * @param {string|undefined} state The state to return actions for.  Defaults
+ *    to the current state.
  * @param {string} name The name of this annotation.
  * @param {Array} originalArgs arguments to original call
  * @returns {geo.actionRecord[]} A list of actions.
@@ -1182,6 +1182,10 @@ function continuousVerticesProcessAction(m_this, evt, name) {
  *    finished rectangle.  This uses styles for {@link geo.polygonFeature}.
  * @property {geo.polygonFeature.styleSpec} [editStyle] The style to apply to a
  *    rectangle in edit mode.
+ */
+/*
+ * @typedef {object} geo.rectangleAnnotation.subspec
+ * @typedef {geo.annotation.spec | geo.rectangleAnnotation.subspec} geo.rectangleAnnotation.spec
  */
 
 /**

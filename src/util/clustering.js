@@ -18,7 +18,7 @@ var $ = require('jquery');
  *
  * @param {geo.util.ClusterGroup} group The source cluster group
  * @param {number} zoom The zoom level of the current node
- * @param {object[]} children An array of ClusterTrees or point objects
+ * @param {object[]} [children] An array of ClusterTrees or point objects
  */
 function ClusterTree(group, zoom, children) {
   this._group = group;
@@ -136,8 +136,8 @@ ClusterTree.prototype.coords = function () {
  * @class
  * @alias geo.util.ClusterGroup
  * @param {object} opts An options object
- * @param {number} maxZoom The maximum zoom level to calculate.
- * @param {number} radius Size of clustering at zoom 0 in point gcs.
+ * @param {number} [opts.maxZoom] The maximum zoom level to calculate.
+ * @param {number} [opts.radius] Size of clustering at zoom 0 in point gcs.
  */
 function C(opts) {
 

@@ -203,7 +203,7 @@ var sliderWidget = function (arg) {
      * Respond to a mouse event on the widget.
      *
      * @param {d3Event} evt The event on the widget.
-     * @param {boolean} trans Truthy for an animated transition.
+     * @param {boolean} [trans] Truthy for an animated transition.
      */
     function respond(evt, trans) {
       var z = m_yscale.invert(d3.mouse(svg.node())[1]),

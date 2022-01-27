@@ -517,7 +517,7 @@ var map = function (arg) {
    * view center.  Rotation mostly ignores `clampBoundsX`, as the behavior
    * feels peculiar otherwise.
    *
-   * @param {number} rotation Absolute angle in radians (positive is
+   * @param {number} [rotation] Absolute angle in radians (positive is
    *    clockwise).
    * @param {object} [origin] If specified, rotate about this origin.
    * @param {geo.geoPosition} origin.geo The gcs coordinates of the
@@ -830,7 +830,7 @@ var map = function (arg) {
    *    coordinate to convert.
    * @param {string|geo.transform|null} [gcs] Output gcs.  `undefined` to use
    *    the interface gcs, `null` to use the map gcs, or any other transform.
-   * @returns {geo.geoPosition|geoPosition[]} GCS space coordinates.
+   * @returns {geo.geoPosition|geo.geoPosition[]} GCS space coordinates.
    */
   this.displayToGcs = function (c, gcs) {
     c = m_this.displayToWorld(c); // done via camera
@@ -954,9 +954,10 @@ var map = function (arg) {
   /**
    * Initialize the map.
    *
+   * @param {object} [arg] Optional arguments.
    * @returns {this} The map object.
    */
-  this._init = function () {
+  this._init = function (arg) {
 
     if (m_node === undefined || m_node === null) {
       throw new Error('Map require DIV node');
@@ -1296,7 +1297,7 @@ var map = function (arg) {
           y: p[1]
         }, null, true, true);
       } else {
-        m_center = m_this.gcsToWorld({x: p[0], y: p[1]}, null, true, true);
+        m_center = m_this.gcsToWorld({x: p[0], y: p[1]}, null);
         m_this.zoom(p[2], m_transition.zoomOrigin, true);
       }
       m_this.rotation(p[3], undefined, true);
@@ -1494,7 +1495,7 @@ var map = function (arg) {
    * @param {number} rotation The requested rotation in clockwise radians.
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
-   * @param {boolean} ignoreDiscreteZoom If `true`, ignore the `discreteZoom`
+   * @param {boolean} [ignoreDiscreteZoom] If `true`, ignore the `discreteZoom`
    *    option when determining the new view.
    * @param {boolean} [ignoreClampBounds] If `true` and `clampBoundsX` or
    *    `clampBoundsY` is set, allow the bounds to be less clamped.
@@ -1728,11 +1729,11 @@ var map = function (arg) {
    * @param {boolean|null} [opts.attribution=null] If `null` or unspecified,
    *    include the attribution only if all layers are used.  If false, never
    *    include the attribution.  If `true`, always include it.
-   * @param {HTMLObject[]|string[]} [opts.html] A list of additional HTML
+   * @param {HTMLElement[]|string[]} [opts.html] A list of additional HTML
    *    elements, selectors, or jQuery elements to render on top of the map.
    *    These are rendered in order, with the last one topmost.
-   * @returns {deferred} A jQuery Deferred object.  The done function receives
-   *    either a data URL or an `HTMLCanvasElement` with the result.
+   * @returns {jQueryDeferred} A jQuery Deferred object.  The done function
+   *    receives either a data URL or an `HTMLCanvasElement` with the result.
    * @fires geo.event.screenshot.ready
    */
   this.screenshot = function (layers, type, encoderOptions, opts) {
@@ -1916,7 +1917,7 @@ var map = function (arg) {
   /**
    * Return the nearest valid zoom level to the requested zoom.
    * @param {number} zoom A zoom level to adjust to current settings
-   * @param {boolean} ignoreDiscreteZoom If `true`, ignore the `discreteZoom`
+   * @param {boolean} [ignoreDiscreteZoom] If `true`, ignore the `discreteZoom`
    *    option when determining the new view.
    * @returns {number} The zoom level clamped to the allowed zoom range and
    *    with other settings applied.
@@ -1960,10 +1961,11 @@ var map = function (arg) {
    * Draw a layer image to a canvas context.  The layer's opacity and transform
    * are applied.  This is used as part of making a screenshot.
    *
-   * @param {context} context The 2d canvas context to draw into.
+   * @param {CanvasRenderingContext2D} context The 2d canvas context to draw
+   *    into.
    * @param {number} opacity The opacity in the range [0, 1].
    * @param {object} elem A jQuery element that might have a transform.
-   * @param {HTMLImageObject} img The image or canvas to draw to the canvas.
+   * @param {HTMLImageElement} img The image or canvas to draw to the canvas.
    * @param {string} [mixBlendMode] the mix-blend-mode used to add this layer.
    * @private
    */
@@ -2155,12 +2157,12 @@ var map = function (arg) {
    * Return a valid rotation angle.
    *
    * @param {number} rotation Proposed rotation.
-   * @param {boolean} ignoreRotationFunc If truthy and rotations are allowed,
+   * @param {boolean} [ignoreRotationFunc] If truthy and rotations are allowed,
    *    allow any rotation.  Otherwise, the rotation is passed through the
    *    `allowRotation` function.
-   * @param {boolean} noRangeLimit If falsy, ensure that the rotation is in the
-   *    range [0, 2*PI).  If it is very close to zero, it is snapped to zero.
-   *    If true, the rotation can have any value.
+   * @param {boolean} [noRangeLimit] If falsy, ensure that the rotation is in
+   *    the range [0, 2*PI).  If it is very close to zero, it is snapped to
+   *    zero.  If true, the rotation can have any value.
    * @returns {number} the validated rotation
    * @private
    */

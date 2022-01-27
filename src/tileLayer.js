@@ -525,7 +525,7 @@ var tileLayer = function (arg) {
   /**
    * Returns a tile's bounds in a gcs.
    *
-   * @param {object|tile} indexOrTile Either a tile or an object with
+   * @param {object|geo.tile} indexOrTile Either a tile or an object with
    *    {x, y, level}` specifying a tile.
    * @param {string|geo.transform|null} [gcs] `undefined` to use the
    *    interface gcs, `null` to use the map gcs, or any other transform.
@@ -668,7 +668,7 @@ var tileLayer = function (arg) {
    * @param {number} maxLevel The zoom level
    * @param {geo.geoBounds} bounds The map bounds
    * @param {boolean} sorted Return a sorted list
-   * @param {boolean} onlyIfChanged If the set of tiles have not changed
+   * @param {boolean} [onlyIfChanged] If the set of tiles have not changed
    *     (even if their desired order has), return undefined instead of an
    *     array of tiles.
    * @returns {geo.tile[]} An array of tile objects
@@ -1134,7 +1134,7 @@ var tileLayer = function (arg) {
    * origin.
    *
    * @param {object} pt A point in world space coordinates with `x` and `y`.
-   * @param {number|undefined} zoom If unspecified, use the map zoom.
+   * @param {number} [zoom] If unspecified, use the map zoom.
    * @returns {object} Local coordinates with `x` and `y`.
    */
   this.toLocal = function (pt, zoom) {
@@ -1180,7 +1180,7 @@ var tileLayer = function (arg) {
    * create the element if it doesn't already exist.
    *
    * @param {number} level The zoom level of the layer to fetch.
-   * @returns {DOM} The layer's DOM element.
+   * @returns {HTMLElement} The layer's DOM element.
    */
   this._getSubLayer = function (level) {
     if (!m_this.canvas()) {
@@ -1512,8 +1512,8 @@ var tileLayer = function (arg) {
    * @param {geo.geoBounds} [bounds] The view bounds (if unspecified, assume
    *      global bounds)
    * @param {number} bounds.level The zoom level the bounds are given as.
-   * @param {number} zoom Keep in bound tile at this zoom level.
-   * @param {boolean} doneLoading If true, allow purging additional tiles.
+   * @param {number} [zoom] Keep in bound tile at this zoom level.
+   * @param {boolean} [doneLoading] If true, allow purging additional tiles.
    * @returns {boolean}
    */
   this._canPurge = function (tile, bounds, zoom, doneLoading) {
@@ -1604,9 +1604,9 @@ var tileLayer = function (arg) {
   /**
    * Get or set the subdomains used for templating.
    *
-   * @param {string|list} [subdomains] A comma-separated list, a string of
+   * @param {string|string[]} [subdomains] A comma-separated list, a string of
    *      single character subdomains, or a list.
-   * @returns {string|list|this}
+   * @returns {string|string[]|this}
    */
   this.subdomains = function (subdomains) {
     if (subdomains === undefined) {
@@ -1644,8 +1644,8 @@ var tileLayer = function (arg) {
   /**
    * Get/Set visibility of the layer.
    *
-   * @param {boolean|undefined} val If unspecified, return the visibility,
-   *    otherwise set it.
+   * @param {boolean} [val] If unspecified, return the visibility, otherwise
+   *    set it.
    * @returns {boolean|this} Either the visibility (if getting) or the layer
    *    (if setting).
    */

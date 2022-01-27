@@ -330,11 +330,12 @@ transform.lookup = function (projection) {
  *
  * @param {string} srcPrj The source projection.
  * @param {string} tgtPrj The destination projection.
- * @param {geoPosition|geoPosition[]|number[]} coordinates An array of
- *      coordinate objects.  These may be in object or array form, or a flat
- *      array.
- * @param {number} numberOfComponents For flat arrays, either 2 or 3.
- * @returns {geoPosition|geoPosition[]|number[]} The transformed coordinates.
+ * @param {geo.geoPosition|geo.geoPosition[]|number[]} coordinates An array of
+ *    coordinate objects.  These may be in object or array form, or a flat
+ *    array.
+ * @param {number} [numberOfComponents] For flat arrays, either 2 or 3.
+ * @returns {geo.geoPosition|geo.geoPosition[]|number[]} The transformed
+ *    coordinates.
  */
 transform.transformCoordinates = function (srcPrj, tgtPrj, coordinates, numberOfComponents) {
   'use strict';
@@ -385,10 +386,10 @@ transform.transformCoordinates = function (srcPrj, tgtPrj, coordinates, numberOf
  * components per coordinate.  The array is modified in place.
  *
  * @param {transform} trans The transformation object.
- * @param {geoPosition[]|number[]} coordinates An array of coordinate
+ * @param {geo.geoPosition[]|number[]} coordinates An array of coordinate
  *      objects or a flat array.
  * @param {number} numberOfComponents For flat arrays, either 2 or 3.
- * @returns {geoPosition[]|number[]} The transformed coordinates
+ * @returns {geo.geoPosition[]|number[]} The transformed coordinates
  */
 transform.transformCoordinatesArray = function (trans, coordinates, numberOfComponents) {
   var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint,
@@ -654,8 +655,6 @@ transform.affineInverse = function (def, coords) {
  * @param {object} [ellipsoid=proj4.WGS84] An object with at least `a` and one
  *    of `b`, `f`, or `rf` (1 / `f`) -- this works with  proj4 ellipsoid
  *    definitions.
- * @param {number} [maxIterations=100] Maximum number of iterations to use
- *    to test convergence.
  * @returns {number} The distance in meters (or whatever units the ellipsoid
  *    was specified in.
  */

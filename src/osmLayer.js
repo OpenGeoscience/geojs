@@ -13,6 +13,8 @@ var quadFeature = require('./quadFeature');
  *   specified, use this as the layer opacity.
  * @property {string} [source] If specified, use the predefined tile source
  *   (see {@link geo.osmLayer.tileSources}).
+ * @property {string} [crossDomain='anonymous'] Image CORS attribute.  This is
+ *   used for the `crossorigin` property when loading images.
  */
 
 /**

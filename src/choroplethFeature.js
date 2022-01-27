@@ -185,7 +185,7 @@ var choroplethFeature = function (arg) {
   /**
    * Add a geojson polygon feature to the current layer.
    *
-   * @param {geojsonFeature} feature A geojson parsed feature.
+   * @param {geo.geojsonFeature} feature A geojson parsed feature.
    * @param {geo.geoColor} fillColor The fill color for the feature.
    * @returns {geo.polygonFeature}
    */

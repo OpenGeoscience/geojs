@@ -59,7 +59,7 @@ var colorName = require('color-name');
 /**
  * @typedef {object} geo.util.cssColorConversionRecord
  * @property {string} name The name of the color conversion.
- * @property {RegEx} regex A regex that, if it matches the color string, will
+ * @property {RegExp} regex A regex that, if it matches the color string, will
  *      cause the process function to be invoked.
  * @property {function} process A function that takes (`color`, `match`) with
  *      the original color string and the results of matching the regex using

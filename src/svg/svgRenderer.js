@@ -484,10 +484,10 @@ var svgRenderer = function (arg) {
    * Create a new feature element from an object that describes the feature
    * attributes.  To be called from feature classes only.
    *
-   * @param {object} arg Options for the features.
+   * @param {object} arg
    * @param {string} arg.id A unique string identifying the feature.
    * @param {array} arg.data Array of data objects used in a d3 data method.
-   * @param {function} [aeg.dataIndex] A function that returns a unique id for
+   * @param {function} [arg.dataIndex] A function that returns a unique id for
    *    each data element.  This is passed to the data access function.
    * @param {object} arg.style An object with style values or functions.
    * @param {object} arg.attributes An object containing element attributes.
@@ -500,7 +500,7 @@ var svgRenderer = function (arg) {
    *    attributes and styles set when new.  If falsy, features always have
    *    attributes and styles updated.
    * @param {boolean} [arg.sortByZ] If truthy, sort features by the `d.zIndex`.
-   * @param {string} [parentId] If set, the group ID of the parent element.
+   * @param {string} [arg.parentId] If set, the group ID of the parent element.
    * @returns {this}
    */
   this._drawFeatures = function (arg) {

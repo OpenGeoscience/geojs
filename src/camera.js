@@ -502,7 +502,7 @@ var camera = function (spec) {
    * Project a vector from world space into viewport (display) space.  The
    * resulting vector always has the last component (`w`) equal to 1.
    *
-   * @param {vec2|vec3|vec4} point The point in world coordinates.
+   * @param {vec3|vec4} point The point in world coordinates.
    * @returns {vec4} The point in display coordinates.
    */
   this.worldToDisplay4 = function (point) {
@@ -518,7 +518,7 @@ var camera = function (spec) {
    * Project a vector from viewport (display) space into world space.  The
    * resulting vector always has the last component (`w`) equal to 1.
    *
-   * @param {vec2|vec3|vec4} point The point in display coordinates.
+   * @param {vec3|vec4} point The point in display coordinates.
    * @returns {vec4} The point in world space coordinates.
    */
   this.displayToWorld4 = function (point) {
@@ -788,7 +788,7 @@ var camera = function (spec) {
   /**
    * Represent a glmatrix as a pretty-printed string.
    * @param {mat4} mat A 4 x 4 matrix.
-   * @param {number} prec The number of decimal places.
+   * @param {number} [prec] The number of decimal places.
    * @returns {string}
    */
   this.ppMatrix = function (mat, prec) {
