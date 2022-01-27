@@ -3,7 +3,8 @@
 [![Build Status](https://github.com/opengeoscience/geojs/actions/workflows/main.yml/badge.svg)](https://github.com/opengeoscience/geojs/actions)
 [![codecov.io](https://codecov.io/github/OpenGeoscience/geojs/coverage.svg?branch=master)](https://codecov.io/github/OpenGeoscience/geojs?branch=master)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.15459-blue)](https://dx.doi.org/10.5281/zenodo.15459)
-[![Gitter](https://badges.gitter.im/OpenGeoscience/geojs.svg)](https://gitter.im/OpenGeoscience/geojs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![npm published version](https://img.shields.io/npm/v/geojs.svg)](https://www.npmjs.com/package/geojs)
+[![Gitter](https://badges.gitter.im/OpenGeoscience/geojs.svg)](https://gitter.im/OpenGeoscience/geojs)
 
 GeoJS is intended to bridge the gap between
 [GIS](https://en.wikipedia.org/wiki/Geographic_information_system),[Scientific Visualization](https://en.wikipedia.org/wiki/Scientific_visualization), and
