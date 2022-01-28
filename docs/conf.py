@@ -65,7 +65,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'geojs'
+project = u'GeoJS'
 copyright = u'Kitware, Inc.'
 
 # The version info for the project you're documenting, acts as replacement for

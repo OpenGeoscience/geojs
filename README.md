@@ -39,15 +39,19 @@ Documentation
 =============
 You can find more information on GeoJS installation and usage in our [Documentation](https://geojs.readthedocs.org/en/latest/index.html).
 
+There are some additional resources:
+
+- [Quick-Start Guide](docs/quickstart.rst)
+- [Provisioning for Development](docs/provisioning.rst)
+- [Developer's Guide](docs/developers.rst)
+- [User's Guide](docs/users.rst)
+- [Examples](https://opengeoscience.github.io/geojs/examples)
+- [Tutorials](https://opengeoscience.github.io/geojs/tutorials)
+- [API Documentation](https://opengeoscience.github.io/geojs/apidocs)
 
 Support
 =======
-We would love to get your feedback and bug reports. Please send us an email at
-[geojs-developers](https://public.kitware.com/mailman/listinfo/geojs-developers)
-for questions related to feature requests, roadmap or in-depth
-technical discussions. Use [geojs-users](https://public.kitware.com/mailman/listinfo/geojs-users)
-if you have general questions or bug reports on GeoJS.
-
+We would love to get your feedback and bug reports.  Please use GitHub issues.
 
 Get Involved
 ============

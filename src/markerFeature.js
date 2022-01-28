@@ -442,7 +442,7 @@ markerFeature.primitiveShapes = pointFeature.primitiveShapes;
 
 /**
  * Marker symbols
- * @enum
+ * @enum {number}
  */
 markerFeature.symbols = {
   // for circle (alias ellipse), the symbolValue is the ratio of the minor to
@@ -499,7 +499,7 @@ markerFeature.symbols = {
 
 /**
  * Marker scale modes
- * @enum
+ * @enum {number}
  */
 markerFeature.scaleMode = {
   none: 0,
