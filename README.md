@@ -61,5 +61,5 @@ source software.
 
 Related Efforts
 ===============
-GeoJS has been used in various Girder [girder] (https://github.com/girder) based applications such
-as [Dansfield-App](https://github.com/Kitware/Danesfield-App) and [DIVE] (https://github.com/Kitware/dive).
+GeoJS has been used in various Girder [girder](https://github.com/girder) based applications such
+as [Dansfield-App](https://github.com/Kitware/Danesfield-App) and [DIVE](https://github.com/Kitware/dive).
