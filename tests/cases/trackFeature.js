@@ -380,11 +380,18 @@ describe('geo.trackFeature', function () {
         .track(function (d) { return d.t; })
         .position(function (d, i, t, j) { return {x: testTracks[j].x[i], y: testTracks[j].y[i]}; })
         .time(function (d, i, t, j) { return d; })
+        .style('strokeOpacity', 0.25)
+        .pastStyle('strokeOpacity', 0.8)
+        .currentStyle('strokeOpacity', 0.85)
+        .futureStyle('strokeOpacity', 0.9)
         .style('text', function (d, i) { return i % 2 ? testTracks[i].id : undefined; });
       track.draw();
       expect(layer.children().length).toBe(6);
       expect(layer.children()[4].features()[0] instanceof geo.webgl.markerFeature).toBe(true);
       expect(layer.children()[5] instanceof geo.canvas.textFeature).toBe(true);
+      // check that specific style has priority over general style
+      expect(layer.children()[3] instanceof geo.canvas.lineFeature).toBe(true);
+      expect(layer.children()[3].style.get('strokeOpacity')(0, 0)).toBe(0.85);
       layer.deleteFeature(track);
       expect(layer.children().length).toBe(0);
       destroyMap();
