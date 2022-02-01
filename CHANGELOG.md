@@ -1,5 +1,17 @@
 # GeoJS Change Log
 
+## Version 1.6.4
+
+### Bug Fixes
+
+- Fix the priority of styles used for tracks ([#1169](../../pull/1169))
+
+## Version 1.6.3
+
+### Improvements
+
+- Update option for addAnnotation ([#1161](../../pull/1161))
+
 ## Version 1.6.2
 
 ### Bug Fixes
