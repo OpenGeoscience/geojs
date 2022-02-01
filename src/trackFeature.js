@@ -275,8 +275,8 @@ var trackFeature = function (arg) {
     m_tracks.textFunc = m_this.style.get('text');
     ['past', 'current', 'future'].forEach(key => {
       m_lineFeatures[key]
-        .style(m_this[key + 'Style']())
         .style(m_this.style())
+        .style(m_this[key + 'Style']())
         .line(m_this.style('track'))
         .gcs(m_this.gcs())
         .data(data)
