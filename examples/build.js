@@ -15,30 +15,22 @@ examples.forEach(function (json) {
   if (json.exampleJs.length) {
     const options = {
       args: [json.main],
-      output: path.resolve(json.output, 'docs'),
-      layout: 'classic'
+      opts: () => ({
+        output: path.resolve(json.output, 'docs'),
+        layout: 'classic'
+      })
     };
-    // docco 0.8.1 requires this weirdness
-    options.opts = () => options;
-    docco(options, function () {
-      // simplify the docco output to reduce the output size by
-      // removing the unnecessary public/ directory
-      fs.removeSync(path.resolve(json.output, 'docs', 'public'));
-    });
+    docco(options, buildUtils.fixupDocco(options.args[0], json.output));
   }
   (json.docJs || []).forEach(function (name) {
     const options = {
       args: [path.resolve(json.dir, name)],
-      output: path.resolve(json.output, 'docs'),
-      layout: 'classic'
+      opts: () => ({
+        output: path.resolve(json.output, 'docs'),
+        layout: 'classic'
+      })
     };
-    // docco 0.8.1 requires this weirdness
-    options.opts = () => options;
-    docco(options, function () {
-      // simplify the docco output to reduce the output size by
-      // removing the unnecessary public/ directory
-      fs.removeSync(path.resolve(json.output, 'docs', 'public'));
-    });
+    docco(options, buildUtils.fixupDocco(options.args[0], json.output));
   });
   json.docHTML = 'docs/' + path.basename(json.main).replace(/js$/, 'html');
 

@@ -98,7 +98,36 @@ function writeYamlList(dir, filename, records) {
   );
 }
 
+/**
+ * Fix paths of docco files and remove unnecessary extra files.
+ *
+ * @param {string} sourceFile The path of the javascript file being processed.
+ * @param {string} outputPath The output directory.
+ * @returns {function} A function to call from docco to fix the results.
+ */
+function fixupDocco(sourceFile, outputPath) {
+  return function () {
+    // docco places the file many directories deep
+    const destname = path.basename(sourceFile, path.extname(sourceFile)) + '.html';
+    const src = path.join(outputPath, 'docs', path.dirname(sourceFile), destname);
+    // read the file and adjust the css link
+    const doc = fs.readFileSync(src, {encoding: 'utf8'}).replace(/href=".*docco\.css/, 'href="docco.css');
+    // write it back in the correct spot
+    fs.writeFileSync(path.join(outputPath, 'docs', destname), doc, {encoding: 'utf8'});
+    // remove it
+    fs.removeSync(src);
+    // if the directory is empty, prune it
+    if (!fs.readdirSync(path.dirname(src)).length) {
+      fs.removeSync(path.join(outputPath, 'docs', path.dirname(sourceFile).substr(0, path.dirname(sourceFile).indexOf('/', 1))));
+      // simplify the docco output to reduce the output size by removing the
+      // unnecessary public/ directory
+      fs.removeSync(path.resolve(outputPath, 'docs', 'public'));
+    }
+  };
+}
+
 module.exports = {
   getList: getList,
+  fixupDocco: fixupDocco,
   writeYamlList: writeYamlList
 };
