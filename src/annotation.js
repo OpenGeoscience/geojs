@@ -1128,7 +1128,7 @@ function continuousVerticesProcessAction(m_this, evt, name) {
     return;
   }
   var cpp = layer.options('continuousPointProximity');
-  var cpc = layer.options('continuousPointColinearity');
+  var cpc = layer.options('continuousPointCollinearity');
   var ccp = layer.options('continuousCloseProximity');
   if (cpp || cpp === 0) {
     var vertices = m_this.options('vertices');
@@ -1140,7 +1140,7 @@ function continuousVerticesProcessAction(m_this, evt, name) {
     }
     var dist = layer.displayDistance(vertices[vertices.length - 2], null, evt.mouse.map, 'display');
     if (dist && dist > cpp) {
-      // combine nearly colinear points
+      // combine nearly collinear points
       if (vertices.length >= (m_this._lastClickVertexCount || 1) + 3) {
         var d01 = layer.displayDistance(vertices[vertices.length - 3], null, vertices[vertices.length - 2], null),
             d12 = dist,

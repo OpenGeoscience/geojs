@@ -396,9 +396,9 @@ var lineFeature = function (arg) {
    *
    * @param {array} data A new data array.
    * @param {number} [tolerance] The maximum variation allowed in map.gcs
-   *    units.  A value of zero will only remove perfectly colinear points.  If
-   *    not specified, this is set to a half display pixel at the map's current
-   *    zoom level.
+   *    units.  A value of zero will only remove perfectly collinear points.
+   *    If not specified, this is set to a half display pixel at the map's
+   *    current zoom level.
    * @param {function} [posFunc=this.style.get('position')] The function to
    *    get the position of each vertex.
    * @param {function} [lineFunc=this.style.get('line')] The function to get

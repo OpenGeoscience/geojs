@@ -1342,7 +1342,7 @@ describe('geo.annotation', function () {
       expect(ann.options('vertices').length).toBe(3);
       expect(ann.processAction(evt)).not.toBe(true);
       expect(ann.options('vertices').length).toBe(3);
-      // add a point that will be colinear with the next one
+      // add a point that will be collinear with the next one
       var halfway = {
         x: (vertices[1].x + vertices[2].x) / 2,
         y: (vertices[1].y + vertices[2].y) / 2
@@ -1363,8 +1363,8 @@ describe('geo.annotation', function () {
           mapgcs: map.displayToGcs(vertices[2], null)
         }
       };
-      // a new colinear point will replace the previous point, so we still have
-      // the same point count
+      // a new collinear point will replace the previous point, so we still
+      // have the same point count
       expect(ann.processAction(evt)).toBe(true);
       expect(ann.options('vertices').length).toBe(4);
       // test up near the end of the line

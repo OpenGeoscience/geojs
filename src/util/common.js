@@ -758,7 +758,7 @@ var util = {
   /**
    * Determine if two line segments cross.  They are not considered crossing if
    * they share a vertex.  They are crossing if either of one segment's
-   * vertices are colinear with the other segment.
+   * vertices are collinear with the other segment.
    *
    * @param {geo.geoPosition} seg1pt1 One endpoint of the first segment.
    * @param {geo.geoPosition} seg1pt2 The other endpoint of the first segment.
@@ -788,7 +788,7 @@ var util = {
     }
     /* If the lines cross, the signed area of the triangles formed between one
      * segment and the other's vertices will have different signs.  By using
-     * > 0, colinear points are crossing. */
+     * > 0, collinear points are crossing. */
     if (util.triangleTwiceSignedArea2d(seg1pt1, seg1pt2, seg2pt1) *
         util.triangleTwiceSignedArea2d(seg1pt1, seg1pt2, seg2pt2) > 0 ||
         util.triangleTwiceSignedArea2d(seg2pt1, seg2pt2, seg1pt1) *
@@ -834,7 +834,7 @@ var util = {
    * @param {geo.geoPosition[]} pts A list of points forming the line or
    *    polygon.
    * @param {number} tolerance The maximum variation allowed.  A value of zero
-   *    will only remove perfectly colinear points.
+   *    will only remove perfectly collinear points.
    * @param {boolean} [closed] If true, this is a polygon rather than an open
    *    line.  In this case, it is possible to get back a single point.
    * @param {Array.<geo.geoPosition[]>?} [noCrossLines] A falsy value to allow
