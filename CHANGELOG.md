@@ -1,5 +1,11 @@
 # GeoJS Change Log
 
+## Version 1.6.5
+
+### Bug Fixes
+
+- Fix spelling of collinear ([#1173](../../pull/1173))
+
 ## Version 1.6.4
 
 ### Bug Fixes
@@ -379,7 +385,7 @@
 - Added an `object.geoIsOn` function to check if an event is bound ([#768](../../pull/768))
 - Use the average perimeter for the center of a polygon or line ([#761](../../pull/761))
 - Allow display to/from gcs conversion functions to handle arrays of points ([#766](../../pull/766))
-- When drawing a line annotation, don't create intermediate colinear points ([#759](../../pull/759))
+- When drawing a line annotation, don't create intermediate collinear points ([#759](../../pull/759))
 - Improve exiting and reloading maps ([#750](../../pull/750))
 - Various minor improvements ([#767](../../pull/767), [#760](../../pull/760))
 

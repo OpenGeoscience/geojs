@@ -53,7 +53,7 @@ describe('svgStickyLayer', function () {
     myMap.pan({x: 100, y: 100});
     myMap.zoom(myMap.zoom() + 0.5);
 
-    // the image should be three points that are NOT colinear and are NOT all
+    // the image should be three points that are NOT collinear and are NOT all
     // the same size.  Specifically, the black and blue circles should be lower
     // than the red circle, and the black circle should be larger than the red
     // and blue circles
