@@ -60,6 +60,7 @@ module.exports = {
       use: [{
         loader: 'babel-loader',
         options: {
+          cacheDirectory: true,
           presets: [['@babel/preset-env', {
             targets: 'defaults, PhantomJS 2.1'
           }]]
@@ -72,7 +73,12 @@ module.exports = {
         path.resolve('examples'),
         path.resolve('tutorials')
       ],
-      use: ['babel-loader']
+      use: [{
+        loader: 'babel-loader',
+        options: {
+          cacheDirectory: true
+        }
+      }]
     }, {
       test: /\.styl$/,
       use: [

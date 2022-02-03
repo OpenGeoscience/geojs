@@ -232,7 +232,7 @@ var quadFeature = function (arg) {
             coordbasis.y = 1 - coordbasis.y;
           }
           if (coordbasis) {
-            extra[quad.idx] = {basis: coordbasis};
+            extra[quad.idx] = {basis: coordbasis, _quad: quad};
           }
         }
       });

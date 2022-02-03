@@ -1,12 +1,16 @@
-// Test geo.pixelmapFeature and geo.canvas.pixelmapFeature
+// Test geo.pixelmapFeature, geo.canvas.pixelmapFeature, geo.webgl.pixelmapFeature
 
 /* globals Image */
 
+var $ = require('jquery');
 var geo = require('../test-utils').geo;
 var createMap = require('../test-utils').createMap;
-var $ = require('jquery');
+var destroyMap = require('../test-utils').destroyMap;
 var waitForIt = require('../test-utils').waitForIt;
 var logCanvas2D = require('../test-utils').logCanvas2D;
+var mockWebglRenderer = geo.util.mockWebglRenderer;
+var restoreWebglRenderer = geo.util.restoreWebglRenderer;
+var vgl = require('vgl');
 
 describe('geo.pixelmapFeature', function () {
   'use strict';
@@ -73,7 +77,7 @@ describe('geo.pixelmapFeature', function () {
       var map, layer, pixelmap;
       map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
-      pixelmap = geo.pixelmapFeature({layer: layer});
+      pixelmap = geo.canvas.pixelmapFeature({layer: layer});
       pixelmap._init({
         position: position,
         url: testImage
@@ -87,7 +91,7 @@ describe('geo.pixelmapFeature', function () {
       var map, layer, pixelmap;
       map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
-      pixelmap = geo.pixelmapFeature({layer: layer});
+      pixelmap = geo.canvas.pixelmapFeature({layer: layer});
       pixelmap._init({
         position: position,
         url: testImage
@@ -111,7 +115,7 @@ describe('geo.pixelmapFeature', function () {
 
       map = createMap();
       layer = map.createLayer('feature', {renderer: 'canvas'});
-      pixelmap = geo.pixelmapFeature({layer: layer});
+      pixelmap = geo.canvas.pixelmapFeature({layer: layer});
       pixelmap._init({
         position: position,
         url: testImage
@@ -330,6 +334,74 @@ describe('geo.pixelmapFeature', function () {
       return window._canvasLog.counts.clearRect >= (counts.clearRect || 0) + 1 &&
              window._canvasLog.counts.getImageData === counts.getImageData &&
              window._canvasLog.counts.drawImage >= (counts.drawImage || 0) + 1;
+    });
+  });
+
+  /* This is a basic integration test of geo.webgl.pixelmapFeature. */
+  describe('geo.webgl.pixelmapFeature', function () {
+    var map, layer, pixelmap, buildTime, glCounts;
+    it('basic usage', function () {
+      mockWebglRenderer();
+      map = createMap();
+      layer = map.createLayer('feature', {renderer: 'webgl'});
+      pixelmap = layer.createFeature('pixelmap', {
+        position: position,
+        url: testImage
+      });
+      /* Trigger rerendering */
+      pixelmap.data(['a', 'b', 'c', 'd', 'e', 'f']);
+      buildTime = pixelmap.buildTime().timestamp();
+      glCounts = $.extend({}, vgl.mockCounts());
+      map.draw();
+      expect(buildTime).not.toEqual(pixelmap.buildTime().timestamp());
+    });
+    waitForIt('next render webgl A', function () {
+      return vgl.mockCounts().createProgram >= (glCounts.createProgram || 0) + 1;
+    });
+    it('Minimal update', function () {
+      pixelmap.modified();
+      glCounts = $.extend({}, vgl.mockCounts());
+      pixelmap.draw();
+    });
+    waitForIt('next render webgl B', function () {
+      return vgl.mockCounts().drawArrays >= (glCounts.drawArrays || 0) + 1;
+    });
+    it('Heavier update', function () {
+      var colorFunc = function (d, i) {
+        return i & 1 ? 'red' : 'blue';
+      };
+      pixelmap.color(colorFunc);
+      glCounts = $.extend({}, vgl.mockCounts());
+      pixelmap.draw();
+    });
+    waitForIt('next render webgl C', function () {
+      return vgl.mockCounts().drawArrays >= (glCounts.drawArrays || 0) + 1;
+    });
+    it('pointSearch', function () {
+      var pt = pixelmap.pointSearch({x: -135, y: 65});
+      expect(pt).toEqual({index: [1], found: ['b']});
+      pt = pixelmap.pointSearch({x: -145, y: 65});
+      expect(pt).toEqual({index: [], found: []});
+      pt = pixelmap.pointSearch({x: -65, y: 15});
+      expect(pt).toEqual({index: [2], found: ['c']});
+    });
+    it('Change data', function () {
+      glCounts = $.extend({}, vgl.mockCounts());
+      pixelmap.data(new Array(5000).fill(0)).draw();
+    });
+    waitForIt('next render webgl D', function () {
+      return vgl.mockCounts().drawArrays >= (glCounts.drawArrays || 0) + 1;
+    });
+    it('Data without change', function () {
+      glCounts = $.extend({}, vgl.mockCounts());
+      pixelmap.data(new Array(5000).fill(0)).draw();
+    });
+    waitForIt('next render webgl E', function () {
+      return vgl.mockCounts().drawArrays >= (glCounts.drawArrays || 0) + 1;
+    });
+    it('_exit', function () {
+      destroyMap();
+      restoreWebglRenderer();
     });
   });
 });

@@ -574,6 +574,20 @@ describe('geo.quadFeature', function () {
       destroyMap();
       restoreWebglRenderer();
     });
+
+    it('setShader', function () {
+      mockWebglRenderer();
+      var map, layer, quad;
+      map = createMap();
+      layer = map.createLayer('feature', {renderer: 'webgl'});
+      quad = geo.quadFeature.create(layer);
+      ['image_vertex', 'image_fragment', 'color_vertex', 'color_fragment'].forEach((shaderType) => {
+        expect(quad.setShader(shaderType, 'shader placeholder')).toBe(quad);
+      });
+      expect(quad.setShader('unknown', 'shader placeholder')).toBe(undefined);
+      destroyMap();
+      restoreWebglRenderer();
+    });
   });
 
   /* This is a basic integration test of geo.canvas.quadFeature. */
