@@ -5,6 +5,25 @@ var geo_event = require('../event');
 var util = require('../util');
 
 /**
+ * Pixelmap feature information record.
+ *
+ * @typedef {object} geo.pixelmapFeature.info
+ * @property {number} width The width of the source image.
+ * @property {number} height The width of the source image.
+ * @property {CanvasRenderingContext2D} context The HTMLCanvasElement context
+ *    used for handling the pixelmap.
+ * @property {ImageData} imageData The context's image data.
+ * @property {number[]} indices An array, one per pixel, of the index value in
+ *    the image.  This decodes the pixel value to the corresponding integer.
+ * @property number} area The number of pixels in the image.  This is
+ *    `width * height`.
+ * @property {object[]} mappedColors This has one entry for each distinct index
+ *    value.  Each entry has `first` and `last` with the first and last pixel
+ *    locations where that index occurs.  Note that last is the inclusive value
+ *    of the location (so its maximum possible value is `size - 1`).
+ */
+
+/**
  * Create a new instance of class pixelmapFeature.
  *
  * @class
@@ -116,11 +135,13 @@ var canvas_pixelmapFeature = function (arg) {
         updateFirst, updateLast = -1, update, prepared;
 
     if (!m_this.m_info) {
+      m_this.indexModified(undefined, 'clear');
       if (!m_this._preparePixelmap()) {
         return;
       }
       prepared = true;
     }
+    m_this.indexModified(undefined, 'clear');
     mappedColors = m_this.m_info.mappedColors;
     updateFirst = m_this.m_info.area;
     for (idx in mappedColors) {

@@ -28,6 +28,7 @@ var webgl_pixelmapFeature = function (arg) {
   const fragmentShader = require('./pixelmapFeature.frag');
 
   var m_quadFeature,
+      m_quadFeatureInit,
       s_exit = this._exit,
       m_lookupTable,
       m_this = this;
@@ -46,25 +47,28 @@ var webgl_pixelmapFeature = function (arg) {
   this.pointSearch = function (geo, gcs) {
     if (m_quadFeature && m_this.m_info) {
       let result = m_quadFeature.pointSearch(geo, gcs);
-      if (result.index.length === 1 &&
-          result.extra && result.extra[result.index[0]].basis &&
-          result.extra[result.index[0]]._quad &&
-          result.extra[result.index[0]]._quad.image) {
-        const img = result.extra[result.index[0]]._quad.image;
-        const basis = result.extra[result.index[0]].basis;
-        const x = Math.floor(basis.x * img.width);
-        const y = Math.floor(basis.y * img.height);
-        const canvas = document.createElement('canvas');
-        canvas.width = canvas.height = 1;
-        const context = canvas.getContext('2d');
-        context.drawImage(img, x, y, 1, 1, 0, 0, 1, 1);
-        const pixel = context.getImageData(0, 0, 1, 1).data;
-        const idx = pixel[0] + pixel[1] * 256 + pixel[2] * 256 * 256;
-        result = {
-          index: [idx],
-          found: [m_this.data()[idx]]
-        };
-        return result;
+      // use the last index by preference, since for tile layers, this is the
+      // topmosttile
+      let idxIdx = result.index.length - 1;
+      for (; idxIdx >= 0; idxIdx -= 1) {
+        if (result.extra[result.index[idxIdx]]._quad &&
+            result.extra[result.index[idxIdx]]._quad.image) {
+          const img = result.extra[result.index[idxIdx]]._quad.image;
+          const basis = result.extra[result.index[idxIdx]].basis;
+          const x = Math.floor(basis.x * img.width);
+          const y = Math.floor(basis.y * img.height);
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 1;
+          const context = canvas.getContext('2d');
+          context.drawImage(img, x, y, 1, 1, 0, 0, 1, 1);
+          const pixel = context.getImageData(0, 0, 1, 1).data;
+          const idx = pixel[0] + pixel[1] * 256 + pixel[2] * 256 * 256;
+          result = {
+            index: [idx],
+            found: [m_this.data()[idx]]
+          };
+          return result;
+        }
       }
     }
     return {index: [], found: []};
@@ -78,34 +82,49 @@ var webgl_pixelmapFeature = function (arg) {
     var data = m_this.data() || [],
         colorFunc = m_this.style.get('color');
 
+    let indexRange = m_this.indexModified(undefined, 'clear');
+    let fullUpdate = m_this.dataTime().timestamp() >= m_this.buildTime().timestamp() || indexRange === undefined;
     if (!m_lookupTable) {
       m_lookupTable = lookupTable2D();
       m_lookupTable.setTextureUnit(1);
+      fullUpdate = true;
     }
     let clrLen = Math.max(1, data.length);
     const maxWidth = m_lookupTable.maxWidth();
     if (clrLen > maxWidth && clrLen % maxWidth) {
       clrLen += maxWidth - (clrLen % maxWidth);
     }
-    const colors = new Uint8Array(clrLen * 4);
-    data.forEach((d, i) => {
+
+    let colors;
+    if (!fullUpdate) {
+      colors = m_lookupTable.colorTable();
+      fullUpdate = colors.length !== clrLen * 4;
+      indexRange[0] = Math.max(0, indexRange[0]);
+      indexRange[1] = Math.min(data.length, indexRange[1] + 1);
+    }
+    if (fullUpdate) {
+      colors = new Uint8Array(clrLen * 4);
+      indexRange = [0, data.length];
+    }
+    for (let i = indexRange[0]; i < indexRange[1]; i += 1) {
+      const d = data[i];
       const color = util.convertColor(colorFunc.call(m_this, d, i));
       colors[i * 4] = color.r * 255;
       colors[i * 4 + 1] = color.g * 255;
       colors[i * 4 + 2] = color.b * 255;
       colors[i * 4 + 3] = color.a === undefined ? 255 : (color.a * 255);
-    });
+    }
     m_this.m_info = {colors: colors};
     // check if colors haven't changed
     var oldcolors = m_lookupTable.colorTable();
     if (oldcolors && oldcolors.length === colors.length) {
-      let idx = 0;
-      for (; idx < colors.length; idx += 1) {
+      let idx = indexRange[0] * 4;
+      for (; idx < indexRange[1] * 4; idx += 1) {
         if (colors[idx] !== oldcolors[idx]) {
           break;
         }
       }
-      if (idx === colors.length) {
+      if (idx === indexRange[1] * 4) {
         return;
       }
     }
@@ -117,6 +136,9 @@ var webgl_pixelmapFeature = function (arg) {
         gcs: m_this.gcs(),
         visible: m_this.visible(undefined, true)
       });
+      m_quadFeatureInit = false;
+    }
+    if (!m_quadFeatureInit) {
       m_this.dependentFeatures([m_quadFeature]);
       m_quadFeature.setShader('image_fragment', fragmentShader);
       m_quadFeature._hookBuild = (prog) => {
@@ -138,11 +160,14 @@ var webgl_pixelmapFeature = function (arg) {
         });
         m_lookupTable.bind(renderState, quads);
       };
-      m_quadFeature.style({
-        image: m_this.m_srcImage,
-        position: m_this.style.get('position')})
-      .data([{}])
-      .draw();
+      if (m_quadFeatureInit === false) {
+        m_quadFeature.style({
+          image: m_this.m_srcImage,
+          position: m_this.style.get('position')})
+        .data([{}])
+        .draw();
+      }
+      m_quadFeatureInit = true;
     }
   };
 
@@ -161,6 +186,9 @@ var webgl_pixelmapFeature = function (arg) {
     return m_this;
   };
 
+  if (arg.quadFeature) {
+    m_quadFeature = arg.quadFeature;
+  }
   this._init(arg);
   return this;
 };
@@ -168,5 +196,8 @@ var webgl_pixelmapFeature = function (arg) {
 inherit(webgl_pixelmapFeature, pixelmapFeature);
 
 // Now register it
-registerFeature('webgl', 'pixelmap', webgl_pixelmapFeature);
+var capabilities = {};
+capabilities[pixelmapFeature.capabilities.lookup] = true;
+
+registerFeature('webgl', 'pixelmap', webgl_pixelmapFeature, capabilities);
 module.exports = webgl_pixelmapFeature;
