@@ -3,6 +3,8 @@ var registerFeature = require('../registry').registerFeature;
 var quadFeature = require('../quadFeature');
 var timestamp = require('../timestamp');
 
+let _memoryCheckLargestTested = 4096 * 4096;
+
 /**
  * Create a new instance of class quadFeature.
  *
@@ -373,8 +375,11 @@ var webgl_quadFeature = function (arg) {
       quad.texture.bind(renderState);
       // only check if the context is out of memory when using modestly large
       // textures.  The check is slow.
-      if ((quad.image.width > 4096 || quad.image.height > 4096 || quad.image.width * quad.image.height > 4194304) && context.getError() === context.OUT_OF_MEMORY) {
-        console.log('Insufficient GPU memory for texture');
+      if (quad.image.width * quad.image.height > _memoryCheckLargestTested) {
+        _memoryCheckLargestTested = quad.image.width * quad.image.height;
+        if (context.getError() === context.OUT_OF_MEMORY) {
+          console.log('Insufficient GPU memory for texture');
+        }
       }
       if (quad.opacity !== opacity) {
         opacity = quad.opacity;
