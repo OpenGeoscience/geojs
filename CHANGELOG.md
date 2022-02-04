@@ -1,5 +1,17 @@
 # GeoJS Change Log
 
+## Version 1.7.0
+
+### Features
+
+- Support tiled pixelmaps ([#1153](../../pull/1153))
+
+## Version 1.6.6
+
+### Improvements
+
+- Add support for webgl pixelmaps ([#1152](../../pull/1152))
+
 ## Version 1.6.5
 
 ### Bug Fixes
