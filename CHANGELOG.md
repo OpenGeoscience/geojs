@@ -1,5 +1,11 @@
 # GeoJS Change Log
 
+## Version 1.7.1
+
+### Improvements
+
+- Reduce texture memory check ([#1175](../../pull/1175))
+
 ## Version 1.7.0
 
 ### Features
