@@ -676,7 +676,10 @@ var tileLayer = function (arg) {
   this._getTiles = function (maxLevel, bounds, sorted, onlyIfChanged) {
     var i, j, tiles = [], index, nTilesLevel,
         start, end, indexRange, source, center, changed = false, old, level,
-        minLevel = (m_this._options.keepLower ? m_this._options.minLevel : Math.max(maxLevel, m_this._options.minLevel));
+        minLevel = (
+          m_this._options.keepLower ?
+            m_this._options.minLevel :
+            Math.min(Math.max(maxLevel, m_this._options.minLevel), m_this._options.maxLevel));
     if (maxLevel < minLevel) {
       maxLevel = minLevel;
     }
@@ -1533,7 +1536,9 @@ var tileLayer = function (arg) {
        * semi-transparent layers. */
       if ((doneLoading || m_this._isCovered(tile)) &&
           zoom !== tile.index.level &&
-          (zoom >= m_this._options.minLevel || tile.index.level !== m_this._options.minLevel)) {
+          (zoom >= m_this._options.minLevel || tile.index.level !== m_this._options.minLevel) &&
+          (zoom < m_this._options.maxLevel || tile.index.level !== m_this._options.maxLevel)
+      ) {
         return true;
       }
     }
