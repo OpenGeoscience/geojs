@@ -1257,6 +1257,13 @@ describe('geo.tileLayer', function () {
         expect(l._canPurge({index: {level: 2}}, {}, 1, true)).toBe(true);
         expect(l._canPurge({index: {level: 2}}, {}, 1, false)).toBe(false);
       });
+      it('past max zoom', function () {
+        var l = geo.tileLayer({map: map({max: 3}), keepLower: true});
+        l._outOfBounds = function () { return false; };
+        expect(l._canPurge({index: {level: 2}}, {}, 3)).toBe(false);
+        expect(l._canPurge({index: {level: 2}}, {}, 2)).toBe(false);
+        expect(l._canPurge({index: {level: 2}}, {}, 1)).toBe(true);
+      });
     });
 
     describe('_outOfBounds', function () {
