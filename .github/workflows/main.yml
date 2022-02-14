@@ -10,6 +10,8 @@ on:
   release:
     types:
       - created
+  schedule:
+    - cron: "0 7 * * 1"
 
 jobs:
   build:
@@ -63,6 +65,24 @@ jobs:
         name: website
         path: |
           website/public
+  unpinned:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    # Don't pin version to test with the latest common version
+    - uses: actions/setup-node@v2
+    - run: npm --version && node --version
+    - uses: browser-actions/setup-firefox@latest
+    - run: sudo apt-get remove --yes fonts-lato
+    - run: fc-list
+    - run: firefox --version
+    - run: google-chrome --version
+    # Delete the package-lock to test with the latest libraries allowed
+    - run: rm package-lock.json
+    - run: npm install
+    - run: npm run setup-website
+    - run: npm run ci-xvfb
+    - run: npm run ci-build-website
   deploy-website:
     if: ${{ github.ref == 'refs/heads/master' }}
     needs: build
