@@ -1,10 +1,16 @@
 # GeoJS Change Log
 
-## Version 1.7.2
+## Version 1.7.3
 
 ### Bug Fixes
 
 - Emit layerMove event when changing a lyer's z-index ([#1185](../../pull/1185))
+
+## Version 1.7.2
+
+### Bug Fixes
+
+- Tile layers with keepLower: false purged tiles on high zoom ([#1178](../../pull/1178))
 
 ## Version 1.7.1
 
