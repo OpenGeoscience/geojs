@@ -1672,9 +1672,9 @@ var tileLayer = function (arg) {
   /**
    * Get/set the baseQuad.
    *
-   * @property {object} [baseQuad] A quad feature element to draw before below
-   *   any tile layers.  If specified, this uses the quad defaults, so this is
-   *   a ``geo.quadFeature.position`` object with, typically, an ``image``
+   * @property {object} [baseQuad] A quad feature element to draw below any
+   *   tile layers.  If specified, this uses the quad defaults, so this is a
+   *   ``geo.quadFeature.position`` object with, typically, an ``image``
    *   property added to it.  The quad positions are in the map gcs
    *   coordinates.
    * @name geo.tileLayer.baseQuad
