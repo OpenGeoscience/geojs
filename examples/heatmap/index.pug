@@ -13,9 +13,9 @@ block append mainContent
       label(for="points") Number of Points
       input#points(type="number", min="1", step="100")
       span#points-shown
-    .form-group(title="Delay between movement and heatmap recalculation in milliseconds.")
+    .form-group(title="Delay between movement and heatmap recalculation in milliseconds.  Use 0 for double the last render time, -1 for the last render time plus a small amount.")
       label(for="updateDelay") Update Delay (ms)
-      input#updateDelay(type="number", placeholder="50", min=0)
+      input#updateDelay(type="number", placeholder="-1", min=-1)
     .form-group(title="Binning the data is faster for large sets and slower for small ones.  Binning tends to make dense data look somewhat sparser.  Smaller bins are closer in appearance to unbinned data but take longer to compute.")
       label(for="binned") Bin Data
       select#binned(placeholder="auto")
