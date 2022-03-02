@@ -174,7 +174,7 @@ var layer = function (arg) {
     if (zIndex !== m_zIndex) {
       m_zIndex = zIndex;
       m_node.css('z-index', m_zIndex);
-      m_this.geoTrigger(geo_event.layerRemove, {
+      m_this.geoTrigger(geo_event.layerMove, {
         layer: m_this
       });
     }

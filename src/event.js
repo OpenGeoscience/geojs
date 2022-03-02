@@ -51,6 +51,16 @@ geo_event.layerAdd = 'geo_layerAdd';
 geo_event.layerRemove = 'geo_layerRemove';
 
 /**
+ * Triggered when a layer z-index is changed.
+ *
+ * @event geo.event.layerMove
+ * @type {geo.event.base}
+ * @property {geo.map} target The current map.
+ * @property {geo.layer} layer The old layer that was removed.
+ */
+geo_event.layerMove = 'geo_layerMove';
+
+/**
  * Triggered when the map's zoom level is changed.
  *
  * @event geo.event.zoom
