@@ -30,7 +30,7 @@ $(function () {
       },
       radius: 25
     },
-    updateDelay: 50
+    updateDelay: -1
   };
 
   // Parse query parameters into an object for ease of access
