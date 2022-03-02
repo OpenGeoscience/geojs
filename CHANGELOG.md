@@ -1,5 +1,11 @@
 # GeoJS Change Log
 
+## Version 1.7.2
+
+### Bug Fixes
+
+- Emit layerMove event when changing a lyer's z-index ([#1185](../../pull/1185))
+
 ## Version 1.7.1
 
 ### Improvements
