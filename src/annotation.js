@@ -6,6 +6,7 @@ var transform = require('./transform');
 var util = require('./util');
 var registerAnnotation = require('./registry').registerAnnotation;
 var lineFeature = require('./lineFeature');
+var markerFeature = require('./markerFeature');
 var pointFeature = require('./pointFeature');
 var polygonFeature = require('./polygonFeature');
 var textFeature = require('./textFeature');
@@ -126,6 +127,14 @@ var annotation = function (type, args) {
   delete m_options.name;
   delete m_options.label;
   delete m_options.description;
+
+  if (m_options.constraint) {
+    if (util.isFunction(m_options.constraint)) {
+      this._selectionConstraint = m_options.constraint;
+    } else {
+      this._selectionConstraint = constrainAspectRatio(m_options.constraint);
+    }
+  }
 
   /**
    * Clean up any resources that the annotation is using.
@@ -1182,10 +1191,10 @@ function continuousVerticesProcessAction(m_this, evt, name) {
  *    finished rectangle.  This uses styles for {@link geo.polygonFeature}.
  * @property {geo.polygonFeature.styleSpec} [editStyle] The style to apply to a
  *    rectangle in edit mode.
- */
-/*
- * @typedef {object} geo.rectangleAnnotation.subspec
- * @typedef {geo.annotation.spec | geo.rectangleAnnotation.subspec} geo.rectangleAnnotation.spec
+ * @property {number|number[]|function} [constraint] If specified, an aspect
+ *    ratio or list of aspect ratios to constraint the rectangle to.  If a
+ *    function, a selection constraint function to call to adjust the
+ *    rectangle.
  */
 
 /**
@@ -1200,11 +1209,12 @@ function continuousVerticesProcessAction(m_this, evt, name) {
  * @extends geo.annotation
  *
  * @param {geo.rectangleAnnotation.spec?} [args] Options for the annotation.
+ * @param {string} [annotationName='rectangle'] Override the annotation name.
  */
-var rectangleAnnotation = function (args) {
+var rectangleAnnotation = function (args, annotationName) {
   'use strict';
   if (!(this instanceof rectangleAnnotation)) {
-    return new rectangleAnnotation(args);
+    return new rectangleAnnotation(args, annotationName);
   }
 
   args = $.extend(true, {}, {
@@ -1232,7 +1242,7 @@ var rectangleAnnotation = function (args) {
   }, args || {});
   args.corners = args.corners || args.coordinates || [];
   delete args.coordinates;
-  annotation.call(this, 'rectangle', args);
+  annotation.call(this, annotationName || 'rectangle', args);
 
   var m_this = this,
       s_actions = this.actions,
@@ -1257,7 +1267,8 @@ var rectangleAnnotation = function (args) {
           owner: annotationActionOwner,
           input: 'left',
           modifiers: {shift: false, ctrl: false},
-          selectionRectangle: true
+          selectionRectangle: true,
+          selectionConstraint: this._selectionConstraint
         }];
       default:
         return s_actions.apply(m_this, arguments);
@@ -1288,6 +1299,9 @@ var rectangleAnnotation = function (args) {
           map.displayToGcs({x: evt.upperRight.x, y: evt.upperRight.y}, null),
           map.displayToGcs({x: evt.upperRight.x, y: evt.lowerLeft.y}, null)
         ];
+    if (this._selectionConstraint && evt.mouse && evt.state.origin) {
+      this._selectionConstraint(evt.mouse.mapgcs, evt.state.origin.mapgcs, corners);
+    }
     /* Don't keep rectangles that have nearly zero area in display pixels */
     if (layer.displayDistance(corners[0], null, corners[1], null) *
         layer.displayDistance(corners[0], null, corners[3], null) < 0.01) {
@@ -1307,29 +1321,17 @@ var rectangleAnnotation = function (args) {
     var opt = m_this.options(),
         state = m_this.state(),
         features;
-    switch (state) {
-      case annotationState.create:
-        features = [];
-        if (opt.corners && opt.corners.length >= 4) {
-          features = [{
-            polygon: {
-              polygon: opt.corners,
-              style: m_this.styleForState(state)
-            }
-          }];
+    features = [];
+    if (opt.corners && opt.corners.length >= 4) {
+      features = [{
+        polygon: {
+          polygon: opt.corners,
+          style: m_this.styleForState(state)
         }
-        break;
-      default:
-        features = [{
-          polygon: {
-            polygon: opt.corners,
-            style: m_this.styleForState(state)
-          }
-        }];
-        if (state === annotationState.edit) {
-          m_this._addEditHandles(features, opt.corners);
-        }
-        break;
+      }];
+    }
+    if (state === annotationState.edit) {
+      m_this._addEditHandles(features, opt.corners);
     }
     return features;
   };
@@ -1410,6 +1412,9 @@ var rectangleAnnotation = function (args) {
     corners[2] = $.extend({}, evt.mapgcs);
     corners[1] = map.displayToGcs(c1, null);
     corners[3] = map.displayToGcs(c3, null);
+    if (this._selectionConstraint) {
+      this._selectionConstraint(evt.mapgcs, corners[0], corners);
+    }
   };
 
   /**
@@ -1530,6 +1535,9 @@ var rectangleAnnotation = function (args) {
         corners[(index + 1) % 4].y += delta1.y;
         corners[(index + 3) % 4].x += delta2.x;
         corners[(index + 3) % 4].y += delta2.y;
+        if (this._selectionConstraint) {
+          corners = this._selectionConstraint(evt.mouse.mapgcs, evt.state.origin.mapgcs, corners, 'vertex', ang, index).corners;
+        }
         m_this.options('corners', corners);
         return true;
       case 'edge':
@@ -1545,6 +1553,9 @@ var rectangleAnnotation = function (args) {
         corners[index].y += delta.y;
         corners[(index + 1) % 4].x += delta.x;
         corners[(index + 1) % 4].y += delta.y;
+        if (this._selectionConstraint) {
+          corners = this._selectionConstraint(evt.mouse.mapgcs, evt.state.origin.mapgcs, corners, 'edge', ang, index).corners;
+        }
         m_this.options('corners', corners);
         return true;
     }
@@ -1556,6 +1567,126 @@ inherit(rectangleAnnotation, annotation);
 var rectangleRequiredFeatures = {};
 rectangleRequiredFeatures[polygonFeature.capabilities.feature] = true;
 registerAnnotation('rectangle', rectangleAnnotation, rectangleRequiredFeatures);
+
+/**
+ * Square annotation class.
+ *
+ * Squares are a subset of rectangles with a fixed aspect ratio.
+ *
+ * @class
+ * @alias geo.squareAnnotation
+ * @extends geo.annotation
+ *
+ * @param {geo.squareAnnotation.spec?} [args] Options for the annotation.
+ * @param {string} [annotationName='square'] Override the annotation name.
+ */
+var squareAnnotation = function (args, annotationName) {
+  'use strict';
+  args = $.extend({}, args, {constraint: 1});
+  if (!(this instanceof squareAnnotation)) {
+    return new squareAnnotation(args, annotationName);
+  }
+  rectangleAnnotation.call(this, args, annotationName || 'square');
+};
+inherit(squareAnnotation, rectangleAnnotation);
+var squareRequiredFeatures = {};
+squareRequiredFeatures[polygonFeature.capabilities.feature] = true;
+registerAnnotation('square', squareAnnotation, squareRequiredFeatures);
+
+/**
+ * Ellipse annotation class.
+ *
+ * Ellipses are always rendered as markers.
+ *
+ * @class
+ * @alias geo.ellipseAnnotation
+ * @extends geo.annotation
+ *
+ * @param {geo.ellipseAnnotation.spec?} [args] Options for the annotation.
+ * @param {string} [annotationName='ellipse'] Override the annotation name.
+ */
+var ellipseAnnotation = function (args, annotationName) {
+  'use strict';
+  if (!(this instanceof ellipseAnnotation)) {
+    return new ellipseAnnotation(args, annotationName);
+  }
+
+  rectangleAnnotation.call(this, args, annotationName || 'ellipse');
+
+  var m_this = this;
+
+  /**
+   * Get a list of renderable features for this annotation.
+   *
+   * @returns {array} An array of features.
+   */
+  this.features = function () {
+    var opt = m_this.options(),
+        state = m_this.state(),
+        features;
+    features = [];
+    if (opt.corners && opt.corners.length >= 4) {
+      const style = m_this.styleForState(state);
+      const w = ((opt.corners[0].x - opt.corners[1].x) ** 2 + (opt.corners[0].y - opt.corners[1].y) ** 2) ** 0.5;
+      const h = ((opt.corners[0].x - opt.corners[3].x) ** 2 + (opt.corners[0].y - opt.corners[3].y) ** 2) ** 0.5;
+      const radius = Math.max(w, h) / 2 / m_this.layer().map().unitsPerPixel(0);
+      const aspect = w ? h / w : 1e20;
+      const rotation = -Math.atan2(opt.corners[1].y - opt.corners[0].y, opt.corners[1].x - opt.corners[0].x);
+      features = [{
+        marker: {
+          x: (opt.corners[0].x + opt.corners[1].x + opt.corners[2].x + opt.corners[3].x) / 4,
+          y: (opt.corners[0].y + opt.corners[1].y + opt.corners[2].y + opt.corners[3].y) / 4,
+          style: $.extend(
+            {}, style,
+            {
+              radius: radius + style.strokeWidth / 2,
+              symbolValue: aspect,
+              rotation: rotation,
+              strokeOffset: 0,
+              scaleWithZoom: markerFeature.scaleMode.fill,
+              rotateWithMap: true,
+              strokeOpacity: style.stroke === false ? 0 : style.strokeOpacity,
+              fillOpacity: style.fill === false ? 0 : style.fillOpacity
+            })
+        }
+      }];
+    }
+    if (state === annotationState.edit) {
+      m_this._addEditHandles(features, opt.corners);
+    }
+    return features;
+  };
+};
+inherit(ellipseAnnotation, rectangleAnnotation);
+
+var ellipseRequiredFeatures = {};
+ellipseRequiredFeatures[markerFeature.capabilities.feature] = true;
+registerAnnotation('ellipse', ellipseAnnotation, ellipseRequiredFeatures);
+
+/**
+ * Circle annotation class.
+ *
+ * Circles are a subset of rectangles with a fixed aspect ratio.
+ *
+ * @class
+ * @alias geo.circleAnnotation
+ * @extends geo.annotation
+ *
+ * @param {geo.circleAnnotation.spec?} [args] Options for the annotation.
+ * @param {string} [annotationName='circle'] Override the annotation name.
+ */
+var circleAnnotation = function (args, annotationName) {
+  'use strict';
+  args = $.extend({}, args, {constraint: 1});
+  if (!(this instanceof circleAnnotation)) {
+    return new circleAnnotation(args, annotationName);
+  }
+  ellipseAnnotation.call(this, args, annotationName || 'circle');
+};
+inherit(circleAnnotation, ellipseAnnotation);
+var circleRequiredFeatures = {};
+circleRequiredFeatures[markerFeature.capabilities.feature] = true;
+registerAnnotation('circle', circleAnnotation, circleRequiredFeatures);
 
 /**
  * Polygon annotation specification.  Extends {@link geo.annotation.spec}.
@@ -2377,6 +2508,137 @@ var pointRequiredFeatures = {};
 pointRequiredFeatures[pointFeature.capabilities.feature] = true;
 registerAnnotation('point', pointAnnotation, pointRequiredFeatures);
 
+/**
+ * Return a function that can be used as a selectionConstraint that requires
+ * that the aspect ratio of a rectangle-like selection is a specific value or
+ * range of values.
+ *
+ * @param {number|number[]} ratio Either a single aspect ratio or a list of
+ *   allowed aspect ratios.  For instance, 1 will require that the selection
+ *   square, 2 would require that it is twice as wide as tall, [2, 1/2] would
+ *   allow it to be twice as wide or half as wide as it is tall.
+ * @returns {function} A function that can be passed to the mapIterator
+ *   selectionConstraint or to an annotation constraint function.
+ */
+function constrainAspectRatio(ratio) {
+  const ratios = Array.isArray(ratio) ? ratio : [ratio];
+
+  /**
+   * Constrain a mouse action or annotation action to a list of aspect ratios.
+   *
+   * @param {geo.geoPosition} pos Mouse or new location in map gcs.
+   * @param {geo.geoPosition} origin Origin in map gcs when the activity
+   *    started.
+   * @param {geo.geoPosition} [corners] If specified, an array of corner
+   *    locations in mapgcs.  This may be modified.
+   * @param {string?} [mode] 'edge', 'vertex' or falsy.  A falsy value implies
+   *    this is just the most recent point in the annotation, otherwise it is
+   *    the portion of the annotation being modified.
+   * @param {number} [ang] A list of angles of each side of the polygon
+   *    represented by corners or the original annotation.
+   * @param {integer} [index] The specific vertex or edge that is being
+   *    modified.
+   * @returns {object} An object with the ``origin`` (this is what is passed
+   *    in), a new position as ``pos``, and the updated corners as ``corners``.
+   */
+  function constraintFunction(pos, origin, corners, mode, ang, index) {
+    let newpos = pos;
+    let best;
+    if (!corners) {
+      corners = [
+        {x: origin.x, y: origin.y},
+        {x: pos.x, y: origin.y},
+        {x: pos.x, y: pos.y},
+        {x: origin.x, y: pos.y}
+      ];
+    }
+    if (mode) {
+      /* Edit a vertex or edge */
+      const i1 = (index + 1) % 4;
+      const i2 = (index + 2) % 4;
+      const i3 = (index + 3) % 4;
+      const dist1 = ((corners[index].x - corners[i1].x) ** 2 + (corners[index].y - corners[i1].y) ** 2) ** 0.5;
+      const dist3 = ((corners[index].x - corners[i3].x) ** 2 + (corners[index].y - corners[i3].y) ** 2) ** 0.5;
+      const area = Math.abs(dist1 * dist3);
+      let shape, edge;
+      ratios.forEach((ratio) => {
+        if (ratio !== 1 && !(index % 2)) {
+          ratio = 1.0 / ratio;
+        }
+        const width = (area * ratio) ** 0.5;
+        const score = (width - dist3) ** 2 + (width / ratio - dist1) ** 2;
+        if (best === undefined || score < best) {
+          best = score;
+          shape = {
+            w: width,
+            h: width / ratio
+          };
+        }
+      });
+      const ang1 = ang[i1];
+      const delta1 = {
+        x: -shape.w * Math.cos(ang1),
+        y: -shape.w * Math.sin(ang1)
+      };
+      const ang2 = ang[index];
+      const delta2 = {
+        x: -shape.h * Math.cos(ang2),
+        y: -shape.h * Math.sin(ang2)
+      };
+      switch (mode) {
+        case 'vertex':
+          corners[index].x = corners[i2].x + delta1.x + delta2.x;
+          corners[index].y = corners[i2].y + delta1.y + delta2.y;
+          corners[i1].x = corners[i2].x + delta1.x;
+          corners[i1].y = corners[i2].y + delta1.y;
+          corners[i3].x = corners[i2].x + delta2.x;
+          corners[i3].y = corners[i2].y + delta2.y;
+          break;
+        case 'edge':
+          edge = {
+            x: (corners[i2].x + corners[i3].x) * 0.5,
+            y: (corners[i2].y + corners[i3].y) * 0.5
+          };
+          corners[i2].x = edge.x + delta2.x / 2;
+          corners[i2].y = edge.y + delta2.y / 2;
+          corners[index].x = edge.x + delta1.x - delta2.x / 2;
+          corners[index].y = edge.y + delta1.y - delta2.y / 2;
+          corners[i1].x = edge.x + delta1.x + delta2.x / 2;
+          corners[i1].y = edge.y + delta1.y + delta2.y / 2;
+          corners[i3].x = edge.x - delta2.x / 2;
+          corners[i3].y = edge.y - delta2.y / 2;
+          break;
+      }
+    } else {
+      /* Not in edit vertex or edge mode */
+      const area = Math.abs((pos.x - origin.x) * (pos.y - origin.y));
+      ratios.forEach((ratio) => {
+        const width = (area * ratio) ** 0.5;
+        const adjusted = {
+          x: origin.x + Math.sign(pos.x - origin.x) * width,
+          y: origin.y + Math.sign(pos.y - origin.y) * width / ratio
+        };
+        const score = (adjusted.x - pos.x) ** 2 + (adjusted.y - pos.y) ** 2;
+        if (best === undefined || score < best) {
+          best = score;
+          newpos = adjusted;
+        }
+      });
+      corners[0].y = corners[1].y = origin.y;
+      corners[0].x = corners[3].x = origin.x;
+      corners[1].x = corners[2].x = newpos.x;
+      corners[2].y = corners[3].y = newpos.y;
+    }
+    return {
+      corners: corners,
+      origin: origin,
+      pos: newpos
+    };
+  }
+
+  return constraintFunction;
+}
+
 module.exports = {
   state: annotationState,
   actionOwner: annotationActionOwner,
@@ -2385,6 +2647,10 @@ module.exports = {
   pointAnnotation: pointAnnotation,
   polygonAnnotation: polygonAnnotation,
   rectangleAnnotation: rectangleAnnotation,
+  squareAnnotation: squareAnnotation,
+  ellipseAnnotation: ellipseAnnotation,
+  circleAnnotation: circleAnnotation,
   _editHandleFeatureLevel: editHandleFeatureLevel,
-  defaultEditHandleStyle: defaultEditHandleStyle
+  defaultEditHandleStyle: defaultEditHandleStyle,
+  constrainAspectRatio: constrainAspectRatio
 };

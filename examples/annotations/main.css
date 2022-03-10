@@ -53,6 +53,9 @@
 }
 #instructions[annotation="polygon"] .annotation.polygon,
 #instructions[annotation="rectangle"] .annotation.rectangle,
+#instructions[annotation="square"] .annotation.square,
+#instructions[annotation="ellipse"] .annotation.ellipse,
+#instructions[annotation="circle"] .annotation.circle,
 #instructions[annotation="point"] .annotation.point,
 #instructions[annotation="line"] .annotation.line,
 #instructions[annotation="none"] .annotation.none {

@@ -47,7 +47,7 @@ var pointFeature = require('./pointFeature');
  * @property {boolean|function} [rotateWithMap=false] If truthy, rotate symbols
  *   with the map.  If falsy, symbol orientation is absolute.
  * @property {number[]|function} [origin] Origin in map gcs coordinates used
- *   for to ensure high precision drawing in this location.  When called as a
+ *   to ensure high precision drawing in this location.  When called as a
  *   function, this is passed the maker positions as a single continuous array
  *   in map gcs coordinates.  It defaults to the first marker's position.
  */

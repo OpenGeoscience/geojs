@@ -529,10 +529,12 @@ var annotationLayer = function (arg) {
    *    {@link geo.listAnnotations}.
    * @param {geo.annotation} [editAnnotation] If `arg === this.modes.edit`,
    *    this is the annotation that should be edited.
+   * @param {object} [options] Additional options to pass when creating an
+   *    annotation.
    * @returns {string|null|this} The current mode or the layer.
    * @fires geo.event.annotation.mode
    */
-  this.mode = function (arg, editAnnotation) {
+  this.mode = function (arg, editAnnotation, options) {
     if (arg === undefined) {
       return m_mode;
     }
@@ -580,14 +582,20 @@ var annotationLayer = function (arg) {
         case 'rectangle':
           createAnnotation = geo_annotation.rectangleAnnotation;
           break;
+        default:
+          if (registry.registries.annotations[m_mode]) {
+            createAnnotation = registry.registries.annotations[m_mode].func;
+          }
+          break;
       }
       m_this.map().interactor().removeAction(
         undefined, undefined, geo_annotation.actionOwner);
       if (createAnnotation) {
-        m_this.currentAnnotation = createAnnotation({
+        options = $.extend({}, options || {}, {
           state: geo_annotation.state.create,
           layer: m_this
         });
+        m_this.currentAnnotation = createAnnotation(options);
         m_this.addAnnotation(m_this.currentAnnotation, null);
         actions = m_this.currentAnnotation.actions(geo_annotation.state.create);
         $.each(actions, function (idx, action) {
@@ -726,6 +734,9 @@ var annotationLayer = function (arg) {
           }
           break;
         case 'point':
+          position = [feature.position()(data, data_idx)];
+          break;
+        case 'marker':
           position = [feature.position()(data, data_idx)];
           break;
       }
@@ -984,8 +995,9 @@ var annotationLayer = function (arg) {
               $.each([
                 'closed', 'fill', 'fillColor', 'fillOpacity', 'line',
                 'lineCap', 'lineJoin', 'polygon', 'position', 'radius',
-                'stroke', 'strokeColor', 'strokeOffset', 'strokeOpacity',
-                'strokeWidth', 'uniformPolygon'
+                'rotateWithMap', 'rotation', 'scaleWithZoom', 'stroke',
+                'strokeColor', 'strokeOffset', 'strokeOpacity', 'strokeWidth',
+                'symbolValue', 'uniformPolygon'
               ], function (keyidx, key) {
                 var origFunc;
                 if (feature.style()[key] !== undefined) {
