@@ -232,7 +232,9 @@ $.when(
         map.gcs(mapParams.gcs);
         exampleDebug.gcsName = processedValue;
         osmLayer.clear();
-        pointFeature.modified();
+        // the locations of points can be cached by the renderer.  When we
+        // change map gcs, we need to signal that updates may be needed.
+        pointFeature.dataTime().modified();
         map.draw();
         break;
       case 'url':
