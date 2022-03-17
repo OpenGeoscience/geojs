@@ -125,7 +125,7 @@ var colorLegendWidget = function (arg) {
   };
 
   /**
-   * Set or get categories.
+   * Get or set categories.
    * @param {geo.gui.colorLegendWidget.category[]} [categories] If `undefined`,
    * return the current legend categories array. If an array is provided,
    * remove current legends and recreate with the new categories.

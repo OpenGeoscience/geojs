@@ -420,7 +420,7 @@ var annotation = function (type, args) {
   };
 
   /**
-   * Set or get options.
+   * Get or set options.
    *
    * @param {string|object} [arg1] If `undefined`, return the options object.
    *    If a string, either set or return the option of that name.  If an
@@ -485,7 +485,7 @@ var annotation = function (type, args) {
   };
 
   /**
-   * Set or get style.
+   * Get or set style.
    *
    * @param {string|object} [arg1] If `undefined`, return the current style
    *    object.  If a string and `arg2` is undefined, return the style
