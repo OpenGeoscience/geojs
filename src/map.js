@@ -569,8 +569,7 @@ var map = function (arg) {
   };
 
   /**
-   * Set center of the map to the given geographic coordinates, or get the
-   * current center.  Uses bare objects {x: 0, y: 0}.
+   * Get or set the center of the map in the given geographic coordinates.
    *
    * @param {geo.geoPosition} coordinates If specified, the new center of the
    *    map.

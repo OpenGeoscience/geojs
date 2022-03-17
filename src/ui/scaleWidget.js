@@ -298,7 +298,7 @@ var scaleWidget = function (arg) {
   };
 
   /**
-   * Set or get options.
+   * Get or set options.
    *
    * @param {string|object} [arg1] If `undefined`, return the options object.
    *    If a string, either set or return the option of that name.  If an

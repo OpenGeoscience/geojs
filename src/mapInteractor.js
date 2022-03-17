@@ -781,7 +781,7 @@ var mapInteractor = function (args) {
   };
 
   /**
-   * Sets or gets map for this interactor, adds draw region layer if needed.
+   * Get or set the map for this interactor, adds draw region layer if needed.
    *
    * @param {geo.map} [val] Either a new map object for `undefined` to return
    *    the current map object.
