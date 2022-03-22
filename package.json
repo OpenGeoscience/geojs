@@ -52,7 +52,7 @@
     "express": "^4.17.2",
     "fs-extra": "^10.0.0",
     "glob": "^7.2.0",
-    "glslang-validator-prebuilt": "0.0.6",
+    "glslang-validator-prebuilt": "^0.0.7",
     "imports-loader": "^3.1.1",
     "jaguarjs-jsdoc": "^1.0.2",
     "jasmine-core": "^4.0.0",
