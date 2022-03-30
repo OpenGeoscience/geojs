@@ -181,6 +181,11 @@ var mapInteractor = function (args) {
        * selectionRectangle: truthy if a selection rectangle should be shown
        *    during the action.  This can be the name of an event that will be
        *    triggered when the selection is complete.
+       * selectionConstraint: if a function and a selection rectangle is being
+       *    drawn, this is a function that takes (mousexy, originxy, state)
+       *    with the coordinates objects with x, y in display coordinates.
+       *    The function returns a modified x, y for the mouse coordinates, or
+       *    undefined for no change.
        * name: a string that can be used to reference this action.
        * owner: a string that can be used to reference this action.
        */
@@ -912,16 +917,26 @@ var mapInteractor = function (args) {
         map = m_this.map(),
         display = {}, gcs = {};
 
-    // TODO: clamp to map bounds
+    let mousexy = mouse.map;
+    if (m_state.actionRecord && util.isFunction(m_state.actionRecord.selectionConstraint)) {
+      const constraint = m_state.actionRecord.selectionConstraint(mouse.mapgcs, origin.mapgcs);
+      mousexy = constraint ? map.gcsToDisplay(constraint.pos, null) : mousexy;
+    } else if (mouse.modifiers.shift) {
+      const width =  Math.abs((mousexy.x - origin.map.x) * (mousexy.y - origin.map.y)) ** 0.5;
+      mousexy = {
+        x: origin.map.x + Math.sign(mousexy.x - origin.map.x) * width,
+        y: origin.map.y + Math.sign(mousexy.y - origin.map.y) * width
+      };
+    }
     // Get the display coordinates
     display.upperLeft = {
-      x: Math.min(origin.map.x, mouse.map.x),
-      y: Math.min(origin.map.y, mouse.map.y)
+      x: Math.min(origin.map.x, mousexy.x),
+      y: Math.min(origin.map.y, mousexy.y)
     };
 
     display.lowerRight = {
-      x: Math.max(origin.map.x, mouse.map.x),
-      y: Math.max(origin.map.y, mouse.map.y)
+      x: Math.max(origin.map.x, mousexy.x),
+      y: Math.max(origin.map.y, mousexy.y)
     };
 
     display.upperRight = {

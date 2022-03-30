@@ -529,10 +529,12 @@ var annotationLayer = function (arg) {
    *    {@link geo.listAnnotations}.
    * @param {geo.annotation} [editAnnotation] If `arg === this.modes.edit`,
    *    this is the annotation that should be edited.
+   * @param {object} [options] Additional options to pass when creating an
+   *    annotation.
    * @returns {string|null|this} The current mode or the layer.
    * @fires geo.event.annotation.mode
    */
-  this.mode = function (arg, editAnnotation) {
+  this.mode = function (arg, editAnnotation, options) {
     if (arg === undefined) {
       return m_mode;
     }
@@ -562,32 +564,21 @@ var annotationLayer = function (arg) {
         }
         m_this.currentAnnotation = null;
       }
-      switch (m_mode) {
-        case m_this.modes.edit:
-          m_this.currentAnnotation = editAnnotation;
-          m_this.currentAnnotation.state(geo_annotation.state.edit);
-          m_this.modified();
-          break;
-        case 'line':
-          createAnnotation = geo_annotation.lineAnnotation;
-          break;
-        case 'point':
-          createAnnotation = geo_annotation.pointAnnotation;
-          break;
-        case 'polygon':
-          createAnnotation = geo_annotation.polygonAnnotation;
-          break;
-        case 'rectangle':
-          createAnnotation = geo_annotation.rectangleAnnotation;
-          break;
+      if (m_mode === m_this.modes.edit) {
+        m_this.currentAnnotation = editAnnotation;
+        m_this.currentAnnotation.state(geo_annotation.state.edit);
+        m_this.modified();
+      } else if (registry.registries.annotations[m_mode]) {
+        createAnnotation = registry.registries.annotations[m_mode].func;
       }
       m_this.map().interactor().removeAction(
         undefined, undefined, geo_annotation.actionOwner);
       if (createAnnotation) {
-        m_this.currentAnnotation = createAnnotation({
+        options = $.extend({}, options || {}, {
           state: geo_annotation.state.create,
           layer: m_this
         });
+        m_this.currentAnnotation = createAnnotation(options);
         m_this.addAnnotation(m_this.currentAnnotation, null);
         actions = m_this.currentAnnotation.actions(geo_annotation.state.create);
         $.each(actions, function (idx, action) {
@@ -700,7 +691,7 @@ var annotationLayer = function (arg) {
       options.style = options.style || {};
       options.labelStyle = options.labelStyle || {};
       delete options.annotationType;
-      // the geoJSON reader can only emit line, polygon, and point
+      // the geoJSON reader can emit line, polygon, point, and marker
       switch (feature.featureType) {
         case 'line':
           position = feature.line()(data, data_idx);
@@ -724,6 +715,9 @@ var annotationLayer = function (arg) {
               return;
             }
           }
+          break;
+        case 'marker':
+          position = data.geometry.coordinates[0].slice(0, 4);
           break;
         case 'point':
           position = [feature.position()(data, data_idx)];
@@ -984,8 +978,9 @@ var annotationLayer = function (arg) {
               $.each([
                 'closed', 'fill', 'fillColor', 'fillOpacity', 'line',
                 'lineCap', 'lineJoin', 'polygon', 'position', 'radius',
-                'stroke', 'strokeColor', 'strokeOffset', 'strokeOpacity',
-                'strokeWidth', 'uniformPolygon'
+                'radiusIncludesStroke', 'rotateWithMap', 'rotation',
+                'scaleWithZoom', 'stroke', 'strokeColor', 'strokeOffset',
+                'strokeOpacity', 'strokeWidth', 'symbolValue', 'uniformPolygon'
               ], function (keyidx, key) {
                 var origFunc;
                 if (feature.style()[key] !== undefined) {
