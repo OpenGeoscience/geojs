@@ -1,5 +1,11 @@
 # GeoJS Change Log
 
+## Version 1.8.0
+
+### Features
+
+- Square, circle, and ellipse annotations, plus a way to constrain rectangle and ellipse annotations to a list of aspect ratios ([#1192](../../pull/1192))
+
 ## Version 1.7.3
 
 ### Bug Fixes
