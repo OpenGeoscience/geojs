@@ -1639,10 +1639,11 @@ var ellipseAnnotation = function (args, annotationName) {
           style: $.extend(
             {}, style,
             {
-              radius: radius + style.strokeWidth / 2,
+              radius: radius,
               symbolValue: aspect,
               rotation: rotation,
               strokeOffset: 0,
+              radiusIncludesStroke: false,
               scaleWithZoom: markerFeature.scaleMode.fill,
               rotateWithMap: true,
               strokeOpacity: style.stroke === false ? 0 : style.strokeOpacity,

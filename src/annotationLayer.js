@@ -564,29 +564,12 @@ var annotationLayer = function (arg) {
         }
         m_this.currentAnnotation = null;
       }
-      switch (m_mode) {
-        case m_this.modes.edit:
-          m_this.currentAnnotation = editAnnotation;
-          m_this.currentAnnotation.state(geo_annotation.state.edit);
-          m_this.modified();
-          break;
-        case 'line':
-          createAnnotation = geo_annotation.lineAnnotation;
-          break;
-        case 'point':
-          createAnnotation = geo_annotation.pointAnnotation;
-          break;
-        case 'polygon':
-          createAnnotation = geo_annotation.polygonAnnotation;
-          break;
-        case 'rectangle':
-          createAnnotation = geo_annotation.rectangleAnnotation;
-          break;
-        default:
-          if (registry.registries.annotations[m_mode]) {
-            createAnnotation = registry.registries.annotations[m_mode].func;
-          }
-          break;
+      if (m_mode === m_this.modes.edit) {
+        m_this.currentAnnotation = editAnnotation;
+        m_this.currentAnnotation.state(geo_annotation.state.edit);
+        m_this.modified();
+      } else if (registry.registries.annotations[m_mode]) {
+        createAnnotation = registry.registries.annotations[m_mode].func;
       }
       m_this.map().interactor().removeAction(
         undefined, undefined, geo_annotation.actionOwner);
@@ -708,7 +691,7 @@ var annotationLayer = function (arg) {
       options.style = options.style || {};
       options.labelStyle = options.labelStyle || {};
       delete options.annotationType;
-      // the geoJSON reader can only emit line, polygon, and point
+      // the geoJSON reader can emit line, polygon, point, and marker
       switch (feature.featureType) {
         case 'line':
           position = feature.line()(data, data_idx);
@@ -733,10 +716,10 @@ var annotationLayer = function (arg) {
             }
           }
           break;
-        case 'point':
-          position = [feature.position()(data, data_idx)];
-          break;
         case 'marker':
+          position = data.geometry.coordinates[0].slice(0, 4);
+          break;
+        case 'point':
           position = [feature.position()(data, data_idx)];
           break;
       }
@@ -995,9 +978,9 @@ var annotationLayer = function (arg) {
               $.each([
                 'closed', 'fill', 'fillColor', 'fillOpacity', 'line',
                 'lineCap', 'lineJoin', 'polygon', 'position', 'radius',
-                'rotateWithMap', 'rotation', 'scaleWithZoom', 'stroke',
-                'strokeColor', 'strokeOffset', 'strokeOpacity', 'strokeWidth',
-                'symbolValue', 'uniformPolygon'
+                'radiusIncludesStroke', 'rotateWithMap', 'rotation',
+                'scaleWithZoom', 'stroke', 'strokeColor', 'strokeOffset',
+                'strokeOpacity', 'strokeWidth', 'symbolValue', 'uniformPolygon'
               ], function (keyidx, key) {
                 var origFunc;
                 if (feature.style()[key] !== undefined) {

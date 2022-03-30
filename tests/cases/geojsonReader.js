@@ -454,4 +454,55 @@ describe('geo.geojsonReader', function () {
       done();
     });
   });
+
+  it('read ellipse and circle', function (done) {
+    var mockWebglRenderer = geo.util.mockWebglRenderer;
+    var restoreWebglRenderer = geo.util.restoreWebglRenderer;
+    var destroyMap = require('../test-utils').destroyMap;
+    mockWebglRenderer();
+    var map = createMap({center: [-105, 39], zoom: 3});
+    var layer = map.createLayer('feature', {renderer: 'webgl'});
+    var reader = geo.createFileReader('geojsonReader', {layer: layer});
+    var ellipseObj = {
+      features: [{
+        type: 'Feature',
+        properties: {
+          annotationType: 'ellipse'
+        },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[[-109, 41], [-102, 41], [-102, 37], [-109, 37], [-109, 41]]]
+        }
+      }, {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[[-109, 41], [-102, 41], [-102, 37], [-109, 37], [-109, 41]]]
+        }
+      }, {
+        type: 'Feature',
+        properties: {
+          annotationType: 'circle'
+        },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[[-109, 41], [-102, 41], [-102, 37], [-109, 37], [-109, 41]]]
+        }
+      }],
+      type: 'FeatureCollection'
+    };
+    reader.read(ellipseObj).then((features) => {
+      expect(features.length).toEqual(2);
+      expect(features[1] instanceof geo.markerFeature).toBe(true);
+      map.draw();
+      destroyMap();
+      restoreWebglRenderer();
+      done();
+    }).catch((err) => {
+      destroyMap();
+      restoreWebglRenderer();
+      throw Error(err);
+    });
+  });
 });

@@ -31,6 +31,8 @@ var geojsonReader = function (arg) {
 
   var $ = require('jquery');
   var convertColor = require('./util').convertColor;
+  var markerFeature = require('./markerFeature');
+  var transform = require('./transform');
 
   var m_this = this,
       m_options = {
@@ -310,6 +312,22 @@ var geojsonReader = function (arg) {
   this.read = function (file, done, progress) {
     var promise = new Promise(function (resolve, reject) {
       /**
+       * Check if a feature is a circle or an ellipse.
+       *
+       * @param {geojson.object} f A geojson feature.
+       * @returns {boolean} true if this should be rendered as an ellipse or
+       *   circle.
+       */
+      function _isEllipse(f) {
+        if (f.geometry.type !== 'Polygon' || f.geometry.coordinates.length !== 1 || f.geometry.coordinates[0].length !== 5) {
+          return false;
+        }
+        return (
+          (f.properties || {}).annotationType === 'ellipse' ||
+          (f.properties || {}).annotationType === 'circle');
+      }
+
+      /**
        * Given a parsed GeoJSON object, convert it into features on the
        * reader's layer.
        *
@@ -384,7 +402,7 @@ var geojsonReader = function (arg) {
         }
 
         // process polygons
-        const polygons = features.filter(f => f.geometry.type === 'Polygon');
+        const polygons = features.filter(f => f.geometry.type === 'Polygon' && !_isEllipse(f));
         if (polygons.length) {
           feature = m_this.layer().createFeature('polygon');
           if (feature) {
@@ -403,6 +421,55 @@ var geojsonReader = function (arg) {
                     [key]: polygons.some(d => d.properties && d.properties[key] !== undefined) ?
                       m_this._style(key, m_options.polygonStyle[key]) :
                       m_options.polygonStyle[key],
+                    ...styleObj
+                  }
+                  ))
+              );
+            allFeatures.push(feature);
+          }
+        }
+        // handle ellipses and circle
+        const ellipses = features.filter(_isEllipse);
+        if (ellipses.length) {
+          feature = m_this.layer().createFeature('marker');
+          if (feature) {
+            ellipses.forEach((d) => {
+              const map = m_this.layer().map();
+              const coord = transform.transformCoordinates(map.ingcs(), map.gcs(), d.geometry.coordinates[0]);
+              const w = ((coord[0][0] - coord[1][0]) ** 2 + (coord[0][1] - coord[1][1]) ** 2) ** 0.5;
+              const h = ((coord[0][0] - coord[3][0]) ** 2 + (coord[0][1] - coord[3][1]) ** 2) ** 0.5;
+              const radius = Math.max(w, h) / 2 / map.unitsPerPixel(0);
+              const aspect = w ? h / w : 1e20;
+              const rotation = -Math.atan2(coord[1][1] - coord[0][1], coord[1][0] - coord[0][0]);
+              const pos = transform.transformCoordinates(map.gcs(), map.ingcs(), {
+                x: (coord[0][0] + coord[1][0] + coord[2][0] + coord[3][0]) / 4,
+                y: (coord[0][1] + coord[1][1] + coord[2][1] + coord[3][1]) / 4
+              });
+              d._props = {
+                pos: pos,
+                radius: radius,
+                aspect: aspect,
+                rotation: rotation
+              };
+            });
+            feature
+              .data(ellipses)
+              .position((d) => d._props.pos)
+              // create an object with each property in m_options.polygonStyle,
+              // mapping the values through the _style function.
+              .style(
+                [{}].concat(Object.keys(m_options.polygonStyle)).reduce(
+                  (styleObj, key) => ({
+                    [key]: ellipses.some(d => d.properties && d.properties[key] !== undefined) ?
+                      m_this._style(key, m_options.polygonStyle[key]) :
+                      m_options.polygonStyle[key],
+                    radius: (d) => d._props.radius,
+                    radiusIncludesStroke: false,
+                    symbolValue: (d) => d._props.aspect,
+                    rotation: (d) => d._props.rotation,
+                    strokeOffset: 0,
+                    rotateWithMap: true,
+                    scaleWithZoom: markerFeature.scaleMode.fill,
                     ...styleObj
                   }
                   ))

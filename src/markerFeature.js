@@ -21,7 +21,8 @@ var pointFeature = require('./pointFeature');
  * @property {number|function} [radius=5] Radius of each marker in pixels.
  *   This includes the stroke width if `strokeOffset` is -1, excludes it if
  *   `strokeOffset` is 1, and includes half the stroke width if `strokeOffset`
- *    is 0.
+ *    is 0.  Note that is `radiusIncludesStroke` is `false`, this never
+ *   includes the stroke width.
  * @property {geo.geoColor|function} [strokeColor] Color to stroke each marker.
  * @property {number|function} [strokeOpacity=1] Opacity for each marker's
  *   stroke.  Opacity is on a [0-1] scale.  Set this or `strokeWidth` to zero
@@ -32,6 +33,10 @@ var pointFeature = require('./pointFeature');
  * @property {number|function} [strokeOffset=-1] The position of the stroke
  *   compared to the radius.  This can only be -1, 0, or 1 (the sign of the
  *   value is used).
+ * @property {boolean|function} [radiusIncludeStroke=true] If truthy or
+ *   undefined, the `radius` includes the `strokeWidth` based on the
+ *   `strokeOffset`.  If defined and falsy, the radius does not include the
+ *   `strokeWidth`.
  * @property {geo.geoColor|function} [fillColor] Color to fill each marker.
  * @property {number|function} [fillOpacity=1] Opacity for each marker.
  *   Opacity is on a [0-1] scale.  Set to zero to have no fill.
@@ -98,6 +103,7 @@ var markerFeature = function (arg) {
     var pts, position,
         radius = m_this.style.get('radius'),
         strokeWidth = m_this.style.get('strokeWidth'),
+        radiusIncludesStroke = m_this.style.get('radiusIncludesStroke'),
         strokeOffset = m_this.style.get('strokeOffset'),
         scaleWithZoom = m_this.style.get('scaleWithZoom');
 
@@ -115,8 +121,10 @@ var markerFeature = function (arg) {
       const r = radius(d, i),
           s = strokeWidth(d, i),
           so = Math.sign(strokeOffset(d, i));
-      const rwiths = r + s * (so + 1) / 2,  // radius with stroke
-          rwos = r + s * (so - 1) / 2;  // radius without stroke
+      let ris = radiusIncludesStroke(d, i);
+      ris = ris === undefined ? true : ris;
+      const rwiths = ris ? r + s * (so + 1) / 2 : r + s,  // radius with stroke
+          rwos = ris ? r + s * (so - 1) / 2 : r;  // radius without stroke
       swz = markerFeature.scaleMode[swz] || (swz >= 1 && swz <= 3 ? swz : 0);
       switch (swz) {
         case markerFeature.scaleMode.stroke:
@@ -174,6 +182,7 @@ var markerFeature = function (arg) {
         corners,
         radius = m_this.style.get('radius'),
         strokeWidth = m_this.style.get('strokeWidth'),
+        radiusIncludesStroke = m_this.style.get('radiusIncludesStroke'),
         strokeOffset = m_this.style.get('strokeOffset'),
         scaleWithZoom = m_this.style.get('scaleWithZoom');
 
@@ -223,7 +232,9 @@ var markerFeature = function (arg) {
           swz = scaleWithZoom(data[i], i),
           so = strokeOffset(data[i], i),
           s = swz ? strokeWidth(data[i], i) : 0;
-      var rwos = rad + s * (so - 1) / 2;  // radius without stroke
+      let ris = radiusIncludesStroke(d, i);
+      ris = ris === undefined ? true : ris;
+      var rwos = ris ? rad + s * (so - 1) / 2 : rad;  // radius without stroke
       rad = rwos + s;
       var p = m_this.position()(d, i),
           dx, dy, rad2;
@@ -287,6 +298,7 @@ var markerFeature = function (arg) {
         data = m_this.data(),
         radius = m_this.style.get('radius'),
         strokeWidth = m_this.style.get('strokeWidth'),
+        radiusIncludesStroke = m_this.style.get('radiusIncludesStroke'),
         strokeOffset = m_this.style.get('strokeOffset'),
         scaleWithZoom = m_this.style.get('scaleWithZoom'),
         idx, min, max, corners,
@@ -347,7 +359,9 @@ var markerFeature = function (arg) {
           swz = scaleWithZoom(data[i], i);
       const so = strokeOffset(data[i], i),
           s = swz ? strokeWidth(data[i], i) : 0;
-      const rwos = rad + s * (so - 1) / 2;  // radius without stroke
+      let ris = radiusIncludesStroke(d, i);
+      ris = ris === undefined ? true : ris;
+      const rwos = ris ? rad + s * (so - 1) / 2 : rad;  // radius without stroke
       swz = markerFeature.scaleMode[swz] || (swz >= 1 && swz <= 3 ? swz : 0);
       rad = rwos + s;
       switch (swz) {
@@ -393,6 +407,7 @@ var markerFeature = function (arg) {
           {},
           {
             radius: 6.25,
+            radiusIncludesStroke: true,
             strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
             strokeOffset: -1.0,
             strokeOpacity: 1.0,

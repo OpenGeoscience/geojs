@@ -120,7 +120,8 @@ var webgl_markerFeature = function (arg) {
           symbolValue: 1,
           rotation: 1,
           scaleWithZoom: 0,
-          rotateWithMap: 0
+          rotateWithMap: 0,
+          radiusIncludesStroke: 0
         },
         vpf = m_this.verticesPerFeature(),
         data = m_this.data(),
@@ -191,7 +192,7 @@ var webgl_markerFeature = function (arg) {
         styleVal.scaleWithZoom +
         (styleVal.rotateWithMap ? 4 : 0) +
         // bit 3 reserved
-        ((Math.sign(styleVal.strokeOffset) + 1) * 16) +
+        ((Math.sign(styleVal.radiusIncludesStroke !== undefined && styleVal.radiusIncludesStroke ? styleVal.strokeOffset : 1) + 1) * 16) +
         styleVal.symbol * 64);
       if (styleVal.symbolValue && styleVal.symbol >= markerFeature.symbols.arrow && styleVal.symbol < markerFeature.symbols.arrow + markerFeature.symbols.arrowMax) {
         styleVal.symbolValue = packFloats(styleVal.symbolValue);
