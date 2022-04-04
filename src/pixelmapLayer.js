@@ -41,6 +41,12 @@ var pixelmapLayer = function (arg) {
     return new pixelmapLayer(arg);
   }
   arg = arg || {};
+  /* Don't extend data from args -- it can be very slow */
+  let argdata;
+  if (arg.data) {
+    argdata = arg.data;
+    delete arg.data;
+  }
   arg = $.extend(
     true,
     {},
@@ -99,8 +105,8 @@ var pixelmapLayer = function (arg) {
       pixelmapArgs.color = arg.color;
     }
     m_pixelmapFeature = m_this.createFeature('pixelmap', pixelmapArgs);
-    if (arg.data) {
-      m_pixelmapFeature.data(arg.data);
+    if (argdata) {
+      m_pixelmapFeature.data(argdata);
     }
     m_this.style = m_pixelmapFeature.style;
     m_this.data = m_pixelmapFeature.data;

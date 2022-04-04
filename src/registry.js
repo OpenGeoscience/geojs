@@ -313,7 +313,12 @@ util.createLayer = function (name, map, arg) {
       options.features = layerDefaultFeatures[name];
     }
     if (arg !== undefined) {
+      const argdata = arg.data;
+      delete arg.data;
       $.extend(true, options, arg);
+      if (argdata) {
+        options.data = argdata;
+      }
     }
     layer = layers[name](options);
     layer.layerName = name;
