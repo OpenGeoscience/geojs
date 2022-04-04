@@ -1,5 +1,11 @@
 # GeoJS Change Log
 
+## Version 1.8.1
+
+### Improvements
+
+- Reduce memory copy on pixelmap layer creation ([#1194](../../pull/1194))
+
 ## Version 1.8.0
 
 ### Features
