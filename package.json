@@ -60,7 +60,7 @@
     "jsdoc": "^3.6.10",
     "jsdoc-autoprivate": "0.0.1",
     "jsonlint-mod": "^1.7.6",
-    "jstransformer-markdown-it": "^2.0.0",
+    "jstransformer-markdown-it": "jstransformers/jstransformer-markdown-it#snyk-fix-9cae6682d6a0ba4f72fd9fec4e488acd",
     "karma": "^6.3.15",
     "karma-chrome-launcher": "^3.1.0",
     "karma-coverage": "^2.1.1",
