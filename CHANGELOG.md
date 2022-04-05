@@ -1,5 +1,11 @@
 # GeoJS Change Log
 
+## Version 1.8.2
+
+### Improvements
+
+- Reduce tile layer updates ([#1196](../../pull/1196))
+
 ## Version 1.8.1
 
 ### Improvements
