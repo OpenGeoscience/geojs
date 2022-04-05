@@ -148,7 +148,10 @@ var webgl_tileLayer = function () {
    *    triggered this.  If `undefined`, clear the quads but don't redraw.
    */
   this._clearQuads = function (evt) {
-    if (evt && (!evt.layer || !(evt.layer instanceof tileLayer))) {
+    if (evt && (!evt.layer || !(evt.layer instanceof tileLayer) || !evt.layer.autoshareRenderer() || (
+      (evt.event === geo_event.layerAdd || evt.event === geo_event.layerRemove) &&
+      m_this.map().layers().every(l => l === evt.layer || evt.layer.zIndex() > l.zIndex())
+    ))) {
       return;
     }
     m_this.clear();
