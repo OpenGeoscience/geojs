@@ -21,6 +21,7 @@
     "jquery": "^3.6.0",
     "kdbush": "^3.0.0",
     "mousetrap": "^1.6.5",
+    "polybooljs": "manubb/polybooljs#eps-logic",
     "proj4": "^2.7.5",
     "vgl": "0.3.11"
   },
