@@ -1,4 +1,4 @@
-const StringReplacePlugin = require('string-replace-webpack-plugin');
+const WebpackStringReplacer = require('webpack-string-replacer');
 var TerserPlugin = require('terser-webpack-plugin');
 
 var path = require('path');
@@ -17,18 +17,18 @@ var rules = base.module.rules.concat([{
     loader: 'expose-loader',
     options: {exposes: 'CodeMirror'}
   }]
-}, {
-  test: /bootstrap.css$/,
-  use: [StringReplacePlugin.replace({
+}]);
+
+var plugins = base.plugins;
+plugins.push(new WebpackStringReplacer({
+  rules:[{
+    fileInclude: /bootstrap.css$/,
     replacements: [{
       pattern: /@import.*fonts.googleapis.com\/css\?family=Lato[^;]*;/g,
       replacement: () => '@import url(../../typeface-lato/index.css);'
     }]
-  })]
-}]);
-
-var plugins = base.plugins;
-plugins.push(new StringReplacePlugin());
+  }]
+}));
 
 var resolve = {
   extensions: ['.js', '.css', '.pug', '...'],
