@@ -1,9 +1,12 @@
-/* global $ */
+var $ = require('jquery');
+var geo = require('../test-utils').geo;
+var createMap = require('../test-utils').createMap;
+var destroyMap = require('../test-utils').destroyMap;
+var mockWebglRenderer = geo.util.mockWebglRenderer;
+var restoreWebglRenderer = geo.util.restoreWebglRenderer;
 
 describe('geo.util.polyops', function () {
   'use strict';
-
-  var geo = require('../test-utils').geo;
 
   var polytests = {
     flat: {
@@ -115,14 +118,65 @@ describe('geo.util.polyops', function () {
         opTests.forEach((test) => {
           it(JSON.stringify(test.a) + ' and ' + JSON.stringify(test.b), function () {
             const opts = {correspond: {}};
-            const out = geo.util.polyops[op](test.a, test.b, opts);
+            let out = geo.util.polyops[op](test.a, test.b, opts);
             expect(out).toEqual(test[op].out);
             expect(opts.correspond.poly1).toEqual(test[op].ca);
             expect(opts.correspond.poly2).toEqual(test[op].cb);
+
+            opts.poly1 = test.a;
+            opts.poly2 = test.b;
+            out = geo.util.polyops[op](opts);
+            expect(out).toEqual(test[op].out);
           });
         });
       });
     });
   });
 
+  var polygonOps = [{
+    op: 'union', len: [[8, 4]]
+  }, {
+    op: 'difference', len: [[4], [8]]
+  }, {
+    op: 'intersect', len: [[8]]
+  }, {
+    op: 'xor', len: [[20]]
+  }];
+
+  describe('with polygonFeature', function () {
+    polygonOps.forEach((test) => {
+      it(test.op, function () {
+        mockWebglRenderer();
+        const map = createMap();
+        const layer = map.createLayer('feature', {renderer: 'webgl'});
+        const poly1 = geo.polygonFeature.create(layer);
+        const poly2 = geo.polygonFeature.create(layer);
+        const poly3 = geo.polygonFeature.create(layer);
+
+        poly1.style({polygon: (d) => ({outer: d[0], inner: d.slice(1)})});
+        poly1.data([[
+          [[-1.1, 50.7], [-1.3, 50.7], [-1.3, 50.9], [-1.1, 50.9]]
+        ]]);
+        poly2.style({polygon: (d) => ({outer: d[0], inner: d.slice(1)})});
+        poly2.data([[
+          [[-1.2, 50.75], [-1.4, 50.75], [-1.4, 50.85], [-1.2, 50.85]],
+          [[-1.25, 50.78], [-1.35, 50.78], [-1.35, 50.82], [-1.25, 50.82]]
+        ]]);
+
+        geo.util.polyops[test.op](poly1, poly2, {style: poly3});
+
+        const d = poly3.data();
+        expect(d.length).toEqual(test.len.length);
+        test.len.forEach((val, idx) => {
+          expect(d[idx].length).toEqual(val.length);
+          val.forEach((val2, idx2) => {
+            expect(d[idx][idx2].length).toEqual(val2);
+          });
+        });
+
+        destroyMap();
+        restoreWebglRenderer();
+      });
+    });
+  });
 });
