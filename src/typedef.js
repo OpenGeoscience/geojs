@@ -55,6 +55,17 @@
  */
 
 /**
+ * General represention of a point on the earth.  The coordinates are most
+ * commonly in longitude and latitude, but the coordinate system is changed
+ * by the interface gcs.  This is a list of numbers consisting of either [x, y]
+ * or [x, y, z], where therse are the horizontal, vertical, and altitude
+ * coordinates.
+ *
+ * @typedef geo.geoPositionFlat
+ * @type {number[]}
+ */
+
+/**
  * General represention of a two-dimensional point in any coordinate system.
  *
  * @typedef geo.point2D

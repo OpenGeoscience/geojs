@@ -1157,6 +1157,103 @@ var annotationLayer = function (arg) {
   };
 
   /**
+   * Return any annotation that has area as a polygon list: an array of
+   * polygons, each of which is an array of polylines, each of which is an
+   * array of points, each of which is a 2-tuple of numbers.
+   *
+   * @param {geo.util.polyop.spec} [opts] Ignored.
+   * @returns {geo.polygonList} A list of polygons.
+   */
+  this.toPolygonList = function (opts) {
+    const poly = [];
+    opts = opts || {};
+    opts.annotationIndices = [];
+    m_annotations.forEach((annotation, idx) => {
+      if (annotation.toPolygonList) {
+        annotation.toPolygonList(opts).forEach((p) => poly.push(p));
+        opts.annotationIndices.push(idx);
+      }
+    });
+    return poly;
+  };
+
+  /**
+   * Replace appropriate annotations with a list of polygons.
+   *
+   * @param {geo.polygonList} poly A list of polygons.
+   * @param {geo.util.polyop.spec} [opts] This contains annotationIndices and
+   *   correspondence used to track annotations.
+   * @returns {this}
+   */
+  this.fromPolygonList = function (poly, opts) {
+    if (!poly || !poly.length) {
+      return m_this;
+    }
+    /* One of 'all', 'exact', 'none'; default is 'exact' */
+    const keep = opts.keepAnnotations;
+    const keepIds = {};
+    const reusedIds = {};
+    let correspond, exact, annot;
+    if (opts.annotationIndices && opts.correspond && opts.correspond.poly1 && opts.annotationIndices.length === opts.correspond.poly1.length) {
+      correspond = opts.correspond.poly1;
+      exact = opts.correspond.exact1;
+      annot = m_this.annotations();
+    }
+    const polyAnnot = [];
+    poly.forEach((p, idx) => {
+      p = p.map((h) => h.map((pt) => ({x: pt[0], y: pt[1]})));
+      const result = {
+        vertices: p.length === 1 ? p[0] : {outer: p[0], inner: p.slice(1)}
+      };
+      if (correspond) {
+        for (let i = 0; i < correspond.length; i += 1) {
+          if (correspond[i] && correspond[i].indexOf(idx) >= 0) {
+            const orig = annot[opts.annotationIndices[i]];
+            if (keep !== 'all' && keep !== 'none' && exact && exact[i] && exact[i].indexOf(idx) >= 0) {
+              keepIds[orig.id()] = true;
+              return;
+            }
+            if (keep !== 'all' && reusedIds[orig.id()] === undefined) {
+              result.annotationId = orig.id();
+              reusedIds[orig.id()] = true;
+            }
+            ['name', 'description', 'label'].forEach((k) => {
+              result[k] = orig[k]();
+            });
+            Object.entries(orig.options()).forEach(([key, value]) => {
+              if (['showLabel', 'style'].indexOf(key) >= 0 || key.endsWith('Style')) {
+                result[key] = value;
+              }
+            });
+            break;
+          }
+        }
+      }
+      polyAnnot.push(result);
+    });
+    let update = false;
+    // delete extant annotations
+    if (keep !== 'all' && annot) {
+      annot
+        .filter((oldAnnot) => keepIds[oldAnnot.id()] === undefined)
+        .forEach((oldAnnot) => {
+          m_this.removeAnnotation(oldAnnot, false);
+          update = true;
+        });
+    }
+    // add new annotations
+    polyAnnot.forEach((p) => {
+      m_this.addAnnotation(registry.createAnnotation('polygon', p), m_this.gcs(), false);
+      update = true;
+    });
+    if (update) {
+      m_this.modified();
+      m_this.draw();
+    }
+    return m_this;
+  };
+
+  /**
    * Initialize.
    *
    * @returns {this} The current layer.

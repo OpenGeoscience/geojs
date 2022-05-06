@@ -692,7 +692,7 @@ var polygonFeature = function (arg) {
    * which is a 2-tuple of numbers.
    *
    * @param {geo.util.polyop.spec} [opts] Ignored.
-   * @returns {array[]} A list of polygons.
+   * @returns {geo.polygonList} A list of polygons.
    */
   this.toPolygonList = function (opts) {
     const polyFunc = m_this.style.get('polygon');
@@ -723,7 +723,7 @@ var polygonFeature = function (arg) {
    * Set the data, position accessor, and polygon accessor to use a list of
    * polygons.
    *
-   * @param {array[]} poly A list of polygons.
+   * @param {geo.polygonList} poly A list of polygons.
    * @param {geo.util.polyop.spec} [opts] Ignored.
    * @returns {this}
    */

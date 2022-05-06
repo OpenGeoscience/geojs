@@ -136,6 +136,25 @@ var polygonAnnotation = function (args) {
   };
 
   /**
+   * Return this annotation as a polygon list.
+   *
+   * @param {geo.util.polyop.spec} [opts] Ignored.
+   * @returns {geo.polygonList} A list of polygons.
+   */
+  this.toPolygonList = function (opts) {
+    const coord = m_this._coordinates();
+    if (coord.outer) {
+      const result = [[coord.outer.map((pt) => [pt.x, pt.y])]];
+      (coord.inner || []).forEach((h) => result[0].push(h.map((pt) => [pt.x, pt.y])));
+      return result;
+    }
+    if (coord.length < 3) {
+      return [];
+    }
+    return [[coord.map((pt) => [pt.x, pt.y])]];
+  };
+
+  /**
    * Get and optionally set coordinates associated with this annotation in the
    * map gcs coordinate system.
    *

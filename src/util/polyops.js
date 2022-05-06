@@ -2,27 +2,26 @@ var PolyBool = require('polybooljs');
 var geo_map = require('../map');
 
 /**
+ * A list of flat polygon lists.
+ *
+ * @typedef {Array.<Array.<Array.<geo.geoPositionFlat>>>} geo.polygonList
+ */
+
+/**
  * A polygon in any of a variety of formats.
  *
  * This can be any object with a ``toPolygonList`` and ``fromPolygonList``
  * method.
  *
- * @typedef {geo.polygonFlat|Array.<geo.polygonFlat>|Array.<Array.<geo.polygonFlat>>|geo.polygonObject|Array.<geo.polygonObject>|object} geo.anyPolygon
+ * @typedef {geo.polygonFlat|Array.<geo.polygonFlat>|Array.<Array.<geo.polygonFlat>>|geo.polygonObject|Array.<geo.polygonObject>|Array.<geo.geoPositionFlat>|Array.<Array.<geo.geoPositionFlat>>|geo.polygonList|object} geo.polygonAny
  */
 
 /**
  * Object specification for polygon operation options.
  *
- * TODO: should poly1/poly2 accept annotationLayer?
- * TODO: should epsilon be configurable from the display pixel size?
- *
- * TODO: add
- * rdp: threshold
- * ellipseToPoly: threshold (only if we input features) -- use rdp
- *
  * @typedef {object} geo.util.polyop.spec
- * @property {geo.anyPolygon} [poly1] The first polygon set to operate on.
- * @property {geo.anyPolygon} [poly2] The second polygon set to operate on.
+ * @property {geo.polygonAny} [poly1] The first polygon set to operate on.
+ * @property {geo.polygonAny} [poly2] The second polygon set to operate on.
  * @property {number} [epsilon1] A precision value to use when computing the
  *   operation.  If not specified, this is computed from the range of values in
  *   ``poly1``.  It is used for processing ``poly1`` and the general operation.
@@ -45,10 +44,20 @@ var geo_map = require('../map');
  *   before the main operation is carried out.
  * @property {object} [correspond] If present, information about the
  *   correspondence of the input and output polygons is added to this object.
- *   This is of the form {poly1: [idx...], poly2: [idx...]}, where the [idx...]
- *   array is the length of the input polygon array and each entry is either
- *   undefined or contains a list of indices of corresponding output polygons.
- *   Multiple inputs can refer to the same output.
+ *   This is of the form {poly1: [idx...], poly2: [idx...], exact1: [idx...],
+ *   exact2: [idx...]}, where the [idx...] array is the length of the input
+ *  polygon array and each entry is either undefined or contains a list of
+ *   indices of corresponding output polygons.  Exact means that all of the
+ *   points in the input polygon are in the output polygon.  Multiple inputs
+ *   can refer to the same output.
+ * @property {number} [tolerance] A tolerance value to pass to features,
+ *   annotations, or other object-based polygon generators to specify how
+ *   closely non-polygons are converted to polygons.  This is in the feature's
+ *   gcs coordinate system.
+ * @property {number} [pixelTolerance] A tolerance value to pass to features,
+ *   annotations, or other object-based polygon generators to specify how
+ *   closely non-polygons are converted to polygons.  This is interpreted in
+ *   the feature's map's display coordinates.
  */
 
 const AlternateOpNames = {
@@ -71,10 +80,10 @@ const AlternateOpNames = {
  * Convert a segment list to a polygon list.
  *
  * @param {object[]} seglist A PolyBool segment list.
- * @returns {array[]} A polygon list.
+ * @returns {geo.polygonList} A polygon list.
  */
 function seglistToPolygonList(seglist) {
-  // This doesn't arrange holes correctly
+  // This single line doesn't arrange holes correctly
   // return seglist.map((s) => PolyBool.polygon(s).regions);
   const polys = [];
   seglist.forEach((s) => {
@@ -103,6 +112,7 @@ function seglistToPolygonList(seglist) {
 function polygonOperationSeglist(op, epsilon, seglist) {
   op = 'select' + op.charAt(0).toUpperCase() + op.slice(1);
   PolyBool.epsilon(epsilon);
+
   while (seglist.length > 1) {
     const newlist = [];
     const half = Math.ceil(seglist.length / 2);
@@ -154,7 +164,7 @@ function polygonOperationSeglist(op, epsilon, seglist) {
  *     in outer/inner object or outer/inner list form
  * The actual format is stored in the mode object.
  *
- * @param {geo.anyPolygon} poly A polygon in one of the above formats to
+ * @param {geo.polygonAny} poly A polygon in one of the above formats to
  *   convert.
  * @param {object} mode An object that is modified with information about
  *   the conversion.  This includes style: the input polygon format; min: a
@@ -163,7 +173,7 @@ function polygonOperationSeglist(op, epsilon, seglist) {
  *   functions.
  * @param {geo.util.polyop.spec} [opts] Options for the operation.  Only used
  *    if poly is an object with a toPolygonList method.
- * @returns {array[]} A list of polygons.
+ * @returns {geo.polygonList} A list of polygons.
  */
 function toPolygonList(poly, mode, opts) {
   mode = mode || {};
@@ -176,9 +186,15 @@ function toPolygonList(poly, mode, opts) {
     if (poly.outer) {
       mode.style = '-outer';
       poly = [[poly.outer, ...(poly.inner || [])]];
-    } else if (poly[0].outer) {
+    } else if (poly.length && poly[0].outer) {
       mode.style = '-outer-list';
       poly = poly.map((p) => [p.outer, ...(p.inner || [])]);
+    }
+    if (!poly.length) {
+      mode.style = 'flat-listlist' + mode.style;
+      mode.min = mode.max = [0, 0];
+      mode.epsilon = 1e-10;
+      return poly;
     }
     if (poly[0].x !== undefined) {
       mode.style = 'object';
@@ -214,14 +230,14 @@ function toPolygonList(poly, mode, opts) {
 /**
  * Convert a polygon list to another format.
  *
- * @param {array[]} poly A list of polygons.
+ * @param {geo.polygonList} poly A list of polygons.
  * @param {object} mode An object that is modified with information about the
  *   conversion.  This includes style: the input polygon format; min: a 2-item
  *   list with minimum values in x, y; max: a 2-item list with maximum values
  *   in x, y; epsilon: a recommended value for epsilon in other functions.
  * @param {geo.util.polyop.spec} [opts] Options for the operation.  Only used
  *    if ``mode.style`` is an object with a fromPolygonList method.
- * @returns {geo.anyPolygon} A polygon in one of several formats.
+ * @returns {geo.polygonAny} A polygon in one of several formats.
  */
 function fromPolygonList(poly, mode, opts) {
   if (mode.style.fromPolygonList) {
@@ -246,7 +262,7 @@ function fromPolygonList(poly, mode, opts) {
 /**
  * Use a minimum style for output to include all of the results.
  *
- * @param {array[]} polylist A list of polygons.
+ * @param {geo.polygonList} polylist A list of polygons.
  * @param {string} style the proposed style.
  * @returns {string} The preferred style.
  */
@@ -276,13 +292,14 @@ function minimumPolygonStyle(polylist, style) {
  * Generate the correspondence between the source polygons and the output
  * polygons.  A polygon corresponds if it has at least two points in common.
  *
- * @param {array[]} poly1 First set of source polygons.
- * @param {array[]} poly2 Second set of source polygons.
- * @param {array[]} newpoly Output polygons.
+ * @param {geo.polygonList} poly1 First set of source polygons.
+ * @param {geo.polygonList} poly2 Second set of source polygons.
+ * @param {geo.polygonList} newpoly Output polygons.
  * @param {object} results An object to add results to.
  */
 function generateCorrespondence(poly1, poly2, newpoly, results) {
   const pts = {};
+  const counts = [];
 
   newpoly.forEach((p, idx) => p.forEach((h) => h.forEach((pt) => {
     const key = '_' + pt[0] + '_' + pt[1];
@@ -293,10 +310,16 @@ function generateCorrespondence(poly1, poly2, newpoly, results) {
     } else {
       pts[key] = [idx];
     }
+    if (counts.length <= idx) {
+      counts.push(0);
+    }
+    counts[idx] += 1;
   })));
   ['poly1', 'poly2'].forEach((pkey) => {
     const poly = pkey === 'poly1' ? poly1 : poly2;
+    const ekey = pkey === 'poly1' ? 'exact1' : 'exact2';
     results[pkey] = Array(poly.length);
+    results[ekey] = Array(poly.length);
     poly.forEach((p, idx) => {
       const found = {};
       p.forEach((h) => h.forEach((pt) => {
@@ -308,6 +331,12 @@ function generateCorrespondence(poly1, poly2, newpoly, results) {
         }
       }));
       Object.keys(found).forEach((nidx) => {
+        if (found[nidx] === counts[+nidx]) {
+          if (!results[ekey][idx]) {
+            results[ekey][idx] = [];
+          }
+          results[ekey][idx].push(+nidx);
+        }
         if (found[nidx] >= 2) {
           if (!results[pkey][idx]) {
             results[pkey][idx] = [];
@@ -324,13 +353,13 @@ function generateCorrespondence(poly1, poly2, newpoly, results) {
  *
  * @param {string} op The operation to handle.  One of union, intersect,
  *    difference, or xor.
- * @param {geo.anyPolygon|geo.util.polyop.spec} poly1 Either the first polygon
+ * @param {geo.polygonAny|geo.util.polyop.spec} poly1 Either the first polygon
  *    set or an object containing all parameters for the function.
- * @param {geo.anyPolygon} [poly2] If the poly1 parameter is not a complete
+ * @param {geo.polygonAny} [poly2] If the poly1 parameter is not a complete
  *    options object, the second polygon set for the operation.
  * @param {geo.util.polyop.spec} [opts] If the poly1 parameter is not a
  *    complete options object, the options for the operation.
- * @returns {geo.anyPolygon} A polygon set in the same style as poly1.
+ * @returns {geo.polygonAny} A polygon set in the same style as poly1.
  */
 function generalOperationProcess(op, poly1, poly2, opts) {
   var transform = require('../transform');
@@ -345,13 +374,15 @@ function generalOperationProcess(op, poly1, poly2, opts) {
   const ingcs1 = opts.ingcs || (
     opts.map ? opts.map.ingcs() : (
       poly1.gcs ? poly1.gcs() : (
-        poly1.layer ? poly1.layer().map().ingcs() : (
-          poly1.map instanceof geo_map ? poly1.map().ingcs() : undefined))));
+        poly1.layer && poly1.layer().gcs ? poly1.layer().gcs() : (
+          poly1.layer ? poly1.layer().map().ingcs() : (
+            poly1.map instanceof geo_map ? poly1.map().ingcs() : undefined)))));
   const ingcs2 = opts.ingcs || (
     opts.map ? opts.map.ingcs() : (
       poly2.gcs ? poly2.gcs() : (
-        poly2.layer ? poly2.layer().map().ingcs() : (
-          poly2.map instanceof geo_map ? poly2.map().ingcs() : ingcs1))));
+        poly2.layer && poly2.layer().gcs ? poly2.layer().gcs() : (
+          poly2.layer ? poly2.layer().map().ingcs() : (
+            poly2.map instanceof geo_map ? poly2.map().ingcs() : ingcs1)))));
   const gcs = opts.gcs || (
     opts.map ? opts.map.gcs() : (
       poly1.layer ? poly1.layer().map().gcs() : (
@@ -370,9 +401,17 @@ function generalOperationProcess(op, poly1, poly2, opts) {
   }
   let seglist1 = poly1.map(p => PolyBool.segments({regions: p}));
   let seglist2 = poly2.map(p => PolyBool.segments({regions: p}));
-  seglist1 = polygonOperationSeglist('xor', mode1.epsilon, seglist1);
-  seglist2 = polygonOperationSeglist('xor', mode2.epsilon, seglist2);
-  const seglist = polygonOperationSeglist(op, Math.max(mode1.epsilon, mode2.epsilon), [seglist1[0], seglist2[0]]);
+  seglist1 = polygonOperationSeglist(opts.innerOperation || 'xor', mode1.epsilon, seglist1);
+  seglist2 = polygonOperationSeglist(opts.innerOperation || 'xor', mode2.epsilon, seglist2);
+  let seglist = seglist1;
+  if (seglist1[0] && seglist2[0]) {
+    /* We need to do the main operation with the same inversion flags */
+    seglist1[0].inverted = false;
+    seglist2[0].inverted = false;
+    seglist = polygonOperationSeglist(op, Math.max(mode1.epsilon, mode2.epsilon), [seglist1[0], seglist2[0]]);
+  } else if (seglist2[0]) {
+    seglist = seglist2;
+  }
   let newpoly = seglistToPolygonList(seglist);
   if (opts.correspond) {
     generateCorrespondence(poly1, poly2, newpoly, opts.correspond);

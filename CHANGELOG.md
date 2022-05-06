@@ -1,5 +1,11 @@
 # GeoJS Change Log
 
+## Version 1.9.0
+
+### Features
+
+- Polygon operations ([#1198](../../pull/1198))
+
 ## Version 1.8.10
 
 ### Improvements

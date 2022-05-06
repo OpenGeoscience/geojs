@@ -168,6 +168,19 @@ var rectangleAnnotation = function (args, annotationName) {
   };
 
   /**
+   * Return this annotation as a polygon list.
+   *
+   * @param {geo.util.polyop.spec} [opts] Ignored.
+   * @returns {geo.polygonList} A list of polygons.
+   */
+  this.toPolygonList = function (opts) {
+    if (m_this._coordinates().length < 3) {
+      return [];
+    }
+    return [[m_this._coordinates().map((pt) => [pt.x, pt.y])]];
+  };
+
+  /**
    * Get and optionally set coordinates associated with this annotation in the
    * map gcs coordinate system.
    *

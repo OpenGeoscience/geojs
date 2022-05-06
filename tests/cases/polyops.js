@@ -179,4 +179,140 @@ describe('geo.util.polyops', function () {
       });
     });
   });
+
+  var annotationOps = [{
+    op: 'union',
+    poly2: [[2, 2], [8, 2], [8, 8], [2, 8]],
+    keep: 'exact',
+    len: [[16, 3]]
+  }, {
+    op: 'difference',
+    poly2: [[2, 2], [8, 2], [8, 8], [2, 8]],
+    keep: 'exact',
+    len: [[3, 3], [11], [4]]
+  }, {
+    op: 'intersect',
+    poly2: [[2, 2], [8, 2], [8, 8], [2, 8]],
+    keep: 'exact',
+    len: [[6], [4]]
+  }, {
+    op: 'xor',
+    poly2: [[2, 2], [8, 2], [8, 8], [2, 8]],
+    keep: 'exact',
+    len: [[11], [15, 3]]
+  }, {
+    op: 'union',
+    poly2: [[2, 2], [8, 2], [8, 8], [2, 8]],
+    keep: 'all',
+    len: [[4], [3, 3], [12], [16, 3]]
+  }, {
+    op: 'difference',
+    poly2: [[2, 2], [8, 2], [8, 8], [2, 8]],
+    keep: 'all',
+    len: [[4], [3, 3], [12], [11], [3, 3], [4]]
+  }, {
+    op: 'intersect',
+    poly2: [[2, 2], [8, 2], [8, 8], [2, 8]],
+    keep: 'all',
+    len: [[4], [3, 3], [12], [6], [4]]
+  }, {
+    op: 'xor',
+    poly2: [[2, 2], [8, 2], [8, 8], [2, 8]],
+    keep: 'all',
+    len: [[4], [3, 3], [12], [11], [15, 3]]
+  }, {
+    op: 'union',
+    poly2: [[2, 2], [8, 2], [8, 8], [2, 8]],
+    keep: 'none',
+    len: [[16, 3]]
+  }, {
+    op: 'difference',
+    poly2: [[2, 2], [8, 2], [8, 8], [2, 8]],
+    keep: 'none',
+    len: [[11], [3, 3], [4]]
+  }, {
+    op: 'intersect',
+    poly2: [[2, 2], [8, 2], [8, 8], [2, 8]],
+    keep: 'none',
+    len: [[6], [4]]
+  }, {
+    op: 'xor',
+    poly2: [[2, 2], [8, 2], [8, 8], [2, 8]],
+    keep: 'none',
+    len: [[11], [15, 3]]
+  }, {
+    op: 'union',
+    poly2: [[6, 6], [6, 4], [8, 4], [8, 6]],
+    keep: 'exact',
+    len: [[4], [3, 3], [12]]
+  }, {
+    op: 'difference',
+    poly2: [[6, 6], [6, 4], [8, 4], [8, 6]],
+    keep: 'exact',
+    len: [[3, 3], [12], [6]]
+  }, {
+    op: 'intersect',
+    poly2: [[6, 6], [6, 4], [8, 4], [8, 6]],
+    keep: 'exact',
+    len: [[4]]
+  }, {
+    op: 'xor',
+    poly2: [[6, 6], [6, 4], [8, 4], [8, 6]],
+    keep: 'exact',
+    len: [[3, 3], [12], [6]]
+  }];
+
+  describe('with annotationLayer', function () {
+    annotationOps.forEach((test) => {
+      it(test.op + ' keep ' + test.keep + ' poly ' + JSON.stringify(test.poly2), function () {
+        mockWebglRenderer();
+        const map = createMap();
+        map.gcs('+proj=longlat +axis=esu');
+        map.ingcs('+proj=longlat +axis=esu');
+        const layer = map.createLayer('annotation', {renderer: 'webgl'});
+        layer.geojson({
+          type: 'FeatureCollection',
+          features: [{
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: [[[6, 6], [12, 6], [12, 2], [6, 2], [6, 6]]]
+            },
+            properties: {
+              annotationType: 'rectangle',
+              annotationId: 1
+            }
+          }, {
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: [[[0, 6], [4, 6], [4, 0], [0, 0], [0, 6]]]
+            },
+            properties: {
+              annotationType: 'ellipse',
+              annotationId: 2
+            }
+          }, {
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: [[[2, 8], [8, 8], [5, 13], [2, 8]], [[3, 9], [7, 9], [5, 12], [3, 9]]]
+            },
+            properties: {
+              annotationType: 'polygon',
+              annotationId: 3
+            }
+          }]
+        });
+        const opts = {correspond: {}, keepAnnotations: test.keep, style: layer};
+        geo.util.polyops[test.op](layer, test.poly2, opts);
+        const polys = layer.toPolygonList();
+        const match = polys.map((p, pi) => p.map((h, hi) => h.length));
+        expect(match).toEqual(test.len);
+
+        destroyMap();
+        restoreWebglRenderer();
+      });
+    });
+  });
 });
