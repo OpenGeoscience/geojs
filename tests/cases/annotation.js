@@ -414,7 +414,7 @@ describe('geo.annotation', function () {
         undefined, undefined, undefined]);
       // add handles with an edge selected
       handles.splice(0, handles.length);
-      ann._editHandle = {handle: {selected: true, type: 'edge', index: 1}};
+      ann._editHandle = {handle: {selected: true, type: 'edge', index: 1, vindex: 0}};
       ann._addEditHandles(features, ann._coordinates());
       expect(handles.map(function (h) { return h.selected; })).toEqual([
         undefined, undefined, undefined, true, undefined, undefined,
@@ -1046,6 +1046,132 @@ describe('geo.annotation', function () {
         time: time,
         map: {x: vertices[0].x + 1, y: vertices[0].y},
         mapgcs: map.displayToGcs({x: vertices[0].x + 1, y: vertices[0].y}, null)
+      })).toBe('done');
+      expect(ann.options('vertices').length).toBe(3);
+      expect(ann.state()).toBe(geo.annotation.state.done);
+    });
+  });
+
+  describe('geo.annotation.polygonAnnotation with holes', function () {
+    var vertices = {
+      outer: [{x: 30, y: 0}, {x: 50, y: 0}, {x: 40, y: 20}, {x: 30, y: 10}],
+      inner: [[{x: 25, y: 5}, {x: 45, y: 5}, {x: 35, y: 15}, {x: 25, y: 10}]]
+    };
+    var vertices2 = [{x: 30, y: 10}, {x: 50, y: 10}, {x: 40, y: 30}];
+    it('features', function () {
+      var map = createMap();
+      var layer = map.createLayer('annotation', {
+        annotations: ['polygon']
+      });
+      var ann = geo.annotation.polygonAnnotation({layer: layer, vertices: vertices});
+      var features = ann.features();
+      expect(features.length).toBe(1);
+      expect(features[0].polygon.polygon).toEqual(vertices);
+      expect(features[0].polygon.style.polygon({polygon: 'a'})).toBe('a');
+      ann.state(geo.annotation.state.edit);
+      features = ann.features();
+      expect(features.length).toBe(4);
+      ann.state(geo.annotation.state.create);
+      features = ann.features();
+      expect(features.length).toBe(2);
+      expect(features[0]).toBe(undefined);
+      expect(features[1].polygon.polygon).toEqual(vertices);
+      expect(features[1].polygon.style.polygon({polygon: 'a'})).toBe('a');
+      ann.options('vertices', [{x: 3, y: 0}, {x: 5, y: 0}]);
+      features = ann.features();
+      expect(features.length).toBe(3);
+      expect(features[0]).toBe(undefined);
+      expect(features[1]).toBe(undefined);
+      expect(features[2].line.line.length).toBe(2);
+    });
+    it('_coordinates', function () {
+      var ann = geo.annotation.polygonAnnotation({vertices: vertices});
+      expect(ann._coordinates()).toEqual(vertices);
+      ann._coordinates(vertices2);
+      expect(ann._coordinates()).toEqual(vertices2);
+    });
+    it('_geojsonCoordinates', function () {
+      var ann = geo.annotation.polygonAnnotation();
+      expect(ann._geojsonCoordinates()).toBe(undefined);
+      ann._coordinates(vertices);
+      var coor = ann._geojsonCoordinates();
+      expect(coor[0].length).toBe(5);
+      expect(coor[1].length).toBe(5);
+    });
+    it('_geojsonGeometryType', function () {
+      var ann = geo.annotation.polygonAnnotation();
+      expect(ann._geojsonGeometryType()).toBe('Polygon');
+    });
+    it('geojson', function () {
+      var ann = geo.annotation.polygonAnnotation({vertices: vertices});
+      var geojson = ann.geojson();
+      expect(geojson.type).toBe('Feature');
+      expect(geojson.geometry.type).toBe('Polygon');
+      expect(geojson.geometry.coordinates.length).toBe(2);
+      expect(geojson.geometry.coordinates[0].length).toBe(5);
+      expect(geojson.geometry.coordinates[1].length).toBe(5);
+      expect(geojson.geometry.coordinates[0][2][1]).toBeCloseTo(20);
+      expect(geojson.geometry.coordinates[1][2][1]).toBeCloseTo(15);
+    });
+    it('mouseMove', function () {
+      var ann = geo.annotation.polygonAnnotation({vertices: vertices});
+      expect(ann.mouseMove({mapgcs: {x: 6, y: 4}})).toBe(undefined);
+      expect(ann.options('vertices')).toEqual(vertices);
+    });
+    it('mouseClick', function () {
+      var map = createMap();
+      var layer = map.createLayer('annotation', {
+        annotations: ['polygon']
+      });
+      var ann = geo.annotation.polygonAnnotation({layer: layer});
+      var time = Date.now();
+      expect(ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 10, y: 20},
+        mapgcs: map.displayToGcs({x: 10, y: 20}, null)
+      })).toBe(undefined);
+      ann.state(geo.annotation.state.create);
+      expect(ann.mouseClick({
+        buttonsDown: {middle: true},
+        time: time,
+        map: vertices.outer[0],
+        mapgcs: map.displayToGcs(vertices.outer[0], null)
+      })).toBe(undefined);
+      expect(ann.options('vertices').length).toBe(0);
+      expect(ann.mouseClick({
+        buttonsDown: {right: true},
+        time: time,
+        map: vertices.outer[0],
+        mapgcs: map.displayToGcs(vertices.outer[0], null)
+      })).toBe(undefined);
+      expect(ann.options('vertices').length).toBe(0);
+      expect(ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: vertices.outer[0],
+        mapgcs: map.displayToGcs(vertices.outer[0], null)
+      })).toBe(true);
+      expect(ann.options('vertices').length).toBe(2);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: vertices.outer[1],
+        mapgcs: map.displayToGcs(vertices.outer[1], null)
+      });
+      expect(ann.options('vertices').length).toBe(3);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: vertices.outer[2],
+        mapgcs: map.displayToGcs(vertices.outer[2], null)
+      });
+      expect(ann.options('vertices').length).toBe(4);
+      expect(ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: vertices.outer[0].x + 1, y: vertices.outer[0].y},
+        mapgcs: map.displayToGcs({x: vertices.outer[0].x + 1, y: vertices.outer[0].y}, null)
       })).toBe('done');
       expect(ann.options('vertices').length).toBe(3);
       expect(ann.state()).toBe(geo.annotation.state.done);

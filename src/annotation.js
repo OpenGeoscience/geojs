@@ -215,7 +215,7 @@ var annotation = function (type, args) {
    */
   this._rotateHandlePosition = function (offset, rotation) {
     var map = m_this.layer().map(),
-        coor = m_this._coordinates(),
+        coord = m_this._coordinates(),
         center = util.centerFromPerimeter(m_this._coordinates()),
         dispCenter = center ? map.gcsToDisplay(center, null) : undefined,
         i, pos, maxr2 = 0, r;
@@ -224,8 +224,9 @@ var annotation = function (type, args) {
     }
     offset = offset || 0;
     rotation = rotation || 0;
-    for (i = 0; i < coor.length; i += 1) {
-      pos = map.gcsToDisplay(coor[i], null);
+    coord = coord.outer ? coord.outer : coord;
+    for (i = 0; i < coord.length; i += 1) {
+      pos = map.gcsToDisplay(coord[i], null);
       maxr2 = Math.max(maxr2, Math.pow(pos.x - dispCenter.x, 2) + Math.pow(pos.y - dispCenter.y, 2));
     }
     r = Math.sqrt(maxr2) + offset;
@@ -391,6 +392,22 @@ var annotation = function (type, args) {
   };
 
   /**
+   * Return a copy of the _coordinates or a geo.polygon record so that it
+   * doesn't share memory with the original.
+   *
+   * @param {geo.polygon} [coord] if specified, return a copy of this object.
+   *   Otherwise, return a copy of this._coordinates.
+   * @returns {geo.polygon}
+   */
+  this._copyOfCoordinates = function (coord) {
+    coord = coord || m_this._coordinates();
+    if (!coord.outer) {
+      return coord.slice();
+    }
+    return {outer: coord.outer.slice(), inner: (coord.inner || []).map((h) => h.slice())};
+  };
+
+  /**
    * When an edit handle is selected or deselected (for instance, by moving the
    * mouse on or off of it), mark if it is selected and record the current
    * coordinates.
@@ -409,7 +426,7 @@ var annotation = function (type, args) {
     var amountRotated = (m_this._editHandle || {}).amountRotated || 0;
     m_this._editHandle = {
       handle: handle,
-      startCoordinates: m_this._coordinates().slice(),
+      startCoordinates: m_this._copyOfCoordinates(),
       center: util.centerFromPerimeter(m_this._coordinates()),
       rotatePosition: m_this._rotateHandlePosition(
         handle.style.rotateHandleOffset, handle.style.rotateHandleRotation + amountRotated),
@@ -465,9 +482,9 @@ var annotation = function (type, args) {
       m_options[arg1] = arg2;
     }
     if (m_options.coordinates) {
-      var coor = m_options.coordinates;
+      var coord = m_options.coordinates;
       delete m_options.coordinates;
-      m_this._coordinates(coor);
+      m_this._coordinates(coord);
     }
     if (m_options.name !== undefined) {
       var name = m_options.name;
@@ -676,7 +693,7 @@ var annotation = function (type, args) {
       gcs = (gcs === null ? map.gcs() : (
         gcs === undefined ? map.ingcs() : gcs));
       if (gcs !== map.gcs()) {
-        coord = transform.transformCoordinates(map.gcs(), gcs, coord);
+        coord = m_this._convertCoordinates(map.gcs(), gcs, coord);
       }
     }
     return coord;
@@ -752,20 +769,20 @@ var annotation = function (type, args) {
    *    should not be represented (for instance, while it is being created).
    */
   this.geojson = function (gcs, includeCrs) {
-    var coor = m_this._geojsonCoordinates(gcs),
+    var coord = m_this._geojsonCoordinates(gcs),
         geotype = m_this._geojsonGeometryType(),
         styles = m_this._geojsonStyles(),
         objStyle = m_this.options('style') || {},
         objLabelStyle = m_this.labelStyle() || {},
         i, key, value;
-    if (!coor || !coor.length || !geotype) {
+    if (!coord || !coord.length || !geotype) {
       return;
     }
     var obj = {
       type: 'Feature',
       geometry: {
         type: geotype,
-        coordinates: coor
+        coordinates: coord
       },
       properties: {
         annotationType: m_type,
@@ -850,22 +867,25 @@ var annotation = function (type, args) {
       features[editHandleFeatureLevel] = {point: []};
     }
     editPoints = features[editHandleFeatureLevel].point;
-    vertices.forEach(function (pt, idx) {
-      if (opts.vertex !== false) {
-        editPoints.push($.extend({}, pt, {type: 'vertex', index: idx, style: style, editHandle: true}));
-      }
-      if (opts.edge !== false && idx !== vertices.length - 1 && (pt.x !== vertices[idx + 1].x || pt.y !== vertices[idx + 1].y)) {
-        editPoints.push($.extend({
-          x: (pt.x + vertices[idx + 1].x) / 2,
-          y: (pt.y + vertices[idx + 1].y) / 2
-        }, {type: 'edge', index: idx, style: style, editHandle: true}));
-      }
-      if (opts.edge !== false && !isOpen && idx === vertices.length - 1 && (pt.x !== vertices[0].x || pt.y !== vertices[0].y)) {
-        editPoints.push($.extend({
-          x: (pt.x + vertices[0].x) / 2,
-          y: (pt.y + vertices[0].y) / 2
-        }, {type: 'edge', index: idx, style: style, editHandle: true}));
-      }
+    const vertexList = vertices.outer ? [vertices.outer].concat(vertices.inner || []) : [vertices];
+    vertexList.forEach((vert, vidx) => {
+      vert.forEach(function (pt, idx) {
+        if (opts.vertex !== false) {
+          editPoints.push($.extend({}, pt, {type: 'vertex', index: idx, vindex: vidx, style: style, editHandle: true}));
+        }
+        if (opts.edge !== false && idx !== vert.length - 1 && (pt.x !== vert[idx + 1].x || pt.y !== vert[idx + 1].y)) {
+          editPoints.push($.extend({
+            x: (pt.x + vert[idx + 1].x) / 2,
+            y: (pt.y + vert[idx + 1].y) / 2
+          }, {type: 'edge', index: idx, vindex: vidx, style: style, editHandle: true}));
+        }
+        if (opts.edge !== false && !isOpen && idx === vert.length - 1 && (pt.x !== vert[0].x || pt.y !== vert[0].y)) {
+          editPoints.push($.extend({
+            x: (pt.x + vert[0].x) / 2,
+            y: (pt.y + vert[0].y) / 2
+          }, {type: 'edge', index: idx, vindex: vidx, style: style, editHandle: true}));
+        }
+      });
     });
     if (opts.center !== false) {
       editPoints.push($.extend({}, util.centerFromPerimeter(m_this._coordinates()), {type: 'center', style: style, editHandle: true}));
@@ -887,11 +907,41 @@ var annotation = function (type, args) {
     }
     if (selected) {
       editPoints.forEach(function (pt) {
-        if (pt.type === selected.type && pt.index === selected.index) {
+        if (pt.type === selected.type && pt.index === selected.index && pt.vindex === selected.vindex) {
           pt.selected = true;
         }
       });
     }
+  };
+
+  /**
+   * Apply a map function of a geo.polygon.
+   *
+   * @param {geo.polygon} coord The polygon to apply the function to.
+   * @param {function} func The function to apply.
+   * @returns {array} The map results.
+   */
+  this._coordinatesMapFunc = function (coord, func) {
+    if (!coord.outer) {
+      return coord.map(func);
+    }
+    return {
+      outer: coord.outer.map(func),
+      inner: (coord.inner || []).map((h) => h.map(func))
+    };
+  };
+
+  /**
+   * Check if two geo.polygons differ in their first point.
+   *
+   * @param {geo.polygon} coord1 One polygon to compare.
+   * @param {geo.polygon} coord2 A second polygon to compare.
+   * @returns {boolean} true if the first point matches.
+   */
+  this._firstPointDifferent = function (coord1, coord2) {
+    coord1 = coord1.outer ? coord1.outer : coord1;
+    coord2 = coord2.outer ? coord2.outer : coord2;
+    return (coord1[0].x !== coord2[0].x || coord1[0].y !== coord2[0].y);
   };
 
   /**
@@ -908,10 +958,10 @@ var annotation = function (type, args) {
           y: evt.mouse.mapgcs.y - evt.state.origin.mapgcs.y
         },
         curPts = m_this._coordinates();
-    var pts = start.map(function (elem) {
+    var pts = m_this._coordinatesMapFunc(start, function (elem) {
       return {x: elem.x + delta.x, y: elem.y + delta.y};
     });
-    if (pts[0].x !== curPts[0].x || pts[0].y !== curPts[0].y) {
+    if (m_this._firstPointDifferent(pts, curPts)) {
       m_this._coordinates(pts);
       return true;
     }
@@ -940,14 +990,14 @@ var annotation = function (type, args) {
           handle.rotatePosition.x + delta.x - handle.center.x),
         ang = ang2 - ang1,
         curPts = m_this._coordinates();
-    var pts = start.map(function (elem) {
+    var pts = m_this._coordinatesMapFunc(start, function (elem) {
       var delta = {x: elem.x - handle.center.x, y: elem.y - handle.center.y};
       return {
         x: delta.x * Math.cos(ang) - delta.y * Math.sin(ang) + handle.center.x,
         y: delta.x * Math.sin(ang) + delta.y * Math.cos(ang) + handle.center.y
       };
     });
-    if (pts[0].x !== curPts[0].x || pts[0].y !== curPts[0].y) {
+    if (m_this._firstPointDifferent(pts, curPts)) {
       m_this._coordinates(pts);
       handle.amountRotated = handle.startAmountRotated + ang;
       return true;
@@ -985,13 +1035,13 @@ var annotation = function (type, args) {
         curPts = m_this._coordinates();
     if (d02 && d01) {
       var scale = d02 / d01;
-      var pts = start.map(function (elem) {
+      var pts = m_this._coordinatesMapFunc(start, function (elem) {
         return {
           x: (elem.x - handle.center.x) * scale + handle.center.x,
           y: (elem.y - handle.center.y) * scale + handle.center.y
         };
       });
-      if (pts[0].x !== curPts[0].x || pts[0].y !== curPts[0].y) {
+      if (m_this._firstPointDifferent(pts, curPts)) {
         m_this._coordinates(pts);
         return true;
       }
@@ -1009,11 +1059,17 @@ var annotation = function (type, args) {
   this._processEditActionEdge = function (evt) {
     var handle = m_this._editHandle,
         index = handle.handle.index,
+        vindex = handle.handle.vindex,
         curPts = m_this._coordinates();
-    curPts.splice(index + 1, 0, {x: handle.handle.x, y: handle.handle.y});
+    if (!curPts.outer) {
+      curPts.splice(index + 1, 0, {x: handle.handle.x, y: handle.handle.y});
+    } else {
+      const loop = vindex ? curPts.inner[vindex - 1] : curPts.outer;
+      loop.splice(index + 1, 0, {x: handle.handle.x, y: handle.handle.y});
+    }
     handle.handle.type = 'vertex';
     handle.handle.index += 1;
-    handle.startCoordinates = curPts.slice();
+    handle.startCoordinates = m_this._copyOfCoordinates(curPts);
     m_this.modified();
     return true;
   };
@@ -1031,8 +1087,10 @@ var annotation = function (type, args) {
   this._processEditActionVertex = function (evt, canClose) {
     var handle = m_this._editHandle,
         index = handle.handle.index,
+        vindex = handle.handle.vindex,
         start = handle.startCoordinates,
-        curPts = m_this._coordinates(),
+        ptsRef = m_this._coordinates(),
+        curPts = ptsRef.outer ? (vindex ? ptsRef.inner[vindex - 1] : ptsRef.outer) : ptsRef,
         origLen = curPts.length,
         origPt = curPts[index],
         delta = {
@@ -1043,6 +1101,9 @@ var annotation = function (type, args) {
         aPP = layer.options('adjacentPointProximity'),
         near, atEnd;
 
+    if (start.outer) {
+      start = vindex ? start.inner[vindex - 1] : start.outer;
+    }
     curPts[index] = {
       x: start[index].x + delta.x,
       y: start[index].y + delta.y
@@ -1078,8 +1139,36 @@ var annotation = function (type, args) {
         curPts[index].x === origPt.x && curPts[index].y === origPt.y) {
       return false;
     }
-    m_this._coordinates(curPts);
+
+    m_this._coordinates(ptsRef);
     return true;
+  };
+
+  /**
+   * Transform the annotations coordinates from one gcs to another.
+   *
+   * @param {string|geo.transform} oldgcs The current gcs.
+   * @param {string|geo.transform} newgcs The new gcs.
+   * @param {geo.polygon} [coord] If not specified, convert the coordinates in
+   *   place.  If specified, convert these coordinates and return them (don't
+   *   alter the existing values).
+   * @returns {geo.polygon}
+   */
+  this._convertCoordinates = function (oldgcs, newgcs, coord) {
+    const store = !coord;
+    coord = coord || m_this._coordinates();
+    if (!coord.outer) {
+      coord = transform.transformCoordinates(oldgcs, newgcs, coord);
+    } else {
+      coord = {
+        outer: transform.transformCoordinates(oldgcs, newgcs, coord.outer),
+        inner: (coord.inner || []).map((h) => transform.transformCoordinates(oldgcs, newgcs, h))
+      };
+    }
+    if (store) {
+      m_this._coordinates(coord);
+    }
+    return coord;
   };
 };
 
@@ -1368,12 +1457,12 @@ var rectangleAnnotation = function (args, annotationName) {
     if (!src || m_this.state() === annotationState.create || src.length < 4) {
       return;
     }
-    var coor = [];
+    var coord = [];
     for (var i = 0; i < 4; i += 1) {
-      coor.push([src[i].x, src[i].y]);
+      coord.push([src[i].x, src[i].y]);
     }
-    coor.push([src[0].x, src[0].y]);
-    return [coor];
+    coord.push([src[0].x, src[0].y]);
+    return [coord];
   };
 
   /**
@@ -1745,12 +1834,16 @@ var polygonAnnotation = function (args) {
       fillColor: {r: 0.3, g: 0.3, b: 0.3},
       fillOpacity: 0.25,
       line: function (d) {
+        const coord = m_this._coordinates();
         /* Return an array that has the same number of items as we have
          * vertices. */
-        return Array.apply(null, Array(m_this.options('vertices').length)).map(
+        return Array.apply(null, Array((coord.outer || coord).length)).map(
           function () { return d; });
       },
       position: function (d, i) {
+        if (d.x !== undefined) {
+          return d.x;
+        }
         return m_this.options('vertices')[i];
       },
       stroke: false,
@@ -1779,7 +1872,7 @@ var polygonAnnotation = function (args) {
     switch (state) {
       case annotationState.create:
         features = [];
-        if (opt.vertices && opt.vertices.length >= 3) {
+        if (opt.vertices && (opt.vertices.outer || opt.vertices.length >= 3)) {
           features[1] = {
             polygon: {
               polygon: opt.vertices,
@@ -1939,15 +2032,23 @@ var polygonAnnotation = function (args) {
    */
   this._geojsonCoordinates = function (gcs) {
     var src = m_this.coordinates(gcs);
-    if (!src || src.length < 3 || m_this.state() === annotationState.create) {
+    if (!src || (!src.outer && src.length < 3) || m_this.state() === annotationState.create) {
       return;
     }
-    var coor = [];
-    for (var i = 0; i < src.length; i += 1) {
-      coor.push([src[i].x, src[i].y]);
+    var coord = [];
+    if (!src.outer) {
+      coord = [src.map((pt) => [pt.x, pt.y])];
+      coord[0].push(coord[0][0].slice());
+    } else {
+      coord = [src.outer.map((pt) => [pt.x, pt.y])];
+      coord[0].push(coord[0][0].slice());
+      (src.inner || []).forEach((h) => {
+        const poly = h.map((pt) => [pt.x, pt.y]);
+        poly.push(poly[0].slice());
+        coord.push(poly);
+      });
     }
-    coor.push([src[0].x, src[0].y]);
-    return [coor];
+    return coord;
   };
 
   /**
@@ -2220,11 +2321,11 @@ var lineAnnotation = function (args) {
     if (!src || src.length < 2 || m_this.state() === annotationState.create) {
       return;
     }
-    var coor = [];
+    var coord = [];
     for (var i = 0; i < src.length; i += 1) {
-      coor.push([src[i].x, src[i].y]);
+      coord.push([src[i].x, src[i].y]);
     }
-    return coor;
+    return coord;
   };
 
   /**

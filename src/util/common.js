@@ -603,13 +603,18 @@ var util = {
    * this is the same as the average of all the points of the lines of the
    * perimeter.
    *
-   * @param {geo.geoPosition[]} coor An array of coordinates.
+   * @param {geo.geoPolygon} coor An array of coordinates.  This can also be
+   *    a polygon object with an ``outer`` element with an array of
+   *    coordinates.
    * @returns {geo.geoPosition|undefined} The position for the center, or
    *    `undefined` if no such position exists.
    * @memberof geo.util
    */
   centerFromPerimeter: function (coor) {
     var position, p0, p1, w, sumw, i;
+    if (coor && coor.outer) {
+      coor = coor.outer;
+    }
     if (!coor || !coor.length) {
       return;
     }
