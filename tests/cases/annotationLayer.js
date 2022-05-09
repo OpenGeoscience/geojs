@@ -841,6 +841,18 @@ describe('geo.annotationLayer', function () {
       attr = layer.geojson().features[0].properties;
       expect(attr.strokeOffset).toBe(0.5);
       expect(attr.lineCap).toBe('round');
+
+      var holepoly = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [[-1.2, 50.75], [-1.4, 50.75], [-1.4, 50.85], [-1.2, 50.85], [-1.2, 50.75]],
+            [[-1.25, 50.78], [-1.35, 50.78], [-1.35, 50.82], [-1.25, 50.82], [-1.25, 50.78]]
+          ]
+        }
+      };
+      expect(layer.geojson(holepoly, true)).toBe(1);
     });
   });
   it('Test destroy layer.', function () {
