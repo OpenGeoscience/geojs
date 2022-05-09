@@ -182,6 +182,44 @@ var annotationLayer = function (arg) {
   };
 
   /**
+   * Check if there is a current boolean operation.
+   *
+   * @returns {string?} Either undefined for no current boolean operation or
+   *   the name of the operation.
+   */
+  this.currentBooleanOperation = function () {
+    let op;
+    if (m_this._currentBooleanClass) {
+      op = m_this._currentBooleanClass.split('-')[1];
+    }
+    return op;
+  };
+
+  /**
+   * Check if the map is currently in a mode where we are adding an annotation
+   * with a boolean operation.  If so, remove the current annotation from the
+   * layer, then apply it via the boolean operation.
+   */
+  this._handleBooleanOperation = function () {
+    const op = m_this.currentBooleanOperation();
+    if (!op || !m_this.currentAnnotation || !m_this.currentAnnotation.toPolygonList) {
+      return;
+    }
+    const newAnnot = m_this.currentAnnotation;
+    m_this.removeAnnotation(m_this.currentAnnotation, false);
+    if (m_this.annotations().length || (op !== 'difference' && op !== 'intersect')) {
+      const evt = {
+        annotation: newAnnot,
+        operation: op
+      };
+      m_this.geoTrigger(geo_event.annotation.boolean, evt);
+      if (evt.cancel !== false) {
+        util.polyops[op](m_this, newAnnot.toPolygonList(), {correspond: {}, keepAnnotations: 'exact', style: m_this});
+      }
+    }
+  };
+
+  /**
    * Handle updating the current annotation based on an update state.
    *
    * @param {string|undefined} update Truthy to update.  `'done'` if the
@@ -196,12 +234,34 @@ var annotationLayer = function (arg) {
         m_this.mode(null);
         break;
       case 'done':
+        m_this._handleBooleanOperation();
         m_this.mode(null);
         break;
     }
     if (update) {
       m_this.modified();
       m_this.draw();
+    }
+  };
+
+  /**
+   * Check the state of the modifier keys and apply them if appropriate.
+   *
+   * @param {geo.event} evt The mouse move or click event.
+   */
+  this._handleMouseMoveModifiers = function (evt) {
+    if (m_this.mode() !== m_this.modes.edit && m_this.currentAnnotation.options('allowBooleanOperations') && m_this.currentAnnotation._coordinates().length < 2) {
+      if (evt.modifiers) {
+        const mod = (evt.modifiers.shift ? 's' : '') + (evt.modifiers.ctrl ? 'c' : '') + (evt.modifiers.meta || evt.modifiers.alt ? 'a' : '');
+        if (m_this._currentBooleanClass === m_this._booleanClasses[mod]) {
+          return;
+        }
+        m_this._currentBooleanClass = m_this._booleanClasses[mod];
+        const mapNode = m_this.map().node();
+        Object.values(m_this._booleanClasses).forEach((c) => {
+          mapNode.toggleClass(c, m_this._booleanClasses[mod] === c);
+        });
+      }
     }
   };
 
@@ -213,6 +273,7 @@ var annotationLayer = function (arg) {
    */
   this._handleMouseMove = function (evt) {
     if (m_this.mode() && m_this.currentAnnotation) {
+      m_this._handleMouseMoveModifiers(evt);
       var update = m_this.currentAnnotation.mouseMove(evt);
       if (update) {
         m_this.modified();
@@ -316,6 +377,7 @@ var annotationLayer = function (arg) {
       });
       retrigger = true;
     } else if (m_this.mode() && m_this.currentAnnotation) {
+      m_this._handleMouseMoveModifiers(evt);
       update = m_this.currentAnnotation.mouseClick(evt);
       m_this._updateFromEvent(update);
       retrigger = !m_this.mode();
@@ -518,6 +580,15 @@ var annotationLayer = function (arg) {
     edit: 'edit'
   };
 
+  /* Keys are short-hand for preferred event modifiers.  Values are classes to
+   * apply to the map node. */
+  this._booleanClasses = {
+    s: 'annotation-union',
+    sc: 'annotation-intersect',
+    c: 'annotation-difference',
+    sa: 'annotation-xor'
+  };
+
   /**
    * Get or set the current mode.
    *
@@ -537,11 +608,15 @@ var annotationLayer = function (arg) {
     if (arg === undefined) {
       return m_mode;
     }
-    if (arg !== m_mode || (arg === m_this.modes.edit && editAnnotation !== m_this.editAnnotation)) {
+    if (arg !== m_mode || (arg === m_this.modes.edit && editAnnotation !== m_this.editAnnotation) || (arg !== m_this.modes.edit && arg && !m_this.currentAnnotation)) {
       var createAnnotation, actions,
           mapNode = m_this.map().node(), oldMode = m_mode;
       m_mode = arg;
       mapNode.toggleClass('annotation-input', !!(m_mode && m_mode !== m_this.modes.edit));
+      if (!m_mode || m_mode === m_this.modes.edit) {
+        Object.values(m_this._booleanClasses).forEach((c) => mapNode.toggleClass(c, false));
+        m_this._currentBooleanClass = undefined;
+      }
       if (!m_keyHandler) {
         m_keyHandler = Mousetrap(mapNode[0]);
       }
@@ -1199,6 +1274,13 @@ var annotationLayer = function (arg) {
       exact = opts.correspond.exact1;
       annot = m_this.annotations();
     }
+    if (keep !== 'all' && keep !== 'none') {
+      annot.forEach((oldAnnot, idx) => {
+        if (opts.annotationIndices.indexOf(idx) < 0) {
+          keepIds[oldAnnot.id()] = true;
+        }
+      });
+    }
     const polyAnnot = [];
     poly.forEach((p, idx) => {
       p = p.map((h) => h.map((pt) => ({x: pt[0], y: pt[1]})));
@@ -1218,7 +1300,9 @@ var annotationLayer = function (arg) {
               reusedIds[orig.id()] = true;
             }
             ['name', 'description', 'label'].forEach((k) => {
-              result[k] = orig[k]();
+              if (orig[k](undefined, true)) {
+                result[k] = orig[k](undefined, true);
+              }
             });
             Object.entries(orig.options()).forEach(([key, value]) => {
               if (['showLabel', 'style'].indexOf(key) >= 0 || key.endsWith('Style')) {

@@ -69,7 +69,8 @@ var rectangleAnnotation = function (args, annotationName) {
       fillColor: {r: 0.3, g: 0.3, b: 0.3},
       fillOpacity: 0.25,
       strokeColor: {r: 0, g: 0, b: 1}
-    }
+    },
+    allowBooleanOperations: true
   }, args || {});
   args.corners = args.corners || args.coordinates || [];
   delete args.coordinates;

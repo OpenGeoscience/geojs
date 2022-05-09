@@ -74,6 +74,12 @@ var editHandleFeatureLevel = 3;
  * @property {boolean|string[]} [showLabel=true] `true` to show the annotation
  *    label on annotations in done or edit states.  Alternately, a list of
  *    states in which to show the label.  Falsy to not show the label.
+ * @property {boolean} [allowBooleanOperations] This defaults to `true` for
+ *    annotations that have area and `false` for those without area (e.g.,
+ *    false for lines and points).  If it is truthy, then, when the annotation
+ *    is being created, it checks the metakeys on the first click that defines
+ *    a coordinate to determine what boolean polygon operation should be
+ *    performaned on the completion of the annotation.
  */
 
 /**

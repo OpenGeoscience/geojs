@@ -79,7 +79,8 @@ var polygonAnnotation = function (args) {
       },
       stroke: false,
       strokeColor: {r: 0, g: 0, b: 1}
-    }
+    },
+    allowBooleanOperations: true
   }, args || {});
   args.vertices = args.vertices || args.coordinates || [];
   delete args.coordinates;

@@ -692,4 +692,18 @@ geo_event.annotation.state = 'geo_annotation_state';
  */
 geo_event.annotation.mode = 'geo_annotation_mode';
 
+/**
+ * Triggered when an annotation can be combined via a boolean operation (union,
+ * intersect, difference, xor).
+ *
+ * @event geo.event.annotation.boolean
+ * @type {geo.event.base}
+ * @property {geo.annotation} annotation The annotation that is being operated
+ *      on.
+ * @property {string} operation The operation being performed.
+ * @property {boolean} [cancel] If the handle sets this to false, don't apply
+ *      the operation to the annotation layer.
+ */
+geo_event.annotation.boolean = 'geo_annotation_boolean';
+
 module.exports = geo_event;
