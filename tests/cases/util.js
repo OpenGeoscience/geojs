@@ -44,6 +44,7 @@ describe('geo.util', function () {
     expect(util.centerFromPerimeter([
       {x: 1, y: 1}, {x: 3, y: 1}, {x: 5, y: 1}, {x: 5, y: 3}, {x: 1, y: 3}
     ])).toEqual({x: 3, y: 2});
+    expect(util.centerFromPerimeter({outer: [{x: 1, y: 1}]})).toEqual({x: 1, y: 1});
   });
 
   it('rdpLineSimplify', function () {

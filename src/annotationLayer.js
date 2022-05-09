@@ -417,8 +417,7 @@ var annotationLayer = function (arg) {
       gcs = (gcs === null ? map.gcs() : (
         gcs === undefined ? map.ingcs() : gcs));
       if (gcs !== map.gcs()) {
-        annotation._coordinates(transform.transformCoordinates(
-          gcs, map.gcs(), annotation._coordinates()));
+        annotation._convertCoordinates(gcs, map.gcs());
       }
       if (update !== false) {
         m_this.modified();
