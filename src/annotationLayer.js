@@ -706,13 +706,24 @@ var annotationLayer = function (arg) {
             return;
           }
           // make a copy of the position array to avoid mutating the original.
-          position = position.outer.slice();
-          if (position[position.length - 1][0] === position[0][0] &&
-              position[position.length - 1][1] === position[0][1]) {
-            position.splice(position.length - 1, 1);
-            if (position.length < 3) {
+          position = {
+            outer: position.outer.slice(),
+            inner: (position.inner || []).map((h) => h.slice())
+          };
+          if (position.outer[position.outer.length - 1][0] === position.outer[0][0] &&
+              position.outer[position.outer.length - 1][1] === position.outer[0][1]) {
+            position.outer.splice(position.outer.length - 1, 1);
+            if (position.outer.length < 3) {
               return;
             }
+          }
+          position.inner.forEach((h) => {
+            if (h.length > 3 && h[h.length - 1][0] === h[0][0] && h[h.length - 1][1] === h[0][1]) {
+              h.splice(h.length - 1, 1);
+            }
+          });
+          if (!position.inner || !position.inner.length) {
+            position = position.outer;
           }
           break;
         case 'marker':
@@ -722,15 +733,20 @@ var annotationLayer = function (arg) {
           position = [feature.position()(data, data_idx)];
           break;
       }
-      for (i = 0; i < position.length; i += 1) {
-        position[i] = util.normalizeCoordinates(position[i]);
-      }
       datagcs = ((data.crs && data.crs.type === 'name' && data.crs.properties &&
                   data.crs.properties.type === 'proj4' &&
                   data.crs.properties.name) ? data.crs.properties.name : gcs);
-      if (datagcs !== map.gcs()) {
-        position = transform.transformCoordinates(datagcs, map.gcs(), position);
-      }
+      [position.outer || position].concat(position.inner || []).forEach((poslist) => {
+        for (i = 0; i < poslist.length; i += 1) {
+          poslist[i] = util.normalizeCoordinates(poslist[i]);
+        }
+        if (datagcs !== map.gcs()) {
+          const transposlist = transform.transformCoordinates(datagcs, map.gcs(), poslist);
+          for (i = 0; i < poslist.length; i += 1) {
+            poslist[i] = transposlist[i];
+          }
+        }
+      });
       options.coordinates = position;
       /* For each style listed in the geojsonStyleProperties object, check if
        * is given under any of the variety of keys as a valid instance of the

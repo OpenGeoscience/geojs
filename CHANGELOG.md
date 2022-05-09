@@ -1,5 +1,17 @@
 # GeoJS Change Log
 
+## Version 1.8.4
+
+### Improvements
+
+- Support polygon annotations with holes through geojson ([#1201](../../pull/1201))
+
+## Version 1.8.3
+
+### Improvements
+
+- Support polygon annotations with holes ([#1200](../../pull/1200))
+
 ## Version 1.8.2
 
 ### Improvements
