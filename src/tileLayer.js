@@ -16,7 +16,7 @@ var featureLayer = require('./featureLayer');
  * @property {function} [tilesAtZoom=null] A function that is given a zoom
  *   level and returns `{x: (num), y: (num)}` with the number of tiles at that
  *   zoom level.
- * @property {number} [cacheSize=400] The maximum number of tiles to cache.
+ * @property {number} [cacheSize=600] The maximum number of tiles to cache.
  *   The default is 200 if keepLower is false.
  * @property {geo.fetchQueue} [queue] A fetch queue to use.  If unspecified, a
  *   new queue is created.
@@ -193,6 +193,10 @@ var tileLayer = function (arg) {
   arg = $.extend(true, {}, this.constructor.defaults, arg || {});
   if (!arg.cacheSize) {
     // this size should be sufficient for a 4k display
+    // where display size is (w, h), minimum tile dimension is ts, and total
+    // number of levels is ml, this is roughly
+    // sum([(math.ceil((w**2+h**2)**0.5 / (ts*2**l)) + 1) *
+    //      (math.ceil(min(w, h) / (ts*2**l)) + 1) for l in range(ml)])
     arg.cacheSize = arg.keepLower ? 600 : 200;
   }
   if ($.type(arg.subdomains) === 'string') {
@@ -261,6 +265,9 @@ var tileLayer = function (arg) {
   });
   this._queue._tileLayers = this._queue._tileLayers || [];
   this._queue._tileLayers.push(m_this);
+  if (this._queue.initialTrack && this._queue.track) {
+    this._queue.track = this._queue.initialTrack * this._queue._tileLayers.length;
+  }
 
   var m_tileOffsetValues = {};
 
@@ -310,10 +317,16 @@ var tileLayer = function (arg) {
       if (m_this._queue !== queue) {
         if (this._queue && this._queue._tileLayers && this._queue._tileLayers.indexOf(m_this) >= 0) {
           this._queue._tileLayers.splice(this._queue._tileLayers.indexOf(m_this), 1);
+          if (this._queue.initialTrack && this._queue.track && this._queue._tileLayers.length) {
+            this._queue.track = this._queue.initialTrack * this._queue._tileLayers.length;
+          }
         }
         m_this._queue = queue;
         m_this._queue._tileLayers = m_this._queue._tileLayers || [];
         m_this._queue._tileLayers.push(m_this);
+        if (m_this._queue.initialTrack && m_this._queue.track) {
+          m_this._queue.track = m_this._queue.initialTrack * m_this._queue._tileLayers.length;
+        }
       }
     }
   });
@@ -1736,6 +1749,9 @@ var tileLayer = function (arg) {
     m_exited = true;
     if (this._queue && this._queue._tileLayers && this._queue._tileLayers.indexOf(m_this) >= 0) {
       this._queue._tileLayers.splice(this._queue._tileLayers.indexOf(m_this), 1);
+      if (this._queue.initialTrack && this._queue.track && this._queue._tileLayers.length) {
+        this._queue.track = this._queue.initialTrack * this._queue._tileLayers.length;
+      }
     }
     return m_this;
   };
@@ -1765,7 +1781,7 @@ tileLayer.defaults = {
   topDown: false,
   keepLower: true,
   idleAfter: 'view',
-  // cacheSize: 400,  // set depending on keepLower
+  // cacheSize: 600,  // set depending on keepLower
   tileRounding: Math.round,
   attribution: '',
   animationDuration: 0

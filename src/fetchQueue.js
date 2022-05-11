@@ -40,6 +40,7 @@ var fetchQueue = function (options) {
   this._size = options.size || 6;
   this._initialSize = options.initialSize || 0;
   this._track = options.track || 600;
+  this._initialTrack = this._track;
   this._needed = options.needed || null;
   this._batch = false;
 
@@ -74,6 +75,30 @@ var fetchQueue = function (options) {
       m_this._initialSize = n;
       m_this.next_item();
     }
+  });
+
+  /**
+   * Get/set the track size.  This is used to determine when to check if
+   * entries can be discarded.
+   * @property {number} track The number of entries to track without checking
+   *    for discards.
+   * @name geo.fetchQueue#track
+   */
+  Object.defineProperty(this, 'track', {
+    get: function () { return m_this._track; },
+    set: function (n) { m_this._track = n; }
+  });
+
+  /**
+   * Get/set the initial track size.  Unless changed, this is the value used
+   * for track on class initialization.
+   * @property {number} initialTrack The number of entries to track without
+   *    checking for discards.
+   * @name geo.fetchQueue#intitialTrack
+   */
+  Object.defineProperty(this, 'initialTrack', {
+    get: function () { return m_this._initialTrack; },
+    set: function (n) { m_this._initialTrack = n; }
   });
 
   /**
@@ -157,7 +182,7 @@ var fetchQueue = function (options) {
     defer.__fetchQueue._batch = m_this._batch;
     if (atEnd) {
       m_this._queue.push(defer);
-    } else if (!this._batch) {
+    } else if (!m_this._batch) {
       m_this._queue.unshift(defer);
     } else {
       for (var i = 0; i < m_this._queue.length; i += 1) {
