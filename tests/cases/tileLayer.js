@@ -464,8 +464,10 @@ describe('geo.tileLayer', function () {
       var origQueue = layer2.queue;
       layer2.queue = layer.queue;
       expect(layer.queue._tileLayers.length).toBe(2);
+      expect(layer.queue.track).toBe(layer.queue.initialTrack * 2);
       layer2.queue = origQueue;
       expect(layer.queue._tileLayers.length).toBe(1);
+      expect(layer.queue.track).toBe(layer.queue.initialTrack);
     });
     it('reference', function () {
       var m = map(), layer;

@@ -273,5 +273,17 @@ describe('geo.core.fetchQueue', function () {
 
       process();
     });
+
+    it('track and initialTrack size', function () {
+      var q = geo.fetchQueue({track: 10});
+      expect(q.track).toBe(10);
+      expect(q.initialTrack).toBe(10);
+      q.track = 20;
+      expect(q.track).toBe(20);
+      expect(q.initialTrack).toBe(10);
+      q.initialTrack = 30;
+      expect(q.track).toBe(20);
+      expect(q.initialTrack).toBe(30);
+    });
   });
 });

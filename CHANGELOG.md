@@ -5,6 +5,7 @@
 ### Improvements
 
 - Support polygon annotations with holes through geojson ([#1201](../../pull/1201))
+- Adjust queue track size based on number of tile layers ([#1202](../../pull/1202))
 
 ## Version 1.8.3
 
