@@ -146,8 +146,8 @@ var fetchQueue = function (options) {
     if (defer.__fetchQueue) {
       var pos = $.inArray(defer, m_this._queue);
       if (pos >= 0) {
-        m_this._queue.splice(pos, 1);
-        m_this._addToQueue(defer, atEnd);
+        // m_this._queue.splice(pos, 1);
+        m_this._addToQueue(defer, atEnd, pos);
         return defer;
       }
     }
@@ -177,20 +177,34 @@ var fetchQueue = function (options) {
    * @param {boolean} atEnd If falsy, add the item to the front of the queue
    *  if batching is turned off or at the end of the current batch if it is
    *  turned on.  If truthy, always add the item to the end of the queue.
+   * @param {number} [pos] If specified, the current location in the queue of
+   *   the object being added.  This avoids having to splice, push, or unshift
+   *   the queue.
    */
-  this._addToQueue = function (defer, atEnd) {
+  this._addToQueue = function (defer, atEnd, pos) {
+    let move = atEnd ? m_this._queue.length - 1 : 0;
     defer.__fetchQueue._batch = m_this._batch;
-    if (atEnd) {
-      m_this._queue.push(defer);
-    } else if (!m_this._batch) {
-      m_this._queue.unshift(defer);
-    } else {
-      for (var i = 0; i < m_this._queue.length; i += 1) {
-        if (m_this._queue[i].__fetchQueue._batch !== m_this._batch) {
+    if (!atEnd && m_this._batch) {
+      for (move = 0; move < m_this._queue.length - (pos === undefined ? 0 : 1); move += 1) {
+        if (m_this._queue[move].__fetchQueue._batch !== m_this._batch) {
           break;
         }
       }
-      m_this._queue.splice(i, 0, defer);
+    }
+    if (pos === undefined) {
+      if (atEnd) {
+        m_this._queue.push(defer);
+      } else if (!move) {
+        m_this._queue.unshift(defer);
+      } else {
+        m_this._queue.splice(move, 0, defer);
+      }
+    } else if (pos !== move) {
+      const dir = pos < move ? 1 : -1;
+      for (let i = pos; i !== move; i += dir) {
+        m_this._queue[i] = m_this._queue[i + dir];
+      }
+      m_this._queue[move] = defer;
     }
   };
 
