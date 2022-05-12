@@ -46,7 +46,6 @@ $.htmlPrefilter = function (html) {
 require('./main.styl');
 
 module.exports = $.extend({
-  annotation: require('./annotation'),
   annotationLayer: require('./annotationLayer'),
   camera: require('./camera'),
   choroplethFeature: require('./choroplethFeature'),
@@ -93,6 +92,7 @@ module.exports = $.extend({
   version: require('./version'),
   sha: require('./sha'),
 
+  annotation: require('./annotation'),
   util: require('./util'),
   jQuery: $,
   canvas: require('./canvas'),
