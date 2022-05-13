@@ -1266,10 +1266,12 @@ function continuousVerticesProcessAction(m_this, evt, name) {
  * that the aspect ratio of a rectangle-like selection is a specific value or
  * range of values.
  *
- * @param {number|number[]} ratio Either a single aspect ratio or a list of
- *   allowed aspect ratios.  For instance, 1 will require that the selection
- *   square, 2 would require that it is twice as wide as tall, [2, 1/2] would
- *   allow it to be twice as wide or half as wide as it is tall.
+ * @param {number|number[]|geo.geoSize|geo.geoSize[]} ratio Either a single
+ *   aspect ratio, a single size, or a list of allowed aspect ratios and sizes.
+ *   For instance, 1 will require that the selection square, 2 would require
+ *   that it is twice as wide as tall, [2, 1/2] would allow it to be twice as
+ *   wide or half as wide as it is tall.  Sizes (e.g., {width: 400, height:
+ *   500}) snap to that size.
  * @returns {function} A function that can be passed to the mapIterator
  *   selectionConstraint or to an annotation constraint function.
  */
@@ -1315,16 +1317,23 @@ function constrainAspectRatio(ratio) {
       const area = Math.abs(dist1 * dist3);
       let shape, edge;
       ratios.forEach((ratio) => {
-        if (ratio !== 1 && !(index % 2)) {
-          ratio = 1.0 / ratio;
+        let width, height;
+        if (ratio.width) {
+          width = ratio.width;
+          height = ratio.height;
+        } else {
+          width = (area * ratio) ** 0.5;
+          height = width / ratio;
         }
-        const width = (area * ratio) ** 0.5;
-        const score = (width - dist3) ** 2 + (width / ratio - dist1) ** 2;
+        if (width !== height && !(index % 2)) {
+          [width, height] = [height, width];
+        }
+        const score = (width - dist3) ** 2 + (height - dist1) ** 2;
         if (best === undefined || score < best) {
           best = score;
           shape = {
             w: width,
-            h: width / ratio
+            h: height
           };
         }
       });
@@ -1366,10 +1375,17 @@ function constrainAspectRatio(ratio) {
       /* Not in edit vertex or edge mode */
       const area = Math.abs((pos.x - origin.x) * (pos.y - origin.y));
       ratios.forEach((ratio) => {
-        const width = (area * ratio) ** 0.5;
+        let width, height;
+        if (ratio.width) {
+          width = ratio.width;
+          height = ratio.height;
+        } else {
+          width = (area * ratio) ** 0.5;
+          height = width / ratio;
+        }
         const adjusted = {
           x: origin.x + Math.sign(pos.x - origin.x) * width,
-          y: origin.y + Math.sign(pos.y - origin.y) * width / ratio
+          y: origin.y + Math.sign(pos.y - origin.y) * height
         };
         const score = (adjusted.x - pos.x) ** 2 + (adjusted.y - pos.y) ** 2;
         if (best === undefined || score < best) {

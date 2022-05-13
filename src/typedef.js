@@ -75,6 +75,15 @@
  */
 
 /**
+ * Represention of a size in gcs coordinates.
+ *
+ * @typedef geo.geoSize
+ * @type {object}
+ * @property {number} width Width in gcs coordinates.
+ * @property {number} height Height in gcs coordinates.
+ */
+
+/**
  * Represention of a size in pixels.
  *
  * @typedef geo.screenSize

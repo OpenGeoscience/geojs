@@ -1,10 +1,16 @@
 # GeoJS Change Log
 
+## Version 1.8.6
+
+### Improvements
+
+- Allow constraining rectangle and ellipse annotations to a list of fixed sizes ([#1205](../../pull/1205))
+
 ## Version 1.8.5
 
 ### Improvements
 
--Optimize reordering fetch queue ([#1203](../../pull/1203))
+- Optimize reordering fetch queue ([#1203](../../pull/1203))
 
 ## Version 1.8.4
 
