@@ -1583,6 +1583,71 @@ describe('geo.annotation', function () {
     });
   });
 
+  describe('contrainAspectRatio', function () {
+    it('ratio', function () {
+      const func = geo.annotation.constrainAspectRatio([2, 0.5]);
+
+      let result;
+      result = func(
+        {x: 40, y: 5},
+        {x: 0, y: 0});
+      expect(result.pos).toEqual({x: 20, y: 10});
+      result = func(
+        {x: 40, y: 5},
+        {x: 0, y: 0},
+        [{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]);
+      expect(result.pos).toEqual({x: 20, y: 10});
+      result = func(
+        {x: 5, y: 40},
+        {x: 0, y: 0},
+        [{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]);
+      expect(result.pos).toEqual({x: 10, y: 20});
+      result = func(
+        {x: 0, y: 0},
+        {x: 0, y: 0},
+        [{x: -10, y: 5}, {x: 30, y: 5}, {x: 30, y: 10}, {x: -10, y: 10}],
+        'edge', [0, -Math.PI / 2, Math.PI, Math.PI / 2], 0);
+      expect(result.corners).toEqual([{x: 20, y: 20}, {x: 0, y: 20}, {x: 0, y: 10}, {x: 20, y: 10}]);
+      result = func(
+        {x: 0, y: 0},
+        {x: 0, y: 0},
+        [{x: -10, y: 5}, {x: 30, y: 5}, {x: 30, y: 10}, {x: -10, y: 10}],
+        'vertex', [0, -Math.PI / 2, Math.PI, Math.PI / 2], 0);
+      expect(result.corners).toEqual([{x: 10, y: 20}, {x: 30, y: 20}, {x: 30, y: 10}, {x: 10, y: 10}]);
+    });
+    it('fixed size', function () {
+      const func = geo.annotation.constrainAspectRatio({width: 20, height: 10});
+
+      let result;
+      result = func(
+        {x: 40, y: 5},
+        {x: 0, y: 0});
+      expect(result.pos).toEqual({x: 20, y: 10});
+      result = func(
+        {x: 40, y: 5},
+        {x: 0, y: 0},
+        [{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]);
+      expect(result.pos).toEqual({x: 20, y: 10});
+      result = func(
+        {x: 5, y: 40},
+        {x: 0, y: 0},
+        [{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]);
+      expect(result.pos).toEqual({x: 20, y: 10});
+      result = func(
+        {x: 0, y: 0},
+        {x: 0, y: 0},
+        [{x: -10, y: 5}, {x: 30, y: 5}, {x: 30, y: 10}, {x: -10, y: 10}],
+        'edge', [0, -Math.PI / 2, Math.PI, Math.PI / 2], 0);
+      expect(result.corners).toEqual([{x: 20, y: 20}, {x: 0, y: 20}, {x: 0, y: 10}, {x: 20, y: 10}]);
+      result = func(
+        {x: 0, y: 0},
+        {x: 0, y: 0},
+        [{x: -10, y: 5}, {x: 30, y: 5}, {x: 30, y: 10}, {x: -10, y: 10}],
+        'vertex', [0, -Math.PI / 2, Math.PI, Math.PI / 2], 0);
+      expect(result.corners).toEqual([{x: 10, y: 20}, {x: 30, y: 20}, {x: 30, y: 10}, {x: 10, y: 10}]);
+    });
+  });
+
   describe('annotation registry', function () {
     var newshapeCount = 0;
     it('listAnnotations', function () {
