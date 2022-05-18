@@ -634,8 +634,8 @@ var polygonFeature = function (arg) {
     });
 
     /* Set the reduced polgons as the data and use simple accessors. */
-    m_this.style('position', function (d) { return d; });
-    m_this.style('polygon', function (d) { return d; });
+    m_this.style('position', util.identityFunction);
+    m_this.style('polygon', util.identityFunction);
     m_this.data(data);
     return m_this;
   };
@@ -719,7 +719,7 @@ var polygonFeature = function (arg) {
         strokeStyle: 'solid',
         strokeColor: {r: 0.0, g: 1.0, b: 1.0},
         strokeOpacity: 1.0,
-        polygon: function (d) { return d; },
+        polygon: util.identityFunction,
         position: (d) => Array.isArray(d) ? {x: d[0], y: d[1], z: d[2] || 0} : d,
         origin: (items) => {
           for (let i = 0; i < items.length; i += 1) {

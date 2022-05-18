@@ -285,7 +285,7 @@ var pixelmapFeature = function (arg) {
             a: 1
           };
         },
-        position: function (d) { return d; }
+        position: util.identityFunction
       },
       arg.style === undefined ? {} : arg.style
     );

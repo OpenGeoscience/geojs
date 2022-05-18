@@ -814,8 +814,8 @@ var trackFeature = function (arg) {
       true,
       {},
       {
-        track: (d) => d,
-        position: (d) => d,
+        track: util.identityFunction,
+        position: util.identityFunction,
         time: (d, i) => (d.t !== undefined ? d.t : i)
       },
       arg.style === undefined ? {} : arg.style

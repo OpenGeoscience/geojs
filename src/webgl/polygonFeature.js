@@ -98,11 +98,13 @@ var webgl_polygonFeature = function (arg) {
 
     if (!onlyStyle) {
       posFunc = m_this.style.get('position');
+      posFunc = posFunc === util.identityFunction ? null : posFunc;
       polyFunc = m_this.style.get('polygon');
+      polyFunc = polyFunc === util.identityFunction ? null : polyFunc;
       m_this.data().forEach(function (item, itemIndex) {
         var polygon, outer, geometry, c;
 
-        polygon = polyFunc(item, itemIndex);
+        polygon = polyFunc ? polyFunc(item, itemIndex) : item;
         if (!polygon) {
           return;
         }
@@ -116,7 +118,7 @@ var webgl_polygonFeature = function (arg) {
          * test). */
         geometry = new Array(outer.length * 3);
         for (i = d3 = 0; i < outer.length; i += 1, d3 += 3) {
-          c = posFunc(outer[i], i, item, itemIndex);
+          c = posFunc ? posFunc(outer[i], i, item, itemIndex) : outer[i];
           geometry[d3] = c.x;
           geometry[d3 + 1] = simpleInverse ? -c.y : c.y;
           // ignore the z values until we support them
@@ -133,7 +135,7 @@ var webgl_polygonFeature = function (arg) {
             original = original.concat(hole);
             geometry.holes.push(d3 / 3);
             for (i = 0; i < hole.length; i += 1, d3 += 3) {
-              c = posFunc(hole[i], i, item, itemIndex);
+              c = posFunc ? posFunc(hole[i], i, item, itemIndex) : hole[i];
               geometry.vertices[d3] = c.x;
               geometry.vertices[d3 + 1] = simpleInverse ? -c.y : c.y;
               // ignore the z values until we support them

@@ -438,8 +438,8 @@ var lineFeature = function (arg) {
     });
 
     /* Set the reduced lines as the data and use simple accessors. */
-    m_this.style('position', function (d) { return d; });
-    m_this.style('line', function (d) { return d; });
+    m_this.style('position', util.identityFunction);
+    m_this.style('line', util.identityFunction);
     m_this.data(data);
     return m_this;
   };
@@ -465,7 +465,7 @@ var lineFeature = function (arg) {
         // Values of 2 and above appear smoothest.
         antialiasing: 2.0,
         closed: false,
-        line: function (d) { return d; },
+        line: util.identityFunction,
         position: (d) => Array.isArray(d) ? {x: d[0], y: d[1], z: d[2] || 0} : d,
         origin: (p) => (p.length >= 3 ? p.slice(0, 3) : [0, 0, 0])
       },

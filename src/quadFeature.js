@@ -699,7 +699,7 @@ var quadFeature = function (arg) {
         previewImage: null,
         image: function (d) { return d.image; },
         video: function (d) { return d.video; },
-        position: function (d) { return d; }
+        position: util.identityFunction
       },
       arg.style === undefined ? {} : arg.style
     );

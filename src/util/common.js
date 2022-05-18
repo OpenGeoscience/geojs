@@ -1443,6 +1443,17 @@ var util = {
     return value !== null && value !== undefined && (type === 'object' || type === 'function');
   },
 
+  /**
+   * Return the first value passed to the function.  Using this function for
+   * identity calls can allow some code to bypass making such a call entirely.
+   *
+   * @param {*} d Any value.
+   * @returns {*} The passed value.
+   */
+  identityFunction: function (d) {
+    return d;
+  },
+
   ///////////////////////////////////////////////////////////////////////////
   /*
    * Utility member properties.

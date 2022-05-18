@@ -2,6 +2,7 @@ var $ = require('jquery');
 var inherit = require('./inherit');
 var feature = require('./feature');
 var transform = require('./transform');
+var util = require('./util');
 
 /**
  * Heatmap feature specification.
@@ -79,7 +80,7 @@ var heatmapFeature = function (arg) {
 
   this.featureType = 'heatmap';
 
-  m_position = arg.position || function (d) { return d; };
+  m_position = arg.position || util.identityFunction;
   m_intensity = arg.intensity || function (d) { return 1; };
   m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
   m_minIntensity = arg.minIntensity !== undefined ? arg.minIntensity : null;

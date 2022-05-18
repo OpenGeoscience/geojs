@@ -4,6 +4,12 @@
 
 ### Improvements
 
+- Reduce polygon and position function calls ([#1208](../../pull/1208))
+
+## Version 1.8.7
+
+### Improvements
+
 - Add some code paths to reduce transform calls ([#1207](../../pull/1207))
 
 ## Version 1.8.6
