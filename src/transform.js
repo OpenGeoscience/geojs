@@ -767,6 +767,21 @@ transform.vincentyDistance = function (pt1, pt2, gcs, baseGcs, ellipsoid, maxIte
   };
 };
 
+/**
+ * Return a boolean indicating if the projections only differ in their y
+ * coordinate.
+ *
+ * @param {string} srcPrj The source projection.
+ * @param {string} tgtPrj The destination projection.
+ * @returns {boolean} truthy if only the y coordinate is different between
+ *    projections.
+ */
+transform.onlyInvertedY = function (srcPrj, tgtPrj) {
+  const smatch = srcPrj.match(axisPattern),
+      tmatch = tgtPrj.match(axisPattern);
+  return smatch && tmatch && smatch[1] === tmatch[1] && smatch[3] === tmatch[3];
+};
+
 /* Expose proj4 to make it easier to debug */
 transform.proj4 = proj4;
 

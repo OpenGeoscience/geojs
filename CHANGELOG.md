@@ -1,5 +1,11 @@
 # GeoJS Change Log
 
+## Version 1.8.7
+
+### Improvements
+
+- Add some code paths to reduce transform calls ([#1207](../../pull/1207))
+
 ## Version 1.8.6
 
 ### Improvements
