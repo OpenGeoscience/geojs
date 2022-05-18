@@ -1,6 +1,6 @@
 # GeoJS Change Log
 
-## Version 1.8.7
+## Version 1.8.8
 
 ### Improvements
 
