@@ -134,6 +134,9 @@ var webgl_lineFeature = function (arg) {
           strokeOffset: 0, posStrokeOffset: 0, negStrokeOffset: 0
         }],
         v = vert[1],
+        target_gcs = m_this.gcs(),
+        map_gcs = m_this.layer().map().gcs(),
+        simpleInverse = transform.onlyInvertedY(target_gcs, map_gcs),
         pos, posIdx3, firstpos, firstPosIdx3,
         lineFunc = m_this.line(),
         strokeWidthFunc = m_this.style.get('strokeWidth'), strokeWidthVal,
@@ -188,7 +191,7 @@ var webgl_lineFeature = function (arg) {
         for (j = 0; j < lineItem.length; j += 1) {
           pos = posFunc(lineItem[j], j, d, i);
           position.push(pos.x);
-          position.push(pos.y);
+          position.push(simpleInverse ? -pos.y : pos.y);
           position.push(pos.z || 0.0);
           if (!j) {
             firstpos = pos;
@@ -208,8 +211,9 @@ var webgl_lineFeature = function (arg) {
         }
       }
 
-      position = transform.transformCoordinates(
-        m_this.gcs(), m_this.layer().map().gcs(), position, 3);
+      if (!simpleInverse) {
+        position = transform.transformCoordinates(target_gcs, map_gcs, position, 3);
+      }
       m_origin = new Float32Array(m_this.style.get('origin')(position));
       if (m_origin[0] || m_origin[1] || m_origin[2]) {
         for (i = 0; i < position.length; i += 3) {
