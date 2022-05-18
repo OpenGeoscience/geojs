@@ -80,7 +80,7 @@ var graphFeature = function (arg) {
       arg.style === undefined ? {} : arg.style);
 
     m_this.style(defaultStyle);
-    m_this.nodes(function (d) { return d; });
+    m_this.nodes(util.identityFunction);
     return m_this;
   };
 

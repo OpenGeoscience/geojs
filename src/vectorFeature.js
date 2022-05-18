@@ -1,5 +1,6 @@
 var inherit = require('./inherit');
 var feature = require('./feature');
+var util = require('./util');
 
 /**
  * Object specification for a graph feature.
@@ -120,7 +121,7 @@ var vectorFeature = function (arg) {
         originStyle: 'none',
         endStyle: 'arrow',
         origin: {x: 0, y: 0, z: 0},
-        delta: function (d) { return d; },
+        delta: util.identityFunction,
         scale: null // size scaling factor (null -> renderer decides)
       },
       arg.style === undefined ? {} : arg.style

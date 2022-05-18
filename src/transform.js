@@ -19,7 +19,7 @@ var maxTransformCacheSize = 10;
 
 /* A RegExp to detect if two transforms only different by the middle axis's
  * direction. */
-var axisPattern = /^(.* |)\\+axis=e(n|s)u(| .*)$/;
+var axisPattern = /^(.* |)\+axis=e(n|s)u(| .*)$/;
 var affinePattern = /(^|\s)\+(s[1-3][1-3]|[xyz]off)=\S/;
 
 /**

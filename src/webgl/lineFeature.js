@@ -178,6 +178,7 @@ var webgl_lineFeature = function (arg) {
     if (!onlyStyle) {
       var position = [],
           posFunc = m_this.position();
+      posFunc = posFunc === util.identityFunction ? null : posFunc;
       lineItemList = new Array(data.length);
       closed = new Array(data.length);
       for (i = 0; i < data.length; i += 1) {
@@ -189,7 +190,7 @@ var webgl_lineFeature = function (arg) {
         }
         numSegments += lineItem.length - 1;
         for (j = 0; j < lineItem.length; j += 1) {
-          pos = posFunc(lineItem[j], j, d, i);
+          pos = posFunc ? posFunc(lineItem[j], j, d, i) : lineItem[j];
           position.push(pos.x);
           position.push(simpleInverse ? -pos.y : pos.y);
           position.push(pos.z || 0.0);
