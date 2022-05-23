@@ -82,7 +82,6 @@ var webgl_polygonFeature = function (arg) {
         items = [],
         target_gcs = m_this.gcs(),
         map_gcs = m_this.layer().map().gcs(),
-        simpleInverse = transform.onlyInvertedY(target_gcs, map_gcs),
         numPts = 0,
         geom = m_mapper.geometryData(),
         color, opacity, fill, d, d3, vertices, i, j, k, n,
@@ -120,7 +119,7 @@ var webgl_polygonFeature = function (arg) {
         for (i = d3 = 0; i < outer.length; i += 1, d3 += 3) {
           c = posFunc ? posFunc(outer[i], i, item, itemIndex) : outer[i];
           geometry[d3] = c.x;
-          geometry[d3 + 1] = simpleInverse ? -c.y : c.y;
+          geometry[d3 + 1] = c.y;
           // ignore the z values until we support them
           geometry[d3 + 2] = 0;  // c.z || 0;
         }
@@ -137,7 +136,7 @@ var webgl_polygonFeature = function (arg) {
             for (i = 0; i < hole.length; i += 1, d3 += 3) {
               c = posFunc ? posFunc(hole[i], i, item, itemIndex) : hole[i];
               geometry.vertices[d3] = c.x;
-              geometry.vertices[d3 + 1] = simpleInverse ? -c.y : c.y;
+              geometry.vertices[d3 + 1] = c.y;
               // ignore the z values until we support them
               geometry.vertices[d3 + 2] = 0;  // c.z || 0;
             }
@@ -145,14 +144,12 @@ var webgl_polygonFeature = function (arg) {
         }
 
         // transform to map gcs
-        if (!simpleInverse) {
-          geometry.vertices = transform.transformCoordinates(
-            target_gcs,
-            map_gcs,
-            geometry.vertices,
-            geometry.dimensions
-          );
-        }
+        geometry.vertices = transform.transformCoordinates(
+          target_gcs,
+          map_gcs,
+          geometry.vertices,
+          geometry.dimensions
+        );
 
         record = {
           // triangulate
