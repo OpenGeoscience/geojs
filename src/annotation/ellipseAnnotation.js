@@ -23,7 +23,7 @@ var ellipseAnnotation = function (args, annotationName) {
   if (!(this instanceof ellipseAnnotation)) {
     return new ellipseAnnotation(args, annotationName);
   }
-
+  args = $.extend(true, {}, this.constructor.defaults, args);
   rectangleAnnotation.call(this, args, annotationName || 'ellipse');
 
   var m_this = this;
@@ -116,6 +116,12 @@ var ellipseAnnotation = function (args, annotationName) {
   };
 };
 inherit(ellipseAnnotation, rectangleAnnotation);
+
+/**
+ * This object contains the default options to initialize the class.
+ */
+ellipseAnnotation.defaults = $.extend({}, rectangleAnnotation.defaults, {
+});
 
 var ellipseRequiredFeatures = {};
 ellipseRequiredFeatures[markerFeature.capabilities.feature] = true;

@@ -40,29 +40,7 @@ var pointAnnotation = function (args) {
     return new pointAnnotation(args);
   }
 
-  args = $.extend(true, {}, {
-    style: {
-      fill: true,
-      fillColor: {r: 0, g: 1, b: 0},
-      fillOpacity: 0.25,
-      radius: 10,
-      scaled: false,
-      stroke: true,
-      strokeColor: {r: 0, g: 0, b: 0},
-      strokeOpacity: 1,
-      strokeWidth: 3
-    },
-    createStyle: {
-      fillColor: {r: 0.3, g: 0.3, b: 0.3},
-      fillOpacity: 0.25,
-      strokeColor: {r: 0, g: 0, b: 1}
-    },
-    highlightStyle: {
-      fillColor: {r: 0, g: 1, b: 1},
-      fillOpacity: 0.5,
-      strokeWidth: 5
-    }
-  }, args || {});
+  args = $.extend(true, {}, this.constructor.defaults, args);
   args.position = args.position || (args.coordinates ? args.coordinates[0] : undefined);
   delete args.coordinates;
   annotation.call(this, 'point', args);
@@ -200,6 +178,33 @@ var pointAnnotation = function (args) {
   };
 };
 inherit(pointAnnotation, annotation);
+
+/**
+ * This object contains the default options to initialize the class.
+ */
+pointAnnotation.defaults = $.extend({}, annotation.defaults, {
+  style: {
+    fill: true,
+    fillColor: {r: 0, g: 1, b: 0},
+    fillOpacity: 0.25,
+    radius: 10,
+    scaled: false,
+    stroke: true,
+    strokeColor: {r: 0, g: 0, b: 0},
+    strokeOpacity: 1,
+    strokeWidth: 3
+  },
+  createStyle: {
+    fillColor: {r: 0.3, g: 0.3, b: 0.3},
+    fillOpacity: 0.25,
+    strokeColor: {r: 0, g: 0, b: 1}
+  },
+  highlightStyle: {
+    fillColor: {r: 0, g: 1, b: 1},
+    fillOpacity: 0.5,
+    strokeWidth: 5
+  }
+});
 
 var pointRequiredFeatures = {};
 pointRequiredFeatures[pointFeature.capabilities.feature] = true;
