@@ -46,6 +46,9 @@ var util = require('./util');
  *   divided by the sine of half the angle between segments, then a bevel join
  *   is used instead.  This is a single value that applies to all lines.  If a
  *   function, it is called with `(data)`.
+ * @property {boolean|function} [uniformLine=false] Boolean indicating if each
+ *   line has a uniform style (uniform stroke color, opacity, and width).  Can
+ *   vary by line.
  * @property {number|function} [antialiasing] Antialiasing distance in pixels.
  *   Values must be non-negative.  A value greater than 1 will produce a
  *   visible gradient.  This is a single value that applies to all lines.
@@ -157,18 +160,30 @@ var lineFeature = function (arg) {
     var data = m_this.data(),
         line = m_this.line(),
         widthFunc = m_this.style.get('strokeWidth'),
+        widthVal = util.isFunction(m_this.style('strokeWidth')) ? undefined : widthFunc(),
         posFunc = m_this.position(),
         closedFunc = m_this.style.get('closed'),
+        closedVal = util.isFunction(m_this.style('closed')) ? undefined : closedFunc(),
+        uniformFunc = m_this.style.get('uniformLine'),
+        uniformVal = util.isFunction(m_this.style('uniformLine')) ? undefined : uniformFunc(),
         gcs = m_this.gcs(),
-        mapgcs = m_this.layer().map().gcs();
+        mapgcs = m_this.layer().map().gcs(),
+        onlyInvertedY = transform.onlyInvertedY(gcs, mapgcs);
 
-    data.forEach(function (d, index) {
-      var closed = closedFunc(d, index),
-          last, lasti, lastr, lastr2, first, record = [], min, max;
+    for (let index = 0; index < data.length; index += 1) {
+      const d = data[index];
+      const closed = closedVal === undefined ? closedFunc(d, index) : closedVal;
+      let last, lasti, lastr, lastr2, first, min, max, width;
+      const record = [];
+      const uniform = uniformVal === undefined ? uniformFunc(d, index) : uniformVal;
 
-      line(d, index).forEach(function (current, j) {
-        var p = posFunc(current, j, d, index);
-        if (gcs !== mapgcs) {
+      const lineRecord = line(d, index);
+      for (let j = 0; j < lineRecord.length; j += 1) {
+        const current = lineRecord[j];
+        let p = posFunc(current, j, d, index);
+        if (onlyInvertedY) {
+          p.y = -p.y;
+        } else if (gcs !== mapgcs) {
           p = transform.transformCoordinates(gcs, mapgcs, p);
         }
         if (min === undefined) { min = {x: p.x, y: p.y}; }
@@ -177,9 +192,12 @@ var lineFeature = function (arg) {
         if (p.x > max.x) { max.x = p.x; }
         if (p.y < min.y) { min.y = p.y; }
         if (p.y > max.y) { max.y = p.y; }
-        var r = Math.ceil(widthFunc(current, j, d, index) / 2) + 2;
+        if (!uniform || !j) {
+          width = widthVal === undefined ? widthFunc(current, j, d, index) : widthVal;
+        }
+        const r = Math.ceil(width / 2) + 2;
         if (max.r === undefined || r > max.r) { max.r = r; }
-        var r2 = r * r;
+        const r2 = r * r;
         if (last) {
           record.push({u: p, v: last, r: lastr > r ? lastr : r, r2: lastr2 > r2 ? lastr2 : r2, i: j, j: lasti});
         }
@@ -190,14 +208,14 @@ var lineFeature = function (arg) {
         if (!first && closed) {
           first = {p: p, r: r, r2: r2, i: j};
         }
-      });
+      }
       if (closed && first && (last.x !== first.p.x || last.y !== first.p.y)) {
         record.push({u: last, v: first.p, r: lastr > first.r ? lastr : first.r, r2: lastr2 > first.r2 ? lastr2 : first.r2, i: lasti, j: first.i});
       }
       record.min = min;
       record.max = max;
       m_pointSearchInfo.push(record);
-    });
+    }
     return m_pointSearchInfo;
   };
 

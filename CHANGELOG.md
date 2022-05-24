@@ -1,5 +1,17 @@
 # GeoJS Change Log
 
+## Version 1.8.10
+
+### Improvements
+
+- Added a uniformLine property to speed up line rendering ([#1211](../../pull/1211))
+
+## Version 1.8.9
+
+### Bug Fixes
+
+- Fix a bug introduced in #1207 ([#1210](../../pull/1210))
+
 ## Version 1.8.8
 
 ### Improvements

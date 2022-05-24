@@ -55,6 +55,7 @@ var geojsonReader = function (arg) {
           strokeOffset: 0,
           lineCap: 'butt',
           lineJoin: 'miter',
+          uniformLine: true,
           closed: false,
           ...arg.lineStyle
         },
@@ -66,6 +67,7 @@ var geojsonReader = function (arg) {
           strokeColor: '#999999',
           strokeWidth: 2,
           strokeOpacity: 1,
+          uniformPolygon: true,
           ...arg.polygonStyle
         }
       };

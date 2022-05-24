@@ -77,7 +77,7 @@ var webgl_polygonFeature = function (arg) {
         fillColor, fillColorFunc, fillColorVal,
         fillOpacity, fillOpacityFunc, fillOpacityVal,
         fillFunc, fillVal,
-        uniformPolyFunc, uniform,
+        uniformFunc, uniformVal, uniform,
         indices,
         items = [],
         target_gcs = m_this.gcs(),
@@ -93,7 +93,8 @@ var webgl_polygonFeature = function (arg) {
     fillOpacityVal = util.isFunction(m_this.style('fillOpacity')) ? undefined : fillOpacityFunc();
     fillFunc = m_this.style.get('fill');
     fillVal = util.isFunction(m_this.style('fill')) ? undefined : fillFunc();
-    uniformPolyFunc = m_this.style.get('uniformPolygon');
+    uniformFunc = m_this.style.get('uniformPolygon');
+    uniformVal = util.isFunction(m_this.style('uniformPolygon')) ? undefined : uniformFunc();
 
     if (!onlyStyle) {
       posFunc = m_this.style.get('position');
@@ -188,7 +189,7 @@ var webgl_polygonFeature = function (arg) {
       item = items[k].item;
       itemIndex = items[k].itemIndex;
       original = items[k].original;
-      uniform = uniformPolyFunc(item, itemIndex);
+      uniform = uniformVal === undefined ? uniformFunc(item, itemIndex) : uniformVal;
       opacity = fillOpacityVal;
       if (uniform) {
         if (fillColorVal === undefined) {
