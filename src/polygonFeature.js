@@ -495,7 +495,8 @@ var polygonFeature = function (arg) {
       strokeStyle: linePolyStyle(polyStyle.strokeStyle),
       strokeColor: linePolyStyle(polyStyle.strokeColor),
       strokeOffset: linePolyStyle(polyStyle.strokeOffset),
-      strokeOpacity: strokeOpacity
+      strokeOpacity: strokeOpacity,
+      uniformLine: linePolyStyle(polyStyle.uniformPolygon)
     });
     var data = m_this.data(),
         posVal = m_this.style('position');

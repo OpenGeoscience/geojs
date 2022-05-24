@@ -146,6 +146,7 @@ var webgl_lineFeature = function (arg) {
         strokeOffsetFunc = m_this.style.get('strokeOffset'), strokeOffsetVal,
         miterLimit = m_this.style.get('miterLimit')(data),
         antialiasing = m_this.style.get('antialiasing')(data) || 0,
+        uniformFunc = m_this.style.get('uniformLine'), uniformVal, uniform,
         order = m_this.featureVertices(), orderk0, prevkey, nextkey, offkey,
         orderLen = order.length,
         // webgl buffers; see _init for details
@@ -164,6 +165,7 @@ var webgl_lineFeature = function (arg) {
     strokeOffsetVal = util.isFunction(m_this.style('strokeOffset')) ? undefined : (strokeOffsetFunc() || 0);
     strokeOpacityVal = util.isFunction(m_this.style('strokeOpacity')) ? undefined : strokeOpacityFunc();
     strokeWidthVal = util.isFunction(m_this.style('strokeWidth')) ? undefined : strokeWidthFunc();
+    uniformVal = util.isFunction(m_this.style('uniformLine')) ? undefined : uniformFunc();
 
     if (miterLimit !== undefined) {
       /* We impose a limit no matter what, since otherwise the growth is
@@ -262,6 +264,7 @@ var webgl_lineFeature = function (arg) {
       if (lineItem.length < 2) {
         continue;
       }
+      uniform = uniformVal === undefined ? uniformFunc(lineItem, i) : uniformVal;
       d = data[i];
       closedVal = closed[i];
       firstPosIdx3 = posIdx3;
@@ -288,12 +291,26 @@ var webgl_lineFeature = function (arg) {
             (j !== lidx ? firstPosIdx3 + 3 : firstPosIdx3 + 6 - closedVal * 3) :
             posIdx3);
         }
-        v.strokeWidth = strokeWidthVal === undefined ? strokeWidthFunc(lineItemData, lidx, d, i) : strokeWidthVal;
-        v.strokeColor = strokeColorVal === undefined ? strokeColorFunc(lineItemData, lidx, d, i) : strokeColorVal;
-        v.strokeOpacity = strokeOpacityVal === undefined ? strokeOpacityFunc(lineItemData, lidx, d, i) : strokeOpacityVal;
+        if (uniform && j > 0) {
+          if (j === 1) {
+            v.strokeWidth = vert[0].strokeWidth;
+            v.strokeColor = vert[0].strokeColor;
+            v.strokeOpacity = vert[0].strokeOpacity;
+          }
+        } else {
+          v.strokeWidth = strokeWidthVal === undefined ? strokeWidthFunc(lineItemData, lidx, d, i) : strokeWidthVal;
+          v.strokeColor = strokeColorVal === undefined ? strokeColorFunc(lineItemData, lidx, d, i) : strokeColorVal;
+          v.strokeOpacity = strokeOpacityVal === undefined ? strokeOpacityFunc(lineItemData, lidx, d, i) : strokeOpacityVal;
+        }
         if (updateFlags) {
           if (strokeOffsetVal !== 0) {
-            v.strokeOffset = (strokeOffsetVal === undefined ? strokeOffsetFunc(lineItemData, lidx, d, i) : strokeOffsetVal) || 0;
+            if (uniform && j > 0) {
+              if (j === 1) {
+                v.strokeOffset = vert[0].strokeOffset;
+              }
+            } else {
+              v.strokeOffset = (strokeOffsetVal === undefined ? strokeOffsetFunc(lineItemData, lidx, d, i) : strokeOffsetVal) || 0;
+            }
             if (v.strokeOffset) {
               /* we use 11 bits to store the offset, and we want to store values
                * from -1 to 1, so multiply our values by 1023, and use some bit
