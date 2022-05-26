@@ -39,7 +39,7 @@ var geo_map = require('../map');
  *   applied.  If not specified , this is taken from the map second if
  *   available.
  * @property {geo.map} [map] Used for ``ingcs`` and ``gcs`` if needed.
- * @property {string} [innerOperation="xor"] one of union, intersect, xor.
+ * @property {string} [innerOperation="union"] one of union, intersect, xor.
  *   Used to combine individual polygons in each of ``poly1`` and ``poly2``
  *   before the main operation is carried out.
  * @property {object} [correspond] If present, information about the
@@ -181,6 +181,11 @@ function toPolygonList(poly, mode, opts) {
   if (poly.toPolygonList) {
     mode.style = poly;
     poly = poly.toPolygonList(opts);
+    if (!poly.length) {
+      mode.min = mode.max = [0, 0];
+      mode.epsilon = 1e-10;
+      return poly;
+    }
   } else {
     mode.style = '';
     if (poly.outer) {
@@ -401,8 +406,8 @@ function generalOperationProcess(op, poly1, poly2, opts) {
   }
   let seglist1 = poly1.map(p => PolyBool.segments({regions: p}));
   let seglist2 = poly2.map(p => PolyBool.segments({regions: p}));
-  seglist1 = polygonOperationSeglist(opts.innerOperation || 'xor', mode1.epsilon, seglist1);
-  seglist2 = polygonOperationSeglist(opts.innerOperation || 'xor', mode2.epsilon, seglist2);
+  seglist1 = polygonOperationSeglist(opts.innerOperation || 'union', mode1.epsilon, seglist1);
+  seglist2 = polygonOperationSeglist(opts.innerOperation || 'union', mode2.epsilon, seglist2);
   let seglist = seglist1;
   if (seglist1[0] && seglist2[0]) {
     /* We need to do the main operation with the same inversion flags */

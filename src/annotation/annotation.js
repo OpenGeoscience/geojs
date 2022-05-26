@@ -74,6 +74,12 @@ var editHandleFeatureLevel = 3;
  * @property {boolean|string[]} [showLabel=true] `true` to show the annotation
  *    label on annotations in done or edit states.  Alternately, a list of
  *    states in which to show the label.  Falsy to not show the label.
+ * @property {boolean} [allowBooleanOperations] This defaults to `true` for
+ *    annotations that have area and `false` for those without area (e.g.,
+ *    false for lines and points).  If it is truthy, then, when the annotation
+ *    is being created, it checks the metakeys on the first click that defines
+ *    a coordinate to determine what boolean polygon operation should be
+ *    performaned on the completion of the annotation.
  */
 
 /**
@@ -94,7 +100,7 @@ var annotation = function (type, args) {
   }
 
   var m_this = this,
-      m_options = $.extend({}, {showLabel: true}, args || {}),
+      m_options = $.extend(true, {}, this.constructor.defaults, args || {}),
       m_id = m_options.annotationId;
   delete m_options.annotationId;
   if (m_id === undefined || (m_options.layer && m_options.layer.annotationById(m_id))) {
@@ -797,10 +803,14 @@ var annotation = function (type, args) {
       key = styles[i];
       value = util.ensureFunction(objStyle[key])();
       if (value !== undefined) {
+        let defvalue = ((m_this.constructor.defaults || {}).style || {})[key];
         if (key.toLowerCase().match(/color$/)) {
           value = util.convertColorToHex(value, 'needed');
+          defvalue = defvalue !== undefined ? util.convertColorToHex(defvalue, 'needed') : defvalue;
         }
-        obj.properties[key] = value;
+        if (value !== defvalue) {
+          obj.properties[key] = value;
+        }
       }
     }
     for (i = 0; i < textFeature.usedStyles.length; i += 1) {
@@ -1407,6 +1417,13 @@ function constrainAspectRatio(ratio) {
 
   return constraintFunction;
 }
+
+/**
+ * This object contains the default options to initialize the class.
+ */
+annotation.defaults = {
+  showLabel: true
+};
 
 module.exports = {
   state: annotationState,

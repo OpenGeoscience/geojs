@@ -68,6 +68,12 @@ describe('geo.util.polyops', function () {
     });
   });
 
+  describe('toPolygonList', function () {
+    it('empty list', function () {
+      expect(geo.util.polyops.toPolygonList([])).toEqual([]);
+    });
+  });
+
   var opTests = [{
     a: [[0, 0], [10, 0], [10, 10], [0, 10]],
     b: [[5, 0], [15, 0], [15, 5], [5, 5]],
