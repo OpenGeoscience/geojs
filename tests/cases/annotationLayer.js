@@ -828,10 +828,10 @@ describe('geo.annotationLayer', function () {
       };
       layer.geojson(badattr, true);
       var attr = layer.geojson().features[0].properties;
-      expect(attr.radius).toBeGreaterThan(0);
-      expect(attr.fillOpacity).toBeGreaterThan(0);
-      expect(attr.fillColor).toBe('#00ff00');
-      expect(attr.scaled).toBe(false);
+      expect(attr.radius).toBe(undefined);
+      expect(attr.fillOpacity).toBe(undefined);
+      expect(attr.fillColor).toBe(undefined);
+      expect(attr.scaled).toBe(undefined);
       var goodattr = {
         type: 'Feature',
         geometry: {

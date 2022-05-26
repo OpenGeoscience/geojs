@@ -43,27 +43,11 @@ var polygonAnnotation = function (args) {
     return new polygonAnnotation(args);
   }
 
-  args = $.extend(true, {}, {
+  args = $.extend(true, {}, this.constructor.defaults, {
     style: {
-      fill: true,
-      fillColor: {r: 0, g: 1, b: 0},
-      fillOpacity: 0.25,
-      polygon: function (d) { return d.polygon; },
-      stroke: true,
-      strokeColor: {r: 0, g: 0, b: 0},
-      strokeOpacity: 1,
-      strokeWidth: 3,
-      uniformPolygon: true
-    },
-    highlightStyle: {
-      fillColor: {r: 0, g: 1, b: 1},
-      fillOpacity: 0.5,
-      strokeWidth: 5
+      polygon: function (d) { return d.polygon; }
     },
     createStyle: {
-      closed: false,
-      fillColor: {r: 0.3, g: 0.3, b: 0.3},
-      fillOpacity: 0.25,
       line: function (d) {
         const coord = m_this._coordinates();
         /* Return an array that has the same number of items as we have
@@ -76,12 +60,9 @@ var polygonAnnotation = function (args) {
           return d.x;
         }
         return m_this.options('vertices')[i];
-      },
-      stroke: false,
-      strokeColor: {r: 0, g: 0, b: 1}
-    },
-    allowBooleanOperations: true
-  }, args || {});
+      }
+    }
+  }, args);
   args.vertices = args.vertices || args.coordinates || [];
   delete args.coordinates;
   annotation.call(this, 'polygon', args);
@@ -324,6 +305,35 @@ var polygonAnnotation = function (args) {
   };
 };
 inherit(polygonAnnotation, annotation);
+
+/**
+ * This object contains the default options to initialize the class.
+ */
+polygonAnnotation.defaults = $.extend({}, annotation.defaults, {
+  style: {
+    fill: true,
+    fillColor: {r: 0, g: 1, b: 0},
+    fillOpacity: 0.25,
+    stroke: true,
+    strokeColor: {r: 0, g: 0, b: 0},
+    strokeOpacity: 1,
+    strokeWidth: 3,
+    uniformPolygon: true
+  },
+  highlightStyle: {
+    fillColor: {r: 0, g: 1, b: 1},
+    fillOpacity: 0.5,
+    strokeWidth: 5
+  },
+  createStyle: {
+    closed: false,
+    fillColor: {r: 0.3, g: 0.3, b: 0.3},
+    fillOpacity: 0.25,
+    stroke: false,
+    strokeColor: {r: 0, g: 0, b: 1}
+  },
+  allowBooleanOperations: true
+});
 
 var polygonRequiredFeatures = {};
 polygonRequiredFeatures[polygonFeature.capabilities.feature] = true;

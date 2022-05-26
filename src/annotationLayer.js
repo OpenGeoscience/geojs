@@ -693,7 +693,12 @@ var annotationLayer = function (arg) {
    */
   this.geojson = function (geojson, clear, gcs, includeCrs) {
     if (geojson !== undefined) {
-      var reader = registry.createFileReader('geojsonReader', {layer: m_this});
+      var reader = registry.createFileReader('geojsonReader', {
+        layer: m_this,
+        lineStyle: require('./annotation/lineAnnotation').defaults.style,
+        pointStyle: require('./annotation/pointAnnotation').defaults.style,
+        polygonStyle: require('./annotation/polygonAnnotation').defaults.style
+      });
       if (!reader.canRead(geojson)) {
         return;
       }
