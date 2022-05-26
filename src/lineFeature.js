@@ -182,7 +182,7 @@ var lineFeature = function (arg) {
         const current = lineRecord[j];
         let p = posFunc(current, j, d, index);
         if (onlyInvertedY) {
-          p.y = -p.y;
+          p = {x: p.x, y: -p.y};
         } else if (gcs !== mapgcs) {
           p = transform.transformCoordinates(gcs, mapgcs, p);
         }
