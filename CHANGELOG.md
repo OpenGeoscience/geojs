@@ -1,11 +1,27 @@
 # GeoJS Change Log
 
+## Version 1.9.2
+
+### Bug Fixes
+
+- Explicitly have annotation defaults ([#1214](../../pull/1214))
+
+## Version 1.9.1
+
+### Changes
+
+- Changed how one module was referenced in package dependencies ([#1213](../../pull/1213))
+
 ## Version 1.9.0
 
 ### Features
 
 - Polygon operations ([#1198](../../pull/1198))
 - Use meta keys to modify annotations ([#1209](../../pull/1209))
+
+### Improvements
+
+- Explicitly have annotation defaults ([#1212](../../pull/1212))
 
 ## Version 1.8.10
 
