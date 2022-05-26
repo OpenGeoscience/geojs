@@ -687,6 +687,56 @@ var polygonFeature = function (arg) {
   };
 
   /**
+   * Return the polygons as a polygon list: an array of polygons, each of which
+   * is an array of polylines, each of which is an array of points, each of
+   * which is a 2-tuple of numbers.
+   *
+   * @param {geo.util.polyop.spec} [opts] Ignored.
+   * @returns {geo.polygonList} A list of polygons.
+   */
+  this.toPolygonList = function (opts) {
+    const polyFunc = m_this.style.get('polygon');
+    const posFunc = m_this.style.get('position');
+    return m_this.data().map((d, i) => {
+      const polygon = polyFunc(d, i);
+      const outer = polygon.outer || (Array.isArray(polygon) ? polygon : []);
+      if (outer.length < 3) {
+        return [];
+      }
+      const resp = [outer.map((p, j) => {
+        const pos = posFunc(p, j, d, i);
+        return [pos.x, pos.y];
+      })];
+      if (polygon.inner) {
+        polygon.inner.forEach((h) => {
+          resp.push(h.map((p, j) => {
+            const pos = posFunc(p, j, d, i);
+            return [pos.x, pos.y];
+          }));
+        });
+      }
+      return resp;
+    });
+  };
+
+  /**
+   * Set the data, position accessor, and polygon accessor to use a list of
+   * polygons.
+   *
+   * @param {geo.polygonList} poly A list of polygons.
+   * @param {geo.util.polyop.spec} [opts] Ignored.
+   * @returns {this}
+   */
+  this.fromPolygonList = function (poly, opts) {
+    m_this.style({
+      position: (p) => ({x: p[0], y: p[1]}),
+      polygon: (p) => ({outer: p[0], inner: p.slice(1)})
+    });
+    m_this.data(poly);
+    return m_this;
+  };
+
+  /**
    * Destroy.
    */
   this._exit = function () {

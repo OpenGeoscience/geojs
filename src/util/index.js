@@ -8,6 +8,7 @@ module.exports = Object.assign(
   {
     DistanceGrid: require('./distanceGrid'),
     ClusterGroup: require('./clustering'),
-    mesh: require('./mesh')
+    mesh: require('./mesh'),
+    polyops: require('./polyops')
   }
 );

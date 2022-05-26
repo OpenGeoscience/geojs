@@ -1,5 +1,12 @@
 # GeoJS Change Log
 
+## Version 1.9.0
+
+### Features
+
+- Polygon operations ([#1198](../../pull/1198))
+- Use meta keys to modify annotations ([#1209](../../pull/1209))
+
 ## Version 1.8.10
 
 ### Improvements

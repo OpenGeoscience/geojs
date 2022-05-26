@@ -19,13 +19,20 @@ const ellipseAnnotation = require('./ellipseAnnotation');
  */
 var circleAnnotation = function (args, annotationName) {
   'use strict';
-  args = $.extend({}, args, {constraint: 1});
   if (!(this instanceof circleAnnotation)) {
     return new circleAnnotation(args, annotationName);
   }
+  args = $.extend(true, {}, this.constructor.defaults, args, {constraint: 1});
   ellipseAnnotation.call(this, args, annotationName || 'circle');
 };
 inherit(circleAnnotation, ellipseAnnotation);
+
+/**
+ * This object contains the default options to initialize the class.
+ */
+circleAnnotation.defaults = $.extend({}, ellipseAnnotation.defaults, {
+});
+
 var circleRequiredFeatures = {};
 circleRequiredFeatures[markerFeature.capabilities.feature] = true;
 registerAnnotation('circle', circleAnnotation, circleRequiredFeatures);

@@ -23,7 +23,7 @@ var ellipseAnnotation = function (args, annotationName) {
   if (!(this instanceof ellipseAnnotation)) {
     return new ellipseAnnotation(args, annotationName);
   }
-
+  args = $.extend(true, {}, this.constructor.defaults, args);
   rectangleAnnotation.call(this, args, annotationName || 'ellipse');
 
   var m_this = this;
@@ -70,8 +70,58 @@ var ellipseAnnotation = function (args, annotationName) {
     }
     return features;
   };
+
+  /**
+   * Return this annotation as a polygon list.
+   *
+   * @param {geo.util.polyop.spec} [opts] The ``tolerance`` and
+   *   ``pixelTolerance`` parameters are used if set.  Otherwise, a polygon is
+   *   approximated to 1/10th of a pixel at the map's current maximum zoom
+   *   level.
+   * @returns {geo.polygonList} A list of polygons.
+   */
+  this.toPolygonList = function (opts) {
+    const coord = m_this._coordinates();
+    if (coord.length < 3) {
+      return [];
+    }
+    let tolerance = (opts && opts.tolerance) || 0;
+    if (!tolerance) {
+      const map = m_this.layer().map();
+      if (opts && opts.pixelTolerance) {
+        tolerance = map.unitsPerPixel(map.zoom()) * opts.pixelTolerance;
+      } else {
+        tolerance = map.unitsPerPixel(map.zoomRange().max) * 0.1;
+      }
+    }
+    const w = ((coord[0].x - coord[1].x) ** 2 + (coord[0].y - coord[1].y) ** 2) ** 0.5;
+    const h = ((coord[0].x - coord[3].x) ** 2 + (coord[0].y - coord[3].y) ** 2) ** 0.5;
+    const cx = (coord[0].x + coord[2].x) / 2;
+    const cy = (coord[0].y + coord[2].y) / 2;
+    const radius = Math.max(w, h) / 2;
+    const rotation = -Math.atan2(coord[1].y - coord[0].y, coord[1].x - coord[0].x);
+    const sides = Math.max(12, Math.ceil(Math.PI / Math.acos((radius - tolerance) / (radius + tolerance))));
+    const a = w / 2 * (1 + (1 - Math.cos(Math.PI / sides)) / 2);
+    const b = h / 2 * (1 + (1 - Math.cos(Math.PI / sides)) / 2);
+    const poly = [];
+    const cosr = Math.cos(rotation), sinr = Math.sin(rotation);
+    for (let s = 0; s < sides; s += 1) {
+      const sa = Math.PI * 2 * s / sides;
+      const cosa = Math.cos(sa), sina = Math.sin(sa);
+      const x = cx + a * cosr * cosa - b * sinr * sina;
+      const y = cy + a * sinr * cosa + b * cosr * sina;
+      poly.push([x, y]);
+    }
+    return [[poly]];
+  };
 };
 inherit(ellipseAnnotation, rectangleAnnotation);
+
+/**
+ * This object contains the default options to initialize the class.
+ */
+ellipseAnnotation.defaults = $.extend({}, rectangleAnnotation.defaults, {
+});
 
 var ellipseRequiredFeatures = {};
 ellipseRequiredFeatures[markerFeature.capabilities.feature] = true;

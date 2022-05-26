@@ -514,6 +514,47 @@ describe('geo.annotationLayer', function () {
       expect(layer.mode()).toBe(null);
       layer.options('clickToEdit', false);
     });
+    it('_handleMouseClick with modifier', function () {
+      layer.removeAllAnnotations();
+      layer.mode('polygon');
+      expect(layer.annotations().length).toBe(1);
+      expect(layer.annotations()[0].options('vertices').length).toBe(0);
+      var time = Date.now();
+      layer._handleMouseClick({
+        buttonsDown: {left: true},
+        modifiers: {shift: true},
+        time: time,
+        map: {x: 10, y: 20},
+        mapgcs: map.displayToGcs({x: 10, y: 20}, null)
+      });
+      layer._handleMouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 30, y: 20},
+        mapgcs: map.displayToGcs({x: 30, y: 20}, null)
+      });
+      layer._handleMouseClick({
+        buttonsDown: {left: true},
+        time: time + 1000,
+        map: {x: 30, y: 20},
+        mapgcs: map.displayToGcs({x: 30, y: 20}, null)
+      });
+      layer._handleMouseClick({
+        buttonsDown: {left: true},
+        time: time + 1000,
+        map: {x: 20, y: 50},
+        mapgcs: map.displayToGcs({x: 20, y: 50}, null)
+      });
+      layer._handleMouseClick({
+        buttonsDown: {left: true},
+        time: time + 1000,
+        map: {x: 20, y: 50},
+        mapgcs: map.displayToGcs({x: 20, y: 50}, null)
+      });
+      expect(layer.annotations()[0].options('vertices').length).toBe(3);
+      expect(layer.annotations()[0].state()).toBe(geo.annotation.state.done);
+      layer.removeAllAnnotations();
+    });
     it('_handleMouseOn', function () {
       var rect = geo.annotation.rectangleAnnotation({
         layer: layer,
@@ -787,10 +828,10 @@ describe('geo.annotationLayer', function () {
       };
       layer.geojson(badattr, true);
       var attr = layer.geojson().features[0].properties;
-      expect(attr.radius).toBeGreaterThan(0);
-      expect(attr.fillOpacity).toBeGreaterThan(0);
-      expect(attr.fillColor).toBe('#00ff00');
-      expect(attr.scaled).toBe(false);
+      expect(attr.radius).toBe(undefined);
+      expect(attr.fillOpacity).toBe(undefined);
+      expect(attr.fillColor).toBe(undefined);
+      expect(attr.scaled).toBe(undefined);
       var goodattr = {
         type: 'Feature',
         geometry: {

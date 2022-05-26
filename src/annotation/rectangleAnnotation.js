@@ -48,29 +48,7 @@ var rectangleAnnotation = function (args, annotationName) {
     return new rectangleAnnotation(args, annotationName);
   }
 
-  args = $.extend(true, {}, {
-    style: {
-      fill: true,
-      fillColor: {r: 0, g: 1, b: 0},
-      fillOpacity: 0.25,
-      polygon: function (d) { return d.polygon; },
-      stroke: true,
-      strokeColor: {r: 0, g: 0, b: 0},
-      strokeOpacity: 1,
-      strokeWidth: 3,
-      uniformPolygon: true
-    },
-    highlightStyle: {
-      fillColor: {r: 0, g: 1, b: 1},
-      fillOpacity: 0.5,
-      strokeWidth: 5
-    },
-    createStyle: {
-      fillColor: {r: 0.3, g: 0.3, b: 0.3},
-      fillOpacity: 0.25,
-      strokeColor: {r: 0, g: 0, b: 1}
-    }
-  }, args || {});
+  args = $.extend(true, {}, this.constructor.defaults, args);
   args.corners = args.corners || args.coordinates || [];
   delete args.coordinates;
   annotation.call(this, annotationName || 'rectangle', args);
@@ -165,6 +143,19 @@ var rectangleAnnotation = function (args, annotationName) {
       m_this._addEditHandles(features, opt.corners);
     }
     return features;
+  };
+
+  /**
+   * Return this annotation as a polygon list.
+   *
+   * @param {geo.util.polyop.spec} [opts] Ignored.
+   * @returns {geo.polygonList} A list of polygons.
+   */
+  this.toPolygonList = function (opts) {
+    if (m_this._coordinates().length < 3) {
+      return [];
+    }
+    return [[m_this._coordinates().map((pt) => [pt.x, pt.y])]];
   };
 
   /**
@@ -394,6 +385,34 @@ var rectangleAnnotation = function (args, annotationName) {
   };
 };
 inherit(rectangleAnnotation, annotation);
+
+/**
+ * This object contains the default options to initialize the class.
+ */
+rectangleAnnotation.defaults = $.extend({}, annotation.defaults, {
+  style: {
+    fill: true,
+    fillColor: {r: 0, g: 1, b: 0},
+    fillOpacity: 0.25,
+    polygon: function (d) { return d.polygon; },
+    stroke: true,
+    strokeColor: {r: 0, g: 0, b: 0},
+    strokeOpacity: 1,
+    strokeWidth: 3,
+    uniformPolygon: true
+  },
+  highlightStyle: {
+    fillColor: {r: 0, g: 1, b: 1},
+    fillOpacity: 0.5,
+    strokeWidth: 5
+  },
+  createStyle: {
+    fillColor: {r: 0.3, g: 0.3, b: 0.3},
+    fillOpacity: 0.25,
+    strokeColor: {r: 0, g: 0, b: 1}
+  },
+  allowBooleanOperations: true
+});
 
 var rectangleRequiredFeatures = {};
 rectangleRequiredFeatures[polygonFeature.capabilities.feature] = true;

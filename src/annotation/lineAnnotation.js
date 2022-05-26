@@ -37,8 +37,7 @@ var lineAnnotation = function (args) {
   if (!(this instanceof lineAnnotation)) {
     return new lineAnnotation(args);
   }
-
-  args = $.extend(true, {}, {
+  args = $.extend(true, {}, this.constructor.defaults, {
     style: {
       line: function (d) {
         /* Return an array that has the same number of items as we have
@@ -48,16 +47,7 @@ var lineAnnotation = function (args) {
       },
       position: function (d, i) {
         return m_this.options('vertices')[i];
-      },
-      strokeColor: {r: 0, g: 0, b: 0},
-      strokeOpacity: 1,
-      strokeWidth: 3,
-      closed: false,
-      lineCap: 'butt',
-      lineJoin: 'miter'
-    },
-    highlightStyle: {
-      strokeWidth: 5
+      }
     },
     createStyle: {
       line: function (d) {
@@ -68,15 +58,9 @@ var lineAnnotation = function (args) {
       },
       position: function (d, i) {
         return m_this.options('vertices')[i];
-      },
-      strokeColor: {r: 0, g: 0, b: 1},
-      strokeOpacity: 1,
-      strokeWidth: 3,
-      closed: false,
-      lineCap: 'butt',
-      lineJoin: 'miter'
+      }
     }
-  }, args || {});
+  }, args);
   args.vertices = args.vertices || args.coordinates || [];
   delete args.coordinates;
   annotation.call(this, 'line', args);
@@ -336,6 +320,31 @@ var lineAnnotation = function (args) {
 
 };
 inherit(lineAnnotation, annotation);
+
+/**
+ * This object contains the default options to initialize the class.
+ */
+lineAnnotation.defaults = $.extend({}, annotation.defaults, {
+  style: {
+    strokeColor: {r: 0, g: 0, b: 0},
+    strokeOpacity: 1,
+    strokeWidth: 3,
+    closed: false,
+    lineCap: 'butt',
+    lineJoin: 'miter'
+  },
+  highlightStyle: {
+    strokeWidth: 5
+  },
+  createStyle: {
+    strokeColor: {r: 0, g: 0, b: 1},
+    strokeOpacity: 1,
+    strokeWidth: 3,
+    closed: false,
+    lineCap: 'butt',
+    lineJoin: 'miter'
+  }
+});
 
 var lineRequiredFeatures = {};
 lineRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
