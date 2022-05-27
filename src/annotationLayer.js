@@ -50,6 +50,17 @@ var textFeature = require('./textFeature');
  */
 
 /**
+ * @typedef {geo.util.polyop.spec} geo.util.polyop.annotationLayerSpec
+ * @extends {geo.util.polyop.spec}
+ * @property {string} [keepAnnotations='exact'] Determine which annotations are
+ *   present after a boolean operation.  `'exact'` replaces modified
+ *   annotations with the results; unmodified annotations are left as is.
+ *   `'all'` replaces all annotations, so unchanged annotations may be
+ *   converted to polygonAnnotations.  `'none'` discards all existing
+ *   annotations and only keeps modified results.
+ */
+
+/**
  * Layer to handle direct interactions with different features.  Annotations
  * (features) can be created by calling mode(<name of feature>) or cancelled
  * with mode(null).  There is also an "edit" mode which is used when modifying
@@ -1261,8 +1272,8 @@ var annotationLayer = function (arg) {
    * Replace appropriate annotations with a list of polygons.
    *
    * @param {geo.polygonList} poly A list of polygons.
-   * @param {geo.util.polyop.spec} [opts] This contains annotationIndices and
-   *   correspondence used to track annotations.
+   * @param {geo.util.polyop.annotationLayerSpec} [opts] This contains
+   *   annotationIndices and correspondence used to track annotations.
    * @returns {this}
    */
   this.fromPolygonList = function (poly, opts) {
