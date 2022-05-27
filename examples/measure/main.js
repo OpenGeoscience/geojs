@@ -161,19 +161,27 @@ if (initialGeoJSON) {
   if (query.x === undefined || query.y === undefined) {
     const range = {};
     layer.annotations().forEach(a => {
-      a.coordinates().forEach(pt => {
-        if (range.left === undefined || pt.x < range.left) {
-          range.left = pt.x;
-        }
-        if (range.bottom === undefined || pt.y < range.bottom) {
-          range.bottom = pt.y;
-        }
-        if (range.right === undefined || pt.x > range.right) {
-          range.right = pt.x;
-        }
-        if (range.top === undefined || pt.y > range.top) {
-          range.top = pt.y;
-        }
+      let ptlist = a.coordinates();
+      if (ptlist.outer) {
+        ptlist = [ptlist.outer.slice()].concat((ptlist.inner || []).map((l) => l.slice()));
+      } else {
+        ptlist = [ptlist.slice()];
+      }
+      ptlist.forEach((pts) => {
+        pts.forEach(pt => {
+          if (range.left === undefined || pt.x < range.left) {
+            range.left = pt.x;
+          }
+          if (range.bottom === undefined || pt.y < range.bottom) {
+            range.bottom = pt.y;
+          }
+          if (range.right === undefined || pt.x > range.right) {
+            range.right = pt.x;
+          }
+          if (range.top === undefined || pt.y > range.top) {
+            range.top = pt.y;
+          }
+        });
       });
     });
     map.bounds(range);
@@ -356,20 +364,27 @@ function handleModeChange(evt) {
 function annotationLength(annotation) {
   let dist = 0;
   const gcs = annotation.layer().map().ingcs();
-  let pts = annotation.coordinates(gcs);
-  if (pts.length < 2) {
-    return;
+  let ptlist = annotation.coordinates(gcs);
+  if (ptlist.outer) {
+    ptlist = [ptlist.outer.slice()].concat((ptlist.inner || []).map((l) => l.slice()));
+  } else {
+    ptlist = [ptlist.slice()];
   }
-  if (['polygon', 'rectangle'].indexOf(annotation.type()) >= 0) {
-    pts = pts.slice();
-    pts.push(pts[0]);
-  }
-  for (let i = 0; i < pts.length - 1; i += 1) {
-    const partial = geo.transform.vincentyDistance(pts[i], pts[i + 1], gcs);
-    if (partial) {
-      dist += partial.distance;
+  ptlist.forEach((pts) => {
+    if (pts.length < 2) {
+      return;
     }
-  }
+    if (['polygon', 'rectangle'].indexOf(annotation.type()) >= 0) {
+      pts = pts.slice();
+      pts.push(pts[0]);
+    }
+    for (let i = 0; i < pts.length - 1; i += 1) {
+      const partial = geo.transform.vincentyDistance(pts[i], pts[i + 1], gcs);
+      if (partial) {
+        dist += partial.distance;
+      }
+    }
+  });
   return dist;
 }
 
@@ -382,20 +397,34 @@ function annotationLength(annotation) {
  */
 function annotationArea(annotation) {
   let area = 0,
-      pts = annotation.coordinates('EPSG:4326');
-  if (pts.length < 3 || ['polygon', 'rectangle'].indexOf(annotation.type()) < 0) {
+      ptlist = annotation.coordinates('EPSG:4326');
+  if (ptlist.outer) {
+    ptlist = [ptlist.outer];
+  } else {
+    ptlist = [ptlist];
+  }
+  if (ptlist[0].length < 3 || ['polygon', 'rectangle'].indexOf(annotation.type()) < 0) {
     return;
   }
   // By using an equal-area projection centered at one of the vertices, the
   // area calculation can be done with a simple formula.  For polygons with
   // long edges, this won't be accurate, however.
-  const gcs = `+proj=laea +lat_0=${pts[0].y} +lon_0=${pts[0].x} +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs`;
-  pts = annotation.coordinates(gcs).slice();
-  pts.push(pts[0]);
-  for (let i = 0; i < pts.length - 1; i += 1) {
-    area += (pts[i + 1].y - pts[i].y) * (pts[i + 1].x + pts[i].x) / 2;
+  const gcs = `+proj=laea +lat_0=${ptlist[0][0].y} +lon_0=${ptlist[0][0].x} +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs`;
+  ptlist = annotation.coordinates(gcs);
+  if (ptlist.outer) {
+    ptlist = [ptlist.outer.slice()].concat((ptlist.inner || []).map((l) => l.slice()));
+  } else {
+    ptlist = [ptlist.slice()];
   }
-  return Math.abs(area);
+  ptlist.forEach((pts, idx) => {
+    let looparea = 0;
+    pts.push(pts[0]);
+    for (let i = 0; i < pts.length - 1; i += 1) {
+      looparea += (pts[i + 1].y - pts[i].y) * (pts[i + 1].x + pts[i].x) / 2;
+    }
+    area += Math.abs(looparea) * (idx ? -1 : 1);
+  });
+  return area;
 }
 
 /**
@@ -416,16 +445,16 @@ function modifyAnnotation(annotation) {
         area = annotationArea(annotation);
     var result = s_labelRecord();
     if (result) {
-      dist = geo.gui.scaleWidget.formatUnit(dist, query.distunit || 'decmiles');
       if (dist) {
+        dist = geo.gui.scaleWidget.formatUnit(dist, query.distunit || 'decmiles');
         result.text += ' - ' + dist;
       }
-      area = geo.gui.scaleWidget.formatUnit(area, query.areaunit || 'decmiles', geo.gui.scaleWidget.areaUnitsTable);
       if (area) {
+        area = geo.gui.scaleWidget.formatUnit(area, query.areaunit || 'decmiles', geo.gui.scaleWidget.areaUnitsTable);
         result.text += ' - ' + area;
       }
     }
-    if (result.text !== annotation._lastResultText) {
+    if (result && result.text !== annotation._lastResultText) {
       map.scheduleAnimationFrame(handleAnnotationChange);
       annotation._lastResultText = result.text;
     }
@@ -441,49 +470,56 @@ function modifyAnnotation(annotation) {
  * @param {object[]} labels The labels data array to extend.
  */
 function labelVertices(annotation, annotationIndex, labels) {
-  const gcs = annotation.layer().map().gcs(),
-      pts = annotation.coordinates(gcs).slice();
-  for (let i = 1; i < pts.length; i += 1) {
-    if (pts[i].x === pts[i - 1].x && pts[i].y === pts[i - 1].y) {
-      pts.splice(i, 1);
+  const gcs = annotation.layer().map().gcs();
+  let ptlist = annotation.coordinates(gcs);
+  if (ptlist.outer) {
+    ptlist = [ptlist.outer.slice()].concat((ptlist.inner || []).map((l) => l.slice()));
+  } else {
+    ptlist = [ptlist.slice()];
+  }
+  ptlist.forEach((pts) => {
+    for (let i = 1; i < pts.length; i += 1) {
+      if (pts[i].x === pts[i - 1].x && pts[i].y === pts[i - 1].y) {
+        pts.splice(i, 1);
+      }
     }
-  }
-  if (pts.length < 3) {
-    return;
-  }
-  if (['polygon', 'rectangle'].indexOf(annotation.type()) >= 0) {
-    pts.push(pts[0]);
-  }
-  var style = labels[annotationIndex].style || {};
-  var dist = [], tally = [0];
-  for (let i = 0; i < pts.length - 1; i += 1) {
-    const value = geo.transform.vincentyDistance(pts[i], pts[i + 1], gcs);
-    dist.push(value ? value.distance : 0);
-  }
-  dist.forEach((d, i) => {
-    tally.push(tally[i] + d);
-  });
-  pts.forEach((p, i) => {
-    if (i) {
-      labels.push({
-        text: geo.gui.scaleWidget.formatUnit(tally[i], query.distunit || 'decmiles') || '',
-        position: p,
-        style: Object.assign({}, style, {offset: {x: 12, y: 0}, textAlign: 'left'})
-      });
+    if (pts.length < 3) {
+      return;
     }
-    if (i !== pts.length - 1) {
-      labels.push({
-        text: geo.gui.scaleWidget.formatUnit(tally[tally.length - 1] - tally[i], query.distunit || 'decmiles') || '',
-        position: p,
-        style: Object.assign({}, style, {offset: {x: -12, y: 0}, textAlign: 'right'})
-      });
-      const p1 = {x: (pts[i + 1].x + p.x) / 2, y: (pts[i + 1].y + p.y) / 2};
-      labels.push({
-        text: geo.gui.scaleWidget.formatUnit(dist[i], query.distunit || 'decmiles') || '',
-        position: p1,
-        style: Object.assign({}, style, {offset: {x: 10, y: 0}, textAlign: 'left'})
-      });
+    if (['polygon', 'rectangle'].indexOf(annotation.type()) >= 0) {
+      pts.push(pts[0]);
     }
+    var style = labels[annotationIndex].style || {};
+    var dist = [], tally = [0];
+    for (let i = 0; i < pts.length - 1; i += 1) {
+      const value = geo.transform.vincentyDistance(pts[i], pts[i + 1], gcs);
+      dist.push(value ? value.distance : 0);
+    }
+    dist.forEach((d, i) => {
+      tally.push(tally[i] + d);
+    });
+    pts.forEach((p, i) => {
+      if (i) {
+        labels.push({
+          text: geo.gui.scaleWidget.formatUnit(tally[i], query.distunit || 'decmiles') || '',
+          position: p,
+          style: Object.assign({}, style, {offset: {x: 12, y: 0}, textAlign: 'left'})
+        });
+      }
+      if (i !== pts.length - 1) {
+        labels.push({
+          text: geo.gui.scaleWidget.formatUnit(tally[tally.length - 1] - tally[i], query.distunit || 'decmiles') || '',
+          position: p,
+          style: Object.assign({}, style, {offset: {x: -12, y: 0}, textAlign: 'right'})
+        });
+        const p1 = {x: (pts[i + 1].x + p.x) / 2, y: (pts[i + 1].y + p.y) / 2};
+        labels.push({
+          text: geo.gui.scaleWidget.formatUnit(dist[i], query.distunit || 'decmiles') || '',
+          position: p1,
+          style: Object.assign({}, style, {offset: {x: 10, y: 0}, textAlign: 'left'})
+        });
+      }
+    });
   });
 }
 
