@@ -184,6 +184,15 @@ var annotationLayer = function (arg) {
             }
           }
           break;
+        case m_this.modes.cursor:
+          m_this.currentAnnotation._cursorHandleMousemove(evt.mouse);
+          update = m_this.currentAnnotation.processAction(evt);
+          m_this.geoTrigger(geo_event.annotation.cursor_action, {
+            annotation: m_this.currentAnnotation,
+            operation: m_this.currentBooleanOperation(),
+            evt: evt
+          });
+          break;
         default:
           update = m_this.currentAnnotation.processAction(evt);
           break;
@@ -261,7 +270,7 @@ var annotationLayer = function (arg) {
    * @param {geo.event} evt The mouse move or click event.
    */
   this._handleMouseMoveModifiers = function (evt) {
-    if (m_this.mode() !== m_this.modes.edit && m_this.currentAnnotation.options('allowBooleanOperations') && m_this.currentAnnotation._coordinates().length < 2) {
+    if (m_this.mode() !== m_this.modes.edit && m_this.currentAnnotation.options('allowBooleanOperations') && (m_this.currentAnnotation._coordinates().length < 2 || m_this.mode() === m_this.modes.cursor)) {
       if (evt.modifiers) {
         const mod = (evt.modifiers.shift ? 's' : '') + (evt.modifiers.ctrl ? 'c' : '') + (evt.modifiers.meta || evt.modifiers.alt ? 'a' : '');
         if (m_this._currentBooleanClass === m_this._booleanClasses[mod]) {
@@ -392,6 +401,13 @@ var annotationLayer = function (arg) {
       update = m_this.currentAnnotation.mouseClick(evt);
       m_this._updateFromEvent(update);
       retrigger = !m_this.mode();
+      if (m_this.mode() === m_this.modes.cursor) {
+        m_this.geoTrigger(geo_event.annotation.cursor_click, {
+          annotation: m_this.currentAnnotation,
+          operation: m_this.currentBooleanOperation(),
+          evt: evt
+        });
+      }
     } else if (!m_this.mode() && !m_this.currentAnnotation && m_this.options('clickToEdit')) {
       var highlighted = m_this.annotations().filter(function (ann) {
         return ann.state() === geo_annotation.state.highlight;
@@ -591,7 +607,8 @@ var annotationLayer = function (arg) {
 
   /* A list of special modes */
   this.modes = {
-    edit: 'edit'
+    edit: 'edit',
+    cursor: 'cursor'
   };
 
   /* Keys are short-hand for preferred event modifiers.  Values are classes to
@@ -608,11 +625,13 @@ var annotationLayer = function (arg) {
    *
    * @param {string|null} [arg] `undefined` to get the current mode, `null` to
    *    stop creating/editing, `this.modes.edit` (`'edit'`) plus an annotation
-   *    to switch to edit mode, or the name of the type of annotation to
-   *    create.  Available annotations can listed via
+   *    to switch to edit mode, `this.modes.cursor` plus an annotation to
+   *    switch to using the annotation as a cursor, or the name of the type of
+   *    annotation to create.  Available annotations can listed via
    *    {@link geo.listAnnotations}.
-   * @param {geo.annotation} [editAnnotation] If `arg === this.modes.edit`,
-   *    this is the annotation that should be edited.
+   * @param {geo.annotation} [editAnnotation] If `arg === this.modes.edit` or
+   *    `arg === this.modes.cursor`, this is the annotation that should be
+   *    edited or used.
    * @param {object} [options] Additional options to pass when creating an
    *    annotation.
    * @returns {string|null|this} The current mode or the layer.
@@ -622,11 +641,14 @@ var annotationLayer = function (arg) {
     if (arg === undefined) {
       return m_mode;
     }
-    if (arg !== m_mode || (arg === m_this.modes.edit && editAnnotation !== m_this.editAnnotation) || (arg !== m_this.modes.edit && arg && !m_this.currentAnnotation)) {
+    if (arg !== m_mode ||
+        ((arg === m_this.modes.edit || arg === m_this.modes.cursor) && editAnnotation !== m_this.editAnnotation) ||
+        (arg !== m_this.modes.edit && arg !== m_this.modes.cursor && arg && !m_this.currentAnnotation)
+    ) {
       var createAnnotation, actions,
           mapNode = m_this.map().node(), oldMode = m_mode;
       m_mode = arg;
-      mapNode.toggleClass('annotation-input', !!(m_mode && m_mode !== m_this.modes.edit));
+      mapNode.toggleClass('annotation-input', !!(m_mode && m_mode !== m_this.modes.edit && m_mode !== m_this.modes.cursor));
       if (!m_mode || m_mode === m_this.modes.edit) {
         Object.values(m_this._booleanClasses).forEach((c) => mapNode.toggleClass(c, false));
         m_this._currentBooleanClass = undefined;
@@ -649,6 +671,12 @@ var annotationLayer = function (arg) {
             m_this.modified();
             m_this.draw();
             break;
+          case geo_annotation.state.cursor:
+            m_this.currentAnnotation.state(geo_annotation.state.done);
+            m_this.modified();
+            m_this.draw();
+            m_this.map().node().toggleClass('annotation-cursor', false);
+            break;
         }
         m_this.currentAnnotation = null;
       }
@@ -656,6 +684,12 @@ var annotationLayer = function (arg) {
         m_this.currentAnnotation = editAnnotation;
         m_this.currentAnnotation.state(geo_annotation.state.edit);
         m_this.modified();
+      } else if (m_mode === m_this.modes.cursor) {
+        m_this.currentAnnotation = editAnnotation;
+        m_this.currentAnnotation.state(geo_annotation.state.cursor);
+        m_this.modified();
+        m_this.map().node().toggleClass('annotation-cursor', true);
+        actions = m_this.currentAnnotation.actions(geo_annotation.state.cursor);
       } else if (registry.registries.annotations[m_mode]) {
         createAnnotation = registry.registries.annotations[m_mode].func;
       }
@@ -669,13 +703,15 @@ var annotationLayer = function (arg) {
         m_this.currentAnnotation = createAnnotation(options);
         m_this.addAnnotation(m_this.currentAnnotation, null);
         actions = m_this.currentAnnotation.actions(geo_annotation.state.create);
+      }
+      if (actions) {
         $.each(actions, function (idx, action) {
           m_this.map().interactor().addAction(action);
         });
       }
       m_this.geoTrigger(geo_event.annotation.mode, {
         mode: m_mode, oldMode: oldMode});
-      if (oldMode === m_this.modes.edit) {
+      if (oldMode === m_this.modes.edit || oldMode === m_this.modes.cursor) {
         m_this.modified();
       }
     }

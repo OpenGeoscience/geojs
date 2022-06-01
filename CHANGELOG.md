@@ -1,5 +1,27 @@
 # GeoJS Change Log
 
+## Version 1.10.0
+
+### Features
+
+- Add a cursor annotation mode ([#1224](../../pull/1224))
+
+## Version 1.9.4
+
+### Improvements
+
+- Update on meta key changes ([#1221](../../pull/1221))
+
+### Bug Fixes
+
+-  Fix determining annotation correspondence ([#1223](../../pull/1223))
+
+## Version 1.9.3
+
+### Improvements
+
+- Speed up track feature ([#1220](../../pull/1220))
+
 ## Version 1.9.2
 
 ### Bug Fixes

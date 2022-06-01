@@ -17,7 +17,8 @@ var geo_action = {
   zoomselect: 'geo_action_zoomselect',
 
   // annotation actions -- some are also added by the registry
-  annotation_edit_handle: 'geo_annotation_edit_handle'
+  annotation_edit_handle: 'geo_annotation_edit_handle',
+  annotation_cursor: 'geo_annotation_cursor'
 };
 
 module.exports = geo_action;

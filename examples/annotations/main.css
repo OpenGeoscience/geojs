@@ -65,6 +65,19 @@
   color: #333;
   cursor: pointer;
 }
+#controls .form-group.compact label {
+  min-width: 0px;
+  padding-right: 5px;
+}
+#controls .form-group.compact select {
+  padding-right: 10px;
+}
+#controls .form-group.compact input[type="range"] {
+  width: 120px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .entry span, .entry a {
   display: inline-block;
 }

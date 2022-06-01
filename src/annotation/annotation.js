@@ -15,7 +15,8 @@ var annotationState = {
   create: 'create',
   done: 'done',
   highlight: 'highlight',
-  edit: 'edit'
+  edit: 'edit',
+  cursor: 'cursor'
 };
 
 var annotationActionOwner = 'annotationAction';
@@ -153,10 +154,13 @@ var annotation = function (type, args) {
 
   /**
    * Assign a new id to this annotation.
+   *
+   * @returns {this}
    */
   this.newId = function () {
     annotationId += 1;
     m_id = annotationId;
+    return m_this;
   };
 
   /**
@@ -308,6 +312,27 @@ var annotation = function (type, args) {
     return m_this;
   };
 
+  this._cursorHandleMousemove = function (evt) {
+    m_this.layer()._handleMouseMoveModifiers(evt);
+    const center = m_this._cursorCenter;
+    const delta = {
+      x: evt.mapgcs.x - center.x,
+      y: evt.mapgcs.y - center.y
+    };
+    if (delta.x || delta.y) {
+      const curPts = m_this._coordinates();
+      var pts = m_this._coordinatesMapFunc(curPts, function (elem) {
+        return {x: elem.x + delta.x, y: elem.y + delta.y};
+      });
+      m_this._coordinates(pts);
+      m_this._cursorCenter = evt.mapgcs;
+      m_this.modified();
+      m_this.draw();
+      return true;
+    }
+    return false;
+  };
+
   /**
    * Get or set the state of this annotation.
    *
@@ -327,6 +352,17 @@ var annotation = function (type, args) {
         m_this.layer().geoTrigger(geo_event.annotation.state, {
           annotation: m_this
         });
+      }
+      if (m_this.layer()) {
+        m_this.layer().geoOff(geo_event.mousemove, m_this._cursorHandleMousemove);
+      }
+      switch (m_state) {
+        case annotationState.cursor:
+          m_this._cursorCenter = util.centerFromPerimeter(m_this._coordinates());
+          if (m_this.layer()) {
+            m_this.layer().geoOn(geo_event.mousemove, m_this._cursorHandleMousemove);
+          }
+          break;
       }
     }
     return m_this;
@@ -355,6 +391,18 @@ var annotation = function (type, args) {
           name: 'annotation edit',
           owner: annotationActionOwner,
           input: 'pan'
+        }];
+      case annotationState.cursor:
+        return [{
+          action: geo_action.annotation_cursor,
+          name: 'annotation cursor',
+          owner: annotationActionOwner,
+          input: 'pan'
+        }, {
+          action: geo_action.annotation_cursor,
+          name: 'annotation cursor',
+          owner: annotationActionOwner,
+          input: 'left'
         }];
       default:
         return [];
@@ -479,7 +527,7 @@ var annotation = function (type, args) {
       /* For style objects, re-extend them without recursion.  This allows
        * setting colors without an opacity field, for instance. */
       ['style', 'createStyle', 'editStyle', 'editHandleStyle', 'labelStyle',
-        'highlightStyle'
+        'highlightStyle', 'cursorStyle'
       ].forEach(function (key) {
         if (arg1[key] !== undefined) {
           $.extend(m_options[key], arg1[key]);
@@ -528,8 +576,8 @@ var annotation = function (type, args) {
    *    current style with the values in the specified object.
    * @param {*} [arg2] If `arg1` is a string, the new value for that style.
    * @param {string} [styleType='style'] The name of the style type, such as
-   *    `createStyle`, `editStyle`, `editHandleStyle`, `labelStyle`, or
-   *    `highlightStyle`.
+   *    `createStyle`, `editStyle`, `editHandleStyle`, `labelStyle`,
+   *    `highlightStyle`, or `cursorStyle`.
    * @returns {object|this} Either the entire style object, the value of a
    *    specific style, or the current class instance.
    */
@@ -578,12 +626,18 @@ var annotation = function (type, args) {
    * @instance
    */
   /**
-   * Calls {@link geo.annotation#style} with `styleType='highlightHandleStyle'`.
-   * @function highlightHandleStyle
+   * Calls {@link geo.annotation#style} with `styleType='highlightStyle'`.
+   * @function highlightStyle
    * @memberof geo.annotation
    * @instance
    */
-  ['createStyle', 'editStyle', 'editHandleStyle', 'labelStyle', 'highlightStyle'
+  /**
+   * Calls {@link geo.annotation#style} with `styleType='cursorStyle'`.
+   * @function cursorStyle
+   * @memberof geo.annotation
+   * @instance
+   */
+  ['createStyle', 'editStyle', 'editHandleStyle', 'labelStyle', 'highlightStyle', 'cursorStyle'
   ].forEach(function (styleType) {
     m_this[styleType] = function (arg1, arg2) {
       return m_this.style(arg1, arg2, styleType);
@@ -607,6 +661,10 @@ var annotation = function (type, args) {
     if (state === annotationState.create) {
       return $.extend({}, m_options.style, m_options.editStyle,
                       m_options[state + 'Style']);
+    }
+    if (state === annotationState.cursor) {
+      return $.extend({}, m_options.style, m_options.editStyle,
+                      m_options.createStyle, m_options[state + 'Style']);
     }
     return m_options[state + 'Style'] || m_options.style || {};
   };

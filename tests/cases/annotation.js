@@ -150,6 +150,13 @@ describe('geo.annotation', function () {
       expect(ann.layer(layer)).toBe(ann);
       expect(ann.layer()).toBe(layer);
     });
+    it('id and new id', function () {
+      var ann = geo.annotation.annotation('test');
+      expect(ann.id()).not.toBe(undefined);
+      var id = ann.id();
+      expect(ann.newId()).toBe(ann);
+      expect(ann.id()).not.toEqual(id);
+    });
     it('state', function () {
       map = createMap();
       layer = map.createLayer('annotation', {
@@ -376,7 +383,8 @@ describe('geo.annotation', function () {
         style: {strokeWidth: 1},
         createStyle: {strokeWidth: 2, fill: false},
         editStyle: {strokeWidth: 3, strokeOpacity: 0.5},
-        highlightStyle: {strokeWidth: 4, fillOpacity: 0.5}
+        highlightStyle: {strokeWidth: 4, fillOpacity: 0.5},
+        cursorStyle: {strokeWidth: 5, fillOpacity: 0.5}
       };
       var ann = geo.annotation.annotation('test', testStyles);
       expect(ann.styleForState()).toEqual(testStyles.style);
@@ -390,6 +398,10 @@ describe('geo.annotation', function () {
       expect(ann.styleForState(geo.annotation.state.highlight)).toEqual(testStyles.highlightStyle);
       ann.state(geo.annotation.state.create);
       expect(ann.styleForState()).toEqual(ann.styleForState(geo.annotation.state.create));
+      // cursor extends create, so it is special
+      expect(ann.styleForState(geo.annotation.state.cursor)).toEqual({
+        strokeWidth: 5, fill: false, strokeOpacity: 0.5, fillOpacity: 0.5
+      });
     });
     it('_addEditHandles', function () {
       var ann = geo.annotation.annotation('test', {layer: layer}),

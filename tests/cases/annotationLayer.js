@@ -350,6 +350,33 @@ describe('geo.annotationLayer', function () {
       expect(layer.displayDistance(c3, null, c1, 'display')).toBeCloseTo(10.63, 2);
       expect(layer.displayDistance(c3, null, c2)).toBeCloseTo(4.47, 2);
     });
+    it('cursor mode', function () {
+      expect(layer.mode()).toBe(null);
+      var rect = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
+      const events = {};
+      layer.addAnnotation(rect, map.gcs());
+      expect(layer.mode(layer.modes.cursor, rect)).toBe(layer);
+      expect(layer.mode()).toBe(layer.modes.cursor);
+      layer.geoOn(geo.event.annotation.cursor_action, function (evt) { events.action = evt; });
+      layer.geoOn(geo.event.annotation.cursor_click, function (evt) { events.click = evt; });
+      map.interactor().simulateEvent('mousemove', {map: {x: 20, y: 20}});
+      expect(events.action).toBe(undefined);
+      expect(events.click).toBe(undefined);
+      map.interactor().simulateEvent('mousedown', {map: {x: 30, y: 30}, button: 'left'});
+      map.interactor().simulateEvent('mousemove', {map: {x: 40, y: 30}, button: 'left'});
+      expect(events.action).not.toBe(undefined);
+      expect(events.click).toBe(undefined);
+      map.interactor().simulateEvent('mouseup', {map: {x: 40, y: 30}, button: 'left'});
+      expect(events.action).not.toBe(undefined);
+      expect(events.click).toBe(undefined);
+      map.interactor().simulateEvent('mousedown', {map: {x: 50, y: 30}, button: 'left'});
+      map.interactor().simulateEvent('mouseup', {map: {x: 50, y: 30}, button: 'left'});
+      expect(events.click).not.toBe(undefined);
+      expect(layer.mode(null)).toBe(layer);
+      expect(layer.mode()).toBe(null);
+    });
   });
   describe('Private utility functions', function () {
     var map, layer, point, rect, rect2, editActionEvent = 0;
