@@ -46,9 +46,12 @@ var util = require('./util');
  *   divided by the sine of half the angle between segments, then a bevel join
  *   is used instead.  This is a single value that applies to all lines.  If a
  *   function, it is called with `(data)`.
- * @property {boolean|function} [uniformLine=false] Boolean indicating if each
- *   line has a uniform style (uniform stroke color, opacity, and width).  Can
- *   vary by line.
+ * @property {boolean|string|function} [uniformLine=false] Boolean indicating
+ *   if each line has a uniform style (uniform stroke color, opacity, and
+ *   width).  Can vary by line.  A value of `'drop'` will modify rendered
+ *   vertex order by dropping duplicates and setting later values to zero
+ *   opacity.  This can be faster but makes it so updating the style array
+ *   can no longer be used.
  * @property {number|function} [antialiasing] Antialiasing distance in pixels.
  *   Values must be non-negative.  A value greater than 1 will produce a
  *   visible gradient.  This is a single value that applies to all lines.
