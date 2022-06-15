@@ -816,7 +816,9 @@ var trackFeature = function (arg) {
       {
         track: util.identityFunction,
         position: util.identityFunction,
-        time: (d, i) => (d.t !== undefined ? d.t : i)
+        time: (d, i) => (d.t !== undefined ? d.t : i),
+        uniformLine: 'drop',
+        closed: false
       },
       arg.style === undefined ? {} : arg.style
     );

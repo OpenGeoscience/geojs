@@ -269,6 +269,7 @@ var webgl_lineFeature = function (arg) {
       closedVal = closed[i];
       firstPosIdx3 = posIdx3;
       maxj = lineItem.length + (closedVal === 2 ? 1 : 0);
+      let skipped = 0;
       for (j = 0; j < maxj; j += 1, posIdx3 += 3) {
         lidx = j;
         if (j === lineItem.length) {
@@ -329,9 +330,17 @@ var webgl_lineFeature = function (arg) {
         }
 
         if (j) {
+          if (uniform === 'drop' && j > 1 && position[vert[0].pos] === position[vert[1].pos] && position[vert[0].pos + 1] === position[vert[1].pos + 1]) {
+            skipped += 1;
+            continue;
+          }
           /* zero out the z position.  This can be changed if we handle it in
            * the shader. */
           for (k = 0; k < orderLen; k += 1, dest += 1, dest3 += 3) {
+            if (uniform === 'drop' && vert[0].strokeOpacity <= 0 && vert[1].strokeOpacity <= 0) {
+              strokeOpacityBuf[dest] = -1;
+              continue;
+            }
             orderk0 = order[k][0];
             v1 = vert[orderk0];
             v2 = vert[1 - orderk0];
@@ -368,6 +377,11 @@ var webgl_lineFeature = function (arg) {
               strokeOpacityBuf[dest] = v1.strokeOpacity;
             }
           }
+        }
+      }
+      if (skipped) {
+        for (k = 0; k < skipped * orderLen; k += 1, dest += 1, dest3 += 3) {
+          strokeOpacityBuf[dest] = -1;
         }
       }
     }
