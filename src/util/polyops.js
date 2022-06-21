@@ -327,16 +327,19 @@ function generateCorrespondence(poly1, poly2, newpoly, results) {
     results[ekey] = Array(poly.length);
     poly.forEach((p, idx) => {
       const found = {};
+      let missed = 0;
       p.forEach((h) => h.forEach((pt) => {
         const key = '_' + pt[0] + '_' + pt[1];
         if (pts[key]) {
           pts[key].forEach((val) => {
             found[val] = (found[val] || 0) + 1;
           });
+        } else {
+          missed += 1;
         }
       }));
       Object.keys(found).forEach((nidx) => {
-        if (found[nidx] === counts[+nidx]) {
+        if (found[nidx] === counts[+nidx] && !missed && p.length === newpoly[+nidx].length) {
           if (!results[ekey][idx]) {
             results[ekey][idx] = [];
           }

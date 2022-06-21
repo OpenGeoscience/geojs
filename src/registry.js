@@ -1,4 +1,6 @@
 var $ = require('jquery');
+var geo_action = require('./action');
+
 var widgets = {
   dom: {}
 };
@@ -398,6 +400,7 @@ util.registerAnnotation = function (name, func, features) {
     console.warn('The ' + name + ' annotation is already registered');
   }
   annotations[name] = {func: func, features: features || {}};
+  geo_action['annotation_' + name] = 'geo_annotation_' + name;
   return old;
 };
 

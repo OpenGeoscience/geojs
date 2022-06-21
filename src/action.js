@@ -16,10 +16,7 @@ var geo_action = {
   zoomrotate: 'geo_action_zoom_rotate',
   zoomselect: 'geo_action_zoomselect',
 
-  // annotation actions
-  annotation_line: 'geo_annotation_line',
-  annotation_polygon: 'geo_annotation_polygon',
-  annotation_rectangle: 'geo_annotation_rectangle',
+  // annotation actions -- some are also added by the registry
   annotation_edit_handle: 'geo_annotation_edit_handle'
 };
 
