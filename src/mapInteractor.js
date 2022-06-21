@@ -25,8 +25,8 @@ var Mousetrap = require('mousetrap');
  *      event must occur within this time in milliseconds of the mouse down
  *      event for it to be considered a click.
  * @property {boolean|number} [click.cancelOnMove=true] If true, don't generate
- *      click events if the mouse moved at all.  If a positive number, the distance
- *      at which to cancel click events when the mouse moves.
+ *      click events if the mouse moved at all.  If a positive number, the
+ *      distance at which to cancel click events when the mouse moves.
  * @property {object} [keyboard] An object describing which keyboard events are
  *      handled.
  * @property {object} [keyboard.actions] An object with different actions that
@@ -39,6 +39,9 @@ var Mousetrap = require('mousetrap');
  *      an object with keys of the meta keys that are required to be down or
  *      up for that scale action to trigger.  If the value of the meta key is
  *      truthy, it must be down.  If `false`, it must be up.
+ * @property {string[]} [keyboard.metakeyMouseEvents] A list of meta keys
+ * *    that, when typed singly, trigger a repeat of the last mousemove or
+ *      actionmove event so that listeners can  update metakey information.
  * @property {boolean} [keyboard.focusHighlight=true] If truthy, when the map
  *      gains focus, a highlight style is shown around it.  This gives an
  *      indicator that keyboard events will affect the map, but may not be
@@ -294,6 +297,10 @@ var mapInteractor = function (args) {
           1: {shift: true, ctrl: true},
           2: {shift: true, ctrl: false}
         },
+        /* This is a list of meta keys that when typed singly trigger a repeat
+         * of the last mousemove or actionmove event so that listeners can
+         * update metakey information. */
+        metakeyMouseEvents: ['shift', 'ctrl', 'shift+ctrl', 'shift+alt', 'shift+meta'],
         /* if focusHighlight is truthy, then a class is added to the map such
          * that when the map gets focus, it is indicated inside the border of
          * the map -- browsers usually show focus on the outside, which isn't
@@ -649,6 +656,35 @@ var mapInteractor = function (args) {
   };
 
   /**
+   * Repeat a mousemove or actionmove event with new metakey information.
+   *
+   * @param {event} [evt] A Mousetrap event with the key change.
+   * @fires geo.event.mousemove
+   * @fires geo.event.actionmove
+   */
+  this._repeatMouseMoveEvent = function (evt) {
+    if (!m_mouse || !m_mouse.modifiers) {
+      return;
+    }
+    const old = {
+      alt: m_mouse.modifiers.alt,
+      ctrl: m_mouse.modifiers.ctrl,
+      meta: m_mouse.modifiers.meta,
+      shift: m_mouse.modifiers.shift
+    };
+    m_this._getMouseModifiers(evt);
+    if (m_mouse.modifiers.alt === old.alt && m_mouse.modifiers.ctrl === old.ctrl && m_mouse.modifiers.meta === old.meta && m_mouse.modifiers.shift === old.shift) {
+      return;
+    }
+    if (m_state.boundDocumentHandlers) {
+      m_this.map().geoTrigger(geo_event.actionmove, {
+        state: m_this.state(), mouse: m_this.mouse(), event: evt});
+    } else {
+      m_this.map().geoTrigger(geo_event.mousemove, m_this.mouse());
+    }
+  };
+
+  /**
    * Retrigger a mouse movement with the current mouse state.
    * @fires geo.event.mousemove
    */
@@ -710,6 +746,13 @@ var mapInteractor = function (args) {
           );
           bound = bound.concat(m_options.keyboard.actions[keyAction]);
         }
+      }
+      if (m_options.keyboard.metakeyMouseEvents) {
+        m_options.keyboard.metakeyMouseEvents.forEach((meta) => {
+          m_keyHandler.bind(meta, m_this._repeatMouseMoveEvent, 'keydown');
+          m_keyHandler.bind(meta, m_this._repeatMouseMoveEvent, 'keyup');
+          bound.push(meta);
+        });
       }
       m_boundKeys = bound;
     }
@@ -2095,7 +2138,7 @@ var mapInteractor = function (args) {
         preventDefault: function () {},
         simulated: true
       };
-      m_keyHandler.trigger(keys);
+      m_keyHandler.trigger(keys, options.event);
       return;
     }
 

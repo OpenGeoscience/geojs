@@ -1296,6 +1296,32 @@ describe('mapInteractor', function () {
     });
   });
 
+  describe('metakey events', function () {
+    it('metakey events', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: false
+            },
+            throttle: false
+          }), triggered = 0;
+      map.geoOn(geo.event.mousemove, function () {
+        triggered += 1;
+      });
+      expect(triggered).toBe(0);
+      interactor.simulateEvent('keyboard', {keys: 'a', event: 'keydown'});
+      expect(triggered).toBe(0);
+      interactor.simulateEvent('keyboard', {keys: 'shift', shift: true, event: 'keydown'});
+      expect(triggered).toBe(1);
+      interactor.simulateEvent(
+        'mousemove', {map: {x: 199, y: 0}, button: 'left'});
+      expect(triggered).toBe(2);
+      interactor.simulateEvent('keyboard', {keys: 'ctrl', ctrl: true, event: 'keydown'});
+      expect(triggered).toBe(3);
+    });
+  });
+
   describe('Public utility methods', function () {
     it('options', function () {
       var interactor = geo.mapInteractor();
