@@ -152,6 +152,14 @@ var annotation = function (type, args) {
   };
 
   /**
+   * Assign a new id to this annotation.
+   */
+  this.newId = function () {
+    annotationId += 1;
+    m_id = annotationId;
+  };
+
+  /**
    * Get or set the name of this annotation.
    *
    * @param {string|undefined} [arg] If `undefined`, return the name, otherwise

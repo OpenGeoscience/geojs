@@ -481,6 +481,9 @@ var annotationLayer = function (arg) {
   this.addAnnotation = function (annotation, gcs, update) {
     var pos = $.inArray(annotation, m_annotations);
     if (pos < 0) {
+      while (m_this.annotationById(annotation.id())) {
+        annotation.newId();
+      }
       m_this.geoTrigger(geo_event.annotation.add_before, {
         annotation: annotation
       });
@@ -1258,11 +1261,15 @@ var annotationLayer = function (arg) {
   this.toPolygonList = function (opts) {
     const poly = [];
     opts = opts || {};
-    opts.annotationIndices = [];
+    const indices = [];
+    if (!opts.annotationIndices) {
+      opts.annotationIndices = {};
+    }
+    opts.annotationIndices[m_this.id()] = indices;
     m_annotations.forEach((annotation, idx) => {
       if (annotation.toPolygonList) {
         annotation.toPolygonList(opts).forEach((p) => poly.push(p));
-        opts.annotationIndices.push(idx);
+        indices.push(idx);
       }
     });
     return poly;
@@ -1285,14 +1292,15 @@ var annotationLayer = function (arg) {
     const keepIds = {};
     const reusedIds = {};
     let correspond, exact, annot;
-    if (opts.annotationIndices && opts.correspond && opts.correspond.poly1 && opts.annotationIndices.length === opts.correspond.poly1.length) {
+    const indices = (opts.annotationIndices || {})[m_this.id()];
+    if (indices && opts.correspond && opts.correspond.poly1 && indices.length === opts.correspond.poly1.length) {
       correspond = opts.correspond.poly1;
       exact = opts.correspond.exact1;
       annot = m_this.annotations();
     }
-    if (keep !== 'all' && keep !== 'none') {
+    if (keep !== 'all' && keep !== 'none' && annot) {
       annot.forEach((oldAnnot, idx) => {
-        if (opts.annotationIndices.indexOf(idx) < 0) {
+        if (indices.indexOf(idx) < 0) {
           keepIds[oldAnnot.id()] = true;
         }
       });
@@ -1306,7 +1314,7 @@ var annotationLayer = function (arg) {
       if (correspond) {
         for (let i = 0; i < correspond.length; i += 1) {
           if (correspond[i] && correspond[i].indexOf(idx) >= 0) {
-            const orig = annot[opts.annotationIndices[i]];
+            const orig = annot[indices[i]];
             if (keep !== 'all' && keep !== 'none' && exact && exact[i] && exact[i].indexOf(idx) >= 0) {
               keepIds[orig.id()] = true;
               return;
@@ -1343,7 +1351,7 @@ var annotationLayer = function (arg) {
     }
     // add new annotations
     polyAnnot.forEach((p) => {
-      m_this.addAnnotation(registry.createAnnotation('polygon', p), m_this.gcs(), false);
+      m_this.addAnnotation(registry.createAnnotation('polygon', p), m_this.map().gcs(), false);
       update = true;
     });
     if (update) {
