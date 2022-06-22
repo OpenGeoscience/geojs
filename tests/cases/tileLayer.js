@@ -485,6 +485,22 @@ describe('geo.tileLayer', function () {
       // we don't test setting it here, as we have too much mocked to carry
       // through.  The setting test is done in the osmLayer tests.
     });
+    it('nearestPixel', function () {
+      var m = map(), layer;
+      opts.map = m;
+      layer = geo.tileLayer(opts);
+      expect(layer.nearestPixel()).toBe(undefined);
+      layer.nearestPixel(4, true);
+      expect(layer.nearestPixel()).toBe(4);
+      layer.nearestPixel(6, true);
+      expect(layer.nearestPixel()).toBe(6);
+      layer.nearestPixel(6, true);
+      expect(layer.nearestPixel()).toBe(6);
+      layer.nearestPixel(true, true);
+      expect(layer.nearestPixel()).toBe(true);
+      layer.nearestPixel(false, true);
+      expect(layer.nearestPixel()).toBe(false);
+    });
   });
   describe('Public utility methods', function () {
     describe('isValid', function () {

@@ -96,6 +96,7 @@ var pixelmapLayer = function (arg) {
   this._init = function () {
     // Call super class init
     s_init.apply(m_this, arguments);
+    m_this.nearestPixel(true, true);
 
     const pixelmapArgs = {quadFeature: m_this.features()[0]};
     if (arg.style) {

@@ -2,6 +2,7 @@ var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var quadFeature = require('../quadFeature');
 var timestamp = require('../timestamp');
+var util = require('../util');
 
 let _memoryCheckLargestTested = 4096 * 4096;
 
@@ -364,6 +365,18 @@ var webgl_quadFeature = function (arg) {
         cropsrc = {x0: 0, y0: 0, x1: 1, y1: 1}, quadcropsrc,
         w, h, quadw, quadh;
 
+    let nearestPixel = m_this.nearestPixel();
+    if (nearestPixel !== undefined) {
+      if (nearestPixel !== true && util.isNonNullFinite(nearestPixel)) {
+        const curZoom = m_this.layer().map().zoom();
+        nearestPixel = curZoom >= nearestPixel;
+      }
+      m_quads.imgQuads.forEach((quad) => {
+        if (quad.image && quad.texture && quad.texture.nearestPixel() !== nearestPixel) {
+          quad.texture.setNearestPixel(nearestPixel);
+        }
+      });
+    }
     if (m_this._hookRenderImageQuads) {
       m_this._hookRenderImageQuads(renderState, m_quads.imgQuads);
     }

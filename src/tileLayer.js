@@ -81,6 +81,10 @@ var featureLayer = require('./featureLayer');
  *   any tile layers.  If specified, this uses the quad defaults, so this is a
  *   ``geo.quadFeature.position`` object with, typically, an ``image`` property
  *   added to it.  The quad positions are in the map gcs coordinates.
+ * @property {boolean|number} [nearestPixel] If true, image quads are
+ *   rendered with near-neighbor sampling.  If false, with interpolated
+ *   sampling.  If a number, interpolate at that zoom level or below and
+ *   nearest neighbor at that zoom level or above.
  */
 
 /**
@@ -228,6 +232,7 @@ var tileLayer = function (arg) {
       m_reference,
       m_exited,
       m_lastBaseQuad,
+      m_nearestPixel = arg.nearestPixel,
       m_this = this;
 
   // copy the options into a private variable
@@ -1676,6 +1681,31 @@ var tileLayer = function (arg) {
       s_visible(val);
 
       if (val) {
+        m_this._update();
+      }
+    }
+    return m_this;
+  };
+
+  /**
+   * Get/Set nearestPixel value.
+   *
+   * @param {boolean|number} [val] If not specified, return the current value.
+   *    If true, image quads are rendered with near-neighbor sampling.  If
+   *    false, with interpolated sampling.  If a number, interpolate at that
+   *    zoom level or below and nearest neighbor at that zoom level or above.
+   * @param {boolean} [skipUpdate] If specifying val and this value is truthy,
+   *    don't update the layer or mark it as modified.
+   * @returns {boolean|number|this}
+   */
+  this.nearestPixel = function (val, skipUpdate) {
+    if (val === undefined) {
+      return m_nearestPixel;
+    }
+    if (m_nearestPixel !== val) {
+      m_nearestPixel = val;
+      if (!skipUpdate) {
+        m_this.modified();
         m_this._update();
       }
     }
