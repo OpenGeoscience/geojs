@@ -27,6 +27,7 @@
   },
   "optionalDependencies": {
     "d3": "^3.5.17",
+    "glslang-validator-prebuilt-predownloaded": "^0.0.2",
     "hammerjs": "^2.0.8",
     "vtk.js": "*"
   },
@@ -53,7 +54,6 @@
     "express": "^4.17.2",
     "fs-extra": "^10.0.0",
     "glob": "^8.0.1",
-    "glslang-validator-prebuilt": "^0.0.7",
     "imports-loader": "^4.0.0",
     "jaguarjs-jsdoc": "^1.0.2",
     "jasmine-core": "^4.0.0",
@@ -135,7 +135,7 @@
     "build-website-tutorials": "node tutorials/build-website.js && webpack --config webpack-website-tutorials.config.js",
     "lint": "eslint --cache . --max-warnings=0",
     "puglint": "pug-lint src examples",
-    "glsllint": "find . \\( -name '*.frag' \\) -exec sh -c 'for n; do python scripts/preprocess_glsl.py \"$n\" | node_modules/glslang-validator-prebuilt/bin/glslangValidator --stdin -S frag || exit 1; done' sh {} \\+ && find . \\( -name '*.vert' \\) -exec sh -c 'for n; do python scripts/preprocess_glsl.py \"$n\" | node_modules/glslang-validator-prebuilt/bin/glslangValidator --stdin -S vert || exit 1; done' sh {} \\+",
+    "glsllint": "chmod +x node_modules/glslang-validator-prebuilt-predownloaded/bin/glslangValidator.linux; find . \\( -name '*.frag' \\) -exec sh -c 'for n; do python scripts/preprocess_glsl.py \"$n\" | node_modules/glslang-validator-prebuilt-predownloaded/bin/glslangValidator.linux --stdin -S frag || exit 1; done' sh {} \\+ && find . \\( -name '*.vert' \\) -exec sh -c 'for n; do python scripts/preprocess_glsl.py \"$n\" | node_modules/glslang-validator-prebuilt-predownloaded/bin/glslangValidator.linux --stdin -S vert || exit 1; done' sh {} \\+",
     "test-headless": "GEOJS_TEST_CASE=tests/test-unit.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch,FirefoxHeadlessTouch",
     "test-headless-all": "GEOJS_TEST_CASE=tests/test-unit.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch,FirefoxHeadlessTouch",
     "test-headed": "GEOJS_TEST_CASE=tests/test-headed.js karma start karma-cov.conf.js --single-run --browsers ChromeFull",
