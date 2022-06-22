@@ -407,18 +407,22 @@ var map = function (arg) {
    *    center.
    * @param {boolean} [ignoreDiscreteZoom] If `true`, ignore the discreteZoom
    *    option when determining the new view.
+   * @param {boolean} [ignoreClampBounds] If `true`, ignore the clampBounds
+   *    option when determining the new view.
    * @returns {number|this}
    * @fires geo.event.zoom
    * @fires geo.event.pan
    */
-  this.zoom = function (val, origin, ignoreDiscreteZoom) {
+  this.zoom = function (val, origin, ignoreDiscreteZoom, ignoreClampBounds) {
     if (val === undefined) {
       return m_zoom;
     }
     var evt, bounds;
     /* If we are zooming around a point, ignore the clamp bounds */
     var aroundPoint = (origin && (origin.mapgcs || origin.geo) && origin.map);
-    var ignoreClampBounds = aroundPoint;
+    if (aroundPoint) {
+      ignoreClampBounds = true;
+    }
 
     /* The ignoreDiscreteZoom flag is intended to allow non-integer zoom values
      * during animation. */
@@ -446,7 +450,7 @@ var map = function (arg) {
       m_this.pan({x: origin.map.x - shifted.x, y: origin.map.y - shifted.y},
                  ignoreDiscreteZoom, true);
     } else {
-      m_this.pan({x: 0, y: 0}, ignoreDiscreteZoom);
+      m_this.pan({x: 0, y: 0}, ignoreDiscreteZoom, ignoreClampBounds);
     }
     return m_this;
   };
@@ -1101,6 +1105,8 @@ var map = function (arg) {
    *    a value based on what canceled a transition, `transition`: the current
    *    transition that just completed, `next`: a boolean if another transition
    *    follows immediately.
+   * @param {boolean} [opts.endClamp=true] If `false`, the last center change
+   *    will not clamp to the bounds and zoom values.
    * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
    *    the interface gcs, `null` to use the map gcs, or any other transform.
    *    Applies only to `opts.center` and to converting zoom values to height,
@@ -1205,7 +1211,8 @@ var map = function (arg) {
       zCoord: opts.zCoord,
       done: opts.done,
       duration: opts.duration,
-      zoomOrigin: opts.zoomOrigin
+      zoomOrigin: opts.zoomOrigin,
+      endClamp: opts.endClamp
     };
 
     m_transition.interp = opts.interp([
@@ -1260,9 +1267,10 @@ var map = function (arg) {
         if (!next) {
           if (m_transition.end.center) {
             var needZoom = m_zoom !== m_this._fix_zoom(m_transition.end.zoom);
-            m_this.center(m_transition.end.center, null, needZoom, needZoom);
+            var noEndClamp = needZoom || opts.endClamp === false;
+            m_this.center(m_transition.end.center, null, noEndClamp, noEndClamp);
           }
-          m_this.zoom(m_transition.end.zoom, m_transition.zoomOrigin);
+          m_this.zoom(m_transition.end.zoom, m_transition.zoomOrigin, opts.endClamp === false, opts.endClamp === false);
           m_this.rotation(fix_rotation(m_transition.end.rotation));
         }
 
@@ -1297,7 +1305,7 @@ var map = function (arg) {
         }, null, true, true);
       } else {
         m_center = m_this.gcsToWorld({x: p[0], y: p[1]}, null);
-        m_this.zoom(p[2], m_transition.zoomOrigin, true);
+        m_this.zoom(p[2], m_transition.zoomOrigin, true, true);
       }
       m_this.rotation(p[3], undefined, true);
 
