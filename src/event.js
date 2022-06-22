@@ -706,4 +706,32 @@ geo_event.annotation.mode = 'geo_annotation_mode';
  */
 geo_event.annotation.boolean = 'geo_annotation_boolean';
 
+/**
+ * Triggered when an annotation is in cursor mode and the mouse is clicked.
+ *
+ * @event geo.event.annotation.cursor_click
+ * @type {geo.event.base}
+ * @property {geo.annotation} annotation The annotation that is being operated
+ *      on.
+ * @property {string} operation The operation being performed.
+ * @property {boolean} [cancel] If the handle sets this to false, don't apply
+ *      the operation to the annotation layer.
+ * @property {object} event The triggering event.
+ */
+geo_event.annotation.cursor_click = 'geo_annotation_cursor_click';
+
+/**
+ * Triggered when an annotation is in cursor mode and an action occurs.
+ *
+ * @event geo.event.annotation.cursor_action
+ * @type {geo.event.base}
+ * @property {geo.annotation} annotation The annotation that is being operated
+ *      on.
+ * @property {string} operation The operation being performed.
+ * @property {boolean} [cancel] If the handle sets this to false, don't apply
+ *      the operation to the annotation layer.
+ * @property {object} event The triggering event.
+ */
+geo_event.annotation.cursor_action = 'geo_annotation_cursor_action';
+
 module.exports = geo_event;

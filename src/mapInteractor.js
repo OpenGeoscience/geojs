@@ -134,6 +134,7 @@ var mapInteractor = function (args) {
       m_boundKeys,
       m_touchHandler,
       m_state,
+      m_nextStateId = 0,
       m_queue,
       $node,
       m_selectionLayer = null,
@@ -1117,6 +1118,7 @@ var mapInteractor = function (args) {
       };
 
       // store the state object
+      m_nextStateId += 1;
       m_state = {
         action: action,
         actionRecord: actionRecord,
@@ -1124,6 +1126,7 @@ var mapInteractor = function (args) {
         initialZoom: map.zoom(),
         initialRotation: map.rotation(),
         initialEventRotation: evt.rotation,
+        stateId: m_nextStateId,
         delta: {x: 0, y: 0}
       };
 

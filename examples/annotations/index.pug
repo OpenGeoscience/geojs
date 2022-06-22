@@ -5,7 +5,7 @@ block append mainContent
     .form-group.annotationtype(title='Select the type of annotation to add.')
       .shortlabel Add
       button#rectangle.lastused(next='square') Rectangle
-      button#square.lastused(next='ellipse') Square
+      button#square(next='ellipse') Square
       button#ellipse(next='circle') Ellipse
       button#circle(next='polygon') Circle
       button#polygon(next='point') Polygon
@@ -21,12 +21,21 @@ block append mainContent
         .annotation.circle Left click-and-drag or left click opposite corners to draw a circle.
         .annotation.point Left click to create a point.
         .annotation.line Left-click points in the line.  Double click, right click, or click the starting point to end the line.
-    .form-group(title='If enabled, left-click to add another annotation, and right-click to switch annotation type.  Otherwise, you must click a button above.')
+    .form-group(title='If "Add New", left-click to add another annotation, and right-click to switch annotation type.  Otherwise, you must click a button above.')
       label(for='clickmode') Click mode
       select#clickmode(param-name='clickmode', placeholder='edit')
         option(value='edit') Select and Edit
         option(value='add') Add New
         option(value='none') None
+        option(value='brush') Brush Mode
+
+    .form-group.compact(title='In Brush Mode, specify the brush shape and size in meters.')
+      label(for='brushshape') Brush Shape
+      select#brushshape(param-name='brushshape', placeholder='square')
+        option(value='square') Square
+        option(value='circle') Circle
+      label(for='brushsize') Size (m)
+      input#brushsize(param-name='brushsize', type='range', min=10, max=100000, value=5000)
     .form-group(title='If enabled, immediately after adding one annotation, you can add another without either left-clicking or selecting a button.')
       label(for='keepadding') Keep adding annotations
       input#keepadding(param-name='keepadding', type='checkbox', placeholder='false')

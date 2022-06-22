@@ -3,6 +3,7 @@ const inherit = require('../inherit');
 const registerAnnotation = require('../registry').registerAnnotation;
 const lineFeature = require('../lineFeature');
 const polygonFeature = require('../polygonFeature');
+const util = require('../util');
 
 const annotation = require('./annotation').annotation;
 const annotationState = require('./annotation').state;
@@ -61,6 +62,9 @@ var polygonAnnotation = function (args) {
         }
         return m_this.options('vertices')[i];
       }
+    },
+    cursorStyle: {
+      position: util.identityFunction
     }
   }, args);
   args.vertices = args.vertices || args.coordinates || [];
@@ -330,6 +334,13 @@ polygonAnnotation.defaults = $.extend({}, annotation.defaults, {
     fillColor: {r: 0.3, g: 0.3, b: 0.3},
     fillOpacity: 0.25,
     stroke: false,
+    strokeColor: {r: 0, g: 0, b: 1}
+  },
+  cursorStyle: {
+    closed: true,
+    fillColor: {r: 0.3, g: 0.3, b: 0.3},
+    fillOpacity: 0.25,
+    stroke: true,
     strokeColor: {r: 0, g: 0, b: 1}
   },
   allowBooleanOperations: true
