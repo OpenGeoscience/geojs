@@ -301,6 +301,7 @@ function select_button(ctl) {
   ctl = $(ctl);
   if (query.clickmode === 'brush') {
     query.clickmode = 'edit';
+    layer.options('clickToEdit', true);
     $('#clickmode').val(query.clickmode);
     utils.setQuery(query);
     setBrushMode();
