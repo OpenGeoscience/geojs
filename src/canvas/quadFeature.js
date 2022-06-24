@@ -138,6 +138,14 @@ var canvas_quadFeature = function (arg) {
 
     var oldAlpha = context2d.globalAlpha;
     var opacity = oldAlpha;
+    var nearestPixel = m_this.nearestPixel();
+    if (nearestPixel !== undefined) {
+      if (nearestPixel !== true && util.isNonNullFinite(nearestPixel)) {
+        const curZoom = m_this.layer().map().zoom();
+        nearestPixel = curZoom >= nearestPixel;
+      }
+      context2d.imageSmoothingEnabled = !nearestPixel;
+    }
     $.each([m_quads.imgQuads, m_quads.vidQuads], function (listidx, quadlist) {
       if (!quadlist) {
         return;
@@ -193,6 +201,7 @@ var canvas_quadFeature = function (arg) {
       context2d.globalAlpha = oldAlpha;
     }
     context2d.setTransform(1, 0, 0, 1, 0, 0);
+    context2d.imageSmoothingEnabled = true;
   };
 
   /**

@@ -47,6 +47,10 @@ var feature = require('./feature');
  *   call `cacheUpdate` on the data item or for all data.
  * @property {geo.quadFeature.styleSpec} [style] Style object with default
  *   style options.
+ * @property {boolean|number} [nearestPixel] If true, image quads are
+ *   rendered with near-neighbor sampling.  If false, with interpolated
+ *   sampling.  If a number, interpolate at that zoom level or below and
+ *   nearest neighbor at that zoom level or above.
  */
 
 /**
@@ -106,6 +110,7 @@ var quadFeature = function (arg) {
   var m_this = this,
       s_init = this._init,
       m_cacheQuads,
+      m_nearestPixel = arg.nearestPixel,
       m_nextQuadId = 0,
       m_images = [],
       m_videos = [],
@@ -675,6 +680,25 @@ var quadFeature = function (arg) {
       return video;
     }
     return null;
+  };
+
+  /**
+   * Get/Set nearestPixel value.
+   *
+   * @param {boolean|number} [val] If not specified, return the current value.
+   *    If true, image quads are rendered with near-neighbor sampling.  If
+   *    false, with interpolated sampling.  If a number, interpolate at that
+   *    zoom level or below and nearest neighbor at that zoom level or above.
+   * @returns {boolean|number|this}
+   */
+  this.nearestPixel = function (val) {
+    if (val === undefined) {
+      return m_nearestPixel;
+    } else {
+      m_nearestPixel = val;
+      m_this.modified();
+    }
+    return m_this;
   };
 
   /**

@@ -185,10 +185,24 @@ describe('geo.core.osmLayer', function () {
       it('destroy', destroy_map);
     });
     describe('webgl', function () {
+      var layer;
       it('creation', function () {
         map = create_map();
-        map.createLayer('osm', {renderer: 'webgl', url: '/testdata/white.jpg'});
+        layer = map.createLayer('osm', {renderer: 'webgl', url: '/testdata/white.jpg'});
         expect(map.node().find('.webgl-canvas').length).toBe(1);
+      });
+      it('nearestPixel', function () {
+        mockAnimationFrame();
+        map.zoom(1);
+        stepAnimationFrame();
+        expect(layer.nearestPixel()).toBe(undefined);
+        layer.nearestPixel(0).draw();
+        stepAnimationFrame();
+        expect(layer.nearestPixel()).toBe(0);
+        layer.nearestPixel(2).draw();
+        stepAnimationFrame();
+        expect(layer.nearestPixel()).toBe(2);
+        unmockAnimationFrame();
       });
       it('destruction', destroy_map);
     });

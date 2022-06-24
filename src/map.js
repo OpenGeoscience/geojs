@@ -1964,6 +1964,9 @@ var map = function (arg) {
     return m_this;
   };
 
+  /* Report the current version on the map object. */
+  this._version = require('./version');
+
   /**
    * Draw a layer image to a canvas context.  The layer's opacity and transform
    * are applied.  This is used as part of making a screenshot.

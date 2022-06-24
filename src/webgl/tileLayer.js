@@ -171,6 +171,7 @@ var webgl_tileLayer = function () {
    */
   this._update = function (request) {
     s_update.call(m_this, request);
+    m_quadFeature.nearestPixel(m_this.nearestPixel());
     m_this._addBaseQuadToTiles(m_quadFeature, m_tiles);
     return m_this;
   };

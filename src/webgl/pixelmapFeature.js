@@ -134,7 +134,8 @@ var webgl_pixelmapFeature = function (arg) {
       m_quadFeature = m_this.layer().createFeature('quad', {
         selectionAPI: false,
         gcs: m_this.gcs(),
-        visible: m_this.visible(undefined, true)
+        visible: m_this.visible(undefined, true),
+        nearestPixel: true
       });
       m_quadFeatureInit = false;
     }
@@ -153,11 +154,6 @@ var webgl_pixelmapFeature = function (arg) {
         prog.addUniform(lutHeight);
       };
       m_quadFeature._hookRenderImageQuads = (renderState, quads) => {
-        quads.forEach((quad) => {
-          if (quad.image && quad.texture && !quad.texture.nearestPixel()) {
-            quad.texture.setNearestPixel(true);
-          }
-        });
         m_lookupTable.bind(renderState, quads);
       };
       if (m_quadFeatureInit === false) {
@@ -188,6 +184,7 @@ var webgl_pixelmapFeature = function (arg) {
 
   if (arg.quadFeature) {
     m_quadFeature = arg.quadFeature;
+    m_quadFeature.nearestPixel(true);
   }
   this._init(arg);
   return this;
