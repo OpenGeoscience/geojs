@@ -1,5 +1,17 @@
 # GeoJS Change Log
 
+## Version 1.10.2
+
+### Improvements
+
+- Directly support nearest pixel or bicubic on quad interpolation ([#1229](../../pull/1229))
+
+## Version 1.10.1
+
+### Improvements
+
+- Make clamping at the end of a map transition optional ([#1226](../../pull/1226))
+
 ## Version 1.10.0
 
 ### Features
