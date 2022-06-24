@@ -373,7 +373,19 @@ var webgl_quadFeature = function (arg) {
       }
       m_quads.imgQuads.forEach((quad) => {
         if (quad.image && quad.texture && quad.texture.nearestPixel() !== nearestPixel) {
+          /* This could just be
+           *   quad.texture.setNearestPixel(nearestPixel);
+           * but that needlessly redecodes the image.  Instead, just change the
+           * the interpolation flags, then change the nearestPixel value
+           * without triggering a complete re-setup. */
+          renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, quad.texture.textureHandle());
+          renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D, vgl.GL.TEXTURE_MIN_FILTER, nearestPixel ? vgl.GL.NEAREST : vgl.GL.LINEAR);
+          renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D, vgl.GL.TEXTURE_MAG_FILTER, nearestPixel ? vgl.GL.NEAREST : vgl.GL.LINEAR);
+          renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, null);
+          const oldmod = quad.texture.modified;
+          quad.texture.modified = () => {};
           quad.texture.setNearestPixel(nearestPixel);
+          quad.texture.modified = oldmod;
         }
       });
     }

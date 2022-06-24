@@ -1,5 +1,11 @@
 # GeoJS Change Log
 
+## Version 1.10.3
+
+### Performance improvements
+
+- Reduce the time it takes to switch texture interpolation ([#1230](../../pull/1230))
+
 ## Version 1.10.2
 
 ### Improvements
