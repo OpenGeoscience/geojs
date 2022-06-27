@@ -1,5 +1,17 @@
 # GeoJS Change Log
 
+## Version 1.10.5
+
+### Bug Fixes
+
+- Guard converting an empty polygon ([#1232](../../pull/1232))
+
+## Version 1.10.4
+
+### Bug Fixes
+
+- Guard accessing a quad feature ([#1231](../../pull/1231))
+
 ## Version 1.10.3
 
 ### Performance improvements
