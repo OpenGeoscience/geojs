@@ -184,7 +184,9 @@ var webgl_pixelmapFeature = function (arg) {
 
   if (arg.quadFeature) {
     m_quadFeature = arg.quadFeature;
-    m_quadFeature.nearestPixel(true);
+    if (m_quadFeature.nearestPixel) {
+      m_quadFeature.nearestPixel(true);
+    }
   }
   this._init(arg);
   return this;
