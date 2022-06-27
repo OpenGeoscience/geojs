@@ -134,7 +134,7 @@ var polygonAnnotation = function (args) {
       (coord.inner || []).forEach((h) => result[0].push(h.map((pt) => [pt.x, pt.y])));
       return result;
     }
-    if (coord.length < 3) {
+    if (coord.length < 3 || !coord.map) {
       return [];
     }
     return [[coord.map((pt) => [pt.x, pt.y])]];

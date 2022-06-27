@@ -141,6 +141,9 @@ var annotation = function (type, args) {
    * Clean up any resources that the annotation is using.
    */
   this._exit = function () {
+    if (m_this.layer()) {
+      m_this.layer().geoOff(geo_event.mousemove, m_this._cursorHandleMousemove);
+    }
   };
 
   /**
@@ -754,6 +757,9 @@ var annotation = function (type, args) {
    */
   this.coordinates = function (gcs) {
     var coord = m_this._coordinates() || [];
+    if (!coord.length && (!coord.outer || !coord.outer.length)) {
+      coord = [];
+    }
     if (m_this.layer()) {
       var map = m_this.layer().map();
       gcs = (gcs === null ? map.gcs() : (
