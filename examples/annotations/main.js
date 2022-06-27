@@ -212,7 +212,7 @@ function setBrushMode(mode) {
   const annot = geo.registries.annotations[shape].func({layer: layer});
   brushLayer.addAnnotation(annot);
   annot._coordinates([{x: 0, y: 0}, {x: size, y: 0}, {x: size, y: size}, {y: size, x: 0}]);
-  brushLayer.mode('cursor', annot);
+  brushLayer.mode(brushLayer.modes.cursor, annot);
   map.draw();
 }
 

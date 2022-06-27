@@ -274,6 +274,15 @@ var object = function () {
   };
 
   /**
+   * Report the current event handlers.
+   *
+   * @returns {object} An object with all of the event handlers.
+   */
+  this._eventHandlers = function () {
+    return m_eventHandlers;
+  };
+
+  /**
    * Free all resources and destroy the object.
    */
   this._exit = function () {
