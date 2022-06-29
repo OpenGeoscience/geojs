@@ -75,7 +75,6 @@ var rectangleAnnotation = function (args, annotationName) {
           name: 'rectangle create',
           owner: annotationActionOwner,
           input: 'left',
-          modifiers: {shift: false, ctrl: false},
           selectionRectangle: true,
           selectionConstraint: this._selectionConstraint
         }];
