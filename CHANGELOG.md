@@ -2,6 +2,19 @@
 
 ## Version 1.10.5
 
+### Improvements
+
+- Allow using the rdp functions on non-feature polygons ([#1234](../../pull/1234))
+- Allow annotations to be created regardless of metakeys ([#1235](../../pull/1235))
+
+## Version 1.10.5
+
+### Bug Fixes
+
+- Guard texture update calls ([#1233](../../pull/1233))
+
+## Version 1.10.5
+
 ### Bug Fixes
 
 - Guard converting an empty polygon ([#1232](../../pull/1232))

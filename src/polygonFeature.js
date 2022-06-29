@@ -573,9 +573,11 @@ var polygonFeature = function (arg) {
    *    get the position of each vertex.
    * @param {function} [polyFunc=this.style.get('polygon')] The function to
    *    get each polygon.
-   * @returns {this}
+   * @param {boolean} [returnData=false] If truthy, return the new data array
+   *    rather than modifying the feature.
+   * @returns {this|array}
    */
-  this.rdpSimplifyData = function (data, tolerance, posFunc, polyFunc) {
+  this.rdpSimplifyData = function (data, tolerance, posFunc, polyFunc, returnData) {
     var map = m_this.layer().map(),
         mapgcs = map.gcs(),
         featuregcs = m_this.gcs(),
@@ -633,6 +635,9 @@ var polygonFeature = function (arg) {
       }
       return elem;
     });
+    if (returnData) {
+      return data;
+    }
 
     /* Set the reduced polgons as the data and use simple accessors. */
     m_this.style('position', util.identityFunction);
