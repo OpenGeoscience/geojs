@@ -372,7 +372,7 @@ var webgl_quadFeature = function (arg) {
         nearestPixel = curZoom >= nearestPixel;
       }
       m_quads.imgQuads.forEach((quad) => {
-        if (quad.image && quad.texture && quad.texture.nearestPixel() !== nearestPixel) {
+        if (quad.image && quad.texture && quad.texture.nearestPixel() !== nearestPixel && quad.texture.textureHandle()) {
           /* This could just be
            *   quad.texture.setNearestPixel(nearestPixel);
            * but that needlessly redecodes the image.  Instead, just change the
