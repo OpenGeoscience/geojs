@@ -1271,8 +1271,7 @@ function continuousVerticesActions(m_this, s_actions, state, name, originalArgs)
         action: geo_action['annotation_' + name],
         name: name + ' create',
         owner: annotationActionOwner,
-        input: 'left',
-        modifiers: {shift: false, ctrl: false}
+        input: 'left'
       }, {
         action: geo_action['annotation_' + name],
         name: name + ' create',
