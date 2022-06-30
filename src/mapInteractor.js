@@ -101,6 +101,28 @@ var Mousetrap = require('mousetrap');
  */
 
 /**
+ * The state of the mouse.
+ *
+ * @typedef {object} geo.mouseState
+ * @property {geo.screenPosition} page Mouse position relative to the page.
+ * @property {geo.geoPosition} map Mouse position relative to the map.
+ * @property {geo.geoPosition} geo Mouse position in map interface gcs.
+ * @property {geo.geoPosition} mapgcs Mouse position in map gcs
+ * @property {object} buttons Which mouse buttons are down.
+ * @property {boolean} buttons.left State of the left mouse button.
+ * @property {boolean} buttons.right State of the right mouse button.
+ * @property {boolean} buttons.middle State of the middle mouse button.
+ * @property {object} modifiers Which modifier keys are down.
+ * @property {boolean} modifiers.alt State of the alt key.
+ * @property {boolean} modifiers.ctrl State of the ctrl key.
+ * @property {boolean} modifiers.shift State of the shift key.
+ * @property {boolean} modifiers.meta State of the meta key.
+ * @property {number} time Time (epoch ms) the event was captured.
+ * @property {number} deltaTime Time elapsed (ms) since the last mouse event.
+ * @property {geo.screenPosition} velocity Mouse speed in pixels/ms.
+ */
+
+/**
  * The mapInteractor class is responsible for handling raw events from the
  * browser and interpreting them as map navigation interactions.  This class
  * will call the navigation methods on the connected map, which will make
