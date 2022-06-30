@@ -1062,6 +1062,58 @@ describe('geo.annotation', function () {
       expect(ann.options('vertices').length).toBe(3);
       expect(ann.state()).toBe(geo.annotation.state.done);
     });
+    it('crossed polygon', function () {
+      var map = createMap();
+      var layer = map.createLayer('annotation', {
+        annotations: ['polygon']
+      });
+      var ann = geo.annotation.polygonAnnotation({layer: layer});
+      var time = Date.now();
+      ann.state(geo.annotation.state.create);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 10, y: 20},
+        mapgcs: map.displayToGcs({x: 10, y: 20}, null)
+      });
+      expect(ann.options('vertices').length).toBe(2);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 50, y: 20},
+        mapgcs: map.displayToGcs({x: 50, y: 20}, null)
+      });
+      expect(ann.options('vertices').length).toBe(3);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 40, y: 30},
+        mapgcs: map.displayToGcs({x: 40, y: 30}, null)
+      });
+      expect(ann.options('vertices').length).toBe(4);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 30, y: 10},
+        mapgcs: map.displayToGcs({x: 30, y: 10}, null)
+      });
+      expect(ann.options('vertices').length).toBe(5);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 20, y: 30},
+        mapgcs: map.displayToGcs({x: 20, y: 30}, null)
+      });
+      expect(ann.options('vertices').length).toBe(6);
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 10, y: 20},
+        mapgcs: map.displayToGcs({x: 10, y: 20}, null)
+      });
+      expect(ann.options('vertices').length).toBe(9);
+      expect(ann.state()).toBe(geo.annotation.state.done);
+    });
   });
 
   describe('geo.annotation.polygonAnnotation with holes', function () {

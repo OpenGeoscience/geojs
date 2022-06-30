@@ -72,7 +72,8 @@ var polygonAnnotation = function (args) {
   annotation.call(this, 'polygon', args);
 
   var m_this = this,
-      s_actions = this.actions;
+      s_actions = this.actions,
+      s_state = this.state;
 
   /**
    * Get a list of renderable features for this annotation.  When the polygon
@@ -243,6 +244,46 @@ var polygonAnnotation = function (args) {
    */
   this.actions = function (state) {
     return continuousVerticesActions(m_this, s_actions, state, 'polygon', arguments);
+  };
+
+  /**
+   * Get or set the state of this annotation.
+   *
+   * @param {string|undefined} [arg] If `undefined`, return the state,
+   *    otherwise change it.  This should be one of the
+   *    {@link geo.annotation.state} values.
+   * @returns {this|string} The current state or this annotation.
+   * @fires geo.event.annotation.state
+   */
+  this.state = function (arg) {
+    const oldState = s_state();
+    if (arg && arg !== oldState && ((oldState === annotationState.create || oldState === annotationState.edit) && arg === annotationState.done)) {
+      /* Uncross polygons when they are complete. */
+      const opts = {style: 'object-listlist-outer-list'};
+      const polys = util.polyops.union(m_this.options('vertices'), [], opts);
+      let merged = true;
+      while (polys.length > 1 && merged) {
+        merged = false;
+        for (let i = 0; !merged && i < polys[0].outer.length; i += 1) {
+          const pt1 = polys[0].outer[i];
+          for (let p = 1; !merged && p < polys.length; p += 1) {
+            for (let j = 0; !merged && j < polys[p].outer.length; j += 1) {
+              const pt2 = polys[p].outer[j];
+              if (pt1.x === pt2.x && pt1.y === pt2.y) {
+                polys[0].inner = polys[0].inner.concat(polys[p].inner);
+                polys[0].outer = polys[0].outer.slice(0, i).concat(polys[p].outer.slice(j)).concat(polys[p].outer.slice(0, j)).concat(polys[0].outer.slice(i));
+                polys.splice(p, 1);
+                merged = true;
+              }
+            }
+          }
+        }
+      }
+      if (polys.length === 1) {
+        m_this.options('vertices', polys[0].inner.length ? polys[0] : polys[0].outer);
+      }
+    }
+    return s_state(arg);
   };
 
   /**
