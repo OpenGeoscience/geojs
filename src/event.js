@@ -7,7 +7,7 @@
  *
  * @namespace
  * @alias geo.event
- * @type {geo.event.base}
+ * @type {object}
  *
  * @example
  * map.geoOn(geo.event.layerAdd, function (event) {
