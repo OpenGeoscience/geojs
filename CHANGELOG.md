@@ -1,5 +1,11 @@
 # GeoJS Change Log
 
+## Version 1.10.6
+
+### Improvements
+
+- Uncross polygon annotations ([#1236](../../pull/1236))
+
 ## Version 1.10.5
 
 ### Improvements
