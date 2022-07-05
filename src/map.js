@@ -1966,6 +1966,8 @@ var map = function (arg) {
 
   /* Report the current version on the map object. */
   this._version = require('./version');
+  /* Link to the main library */
+  this._geo = require('./index');
 
   /**
    * Draw a layer image to a canvas context.  The layer's opacity and transform
