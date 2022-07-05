@@ -1,19 +1,29 @@
 # GeoJS Change Log
 
-## Version 1.10.6
+## Version 1.10.9
+
+### Performance Improvements
+
+- Speed up converting polybool segments to polygons ([#1239](../../pull/1239))
+
+### Improvements
+
+- Easier map debugging ([#1240](../../pull/1240))
+
+## Version 1.10.8
 
 ### Improvements
 
 - Uncross polygon annotations ([#1236](../../pull/1236))
 
-## Version 1.10.5
+## Version 1.10.7
 
 ### Improvements
 
 - Allow using the rdp functions on non-feature polygons ([#1234](../../pull/1234))
 - Allow annotations to be created regardless of metakeys ([#1235](../../pull/1235))
 
-## Version 1.10.5
+## Version 1.10.6
 
 ### Bug Fixes
 
