@@ -1,5 +1,6 @@
 var PolyBool = require('polybooljs');
 var geo_map = require('../map');
+var util = require('../util/common');
 
 /**
  * A list of flat polygon lists.
@@ -80,11 +81,13 @@ const AlternateOpNames = {
  * Convert a segment list to a polygon list.
  *
  * @param {object[]} seglist A PolyBool segment list.
- * @returns {geo.polygonList} A polygon list.
+ * @returns {geo.polygonList|undefined} A polygon list.
  */
 function seglistToPolygonList(seglist) {
   // This single line doesn't arrange holes correctly
   // return seglist.map((s) => PolyBool.polygon(s).regions);
+  /* This uses PolyBools' operations (mostly), but is much slower than needed
+   * since it goes through geojson.
   const polys = [];
   seglist.forEach((s) => {
     const geojson = PolyBool.polygonToGeoJSON(PolyBool.polygon(s));
@@ -97,6 +100,52 @@ function seglistToPolygonList(seglist) {
     }
   });
   return polys;
+   */
+  const polys = []; // end result
+  const borders = []; // polygons in format needed for util.pointInPolygon
+  const regions = []; // polygons in end result format
+  const parents = []; // list of parents of each polygon
+  seglist.forEach((s) => PolyBool.polygon(s).regions.forEach((r) => {
+    const border = r.map((pt) => ({x: pt[0], y: pt[1]}));
+    if (border.length < 3) {
+      return;
+    }
+    parents.push([]);
+    borders.forEach((b, i) => {
+      if (util.pointInPolygon(border[0], b)) {
+        parents[borders.length].push(i);
+      } else if (util.pointInPolygon(b[0], border)) {
+        parents[i].push(borders.length);
+      }
+    });
+    regions.push(r);
+    borders.push(border);
+  }));
+  /* find nested polygons */
+  const dest = Array(regions.length);
+  let used = 0;
+  while (used < regions.length) {
+    for (let i = 0; i < regions.length; i += 1) {
+      if (dest[i] === undefined && !parents[i].length) {
+        dest[i] = polys.length;
+        /* reverse the outer polygons for consistency with how PolyBool
+         * generates geojson */
+        polys.push([regions[i].reverse()]);
+        used += 1;
+      }
+    }
+    for (let i = 0; i < regions.length; i += 1) {
+      if (dest[i] === undefined && parents[i].length === 1 && dest[parents[i][0]] !== undefined) {
+        polys[dest[parents[i][0]]].push(regions[i]);
+        dest[i] = dest[parents[i][0]];
+        used += 1;
+      }
+    }
+    for (let i = 0; i < regions.length; i += 1) {
+      parents[i] = parents[i].filter((d) => dest[d] === undefined);
+    }
+  }
+  return polys.length ? polys : [[]];
 }
 
 /**
