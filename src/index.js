@@ -108,3 +108,9 @@ if (window && !window.$) {
 if (window && !window.jQuery) {
   window.jQuery = $;
 }
+if (window && !window.geojsMap) {
+  window.geojsMap = () => {
+    const maps = $('.geojs-map').map((idx, m) => $(m).data('data-geojs-map'));
+    return maps.length === 0 ? undefined : maps.length === 1 ? maps[0] : maps;
+  };
+}
