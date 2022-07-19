@@ -20,6 +20,7 @@
         "no-var": "off",
         "object-curly-spacing": "off",
         "object-curly-newline": "off",
+        "object-shorthand": "off",
         "one-var": "off",
         "operator-linebreak": "off",
         "padded-blocks": "off",
