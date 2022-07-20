@@ -76,3 +76,52 @@ block mainTutorial
     'map.layers()[1].features()[0].style().fillColor === "red"',
     'map.layers()[1].features()[0].style().strokeColor === "black"'
     ])
+
+  :markdown-it
+    We can make the points draggable.
+
+  +codeblock('javascript', 5, 4).
+    // we store the current city in this value
+    let focusCity;
+    // we copy the current city here when we start dragging
+    let startingPosition;
+    // when the mouse goes over a city, record that it has done so and add some
+    // actions so that touch and mosue pans are ignored and our own action is
+    // used instead.
+    feature.geoOn(geo.event.feature.mouseon, (evt) => {
+      focusCity = cities[evt.index];
+      startingPosition = Object.assign({}, focusCity);
+      map.interactor().addAction({
+        action: 'dragpoint',
+        name: 'drag point with mouse',
+        owner: 'example',
+        input: 'left'});  // left mouse drag
+      map.interactor().addAction({
+        action: 'dragpoint',
+        name: 'drag point with touch',
+        owner: 'example',
+        input: 'pan'});  // touch drag
+    });
+    // when the mouse leaves a city, discard the special actions so panning
+    // works again
+    feature.geoOn(geo.event.feature.mouseoff, (evt) => {
+      focusCity = undefined;
+      map.interactor().removeAction(undefined, undefined, 'example');
+    });
+    // when our action fires, use the action delta in the map interface
+    // coordinate system to move the focusCity city.
+    feature.geoOn(geo.event.actionmove, (evt) => {
+      if (evt.state.action !== 'dragpoint' || focusCity === undefined) {
+        return;
+      }
+      // evt.mouse.geo is the current mouse position in the map interface gcs.
+      // evt.state.origin.geo is the mouse position when the action started in
+      // the map interface gcs.
+      focusCity.lon = startingPosition.lon + evt.mouse.geo.x - evt.state.origin.geo.x;
+      focusCity.lat = startingPosition.lat + evt.mouse.geo.y - evt.state.origin.geo.y;
+      // mark that the feature's data has changed so that positions will be
+      // recomputed.  We could have also done "feature.data(cities)".
+      feature.dataTime().modified();
+      // draw the change
+      feature.draw();
+    });
