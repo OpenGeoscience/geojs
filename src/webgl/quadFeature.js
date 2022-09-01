@@ -283,6 +283,16 @@ var webgl_quadFeature = function (arg) {
       } else {
         texture = new vgl.texture();
         texture.setImage(quad.image);
+        let nearestPixel = m_this.nearestPixel();
+        if (nearestPixel !== undefined) {
+          if (nearestPixel !== true && util.isNonNullFinite(nearestPixel)) {
+            const curZoom = m_this.layer().map().zoom();
+            nearestPixel = curZoom >= nearestPixel;
+          }
+        }
+        if (nearestPixel) {
+          texture.setNearestPixel(true);
+        }
         quad.texture = quad.image._texture = texture;
       }
     });
