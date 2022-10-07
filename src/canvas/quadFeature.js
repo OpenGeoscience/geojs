@@ -172,8 +172,10 @@ var canvas_quadFeature = function (arg) {
         var p0 = map.gcsToDisplay({x: quad.pos[0], y: quad.pos[1]}, null),
             p2 = map.gcsToDisplay({x: quad.pos[6], y: quad.pos[7]}, null),
             p3 = map.gcsToDisplay({x: quad.pos[9], y: quad.pos[10]}, null);
-        context2d.setTransform((p3.x - p2.x) / w, (p3.y - p2.y) / w,
-                               (p0.x - p2.x) / h, (p0.y - p2.y) / h,
+        const cw = Math.min(w, quad.crop ? quad.crop.x || w : w);
+        const ch = Math.min(h, quad.crop ? quad.crop.y || h : h);
+        context2d.setTransform((p3.x - p2.x) / cw, (p3.y - p2.y) / cw,
+                               (p0.x - p2.x) / ch, (p0.y - p2.y) / ch,
                                p2.x, p2.y);
         if (quad.opacity !== opacity) {
           opacity = quad.opacity;
@@ -182,17 +184,15 @@ var canvas_quadFeature = function (arg) {
         if (!quad.crop) {
           context2d.drawImage(src, 0, 0);
         } else {
-          const cropw = Math.min(w, quad.crop.x || w),
-              croph = Math.min(h, quad.crop.y || h),
-              cropx0 = Math.max(0, quad.crop.left || 0),
+          const cropx0 = Math.max(0, quad.crop.left || 0),
               cropy0 = Math.max(0, quad.crop.top || 0),
               cropx1 = Math.min(w, quad.crop.right || w),
               cropy1 = Math.min(h, quad.crop.bottom || h);
-          if (w && h && cropw > 0 && croph > 0 && cropx1 > cropx0 && cropy1 > cropy0) {
+          if (w && h && cw > 0 && ch > 0 && cropx1 > cropx0 && cropy1 > cropy0) {
             context2d.drawImage(
               src,
-              cropx0, cropy0, Math.floor((cropx1 - cropx0) * cropw / w), Math.floor((cropy1 - cropy0) * croph / h),
-              0, 0, cropw, croph);
+              cropx0, cropy0, cropx1 - cropx0, cropy1 - cropy0,
+              0, 0, cw, ch);
           }
         }
       });
