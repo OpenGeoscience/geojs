@@ -17,8 +17,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
       with:
         node-version: '16'
     - uses: browser-actions/setup-firefox@latest
@@ -44,7 +44,7 @@ jobs:
         python3 tests/runners/baseline_images.py -cevb _build
     - name: Upload test images on failure
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: images
         path: |
@@ -52,7 +52,7 @@ jobs:
           _build/Baseline*tgz
     - name: Upload artifacts
       if: ${{ always() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: dist
         path: |
@@ -60,7 +60,7 @@ jobs:
           dist/built
     - name: Upload built website
       if: ${{ success() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: website
         path: |
@@ -68,9 +68,9 @@ jobs:
   unpinned:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     # Don't pin version to test with the latest common version
-    - uses: actions/setup-node@v2
+    - uses: actions/setup-node@v3
     - run: npm --version && node --version
     - uses: browser-actions/setup-firefox@latest
     - run: sudo apt-get remove --yes fonts-lato
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Import artifacts
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: website
         path: website/public
@@ -104,13 +104,13 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
       with:
         node-version: '16'
     - run: npm ci
     - name: Import artifacts
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: dist
         path: dist

@@ -36,7 +36,7 @@
     "@babel/plugin-proposal-class-properties": "^7.16.5",
     "@babel/preset-env": "^7.16.5",
     "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
-    "babel-loader": "^8.2.3",
+    "babel-loader": "^9.0.1",
     "babel-plugin-istanbul": "^6.1.1",
     "bootstrap": "^3.4.1",
     "bootswatch": "^3.4.1",
