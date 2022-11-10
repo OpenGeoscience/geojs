@@ -7,7 +7,8 @@
 [![Gitter](https://badges.gitter.im/OpenGeoscience/geojs.svg)](https://gitter.im/OpenGeoscience/geojs)
 
 GeoJS is intended to bridge the gap between
-[GIS](https://en.wikipedia.org/wiki/Geographic_information_system),[Scientific Visualization](https://en.wikipedia.org/wiki/Scientific_visualization), and
+[GIS](https://en.wikipedia.org/wiki/Geographic_information_system),
+[Scientific Visualization](https://en.wikipedia.org/wiki/Scientific_visualization), and
 [Infovis](https://en.wikipedia.org/wiki/Information_visualization).
 GeoJS is more than just a GIS library as users can create scientific plots
 such as vector and contour and can embed infovis plots using [D3.js](https://github.com/d3/d3).
