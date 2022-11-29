@@ -430,7 +430,7 @@ var webgl_quadFeature = function (arg) {
       if (!crop || quadcrop.x !== crop.x || quadcrop.y !== crop.y) {
         crop = quadcrop;
         context.uniform2fv(renderState.m_material.shaderProgram()
-          .uniformLocation('crop'), new Float32Array([crop.x || 1, crop.y || 1]));
+          .uniformLocation('crop'), new Float32Array([crop.x === undefined ? 1 : crop.x, crop.y === undefined ? 1 : crop.y]));
       }
       w = quad.image.width;
       h = quad.image.height;
