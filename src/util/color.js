@@ -2,6 +2,7 @@
 
 var util = require('./common');
 var colorName = require('color-name');
+colorName = colorName.__esModule ? colorName.default : colorName;
 
 /**
  * A color value.  Although opacity can be specified, it is not always used.
