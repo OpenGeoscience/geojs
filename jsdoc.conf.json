@@ -16,5 +16,41 @@
     "default": {
       "outputSourceFiles": true
     }
+  },
+  "docdash": {
+    "static": true,
+    "sort": true,
+    "sectionOrder": [
+      "Classes",
+      "Modules",
+      "Externals",
+      "Events",
+      "Namespaces",
+      "Mixins",
+      "Tutorials",
+      "Interfaces"
+    ],
+    "search": true,
+    "collapse": true,
+    "wrap": false,
+    "typedefs": true,
+    "removeQuotes": "trim",
+    "scopeInOutputPath": false,
+    "nameInOutputPath": false,
+    "versionInOutputPath": false,
+    "menu": {
+      "GitHub Repository": {
+        "href": "https://github.com/OpenGeoscience/geojs",
+        "target":"_blank",
+        "class":"menu-item",
+        "id":"website_link"
+      }
+    },
+    "openGraph": {
+      "title": "GeoJS"
+    },
+    "meta": {
+      "title": "GeoJS"
+    }
   }
 }

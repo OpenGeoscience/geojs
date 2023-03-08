@@ -71,6 +71,9 @@ jobs:
     - uses: actions/checkout@v3
     # Don't pin version to test with the latest common version
     - uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+    #    node-version: 'lts/*'
     - run: npm --version && node --version
     - uses: browser-actions/setup-firefox@latest
     - run: sudo apt-get remove --yes fonts-lato

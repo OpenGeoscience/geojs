@@ -1,21 +1,15 @@
-.main ul.list {
-  column-width: 300px;
+#main ul.list {
+  column-width: 240px;
+  padding: 0;
+  margin: 0;
 }
-.main td.name .inherited {
-  background-color: #ccc!important;
+#main ul.list li {
+  list-style-type: none;
+  line-height: 133%;
 }
-.main td.name .inherited a {
-  color: #c7254e;
+#main .top-class-list, #main .top-typedef-list {
+  padding-left: 30px;
 }
-.main .subsection-title {
-  margin-top: inherit;
-}
-.main h2.subsection-title {
-  font-size: 20px;
-  margin-top: 30px;
-  border-top: 3px double #e1e1e1;
-  padding-top: 20px;
-}
-:target {
-  background-color: #ff8;
+nav > ul > li > a {
+  margin-top: 5px;
 }
