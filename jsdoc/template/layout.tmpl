@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <?js if (!env.conf.docdash) { env.conf.docdash = {};} ?>
     <meta charset="utf-8">
-    <title><?js= ((env.conf.templates.meta && env.conf.templates.meta.title) || title) ?></title>
+    <title><?js= title ?> - <?js= ((env.conf.docdash.meta && env.conf.docdash.meta.title) || "Documentation") ?></title>
     <link rel="apple-touch-icon" sizes="57x57" href="../favicon/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="../favicon/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="../favicon/apple-icon-72x72.png">
@@ -17,74 +18,99 @@
     <link rel="icon" type="image/png" sizes="96x96" href="../favicon/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
     <link rel="manifest" href="../favicon/manifest.json">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="../favicon/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff">
-    <?js if (env.conf.templates.meta) { ?>
-    <?js if (env.conf.templates.meta.description) { ?><meta name="description" content="<?js= env.conf.templates.meta.description ?>" /><?js } ?>
-    <?js if (env.conf.templates.meta.keyword) { ?>
-        <meta name="keywords" content="<?js= env.conf.templates.meta.keyword ?>" />
-        <meta name="keyword" content="<?js= env.conf.templates.meta.keyword ?>" />
+    <?js if (env.conf.docdash.meta) { ?>
+    <?js if (env.conf.docdash.meta.description) { ?><meta name="description" content="<?js= env.conf.docdash.meta.description ?>" /><?js } ?>
+    <?js if (env.conf.docdash.meta.keyword) { ?>
+        <meta name="keywords" content="<?js= env.conf.docdash.meta.keyword ?>" />
+        <meta name="keyword" content="<?js= env.conf.docdash.meta.keyword ?>" />
     <?js } ?>
     <?js } ?>
-    <?js if (env.conf.templates.openGraph) { ?>
-    <meta property="og:title" content="<?js= env.conf.templates.openGraph.title ?>"/>
-    <meta property="og:type" content="<?js= env.conf.templates.openGraph.type ?>"/>
-    <meta property="og:image" content="<?js= env.conf.templates.openGraph.image ?>"/>
-    <?js if (env.conf.templates.openGraph.site_name) { ?><meta property="og:site_name" content="<?js= env.conf.templates.openGraph.site_name ?>"/><?js } ?>
-    <meta property="og:url" content="<?js= env.conf.templates.openGraph.url ?>"/>
+    <?js if (env.conf.docdash.openGraph) { ?>
+    <meta property="og:title" content="<?js= env.conf.docdash.openGraph.title ?>"/>
+    <meta property="og:type" content="<?js= env.conf.docdash.openGraph.type ?>"/>
+    <meta property="og:image" content="<?js= env.conf.docdash.openGraph.image ?>"/>
+    <?js if (env.conf.docdash.openGraph.site_name) { ?><meta property="og:site_name" content="<?js= env.conf.docdash.openGraph.site_name ?>"/><?js } ?>
+    <meta property="og:url" content="<?js= env.conf.docdash.openGraph.url ?>"/>
     <?js } ?>
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
-    <script src="scripts/jquery.min.js"></script>
     <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="styles/jaguar.css">
-
-    <?js if (env.conf.templates) { ?>
-    <script>
-    var config = <?js= JSON.stringify(env.conf.templates) ?>;
-    </script>
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <?js if (env.conf.docdash.commonNav) { ?>
+    <script src="scripts/commonNav.js" defer></script>
     <?js } ?>
-
-    <?js if (env.conf.templates.googleAnalytics) { ?>
-    <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', config.googleAnalytics]);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-    </script>
-    <?js } ?>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-<div id="wrap" class="clearfix">
-    <?js= this.partial('navigation.tmpl', this) ?>
-    <div class="main">
-        <h1 class="page-title" data-filename="<?js= filename ?>"><?js= title ?></h1>
-        <?js= content ?>
 
-        <?js if (env.conf.templates.disqus) { ?>
-        <!-- disqus code -->
-        <div id="disqus_thread"></div>
-        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-        <!-- // disqus code -->
-        <?js } ?>
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
 
-        <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc <?js= env.version.number ?></a> on <?js= (new Date()) ?>
-        </footer>
-    </div>
+<label for="nav-trigger" class="overlay"></label>
+
+<nav <?js if (env.conf.docdash.wrap) { ?>class="wrap"<?js } ?>>
+    <?js if (env.conf.docdash.search) { ?>
+    <input type="text" id="nav-search" placeholder="Search" />
+    <?js } ?>
+    <?js if (!env.conf.docdash.commonNav) { ?>
+    <?js= this.nav ?>
+    <?js } ?>
+</nav>
+
+<div id="main">
+    <?js if (title != 'Home') { ?>
+    <h1 class="page-title"><?js= title ?></h1>
+    <?js } ?>
+
+    <?js= content ?>
+
+    <?js if (env.conf.docdash.disqus) { ?>
+    <div id="disqus_thread"></div>
+    <script>
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//<?js= env.conf.docdash.disqus ?>.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <?js } ?>
 </div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc <?js= env.version.number ?></a><?js if(env.conf.templates && env.conf.templates.default && env.conf.templates.default.includeDate !== false) { ?> on <?js= (new Date()) ?><?js } ?> using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
 <script>prettyPrint();</script>
-<script src="scripts/jaguar.js"></script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+<?js if (env.conf.docdash.search) { ?>
+<script src="scripts/search.js" defer></script>
+<?js } ?>
+<?js if (env.conf.docdash.collapse) { ?>
+<script src="scripts/collapse.js" defer></script>
+<?js } ?>
+<?js if (env.conf.docdash.scripts && env.conf.docdash.scripts.length) {
+    for(var i = 0; i < env.conf.docdash.scripts.length; i++){
+        if (env.conf.docdash.scripts[i].indexOf(".css") != -1) {
+    ?>
+    <link type="text/css" rel="stylesheet" href="<?js= env.conf.docdash.scripts[i] ?>">
+    <?js
+        } else {
+    ?>
+    <script src="<?js= env.conf.docdash.scripts[i] ?>"></script>
+    <?js
+        }
+    }
+} ?>
 </body>
 </html>
