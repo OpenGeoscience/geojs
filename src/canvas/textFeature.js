@@ -143,6 +143,9 @@ var canvas_textFeature = function (arg) {
       }
       m_this._canvasProperty(context2d, 'fillStyle', util.convertColorToRGBA(color));
       text = textFunc(d, i);
+      if (text === undefined || text === null || text === '') {
+        return;
+      }
       m_this._canvasProperty(context2d, 'font', m_this.getFontFromStyles(fontFromSubValues, d, i));
       m_this._canvasProperty(context2d, 'textAlign', m_this.style.get('textAlign')(d, i) || 'center');
       m_this._canvasProperty(context2d, 'textBaseline', m_this.style.get('textBaseline')(d, i) || 'middle');
