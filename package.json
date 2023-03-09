@@ -79,7 +79,7 @@
     "pug-lint": "^2.6.0",
     "pug-load": "^3.0.0",
     "raw-body": "^2.4.2",
-    "resemblejs": "^4.0.0",
+    "resemblejs": "git+https://github.com/dominykas/Resemble.js",
     "semantic-release": "^19.0.2",
     "serve-index": "^1.9.1",
     "shader-loader": "git+https://github.com/Makio64/shader-loader",
