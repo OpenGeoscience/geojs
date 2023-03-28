@@ -89,6 +89,25 @@ describe('webglPixelmapLayer', function () {
       done();
     });
   });
+  it('geoOn and geoOff from array', function (done) {
+    createPixelmap();
+    var click = 0;
+    layer.geoOn([geo.event.feature.mouseclick], () => {
+      click += 1;
+    });
+    // wait for the tiles to be available
+    map.onIdle(() => {
+      expect(click).toEqual(0);
+      map.interactor().simulateEvent('mousedown', {map: {x: 390, y: 200}});
+      map.interactor().simulateEvent('mouseup', {map: {x: 390, y: 200}});
+      expect(click).toEqual(1);
+      layer.geoOff([geo.event.feature.mouseclick]);
+      map.interactor().simulateEvent('mousedown', {map: {x: 390, y: 200}});
+      map.interactor().simulateEvent('mouseup', {map: {x: 390, y: 200}});
+      expect(click).toEqual(1);
+      done();
+    });
+  });
   it('geospatial', function (done) {
     map = geo.map({node: '#map'});
     layer = map.createLayer('pixelmap', {
