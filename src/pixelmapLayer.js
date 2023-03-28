@@ -120,7 +120,9 @@ var pixelmapLayer = function (arg) {
     ['modified', 'geoOn', 'geoOff', 'geoOnce'].forEach((funcName) => {
       const superFunc = m_this[funcName];
       m_this[funcName] = function () {
-        m_pixelmapFeature[funcName].apply(this, arguments);
+        if (!Array.isArray(arguments[0])) {
+          m_pixelmapFeature[funcName].apply(this, arguments);
+        }
         return superFunc.apply(this, arguments);
       };
     });
