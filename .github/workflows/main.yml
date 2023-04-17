@@ -31,12 +31,10 @@ jobs:
     - run: npm run setup-website
     - run: npm run ci-xvfb
     - run: npm run ci-build-website
-
-    - name: Report coverage
-      run: |
-        pip3 install codecov
-        codecov
-
+    - uses: codecov/codecov-action@v3
+      with:
+        fail_ci_if_error: true
+        verbose: true
     - name: On failure, create alternate baseline images in case the new behavior is correct
       if: ${{ failure() }}
       run: |
