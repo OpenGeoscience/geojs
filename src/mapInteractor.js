@@ -276,6 +276,12 @@ var mapInteractor = function (args) {
         input: 'rotate',
         owner: 'geo.mapInteractor',
         name: 'touch zoom and rotate'
+      }, {
+        action: geo_action.pan,
+        input: 'middle',
+        modifiers: {shift: false, ctrl: false},
+        owner: 'geo.mapInteractor',
+        name: 'button pan'
       }],
 
       click: {
