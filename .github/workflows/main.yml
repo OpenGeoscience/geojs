@@ -115,7 +115,7 @@ jobs:
         name: dist
         path: dist
     - name: Install semantic-release
-      run: npm install semantic-release
+      run: npm install semantic-release --no-save
     - name: Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
