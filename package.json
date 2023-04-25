@@ -80,7 +80,7 @@
     "pug-load": "^3.0.0",
     "raw-body": "^2.4.2",
     "resemblejs": "git+https://github.com/dominykas/Resemble.js",
-    "semantic-release": "^19.0.5",
+    "semantic-release": "^21.0.1",
     "serve-index": "^1.9.1",
     "shader-loader": "git+https://github.com/Makio64/shader-loader",
     "sinon": "^15.0.0",
