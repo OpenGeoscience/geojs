@@ -98,6 +98,11 @@ block mainTutorial
       }
     }).draw();
     pixelmap.geoOn(geo.event.feature.mouseclick, function (evt) {
+      // ignore clicks with a shift; this prevents conflicting interaction in
+      // the next step
+      if (evt.mouse.modifiers.shift) {
+        return;
+      }
       // use the index of the superpixel rather than its border, regardless of
       // which was clicked.
       var index = evt.index - evt.index % 2;
@@ -121,8 +126,8 @@ block mainTutorial
     map.interactor().removeAction(geo.geo_action.zoomselect);
     // if the mouse moves, decide whether we should handle it
     var newValue = undefined;
-    pixelmap.geoOn(geo.event.feature.mousemove, function (evt) {
-      // if shift or the left button aren't down, stop setting values
+    function onOver(evt) {
+      // for movement, if shift or the left button aren't down, stop setting values
       if (!evt.mouse.modifiers.shift || !evt.mouse.buttons.left) {
          newValue = undefined;
          return;
@@ -131,7 +136,7 @@ block mainTutorial
       var index = evt.index - evt.index % 2;
       var data = pixelmap.data();
       // if we just started a movement with shift, update the value and record it
-      if (newValue === undefined) {
+      if (newValue === undefined || evt.event === geo.event.feature.mousedown) {
         data[index] = data[index + 1] = (data[index] + 1) % 4;
         newValue = data[index];
         pixelmap.indexModified(index, index + 1).draw();
@@ -141,4 +146,9 @@ block mainTutorial
         data[index] = data[index + 1] = newValue;
         pixelmap.indexModified(index, index + 1).draw();
       }
-    });
+    }
+    // An alternative would be to bind on mousemove instead of mousedown and
+    // mouseover and leave the click handler; this requires movement to start
+    // setting values, whereas mousedown doesn't require mouse movement.
+    pixelmap.geoOn(geo.event.feature.mousedown, onOver);
+    pixelmap.geoOn(geo.event.feature.mouseover, onOver);

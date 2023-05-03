@@ -1090,6 +1090,7 @@ var mapInteractor = function (args) {
    * @param {jQuery.Event} evt The event that triggered this.
    * @fires geo.event.brushstart
    * @fires geo.event.actiondown
+   * @fires geo.event.mousedown
    */
   this._handleMouseDown = function (evt) {
     var action, actionRecord;
@@ -1108,6 +1109,9 @@ var mapInteractor = function (args) {
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
+
+    console.log(JSON.stringify(m_this.mouse().buttons));  // DWM::
+    m_this.map().geoTrigger(geo_event.mousedown, m_this.mouse());
 
     if (m_options.click.enabled &&
         (!m_mouse.buttons.left || m_options.click.buttons.left) &&
@@ -1538,6 +1542,7 @@ var mapInteractor = function (args) {
    * @fires geo.event.brushend
    * @fires geo.event.actionselection
    * @fires geo.event.actionup
+   * @fires geo.event.mouseup
    * @fires geo.event.select
    * @fires geo.event.zoomselect
    * @fires geo.event.unzoomselect
@@ -1625,6 +1630,9 @@ var mapInteractor = function (args) {
     if (m_clickMaybe) {
       m_this._handleMouseClick(evt);
     }
+    var details = m_this.mouse();
+    details.buttonsDown = m_clickMaybe.buttons;
+    m_this.map().geoTrigger(geo_event.mouseup, details);
   };
 
   /**

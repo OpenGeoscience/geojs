@@ -162,6 +162,8 @@ var feature = function (arg) {
     m_this._unbindMouseHandlers();
 
     m_this.geoOn(geo_event.mousemove, m_this._handleMousemove);
+    m_this.geoOn(geo_event.mousedown, m_this._handleMousedown);
+    m_this.geoOn(geo_event.mouseup, m_this._handleMouseup);
     m_this.geoOn(geo_event.mouseclick, m_this._handleMouseclick);
     m_this.geoOn(geo_event.brushend, m_this._handleBrushend);
     m_this.geoOn(geo_event.brush, m_this._handleBrush);
@@ -172,6 +174,8 @@ var feature = function (arg) {
    */
   this._unbindMouseHandlers = function () {
     m_this.geoOff(geo_event.mousemove, m_this._handleMousemove);
+    m_this.geoOff(geo_event.mousedown, m_this._handleMousedown);
+    m_this.geoOff(geo_event.mouseup, m_this._handleMouseup);
     m_this.geoOff(geo_event.mouseclick, m_this._handleMouseclick);
     m_this.geoOff(geo_event.brushend, m_this._handleBrushend);
     m_this.geoOff(geo_event.brush, m_this._handleBrush);
@@ -239,19 +243,45 @@ var feature = function (arg) {
   };
 
   /**
+   * Private mousedown handler.  This uses `pointSearch` to determine which
+   * features the mouse is over, then fires appropriate events.
+   *
+   * @param {geo.event} evt The event that triggered this handler.
+   * @fires geo.event.feature.mousedown
+   */
+  this._handleMousedown = function (evt) {
+    this._handleMousemove(evt, geo_event.feature.mousedown);
+  };
+
+  /**
+   * Private mouseup handler.  This uses `pointSearch` to determine which
+   * features the mouse is over, then fires appropriate events.
+   *
+   * @param {geo.event} evt The event that triggered this handler.
+   * @fires geo.event.feature.mouseup
+   */
+  this._handleMouseup = function (evt) {
+    this._handleMousemove(evt, geo_event.feature.mouseup);
+  };
+
+  /**
    * Private mousemove handler.  This uses `pointSearch` to determine which
    * features the mouse is over, then fires appropriate events.
    *
    * @param {geo.event} evt The event that triggered this handler.
+   * @param {string} [updown] If "mouseup" or "mousedown", fire that event
+   *    instead of mouseon.
    * @fires geo.event.feature.mouseover_order
    * @fires geo.event.feature.mouseover
    * @fires geo.event.feature.mouseout
    * @fires geo.event.feature.mousemove
    * @fires geo.event.feature.mouseoff
    * @fires geo.event.feature.mouseon
+   * @fires geo.event.feature.mouseup
+   * @fires geo.event.feature.mousedown
    */
-  this._handleMousemove = function (evt) {
-    var mouse = m_this.layer().map().interactor().mouse(),
+  this._handleMousemove = function (evt, updown) {
+    var mouse = evt && evt.mouse ? evt.mouse : m_this.layer().map().interactor().mouse(),
         data = m_this.data(),
         over = m_this.pointSearch(mouse.geo),
         newFeatures = [], oldFeatures = [], lastTop = -1, top = -1, extra;
@@ -277,6 +307,23 @@ var feature = function (arg) {
       });
     }
 
+    feature.eventID += 1;
+
+    if (updown) {
+      over.index.forEach((i, idx) => {
+        m_this.geoTrigger(updown, {
+          data: data[i],
+          index: i,
+          extra: extra[i],
+          mouse: mouse,
+          eventID: feature.eventID,
+          top: idx === over.length - 1,
+          sourceEvent: evt
+        }, true);
+      });
+      return;
+    }
+
     // Get the index of the element that was previously on top
     if (m_selectedFeatures.length) {
       lastTop = m_selectedFeatures[m_selectedFeatures.length - 1];
@@ -290,7 +337,6 @@ var feature = function (arg) {
       return over.index.indexOf(i) < 0;
     });
 
-    feature.eventID += 1;
     // Fire events for mouse in first.
     newFeatures.forEach(function (i, idx) {
       m_this.geoTrigger(geo_event.feature.mouseover, {
