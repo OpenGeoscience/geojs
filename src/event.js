@@ -164,6 +164,28 @@ geo_event.mousemove = 'geo_mousemove';
 geo_event.mouseclick = 'geo_mouseclick';
 
 /**
+ * Triggered on `mouseup` events.  The event object extends
+ * {@link geo.mouseState}.
+ *
+ * @event geo.event.mouseup
+ * @type {(geo.event.base|geo.mouseState)}
+ * @property {geo.mouseButtons} buttonsDown The buttons that were down at the
+ *      start of the up action.
+ */
+geo_event.mouseup = 'geo_mouseup';
+
+/**
+ * Triggered on `mousedown` events.  The event object extends
+ * {@link geo.mouseState}.
+ *
+ * @event geo.event.mousedown
+ * @type {(geo.event.base|geo.mouseState)}
+ * @property {geo.mouseButtons} buttonsDown The buttons that were down at the
+ *      end of the down action.
+ */
+geo_event.mousedown = 'geo_mousedown';
+
+/**
  * Triggered on every `mousemove` during a brushing selection.
  * The event object extends {@link geo.brushSelection}.
  *
@@ -485,6 +507,41 @@ geo_event.feature = {
    * @property {geo.event} sourceEvent The underlying event that trigger this.
    */
   mouseclick_order: 'geo_feature_mouseclick_order',
+  /**
+   * The event is the feature version of {@link geo.event.mousedown}.
+   *
+   * @event geo.event.feature.mousedown
+   * @type {geo.event.base}
+   * @property {object} data The feature data the mouse is above.
+   * @property {number} index The index of the feature data the mouse is above.
+   * @property {object} extra Extra information about the feature and mouse
+   *    location.
+   * @property {geo.mouseState} mouse The mouse state.
+   * @property {number} eventID a monotonically increasing event number.  All
+   *    features that the mouse goes down on simultaneously will have the same
+   *    `eventID`.
+   * @property {boolean} top True if this is the topmost data element.
+   * @property {geo.event} sourceEvent The underlying event that trigger this.
+   */
+  mousedown: 'geo_feature_mousedown',
+  /**
+   * The event is the feature version of {@link geo.event.mouseup}.
+   *
+   * @event geo.event.feature.mouseup
+   * @type {geo.event.base}
+   * @property {object} data The feature data the mouse is above.
+   * @property {number} index The index of the feature data the mouse is above.
+   * @property {object} extra Extra information about the feature and mouse
+   *    location.
+   * @property {geo.mouseState} mouse The mouse state.  The buttons are before
+   *    the up action occurs.
+   * @property {number} eventID a monotonically increasing event number.  All
+   *    features that the mouse goes up on simultaneously will have the same
+   *    `eventID`.
+   * @property {boolean} top True if this is the topmost data element.
+   * @property {geo.event} sourceEvent The underlying event that trigger this.
+   */
+  mouseup: 'geo_feature_mouseup',
   /**
    * This event is fired for each data component of a feature under a brush
    * that has just finished its selection.
