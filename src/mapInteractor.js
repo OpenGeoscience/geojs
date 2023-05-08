@@ -1110,7 +1110,6 @@ var mapInteractor = function (args) {
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
-    console.log(JSON.stringify(m_this.mouse().buttons));  // DWM::
     m_this.map().geoTrigger(geo_event.mousedown, m_this.mouse());
 
     if (m_options.click.enabled &&
