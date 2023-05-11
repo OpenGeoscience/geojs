@@ -229,10 +229,10 @@ osmLayer.tileSources = {
     minLevel: 0,
     maxLevel: 18
   },
-  'voyager-without-layers': {
+  'voyager-without-labels': {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png',
     attribution: CartoAttribution,
-    name:'Carto Voyager Without Layers',
+    name:'Carto Voyager Without Labels',
     minLevel: 0,
     maxLevel: 18
   }
