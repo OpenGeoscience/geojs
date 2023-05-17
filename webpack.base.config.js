@@ -32,7 +32,6 @@ module.exports = {
   resolve: {
     alias: {
       jquery: 'jquery/dist/jquery',
-      kdbush: 'kdbush/kdbush.js',
       proj4: 'proj4/lib',
       vgl: 'vgl/vgl.js',
       d3: 'd3/d3.js',

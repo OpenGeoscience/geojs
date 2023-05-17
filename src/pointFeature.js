@@ -82,6 +82,7 @@ var pointFeature = function (arg) {
   var geo_event = require('./event');
   var util = require('./util');
   var KDBush = require('kdbush');
+  KDBush = KDBush.__esModule ? KDBush.default : KDBush;
 
   /**
    * @private
@@ -267,7 +268,11 @@ var pointFeature = function (arg) {
       return [pt.x, pt.y];
     });
 
-    m_rangeTree = new KDBush(pts);
+    m_rangeTree = new KDBush(pts.length);
+    for (const [x, y] of pts) {
+      m_rangeTree.add(x, y);
+    }
+    m_rangeTree.finish();
     m_rangeTreeTime.modified();
   };
 
