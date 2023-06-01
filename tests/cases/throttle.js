@@ -1,4 +1,3 @@
-
 var $ = require('jquery');
 var geo = require('../test-utils').geo;
 

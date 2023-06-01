@@ -49,8 +49,8 @@ exports.handlers = {
                 /* Make a copy so we don't mutate the original property. */
                 var prop = Object.assign({}, origprop);
                 /* Add a value that a rendering template could use to show that
-                 * the property was inherted from a parent.  Since that in turn
-                 * could have been inherited, preserve a known value. */
+                 * the property was inherited from a parent.  Since that in
+                 * turn could have been inherited, preserve a known value. */
                 prop.inherited = prop.inherited || augmentName;
                 /* Add the property to the typedef and to the list of known
                  * properties. */

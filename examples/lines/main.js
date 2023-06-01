@@ -165,7 +165,7 @@ $(function () {
     }
     if (!simplify || simplify === 'false') {
       // set the data, and reset the line and position accessors in case we
-      // changed them with the line simplication
+      // changed them with the line simplification
       lineFeature.data(reduceddata)
         .line(lineAccessor)
         .position(positionAccessor);

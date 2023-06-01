@@ -1102,7 +1102,7 @@ var util = {
   },
 
   /**
-   * Check if the current browser supports covnerting html to an image via an
+   * Check if the current browser supports converting html to an image via an
    * svg foreignObject and canvas.  If this has not been checked before, it
    * returns a Deferred that resolves to a boolean (never rejects).  If the
    * check has been done before, it returns a boolean.
