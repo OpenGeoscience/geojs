@@ -81,7 +81,7 @@ function pointUtil(m_this, arg) {
    *   the new primitive shape.
    * @param {boolean} [currentShape] If truthy and getting the shape, return
    *   the shape currently in use if the shape is set to `auto`.  If falsy,
-   *   return the specifiec primitiveShape, which may be `auto`.
+   *   return the specific primitiveShape, which may be `auto`.
    * @returns {geo.pointFeature.primitiveShapes|this} The primitiveShape or
    *   this instance of the feature.
    */

@@ -43,7 +43,7 @@
  */
 
 /**
- * General represention of a point on the earth.  The coordinates are most
+ * General representation of a point on the earth.  The coordinates are most
  * commonly in longitude and latitude, but the coordinate system is changed
  * by the interface gcs.
  *
@@ -55,7 +55,7 @@
  */
 
 /**
- * General represention of a point on the earth.  The coordinates are most
+ * General representation of a point on the earth.  The coordinates are most
  * commonly in longitude and latitude, but the coordinate system is changed
  * by the interface gcs.  This is a list of numbers consisting of either [x, y]
  * or [x, y, z], where therse are the horizontal, vertical, and altitude
@@ -66,7 +66,7 @@
  */
 
 /**
- * General represention of a two-dimensional point in any coordinate system.
+ * General representation of a two-dimensional point in any coordinate system.
  *
  * @typedef geo.point2D
  * @type {object}
@@ -75,7 +75,7 @@
  */
 
 /**
- * Represention of a point on the map.  The coordinates are in the map's
+ * Representation of a point on the map.  The coordinates are in the map's
  * reference system, possibly with an affine transformation.
  *
  * @typedef geo.worldPosition
@@ -86,7 +86,7 @@
  */
 
 /**
- * Represention of a size in gcs coordinates.
+ * Representation of a size in gcs coordinates.
  *
  * @typedef geo.geoSize
  * @type {object}
@@ -95,7 +95,7 @@
  */
 
 /**
- * Represention of a size in pixels.
+ * Representation of a size in pixels.
  *
  * @typedef geo.screenSize
  * @type {object}

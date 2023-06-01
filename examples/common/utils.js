@@ -17,7 +17,7 @@ var exampleUtils = {
 
   /* Encode a dictionary of parameters to the query string, setting the window
    * location and history.  This will also remove undefined values from the
-   * set properites of params.
+   * set properties of params.
    *
    * @param {object} params The query parameters as a dictionary.
    * @param {boolean} [updateHistory] If true, update the browser history.  If

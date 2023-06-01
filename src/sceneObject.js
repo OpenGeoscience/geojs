@@ -57,7 +57,7 @@ var sceneObject = function (arg) {
   /**
    * Get/set parent of the object.
    *
-   * @param {geo.sceneObject} [arg] The new parant or `undefined` to get the
+   * @param {geo.sceneObject} [arg] The new parent or `undefined` to get the
    *    current parent.
    * @returns {this|geo.sceneObject}
    */

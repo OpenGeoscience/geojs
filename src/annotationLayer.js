@@ -1098,7 +1098,7 @@ var annotationLayer = function (arg) {
                 selectionAPI: editable
               });
               if (!feature) {
-                /* We can't create the desired feature, porbably because of the
+                /* We can't create the desired feature, probably because of the
                  * selected renderer.  Issue one warning only. */
                 var key = 'error_feature_' + type;
                 if (!m_this[key]) {
