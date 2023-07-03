@@ -22,22 +22,26 @@ block mainTutorial
     // define a function that, given a tile location, returns a URL with
     // appropriate parameters for a WMS server
     function getWMSURL(x, y, zoom) {
-      var service = 'NWS_Observations';
-      var observation = 'radar_base_reflectivity';
       // get data from NOAA
-      var baseUrl = 'https://idpgis.ncep.noaa.gov/arcgis/rest/services/' + service + '/' + observation + '/MapServer/export';
+      var service = 'conus';
+      var observation = 'conus_bref_qcd';
+      var baseUrl = 'https://opengeo.ncep.noaa.gov/geoserver/' + service + '/' + observation + '/ows';
       // Get the bounding box of the tile in the desired projection
       var bb = this.gcsTileBounds({x: x, y: y, level: zoom}, projection);
       // Set the WMS server parameters
       var params = {
-        transparent: true,
-        format: 'png32',
-        bbox: bb.left + ',' + bb.bottom + ',' + bb.right + ',' + bb.top,
-        bboxSR: projection.split(':')[1],
-        imageSR: projection.split(':')[1],
-        size: '256,256',
-        layers: 'show:3',
-        f: 'image'
+        SERVICE: 'WMS',
+        VERSION: '1.3.0',
+        REQUEST: 'GetMap',
+        LAYERS: observation,
+        STYLES: '',
+        BBOX: bb.left + ',' + bb.bottom + ',' + bb.right + ',' + bb.top,
+        WIDTH: 256,
+        HEIGHT: 256,
+        FORMAT: 'image/png',
+        TRANSPARENT: true,
+        SRS: projection,
+        TILED: true
       };
       // construct the url for a tile.  We can use jQuery's $.param function.
       var url =  baseUrl + '?' + $.param(params);
