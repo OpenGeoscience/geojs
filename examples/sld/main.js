@@ -7,12 +7,12 @@ var layer = {
   type: 'continuous',
   min: '0',
   max: '300',
-  name: 'usgs:ned',
+  name: 'conus_cref_raw',
   sld: '',
-  projection: 'EPSG:3785'
+  projection: 'EPSG:3857'
 };
 
-var baseUrl = 'https://demo.boundlessgeo.com/geoserver/ows';
+var baseUrl = 'https://opengeo.ncep.noaa.gov/geoserver/conus/conus_cref_raw/ows';
 
 var layerViewer = {
   renderPalettes: function () {
