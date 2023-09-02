@@ -31,7 +31,7 @@ for line in list.split('\n'):
     if len(parts) < 2:
         continue
     tile = parts[1].strip("'").strip()
-    url = 'http://a.tile.openstreetmap.org' + tile
+    url = 'https://tile.openstreetmap.org' + tile
     # url = 'https://stamen-tiles-a.a.ssl.fastly.net/toner-lite ' + tile
     path = 'dist/data/tiles' + tile
     try:
