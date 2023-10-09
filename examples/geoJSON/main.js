@@ -17,7 +17,7 @@ $(function () {
   });
 
   // Add the osm layer with a custom tile url
-  map.createLayer('osm', {source: 'stamen-toner-lite'});
+  map.createLayer('osm', {source: 'osm'});
 
   // Create a layer to put the features in.  We could need point, line, and
   // polygon features, so ask for a layer that supports all of them.

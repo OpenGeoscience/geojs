@@ -88,8 +88,8 @@ map = geo.map({
 
 // Add the default osm layer
 map.createLayer('osm', {
-  source: query.map !== 'light' ? 'stamen-toner-lite' : 'osm',
-  opacity: query.map !== 'light' ? 0.25 : 1
+  source: query.map === 'dark' ? 'stamen-toner-lite' : 'osm',
+  opacity: query.map === 'dark' ? 0.25 : 1
 });
 
 if (query.map !== 'light') {

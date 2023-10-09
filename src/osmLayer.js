@@ -124,7 +124,7 @@ osmLayer.defaults = $.extend({}, tileLayer.defaults, {
     return {x: s, y: s};
   },
   url: '',
-  source: 'stamen-toner-lite'
+  source: 'osm'
 });
 
 /* Stamen's website (http://maps.stamen.com) as of 2019-08-28 says that the
@@ -160,10 +160,31 @@ osmLayer.tileSources = {
     minLevel: 0,
     maxLevel: 18
   },
+  'nationalmap-relief': {
+    url: 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tile data from <a href="https://basemap.nationalmap.gov/">USGS</a>',
+    name:'National Map Shaded Relief',
+    minLevel: 0,
+    maxLevel: 16
+  },
   'nationalmap-satellite': {
     url: 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}',
     attribution: 'Tile data from <a href="https://basemap.nationalmap.gov/">USGS</a>',
     name:'National Map Satellite',
+    minLevel: 0,
+    maxLevel: 16
+  },
+  'nationalmap-satellite-topo': {
+    url: 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tile data from <a href="https://basemap.nationalmap.gov/">USGS</a>',
+    name:'National Map Satellite and Topo',
+    minLevel: 0,
+    maxLevel: 16
+  },
+  'nationalmap-topo': {
+    url: 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tile data from <a href="https://basemap.nationalmap.gov/">USGS</a>',
+    name:'National Map Topo',
     minLevel: 0,
     maxLevel: 16
   },
