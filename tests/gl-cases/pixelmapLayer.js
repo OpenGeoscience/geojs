@@ -111,7 +111,7 @@ describe('webglPixelmapLayer', function () {
   it('geospatial', function (done) {
     map = geo.map({node: '#map'});
     layer = map.createLayer('pixelmap', {
-      url: geo.osmLayer.tileSources['stamen-toner-lite'].url,
+      url: geo.osmLayer.tileSources.osm.url,
       data: new Array(5112).fill(0),
       color: 'black'
     });

@@ -63,7 +63,7 @@ for (const option in options) {
 var map, mapLayer, layer, fromButtonSelect, fromGeojsonUpdate;
 
 // Set controls based on query parameters
-$('#basemap').val(query.basemap || 'stamen-toner-lite');
+$('#basemap').val(query.basemap || 'osm');
 $('#mapurl').val(query.mapurl || '');
 $('#mapurl').toggleClass('hidden', $('#basemap').val() !== 'custom');
 $('#distunit').val(query.distunit || 'decmiles');

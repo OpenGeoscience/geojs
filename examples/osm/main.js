@@ -16,12 +16,8 @@ $(function () {
   map.createLayer(
     'osm',
     {
-      url: 'http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png',
-      attribution: ['Map tiles by <a href="http://stamen.com">Stamen Design</a>,',
-        'under <a href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>.',
-        'Data by <a href="https://openstreetmap.org">OpenStreetMap</a>, under',
-        '<a href="https://openstreetmap.org/copyright">ODbL</a>.'
-      ].join(' ')
+      url: 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}',
+      attribution: 'Tile data from <a href="https://basemap.nationalmap.gov/">USGS</a>'
     }
   );
 });
