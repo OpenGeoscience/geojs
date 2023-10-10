@@ -55,7 +55,8 @@ module.exports = {
   module: {
     rules: [{
       test: /\.js$/,
-      include: path.resolve('src'),
+      // include: path.resolve('src'),
+      exclude: /node_modules\/(?!kdbush\/).*/,
       use: [{
         loader: 'babel-loader',
         options: {
@@ -75,7 +76,10 @@ module.exports = {
       use: [{
         loader: 'babel-loader',
         options: {
-          cacheDirectory: true
+          cacheDirectory: true,
+          presets: [['@babel/preset-env', {
+            targets: 'defaults, PhantomJS 2.1'
+          }]]
         }
       }]
     }, {
