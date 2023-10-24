@@ -27,9 +27,9 @@
     "vgl": "0.3.11"
   },
   "optionalDependencies": {
+    "@egjs/hammerjs": "^2.0.8",
     "d3": "^3.5.17",
     "glslang-validator-prebuilt-predownloaded": "^0.0.2",
-    "@egjs/hammerjs": "^2.0.8",
     "vtk.js": "*"
   },
   "devDependencies": {
@@ -56,7 +56,7 @@
     "fs-extra": "^11.0.0",
     "glob": "^10.1.0",
     "imports-loader": "^4.0.0",
-    "jasmine-core": "^4.0.0",
+    "jasmine-core": "^5.0.0",
     "js-yaml": "^4.1.0",
     "jsdoc": "^4.0.0",
     "jsdoc-autoprivate": "0.0.1",
@@ -82,7 +82,7 @@
     "resemblejs": "^5.0.0",
     "serve-index": "^1.9.1",
     "shader-loader": "git+https://github.com/Makio64/shader-loader",
-    "sinon": "^15.0.0",
+    "sinon": "^17.0.0",
     "style-loader": "^3.3.1",
     "stylus": "^0.59.0",
     "stylus-loader": "^7.0.0",
