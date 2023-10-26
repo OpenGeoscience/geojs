@@ -27,7 +27,7 @@ var self = this;
     ?>
         <li class="item" data-name="<?js= item.longname ?>">
             <span class="title">
-                <?js= self.linkto(item.longname, item.longname) ?>
+                <?js= self.linkto(item.longname, item.longname.replace(/^geo\./, '')) ?>
             </span>
     <?js
     });
@@ -44,7 +44,7 @@ var self = this;
     ?>
         <li class="item" data-name="<?js= item.longname ?>">
             <span class="title">
-                <?js= self.linkto(item.longname, item.longname) ?>
+                <?js= self.linkto(item.longname, item.longname.replace(/^geo\./, '')) ?>
             </span>
     <?js
     });
