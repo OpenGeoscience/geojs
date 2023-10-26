@@ -23,7 +23,7 @@ var webgl_quadFeature = function (arg) {
   quadFeature.call(this, arg);
 
   var $ = require('jquery');
-  var vgl = require('vgl');
+  var vgl = require('../vgl');
   var object = require('./object');
   var fragmentShaderImage = require('./quadFeatureImage.frag');
   var vertexShaderImage = require('./quadFeatureImage.vert');

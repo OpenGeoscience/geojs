@@ -15,7 +15,7 @@ describe('geo.core.osmLayer', function () {
   var destroyMap = require('../test-utils').destroyMap;
   var mockWebglRenderer = geo.util.mockWebglRenderer;
   var restoreWebglRenderer = geo.util.restoreWebglRenderer;
-  var vgl = require('vgl');
+  var vgl = require('../test-utils').vgl;
   var closeToEqual = require('../test-utils').closeToEqual;
 
   function create_map(opts) {

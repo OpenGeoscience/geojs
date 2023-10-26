@@ -10,7 +10,7 @@ var waitForIt = require('../test-utils').waitForIt;
 var logCanvas2D = require('../test-utils').logCanvas2D;
 var mockWebglRenderer = geo.util.mockWebglRenderer;
 var restoreWebglRenderer = geo.util.restoreWebglRenderer;
-var vgl = require('vgl');
+var vgl = require('../test-utils').vgl;
 
 describe('geo.pixelmapFeature', function () {
   'use strict';

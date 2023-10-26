@@ -23,8 +23,7 @@
     "kdbush": "^4.0.0",
     "mousetrap": "^1.6.5",
     "polybooljs": "git+https://github.com/manubb/polybooljs#eps-logic",
-    "proj4": "^2.7.5",
-    "vgl": "0.3.11"
+    "proj4": "^2.7.5"
   },
   "optionalDependencies": {
     "@egjs/hammerjs": "^2.0.8",

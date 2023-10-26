@@ -24,7 +24,7 @@ var webgl_pixelmapFeature = function (arg) {
   var object = require('./object');
   object.call(this);
 
-  const vgl = require('vgl');
+  const vgl = require('../vgl');
   const fragmentShader = require('./pixelmapFeature.frag');
 
   var m_quadFeature,

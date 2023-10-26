@@ -21,7 +21,7 @@ var webgl_markerFeature = function (arg) {
   arg = arg || {};
   markerFeature.call(this, arg);
 
-  var vgl = require('vgl');
+  var vgl = require('../vgl');
   var transform = require('../transform');
   var util = require('../util');
   var object = require('./object');

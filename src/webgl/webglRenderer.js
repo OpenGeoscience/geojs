@@ -25,7 +25,7 @@ var webglRenderer = function (arg) {
   renderer.call(this, arg);
 
   var $ = require('jquery');
-  var vgl = require('vgl');
+  var vgl = require('../vgl');
   var mat4 = require('gl-mat4');
   var util = require('../util');
   var geo_event = require('../event');

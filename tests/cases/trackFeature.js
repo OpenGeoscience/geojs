@@ -1,13 +1,10 @@
 // Test geo.trackFeature, geo.svg.trackFeature, and geo.webgl.trackFeature
 
-// var $ = require('jquery');
 var geo = require('../test-utils').geo;
 var createMap = require('../test-utils').createMap;
 var destroyMap = require('../test-utils').destroyMap;
 var mockWebglRenderer = geo.util.mockWebglRenderer;
 var restoreWebglRenderer = geo.util.restoreWebglRenderer;
-// var vgl = require('vgl');
-// var waitForIt = require('../test-utils').waitForIt;
 
 describe('geo.trackFeature', function () {
   'use strict';

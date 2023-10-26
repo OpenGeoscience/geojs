@@ -11,7 +11,7 @@ var webgl_meshColored = function (arg) {
 
   arg = arg || {};
 
-  var vgl = require('vgl');
+  var vgl = require('../vgl');
   var transform = require('../transform');
   var util = require('../util');
   var fragmentShader = require('./meshColored.frag');

@@ -328,7 +328,7 @@ var util = {
    * is the correct size, return it.  Otherwise, allocate a new buffer; any
    * data in an old buffer is discarded.
    *
-   * @param {vgl.geometryData} geom The geometry to reference and modify.
+   * @param {geo.vgl.geometryData} geom The geometry to reference and modify.
    * @param {string} srcName The name of the source.
    * @param {number} len The number of elements for the array.
    * @param {number} [allowLarger=0.2] If the existing buffer is larger than

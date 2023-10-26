@@ -51,12 +51,12 @@ so there is no need to rerun this command unless you add a new file.
 
 There are a number of utilities present in the file ``tests/test-utils.js``
 that developers can use to make better unit tests.  For example, a mocked
-vgl renderer can be used to hit code paths within webgl rendered layers.  There
-are also methods for mocking global methods like ``requestAnimationFrame``
-to test complex, asynchronous code paths in a stable and repeatable manner.
-The `Sinon <https://sinonjs.org/>`_ testing library is also available to
-generate stubs, spies, and mocked methods.  Because all tests share
-a global scope, they should be careful to clean up all mocking and
+webgl renderer can be used to hit code paths within webgl rendered layers.
+There are also methods for mocking global methods like
+``requestAnimationFrame`` to test complex, asynchronous code paths in a stable
+and repeatable manner.  The `Sinon <https://sinonjs.org/>`_ testing library is
+also available to generate stubs, spies, and mocked methods.  Because all tests
+share a global scope, they should be careful to clean up all mocking and
 instrumentation after running.  Ideally, each test should be runnable
 independently and use jasmines ``beforeEach`` and ``afterEach`` methods
 for setup and tear down.
