@@ -84,6 +84,8 @@
     "shader-loader": "git+https://github.com/Makio64/shader-loader",
     "sinon": "^17.0.0",
     "style-loader": "^3.3.1",
+    "stylelint": "^15.11.0",
+    "stylelint-stylus": "^0.18.0",
     "stylus": "^0.59.0",
     "stylus-loader": "^7.0.0",
     "tar": "^6.1.13",
@@ -134,8 +136,9 @@
     "build-tutorials": "node tutorials/build.js && webpack --config webpack-tutorials.config.js",
     "build-website-tutorials": "node tutorials/build-website.js && webpack --config webpack-website-tutorials.config.js",
     "lint": "eslint --cache . --max-warnings=0",
-    "format": "eslint --cache --fix .",
+    "format": "eslint --cache --fix . && stylelint **/*.styl --fix",
     "puglint": "pug-lint src examples",
+    "styllint": "stylelint **/*.styl",
     "glsllint": "chmod +x node_modules/glslang-validator-prebuilt-predownloaded/bin/glslangValidator.linux; find . \\( -name '*.frag' \\) -exec sh -c 'for n; do python scripts/preprocess_glsl.py \"$n\" | node_modules/glslang-validator-prebuilt-predownloaded/bin/glslangValidator.linux --stdin -S frag || exit 1; done' sh {} \\+ && find . \\( -name '*.vert' \\) -exec sh -c 'for n; do python scripts/preprocess_glsl.py \"$n\" | node_modules/glslang-validator-prebuilt-predownloaded/bin/glslangValidator.linux --stdin -S vert || exit 1; done' sh {} \\+",
     "test-headless": "GEOJS_TEST_CASE=tests/test-unit.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch,FirefoxHeadlessTouch",
     "test-headless-all": "GEOJS_TEST_CASE=tests/test-unit.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch,FirefoxHeadlessTouch",
@@ -149,7 +152,7 @@
     "get-data-files": "node scripts/datastore.js dist/data",
     "ci-clean": "git clean -fxd dist -e dist/data jsdoc/tmpl jsdoc/static images lcov",
     "ci": "npm-run-all ci-build ci-test",
-    "ci-build": "npm-run-all -c -p build-full build-lean docs get-data-files lint puglint glsllint build-examples build-tutorials",
+    "ci-build": "npm-run-all -c -p build-full build-lean docs get-data-files lint puglint glsllint styllint build-examples build-tutorials",
     "ci-test": "npm-run-all test-headless test-webglheadless test-headed test-tutorials",
     "ci-xvfb": "npm-run-all ci-clean ci-build && TEST_SAVE_IMAGE='all' xvfb-run -s '-ac -screen 0 1280x1024x24' npm run ci-test",
     "start": "karma start karma.conf.js",
@@ -161,6 +164,11 @@
     "ci-build-website": "cp -a dist/built/. website/source/built && bash -c '(npm run build-website-examples & npm run build-website-tutorials & wait -n && wait -n)' && cd dist && cp -ar data ../website/source/. && rm -rf ../website/source/data/tiles && rm -rf ../website/source/data/tiles.tgz && rm -rf ../website/source/data/base-images && rm -rf ../website/source/data/base-images.tgz && cp -ar apidocs/. ../website/source/apidocs && cd ../website && npm install && rm -f db.json && npx hexo generate",
     "prepublishOnly": "npm run build && cp dist/built/*.js .",
     "semantic-release": "semantic-release"
+  },
+  "stylelint": {
+    "extends": [
+      "stylelint-stylus/standard"
+    ]
   },
   "keywords": [
     "map",
