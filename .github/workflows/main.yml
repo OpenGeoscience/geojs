@@ -33,7 +33,7 @@ jobs:
     - run: npm run ci-build-website
     - uses: codecov/codecov-action@v3
       with:
-        fail_ci_if_error: true
+        fail_ci_if_error: false
         verbose: true
     - name: On failure, create alternate baseline images in case the new behavior is correct
       if: ${{ failure() }}
