@@ -55,7 +55,11 @@ module.exports = {
   module: {
     rules: [{
       test: /\.js$/,
-      // include: path.resolve('src'),
+      include: [
+        path.resolve('src'),
+        path.resolve('examples'),
+        path.resolve('tutorials')
+      ],
       exclude: /node_modules\/(?!kdbush\/).*/,
       use: [{
         loader: 'babel-loader',
@@ -69,9 +73,7 @@ module.exports = {
     }, {
       test: /\.js$/,
       include: [
-        path.resolve('tests'),
-        path.resolve('examples'),
-        path.resolve('tutorials')
+        path.resolve('tests')
       ],
       use: [{
         loader: 'babel-loader',
