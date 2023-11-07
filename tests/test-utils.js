@@ -12,6 +12,7 @@ module.exports = {};
  * Provides a uniform entry point into the geojs library.
  */
 module.exports.geo = geo;
+module.exports.vgl = geo.vgl;
 /**
  * Create a pair of it functions.  The first one waits for a function to return
  * a truthy value, and the second one runs after the first has assured its

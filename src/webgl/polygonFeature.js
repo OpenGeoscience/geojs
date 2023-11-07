@@ -19,7 +19,7 @@ var webgl_polygonFeature = function (arg) {
   arg = arg || {};
   polygonFeature.call(this, arg);
 
-  var vgl = require('vgl');
+  var vgl = require('../vgl');
   var earcut = require('earcut');
   var transform = require('../transform');
   var util = require('../util');

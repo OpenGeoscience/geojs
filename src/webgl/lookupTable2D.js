@@ -1,6 +1,6 @@
 var inherit = require('../inherit');
 var timestamp = require('../timestamp');
-var vgl = require('vgl');
+var vgl = require('../vgl');
 
 /**
  * Switch to a specific texture unit.

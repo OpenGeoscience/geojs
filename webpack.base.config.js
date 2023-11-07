@@ -33,7 +33,6 @@ module.exports = {
     alias: {
       jquery: 'jquery/dist/jquery',
       proj4: 'proj4/lib',
-      vgl: 'vgl/vgl.js',
       d3: 'd3/d3.js',
       hammerjs: '@egjs/hammerjs/dist/hammer.js',
       mousetrap: 'mousetrap/mousetrap.js'
@@ -103,29 +102,6 @@ module.exports = {
         loader: 'shader-loader',
         options: {
           glsl: { chunkPath: 'src/webgl' }
-        }
-      }]
-    }, {
-      // vgl expects jQuery, gl-vec3/4, gl-mat4 to be in the global name space
-      test: /vgl\.js$/,
-      use: [{
-        loader: 'expose-loader',
-        options: {
-          exposes: {
-            globalName: 'vgl',
-            override: true
-          }
-        }
-      }, {
-        loader: 'imports-loader',
-        options: {
-          type: 'commonjs',
-          imports: [
-            'single gl-mat4 mat4',
-            'single gl-vec4 vec4',
-            'single gl-vec3 vec3',
-            'single jquery $'
-          ]
         }
       }]
     }]

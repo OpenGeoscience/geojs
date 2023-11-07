@@ -18,7 +18,7 @@ module.exports = {};
  */
 module.exports.mockWebglRenderer = function mockWebglRenderer(supported) {
   'use strict';
-  var vgl = require('vgl');
+  var vgl = require('../vgl');
 
   if (supported === undefined) {
     supported = true;
@@ -189,7 +189,7 @@ module.exports.mockWebglRenderer = function mockWebglRenderer(supported) {
  * @alias geo.util.restoreWebglRenderer
  */
 module.exports.restoreWebglRenderer = function () {
-  var vgl = require('vgl');
+  var vgl = require('../vgl');
 
   if (vgl._mocked) {
     vgl.renderWindow = _renderWindow;

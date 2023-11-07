@@ -8,10 +8,6 @@
 /*
  * Bundled with the following libraries:
  *
- * vgl
- * @copyright 2014-2016, Kitware, Inc.
- * @license Apache-2.0
- *
  * Proj4js
  * @copyright 2014, Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf
  * @license MIT
@@ -99,7 +95,8 @@ module.exports = $.extend({
   svg: require('./svg'),
   vtkjs: require('./vtkjs'),
   webgl: require('./webgl'),
-  gui: require('./ui')
+  gui: require('./ui'),
+  vgl: require('./vgl')
 }, require('./registry'));
 
 if (window && !window.$) {
