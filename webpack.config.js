@@ -5,5 +5,8 @@ module.exports = merge(config, {
   entry: {
     geo: ['./index.js'],
     'geo.min': ['./index.js']
+  },
+  externals: {
+    'vtk.js': 'vtk.js'
   }
 });
