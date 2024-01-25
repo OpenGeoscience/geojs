@@ -1,10 +1,21 @@
+/* globals utils */
+
 // Run after the DOM loads
 $(function () {
   'use strict';
 
   var map, layer, feature, ui, save, infoData = null, canvas;
 
-  var cscale = d3.scale.ordinal()
+  // Get query parameters
+  // scale: false -- turn off category scale and colorng
+  // width: speed -- width is proportional to speed
+  // opacity: false -- don't make lower categories somewhat transparent
+  // smooth: true -- round corners of line angles
+  // hover: false -- don't show specific hurricane on hover
+  // x, y, zoom
+  var query = utils.getQuery();
+
+  var cscale = d3.scaleOrdinal()
     .range([
       '#7f7f7f',
       '#d62728',
@@ -137,22 +148,16 @@ $(function () {
         .attr('height', (height - 70) / 3);
 
       data.time = data.time.map(function (t) { return new Date(t.valueOf()); });
-      var x = d3.time.scale().nice(4)
+      var x = d3.scaleTime().nice(4)
         .domain(d3.extent(data.time))
         .range([50, width]);
-      var y = d3.scale.linear().nice(5)
+      var y = d3.scaleLinear().nice(5)
         .domain(d3.extent(data.time, f))
         .range([height / 3 - 50, 36]);
 
-      var xAxis = d3.svg.axis()
-        .scale(x)
-        .ticks(4)
-        .orient('bottom');
+      var xAxis = d3.axisBottom(x).ticks(4);
 
-      var yAxis = d3.svg.axis()
-        .scale(y)
-        .ticks(5)
-        .orient('left');
+      var yAxis = d3.axisLeft(y).ticks(5);
 
       group.append('g')
         .attr('class', 'x axis')
@@ -164,7 +169,7 @@ $(function () {
         .attr('transform', 'translate(' + x.range()[0] + ')')
         .call(yAxis);
 
-      var line = d3.svg.line()
+      var line = d3.line()
         .x(function (d) { return x(d); })
         .y(function (d, j) { return y(f(d, j)); });
 
@@ -200,7 +205,7 @@ $(function () {
     canvas.selectAll('.app-histogram').remove();
     var group = canvas.append('g').attr('class', 'app-histogram');
 
-    var x = d3.scale.linear()
+    var x = d3.scaleLinear()
       .domain([-0.5, 5.5])
       .range([15 + margin.left, 15 + margin.left + width]);
 
@@ -211,16 +216,13 @@ $(function () {
       });
     });
 
-    var hist = d3.layout.histogram()
-      .bins(d3.range(7))(cats);
+    var hist = d3.bin().domain(d3.extent(cats)).thresholds(d3.range(7))(cats);
 
-    var y = d3.scale.linear()
-      .domain([0, d3.max(hist, function (d) { return d.y; })])
+    var y = d3.scaleLinear()
+      .domain([0, d3.max(hist, function (d) { return d.length; })])
       .range([mapHeight - margin.bottom, mapHeight - height - margin.bottom]);
 
-    var xAxis = d3.svg.axis()
-      .scale(x)
-      .orient('bottom')
+    var xAxis = d3.axisBottom(x)
       .tickValues(d3.range(6))
       .tickFormat(d3.format('.0f'));
 
@@ -238,34 +240,35 @@ $(function () {
       .enter().append('g')
         .attr('class', 'bar')
         .attr('transform', function (d) {
-          return 'translate(' + [x(d.x - 0.5), 0] + ')';
+          return 'translate(' + [x(d.x0 - 0.5), 0] + ')';
         });
 
     bar.append('rect')
       .attr('x', 1)
-      .attr('y', function (d) { return y(d.y); })
+      .attr('y', function (d) { return y(d.length); })
       .attr('width', x(1) - x(0) - 2)
       .attr('height', function (d) {
-        return y(0) - y(d.y);
+        return y(0) - y(d.length);
       })
       .style('fill', function (d) {
-        return cscale(d.x);
+        return cscale(d.x0);
       });
 
     bar.append('text')
       .attr('dy', '0.75em')
       .attr('y', function (d) {
-        return y(d.y) - 18;
+        return y(d.length) - 18;
       })
-      .attr('x', (x(1 + hist[0].dx) - x(1)) / 2)
+      .attr('x', (x(1) - x(0)) / 2)
       .attr('text-anchor', 'middle')
       .text(function (d) {
-        return d.y;
+        return d.length;
       });
 
     group.append('g')
       .attr('class', 'x axis')
       .attr('transform', 'translate(' + [0, y(0)] + ')')
+      .style('font-size', 'unset')
       .call(xAxis);
 
     group.append('text')
@@ -314,27 +317,42 @@ $(function () {
       })
       .style({
         strokeColor: function (d) {
+          if (query.scale === 'false') {
+            return cscale(0);
+          }
           return cscale(d.c);
         },
         strokeWidth: function (d, i, l, pos) {
-          if (data[pos].hover) {
-            return 5;
+          var width = 1.5;
+          if (query.width === 'speed') {
+            width = Math.max(1.5, d.w / 20);
           }
-          return 1.5;
+          if (data[pos].hover) {
+            width += 3.5;
+          }
+          return width;
         },
         strokeOpacity: function (d, i, l, pos) {
           if (data[pos].hover) {
             return 1;
           }
+          if (query.opacity === 'false') {
+            return 0.50;
+          }
           if (d.c === 0) {
             return 0.25;
           }
           return 0.25 + 0.5 * (d.t - start) / drange;
-        }
+        },
+        lineCap: query.smooth === 'true' ? 'round' : undefined,
+        lineJoin: query.smooth === 'true' ? 'round' : undefined
       })
       .geoOff(geo.event.feature.mouseover)
       .geoOff(geo.event.feature.mouseout)
       .geoOn(geo.event.feature.mouseover, function (evt) {
+        if (query.hover === 'false') {
+          return;
+        }
         if (!evt.top) { return; }
         data.forEach(function (d) {
           d.hover = false;
@@ -351,10 +369,10 @@ $(function () {
   map = geo.map({
     node: '#map',
     center: {
-      x: -50,
-      y: 30
+      x: query.x ? +query.x : -50,
+      y: query.y ? +query.y : 30
     },
-    zoom: 4
+    zoom: query.zoom ? +query.zoom : 4
   });
 
   // Add the default osm layer
@@ -368,57 +386,88 @@ $(function () {
 
   // Create a legend
   ui = map.createLayer('ui');
-  ui.createWidget('legend', {position: {right: 20, top: 10}})
-    .categories([
-      {
-        name: 'Category 5',
-        style: {
-          strokeColor: cscale(5),
-          strokeWidth: 3
-        },
-        type: 'line'
+  ui = map.createLayer('ui');
+  var legend = [];
+  if (query.scale !== 'false') {
+    legend = legend.concat([{
+      name: 'Category 5',
+      style: {
+        strokeColor: cscale(5),
+        strokeWidth: 3
       },
-      {
-        name: 'Category 4',
-        style: {
-          strokeColor: cscale(4),
-          strokeWidth: 3
-        },
-        type: 'line'
+      type: 'line'
+    }, {
+      name: 'Category 4',
+      style: {
+        strokeColor: cscale(4),
+        strokeWidth: 3
       },
-      {
-        name: 'Category 3',
-        style: {
-          strokeColor: cscale(3),
-          strokeWidth: 3
-        },
-        type: 'line'
+      type: 'line'
+    }, {
+      name: 'Category 3',
+      style: {
+        strokeColor: cscale(3),
+        strokeWidth: 3
       },
-      {
-        name: 'Category 2',
-        style: {
-          strokeColor: cscale(2),
-          strokeWidth: 3
-        },
-        type: 'line'
+      type: 'line'
+    }, {
+      name: 'Category 2',
+      style: {
+        strokeColor: cscale(2),
+        strokeWidth: 3
       },
-      {
-        name: 'Category 1',
-        style: {
-          strokeColor: cscale(1),
-          strokeWidth: 3
-        },
-        type: 'line'
+      type: 'line'
+    }, {
+      name: 'Category 1',
+      style: {
+        strokeColor: cscale(1),
+        strokeWidth: 3
       },
-      {
-        name: 'Other',
-        style: {
-          strokeColor: cscale(0),
-          strokeWidth: 3
-        },
-        type: 'line'
-      }
-    ]);
+      type: 'line'
+    }, {
+      name: 'Other',
+      style: {
+        strokeColor: cscale(0),
+        strokeWidth: 3
+      },
+      type: 'line'
+    }]);
+  }
+  if (query.width === 'speed') {
+    legend = legend.concat([{
+      name: '<30 knots',
+      style: {
+        strokeColor: 'black',
+        strokeWidth: 1.5
+      },
+      type: 'line'
+    }, {
+      name: '60 knots',
+      style: {
+        strokeColor: 'black',
+        strokeWidth: 3
+      },
+      type: 'line'
+    }, {
+      name: '110 knots',
+      style: {
+        strokeColor: 'black',
+        strokeWidth: 5.5
+      },
+      type: 'line'
+    }, {
+      name: '160 knots',
+      style: {
+        strokeColor: 'black',
+        strokeWidth: 8
+      },
+      type: 'line'
+    }]);
+  }
+  if (legend.length) {
+    ui.createWidget('legend', {position: {right: 20, top: 10}})
+      .categories(legend);
+  }
 
   canvas = d3.select(ui.canvas()).append('svg')
     .attr('class', 'dynamic-content');

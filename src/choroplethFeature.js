@@ -9,7 +9,7 @@ var feature = require('./feature');
  * @property {geo.colorObject[]} [colorRange] Color lookup table.  Default is
  *   9-step color table.
  * @property {function} [scale] A scale converts a input domain into the
- *   the colorRange.  Default is `d3.scale.quantize()`.
+ *   the colorRange.  Default is `d3.scaleQuantize()`.
  * @property {function} [geoId] Given a geometry feature, return an identifier.
  * @property {function} [scalarId] Given a scalar element, return an
  *   identifier.
@@ -59,7 +59,7 @@ var choroplethFeature = function (arg) {
             {r: 1, g: 0.472800903, b: 0.404551679},
             {r: 0.916482116, g: 0.236630659, b: 0.209939162}
           ],
-          scale: d3.scale.quantize(),
+          scale: d3.scaleQuantize(),
           //accessor for ID on geodata feature
           geoId: function (geoFeature) {
             return geoFeature.properties.GEO_ID;

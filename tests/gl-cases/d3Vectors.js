@@ -20,13 +20,13 @@ describe('svgLines', function () {
     common.loadCitiesData(function (citieslatlon) {
       var layer = myMap.createLayer('feature', {renderer: 'svg'});
 
-      var color = d3.scale.category20().domain(d3.range(20));
+      var color = d3.scaleOrdinal(d3.schemeCategory10).domain(d3.range(10));
 
       var vectors = layer.createFeature('vector')
         .data(citieslatlon)
         .origin(function (d) { return { x: d.lon, y: d.lat }; })
         .style('strokeColor', function (d, i) {
-          return color(i % 20);
+          return color(i % 10);
         })
         .style('strokeWidth', 2.5);
 

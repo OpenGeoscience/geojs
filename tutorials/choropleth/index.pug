@@ -53,7 +53,10 @@ block mainTutorial
     var domain = [Math.min.apply(null, populations), Math.max.apply(null, populations)];
     var colorRange = ['rgb(237,248,233)', 'rgb(186,228,179)', 'rgb(116,196,118)', 'rgb(35,139,69)'];
 
-    var scale = d3.scale.quantize().domain(domain).range(colorRange);
+    // Use the partial d3 that is included with geojs
+    d3 = geo.registries.renderers.svg.d3
+
+    var scale = d3.scaleQuantize().domain(domain).range(colorRange);
 
     polygon
       .style({

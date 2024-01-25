@@ -62,7 +62,7 @@ $(function () {
     this.draw();
   }
 
-  var color = d3.scale.category10();
+  var color = d3.scaleOrdinal(d3.schemeCategory10);
   webglLayer.createFeature('line', {selectionAPI: true})
     .data([window.randomPath(1000, 0.1, -88, 30), window.randomPath(500, 0.05, -110, 40)])
     .style({

@@ -51,7 +51,7 @@ repos:
   - id: codespell
     args:
       - --ignore-words-list
-      - "hist,indext,pixelx,thex,hight,reenable,lastr,xdescribe,afterall,countr"
+      - "hist,indext,pixelx,thex,hight,reenable,lastr,xdescribe,afterall,countr,curvelinear"
       - --skip
       - examples/sld/index.pug,package-lock.json,examples/reprojection/proj.json,website/themes/agency/source/vendor/jquery/jquery.min.js,examples/reprojection/capitals.json
 - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook

@@ -123,10 +123,7 @@ var scaleWidget = function (arg) {
     m_this._appendCanvasToParent();
     m_this.reposition();
 
-    d3.select(m_this.canvas()).attr({
-      width: m_options.maxWidth,
-      height: m_options.maxHeight
-    });
+    d3.select(m_this.canvas()).attr('width', m_options.maxWidth).attr('height', m_options.maxHeight);
     // Update the scale on pan
     m_this.geoOn(geo_event.pan, m_this._update);
     m_this._render();
@@ -220,8 +217,7 @@ var scaleWidget = function (arg) {
     pixels = (vert ? m_options.maxHeight : m_options.maxWidth) - sw;
     /* Calculate the distance that the maximum length scale bar can occupy at
      * the location that the scale bar will be drawn. */
-    // svg.attr({width: width, height: height});
-    pt1 = $(svg[0][0]).offset();
+    pt1 = $(svg.node()).offset();
     pt1 = {
       x: pt1.left + (m_options.orientation === 'left' ? width - sw2 : sw2),
       y: pt1.top + (m_options.orientation === 'top' ? height - sw2 : sw2)
@@ -238,12 +234,9 @@ var scaleWidget = function (arg) {
     } else {
       width = value.pixels + sw;
     }
-    svg.attr({width: width, height: height});
+    svg.attr('width', width).attr('height', height);
     if (svg.select('polyline').empty()) {
-      svg.append('polyline').classed('geojs-scale-widget-bar', true).attr({
-        fill: 'none',
-        'stroke-width': sw
-      });
+      svg.append('polyline').classed('geojs-scale-widget-bar', true).attr('fill', 'none').attr('stroke-width', sw);
     }
     if (svg.select('text').empty()) {
       svg.append('text').classed('geojs-scale-widget-text', true);
@@ -251,39 +244,35 @@ var scaleWidget = function (arg) {
     switch (m_options.orientation) {
       case 'bottom':
         pts = [[sw2, tl], [sw2, sw2], [width - sw2, sw2], [width - sw2, tl]];
-        svg.select('text').attr({
-          x: width / 2,
-          y: sw * 2,
-          'text-anchor': 'middle',
-          'dominant-baseline': 'hanging'
-        });
+        svg.select('text')
+          .attr('x', width / 2)
+          .attr('y', sw * 2)
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'hanging');
         break;
       case 'top':
         pts = [[sw2, height - tl], [sw2, height - sw2], [width - sw2, height - sw2], [width - sw2, height - tl]];
-        svg.select('text').attr({
-          x: width / 2,
-          y: height - sw * 2,
-          'text-anchor': 'middle',
-          'dominant-baseline': 'alphabetic'
-        });
+        svg.select('text')
+          .attr('x', width / 2)
+          .attr('y', height - sw * 2)
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'alphabetic');
         break;
       case 'left':
         pts = [[width - tl, sw2], [width - sw2, sw2], [width - sw2, height - sw2], [width - tl, height - sw2]];
-        svg.select('text').attr({
-          x: width - sw * 2,
-          y: height / 2,
-          'text-anchor': 'end',
-          'dominant-baseline': 'middle'
-        });
+        svg.select('text')
+          .attr('x', width - sw * 2)
+          .attr('y', height / 2)
+          .attr('text-anchor', 'end')
+          .attr('dominant-baseline', 'middle');
         break;
       case 'right':
         pts = [[tl, sw2], [sw2, sw2], [sw2, height - sw2], [tl, height - sw2]];
-        svg.select('text').attr({
-          x: sw * 2,
-          y: height / 2,
-          'text-anchor': 'start',
-          'dominant-baseline': 'middle'
-        });
+        svg.select('text')
+          .attr('x', sw * 2)
+          .attr('y', height / 2)
+          .attr('text-anchor', 'start')
+          .attr('dominant-baseline', 'middle');
         break;
     }
     svg.select('polyline').attr('points', pts.map(function (pt) { return pt.join(','); }).join(' '));

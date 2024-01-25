@@ -90,15 +90,15 @@ $(function () {
   // Add a red box that blocks mouse clicks.
   addEventBox(width / 4, height / 2, 'Blocking click')
     .style('fill', 'firebrick')
-    .on('mousedown', function () {
-      d3.event.stopPropagation();
+    .on('mousedown', function (evt) {
+      evt.stopPropagation();
     });
 
   // Add a blue box that blocks the mouse wheel.
   addEventBox(3 * width / 4, height / 2, 'Blocking wheel')
     .style('fill', 'steelblue')
-    .on('wheel', function () {
-      d3.event.stopPropagation();
+    .on('wheel', function (evt) {
+      evt.stopPropagation();
     });
 
   // Connect the button that adds or removes the top layer.

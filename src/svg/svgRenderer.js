@@ -591,7 +591,9 @@ var svgRenderer = function (arg) {
         entries, rendersel;
     entries = selection.enter().append(append);
     selection.exit().remove();
-    rendersel = m_features[id].onlyRenderNew ? entries : selection;
+    // in d3 v3 this was
+    // rendersel = m_features[id].onlyRenderNew ? entries : selection;
+    rendersel = entries;
     setAttrs(rendersel, attributes);
     rendersel.attr('class', classes.concat([id]).join(' '));
     setStyles(rendersel, style);

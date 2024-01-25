@@ -6,27 +6,23 @@ $(function () {
       width = 710 - margin.left - margin.right,
       height = 410 - margin.top - margin.bottom;
 
-  var parseDate = d3.time.format('%Y%m%d').parse;
+  var parseDate = d3.timeParse('%Y%m%d');
 
-  var x = d3.time.scale()
+  var x = d3.scaleTime()
         .range([0, width]);
 
-  var y = d3.scale.linear()
+  var y = d3.scaleLinear()
         .range([height, 0]);
 
-  var color = d3.scale.category10();
+  var color = d3.scaleOrdinal(d3.schemeCategory10);
 
-  var xAxis = d3.svg.axis()
-        .scale(x)
-        .tickFormat(d3.time.format('%b'))
-        .orient('bottom');
+  var xAxis = d3.axisBottom(x)
+        .tickFormat(d3.timeFormat('%b'));
 
-  var yAxis = d3.svg.axis()
-        .scale(y)
-        .orient('left');
+  var yAxis = d3.axisLeft(y);
 
-  var line = d3.svg.line()
-        .interpolate('basis')
+  var line = d3.line()
+        .curve(d3.curveBasis)
         .x(function (d) { return x(d.date); })
         .y(function (d) { return y(d.temperature); });
 
@@ -36,10 +32,8 @@ $(function () {
         .append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  d3.tsv('../../data/temperature_data.tsv', function (error, data) {
-    if (error) throw error;
-
-    color.domain(d3.keys(data[0]).filter(function (key) { return key !== 'date'; }));
+  d3.tsv('../../data/temperature_data.tsv').then(function (data) {
+    color.domain(Object.keys(data[0]).filter(function (key) { return key !== 'date'; }));
 
     data.forEach(function (d) {
       d.date = parseDate(d.date);

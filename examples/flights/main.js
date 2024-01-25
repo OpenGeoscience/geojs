@@ -40,7 +40,7 @@ var map, layer, feature, ranges, data;
 // 10 * 256 + 1 size array to use pre-computed colors with surety that it has
 // all possible values for 8-bit color displays.  We can manually interpolate
 // to use the scale array.
-var d3Scale = d3.scale.linear()
+var d3Scale = d3.scaleLinear()
       .range(colorbrewer.RdYlBu[11])
       .domain([1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0]),
     d3ScaleParts = 10 * 256,

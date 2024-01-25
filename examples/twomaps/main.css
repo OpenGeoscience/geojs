@@ -1,0 +1,60 @@
+#maindiv {
+  width: 100%;
+  height: calc(100% - 60px);
+  position: relative;
+  overflow: hidden;
+}
+#mapdiv {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: 0;
+}
+#insetdiv {
+  top: 25%;
+  left: 25%;
+  bottom: 25%;
+  right: 25%;
+  position: absolute;
+  z-index: 1;
+}
+#insetdiv.circular {
+  top: 50%;
+  margin-top: -250px;
+  left: 50%;
+  margin-left: -250px;
+  bottom: inherit;
+  right: inherit;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+#map, #insetmap {
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+#mapdiv:focus, #insetdiv:focus {
+  outline: none;
+}
+#map:focus, #insetmap:focus {
+  outline: none;
+}
+.geo-attribution {
+  max-width: 50%;
+}
+#tooltip1, #tooltip2 {
+  font-size: 14px;
+  font-family: sans-serif;
+}
+#tooltip1 {
+  color: black;
+  text-shadow: 0 0 2px white;
+}
+#tooltip2 {
+  color: white;
+  text-shadow: 0 0 2px black;
+}

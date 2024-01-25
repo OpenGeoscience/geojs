@@ -33,7 +33,6 @@ module.exports = {
     alias: {
       jquery: 'jquery/dist/jquery',
       proj4: 'proj4/lib',
-      d3: 'd3/d3.js',
       hammerjs: '@egjs/hammerjs/dist/hammer.js',
       mousetrap: 'mousetrap/mousetrap.js'
     }

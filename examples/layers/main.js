@@ -71,13 +71,13 @@ $(function () {
       return 9 * d * Math.PI / 100;
     }
     var alpha = 0.1;
-    var xScale = d3.scale.linear()
+    var xScale = d3.scaleLinear()
       .domain([-6, 6])
       .range([width * 3.3, width * 4]);
-    var yScale = d3.scale.linear()
+    var yScale = d3.scaleLinear()
       .domain([-6, 6])
       .range([width * 0.7, 0]);
-    var spiral = d3.svg.line()
+    var spiral = d3.line()
       .x(function (d) {
         var t = theta(d);
         return xScale(alpha * t * Math.cos(t));

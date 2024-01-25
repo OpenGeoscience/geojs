@@ -19,7 +19,6 @@ var svg_pathFeature = function (arg) {
   }
 
   var $ = require('jquery');
-  var d3 = require('./svgRenderer').d3;
   var object = require('./object');
   var timestamp = require('../timestamp');
 
@@ -47,11 +46,12 @@ var svg_pathFeature = function (arg) {
     s_update.call(m_this);
 
     diag = function (d) {
-      var p = {
-        source: d.source,
-        target: d.target
-      };
-      return d3.svg.diagonal()(p);
+      // in d3 v3 this was "d3.svg.diagonal(d);".  See
+      // https://stackoverflow.com/questions/40845121/where-is-d3-svg-diagonal
+      return 'M' + d.source.x + ',' + d.source.y + 'C' +
+        d.source.x + ',' + (d.source.y + d.target.y) / 2 + ' ' +
+        d.target.x + ',' + (d.source.y + d.target.y) / 2 + ' ' +
+        d.target.x + ',' + d.target.y;
     };
     tmp = [];
     data.forEach(function (d, i) {
