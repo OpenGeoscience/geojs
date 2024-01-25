@@ -230,6 +230,15 @@ vgl.texture = function () {
     }
   };
 
+  /**
+   * Return the texture handle.
+   *
+   * @returns {number}
+   */
+  this.textureHandle = function () {
+    return this.m_textureHandle;
+  };
+
   return this;
 };
 
@@ -347,15 +356,6 @@ vgl.lookupTable = function () {
     this.m_colorTable = colors;
     this.modified();
     return true;
-  };
-
-  /**
-   * Return the texture handle.
-   *
-   * @returns {number}
-   */
-  this.textureHandle = function () {
-    return this.m_textureHandle;
   };
 
   return this;
