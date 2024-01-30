@@ -112,8 +112,8 @@ var sliderWidget = function (arg) {
 
     // create d3 scales for positioning
     // TODO: make customizable and responsive
-    m_xscale = d3.scale.linear().domain([-4, 4]).range([0, m_width]);
-    m_yscale = d3.scale.linear().domain([0, 1]).range([m_width * 1.5, m_height - m_width * 1.5]);
+    m_xscale = d3.scaleLinear().domain([-4, 4]).range([0, m_width]);
+    m_yscale = d3.scaleLinear().domain([0, 1]).range([m_width * 1.5, m_height - m_width * 1.5]);
 
     // Create the main group element
     svg = svg.append('g').classed('geo-ui-slider', true);
@@ -130,19 +130,17 @@ var sliderWidget = function (arg) {
       .attr('cx', m_xscale(0))
       .attr('cy', m_yscale(0.0) - m_width + 2)
       .attr('r', (m_width - 2) / 2)
-      .style({
-        cursor: 'pointer'
-      })
+      .style('cursor', 'pointer')
       .on('click', function () {
         var z = map.zoom();
         map.transition({
           zoom: z + 1,
-          ease: d3.ease('cubic-in-out'),
+          ease: d3.easeCubicInOut,
           duration: 500
         });
       })
-      .on('mousedown', function () {
-        d3.event.stopPropagation();
+      .on('mousedown', function (evt) {
+        evt.stopPropagation();
       });
 
     put_icon(
@@ -170,19 +168,17 @@ var sliderWidget = function (arg) {
       .attr('cx', m_xscale(0))
       .attr('cy', m_yscale(1.0) + m_width - 2)
       .attr('r', (m_width - 2) / 2)
-      .style({
-        cursor: 'pointer'
-      })
+      .style('cursor', 'pointer')
       .on('click', function () {
         var z = map.zoom();
         map.transition({
           zoom: z - 1,
-          ease: d3.ease('cubic-in-out'),
+          ease: d3.easeCubicInOut,
           duration: 500
         });
       })
-      .on('mousedown', function () {
-        d3.event.stopPropagation();
+      .on('mousedown', function (evt) {
+        evt.stopPropagation();
       });
 
     put_icon(
@@ -206,13 +202,13 @@ var sliderWidget = function (arg) {
      * @param {boolean} [trans] Truthy for an animated transition.
      */
     function respond(evt, trans) {
-      var z = m_yscale.invert(d3.mouse(svg.node())[1]),
+      var z = m_yscale.invert(d3.pointer(event, svg.node())[1]),
           zrange = map.zoomRange();
       z = (1 - z) * (zrange.max - zrange.min) + zrange.min;
       if (trans) {
         map.transition({
           zoom: z,
-          ease: d3.ease('cubic-in-out'),
+          ease: d3.easeCubicInOut,
           duration: 500,
           done: m_this._update()
         });
@@ -236,11 +232,9 @@ var sliderWidget = function (arg) {
       .attr('ry', m_width / 10)
       .attr('width', m_width / 3)
       .attr('height', m_height - m_width * 3)
-      .style({
-        cursor: 'pointer'
-      })
-      .on('click', function () {
-        respond(d3.event, true);
+      .style('cursor', 'pointer')
+      .on('click', function (evt) {
+        respond(evt, true);
       });
 
     // Create the nub
@@ -256,18 +250,16 @@ var sliderWidget = function (arg) {
       .attr('ry', 3)
       .attr('width', m_width)
       .attr('height', m_nubSize)
-      .style({
-        cursor: 'pointer'
-      })
-      .on('mousedown', function () {
+      .style('cursor', 'pointer')
+      .on('mousedown', function (evt) {
         d3.select(document).on('mousemove.geo.slider', function () {
-          respond(d3.event);
+          respond(evt);
         });
         d3.select(document).on('mouseup.geo.slider', function () {
-          respond(d3.event);
+          respond(evt);
           d3.select(document).on('.geo.slider', null);
         });
-        d3.event.stopPropagation();
+        evt.stopPropagation();
       });
 
     /**
@@ -332,7 +324,7 @@ var sliderWidget = function (arg) {
     var map = m_this.layer().map(),
         zoomRange = map.zoomRange(),
         zoom = map.zoom(),
-        zoomScale = d3.scale.linear();
+        zoomScale = d3.scaleLinear();
 
     obj = obj || {};
     zoom = obj.value || zoom;

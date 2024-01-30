@@ -5,7 +5,7 @@
     var p = [], q = [];
     var i, j, dx, ss = sigma * sigma * 2 * n * n;
     var c = 1 / (2 * sigma * Math.PI);
-    var rnd = d3.random.normal();
+    var rnd = d3.randomNormal();
 
     // preallocate
     p.length = n;

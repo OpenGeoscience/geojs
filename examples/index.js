@@ -24,6 +24,9 @@ require('codemirror/addon/edit/matchbrackets');
 // Colorbrewer
 window.colorbrewer = require('colorbrewer').default;
 
+// d3
+window.d3 = require('d3');
+
 // common example code
 require('./common/examples.css');
 require('./common/examples');

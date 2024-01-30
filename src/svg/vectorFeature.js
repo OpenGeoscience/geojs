@@ -143,17 +143,17 @@ var svg_vectorFeature = function (arg) {
       return markers;
     }, []);
 
+    markerGroup = m_this.renderer()._definitions()
+      .selectAll('g.marker-group#' + m_this._svgid());
+
     var sel = markerGroup
       .selectAll('marker.geo-vector-marker')
       .data(markers);
 
-    sel.enter()
-      .append('marker')
-      .append('path');
-
     var renderer = m_this.renderer();
 
-    sel
+    sel.enter()
+      .append('marker')
       .each(function (d) {
         var marker = d3.select(this);
         var markerData = d.head ? markerConfigs[endStyle(d.data, d.dataIndex)] : markerConfigs[originStyle(d.data, d.dataIndex)];
@@ -173,7 +173,7 @@ var svg_vectorFeature = function (arg) {
       .style('opacity', function (d) {
         return opacity(d.data, d.dataIndex);
       })
-      .select('path')
+      .append('path')
       .attr('d', function (d) {
         return d.head ? markerConfigs[endStyle(d.data, d.dataIndex)].path : markerConfigs[originStyle(d.data, d.dataIndex)].path;
       });

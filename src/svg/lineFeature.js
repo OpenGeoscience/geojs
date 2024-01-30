@@ -82,11 +82,11 @@ var svg_lineFeature = function (arg) {
         }
       }
 
-      line = d3.svg.line()
+      line = d3.line()
           .x(function (d) { return m_this.featureGcsToDisplay(d).x; })
           .y(function (d) { return m_this.featureGcsToDisplay(d).y; })
-          .interpolate(m_this.style.get('closed')(item, idx) && ln.length > 2 ?
-            'linear-closed' : 'linear');
+          .curve(m_this.style.get('closed')(item, idx) && ln.length > 2 ?
+            d3.curveLinearClosed : d3.curveLinear);
       // item is an object representing a single line
       // m_this.line()(item) is an array of coordinates
       m_style = {

@@ -89,7 +89,7 @@ var svgWidget = function (arg) {
     // svg widgets manage their own sizes, so make the resize handler a no-op
     m_renderer._resize = function () {};
 
-    m_this.canvas(m_renderer.canvas()[0][0]);
+    m_this.canvas(m_renderer.canvas().node());
   };
 
   return this;

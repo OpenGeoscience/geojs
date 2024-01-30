@@ -108,13 +108,10 @@ var colorLegendWidget = function (arg) {
 
       var legendSvg = legendContainer
         .append('svg')
-        .attr({
-          class: 'svg',
-          width: width,
-          height: '40px',
-          viewBox: -margin + ' 0 ' + width + ' 40'
-        });
-
+        .attr('class', 'svg')
+        .attr('width', width)
+        .attr('height', '40px')
+        .attr('viewBox', -margin + ' 0 ' + width + ' 40');
       if (category.type === 'discrete') {
         m_this._drawDiscrete(legendSvg, width - 2 * margin, category);
       } else if (category.type === 'continuous') {
@@ -190,32 +187,41 @@ var colorLegendWidget = function (arg) {
    * @param {geo.gui.colorLegendWidget.category} category The discrete type legend category
    */
   this._drawDiscrete = function (svg, width, category) {
+    /**
+     * Render the d3 axis object based on the axis d3 Scale.
+     * @param {object} axisScale d3 scale object
+     * @returns {object} d3 axis object
+     */
+    function createAxis(axisScale) {
+      var skip = Math.ceil(axisScale.domain().length / m_ticks);
+      var values = axisScale.domain().filter(function (d, i) { return i % skip === 0; });
+      return d3.axisBottom(axisScale)
+        .tickFormat(d3.format('.2s'))
+        .tickValues(values);
+    }
+
     if (['linear', 'log', 'sqrt', 'pow', 'quantile', 'ordinal'].indexOf(category.scale) === -1) {
       throw new Error('unsupported scale');
     }
     var valueRange, valueScale, colorScale, axisScale, axis, steps, ticks;
     if (category.scale === 'ordinal') {
-      colorScale = d3.scale.ordinal()
+      colorScale = d3.scaleOrdinal()
         .domain(category.domain)
         .range(category.colors);
       m_this._renderDiscreteColors(
         svg, category.domain, colorScale, width, function (d) { return d; });
 
-      axisScale = d3.scale.ordinal()
+      axisScale = d3.scaleBand()
         .domain(category.domain)
-        .rangeRoundBands([0, width]);
-      axis = d3.svg.axis()
-        .scale(axisScale)
-        .tickValues(function () {
-          var skip = Math.ceil(category.domain.length / m_ticks);
-          return category.domain
-            .filter(function (d, i) { return i % skip === 0; });
-        });
+        .rangeRound([0, width]);
+      var skip = Math.ceil(category.domain.length / m_ticks);
+      var values = category.domain.filter(function (d, i) { return i % skip === 0; });
+      axis = d3.axisBottom(axisScale).tickValues(values);
     } else if (category.scale === 'quantile') {
       valueRange = [0, category.colors.length];
       steps = util.range(0, category.colors.length - 1);
-      valueScale = d3.scale.quantile().domain(category.domain).range(steps);
-      colorScale = d3.scale.quantize().domain(valueRange).range(category.colors);
+      valueScale = d3.scaleQuantile().domain(category.domain).range(steps);
+      colorScale = d3.scaleQuantize().domain(valueRange).range(category.colors);
       m_this._renderDiscreteColors(svg, steps, colorScale, width, function (d) {
         return valueScale.invertExtent(d).join(' - ');
       });
@@ -224,15 +230,15 @@ var colorLegendWidget = function (arg) {
       axisDomain = axisDomain.concat(steps.map(
         function (step) { return valueScale.invertExtent(step)[1]; }));
 
-      axisScale = d3.scale.ordinal()
+      axisScale = d3.scalePoint()
         .domain(axisDomain)
-        .rangePoints([0, width]);
+        .range([0, width]);
       axis = createAxis(axisScale);
     } else if (['linear', 'log', 'sqrt', 'pow'].indexOf(category.scale) !== -1) {
       valueRange = [0, category.colors.length];
-      valueScale = d3.scale[category.scale]()
+      valueScale = d3['scale' + category.scale.charAt(0).toUpperCase() + category.scale.slice(1)]()
         .domain(category.domain).range(valueRange).nice();
-      colorScale = d3.scale.quantize().domain(valueRange).range(category.colors);
+      colorScale = d3.scaleQuantize().domain(valueRange).range(category.colors);
       steps = util.range(0, category.colors.length - 1);
       var precision = Math.max.apply(null, category.domain
         .map(function (number) { return getPrecision(number); }));
@@ -243,32 +249,17 @@ var colorLegendWidget = function (arg) {
 
       ticks = steps.slice();
       ticks.push(category.colors.length);
-      axisScale = d3.scale.ordinal()
+      axisScale = d3.scalePoint()
         .domain(ticks.map(function (tick) {
           return valueScale.invert(tick);
         }))
-        .rangePoints([0, width]);
+        .range([0, width]);
       axis = createAxis(axisScale);
     }
     if (category.endAxisLabelOnly) {
       axis.tickValues([axisScale.domain()[0], axisScale.domain()[axisScale.domain().length - 1]]);
     }
     m_this._renderAxis(svg, axis);
-
-    /**
-     * Render the d3 axis object based on the axis d3 Scale.
-     * @param {object} axisScale d3 scale object
-     * @returns {object} d3 axis object
-     */
-    function createAxis(axisScale) {
-      return d3.svg.axis()
-        .scale(axisScale)
-        .tickFormat(d3.format('.2s'))
-        .tickValues(function () {
-          var skip = Math.ceil(axisScale.domain().length / m_ticks);
-          return axisScale.domain().filter(function (d, i) { return i % skip === 0; });
-        });
-    }
   };
 
   /**
@@ -292,8 +283,8 @@ var colorLegendWidget = function (arg) {
       .attr('transform', function (d, i) {
         return 'translate(' + i * width / steps.length + ' ,0)';
       })
-      .on('mousemove', function (d) {
-        m_this._showPopup(getValue(d));
+      .on('mousemove', function (evt, d) {
+        m_this._showPopup(evt, getValue(d));
       })
       .on('mouseout', m_this._hidePopup);
   };
@@ -314,7 +305,7 @@ var colorLegendWidget = function (arg) {
       range.push((width / (category.domain.length - 1) * i));
     }
     range.push(width);
-    axisScale = d3.scale[category.scale]().domain(category.domain).range(range).nice();
+    axisScale = d3['scale' + category.scale.charAt(0).toUpperCase() + category.scale.slice(1)]().domain(category.domain).range(range).nice();
     if (category.scale === 'log' && category.base) {
       axisScale.base(category.base);
     }
@@ -344,15 +335,14 @@ var colorLegendWidget = function (arg) {
       .attr('fill', 'url(#gradient' + id + ')')
       .attr('width', width)
       .attr('height', '20px')
-      .on('mousemove', function () {
-        var value = axisScale.invert(d3.mouse(this)[0]);
+      .on('mousemove', function (event) {
+        var value = axisScale.invert(d3.pointer(event)[0]);
         var text = m_this._popupFormatter(value, precision);
-        m_this._showPopup(text);
+        m_this._showPopup(event, text);
       })
       .on('mouseout', m_this._hidePopup);
 
-    axis = d3.svg.axis()
-      .scale(axisScale)
+    axis = d3.axisBottom(axisScale)
       .ticks(m_ticks, '.2s');
     if (category.endAxisLabelOnly) {
       axis.tickValues([category.domain[0], category.domain[category.domain.length - 1]]);
@@ -369,9 +359,12 @@ var colorLegendWidget = function (arg) {
     svg.append('g')
       .attr('class', 'axis x')
       .attr('transform', 'translate(0, 20)')
+      /*
       .call(function (g) {
         g.call(axis);
       });
+      */
+      .call(axis);
   };
 
   /**
@@ -390,22 +383,20 @@ var colorLegendWidget = function (arg) {
 
   /**
    * Show the popup based on current mouse event.
+   * @param {d3.event} event The triggering d3 event.
    * @param {string} text content to be shown in the popup
    */
-  this._showPopup = function (text) {
+  this._showPopup = function (event, text) {
     // The cursor location relative to the container
-    var offset = d3.mouse(m_this.canvas());
+    var offset = d3.pointer(event, m_this.canvas());
     m_this.popup
       .text(text);
     var containerWidth = m_this.canvas().clientWidth;
-    var popupWidth = m_this.popup[0][0].clientWidth;
+    var popupWidth = m_this.popup.node().clientWidth;
     m_this.popup
-      .style({
-        // If the popup will be longer or almost longer than the container
-        left: offset[0] - (offset[0] +
-          popupWidth - containerWidth > -10 ? popupWidth : 0) + 'px',
-        top: (offset[1] - 22) + 'px'
-      })
+      // If the popup will be longer or almost longer than the container
+      .style('left', offset[0] - (offset[0] + popupWidth - containerWidth > -10 ? popupWidth : 0) + 'px')
+      .style('top', (offset[1] - 22) + 'px')
       .transition()
       .duration(200)
       .style('opacity', 1);

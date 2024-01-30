@@ -206,10 +206,10 @@ var legendWidget = function (arg) {
    */
   this._scale = function () {
     return {
-      x: d3.scale.linear()
+      x: d3.scaleLinear()
         .domain([0, 1])
         .range([0, m_this.size().width]),
-      y: d3.scale.linear()
+      y: d3.scaleLinear()
         .domain([0, m_categories.length - 1])
         .range([m_padding / 2, m_this.size().height - m_padding / 2])
     };
@@ -249,16 +249,15 @@ var legendWidget = function (arg) {
       .attr('width', w - 4)
       .attr('height', h - 4)
       .attr('rx', 3)
-      .attr('ry', 3)
-      .style({
-        stroke: 'black',
-        'stroke-width': '1.5px',
-        fill: 'white',
-        'fill-opacity': 0.75,
-        display: 'none'
-      });
-    m_group.on('mousedown', function () {
-      d3.event.stopPropagation();
+      .attr('ry', 3);
+    m_border
+      .style('stroke', 'black')
+      .style('stroke-width', '1.5px')
+      .style('fill', 'white')
+      .style('fill-opacity', 0.75)
+      .style('display', 'none');
+    m_group.on('mousedown', function (evt) {
+      evt.stopPropagation();
     });
     m_group.on('mouseover', function () {
       m_border.transition()

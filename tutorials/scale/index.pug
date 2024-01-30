@@ -35,7 +35,7 @@ block mainTutorial
   +codeblock_test('map has a scale widget', [
     'uiLayer.children().length === 1',
     'uiLayer.children()[0] instanceof geo.gui.scaleWidget',
-    'd3.select(uiLayer.children()[0].canvas()).select("text").html() === "80 km"'
+    'geo.registries.renderers.svg.d3.select(uiLayer.children()[0].canvas()).select("text").html() === "80 km"'
     ])
 
   :markdown-it
@@ -46,7 +46,7 @@ block mainTutorial
       units: 'miles'
     });
   +codeblock_test('map has a scale widget', [
-    'd3.select(uiLayer.children()[0].canvas()).select("text").html() === "50 mi"'
+    'geo.registries.renderers.svg.d3.select(uiLayer.children()[0].canvas()).select("text").html() === "50 mi"'
     ])
 
   :markdown-it
@@ -60,7 +60,7 @@ block mainTutorial
       units: [{unit: 'NM', scale: 1852}]
     });
   +codeblock_test('map has a scale widget', [
-    'd3.select(uiLayer.children()[0].canvas()).select("text").html() === "30 NM"'
+    'geo.registries.renderers.svg.d3.select(uiLayer.children()[0].canvas()).select("text").html() === "30 NM"'
     ])
 
   :markdown-it
@@ -82,6 +82,6 @@ block mainTutorial
     'uiLayer.children().length === 2',
     'uiLayer.children()[0] instanceof geo.gui.scaleWidget',
     'uiLayer.children()[1] instanceof geo.gui.scaleWidget',
-    'd3.select(uiLayer.children()[0].canvas()).select("text").html() === "80 km"',
-    'd3.select(uiLayer.children()[1].canvas()).select("text").html() === "50 mi"'
+    'geo.registries.renderers.svg.d3.select(uiLayer.children()[0].canvas()).select("text").html() === "80 km"',
+    'geo.registries.renderers.svg.d3.select(uiLayer.children()[1].canvas()).select("text").html() === "50 mi"'
     ])
