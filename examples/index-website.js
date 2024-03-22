@@ -18,3 +18,6 @@ require('codemirror/addon/edit/matchbrackets');
 
 // Colorbrewer
 window.colorbrewer = require('colorbrewer').default;
+
+// d3
+window.d3 = require('d3');
