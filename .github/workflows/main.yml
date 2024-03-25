@@ -35,6 +35,8 @@ jobs:
       with:
         fail_ci_if_error: false
         verbose: true
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     - name: On failure, create alternate baseline images in case the new behavior is correct
       if: ${{ failure() }}
       run: |
@@ -42,7 +44,7 @@ jobs:
         python3 tests/runners/baseline_images.py -cevb _build
     - name: Upload test images on failure
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: images
         path: |
@@ -50,7 +52,7 @@ jobs:
           _build/Baseline*tgz
     - name: Upload artifacts
       if: ${{ always() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: |
@@ -58,7 +60,7 @@ jobs:
           dist/built
     - name: Upload built website
       if: ${{ success() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: website
         path: |
@@ -90,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Import artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: website
         path: website/public
@@ -110,7 +112,7 @@ jobs:
         node-version: 'lts/*'
     - run: npm ci
     - name: Import artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: dist
         path: dist
