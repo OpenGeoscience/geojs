@@ -42,7 +42,7 @@ jobs:
         python3 tests/runners/baseline_images.py -cevb _build
     - name: Upload test images on failure
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: images
         path: |
@@ -50,7 +50,7 @@ jobs:
           _build/Baseline*tgz
     - name: Upload artifacts
       if: ${{ always() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: |
@@ -58,7 +58,7 @@ jobs:
           dist/built
     - name: Upload built website
       if: ${{ success() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: website
         path: |
