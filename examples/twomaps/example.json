@@ -1,0 +1,8 @@
+{
+  "title": "One map set inside another.",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "This example show how two maps can be made to move together and show similar, but different data."
+  }
+}

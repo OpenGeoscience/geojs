@@ -1,0 +1,15 @@
+{
+  "title": "Isolines",
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "This example shows how to add isolines to a map."
+  },
+  "tests": [{
+    "description": "isoline feature is loaded and has text",
+    "wait": ["example.ready"],
+    "tests": [
+      "example.iso instanceof geo.isolineFeature",
+      "example.isolineLayer.children()[2].features()[0] instanceof geo.textFeature"
+    ]
+  }]
+}
