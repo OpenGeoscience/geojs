@@ -17,7 +17,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
         node-version: '18'
@@ -66,7 +66,7 @@ jobs:
   unpinned:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     # Don't pin version to test with the latest common version
     - uses: actions/setup-node@v4
       with:
@@ -104,7 +104,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
         node-version: 'lts/*'
