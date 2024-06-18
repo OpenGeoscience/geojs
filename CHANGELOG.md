@@ -1,5 +1,108 @@
 # GeoJS Change Log
 
+## Version 1.12.2
+
+### Improvements
+
+- Expose original event as part of click events ([#1329](../../pull/1329))
+
+## Version 1.12.1
+
+### Improvements
+
+- Attempt to reinitialize the webgl context when restored ([#1327](../../pull/1327))
+- Zero out uniform arrays by default ([#1327](../../pull/1327))
+
+## Version 1.12.0
+
+### Changes
+
+- Update to modern d3 ([#1309](../../pull/1309))
+
+## Version 1.11.2
+
+### Bug Fixes
+
+- Fix textureHandle accessor ([#1308](../../pull/1308))
+
+## Version 1.11.1
+
+### Bug Fixes
+
+- Ensure compatibility with older systems ([#1305](../../pull/1305))
+
+## Version 1.11.0
+
+### Changes
+
+- Never include vtkjs in the bundle ([#1304](../../pull/1304))
+
+## Version 1.10.20
+
+### Performance Improvements
+
+- Skip rendering empty text values ([#1300](../../pull/1300))
+
+## Version 1.10.19
+
+### Bug Fixes
+
+- Ensure compatibility with older systems ([#1293](../../pull/1293))
+
+## Version 1.10.18
+
+### Changes
+
+- Change default back to OSM ([#1292](../../pull/1292))
+
+## Version 1.10.17
+
+### Bug Fixes
+
+- Fix the name of one of the tile map options ([#1277](../../pull/1277))
+
+## Version 1.10.16
+
+### Bug Fixes
+
+- Remove debug statement ([#1276](../../pull/1276))
+
+## Version 1.10.15
+
+### Improvements
+
+- Add mouseup and mousedown events ([#1275](../../pull/1275))
+
+## Version 1.10.14
+
+### Improvements
+
+- Add an action where the middle mouse button pans ([#1269](../../pull/1269))
+
+## Version 1.10.13
+
+### Bug Fixes
+
+- When binding an array of events, don't duplicate ([#1265](../../pull/1265))
+
+## Version 1.10.12
+
+### Bug Fixes
+
+- Improve quad cropping to zero ([#1258](../../pull/1258))
+
+## Version 1.10.11
+
+### Bug Fixes
+
+- Fix an issue cropping large canvas quads ([#1250](../../pull/1250))
+
+## Version 1.10.10
+
+### Bug Fixes
+
+- Fix setting nearest pixel on texture creation ([#1246](../../pull/1246))
+
 ## Version 1.10.9
 
 ### Performance Improvements

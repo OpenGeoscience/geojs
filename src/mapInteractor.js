@@ -1665,6 +1665,7 @@ var mapInteractor = function (args) {
     // add information about the button state to the event information
     var details = m_this.mouse();
     details.buttonsDown = m_clickMaybe.buttons;
+    details.evt = evt;
 
     // reset click detector variable
     m_this._setClickMaybe(false);
