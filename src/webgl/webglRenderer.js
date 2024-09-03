@@ -92,6 +92,8 @@ var webglRenderer = function (arg) {
     m_viewer.init();
     m_contextRenderer = m_viewer.renderWindow().activeRenderer();
     m_contextRenderer.setResetScene(false);
+    canvas.get(0).addEventListener('webglcontextlost', (evt) => evt.preventDefault(), false);
+    canvas.get(0).addEventListener('webglcontextrestored', () => m_viewer.renderWindow()._init(), false);
 
     if (m_viewer.renderWindow().renderers().length > 0) {
       m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
@@ -140,7 +142,7 @@ var webglRenderer = function (arg) {
     /* If we are already scheduled to render, don't schedule again.  Rather,
      * mark that we should render after other animation frame requests occur.
      * It would be nice if we could just reschedule the call by removing and
-     * readding the animation frame request, but this doesn't work for if the
+     * re-adding the animation frame request, but this doesn't work for if the
      * reschedule occurs during another animation frame callback (it then waits
      * until a subsequent frame). */
     m_this.layer().map().scheduleAnimationFrame(m_this._renderFrame, true);
