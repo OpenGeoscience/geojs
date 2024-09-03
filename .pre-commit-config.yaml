@@ -6,7 +6,7 @@
 default_stages: [commit, push]
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v4.6.0
   hooks:
   - id: check-added-large-files
   - id: check-ast
@@ -46,7 +46,7 @@ repos:
     files: README.rst
     name: rst-linter of README.rst
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.4
+  rev: v2.3.0
   hooks:
   - id: codespell
     args:
@@ -55,7 +55,7 @@ repos:
       - --skip
       - examples/sld/index.pug,package-lock.json,examples/reprojection/proj.json,website/themes/agency/source/vendor/jquery/jquery.min.js,examples/reprojection/capitals.json
 - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
-  rev: v9.13.0
+  rev: v9.17.0
   hooks:
   - id: commitlint
     stages: [commit-msg]
