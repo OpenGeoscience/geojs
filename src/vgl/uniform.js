@@ -53,9 +53,7 @@ vgl.uniform = function (type, name) {
 
   var m_type = type,
       m_name = name,
-      m_dataArray = [];
-
-  m_dataArray.length = this.getTypeNumberOfComponents(m_type);
+      m_dataArray = new Array(this.getTypeNumberOfComponents(m_type)).fill(0);
 
   /**
    * Get name of the uniform.
