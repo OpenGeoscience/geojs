@@ -971,10 +971,21 @@ var util = {
    * @memberof geo.util
    */
   escapeUnicodeHTML: function (text) {
-    return text.replace(/./g, function (k) {
+    return text.replace(/[^- 0-9A-Za-z~`!@#$%^&*()_+={}|[\]\\:";'<>?,./]/g, function (k, pos) {
       var code = k.charCodeAt(0);
       if (code < 127) {
         return k;
+      }
+      /* decode utf016 surrogate pairs */
+      if (code >= 0xD800 && code <= 0xE000) {
+        if (code < 0xDC00 || pos) {
+          return '';
+        }
+        var code0 = text.charCodeAt(pos - 1);
+        if (code0 < 0xD800 || code0 >= 0xDC00) {
+          return '';
+        }
+        code = (code0 - 0xD800) * 0x400 + (code - 0xDC00);
       }
       return '&#' + code.toString(10) + ';';
     });
