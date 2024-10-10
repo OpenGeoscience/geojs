@@ -1,0 +1,8 @@
+{
+  "title": "Tracks",
+  "hideNavbar": true,
+  "level": 0,
+  "about": {
+    "text": "Track features are much like line featrues with a time value per vertex.  A start and end time can be specified."
+  }
+}
