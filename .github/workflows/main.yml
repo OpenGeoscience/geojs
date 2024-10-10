@@ -22,7 +22,7 @@ jobs:
       with:
         node-version: '18'
     - uses: browser-actions/setup-firefox@latest
-    - run: sudo apt-get install --yes --no-install-recommends optipng
+    - run: sudo apt-get install --yes --no-install-recommends optipng imagemagick
     - run: sudo apt-get remove --yes fonts-lato
     - run: fc-list
     - run: firefox --version
@@ -75,6 +75,7 @@ jobs:
         node-version: 'lts/*'
     - run: npm --version && node --version
     - uses: browser-actions/setup-firefox@latest
+    - run: sudo apt-get install --yes --no-install-recommends optipng imagemagick
     - run: sudo apt-get remove --yes fonts-lato
     - run: fc-list
     - run: firefox --version
