@@ -156,7 +156,7 @@ var pointFeature = function (arg) {
     m_allData.forEach(function (d, i) {
 
       // for each point in the data set normalize the coordinate
-      // representation and add the point to the cluster treee
+      // representation and add the point to the cluster tree
       var pt = util.normalizeCoordinates(position(d, i));
       pt.index = i;
       m_clusterTree.addPoint(pt);

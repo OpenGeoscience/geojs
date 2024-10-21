@@ -21,6 +21,7 @@ var webgl_polygonFeature = function (arg) {
 
   var vgl = require('../vgl');
   var earcut = require('earcut');
+  earcut = earcut.__esModule ? earcut.default : earcut;
   var transform = require('../transform');
   var util = require('../util');
   var object = require('./object');
