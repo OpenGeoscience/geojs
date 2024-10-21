@@ -105,7 +105,7 @@ var vtkjsRenderer = function (arg) {
     /* If we are already scheduled to render, don't schedule again.  Rather,
      * mark that we should render after other animation frame requests occur.
      * It would be nice if we could just reschedule the call by removing and
-     * readding the animation frame request, but this doesn't work for if the
+     * re-adding the animation frame request, but this doesn't work for if the
      * reschedule occurs during another animation frame callback (it then waits
      * until a subsequent frame). */
     m_this.layer().map().scheduleAnimationFrame(m_this._renderFrame, true);

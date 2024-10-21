@@ -1594,10 +1594,10 @@ var map = function (arg) {
   this.layers = this.children;
 
   /**
-   * Comapare two layers by zIndex.  If the zIndex is the same, the order in
-   * the parent element is used.  If the two layers don't have the same parent
-   * (for instance, one layer isn't attached to the map), layers in the map
-   * are sorted below detached layers.
+   * Compare two layers by zIndex.  If the zIndex is the same, the order in the
+   * parent element is used.  If the two layers don't have the same parent (for
+   * instance, one layer isn't attached to the map), layers in the map are
+   * sorted below detached layers.
    *
    * @param {geo.layer} a First layer to compare.
    * @param {geo.layer} b Second layer to compare.

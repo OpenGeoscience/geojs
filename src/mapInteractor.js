@@ -45,7 +45,7 @@ var Mousetrap = require('mousetrap');
  * @property {boolean} [keyboard.focusHighlight=true] If truthy, when the map
  *      gains focus, a highlight style is shown around it.  This gives an
  *      indicator that keyboard events will affect the map, but may not be
- *      visuallly desirabel.
+ *      visually desirable.
  * @property {boolean} [alwaysTouch=false] If true, add touch support even if
  *      the browser doesn't apepar to be touch-aware.
  * @property {number} [wheelScaleX=1] A scale multiplier for horizontal wheel

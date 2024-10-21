@@ -639,7 +639,7 @@ var polygonFeature = function (arg) {
       return data;
     }
 
-    /* Set the reduced polgons as the data and use simple accessors. */
+    /* Set the reduced polygons as the data and use simple accessors. */
     m_this.style('position', util.identityFunction);
     m_this.style('polygon', util.identityFunction);
     m_this.data(data);

@@ -49,7 +49,7 @@ require('./scaleWidget.styl');
  *   that determine what round values are displayed.
  * @property {number} multiples.multiple The value that is selected for display.
  * @property {number} multiples.digit The number of significant digits in
- *   `mutliple`.
+ *   `multiple`.
  */
 
 /**
