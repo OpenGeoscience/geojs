@@ -1,0 +1,10 @@
+{
+  "title": "Hurricane tracking data",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "level": 0,
+  "order": 0,
+  "about": {
+    "text": "Explore historic hurricane paths since 1980 on an interactive map."
+  }
+}
