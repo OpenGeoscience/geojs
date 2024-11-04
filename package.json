@@ -12,6 +12,7 @@
     "url": "https://github.com/OpenGeoscience/geojs"
   },
   "dependencies": {
+    "canvas": "^2.11.2",
     "color-name": "^2.0.0",
     "docdash": "^2.0.1",
     "earcut": "^3.0.0",
