@@ -96,6 +96,7 @@ var annotationLayer = function (arg) {
       m_options,
       m_mode = null,
       m_annotations = [],
+      m_annotationIds = {},
       m_features = [],
       m_labelFeature,
       m_labelLayer,
@@ -504,6 +505,7 @@ var annotationLayer = function (arg) {
         annotation: annotation
       });
       m_annotations.push(annotation);
+      m_annotationIds[annotation.id()] = annotation;
       annotation.layer(m_this);
       var map = m_this.map();
       gcs = (gcs === null ? map.gcs() : (
@@ -536,6 +538,9 @@ var annotationLayer = function (arg) {
     if (pos >= 0) {
       if (annotation === m_this.currentAnnotation) {
         m_this.currentAnnotation = null;
+      }
+      if (m_annotationIds[annotation.id()] !== undefined) {
+        delete m_annotationIds[annotation.id()];
       }
       annotation._exit();
       m_annotations.splice(pos, 1);
@@ -597,12 +602,7 @@ var annotationLayer = function (arg) {
     if (id !== undefined && id !== null) {
       id = +id;  /* Cast to int */
     }
-    var annotations = m_annotations.filter(function (annotation) {
-      return annotation.id() === id;
-    });
-    if (annotations.length) {
-      return annotations[0];
-    }
+    return m_annotationIds[id];
   };
 
   /* A list of special modes */
@@ -1434,6 +1434,7 @@ var annotationLayer = function (arg) {
     // Call super class exit
     s_exit.call(m_this);
     m_annotations = [];
+    m_annotationIds = {};
     m_features = [];
     return m_this;
   };
