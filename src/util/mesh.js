@@ -35,7 +35,6 @@
  *    information.
  */
 function createColoredMesh(feature, elementValues) {
-  var $ = require('jquery');
   var util = require('../util');
 
   var mesh = feature.mesh,
@@ -62,14 +61,14 @@ function createColoredMesh(feature, elementValues) {
   result.stepped = stepped === undefined || stepped ? true : false;
   /* Create the min/max colors and the color array */
   result.colorMap = [];
-  result.minColor = $.extend(
+  result.minColor = Object.assign(
     {a: mesh.get('minOpacity')(result) || 0},
     util.convertColor(mesh.get('minColor')(result)));
-  result.maxColor = $.extend(
+  result.maxColor = Object.assign(
     {a: mesh.get('maxOpacity')(result) || 0},
     util.convertColor(mesh.get('maxColor')(result)));
   mesh.get('colorRange')(result).forEach(function (clr, idx) {
-    result.colorMap.push($.extend({
+    result.colorMap.push(Object.assign({
       a: opacityRange && opacityRange[idx] !== undefined ? opacityRange[idx] : 1
     }, util.convertColor(clr)));
   });

@@ -190,7 +190,6 @@ var isolineFeature = function (arg) {
     return new isolineFeature(arg);
   }
 
-  var $ = require('jquery');
   var transform = require('./transform');
   var geo_event = require('./event');
   var textFeature = require('./textFeature');
@@ -646,7 +645,7 @@ var isolineFeature = function (arg) {
    *    properties if there are no labels.
    */
   this.lastLabelPositions = function () {
-    return $.extend({}, m_lastLabelPositions);
+    return Object.assign({}, m_lastLabelPositions);
   };
 
   /**
@@ -816,7 +815,7 @@ var isolineFeature = function (arg) {
     arg = arg || {};
     s_init.call(m_this, arg);
 
-    var defaultStyle = $.extend(
+    var defaultStyle = Object.assign(
       {},
       {
         opacity: 1.0,
@@ -836,7 +835,7 @@ var isolineFeature = function (arg) {
 
     m_this.style(defaultStyle);
 
-    m_this.isoline($.extend({}, {
+    m_this.isoline(Object.assign({}, {
       count: 15,
       autofit: true,
       levels: [5, 5],

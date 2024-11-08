@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 
-var $ = require('jquery');
 var webglRenderer = require('../webgl/webglRenderer');
 
 var _renderWindow, _supported;
@@ -152,7 +151,7 @@ module.exports.mockWebglRenderer = function mockWebglRenderer(supported) {
           wsize = m_this.windowSize(),
           wpos = m_this.windowPosition();
 
-      m_context = $.extend({}, vgl.GL, default_context);
+      m_context = Object.assign({}, vgl.GL, default_context);
 
       for (i = 0; i < renderers.length; i += 1) {
         if ((renderers[i].width() > wsize[0]) ||

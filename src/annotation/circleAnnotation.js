@@ -1,7 +1,7 @@
-const $ = require('jquery');
 const inherit = require('../inherit');
 const registerAnnotation = require('../registry').registerAnnotation;
 const markerFeature = require('../markerFeature');
+const util = require('../util');
 
 const ellipseAnnotation = require('./ellipseAnnotation');
 
@@ -22,7 +22,7 @@ var circleAnnotation = function (args, annotationName) {
   if (!(this instanceof circleAnnotation)) {
     return new circleAnnotation(args, annotationName);
   }
-  args = $.extend(true, {}, this.constructor.defaults, args, {constraint: 1});
+  args = util.deepMerge({}, this.constructor.defaults, args, {constraint: 1});
   ellipseAnnotation.call(this, args, annotationName || 'circle');
 };
 inherit(circleAnnotation, ellipseAnnotation);
@@ -30,7 +30,7 @@ inherit(circleAnnotation, ellipseAnnotation);
 /**
  * This object contains the default options to initialize the class.
  */
-circleAnnotation.defaults = $.extend({}, ellipseAnnotation.defaults, {
+circleAnnotation.defaults = Object.assign({}, ellipseAnnotation.defaults, {
 });
 
 var circleRequiredFeatures = {};

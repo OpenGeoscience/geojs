@@ -1,4 +1,3 @@
-const $ = require('jquery');
 const inherit = require('../inherit');
 const util = require('../util');
 const registerAnnotation = require('../registry').registerAnnotation;
@@ -40,7 +39,7 @@ var pointAnnotation = function (args) {
     return new pointAnnotation(args);
   }
 
-  args = $.extend(true, {}, this.constructor.defaults, args);
+  args = util.deepMerge({}, this.constructor.defaults, args);
   args.position = args.position || (args.coordinates ? args.coordinates[0] : undefined);
   delete args.coordinates;
   annotation.call(this, 'point', args);
@@ -66,7 +65,7 @@ var pointAnnotation = function (args) {
           if (opt.style.scaled === true) {
             opt.style.scaled = m_this.layer().map().zoom();
           }
-          style = $.extend({}, style, {
+          style = Object.assign({}, style, {
             radius: function () {
               var radius = opt.style.radius,
                   zoom = m_this.layer().map().zoom();
@@ -182,7 +181,7 @@ inherit(pointAnnotation, annotation);
 /**
  * This object contains the default options to initialize the class.
  */
-pointAnnotation.defaults = $.extend({}, annotation.defaults, {
+pointAnnotation.defaults = Object.assign({}, annotation.defaults, {
   style: {
     fill: true,
     fillColor: {r: 0, g: 1, b: 0},

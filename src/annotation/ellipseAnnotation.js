@@ -1,7 +1,7 @@
-const $ = require('jquery');
 const inherit = require('../inherit');
 const registerAnnotation = require('../registry').registerAnnotation;
 const markerFeature = require('../markerFeature');
+const util = require('../util');
 
 const annotationState = require('./annotation').state;
 const rectangleAnnotation = require('./rectangleAnnotation');
@@ -23,7 +23,7 @@ var ellipseAnnotation = function (args, annotationName) {
   if (!(this instanceof ellipseAnnotation)) {
     return new ellipseAnnotation(args, annotationName);
   }
-  args = $.extend(true, {}, this.constructor.defaults, args);
+  args = util.deepMerge({}, this.constructor.defaults, args);
   rectangleAnnotation.call(this, args, annotationName || 'ellipse');
 
   var m_this = this;
@@ -49,7 +49,7 @@ var ellipseAnnotation = function (args, annotationName) {
         marker: {
           x: (opt.corners[0].x + opt.corners[1].x + opt.corners[2].x + opt.corners[3].x) / 4,
           y: (opt.corners[0].y + opt.corners[1].y + opt.corners[2].y + opt.corners[3].y) / 4,
-          style: $.extend(
+          style: Object.assign(
             {}, style,
             {
               radius: radius,
@@ -120,7 +120,7 @@ inherit(ellipseAnnotation, rectangleAnnotation);
 /**
  * This object contains the default options to initialize the class.
  */
-ellipseAnnotation.defaults = $.extend({}, rectangleAnnotation.defaults, {
+ellipseAnnotation.defaults = Object.assign({}, rectangleAnnotation.defaults, {
 });
 
 var ellipseRequiredFeatures = {};

@@ -52,8 +52,6 @@ var vectorFeature = function (arg) {
     return new vectorFeature(arg);
   }
 
-  var $ = require('jquery');
-
   arg = arg || {};
   feature.call(this, arg);
 
@@ -112,7 +110,7 @@ var vectorFeature = function (arg) {
   this._init = function (arg) {
     s_init.call(m_this, arg);
 
-    var defaultStyle = $.extend(
+    var defaultStyle = Object.assign(
       {},
       {
         strokeColor: 'black',

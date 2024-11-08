@@ -522,7 +522,7 @@ var util = {
    * @example <caption>The returned objects can be modified or
    *    extended.</caption>
    * var results = pixelCoordinateParams('#map', 10000, 9000);
-   * var map = geo.map($.extend(results.map, {clampZoom: false}));
+   * var map = geo.map(Object.assign(results.map, {clampZoom: false}));
    * map.createLayer('osm', results.layer);
    *
    * @param {string?} node DOM selector for the map container.
@@ -989,6 +989,43 @@ var util = {
       }
       return '&#' + code.toString(10) + ';';
     });
+  },
+
+  /**
+   * Recursively merge two objects.  This is intended to replace
+   * util.deepMerge(target, ...sources).
+   *
+   * @param {object} target target object to modify.
+   * @param {object} sources object(s) to merge into the target.
+   * @returns {object} The merged object.
+   * @member geo.util
+   */
+  deepMerge: function (target, ...sources) {
+    for (const source of sources) {
+      if (source === null || source === undefined) {
+        continue;
+      }
+      for (const key in source) {
+        if (key === '__proto__' || target === source[key]) {
+          continue;
+        }
+        const copy = source[key];
+        if (copy && typeof copy === 'object' && copy && (copy.constructor === undefined || copy.constructor === Object || Array.isArray(copy))) {
+          let src = target[key];
+          if (!Array.isArray(copy)) {
+            if (typeof src !== 'object' || Array.isArray(src)) {
+              src = {};
+            }
+          } else if (!Array.isArray(src)) {
+            src = [];
+          }
+          target[key] = util.deepMerge(src, copy);
+        } else if (copy !== undefined) {
+          target[key] = copy;
+        }
+      }
+    }
+    return target;
   },
 
   /**

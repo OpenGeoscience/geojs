@@ -332,7 +332,7 @@ var map = function (arg) {
    * @returns {geo.geoPosition}
    */
   this.origin = function () {
-    return $.extend({}, m_origin);
+    return Object.assign({}, m_origin);
   };
 
   /**
@@ -594,7 +594,7 @@ var map = function (arg) {
   this.center = function (coordinates, gcs, ignoreDiscreteZoom, ignoreClampBounds) {
     var center;
     if (coordinates === undefined) {
-      center = $.extend({}, m_this.worldToGcs(m_center, gcs));
+      center = Object.assign({}, m_this.worldToGcs(m_center, gcs));
       return center;
     }
 
@@ -901,7 +901,7 @@ var map = function (arg) {
     if (typeof readerOrName === 'string') {
       opts = opts || {};
       if (!opts.layer) {
-        opts.layer = m_this.createLayer('feature', $.extend({}, opts));
+        opts.layer = m_this.createLayer('feature', Object.assign({}, opts));
       }
       opts.renderer = opts.layer.renderer().api();
       m_fileReader = registry.createFileReader(readerOrName, opts);
@@ -1060,7 +1060,7 @@ var map = function (arg) {
    */
   this.zoomRange = function (arg, noRefresh) {
     if (arg === undefined) {
-      return $.extend({}, m_validZoomRange);
+      return Object.assign({}, m_validZoomRange);
     }
     if (arg.max !== undefined) {
       m_validZoomRange.max = arg.max;
@@ -1130,12 +1130,12 @@ var map = function (arg) {
       /* The queued transition needs to combine the current transition's
        * endpoint, any other queued transition, and the new transition to be
        * complete. */
-      var transitionEnd = $.extend(true, {}, m_transition.end);
+      var transitionEnd = util.deepMerge({}, m_transition.end);
       if (transitionEnd.center && m_gcs !== m_ingcs) {
         transitionEnd.center = transform.transformCoordinates(
           m_gcs, m_ingcs, transitionEnd.center);
       }
-      m_queuedTransition = $.extend(
+      m_queuedTransition = Object.assign(
         {}, transitionEnd || {}, m_queuedTransition || {}, opts);
       return m_this;
     }
@@ -1188,13 +1188,13 @@ var map = function (arg) {
 
     if (opts.center) {
       gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
-      opts = $.extend(true, {}, opts);
+      opts = util.deepMerge({}, opts);
       opts.center = util.normalizeCoordinates(opts.center);
       if (gcs !== m_gcs) {
         opts.center = transform.transformCoordinates(gcs, m_gcs, opts.center);
       }
     }
-    opts = $.extend(true, {}, defaultOpts, opts);
+    opts = util.deepMerge({}, defaultOpts, opts);
 
     m_transition = {
       start: {
@@ -1756,7 +1756,7 @@ var map = function (arg) {
     /* if asked to wait, return a Deferred that will do so, calling the
      * screenshot function without waiting once it is done. */
     if (opts.wait) {
-      var optsWithoutWait = $.extend({}, opts, {wait: false});
+      var optsWithoutWait = Object.assign({}, opts, {wait: false});
       defer = $.Deferred();
 
       var waitForRAF = function () {
@@ -2228,7 +2228,7 @@ var map = function (arg) {
     }
     var dx, dy, maxBounds = m_maxBounds;
     if (rotation) {
-      maxBounds = $.extend({}, m_maxBounds);
+      maxBounds = Object.assign({}, m_maxBounds);
       /* When rotated, expand the maximum bounds so that they will allow the
        * corners to be visible.  We know the rotated bounding box, plus the
        * original maximum bounds.  To fit the corners of the maximum bounds, we
@@ -2417,7 +2417,7 @@ var map = function (arg) {
   m_zoom = this._fix_zoom(m_zoom);
   m_rotation = fix_rotation(m_rotation);
   // Now update to the correct center and zoom level
-  this.center($.extend({}, arg.center || m_center), undefined);
+  this.center(Object.assign({}, arg.center || m_center), undefined);
 
   if (arg.interactor !== null) {
     this.interactor(arg.interactor || mapInteractor({discreteZoom: m_discreteZoom}));

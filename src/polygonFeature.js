@@ -1,4 +1,3 @@
-var $ = require('jquery');
 var inherit = require('./inherit');
 var feature = require('./feature');
 var transform = require('./transform');
@@ -763,7 +762,7 @@ var polygonFeature = function (arg) {
     arg = arg || {};
     s_init.call(m_this, arg);
 
-    var style = $.extend(
+    var style = Object.assign(
       {},
       {
         // default style

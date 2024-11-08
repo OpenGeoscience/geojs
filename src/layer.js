@@ -517,7 +517,7 @@ var layer = function (arg) {
     m_map.node().append(m_node);
 
     /* Pass along the arguments, but not the map reference */
-    var options = $.extend({}, arg);
+    var options = Object.assign({}, arg);
     delete options.map;
 
     if (m_renderer) {

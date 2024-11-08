@@ -1,4 +1,3 @@
-var $ = require('jquery');
 var inherit = require('./inherit');
 var feature = require('./feature');
 var transform = require('./transform');
@@ -233,7 +232,7 @@ var heatmapFeature = function (arg) {
   this._init = function (arg) {
     s_init.call(m_this, arg);
 
-    var defaultStyle = $.extend(
+    var defaultStyle = Object.assign(
       {},
       {
         radius: 10,

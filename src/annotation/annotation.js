@@ -1,4 +1,3 @@
-var $ = require('jquery');
 var geo_event = require('../event');
 var geo_action = require('../action');
 var transform = require('../transform');
@@ -101,7 +100,7 @@ var annotation = function (type, args) {
   }
 
   var m_this = this,
-      m_options = $.extend(true, {}, this.constructor.defaults, args || {}),
+      m_options = util.deepMerge({}, this.constructor.defaults, args || {}),
       m_id = m_options.annotationId;
   delete m_options.annotationId;
   if (m_id === undefined || (m_options.layer && m_options.layer.annotationById(m_id))) {
@@ -526,14 +525,14 @@ var annotation = function (type, args) {
     var coordinatesSet;
     if (arg2 === undefined) {
       coordinatesSet = arg1[m_this._coordinateOption] !== undefined;
-      m_options = $.extend(true, m_options, arg1);
+      m_options = util.deepMerge(m_options, arg1);
       /* For style objects, re-extend them without recursion.  This allows
        * setting colors without an opacity field, for instance. */
       ['style', 'createStyle', 'editStyle', 'editHandleStyle', 'labelStyle',
         'highlightStyle', 'cursorStyle'
       ].forEach(function (key) {
         if (arg1[key] !== undefined) {
-          $.extend(m_options[key], arg1[key]);
+          Object.assign(m_options[key], arg1[key]);
         }
       });
     } else {
@@ -596,7 +595,7 @@ var annotation = function (type, args) {
       m_options[styleType] = {};
     }
     if (arg2 === undefined) {
-      m_options[styleType] = $.extend(true, m_options[styleType], arg1);
+      m_options[styleType] = util.deepMerge(m_options[styleType], arg1);
     } else {
       m_options[styleType][arg1] = arg2;
     }
@@ -659,15 +658,15 @@ var annotation = function (type, args) {
     /* for some states, fall back to the general style if they don't specify a
      * value explicitly. */
     if (state === annotationState.edit || state === annotationState.highlight) {
-      return $.extend({}, m_options.style, m_options[state + 'Style']);
+      return Object.assign({}, m_options.style, m_options[state + 'Style']);
     }
     if (state === annotationState.create) {
-      return $.extend({}, m_options.style, m_options.editStyle,
-                      m_options[state + 'Style']);
+      return Object.assign({}, m_options.style, m_options.editStyle,
+                           m_options[state + 'Style']);
     }
     if (state === annotationState.cursor) {
-      return $.extend({}, m_options.style, m_options.editStyle,
-                      m_options.createStyle, m_options[state + 'Style']);
+      return Object.assign({}, m_options.style, m_options.editStyle,
+                           m_options.createStyle, m_options[state + 'Style']);
     }
     return m_options[state + 'Style'] || m_options.style || {};
   };
@@ -925,7 +924,7 @@ var annotation = function (type, args) {
    */
   this._addEditHandles = function (features, vertices, opts, isOpen) {
     var editPoints,
-        style = $.extend({}, defaultEditHandleStyle, m_this.editHandleStyle()),
+        style = Object.assign({}, defaultEditHandleStyle, m_this.editHandleStyle()),
         handles = util.ensureFunction(style.handles)() || {},
         selected = (
           m_this._editHandle && m_this._editHandle.handle &&
@@ -933,7 +932,7 @@ var annotation = function (type, args) {
             m_this._editHandle.handle : undefined);
     /* opts specify which handles are allowed.  They must be allowed by the
      * original opts object and by the editHandleStyle.handle object. */
-    opts = $.extend({}, opts);
+    opts = Object.assign({}, opts);
     Object.keys(handles).forEach(function (key) {
       if (handles[key] === false) {
         opts[key] = false;
@@ -947,16 +946,16 @@ var annotation = function (type, args) {
     vertexList.forEach((vert, vidx) => {
       vert.forEach(function (pt, idx) {
         if (opts.vertex !== false) {
-          editPoints.push($.extend({}, pt, {type: 'vertex', index: idx, vindex: vidx, style: style, editHandle: true}));
+          editPoints.push(Object.assign({}, pt, {type: 'vertex', index: idx, vindex: vidx, style: style, editHandle: true}));
         }
         if (opts.edge !== false && idx !== vert.length - 1 && (pt.x !== vert[idx + 1].x || pt.y !== vert[idx + 1].y)) {
-          editPoints.push($.extend({
+          editPoints.push(Object.assign({
             x: (pt.x + vert[idx + 1].x) / 2,
             y: (pt.y + vert[idx + 1].y) / 2
           }, {type: 'edge', index: idx, vindex: vidx, style: style, editHandle: true}));
         }
         if (opts.edge !== false && !isOpen && idx === vert.length - 1 && (pt.x !== vert[0].x || pt.y !== vert[0].y)) {
-          editPoints.push($.extend({
+          editPoints.push(Object.assign({
             x: (pt.x + vert[0].x) / 2,
             y: (pt.y + vert[0].y) / 2
           }, {type: 'edge', index: idx, vindex: vidx, style: style, editHandle: true}));
@@ -964,10 +963,10 @@ var annotation = function (type, args) {
       });
     });
     if (opts.center !== false) {
-      editPoints.push($.extend({}, util.centerFromPerimeter(m_this._coordinates()), {type: 'center', style: style, editHandle: true}));
+      editPoints.push(Object.assign({}, util.centerFromPerimeter(m_this._coordinates()), {type: 'center', style: style, editHandle: true}));
     }
     if (opts.rotate !== false) {
-      editPoints.push($.extend(m_this._rotateHandlePosition(
+      editPoints.push(Object.assign(m_this._rotateHandlePosition(
         style.rotateHandleOffset,
         style.rotateHandleRotation + (selected && selected.type === 'rotate' ? m_this._editHandle.amountRotated : 0)
       ), {type: 'rotate', style: style, editHandle: true}));
@@ -976,7 +975,7 @@ var annotation = function (type, args) {
       }
     }
     if (opts.resize !== false) {
-      editPoints.push($.extend(m_this._rotateHandlePosition(
+      editPoints.push(Object.assign(m_this._rotateHandlePosition(
         style.resizeHandleOffset,
         style.resizeHandleRotation
       ), {type: 'resize', style: style, editHandle: true}));

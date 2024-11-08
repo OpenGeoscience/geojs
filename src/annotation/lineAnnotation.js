@@ -1,7 +1,7 @@
-const $ = require('jquery');
 const inherit = require('../inherit');
 const registerAnnotation = require('../registry').registerAnnotation;
 const lineFeature = require('../lineFeature');
+const util = require('../util');
 
 const annotation = require('./annotation').annotation;
 const annotationState = require('./annotation').state;
@@ -37,7 +37,7 @@ var lineAnnotation = function (args) {
   if (!(this instanceof lineAnnotation)) {
     return new lineAnnotation(args);
   }
-  args = $.extend(true, {}, this.constructor.defaults, {
+  args = util.deepMerge({}, this.constructor.defaults, {
     style: {
       line: function (d) {
         /* Return an array that has the same number of items as we have
@@ -324,7 +324,7 @@ inherit(lineAnnotation, annotation);
 /**
  * This object contains the default options to initialize the class.
  */
-lineAnnotation.defaults = $.extend({}, annotation.defaults, {
+lineAnnotation.defaults = Object.assign({}, annotation.defaults, {
   style: {
     strokeColor: {r: 0, g: 0, b: 0},
     strokeOpacity: 1,

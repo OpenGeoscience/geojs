@@ -79,8 +79,6 @@ var lineFeature = function (arg) {
     return new lineFeature(arg);
   }
 
-  var $ = require('jquery');
-
   arg = arg || {};
   feature.call(this, arg);
 
@@ -475,7 +473,7 @@ var lineFeature = function (arg) {
     arg = arg || {};
     s_init.call(m_this, arg);
 
-    var defaultStyle = $.extend(
+    var defaultStyle = Object.assign(
       {},
       {
         strokeWidth: 1.0,

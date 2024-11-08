@@ -93,7 +93,6 @@ var gridFeature = function (arg) {
     return new gridFeature(arg);
   }
 
-  var $ = require('jquery');
   var util = require('./util');
   var meshUtil = require('./util/mesh');
 
@@ -128,7 +127,7 @@ var gridFeature = function (arg) {
   this._init = function (arg) {
     s_init.call(m_this, arg);
 
-    var defaultStyle = $.extend(
+    var defaultStyle = Object.assign(
       {},
       {
         opacity: 1.0,
@@ -143,7 +142,7 @@ var gridFeature = function (arg) {
 
     m_this.style(defaultStyle);
 
-    m_this.grid($.extend({}, {
+    m_this.grid(Object.assign({}, {
       minColor: 'black',
       minOpacity: 0,
       maxColor: 'black',

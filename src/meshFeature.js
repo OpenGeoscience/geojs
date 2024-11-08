@@ -112,7 +112,6 @@ var meshFeature = function (arg) {
     return new meshFeature(arg);
   }
 
-  var $ = require('jquery');
   var util = require('./util');
 
   arg = arg || {};
@@ -145,7 +144,7 @@ var meshFeature = function (arg) {
       return m_mesh[specOrProperty];
     }
     if (value === undefined) {
-      var mesh = $.extend(
+      var mesh = Object.assign(
         {},
         {
           gridWidth: function () {
@@ -552,7 +551,7 @@ var meshFeature = function (arg) {
 
     /* Initialize from arguments */
     arg = arg || {};
-    var style = $.extend({}, {
+    var style = Object.assign({}, {
       position: (d) => Array.isArray(d) ? {x: d[0], y: d[1], z: d[2] || 0} : d
     }, arg.style || {});
 

@@ -1,5 +1,6 @@
 var inherit = require('./inherit');
 var featureLayer = require('./featureLayer');
+var util = require('./util');
 
 /**
  * Object specification for a tile layer.
@@ -194,7 +195,7 @@ var tileLayer = function (arg) {
   var adjustLayerForRenderer = require('./registry').adjustLayerForRenderer;
   var Tile = require('./tile');
 
-  arg = $.extend(true, {}, this.constructor.defaults, arg || {});
+  arg = util.deepMerge({}, this.constructor.defaults, arg || {});
   if (!arg.cacheSize) {
     // this size should be sufficient for a 4k display
     // where display size is (w, h), minimum tile dimension is ts, and total
@@ -236,7 +237,7 @@ var tileLayer = function (arg) {
       m_this = this;
 
   // copy the options into a private variable
-  this._options = $.extend(true, {}, arg);
+  this._options = util.deepMerge({}, arg);
 
   // set the layer attribution text
   this.attribution(arg.attribution);
@@ -282,7 +283,7 @@ var tileLayer = function (arg) {
    * @name geo.tileLayer#options
    */
   Object.defineProperty(this, 'options', {get: function () {
-    return $.extend({}, m_this._options);
+    return Object.assign({}, m_this._options);
   }});
 
   /**
@@ -303,7 +304,7 @@ var tileLayer = function (arg) {
    * @name geo.tileLayer#activeTiles
    */
   Object.defineProperty(this, 'activeTiles', {get: function () {
-    return $.extend({}, m_this._activeTiles); // copy on output
+    return Object.assign({}, m_this._activeTiles); // copy on output
   }});
 
   /**

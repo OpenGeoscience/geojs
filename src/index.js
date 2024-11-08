@@ -41,7 +41,7 @@ $.htmlPrefilter = function (html) {
 
 require('./main.styl');
 
-module.exports = $.extend({
+module.exports = Object.assign({
   annotationLayer: require('./annotationLayer'),
   camera: require('./camera'),
   choroplethFeature: require('./choroplethFeature'),
