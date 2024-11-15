@@ -1,9 +1,9 @@
-var $ = require('jquery');
 var inherit = require('./inherit');
 var tileLayer = require('./tileLayer');
 var registry = require('./registry');
 var quadFeature = require('./quadFeature');
 var pixelmapFeature = require('./pixelmapFeature');
+var util = require('./util');
 
 /**
  * Object specification for a pixelmap layer.
@@ -47,8 +47,7 @@ var pixelmapLayer = function (arg) {
     argdata = arg.data;
     delete arg.data;
   }
-  arg = $.extend(
-    true,
+  arg = util.deepMerge(
     {},
     this.constructor.defaults,
     arg);
@@ -136,7 +135,7 @@ var pixelmapLayer = function (arg) {
  * This object contains the default options used to initialize the
  * pixelmapLayer.
  */
-pixelmapLayer.defaults = $.extend({}, tileLayer.defaults, {
+pixelmapLayer.defaults = Object.assign({}, tileLayer.defaults, {
   features: [quadFeature.capabilities.image, pixelmapFeature.capabilities.lookup],
   tileOffset : function (level) {
     var s = Math.pow(2, level - 1) * 256;

@@ -39,7 +39,6 @@ var graphFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
-  var $ = require('jquery');
   var util = require('./util');
   var registry = require('./registry');
 
@@ -64,8 +63,9 @@ var graphFeature = function (arg) {
   this._init = function (arg) {
     s_init.call(m_this, arg);
 
-    var defaultStyle = $.extend(
-      true, {}, {
+    var defaultStyle = util.deepMerge(
+      {},
+      {
         nodes: {
           radius: 5.0,
           fill: true,

@@ -274,7 +274,7 @@ var pixelmapFeature = function (arg) {
     arg = arg || {};
     s_init.call(m_this, arg);
 
-    var style = $.extend(
+    var style = Object.assign(
       {},
       {
         color: function (d, idx) {

@@ -540,7 +540,7 @@ var feature = function (arg) {
     } else if (typeof arg1 === 'string' && arg2 === undefined) {
       return m_style[arg1];
     } else if (arg2 === undefined) {
-      m_style = $.extend({}, m_style, arg1);
+      m_style = Object.assign({}, m_style, arg1);
       m_this.modified();
       return m_this;
     } else {
@@ -936,7 +936,7 @@ var feature = function (arg) {
     if (!m_layer) {
       throw new Error('Feature requires a valid layer');
     }
-    m_style = $.extend(
+    m_style = Object.assign(
       {},
       {opacity: 1.0},
       arg.style === undefined ? {} : arg.style);

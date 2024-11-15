@@ -140,7 +140,7 @@ var annotationLayer = function (arg) {
     };
   });
 
-  m_options = $.extend(true, {}, {
+  m_options = util.deepMerge({}, {
     dblClickTime: 300,
     adjacentPointProximity: 5,  // in pixels, 0 is exact
     // in pixels; set to continuousPointProximity to false to disable
@@ -445,7 +445,7 @@ var annotationLayer = function (arg) {
       return m_options[arg1];
     }
     if (arg2 === undefined) {
-      m_options = $.extend(true, m_options, arg1);
+      m_options = util.deepMerge(m_options, arg1);
     } else {
       m_options[arg1] = arg2;
     }
@@ -696,7 +696,7 @@ var annotationLayer = function (arg) {
       m_this.map().interactor().removeAction(
         undefined, undefined, geo_annotation.actionOwner);
       if (createAnnotation) {
-        options = $.extend({}, options || {}, {
+        options = Object.assign({}, options || {}, {
           state: geo_annotation.state.create,
           layer: m_this
         });
@@ -812,7 +812,7 @@ var annotationLayer = function (arg) {
       gcs === undefined ? map.ingcs() : gcs));
     $.each(dataList, function (data_idx, data) {
       var type = (data.properties || {}).annotationType || feature.featureType,
-          options = $.extend({}, data.properties || {}),
+          options = Object.assign({}, data.properties || {}),
           position, datagcs, i, existing;
       if ($.inArray(type, annotationList) < 0) {
         return;

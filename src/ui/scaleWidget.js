@@ -93,7 +93,7 @@ var scaleWidget = function (arg) {
 
   var m_this = this,
       s_exit = this._exit,
-      m_options = $.extend({}, {
+      m_options = Object.assign({}, {
         scale: 1,
         maxWidth: 200,
         maxHeight: arg.orientation === 'left' || arg.orientation === 'right' ? 200 : 20,
@@ -299,7 +299,7 @@ var scaleWidget = function (arg) {
    */
   this.options = function (arg1, arg2) {
     if (arg1 === undefined) {
-      var result = $.extend({}, m_options);
+      var result = Object.assign({}, m_options);
       result.position = m_this.position(undefined, true);
       return result;
     }
@@ -307,7 +307,7 @@ var scaleWidget = function (arg) {
       return arg1 === 'position' ? m_this.position(undefined, true) : m_options[arg1];
     }
     if (arg2 === undefined) {
-      m_options = $.extend(true, m_options, arg1);
+      m_options = util.deepMerge(m_options, arg1);
     } else {
       m_options[arg1] = arg2;
     }

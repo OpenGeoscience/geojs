@@ -175,8 +175,7 @@ var mapInteractor = function (args) {
   }
 
   // copy the options object with defaults
-  m_options = $.extend(
-    true,
+  m_options = util.deepMerge(
     {},
     {
       throttle: 30,
@@ -390,13 +389,13 @@ var mapInteractor = function (args) {
   /* We don't want to merge the original arrays with arrays passed in the args,
    * so override that as necessary for actions. */
   if (args && args.actions) {
-    m_options.actions = $.extend(true, [], args.actions);
+    m_options.actions = util.deepMerge([], args.actions);
   }
   if (args && args.momentum && args.momentum.actions) {
-    m_options.momentum.actions = $.extend(true, [], args.momentum.actions);
+    m_options.momentum.actions = util.deepMerge([], args.momentum.actions);
   }
   if (args && args.keyboard && args.keyboard.actions !== undefined) {
-    m_options.keyboard.actions = $.extend(true, {}, args.keyboard.actions);
+    m_options.keyboard.actions = util.deepMerge({}, args.keyboard.actions);
   }
 
   // default mouse object
@@ -882,9 +881,9 @@ var mapInteractor = function (args) {
    */
   this.options = function (opts) {
     if (opts === undefined) {
-      return $.extend({}, m_options);
+      return Object.assign({}, m_options);
     }
-    $.extend(m_options, opts);
+    Object.assign(m_options, opts);
 
     // reset event handlers for new options
     m_this._connectEvents();
@@ -1039,7 +1038,7 @@ var mapInteractor = function (args) {
       display: display,
       gcs: gcs,
       mouse: mouse,
-      origin: $.extend({}, m_state.origin)
+      origin: Object.assign({}, m_state.origin)
     };
   };
 
@@ -1119,7 +1118,7 @@ var mapInteractor = function (args) {
       m_this._setClickMaybe({
         x: m_mouse.page.x,
         y: m_mouse.page.y,
-        buttons: $.extend({}, m_mouse.buttons)
+        buttons: Object.assign({}, m_mouse.buttons)
       });
       if (m_options.click.duration > 0) {
         m_clickMaybeTimeout = window.setTimeout(function () {
@@ -1153,7 +1152,7 @@ var mapInteractor = function (args) {
       m_state = {
         action: action,
         actionRecord: actionRecord,
-        origin: $.extend(true, {}, m_mouse),
+        origin: util.deepMerge({}, m_mouse),
         initialZoom: map.zoom(),
         initialRotation: map.rotation(),
         initialEventRotation: evt.rotation,
@@ -1686,7 +1685,7 @@ var mapInteractor = function (args) {
     function accum(dz, org) {
       var map = m_this.map(), zoom;
 
-      origin = $.extend(true, {}, org);
+      origin = util.deepMerge({}, org);
       deltaZ += dz;
       if (targetZoom === undefined) {
         startZoom = targetZoom = map.zoom();
@@ -2004,7 +2003,7 @@ var mapInteractor = function (args) {
    * @returns {object} The current mouse state.
    */
   this.mouse = function () {
-    return $.extend(true, {}, m_mouse);
+    return util.deepMerge({}, m_mouse);
   };
 
   /**
@@ -2017,7 +2016,7 @@ var mapInteractor = function (args) {
    */
   this.keyboard = function (newValue) {
     if (newValue === undefined) {
-      return $.extend(true, {}, m_options.keyboard || {});
+      return util.deepMerge({}, m_options.keyboard || {});
     }
     return m_this.options({keyboard: newValue});
   };
@@ -2028,7 +2027,7 @@ var mapInteractor = function (args) {
    * @returns {geo.interactorState}
    */
   this.state = function () {
-    return $.extend(true, {}, m_state);
+    return util.deepMerge({}, m_state);
   };
 
   /**

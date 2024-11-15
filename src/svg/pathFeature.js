@@ -18,7 +18,6 @@ var svg_pathFeature = function (arg) {
     return new svg_pathFeature(arg);
   }
 
-  var $ = require('jquery');
   var object = require('./object');
   var timestamp = require('../timestamp');
 
@@ -73,7 +72,7 @@ var svg_pathFeature = function (arg) {
     m_style.id = m_this._svgid();
     m_style.append = 'path';
     m_style.classes = ['svgPathFeature'];
-    m_style.style = $.extend({
+    m_style.style = Object.assign({
       fill: function () { return false; },
       fillColor: {r: 0, g: 0, b: 0}
     }, s_style);

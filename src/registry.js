@@ -1,5 +1,6 @@
 var $ = require('jquery');
 var geo_action = require('./action');
+var util = require('./util/common');
 
 var widgets = {
   dom: {}
@@ -12,7 +13,7 @@ var featureCapabilities = {};
 var fileReaders = {};
 var rendererLayerAdjustments = {};
 var annotations = {};
-var util = {};
+var registry = {};
 
 /**
  * Register a new file reader type.
@@ -22,7 +23,7 @@ var util = {};
  *      exists, the class creation function is replaced.
  * @param {function} func Class creation function.
  */
-util.registerFileReader = function (name, func) {
+registry.registerFileReader = function (name, func) {
   fileReaders[name] = func;
 };
 
@@ -35,7 +36,7 @@ util.registerFileReader = function (name, func) {
  * @returns {geo.fileReader|null} The new reader or null if no such name is
  *      registered.
  */
-util.createFileReader = function (name, opts) {
+registry.createFileReader = function (name, opts) {
   if (fileReaders.hasOwnProperty(name)) {
     return fileReaders[name](opts);
   }
@@ -50,7 +51,7 @@ util.createFileReader = function (name, opts) {
  *      exists, the class creation function is replaced.
  * @param {function} func Class creation function.
  */
-util.registerRenderer = function (name, func) {
+registry.registerRenderer = function (name, func) {
   renderers[name] = func;
 };
 
@@ -66,7 +67,7 @@ util.registerRenderer = function (name, func) {
  * @returns {geo.renderer|null} The new renderer or null if no such name is
  *      registered.
  */
-util.createRenderer = function (name, layer, canvas, options) {
+registry.createRenderer = function (name, layer, canvas, options) {
   if (renderers.hasOwnProperty(name)) {
     var ren = renderers[name](
       {layer: layer, canvas: canvas, options: options}
@@ -89,7 +90,7 @@ util.createRenderer = function (name, layer, canvas, options) {
  * @returns {string|null|false} The name of the renderer that should be used
  *      or false if no valid renderer can be determined.
  */
-util.checkRenderer = function (name, noFallback) {
+registry.checkRenderer = function (name, noFallback) {
   if (name === null) {
     return name;
   }
@@ -101,7 +102,7 @@ util.checkRenderer = function (name, noFallback) {
     if (!ren.fallback || noFallback) {
       return false;
     }
-    var fallback = util.checkRenderer(ren.fallback(), true);
+    var fallback = registry.checkRenderer(ren.fallback(), true);
     if (fallback !== false) {
       console.warn(name + ' renderer is unavailable, using ' + fallback +
                    ' renderer instead');
@@ -129,13 +130,13 @@ util.checkRenderer = function (name, noFallback) {
  * @returns {string|null|false} The name of the renderer that should be used
  *      or false if no valid renderer can be determined.
  */
-util.rendererForFeatures = function (featureList) {
+registry.rendererForFeatures = function (featureList) {
   var preferredRenderers = ['webgl', 'canvas', 'svg', 'vtkjs', null];
 
   var renderer, ridx, feature, fidx, capability, available;
   for (ridx = 0; ridx < preferredRenderers.length; ridx += 1) {
     renderer = preferredRenderers[ridx];
-    if (util.checkRenderer(renderer, true) === false) {
+    if (registry.checkRenderer(renderer, true) === false) {
       continue;
     }
     if (!featureList) {
@@ -189,7 +190,7 @@ util.rendererForFeatures = function (featureList) {
  * @returns {object} if this feature replaces an existing one, this was the
  *      feature that was replaced.  In this case, a warning is issued.
  */
-util.registerFeature = function (category, name, func, capabilities) {
+registry.registerFeature = function (category, name, func, capabilities) {
   if (!(category in features)) {
     features[category] = {};
     featureCapabilities[category] = {};
@@ -216,12 +217,12 @@ util.registerFeature = function (category, name, func, capabilities) {
  * @returns {geo.feature|null} The new feature or null if no such name is
  *      registered.
  */
-util.createFeature = function (name, layer, renderer, arg) {
+registry.createFeature = function (name, layer, renderer, arg) {
   var category = renderer.api(),
       options = {layer: layer, renderer: renderer};
   if (category in features && name in features[category]) {
     if (arg !== undefined) {
-      $.extend(true, options, arg);
+      util.deepMerge(options, arg);
     }
     var feature = features[category][name](options);
     if (layer.gcs === undefined) {
@@ -248,7 +249,7 @@ util.createFeature = function (name, layer, renderer, arg) {
  * @returns {object} if this layer adjustment replaces an existing one, this
  *      was the value that was replaced.  In this case, a warning is issued.
  */
-util.registerLayerAdjustment = function (category, name, func) {
+registry.registerLayerAdjustment = function (category, name, func) {
   if (!(category in rendererLayerAdjustments)) {
     rendererLayerAdjustments[category] = {};
   }
@@ -269,7 +270,7 @@ util.registerLayerAdjustment = function (category, name, func) {
  * @param {string} name Name of the layer or adjustment.
  * @param {object} layer Instantiated layer object.
  */
-util.adjustLayerForRenderer = function (name, layer) {
+registry.adjustLayerForRenderer = function (name, layer) {
   var rendererName = layer.rendererName();
   if (rendererName) {
     if (rendererLayerAdjustments &&
@@ -290,7 +291,7 @@ util.adjustLayerForRenderer = function (name, layer) {
  * @param {string[]} [defaultFeatures] An optional list of feature capabilities
  *      that are required to use this layer.
  */
-util.registerLayer = function (name, func, defaultFeatures) {
+registry.registerLayer = function (name, func, defaultFeatures) {
   layers[name] = func;
   layerDefaultFeatures[name] = defaultFeatures;
 };
@@ -305,7 +306,7 @@ util.registerLayer = function (name, func, defaultFeatures) {
  * @returns {geo.layer|null} The new layer or null if no such name is
  *      registered.
  */
-util.createLayer = function (name, map, arg) {
+registry.createLayer = function (name, map, arg) {
   // Default renderer is webgl
   var options = {map: map},
       layer = null;
@@ -317,7 +318,7 @@ util.createLayer = function (name, map, arg) {
     if (arg !== undefined) {
       const argdata = arg.data;
       delete arg.data;
-      $.extend(true, options, arg);
+      util.deepMerge(options, arg);
       if (argdata) {
         options.data = argdata;
       }
@@ -342,7 +343,7 @@ util.createLayer = function (name, map, arg) {
  * @returns {object} If this widget replaces an existing one, this was the
  *      value that was replaced.  In this case, a warning is issued.
  */
-util.registerWidget = function (category, name, func) {
+registry.registerWidget = function (category, name, func) {
   if (!(category in widgets)) {
     widgets[category] = {};
   }
@@ -364,14 +365,14 @@ util.registerWidget = function (category, name, func) {
  * @param {object} arg Options for the new widget.
  * @returns {geo.widget} The new widget.
  */
-util.createWidget = function (name, layer, arg) {
+registry.createWidget = function (name, layer, arg) {
   var options = {
     layer: layer
   };
 
   if (name in widgets.dom) {
     if (arg !== undefined) {
-      $.extend(true, options, arg);
+      util.deepMerge(options, arg);
     }
 
     return widgets.dom[name](options);
@@ -394,7 +395,7 @@ util.createWidget = function (name, layer, arg) {
  * @returns {object} if this annotation replaces an existing one, this was the
  *      value that was replaced.  In this case, a warning is issued.
  */
-util.registerAnnotation = function (name, func, features) {
+registry.registerAnnotation = function (name, func, features) {
   var old = annotations[name];
   if (old) {
     console.warn('The ' + name + ' annotation is already registered');
@@ -412,7 +413,7 @@ util.registerAnnotation = function (name, func, features) {
  * @param {object} options The options for the annotation.
  * @returns {object} the new annotation.
  */
-util.createAnnotation = function (name, options) {
+registry.createAnnotation = function (name, options) {
   if (!annotations[name]) {
     console.warn('The ' + name + ' annotation is not registered');
     return;
@@ -427,7 +428,7 @@ util.createAnnotation = function (name, options) {
  * @alias geo.listAnnotations
  * @returns {string[]} A list of registered annotations.
  */
-util.listAnnotations = function () {
+registry.listAnnotations = function () {
   return Object.keys(annotations);
 };
 
@@ -445,7 +446,7 @@ util.listAnnotations = function () {
  * @returns {string[]} a list of features needed for the specified annotations.
  *   There may be duplicates in the list.
  */
-util.featuresForAnnotations = function (annotationList) {
+registry.featuresForAnnotations = function (annotationList) {
   var features = [];
 
   var annList = Array.isArray(annotationList) ? annotationList : Object.keys(annotationList);
@@ -483,8 +484,8 @@ util.featuresForAnnotations = function (annotationList) {
  * @returns {string|null|false} the name of the renderer that should be used or
  *   false if no valid renderer can be determined.
  */
-util.rendererForAnnotations = function (annotationList) {
-  return util.rendererForFeatures(util.featuresForAnnotations(annotationList));
+registry.rendererForAnnotations = function (annotationList) {
+  return registry.rendererForFeatures(registry.featuresForAnnotations(annotationList));
 };
 
 /**
@@ -493,7 +494,7 @@ util.rendererForAnnotations = function (annotationList) {
  *
  * @namespace geo.registries
  */
-util.registries = {
+registry.registries = {
   annotations: annotations,
   features: features,
   featureCapabilities: featureCapabilities,
@@ -503,4 +504,4 @@ util.registries = {
   widgets: widgets
 };
 
-module.exports = util;
+module.exports = registry;

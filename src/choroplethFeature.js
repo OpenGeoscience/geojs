@@ -34,7 +34,6 @@ var choroplethFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
-  var $ = require('jquery');
   var ensureFunction = require('./util').ensureFunction;
 
   delete arg.layer;
@@ -45,7 +44,7 @@ var choroplethFeature = function (arg) {
   var d3 = require('./svg/svgRenderer').d3,
       m_this = this,
       s_init = this._init,
-      m_choropleth = $.extend(
+      m_choropleth = Object.assign(
         {},
         {
           colorRange: [
@@ -142,7 +141,7 @@ var choroplethFeature = function (arg) {
       return m_choropleth[arg1];
     }
     if (arg2 === undefined) {
-      choropleth = $.extend(
+      choropleth = Object.assign(
         {},
         m_choropleth,
         arg1

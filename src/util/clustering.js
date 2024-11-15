@@ -144,7 +144,7 @@ function C(opts) {
   var DistanceGrid = require('./distanceGrid');
 
   // store the options
-  this._opts = $.extend({
+  this._opts = Object.assign({
     maxZoom: 18,
     radius: 5
   }, opts);

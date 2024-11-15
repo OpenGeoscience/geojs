@@ -1,4 +1,3 @@
-const $ = require('jquery');
 const inherit = require('../inherit');
 const registerAnnotation = require('../registry').registerAnnotation;
 const lineFeature = require('../lineFeature');
@@ -44,7 +43,7 @@ var polygonAnnotation = function (args) {
     return new polygonAnnotation(args);
   }
 
-  args = $.extend(true, {}, this.constructor.defaults, {
+  args = util.deepMerge({}, this.constructor.defaults, {
     style: {
       polygon: function (d) { return d.polygon; }
     },
@@ -354,7 +353,7 @@ inherit(polygonAnnotation, annotation);
 /**
  * This object contains the default options to initialize the class.
  */
-polygonAnnotation.defaults = $.extend({}, annotation.defaults, {
+polygonAnnotation.defaults = Object.assign({}, annotation.defaults, {
   style: {
     fill: true,
     fillColor: {r: 0, g: 1, b: 0},

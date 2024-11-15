@@ -1,7 +1,7 @@
-const $ = require('jquery');
 const inherit = require('../inherit');
 const registerAnnotation = require('../registry').registerAnnotation;
 const polygonFeature = require('../polygonFeature');
+const util = require('../util');
 
 const rectangleAnnotation = require('./rectangleAnnotation');
 
@@ -22,7 +22,7 @@ var squareAnnotation = function (args, annotationName) {
   if (!(this instanceof squareAnnotation)) {
     return new squareAnnotation(args, annotationName);
   }
-  args = $.extend(true, {}, this.constructor.defaults, args, {constraint: 1});
+  args = util.deepMerge({}, this.constructor.defaults, args, {constraint: 1});
   rectangleAnnotation.call(this, args, annotationName || 'square');
 };
 inherit(squareAnnotation, rectangleAnnotation);
@@ -30,7 +30,7 @@ inherit(squareAnnotation, rectangleAnnotation);
 /**
  * This object contains the default options to initialize the class.
  */
-squareAnnotation.defaults = $.extend({}, rectangleAnnotation.defaults, {
+squareAnnotation.defaults = Object.assign({}, rectangleAnnotation.defaults, {
 });
 
 var squareRequiredFeatures = {};

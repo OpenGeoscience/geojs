@@ -74,7 +74,6 @@ var markerFeature = function (arg) {
   arg = arg || {};
   pointFeature.call(this, arg);
 
-  var $ = require('jquery');
   var timestamp = require('./timestamp');
   var util = require('./util');
   var KDBush = require('kdbush');
@@ -404,11 +403,10 @@ var markerFeature = function (arg) {
    * @returns {this}
    */
   this._init = function (arg) {
-    arg = $.extend(
-      true,
+    arg = util.deepMerge(
       {},
       {
-        style: $.extend(
+        style: Object.assign(
           {},
           {
             radius: 6.25,

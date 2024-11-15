@@ -1,6 +1,5 @@
 var inherit = require('../inherit');
 var sceneObject = require('../sceneObject');
-var $ = require('jquery');
 
 /**
  * @typedef {object} geo.gui.widget.position
@@ -164,7 +163,7 @@ var widget = function (arg) {
       if (m_position.hasOwnProperty('x') && m_position.hasOwnProperty('y')) {
         m_this.layer().geoOn(geo_event.pan, m_this.repositionEvent);
       }
-      m_this.reposition($.extend(clearPosition, m_this.position()));
+      m_this.reposition(Object.assign(clearPosition, m_this.position()));
       return m_this;
     }
     if (m_position.hasOwnProperty('x') && m_position.hasOwnProperty('y') && !actualValue) {

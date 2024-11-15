@@ -94,8 +94,6 @@ var textFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
-  var $ = require('jquery');
-
   /**
    * @private
    */
@@ -149,7 +147,7 @@ var textFeature = function (arg) {
     arg = arg || {};
     s_init.call(m_this, arg);
 
-    var style = $.extend(
+    var style = Object.assign(
       {},
       {
         font: 'bold 16px sans-serif',

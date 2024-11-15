@@ -94,7 +94,6 @@ var contourFeature = function (arg) {
     return new contourFeature(arg);
   }
 
-  var $ = require('jquery');
   var util = require('./util');
   var meshUtil = require('./util/mesh');
 
@@ -129,7 +128,7 @@ var contourFeature = function (arg) {
   this._init = function (arg) {
     s_init.call(m_this, arg);
 
-    var defaultStyle = $.extend(
+    var defaultStyle = Object.assign(
       {},
       {
         opacity: 1.0,
@@ -144,7 +143,7 @@ var contourFeature = function (arg) {
 
     m_this.style(defaultStyle);
 
-    m_this.contour($.extend({}, {
+    m_this.contour(Object.assign({}, {
       minColor: 'black',
       minOpacity: 0,
       maxColor: 'black',

@@ -1,9 +1,9 @@
-const $ = require('jquery');
 const inherit = require('../inherit');
 const geo_event = require('../event');
 const geo_action = require('../action');
 const registerAnnotation = require('../registry').registerAnnotation;
 const polygonFeature = require('../polygonFeature');
+const util = require('../util');
 
 const annotation = require('./annotation').annotation;
 const annotationState = require('./annotation').state;
@@ -48,7 +48,7 @@ var rectangleAnnotation = function (args, annotationName) {
     return new rectangleAnnotation(args, annotationName);
   }
 
-  args = $.extend(true, {}, this.constructor.defaults, args);
+  args = util.deepMerge({}, this.constructor.defaults, args);
   args.corners = args.corners || args.coordinates || [];
   delete args.coordinates;
   annotation.call(this, annotationName || 'rectangle', args);
@@ -230,7 +230,7 @@ var rectangleAnnotation = function (args, annotationName) {
         c2 = map.gcsToDisplay(evt.mapgcs, null),
         c1 = {x: c2.x, y: c0.y},
         c3 = {x: c0.x, y: c2.y};
-    corners[2] = $.extend({}, evt.mapgcs);
+    corners[2] = Object.assign({}, evt.mapgcs);
     corners[1] = map.displayToGcs(c1, null);
     corners[3] = map.displayToGcs(c3, null);
     if (this._selectionConstraint) {
@@ -290,10 +290,10 @@ var rectangleAnnotation = function (args, annotationName) {
       return 'done';
     }
     if (evt.buttonsDown.left) {
-      corners.push($.extend({}, evt.mapgcs));
-      corners.push($.extend({}, evt.mapgcs));
-      corners.push($.extend({}, evt.mapgcs));
-      corners.push($.extend({}, evt.mapgcs));
+      corners.push(Object.assign({}, evt.mapgcs));
+      corners.push(Object.assign({}, evt.mapgcs));
+      corners.push(Object.assign({}, evt.mapgcs));
+      corners.push(Object.assign({}, evt.mapgcs));
       return true;
     }
   };
@@ -388,7 +388,7 @@ inherit(rectangleAnnotation, annotation);
 /**
  * This object contains the default options to initialize the class.
  */
-rectangleAnnotation.defaults = $.extend({}, annotation.defaults, {
+rectangleAnnotation.defaults = Object.assign({}, annotation.defaults, {
   style: {
     fill: true,
     fillColor: {r: 0, g: 1, b: 0},

@@ -712,7 +712,7 @@ var quadFeature = function (arg) {
 
     m_cacheQuads = (arg.cacheQuads !== false);
 
-    var style = $.extend(
+    var style = Object.assign(
       {},
       {
         color: { r: 1.0, g: 1, b: 1 },
