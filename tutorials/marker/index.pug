@@ -53,9 +53,11 @@ block mainTutorial
     - `symbolValue`: a number that modifies how the symbol appears, usually in the range of [0, 1].  This is often the ratio of the minor axis of the symbol to its major axis.  For `triangle`, it is the length of the base side compared to the identical sides.
     - `rotation`: the rotation in radians.
     - `rotateWithMap`: a boolean; if true, the symbol rotates when the map is rotated.  If false, it remains in the same orientation on the screen.
-    - `radius`: in pixels.  This includes the stroke width, if any.
+    - `radius`: in pixels.  Depending on `strokeOffset` and `radiusIncludesStroke`, this can include half or all of the stroke width.
+    - `radiusIncludesStroke`: if truthy or undefined, the `radius` includes the `strokeWidth` based on the `strokeOffset`.  If defined and falsy, the radius does not include the `strokeWidth`; set this to `false` if `scaleWithZoom` is set to `"fill"`.
     - `strokeWidth`: the width of the stroke around the symbol in pixels.
-    - `scaleWithZoom`: one of the values defined in `geo.markerFeature.scaleModes`.  If `none`, the symbols remains the same size when the map is zoomed.  This can also be `fill`, `stroke`, or `all`, in which case the symbol will change size when the map is zoomed.  The `radius` and `strokeWidth` are in pixels at zoom level 0.
+    - `strokeOffset`: the position of the stroke compared to the radius.  This can only be -1 (inside), 0 (centered at the radius), or 1 (outside).
+    - `scaleWithZoom`: one of the values defined in `geo.markerFeature.scaleModes`.  If `none`, the symbols remains the same size when the map is zoomed.  This can also be `fill`, `stroke`, or `all`, in which case the symbol will change size when the map is zoomed.  If scaling with zoom, the `radius` and `strokeWidth` are in pixels at zoom level 0.
     - `fillColor`
     - `fillOpacity`
     - `strokeColor`

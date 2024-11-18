@@ -33,7 +33,7 @@ var pointFeature = require('./pointFeature');
  * @property {number|function} [strokeOffset=-1] The position of the stroke
  *   compared to the radius.  This can only be -1, 0, or 1 (the sign of the
  *   value is used).
- * @property {boolean|function} [radiusIncludeStroke=true] If truthy or
+ * @property {boolean|function} [radiusIncludesStroke=true] If truthy or
  *   undefined, the `radius` includes the `strokeWidth` based on the
  *   `strokeOffset`.  If defined and falsy, the radius does not include the
  *   `strokeWidth`.
