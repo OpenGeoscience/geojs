@@ -97,6 +97,11 @@
     "webpack-merge": "^6.0.1",
     "webpack-string-replacer": "^0.0.20"
   },
+  "overrides": {
+    "npm-run-all": {
+      "cross-spawn": "^7.0.5"
+    }
+  },
   "release": {
     "plugins": [
       "@semantic-release/commit-analyzer",
