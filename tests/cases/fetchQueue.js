@@ -204,7 +204,7 @@ describe('geo.core.fetchQueue', function () {
           expect(q.get(dlist[qrefs[i][j] - 1])).toBe(j);
         }
         for (j = 0; j < dlist.length; j += 1) {
-          expect(q.get(dlist[j])).toBe($.inArray(dlist[j].ref, qrefs[i]));
+          expect(q.get(dlist[j])).toBe(qrefs[i].indexOf(dlist[j].ref));
         }
       }
 

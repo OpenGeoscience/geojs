@@ -536,7 +536,7 @@ var annotationLayer = function (arg) {
    */
   this.removeAnnotation = function (annotation, update, pos) {
     if (annotation.id && m_annotationIds[annotation.id()] !== undefined) {
-      pos = $.inArray(annotation, m_annotations);
+      pos = m_annotations.indexOf(annotation);
       if (annotation === m_this.currentAnnotation) {
         m_this.currentAnnotation = null;
       }
@@ -815,7 +815,7 @@ var annotationLayer = function (arg) {
       var type = (data.properties || {}).annotationType || feature.featureType,
           options = Object.assign({}, data.properties || {}),
           position, datagcs, i, existing;
-      if ($.inArray(type, annotationList) < 0) {
+      if (!annotationList.includes(type)) {
         return;
       }
       options.style = options.style || {};

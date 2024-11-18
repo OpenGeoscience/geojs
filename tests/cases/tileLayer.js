@@ -1430,8 +1430,7 @@ describe('geo.tileLayer', function () {
           tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50});
           expect(tiles.length).toBe(5);
           tiles.forEach(function (tile) {
-            expect($.inArray(tile._url.split('?s=')[1].split('&')[0],
-                             subdomains)).toBeGreaterThan(-1);
+            expect(subdomains.includes(tile._url.split('?s=')[1].split('&')[0])).toBe(true);
             expect(tile._url.split('&x')[1]).toBe('=' + tile.index.x + '&y=' +
                 tile.index.y + '&z=' + tile.index.level);
           });

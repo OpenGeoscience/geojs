@@ -144,7 +144,7 @@ var fetchQueue = function (options) {
    */
   this.add = function (defer, callback, atEnd) {
     if (defer.__fetchQueue) {
-      var pos = $.inArray(defer, m_this._queue);
+      var pos = m_this._queue.indexOf(defer);
       if (pos >= 0) {
         // m_this._queue.splice(pos, 1);
         m_this._addToQueue(defer, atEnd, pos);
@@ -215,7 +215,7 @@ var fetchQueue = function (options) {
    * @returns {number} -1 if not in the queue, or the position in the queue.
    */
   this.get = function (defer) {
-    return $.inArray(defer, m_this._queue);
+    return m_this._queue.indexOf(defer);
   };
 
   /**
@@ -225,7 +225,7 @@ var fetchQueue = function (options) {
    * @returns {boolean} `true` if the object was removed.
    */
   this.remove = function (defer) {
-    var pos = $.inArray(defer, m_this._queue);
+    var pos = m_this._queue.indexOf(defer);
     if (pos >= 0) {
       m_this._queue.splice(pos, 1);
       return true;

@@ -356,7 +356,7 @@ function handleAnnotationChange(evt) {
     }
     var id = entry.attr('annotation-id');
     // Remove deleted annotations
-    if ($.inArray(id, ids) < 0) {
+    if (!ids.includes(id)) {
       entry.remove();
       return;
     }
@@ -366,7 +366,7 @@ function handleAnnotationChange(evt) {
   });
   // Add if new and fully created
   $.each(ids, function (idx, id) {
-    if ($.inArray(id, present) >= 0) {
+    if (present.includes(id)) {
       return;
     }
     var annotation = layer.annotationById(id);
