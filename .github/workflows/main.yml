@@ -31,7 +31,7 @@ jobs:
     - run: npm run setup-website
     - run: npm run ci-xvfb
     - run: npm run ci-build-website
-    - uses: codecov/codecov-action@v4
+    - uses: codecov/codecov-action@v5
       with:
         fail_ci_if_error: false
         verbose: true
