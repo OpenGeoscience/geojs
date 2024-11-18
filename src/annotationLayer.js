@@ -496,8 +496,7 @@ var annotationLayer = function (arg) {
    * @fires geo.event.annotation.add
    */
   this.addAnnotation = function (annotation, gcs, update) {
-    var pos = $.inArray(annotation, m_annotations);
-    if (pos < 0) {
+    if (m_annotationIds[annotation.id()] === undefined) {
       while (m_this.annotationById(annotation.id())) {
         annotation.newId();
       }
@@ -530,12 +529,14 @@ var annotationLayer = function (arg) {
    * @param {geo.annotation} annotation The annotation to remove.
    * @param {boolean} [update] If `false`, don't update the layer after removing
    *    the annotation.
+   * @param {int} [pos] The posiiton of the annotation in the annotation list,
+   *    if known.  This speeds up the process.
    * @returns {boolean} `true` if an annotation was removed.
    * @fires geo.event.annotation.remove
    */
-  this.removeAnnotation = function (annotation, update) {
-    var pos = $.inArray(annotation, m_annotations);
-    if (pos >= 0) {
+  this.removeAnnotation = function (annotation, update, pos) {
+    if (annotation.id && m_annotationIds[annotation.id()] !== undefined) {
+      pos = $.inArray(annotation, m_annotations);
       if (annotation === m_this.currentAnnotation) {
         m_this.currentAnnotation = null;
       }
@@ -551,8 +552,9 @@ var annotationLayer = function (arg) {
       m_this.geoTrigger(geo_event.annotation.remove, {
         annotation: annotation
       });
+      return true;
     }
-    return pos >= 0;
+    return false;
   };
 
   /**
@@ -565,14 +567,13 @@ var annotationLayer = function (arg) {
    * @returns {number} The number of annotations that were removed.
    */
   this.removeAllAnnotations = function (skipCreating, update) {
-    var removed = 0, annotation, pos = 0;
-    while (pos < m_annotations.length) {
+    var removed = 0, annotation;
+    for (let pos = m_annotations.length - 1; pos >= 0; pos -= 1) {
       annotation = m_annotations[pos];
       if (skipCreating && annotation.state() === geo_annotation.state.create) {
-        pos += 1;
         continue;
       }
-      m_this.removeAnnotation(annotation, false);
+      m_this.removeAnnotation(annotation, false, pos);
       removed += 1;
     }
     if (removed && update !== false) {
