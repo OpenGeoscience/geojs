@@ -466,8 +466,8 @@ var quadFeature = function (arg) {
             prev_onload = image.onload;
             image.onload = function () {
               if (previewColor !== undefined) {
-                if ($.inArray(quad, clrQuads) >= 0) {
-                  clrQuads.splice($.inArray(quad, clrQuads), 1);
+                if (clrQuads.includes(quad)) {
+                  clrQuads.splice(clrQuads.indexOf(quad), 1);
                 }
                 delete quadinfo.clrquad;
               }
@@ -544,8 +544,8 @@ var quadFeature = function (arg) {
             prev_onload = video.onloadeddata;
             video.onloadeddata = function () {
               if (previewColor !== undefined) {
-                if ($.inArray(quad, clrQuads) >= 0) {
-                  clrQuads.splice($.inArray(quad, clrQuads), 1);
+                if (clrQuads.includes(quad)) {
+                  clrQuads.splice(clrQuads.indexOf(quad), 1);
                 }
                 delete quadinfo.clrquad;
               }

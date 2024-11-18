@@ -1,4 +1,3 @@
-var $ = require('jquery');
 var geo_action = require('./action');
 var util = require('./util/common');
 
@@ -460,7 +459,7 @@ registry.featuresForAnnotations = function (annotationList) {
         features.push(feature);
       } else {
         annotationList[ann].forEach(function (state) {
-          if ($.inArray(state, annotations[ann].features[feature]) >= 0) {
+          if (annotations[ann].features[feature].includes(state)) {
             features.push(feature);
           }
         });

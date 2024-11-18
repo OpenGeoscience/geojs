@@ -464,7 +464,7 @@ var util = {
     do {
       found = util.hasAction(actions, action, name, owner);
       if (found) {
-        actions.splice($.inArray(found, actions), 1);
+        actions.splice(actions.indexOf(found), 1);
         removed += 1;
       }
     } while (found);
@@ -1010,7 +1010,7 @@ var util = {
           continue;
         }
         const copy = source[key];
-        if (copy && typeof copy === 'object' && copy && (copy.constructor === undefined || copy.constructor === Object || Array.isArray(copy))) {
+        if (copy && typeof copy === 'object' && (copy.constructor === Object || Array.isArray(copy))) {
           let src = target[key];
           if (!Array.isArray(copy)) {
             if (typeof src !== 'object' || Array.isArray(src)) {

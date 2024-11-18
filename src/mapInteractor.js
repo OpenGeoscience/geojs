@@ -1598,8 +1598,7 @@ var mapInteractor = function (args) {
     clearState();
 
     // if momentum is enabled, start the action here
-    if (m_options.momentum.enabled &&
-            $.inArray(oldAction, m_options.momentum.actions) >= 0) {
+    if (m_options.momentum.enabled && m_options.momentum.actions.includes(oldAction)) {
       var t = (new Date()).valueOf();
       var dt = t - m_mouse.time + m_mouse.deltaTime;
       if (t - m_mouse.time < m_options.momentum.stopTime) {

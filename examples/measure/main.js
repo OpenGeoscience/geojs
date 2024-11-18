@@ -541,7 +541,7 @@ function handleAnnotationChange(evt) {
     }
     var id = entry.attr('annotation-id');
     // Remove deleted annotations
-    if ($.inArray(id, ids) < 0) {
+    if (!ids.includes(id)) {
       entry.remove();
       return;
     }
@@ -562,7 +562,7 @@ function handleAnnotationChange(evt) {
     if (area) {
       dist = (dist ? dist + ' - ' : '') + area;
     }
-    if ($.inArray(id, present) >= 0) {
+    if (present.includes(id)) {
       $('#annotationlist .entry[annotation-id="' + id + '"] .entry-dist').text(dist);
       return;
     }

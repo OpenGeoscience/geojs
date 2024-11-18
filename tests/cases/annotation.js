@@ -3,7 +3,6 @@
 describe('geo.annotation', function () {
   'use strict';
 
-  var $ = require('jquery');
   var geo = require('../test-utils').geo;
   var createMap = require('../test-utils').createMap;
   var destroyMap = require('../test-utils').destroyMap;
@@ -1716,22 +1715,22 @@ describe('geo.annotation', function () {
     var newshapeCount = 0;
     it('listAnnotations', function () {
       var list = geo.listAnnotations();
-      expect($.inArray('rectangle', list) >= 0).toBe(true);
-      expect($.inArray('polygon', list) >= 0).toBe(true);
-      expect($.inArray('point', list) >= 0).toBe(true);
-      expect($.inArray('line', list) >= 0).toBe(true);
-      expect($.inArray('unknown', list) >= 0).toBe(false);
+      expect(list.includes('rectangle')).toBe(true);
+      expect(list.includes('polygon')).toBe(true);
+      expect(list.includes('point')).toBe(true);
+      expect(list.includes('line')).toBe(true);
+      expect(list.includes('unknown')).toBe(false);
     });
     it('registerAnnotation', function () {
       var func = function () { newshapeCount += 1; return 'newshape return'; };
       sinon.stub(console, 'warn').callsFake(function () {});
-      expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(false);
+      expect(geo.listAnnotations().includes('newshape')).toBe(false);
       expect(geo.registerAnnotation('newshape', func)).toBe(undefined);
-      expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(true);
+      expect(geo.listAnnotations().includes('newshape')).toBe(true);
       expect(console.warn.calledOnce).toBe(false);
       expect(geo.registerAnnotation('newshape', func).func).toBe(func);
       expect(console.warn.calledOnce).toBe(true);
-      expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(true);
+      expect(geo.listAnnotations().includes('newshape')).toBe(true);
       console.warn.restore();
     });
     it('createAnnotation', function () {
@@ -1745,29 +1744,29 @@ describe('geo.annotation', function () {
     });
     it('featuresForAnnotations', function () {
       var features = geo.featuresForAnnotations(['polygon']);
-      expect($.inArray('polygon', features) >= 0).toBe(true);
-      expect($.inArray('line.basic', features) >= 0).toBe(true);
-      expect($.inArray('point', features) >= 0).toBe(false);
+      expect(features.includes('polygon')).toBe(true);
+      expect(features.includes('line.basic')).toBe(true);
+      expect(features.includes('point')).toBe(false);
       features = geo.featuresForAnnotations({polygon: true});
-      expect($.inArray('polygon', features) >= 0).toBe(true);
-      expect($.inArray('line.basic', features) >= 0).toBe(true);
-      expect($.inArray('point', features) >= 0).toBe(false);
+      expect(features.includes('polygon')).toBe(true);
+      expect(features.includes('line.basic')).toBe(true);
+      expect(features.includes('point')).toBe(false);
       features = geo.featuresForAnnotations({polygon: [geo.annotation.state.done]});
-      expect($.inArray('polygon', features) >= 0).toBe(true);
-      expect($.inArray('line.basic', features) >= 0).toBe(false);
-      expect($.inArray('point', features) >= 0).toBe(false);
+      expect(features.includes('polygon')).toBe(true);
+      expect(features.includes('line.basic')).toBe(false);
+      expect(features.includes('point')).toBe(false);
       features = geo.featuresForAnnotations({polygon: [geo.annotation.state.done, geo.annotation.state.create]});
-      expect($.inArray('polygon', features) >= 0).toBe(true);
-      expect($.inArray('line.basic', features) >= 0).toBe(true);
-      expect($.inArray('point', features) >= 0).toBe(false);
+      expect(features.includes('polygon')).toBe(true);
+      expect(features.includes('line.basic')).toBe(true);
+      expect(features.includes('point')).toBe(false);
       features = geo.featuresForAnnotations(['polygon', 'point']);
-      expect($.inArray('polygon', features) >= 0).toBe(true);
-      expect($.inArray('line.basic', features) >= 0).toBe(true);
-      expect($.inArray('point', features) >= 0).toBe(true);
+      expect(features.includes('polygon')).toBe(true);
+      expect(features.includes('line.basic')).toBe(true);
+      expect(features.includes('point')).toBe(true);
       features = geo.featuresForAnnotations(['polygon', 'unknown']);
-      expect($.inArray('polygon', features) >= 0).toBe(true);
-      expect($.inArray('line.basic', features) >= 0).toBe(true);
-      expect($.inArray('point', features) >= 0).toBe(false);
+      expect(features.includes('polygon')).toBe(true);
+      expect(features.includes('line.basic')).toBe(true);
+      expect(features.includes('point')).toBe(false);
     });
     it('rendererForAnnotations', function () {
       sinon.stub(console, 'warn').callsFake(function () {});
