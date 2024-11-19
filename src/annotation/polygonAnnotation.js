@@ -43,7 +43,9 @@ var polygonAnnotation = function (args) {
     return new polygonAnnotation(args);
   }
 
-  args = util.deepMerge({}, this.constructor.defaults, {
+  var m_this = this;
+
+  args = util.deepMerge({
     style: {
       polygon: function (d) { return d.polygon; }
     },
@@ -52,12 +54,11 @@ var polygonAnnotation = function (args) {
         const coord = m_this._coordinates();
         /* Return an array that has the same number of items as we have
          * vertices. */
-        return Array.apply(null, Array((coord.outer || coord).length)).map(
-          function () { return d; });
+        return Array((coord.outer || coord).length).fill(d);
       },
       position: function (d, i) {
         if (d.x !== undefined) {
-          return d.x;
+          return d;
         }
         return m_this.options('vertices')[i];
       }
@@ -65,13 +66,12 @@ var polygonAnnotation = function (args) {
     cursorStyle: {
       position: util.identityFunction
     }
-  }, args);
+  }, this.constructor.defaults, args);
   args.vertices = args.vertices || args.coordinates || [];
   delete args.coordinates;
   annotation.call(this, 'polygon', args);
 
-  var m_this = this,
-      s_actions = this.actions,
+  var s_actions = this.actions,
       s_state = this.state;
 
   /**
