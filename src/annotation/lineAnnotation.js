@@ -42,8 +42,7 @@ var lineAnnotation = function (args) {
       line: function (d) {
         /* Return an array that has the same number of items as we have
          * vertices. */
-        return Array.apply(null, Array(m_this.options('vertices').length)).map(
-          function () { return d; });
+        return Array(m_this.options('vertices').length).fill(d);
       },
       position: function (d, i) {
         return m_this.options('vertices')[i];
@@ -53,8 +52,7 @@ var lineAnnotation = function (args) {
       line: function (d) {
         /* Return an array that has the same number of items as we have
          * vertices. */
-        return Array.apply(null, Array(m_this.options('vertices').length)).map(
-          function () { return d; });
+        return Array(m_this.options('vertices').length).fill(d);
       },
       position: function (d, i) {
         return m_this.options('vertices')[i];

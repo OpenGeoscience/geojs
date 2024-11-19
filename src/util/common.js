@@ -1011,15 +1011,15 @@ var util = {
         }
         const copy = source[key];
         if (copy && typeof copy === 'object' && (copy.constructor === Object || Array.isArray(copy))) {
-          let src = target[key];
+          let value = target[key];
           if (!Array.isArray(copy)) {
-            if (typeof src !== 'object' || Array.isArray(src)) {
-              src = {};
+            if (typeof value !== 'object' || Array.isArray(value)) {
+              value = {};
             }
-          } else if (!Array.isArray(src)) {
-            src = [];
+          } else if (!Array.isArray(value)) {
+            value = [];
           }
-          target[key] = util.deepMerge(src, copy);
+          target[key] = util.deepMerge(value, copy);
         } else if (copy !== undefined) {
           target[key] = copy;
         }
