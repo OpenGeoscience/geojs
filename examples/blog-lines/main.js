@@ -14,17 +14,17 @@ var Libraries = {
   },
   leaflet: {
     url: 'https://unpkg.com/leaflet@{version}/dist/leaflet.js',
-    defaultVersion: '1.0.2',
+    defaultVersion: '1.9.4',
     mainReference: 'L'
   },
   mapbox: {
     url: 'https://api.mapbox.com/mapbox.js/v{version}/mapbox.js',
-    defaultVersion: '3.0.1',
+    defaultVersion: '3.3.1',
     mainReference: 'L'
   },
   mapboxgl: {
     url: 'https://api.mapbox.com/mapbox-gl-js/v{version}/mapbox-gl.js',
-    defaultVersion: '0.28.0',
+    defaultVersion: '1.13.3',
     mainReference: 'mapboxgl'
   }
 };
