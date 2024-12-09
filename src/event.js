@@ -656,20 +656,23 @@ geo_event.camera.viewport = 'geo_camera_viewport';
 geo_event.annotation = {};
 
 /**
- * Triggered when an annotation has been added.
+ * Triggered when or more multiple annotations have been added.
  *
  * @event geo.event.annotation.add
  * @type {geo.event.base}
- * @property {geo.annotation} annotation The annotation that was added.
+ * @property {geo.annotation} [annotation] The annotation that was added.
+ * @property {geo.annotation} [annotations] The annotations that were added.
  */
 geo_event.annotation.add = 'geo_annotation_add';
 
 /**
- * Triggered when an annotation is about to be added.
+ * Triggered when one or multiple annotations are about to be added.
  *
  * @event geo.event.annotation.add_before
  * @type {geo.event.base}
- * @property {geo.annotation} annotation The annotation that will be added.
+ * @property {geo.annotation} [annotation] The annotation that will be added.
+ * @property {geo.annotation[]} [annotations] The annotations that will be
+ *   added.
  */
 geo_event.annotation.add_before = 'geo_annotation_add_before';
 

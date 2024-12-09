@@ -1,5 +1,47 @@
 # GeoJS Change Log
 
+## Version 1.12.9
+
+### Performance Improvements
+
+- Add addMultipleAnnotations method ([#1351](../../pull/1351))
+
+## Version 1.12.8
+
+### Performance Improvements
+
+- Switch to more native functions ([#1345](../../pull/1345))
+
+## Version 1.12.7
+
+### Performance Improvements
+
+- Make adding and removing annotations somewhat more efficient ([#1343](../../pull/1343))
+
+## Version 1.12.6
+
+### Performance Improvements
+
+- Stop using jquery extend ([#1342](../../pull/1342))
+
+## Version 1.12.5
+
+### Bug Fixes
+
+- Change how webpack builds some libraries ([#1341](../../pull/1341))
+
+## Version 1.12.4
+
+### Performance Improvements
+
+- Speed up adding annotations ([#1340](../../pull/1340))
+
+## Version 1.12.3
+
+### Bug Fixes
+
+- Improve encoding html for screenshots ([#1334](../../pull/1334))
+
 ## Version 1.12.2
 
 ### Improvements
