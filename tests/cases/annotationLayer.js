@@ -89,7 +89,7 @@ describe('geo.annotationLayer', function () {
       expect(layer.mode()).toBe(layer.modes.edit);
       expect(layer.mode(null)).toBe(layer);
       expect(layer.mode()).toBe(null);
-      layer.removeAllAnnotations();
+      layer.removeAllAnnotations(undefined, undefined, false);
     });
     it('annotations', function () {
       var poly = geo.annotation.polygonAnnotation({

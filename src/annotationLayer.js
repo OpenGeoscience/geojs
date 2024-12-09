@@ -491,7 +491,7 @@ var annotationLayer = function (arg) {
    *    gcs, `null` to use the map gcs, or any other transform.
    * @param {boolean} [update] If `false`, don't update the layer after adding
    *    the annotation.
-   * @param {boolean} [trigger] If `false`, do trigger add_before and add
+   * @param {boolean} [trigger] If `false`, do not trigger add_before and add
    *    events.
    * @returns {this} The current layer.
    * @fires geo.event.annotation.add_before
@@ -570,10 +570,11 @@ var annotationLayer = function (arg) {
    *    the annotation.
    * @param {int} [pos] The posiiton of the annotation in the annotation list,
    *    if known.  This speeds up the process.
+   * @param {boolean} [trigger] If `false`, do not trigger remove event.
    * @returns {boolean} `true` if an annotation was removed.
    * @fires geo.event.annotation.remove
    */
-  this.removeAnnotation = function (annotation, update, pos) {
+  this.removeAnnotation = function (annotation, update, pos, trigger) {
     if (annotation.id && m_annotationIds[annotation.id()] !== undefined) {
       pos = m_annotations.indexOf(annotation);
       if (annotation === m_this.currentAnnotation) {
@@ -588,9 +589,11 @@ var annotationLayer = function (arg) {
         m_this.modified();
         m_this.draw();
       }
-      m_this.geoTrigger(geo_event.annotation.remove, {
-        annotation: annotation
-      });
+      if (trigger !== false) {
+        m_this.geoTrigger(geo_event.annotation.remove, {
+          annotation: annotation
+        });
+      }
       return true;
     }
     return false;
@@ -603,16 +606,17 @@ var annotationLayer = function (arg) {
    *    are in the create state.
    * @param {boolean} [update] If `false`, don't update the layer after
    *    removing the annotation.
+   * @param {boolean} [trigger] If `false`, do not trigger remove events.
    * @returns {number} The number of annotations that were removed.
    */
-  this.removeAllAnnotations = function (skipCreating, update) {
+  this.removeAllAnnotations = function (skipCreating, update, trigger) {
     var removed = 0, annotation;
     for (let pos = m_annotations.length - 1; pos >= 0; pos -= 1) {
       annotation = m_annotations[pos];
       if (skipCreating && annotation.state() === geo_annotation.state.create) {
         continue;
       }
-      m_this.removeAnnotation(annotation, false, pos);
+      m_this.removeAnnotation(annotation, false, pos, trigger);
       removed += 1;
     }
     if (removed && update !== false) {
