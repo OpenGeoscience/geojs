@@ -1,5 +1,11 @@
 # GeoJS Change Log
 
+## Version 1.12.10
+
+### Performance Improvements
+
+- Allow skipping event triggers on removeAnnotation and removeAllAnnotations ([#13521](../../pull/13521))
+
 ## Version 1.12.9
 
 ### Performance Improvements
