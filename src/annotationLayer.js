@@ -491,18 +491,22 @@ var annotationLayer = function (arg) {
    *    gcs, `null` to use the map gcs, or any other transform.
    * @param {boolean} [update] If `false`, don't update the layer after adding
    *    the annotation.
+   * @param {boolean} [trigger] If `false`, do trigger add_before and add
+   *    events.
    * @returns {this} The current layer.
    * @fires geo.event.annotation.add_before
    * @fires geo.event.annotation.add
    */
-  this.addAnnotation = function (annotation, gcs, update) {
+  this.addAnnotation = function (annotation, gcs, update, trigger) {
     if (m_annotationIds[annotation.id()] === undefined) {
       while (m_this.annotationById(annotation.id())) {
         annotation.newId();
       }
-      m_this.geoTrigger(geo_event.annotation.add_before, {
-        annotation: annotation
-      });
+      if (trigger !== false) {
+        m_this.geoTrigger(geo_event.annotation.add_before, {
+          annotation: annotation
+        });
+      }
       m_annotations.push(annotation);
       m_annotationIds[annotation.id()] = annotation;
       annotation.layer(m_this);
@@ -516,8 +520,43 @@ var annotationLayer = function (arg) {
         m_this.modified();
         m_this.draw();
       }
+      if (trigger !== false) {
+        m_this.geoTrigger(geo_event.annotation.add, {
+          annotation: annotation
+        });
+      }
+    }
+    return m_this;
+  };
+
+  /**
+   * Add multiple annotations to the layer.  The annotations could be in any
+   * state.
+   *
+   * @param {geo.annotation[]} annotations The annotations to add.
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.
+   * @param {boolean} [update] If `false`, don't update the layer after adding
+   *    the annotation.
+   * @returns {this} The current layer.
+   * @fires geo.event.annotation.add_before
+   * @fires geo.event.annotation.add
+   */
+  this.addMultipleAnnotations = function (annotations, gcs, update) {
+    const added = [];
+    m_this.geoTrigger(geo_event.annotation.add_before, {
+      annotations: annotations
+    });
+    for (let i = 0; i < annotations.length; i += 1) {
+      const annotation = annotations[i];
+      if (m_annotationIds[annotation.id()] === undefined) {
+        this.addAnnotation(annotation, gcs, update, false);
+        added.push(annotation);
+      }
+    }
+    if (added.length) {
       m_this.geoTrigger(geo_event.annotation.add, {
-        annotation: annotation
+        annotations: added
       });
     }
     return m_this;

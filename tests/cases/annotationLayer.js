@@ -110,6 +110,18 @@ describe('geo.annotationLayer', function () {
       layer.removeAllAnnotations();
       expect(layer.annotations().length).toBe(0);
     });
+    it('multipleAnnotations', function () {
+      var poly = geo.annotation.polygonAnnotation({
+            state: geo.annotation.state.create, layer: layer}),
+          rect = geo.annotation.rectangleAnnotation({
+            layer: layer,
+            corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
+      expect(layer.annotations().length).toBe(0);
+      layer.addMultipleAnnotations([poly, rect]);
+      expect(layer.annotations().length).toBe(2);
+      expect(layer.annotations()[0]).toBe(poly);
+      expect(layer.annotations()[1]).toBe(rect);
+    });
   });
   describe('Public utility functions', function () {
     var map, layer,
