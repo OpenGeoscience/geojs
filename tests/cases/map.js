@@ -266,6 +266,8 @@ describe('geo.core.map', function () {
         bottom: -128 * units,
         width: 256 * units,
         height: 256 * units})).toBe(true);
+      expect(closeToEqual(m.corners()[0], {x: -180, y: 85.05}));
+      expect(closeToEqual(m.corners(null)[0], {x: -128 * units, y: 128 * units}));
       m.ingcs('EPSG:3857');
       expect(m.ingcs()).toBe('EPSG:3857');
       expect(closeToEqual(m.bounds(), {
