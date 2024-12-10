@@ -1,0 +1,19 @@
+{
+  "title": "Rainfall - Annual precipitation totals",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "Show isolines and contours of annual precipitation totals in the United States and nearby areas."
+  },
+  "tests": [{
+    "description": "data is loaded and has isoline, isoline text, contour, and points",
+    "wait": ["year === 2010"],
+    "tests": [
+      "iso instanceof geo.isolineFeature",
+      "layer.children().filter(function (c) { return c instanceof geo.layer; })[0].features()[0] instanceof geo.textFeature",
+      "iso.data().length === 25944",
+      "contour.data().length === 25944",
+      "point.data().length === 25944"
+    ]
+  }]
+}

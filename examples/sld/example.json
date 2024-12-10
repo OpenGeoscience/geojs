@@ -1,0 +1,17 @@
+{
+  "title": "Styling WMS raster layers",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "Rendering tiles from a WMS server by customizing the style."
+  },
+  "disabled": true,
+  "disable_tests": [{
+    "description": "data is loaded from the WMS source",
+    "idle": ["$('#map.geojs-map').data('data-geojs-map').onIdle"],
+    "tests": [
+      "Object.keys($('#map.geojs-map').data('data-geojs-map').layers()[1]._activeTiles).length === 15",
+      "$('#map.geojs-map').data('data-geojs-map').layers()[1]._activeTiles['9_194_148']._image.naturalWidth === 256"
+    ]
+  }]
+}
