@@ -307,14 +307,14 @@ transform.lookup = function (projection) {
   code = parts[1];
 
   return $.ajax({
-    url: 'https://epsg.io/?q=' + code + '&format=json'
+    url: 'https://epsg.io/' + encodeURIComponent(code) + '.proj4'
   }).done(function (data) {
     var result = (data.results || [])[0];
-    if (!result || !result.proj4) {
+    if (!result) {
       return defer.reject(data).promise();
     }
 
-    proj4.defs(projection, result.proj4);
+    proj4.defs(projection, result);
     return $.when(proj4.defs[projection]);
   });
 };
