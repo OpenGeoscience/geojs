@@ -329,7 +329,7 @@ var pointFeature = function (arg) {
     // Find points inside the bounding box
     idx = m_rangeTree.range(min.x, min.y, max.x, max.y);
 
-    idx.sort((a, b) => a - b);
+    idx = Uint32Array.from(idx).sort();
     // Filter by circular region
     idx.forEach(function (i) {
       var d = data[i],
@@ -434,7 +434,7 @@ var pointFeature = function (arg) {
     // Find points inside the bounding box.  Only these could be in the polygon
     idx = m_rangeTree.range(min.x, min.y, max.x, max.y);
     // sort by index
-    idx.sort((a, b) => a - b);
+    idx = Uint32Array.from(idx).sort();
     // filter points within the polygon
     idx.forEach(function (i) {
       var d = data[i],
