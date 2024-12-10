@@ -124,7 +124,7 @@ describe('geo.transform', function () {
       geo.transform.lookup('EPSG:5000').then(spy);
 
       request = server.requests[0];
-      expect(request.url).toMatch(/\?q=5000/);
+      expect(request.url).toMatch(/5000\.proj4/);
       request.respond(200, {'Content-Type': 'application/json'}, JSON.stringify({
         status: 'ok',
         number_result: 1,
