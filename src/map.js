@@ -1441,6 +1441,27 @@ var map = function (arg) {
   };
 
   /**
+   * Get the corners of the map.  Since the map can be rotated, this is
+   * necessarily not the same as the overall bounds, which is the orthogonal
+   * bounding box.
+   *
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.  If setting the
+   *    bounds, they are converted from this gcs to the map projection.  The
+   *    returned bounds are converted from the map projection to this gcs.
+   * @returns {geo.geoPosition[]} The corners of the map in the order
+   *    upper-left, upper-right, lower-right, lower-left.
+   */
+  this.corners = function (gcs) {
+    return [
+      m_this.displayToGcs({x: 0, y: 0}, gcs),
+      m_this.displayToGcs({x: m_width, y: 0}, gcs),
+      m_this.displayToGcs({x: m_width, y: m_height}, gcs),
+      m_this.displayToGcs({x: 0, y: m_height}, gcs)
+    ];
+  };
+
+  /**
    * Get the center zoom level necessary to display the given bounds.
    *
    * @param {geo.geoBounds} bounds The requested map bounds.  `right` must be
