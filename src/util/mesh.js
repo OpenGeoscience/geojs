@@ -33,6 +33,7 @@
  *    elements, falsy for vertices.
  * @returns {geo.meshFeature.meshColoredInfo} An object with the colored mesh
  *    information.
+ * @memberof geo.util
  */
 function createColoredMesh(feature, elementValues) {
   var util = require('../util');

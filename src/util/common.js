@@ -998,7 +998,7 @@ var util = {
    * @param {object} target target object to modify.
    * @param {object} sources object(s) to merge into the target.
    * @returns {object} The merged object.
-   * @member geo.util
+   * @memberof geo.util
    */
   deepMerge: function (target, ...sources) {
     for (const source of sources) {
