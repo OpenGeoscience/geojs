@@ -102,6 +102,7 @@ function modulo(a, b) {
 /**
  * Pick a subdomain from a list of subdomains based on a the tile location.
  *
+ * @private
  * @param {number} x The x tile coordinate.
  * @param {number} y The y tile coordinate.
  * @param {number} z The tile layer.
@@ -121,9 +122,9 @@ function m_getTileSubdomain(x, y, z, subdomains) {
  * all equivalent.  The comma-separated list can have subdomains that are of
  * any length; the string and range both use one-character subdomains.
  *
+ * @private
  * @param {string} base The tile format string
  * @returns {function} A conversion function.
- * @private.
  */
 function m_tileUrlFromTemplate(base) {
   var xPattern = /\$?\{[xX]\}/g,

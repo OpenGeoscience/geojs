@@ -82,6 +82,7 @@ const AlternateOpNames = {
  *
  * @param {object[]} seglist A PolyBool segment list.
  * @returns {geo.polygonList|undefined} A polygon list.
+ * @private
  */
 function seglistToPolygonList(seglist) {
   // This single line doesn't arrange holes correctly
@@ -157,6 +158,7 @@ function seglistToPolygonList(seglist) {
  *      around 0.11 mm in ground distance.
  * @param {object} seglist A seglist array as used by the polybool library.
  * @returns {object} A seglist array.
+ * @private
  */
 function polygonOperationSeglist(op, epsilon, seglist) {
   op = 'select' + op.charAt(0).toUpperCase() + op.slice(1);
@@ -223,6 +225,7 @@ function polygonOperationSeglist(op, epsilon, seglist) {
  * @param {geo.util.polyop.spec} [opts] Options for the operation.  Only used
  *    if poly is an object with a toPolygonList method.
  * @returns {geo.polygonList} A list of polygons.
+ * @memberof geo.util.polyops
  */
 function toPolygonList(poly, mode, opts) {
   mode = mode || {};
@@ -292,6 +295,7 @@ function toPolygonList(poly, mode, opts) {
  * @param {geo.util.polyop.spec} [opts] Options for the operation.  Only used
  *    if ``mode.style`` is an object with a fromPolygonList method.
  * @returns {geo.polygonAny} A polygon in one of several formats.
+ * @memberof geo.util.polyops
  */
 function fromPolygonList(poly, mode, opts) {
   if (mode.style.fromPolygonList) {
@@ -316,6 +320,7 @@ function fromPolygonList(poly, mode, opts) {
 /**
  * Use a minimum style for output to include all of the results.
  *
+ * @private
  * @param {geo.polygonList} polylist A list of polygons.
  * @param {string} style the proposed style.
  * @returns {string} The preferred style.
@@ -346,6 +351,7 @@ function minimumPolygonStyle(polylist, style) {
  * Generate the correspondence between the source polygons and the output
  * polygons.  A polygon corresponds if it has at least two points in common.
  *
+ * @private
  * @param {geo.polygonList} poly1 First set of source polygons.
  * @param {geo.polygonList} poly2 Second set of source polygons.
  * @param {geo.polygonList} newpoly Output polygons.
@@ -408,6 +414,7 @@ function generateCorrespondence(poly1, poly2, newpoly, results) {
 /**
  * Perform a general operation of a set of polygons.
  *
+ * @private
  * @param {string} op The operation to handle.  One of union, intersect,
  *    difference, or xor.
  * @param {geo.polygonAny|geo.util.polyop.spec} poly1 Either the first polygon
@@ -483,6 +490,7 @@ function generalOperationProcess(op, poly1, poly2, opts) {
 /**
  * Generate a polygon function for a specific operation.
  *
+ * @private
  * @param {string} op The operation to handle.  One of union, intersect,
  *    difference, or xor.
  * @returns {function} a function for the polygons.

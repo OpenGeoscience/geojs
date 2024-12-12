@@ -76,6 +76,7 @@ var m_memoizeConvertColor = {maxCount: 1000, count: 0, memo: {}};
  * be returned quickly.  If the memoization table gets over a certain size,
  * just reset it.
  *
+ * @private
  * @param {geo.geoColor} origColor The original color specification.
  * @param {geo.geoColorObject} resultColor The result of the conversion.
  * @returns {geo.geoColorObject} The `resultColor`.

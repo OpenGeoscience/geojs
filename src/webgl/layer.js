@@ -20,6 +20,7 @@ var webgl_layer = function () {
    * @param {number} [opacity] If specified, set the opacity.  Otherwise,
    *    return the opacity.
    * @returns {number|this} The current opacity or the current layer.
+   * @memberof geo.webgl.layer
    */
   this.opacity = function (opacity) {
     var result = s_opacity.apply(m_this, arguments);
@@ -36,6 +37,7 @@ var webgl_layer = function () {
    *    get it.
    * @returns {boolean|this} either the visibility (if getting) or the layer
    *    (if setting).
+   * @memberof geo.webgl.layer
    */
   this.visible = function (val) {
     if (val === undefined) {
@@ -60,6 +62,7 @@ var webgl_layer = function () {
    *    truthy, allow other layers to have the same z-index.  Otherwise,
    *    ensure that other layers have distinct z-indices from this one.
    * @returns {number|this}
+   * @memberof geo.webgl.layer
    */
   this.zIndex = function (zIndex, allowDuplicate) {
     var result = s_zIndex.apply(m_this, arguments);
@@ -84,6 +87,7 @@ var webgl_layer = function () {
    * @param {geo.webgl.webglRenderer} newRenderer The renderer to move to.
    * @param {boolean} [rerender=false] If truthy, rerender after the switch.
    * @returns {this}
+   * @memberof geo.webgl.layer
    */
   this.switchRenderer = function (newRenderer, rerender) {
     if (newRenderer instanceof webglRenderer && newRenderer !== m_this.renderer()) {
@@ -122,6 +126,7 @@ var webgl_layer = function () {
    * Initialize after the layer is added to the map.
    *
    * @returns {this}
+   * @memberof geo.webgl.layer
    */
   this._init = function () {
 
