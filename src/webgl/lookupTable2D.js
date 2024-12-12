@@ -8,6 +8,7 @@ var vgl = require('../vgl');
  * @param {vgl.renderState} renderState An object that contains the context
  *   used for drawing.
  * @param {number} textureUnit The number of the texture unit [0-15].
+ * @private
  */
 function activateTextureUnit(renderState, textureUnit) {
   if (textureUnit >= 0 && textureUnit <= 31) {
