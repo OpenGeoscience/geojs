@@ -20,6 +20,7 @@ var webgl_tileLayer = function () {
    * Add a tile to the list of quads.
    *
    * @param {geo.tile} tile The tile to add and draw.
+   * @memberof geo.webgl.tileLayer
    */
   this._drawTile = function (tile) {
     if (!m_quadFeature) {
@@ -108,6 +109,7 @@ var webgl_tileLayer = function () {
    * @param {boolean} [val] If specified, change the visibility, otherwise
    *    return it.
    * @returns {boolean|this} The current visibility or the layer.
+   * @memberof geo.webgl.tileLayer
    */
   this.visible = function (val) {
     if (val === undefined) {
@@ -132,6 +134,7 @@ var webgl_tileLayer = function () {
    *    truthy, allow other layers to have the same z-index.  Otherwise,
    *    ensure that other layers have distinct z-indices from this one.
    * @returns {number|this}
+   * @memberof geo.webgl.tileLayer
    */
   this.zIndex = function (zIndex, allowDuplicate) {
     if (zIndex !== undefined) {
@@ -146,6 +149,7 @@ var webgl_tileLayer = function () {
    *
    * @param {geo.event} [evt] If specified, the layer add or remove event that
    *    triggered this.  If `undefined`, clear the quads but don't redraw.
+   * @memberof geo.webgl.tileLayer
    */
   this._clearQuads = function (evt) {
     if (evt && (!evt.layer || !(evt.layer instanceof tileLayer) || !evt.layer.autoshareRenderer() || (
@@ -168,6 +172,7 @@ var webgl_tileLayer = function () {
    *
    * @param {object} request A value to pass to the parent class.
    * @returns {this}
+   * @memberof geo.webgl.tileLayer
    */
   this._update = function (request) {
     s_update.call(m_this, request);
@@ -180,6 +185,7 @@ var webgl_tileLayer = function () {
 
   /**
    * Cleanup.  This purges the texture and tile cache.
+   * @memberof geo.webgl.tileLayer
    */
   this._cleanup = function () {
     var tile;
@@ -197,6 +203,7 @@ var webgl_tileLayer = function () {
 
   /**
    * Destroy.
+   * @memberof geo.webgl.tileLayer
    */
   this._exit = function () {
     var map = m_this.map();
@@ -211,6 +218,7 @@ var webgl_tileLayer = function () {
 
   /**
    * Initialize after the layer is added to the map.
+   * @memberof geo.webgl.tileLayer
    */
   this._init = function () {
     s_init.apply(m_this, arguments);

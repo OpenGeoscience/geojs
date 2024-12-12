@@ -6,6 +6,7 @@ var pointFeature = require('../pointFeature');
  * @param {this} m_this The point-like feature.
  * @param {object} [arg] Feature definition object that might specify the
  *      primitive shape.
+ * @memberof geo.webgl
  */
 function pointUtil(m_this, arg) {
   arg = arg || {};

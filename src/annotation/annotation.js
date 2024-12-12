@@ -1252,6 +1252,7 @@ var annotation = function (type, args) {
 /**
  * Return actions needed for the specified state of this annotation.
  *
+ * @private
  * @param {object} m_this The current annotation instance.
  * @param {function} s_actions The parent actions method.
  * @param {string|undefined} state The state to return actions for.  Defaults
@@ -1285,6 +1286,7 @@ function continuousVerticesActions(m_this, s_actions, state, name, originalArgs)
 /**
  * Process actions to allow drawing continuous vertices for an annotation.
  *
+ * @private
  * @param {object} m_this The current annotation instance.
  * @param {geo.event} evt The action event.
  * @param {string} name The name of this annotation.
@@ -1346,6 +1348,7 @@ function continuousVerticesProcessAction(m_this, evt, name) {
  * that the aspect ratio of a rectangle-like selection is a specific value or
  * range of values.
  *
+ * @private
  * @param {number|number[]|geo.geoSize|geo.geoSize[]} ratio Either a single
  *   aspect ratio, a single size, or a list of allowed aspect ratios and sizes.
  *   For instance, 1 will require that the selection square, 2 would require
