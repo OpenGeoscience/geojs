@@ -1,0 +1,14 @@
+extends ../common/index.pug
+
+block append mainContent
+  #controls
+    img#rewind
+    img#back
+    img#pause
+    img#play
+    img#step
+    img#ff
+    input#scrubber(type='range', min='0', value='0')
+    | Year:
+    |
+    span#info.info loading
