@@ -81,7 +81,7 @@ var pixelmapLayer = function (arg) {
       overlap: m_this._options.tileOverlap,
       scale: m_this._options.tileScale,
       url: m_this._options.url.call(
-        m_this, urlParams.x, urlParams.y, urlParams.level || 0,
+        m_this, urlParams.x, urlParams.y, Math.max(urlParams.level || 0, 0),
         m_this._options.subdomains),
       crossDomain: m_this._options.crossDomain
     });

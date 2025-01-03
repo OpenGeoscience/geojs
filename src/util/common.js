@@ -569,6 +569,7 @@ var util = {
     };
     var layerParams = {
       maxLevel: maxLevel,
+      minLevel: Math.min(0, maxLevel),
       wrapX: false,
       wrapY: false,
       tileOffset: function () {
