@@ -409,11 +409,13 @@ var map = function (arg) {
    *    option when determining the new view.
    * @param {boolean} [ignoreClampBounds] If `true`, ignore the clampBounds
    *    option when determining the new view.
+   * @param {boolean} [noTrigger] If truthy, do not trigger a pan or zoom
+   *    event.  If 'pan', only trigger the zoom event.
    * @returns {number|this}
    * @fires geo.event.zoom
    * @fires geo.event.pan
    */
-  this.zoom = function (val, origin, ignoreDiscreteZoom, ignoreClampBounds) {
+  this.zoom = function (val, origin, ignoreDiscreteZoom, ignoreClampBounds, noTrigger) {
     if (val === undefined) {
       return m_zoom;
     }
@@ -442,17 +444,47 @@ var map = function (arg) {
       zoomLevel: m_zoom,
       screenPosition: origin ? origin.map : undefined
     };
-    m_this.geoTrigger(geo_event.zoom, evt);
+    if (!noTrigger || noTrigger === 'pan') {
+      m_this.geoTrigger(geo_event.zoom, evt);
+    }
 
     if (aroundPoint) {
       var shifted = m_this.gcsToDisplay(origin.mapgcs || origin.geo,
                                         origin.mapgcs ? null : undefined);
       m_this.pan({x: origin.map.x - shifted.x, y: origin.map.y - shifted.y},
-                 ignoreDiscreteZoom, true);
+                 ignoreDiscreteZoom, true, noTrigger);
     } else {
-      m_this.pan({x: 0, y: 0}, ignoreDiscreteZoom, ignoreClampBounds);
+      m_this.pan({x: 0, y: 0}, ignoreDiscreteZoom, ignoreClampBounds, noTrigger);
     }
     return m_this;
+  };
+
+  /**
+   * Set zoom level and center of the map.
+   *
+   * @param {number} zoom The new zoom level to set.
+   * @param {geo.geoPosition} center The new center of the
+   * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
+   *    gcs, `null` to use the map gcs, or any other transform.  The center is
+   *    converted from this gcs to the map projection.
+   * @param {geo.geoPosition} origin.geo The gcs coordinates of the zoom
+   *    center.
+   * @param {geo.screenPosition} origin.map The display coordinates of the zoom
+   *    center.
+   * @param {boolean} [ignoreDiscreteZoom] If `true`, ignore the discreteZoom
+   *    option when determining the new view.
+   * @param {boolean} [ignoreClampBounds] If `true`, ignore the clampBounds
+   *    option when determining the new view.
+   * @param {boolean} [noTrigger] If truthy, do not trigger a pan or zoom
+   *    event.
+   * @returns {this}
+   * @fires geo.event.zoom
+   * @fires geo.event.pan
+   */
+  this.zoomAndCenter = function (zoom, center, gcs, ignoreDiscreteZoom, ignoreClampBounds, noTrigger) {
+    this.zoom(zoom, undefined, ignoreDiscreteZoom, ignoreClampBounds, noTrigger || 'pan');
+    this.center(center, gcs, ignoreDiscreteZoom, ignoreClampBounds, noTrigger);
+    return this;
   };
 
   /**
@@ -468,10 +500,11 @@ var map = function (arg) {
    *    view.  When `'limited'`, the `clampBoundsX` and `clampBoundsY` options
    *    are selectively enforced so that the map will not end up more out of
    *    bounds than its current state.
+   * @param {boolean} [noTrigger] If truthy, do not trigger a pan event.
    * @returns {this}
    * @fires geo.event.pan
    */
-  this.pan = function (delta, ignoreDiscreteZoom, ignoreClampBounds) {
+  this.pan = function (delta, ignoreDiscreteZoom, ignoreClampBounds, noTrigger) {
     var evt = {
       screenDelta: delta
     };
@@ -510,7 +543,9 @@ var map = function (arg) {
       y: m_height / 2
     });
 
-    m_this.geoTrigger(geo_event.pan, evt);
+    if (!noTrigger) {
+      m_this.geoTrigger(geo_event.pan, evt);
+    }
 
     m_this.modified();
     return m_this;
@@ -575,7 +610,7 @@ var map = function (arg) {
   /**
    * Get or set the center of the map in the given geographic coordinates.
    *
-   * @param {geo.geoPosition} coordinates If specified, the new center of the
+   * @param {geo.geoPosition} [coordinates] If specified, the new center of the
    *    map.
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.  If setting the
@@ -588,10 +623,11 @@ var map = function (arg) {
    *    view.  When `'limited'`, the `clampBoundsX` and `clampBoundsY` options
    *    are selectively enforced so that the map will not end up more out of
    *    bounds than its current state.
+   * @param {boolean} [noTrigger] If truthy, do not trigger a pan event.
    * @returns {geo.geoPosition|this}
    * @fires geo.event.pan
    */
-  this.center = function (coordinates, gcs, ignoreDiscreteZoom, ignoreClampBounds) {
+  this.center = function (coordinates, gcs, ignoreDiscreteZoom, ignoreClampBounds, noTrigger) {
     var center;
     if (coordinates === undefined) {
       center = Object.assign({}, m_this.worldToGcs(m_center, gcs));
@@ -606,9 +642,11 @@ var map = function (arg) {
       ignoreClampBounds), m_rotation);
     m_this.modified();
     // trigger a pan event
-    m_this.geoTrigger(geo_event.pan, {
-      screenDelta: {x: 0, y: 0}
-    });
+    if (!noTrigger) {
+      m_this.geoTrigger(geo_event.pan, {
+        screenDelta: {x: 0, y: 0}
+      });
+    }
     return m_this;
   };
 
@@ -1383,7 +1421,7 @@ var map = function (arg) {
 
       // This might have consequences in terms of bounds/zoom clamping.
       // What behavior do we expect from this method in that case?
-      m_this.zoom(nav.zoom);
+      m_this.zoom(nav.zoom, undefined, undefined, undefined, 'pan');
       m_this.center(nav.center, null);
     }
 

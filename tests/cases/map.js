@@ -421,6 +421,16 @@ describe('geo.core.map', function () {
       m = createMap({autoshareRenderer: 'more'});
       expect(m.autoshareRenderer()).toBe('more');
     });
+    it('zoomAndCenter and center', function () {
+      var m = createMap(undefined, {width: '500px', height: '500px'});
+      expect(m.zoom()).toBe(4);
+      m.zoomAndCenter(3.5, {x: 4, y: 2});
+      expect(m.zoom()).toBe(3.5);
+      expect(closeToEqual(m.center(), {x: 4, y: 2, z: 0})).toBe(true);
+      m.center({x: 0, y: 0});
+      expect(m.zoom()).toBe(3.5);
+      expect(closeToEqual(m.center(), {x: 0, y: 0, z: 0})).toBe(true);
+    });
   });
 
   describe('Public utility methods', function () {
