@@ -25,7 +25,7 @@ plugins.push(new WebpackStringReplacer({
     fileInclude: /bootstrap.css$/,
     replacements: [{
       pattern: /@import.*fonts.googleapis.com\/css\?family=Lato[^;]*;/g,
-      replacement: () => '@import url(../../typeface-lato/index.css);'
+      replacement: () => '@import url(../../@fontsource/lato/index.css);'
     }]
   }]
 }));
