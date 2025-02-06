@@ -11,9 +11,9 @@
     "tests": [
       "iso instanceof geo.isolineFeature",
       "layer.children().filter(function (c) { return c instanceof geo.layer; })[0].features()[0] instanceof geo.textFeature",
-      "iso.data().length === 25944",
-      "contour.data().length === 25944",
-      "point.data().length === 25944"
+      "iso.data().length === 30706",
+      "contour.data().length === 30706",
+      "point.data().length === 30706"
     ]
   }]
 }
