@@ -62,6 +62,29 @@ void main(void)
     gl_Position = vec4(2.0, 2.0, 0.0, 1.0);
     return;
   }
+  float lineLength = length(vec2(deltaCB.x, deltaCB.y / aspect)) / pixelWidth;
+  // if lines reverse upon themselves and are not nearly the same length, skip
+  // joins.  This is a heuristic; the correct method would to be to pass some
+  // sort of length of the adjacent line to the fragment renderer and adjust
+  // which fragments are rendered, but this is much more complex.
+  float abLimit = length(vec2(A.x - B.x, (A.y - B.y) / aspect)) / pixelWidth;
+  float dcLimit = length(vec2(D.x - C.x, (D.y - C.y) / aspect)) / pixelWidth;
+  if (abLimit >= lineLength - antialiasing - strokeWidth * 0.5 && abLimit <= lineLength + antialiasing + strokeWidth * 0.5) {
+    abLimit = 0.0001;
+  } else {
+    if (abLimit < lineLength)  abLimit = lineLength;
+    abLimit = (strokeWidth - antialiasing) / (abLimit + antialiasing);
+    if (abLimit < 0.0001) abLimit = 0.0001;
+    if (abLimit > 0.1) abLimit = 0.1;
+  }
+  if (dcLimit >= lineLength - antialiasing - strokeWidth * 0.5 && dcLimit <= lineLength + antialiasing + strokeWidth * 0.5) {
+    dcLimit = 0.0001;
+  } else {
+    if (dcLimit < lineLength)  dcLimit = lineLength;
+    dcLimit = (strokeWidth - antialiasing) / (dcLimit + antialiasing);
+    if (dcLimit < 0.0001) dcLimit = 0.0001;
+    if (dcLimit > 0.1) dcLimit = 0.1;
+  }
   float angleCB = atan2(deltaCB.y, deltaCB.x * aspect);
   // values we need to pass along
   strokeColorVar = vec4(strokeColor, strokeOpacity);
@@ -78,7 +101,7 @@ void main(void)
   // by default, offset by the width and don't extend lines.  Later,
   // calculate line extensions based on end cap and end join modes
   float yOffset = strokeWidth + antialiasing;
-  if (vertex == 0 || vertex == 2)  yOffset *= -1.0;
+  if (vertex == 0)  yOffset *= -1.0;
   yOffset += strokeWidth * offset;
   float xOffset = 0.0;
   // end caps
@@ -105,7 +128,7 @@ void main(void)
     angleABC = (mod(angleABC + 3.0 * PI, 2.0 * PI) - PI) / 2.0;
     cosABC = cos(angleABC);  sinABC = sin(angleABC);
     // if this angle is close to flat, pass-through the join
-    if (nearMode >= 4 && cosABC > 0.999999) {
+    if (nearMode >= 4 && (cosABC > 0.999999 || cosABC < abLimit)) {
       nearMode = 3;
     }
     // miter, miter-clip
@@ -138,7 +161,7 @@ void main(void)
     angleBCD = (mod(angleBCD + 3.0 * PI, 2.0 * PI) - PI) / 2.0;
     cosBCD = cos(angleBCD);  sinBCD = sin(angleBCD);
     // if this angle is close to flat, pass-through the join
-    if (farMode >= 4 && cosBCD > 0.999999) {
+    if (farMode >= 4 && (cosBCD > 0.999999 || cosBCD < dcLimit)) {
       farMode = 3;
     }
     // miter, miter-clip
@@ -159,8 +182,6 @@ void main(void)
     B.y + (xOffset * sin(angleCB) + yOffset * cos(angleCB)) * pixelWidth * aspect,
     B.z, 1.0);
   // store other values needed to determine which pixels to plot.
-  float lineLength = length(vec2(deltaCB.x, deltaCB.y / aspect)) / pixelWidth;
-
   if (vertex == 0 || vertex == 1) {
     subpos = vec4(xOffset, yOffset, lineLength - xOffset, strokeWidth);
     info = vec4(float(nearMode), float(farMode), offset, 0.0);
