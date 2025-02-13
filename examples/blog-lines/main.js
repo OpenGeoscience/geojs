@@ -2,7 +2,7 @@
 
 var Libraries = {
   geojs: {
-    url: 'https://cdnjs.cloudflare.com/ajax/libs/geojs/{version}/geo.min.js',
+    url: 'https://cdn.jsdelivr.net/npm/geojs@{version}/geo.min.js',
     defaultVersion: 'current',
     mainReference: 'geo',
     versions: {
