@@ -216,6 +216,8 @@ var trackFeature = function (arg) {
           highidx = testidx;
         }
       }
+      // todo: if we want non-linear travel between points, we would adjust
+      // fl and fh here
       var fh = (time - lowt) / (hight - lowt), fl = 1 - fh;
       return {posidx0: lowidx, posidx1: highidx, factor0: fl, factor1: fh, angidx0: lowidx, angidx1: highidx};
     });

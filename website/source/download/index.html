@@ -10,9 +10,11 @@ title: Download
                 <h4>Released builds</h4>
                 <p>Each released versions of GeoJS can be found on <a href="https://github.com/OpenGeoscience/geojs/releases">Github</a>.</p>
                 <h4>Use GeoJS from CDN</h4>
-                <p>GeoJS is hosted on <a href="https://cdnjs.com/libraries/geojs">cdnjs</a>. To use GeoJS, include the following in your HTML head:</p>
+                <p>GeoJS is hosted on <a href="https://cdnjs.com/libraries/geojs">cdnjs</a>. It can also be accessed via cdn.jsdelivr.net and unpkg.com.  To use GeoJS, include <b>one</b> of the following lines in your HTML head:</p>
 {% codeblock lang:html line_number:false %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/geojs/1.4.2/geo.min.js" integrity="sha256-t9oLE+BFJc7iWaTIqMFk+8dYJn5kmfg/FIdKNuAxMII=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/geojs/1.14.0/geo.min.js" integrity="sha512-UP9PPy450DGNsgZedRODl/TwPcLL+6Uoyzn05611NL36+BTXM7J9Higk6zhJCzfVcCVA8SBMfv11qmC0/AlW6g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/geojs/geo.min.js"></script>
+<script src="https://unpkg.com/geojs/geo.min.js"></script>
 {% endcodeblock %}
                 <p>This will include minified version of GeoJS and its dependencies on your page. The integrity hash will make sure the integrity of the file.</p>
                 <h4>Install from NPM</h4>
