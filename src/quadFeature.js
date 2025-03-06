@@ -237,6 +237,11 @@ var quadFeature = function (arg) {
             coordbasis.y = 1 - coordbasis.y;
           }
           if (coordbasis) {
+            if (quad.crop && quad.crop.x !== undefined && quad.crop.y !== undefined && (coordbasis.x >= quad.crop.x || coordbasis.y >= quad.crop.y)) {
+              indices.pop();
+              found.pop();
+              return;
+            }
             extra[quad.idx] = {basis: coordbasis, _quad: quad};
           }
         }
