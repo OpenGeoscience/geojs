@@ -30,7 +30,7 @@
     "@egjs/hammerjs": "^2.0.8",
     "d3": "^7.8.5",
     "glslang-validator-prebuilt-predownloaded": "^0.0.2",
-    "vtk.js": "*"
+    "vtk.js": "<32.10.0 || >32.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.17.0",
