@@ -1,0 +1,10 @@
+{
+  "title": "Changing Tile Source",
+  "hideNavbar": true,
+  "level": 0,
+  "tutorialCss": [],
+  "tutorialJs": [],
+  "about": {
+    "text": "Make a simple map and change the tile source."
+  }
+}
