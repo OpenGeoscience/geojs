@@ -601,7 +601,8 @@ var tileLayer = function (arg) {
       size: {x: m_this._options.tileWidth, y: m_this._options.tileHeight},
       queue: m_this._queue,
       url: m_this._options.url.call(
-        m_this, urlParams.x, urlParams.y, Math.max(urlParams.level || 0, 0),
+        m_this, urlParams.x, urlParams.y,
+        Math.max(urlParams.level || 0, Math.min(0, m_this._options.minLevel || 0)),
         m_this._options.subdomains)
     });
   };
