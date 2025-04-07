@@ -1,0 +1,516 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>GeoJS - Examples</title>
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+
+
+    <!-- Custom Fonts -->
+    
+<link rel="stylesheet" href="../vendor/font-awesome/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+    <!-- Theme CSS -->
+    
+<link rel="stylesheet" href="../css/agency.css">
+
+    
+<link rel="stylesheet" href="../css/main.css">
+
+    
+<link rel="stylesheet" href="../css/highlight.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js" integrity="sha384-0s5Pv64cNZJieYFkXYOTId2HMA2Lfb6q2nAcx2n0RTLUnCAoTTsS0nKEO27XyKcY" crossorigin="anonymous"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js" integrity="sha384-ZoaMbDF+4LeFxg6WdScQ9nnR1QC2MIRxA1O9KWEXQwns1G8UNyIEZIQidzb0T1fo" crossorigin="anonymous"></script>
+    <![endif]-->
+
+    <!-- jQuery -->
+    
+<script src="../vendor/jquery/jquery.min.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    
+<script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+
+    <link rel="apple-touch-icon" sizes="57x57" href="../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="../favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body id="page-top" class="index">
+    <!-- Navigation -->
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span><i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="../index.html"><img class="navbar-logo" src="../images/logo_transparent.png" /></a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="">
+                        <a href="../">Welcome</a>
+                    </li>
+                    <li class="">
+                        <a href="../tutorials/">Tutorials</a>
+                    </li>
+                    <li class=" active ">
+                        <a href="">Examples</a>
+                    </li>
+                    <li>
+                        <a href="../apidocs/">API Docs</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/OpenGeoscience/geojs">GitHub</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <div class="content-wrapper">
+        <div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <section>
+                <h2>Examples</h2>
+                <p class="text-muted">GeoJS has many features, some of which are shown off in these examples.  Some of the examples are intended to showcase all of the options of a feature, such as the <a href="tiles">Tile Layer</a>.  Other examples show how real data can be visualized, such as the <a href="hurricanes">Hurricane Tracking Data</a>.  Each example has commented source code.</p>
+            </section>
+            <div class="row">
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="hurricanes/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="hurricanes/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="hurricanes"><h4 class="title">Hurricane tracking data</h4></a>
+                            <div class="description">Explore historic hurricane paths since 1980 on an interactive map.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="animation/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="animation/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="animation"><h4 class="title">Animate Features</h4></a>
+                            <div class="description">This example shows how to animate features by updating styles.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="annotations/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="annotations/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="annotations"><h4 class="title">Annotation Layer</h4></a>
+                            <div class="description">This example shows how to add annotations, such as marked rectangles, to a map.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="choropleth/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="choropleth/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="choropleth"><h4 class="title">Choropleth plot</h4></a>
+                            <div class="description">This example shows how to add choropleth features to a map.  Choropleths color each region in a set of regions based on a scalar value for each region.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="cluster/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="cluster/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="cluster"><h4 class="title">Cluster points</h4></a>
+                            <div class="description">Cluster nearby points on a map.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="color-legend/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="color-legend/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="color-legend"><h4 class="title">Color legends</h4></a>
+                            <div class="description">This example shows how to create a discrete or continuous color legends.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="contour/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="contour/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="contour"><h4 class="title">Contour plot</h4></a>
+                            <div class="description">This example shows how to add contour features to a map.  Contours color a region based on an array of scalar values.  If stepped colors are used, these are called isobands.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="legend/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="legend/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="legend"><h4 class="title">Feature legends</h4></a>
+                            <div class="description">This example shows how to create a legend to describe feature styles on a map.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="geoJSON/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="geoJSON/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="geoJSON"><h4 class="title">GeoJSON file reader</h4></a>
+                            <div class="description">Shows how to use the included geoJSON reader, and how to use the properties to adjust the style of the features.  In this example, you can edit the json file while the features on the map update in response.  You can also drop a new geoJSON file onto the text editor to load it.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="heatmap/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="heatmap/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="heatmap"><h4 class="title">Heatmap Feature</h4></a>
+                            <div class="description">This example shows how to add a heatmap to a map.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="isoline/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="isoline/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="isoline"><h4 class="title">Isolines</h4></a>
+                            <div class="description">This example shows how to add isolines to a map.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="lines/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="lines/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="lines"><h4 class="title">Line Feature</h4></a>
+                            <div class="description">This example shows the variations that are available for line features.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="widgets/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="widgets/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="widgets"><h4 class="title">Map Widgets</h4></a>
+                            <div class="description">This example shows how the widgets API can be used to place elements on top of the map.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="measure/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="measure/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="measure"><h4 class="title">Measure Annotations</h4></a>
+                            <div class="description">Show lengths and areas of annotations.  This shows how annotations can be altered while being drawn.  Areas are computed using an equal-area projection.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="twomaps/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="twomaps/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="twomaps"><h4 class="title">One map set inside another.</h4></a>
+                            <div class="description">This example show how two maps can be made to move together and show similar, but different data.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="pixelmap/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="pixelmap/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="pixelmap"><h4 class="title">Pixelmap feature</h4></a>
+                            <div class="description">This example shows how to use a pixelmap feature.  The pixelmap colors areas based on an index derived from an image and some data per index.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="polygons/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="polygons/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="polygons"><h4 class="title">Polygon features</h4></a>
+                            <div class="description">This example shows how to add polygons to a map.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="rainfall/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="rainfall/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="rainfall"><h4 class="title">Rainfall - Annual precipitation totals</h4></a>
+                            <div class="description">Show isolines and contours of annual precipitation totals in the United States and nearby areas.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="wms/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="wms/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="wms"><h4 class="title">Rendering tiles from a WMS server</h4></a>
+                            <div class="description">Rendering tiles from a WMS server by customizing the tile URL of an OSM layer.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="reprojection/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="reprojection/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="reprojection"><h4 class="title">Reproject tiles</h4></a>
+                            <div class="description">This example shows how you can reproject tiles from one projection to another.  The source tiles are in Web Mercator (EPSG:3857), but can be drawn in many different projections.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="tiles/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="tiles/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="tiles"><h4 class="title">Tile layer with controllable options</h4></a>
+                            <div class="description">This example provides controls for changing many options on tile layers.  The code and query parameters allow even more options to be adjusted.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 example-container">
+                    <div class="row">
+                        <div class="col-xs-5 thumbnail-container">
+                            <a href="transitions/">
+                                <div class="thumbnail-hover">
+                                </div>
+                                <img src="transitions/thumb.jpg">
+                            </a>
+                        </div>
+                        <div class="col-xs-7 word-container">
+                            <a href="transitions"><h4 class="title">Using animated transitions</h4></a>
+                            <div class="description">Using animations to transition between points on a map.</div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+    
+    <footer class="">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-3">
+                    <ul class="list-inline social-buttons">
+                        <li><a href="https://github.com/OpenGeoscience/geojs"><i class="fa fa-github"></i></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-sm-6">
+                    <span class="copyright">Licensed under the <a href="https://github.com/OpenGeoscience/geojs/blob/master/LICENSE">Apache License 2.0</a></span>
+                </div>
+                <div class="col-md-3">
+                    <ul class="list-inline quicklinks">
+                        <li><a href="https://www.kitware.com">Kitware</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Theme JavaScript -->
+    
+<script src="../js/agency.js"></script>
+
+
+</body>
+
+</html>
