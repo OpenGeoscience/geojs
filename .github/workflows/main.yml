@@ -22,7 +22,8 @@ jobs:
       with:
         node-version: '20'
     - uses: browser-actions/setup-firefox@latest
-    - run: sudo apt-get install --yes --no-install-recommends optipng imagemagick build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+    - run: sudo apt-get update
+    - run: sudo apt-get install --yes --no-install-recommends optipng imagemagick build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev liblzma-dev
     - run: sudo apt-get remove --yes fonts-lato
     - run: fc-list
     - run: firefox --version
@@ -75,7 +76,8 @@ jobs:
         node-version: 'lts/*'
     - run: npm --version && node --version
     - uses: browser-actions/setup-firefox@latest
-    - run: sudo apt-get install --yes --no-install-recommends optipng imagemagick build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+    - run: sudo apt-get update
+    - run: sudo apt-get install --yes --no-install-recommends optipng imagemagick build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev liblzma-dev
     - run: sudo apt-get remove --yes fonts-lato
     - run: fc-list
     - run: firefox --version
@@ -111,7 +113,8 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: 'lts/*'
-    - run: sudo apt-get install --yes --no-install-recommends optipng imagemagick build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+    - run: sudo apt-get update
+    - run: sudo apt-get install --yes --no-install-recommends optipng imagemagick build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev liblzma-dev
     - run: npm ci
     - name: Import artifacts
       uses: actions/download-artifact@v4
