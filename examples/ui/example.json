@@ -1,0 +1,8 @@
+{
+  "title": "User interface widgets",
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "A basic map with user interface widgets"
+  },
+  "disabled": true
+}
