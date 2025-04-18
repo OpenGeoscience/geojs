@@ -46,16 +46,16 @@ repos:
     files: README.rst
     name: rst-linter of README.rst
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.3.0
+  rev: v2.4.1
   hooks:
   - id: codespell
     args:
       - --ignore-words-list
       - "hist,indext,pixelx,thex,hight,reenable,lastr,xdescribe,afterall,countr,curvelinear"
       - --skip
-      - examples/sld/index.pug,package-lock.json,examples/reprojection/proj.json,website/themes/agency/source/vendor/jquery/jquery.min.js,examples/reprojection/capitals.json
+      - examples/sld/index.pug,package-lock.json,examples/reprojection/proj.json,website/themes/agency/source/vendor/jquery/jquery.min.js,examples/reprojection/capitals.json,website/themes/agency/source/vendor/jquery/jquery.js
 - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
-  rev: v9.18.0
+  rev: v9.22.0
   hooks:
   - id: commitlint
     language_version: "22.10.0"
