@@ -229,7 +229,7 @@ var mapInteractor = function (args) {
       }, {
         action: geo_action.zoom,
         input: 'wheel',
-        modifiers: {shift: false, ctrl: false},
+        modifiers: {shift: false},
         owner: 'geo.mapInteractor',
         name: 'wheel zoom'
       }, {
@@ -241,7 +241,7 @@ var mapInteractor = function (args) {
       }, {
         action: geo_action.rotate,
         input: 'wheel',
-        modifiers: {shift: false, ctrl: true},
+        modifiers: {shift: true, ctrl: false},
         owner: 'geo.mapInteractor',
         name: 'wheel rotate'
       }, {
