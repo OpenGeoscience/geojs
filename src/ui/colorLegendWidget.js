@@ -44,8 +44,8 @@ require('./colorLegendWidget.styl');
  * container.
  * @param {geo.gui.colorLegendWidget.category[]} [arg.categories] An array
  * of category definitions for the initial color legends
- * @param {number} [arg.width=300] The width of the widget in pixels.
- * @param {number} [arg.ticks=6] The maximum number of ticks on the axis of a legend, default is 6.
+ * @param {number} [arg.width] The width of the widget in pixels.
+ * @param {number} [arg.ticks] The maximum number of ticks on the axis of a legend, default is 6.
  * @returns {geo.gui.colorLegendWidget}
  */
 var colorLegendWidget = function (arg) {

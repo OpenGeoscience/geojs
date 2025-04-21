@@ -275,7 +275,7 @@ var webgl_markerFeature = function (arg) {
    *    each arrays.
    * @param {array} styleArray If keyOrObject is a string, an array of values
    *    for the style.  If keyOrObject is an object, this parameter is ignored.
-   * @param {boolean} [refresh=false] `true` to redraw the feature when it has
+   * @param {boolean} [refresh] `true` to redraw the feature when it has
    *    been updated.  If an object with styles is passed, the redraw is only
    *    done once.
    * @returns {this}

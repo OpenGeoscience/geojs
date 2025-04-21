@@ -1970,7 +1970,7 @@ describe('Optional Dependencies', function () {
   it('test missing Hammer library', function () {
     var old = __webpack_modules__[require.resolveWeak('hammerjs')];  // eslint-disable-line
     __webpack_modules__[require.resolveWeak('hammerjs')] = null;  // eslint-disable-line
-    delete require.cache[require.resolveWeak('hammerjs')];  // eslint-disable-line
+    delete require.cache[require.resolveWeak('hammerjs')];
     var map = geo.map({node: '#mapNode1'}),
         interactor = map.interactor();
 
@@ -1987,6 +1987,6 @@ describe('Optional Dependencies', function () {
       'panend', {touch: true, center: {x: 40, y: 20}});
     expect(map.center().x).toBeCloseTo(0);
     __webpack_modules__[require.resolveWeak('hammerjs')] = old;  // eslint-disable-line
-    delete require.cache[require.resolveWeak('hammerjs')];  // eslint-disable-line
+    delete require.cache[require.resolveWeak('hammerjs')];
   });
 });

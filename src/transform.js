@@ -650,9 +650,9 @@ transform.affineInverse = function (def, coords) {
  * @param {geo.geoPosition} pt2 The second point.
  * @param {string|geo.transform} [gcs] `undefined` to use the same gcs as the
  *    ellipsoid, otherwise the gcs of the points.
- * @param {string|geo.transform} [baseGcs='EPSG:4326'] the gcs of the
+ * @param {string|geo.transform} [baseGcs] the gcs of the
  *    ellipsoid.
- * @param {object} [ellipsoid=proj4.WGS84] An object with at least `a` and one
+ * @param {object} [ellipsoid] An object with at least `a` and one
  *    of `b`, `f`, or `rf` (1 / `f`) -- this works with  proj4 ellipsoid
  *    definitions.
  * @returns {number} The distance in meters (or whatever units the ellipsoid
@@ -690,12 +690,12 @@ transform.sphericalDistance = function (pt1, pt2, gcs, baseGcs, ellipsoid) {
  * @param {geo.geoPosition} pt2 The second point.
  * @param {string|geo.transform} [gcs] `undefined` to use the same gcs as the
  *    ellipsoid, otherwise the gcs of the points.
- * @param {string|geo.transform} [baseGcs='EPSG:4326'] the gcs of the
+ * @param {string|geo.transform} [baseGcs] the gcs of the
  *    ellipsoid.
- * @param {object} [ellipsoid=proj4.WGS84] An object with at least `a` and one
+ * @param {object} [ellipsoid] An object with at least `a` and one
  *    of `b`, `f`, or `rf` (1 / `f`) -- this works with  proj4 ellipsoid
  *    definitions.
- * @param {number} [maxIterations=100] Maximum number of iterations to use
+ * @param {number} [maxIterations] Maximum number of iterations to use
  *    to test convergence.
  * @returns {object} An object with `distance` in meters (or whatever units the
  *    ellipsoid was specified in), `alpha1` and `alpha2`, the azimuths at the

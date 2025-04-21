@@ -121,17 +121,17 @@ var pointAnnotation = function (args) {
    * evt.handled should be set to `true` to prevent further processing.
    *
    * @param {geo.event} evt The mouse click event.
-   * @returns {boolean|string} `true` to update the annotation, `'done'` if
-   *    the annotation was completed (changed from create to done state),
-   *    `'remove'` if the annotation should be removed, falsy to not update
-   *    anything.
+   * @returns {boolean|string|undefined} `true` to update the annotation,
+   *    `'done'` if the annotation was completed (changed from create to done
+   *    state), `'remove'` if the annotation should be removed, falsy to not
+   *    update anything.
    */
   this.mouseClick = function (evt) {
     if (m_this.state() !== annotationState.create) {
-      return;
+      return undefined;
     }
     if (!evt.buttonsDown.left) {
-      return;
+      return undefined;
     }
     evt.handled = true;
     m_this.options('position', evt.mapgcs);
@@ -156,13 +156,13 @@ var pointAnnotation = function (args) {
    *
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
-   * @returns {array} An array of flattened coordinates in the interface gcs
+   * @returns {array?} An array of flattened coordinates in the interface gcs
    *    coordinate system.  `undefined` if this annotation is incomplete.
    */
   this._geojsonCoordinates = function (gcs) {
     var src = m_this.coordinates(gcs);
     if (!src || m_this.state() === annotationState.create || src.length < 1 || src[0] === undefined) {
-      return;
+      return undefined;
     }
     return [src[0].x, src[0].y];
   };

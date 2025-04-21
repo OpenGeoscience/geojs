@@ -167,7 +167,7 @@ var checkedCanvas;
 canvasRenderer.supported = function () {
   if (checkedCanvas === undefined) {
     /* This is extracted from what Modernizr uses. */
-    var canvas; // eslint-disable-line no-unused-vars
+    var canvas;
     try {
       canvas = document.createElement('canvas');
       checkedCanvas = !!(canvas.getContext && canvas.getContext('2d'));

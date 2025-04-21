@@ -37,7 +37,7 @@
  * @alias geo.util.throttle
  * @param {number} delay A zero-or-greater delay in milliseconds. For event
  *    callbacks, values around 100 or 250 (or even higher) are most useful.
- * @param {boolean} [no_trailing=false] If no_trailing is
+ * @param {boolean} [no_trailing] If no_trailing is
  *    true, callback will only execute every `delay` milliseconds while the
  *    throttled-function is being called. If no_trailing is false or
  *    unspecified, callback will be executed one final time after the last
@@ -173,7 +173,7 @@ var throttle = function (delay, no_trailing, callback, accumulator, debounce_mod
  * @method geo.util.debounce
  * @param {number} delay A zero-or-greater delay in milliseconds. For event
  *    callbacks, values around 100 or 250 (or even higher) are most useful.
- * @param {boolean} [at_begin=false] If at_begin is false or
+ * @param {boolean} [at_begin] If at_begin is false or
  *    unspecified, callback will only be executed `delay` milliseconds after
  *    the last debounced-function call. If at_begin is true, callback will be
  *    executed only at the first debounced-function call. (After the

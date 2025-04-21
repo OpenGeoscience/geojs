@@ -40,7 +40,7 @@ const annotationActionOwner = require('./annotation').annotationActionOwner;
  * @extends geo.annotation
  *
  * @param {geo.rectangleAnnotation.spec?} [args] Options for the annotation.
- * @param {string} [annotationName='rectangle'] Override the annotation name.
+ * @param {string} [annotationName] Override the annotation name.
  */
 var rectangleAnnotation = function (args, annotationName) {
   'use strict';
@@ -87,17 +87,17 @@ var rectangleAnnotation = function (args, annotationName) {
    * Process any actions for this annotation.
    *
    * @param {geo.event} evt The action event.
-   * @returns {boolean|string} `true` to update the annotation, `'done'` if the
-   *    annotation was completed (changed from create to done state),
-   *    `'remove'` if the annotation should be removed, falsy to not update
-   *    anything.
+   * @returns {boolean|string|undefined} `true` to update the annotation,
+   *    `'done'` if the annotation was completed (changed from create to done
+   *    state), `'remove'` if the annotation should be removed, falsy to not
+   *    update anything.
    */
   this.processAction = function (evt) {
     var layer = m_this.layer();
     if (m_this.state() !== annotationState.create || !layer ||
         evt.event !== geo_event.actionselection ||
         evt.state.action !== geo_action.annotation_rectangle) {
-      return;
+      return undefined;
     }
     var map = layer.map(),
         corners = [
@@ -181,13 +181,13 @@ var rectangleAnnotation = function (args, annotationName) {
    *
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
-   * @returns {array} An array of flattened coordinates in the interface gcs
+   * @returns {array?} An array of flattened coordinates in the interface gcs
    *    coordinate system.  `undefined` if this annotation is incomplete.
    */
   this._geojsonCoordinates = function (gcs) {
     var src = m_this.coordinates(gcs);
     if (!src || m_this.state() === annotationState.create || src.length < 4) {
-      return;
+      return undefined;
     }
     var coord = [];
     for (var i = 0; i < 4; i += 1) {
@@ -242,18 +242,19 @@ var rectangleAnnotation = function (args, annotationName) {
    * Handle a mouse move on this annotation.
    *
    * @param {geo.event} evt The mouse move event.
-   * @returns {boolean} Truthy to update the annotation, falsy to not
+   * @returns {boolean?} Truthy to update the annotation, falsy to not
    *    update anything.
    */
   this.mouseMove = function (evt) {
     if (m_this.state() !== annotationState.create) {
-      return;
+      return undefined;
     }
     var corners = m_this.options('corners');
     if (corners.length) {
       m_this._setCornersFromMouse(corners, evt);
       return true;
     }
+    return undefined;
   };
 
   /**
@@ -261,22 +262,22 @@ var rectangleAnnotation = function (args, annotationName) {
    * evt.handled should be set to `true` to prevent further processing.
    *
    * @param {geo.event} evt The mouse click event.
-   * @returns {boolean|string} `true` to update the annotation, `'done'` if
-   *    the annotation was completed (changed from create to done state),
-   *    `'remove'` if the annotation should be removed, falsy to not update
-   *    anything.
+   * @returns {boolean|string|undefined} `true` to update the annotation,
+   *    `'done'` if the annotation was completed (changed from create to done
+   *    state), `'remove'` if the annotation should be removed, falsy to not
+   *    update anything.
    */
   this.mouseClick = function (evt) {
     var layer = m_this.layer();
     if (m_this.state() !== annotationState.create || !layer) {
-      return;
+      return undefined;
     }
     if (!evt.buttonsDown.left && !evt.buttonsDown.right) {
-      return;
+      return undefined;
     }
     var corners = m_this.options('corners');
     if (evt.buttonsDown.right && !corners.length) {
-      return;
+      return undefined;
     }
     evt.handled = true;
     if (corners.length) {
@@ -296,6 +297,7 @@ var rectangleAnnotation = function (args, annotationName) {
       corners.push(Object.assign({}, evt.mapgcs));
       return true;
     }
+    return undefined;
   };
 
   /**

@@ -15,7 +15,7 @@ const rectangleAnnotation = require('./rectangleAnnotation');
  * @extends geo.annotation
  *
  * @param {geo.squareAnnotation.spec?} [args] Options for the annotation.
- * @param {string} [annotationName='square'] Override the annotation name.
+ * @param {string} [annotationName] Override the annotation name.
  */
 var squareAnnotation = function (args, annotationName) {
   'use strict';

@@ -10,8 +10,7 @@ var sceneObject = require('../sceneObject');
  * @property {string|number} [bottom] The position to the bottom of the
  *   container.  A string css position or a number in pixels.
  * @property {string|number} [left] The position to the left of the container.
- * @property {string|number} [top] The position to the top of the container.
- * @property {*} [...] Additional css properties that affect position are
+ * @property {*} [any] Additional css properties that affect position are
  *   allowed.  See the css specification for details.
  */
 

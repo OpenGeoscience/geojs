@@ -428,12 +428,12 @@ var annotation = function (type, args) {
    * Process any edit actions for this annotation.
    *
    * @param {geo.event} evt The action event.
-   * @returns {boolean} `true` to update the annotation, falsy to not update
+   * @returns {boolean?} `true` to update the annotation, falsy to not update
    *    anything.
    */
   this.processEditAction = function (evt) {
     if (!evt || !m_this._editHandle || !m_this._editHandle.handle) {
-      return;
+      return undefined;
     }
     switch (m_this._editHandle.handle.type) {
       case 'vertex':
@@ -447,6 +447,7 @@ var annotation = function (type, args) {
       case 'resize':
         return m_this._processEditActionResize(evt);
     }
+    return undefined;
   };
 
   /**
@@ -577,7 +578,7 @@ var annotation = function (type, args) {
    *    set the named style to the specified value.  Otherwise, extend the
    *    current style with the values in the specified object.
    * @param {*} [arg2] If `arg1` is a string, the new value for that style.
-   * @param {string} [styleType='style'] The name of the style type, such as
+   * @param {string} [styleType] The name of the style type, such as
    *    `createStyle`, `editStyle`, `editHandleStyle`, `labelStyle`,
    *    `highlightStyle`, or `cursorStyle`.
    * @returns {object|this} Either the entire style object, the value of a
@@ -836,7 +837,7 @@ var annotation = function (type, args) {
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
    * @param {boolean} [includeCrs] If truthy, include the coordinate system.
-   * @returns {object} The annotation as a geojson object, or `undefined` if it
+   * @returns {object?} The annotation as a geojson object, or `undefined` if it
    *    should not be represented (for instance, while it is being created).
    */
   this.geojson = function (gcs, includeCrs) {
@@ -847,7 +848,7 @@ var annotation = function (type, args) {
         objLabelStyle = m_this.labelStyle() || {},
         i, key, value;
     if (!coord || !coord.length || !geotype) {
-      return;
+      return undefined;
     }
     var obj = {
       type: 'Feature',
@@ -919,7 +920,7 @@ var annotation = function (type, args) {
    *    handles.  This matches the `editHandleStyle.handle` object.  Any type
    *    that is set to `false` in either `opts` or `editHandleStyle.handle`
    *    will prevent those handles from being created.
-   * @param {boolean} [isOpen=false] If true, no edge handle will be created
+   * @param {boolean} [isOpen] If true, no edge handle will be created
    *    between the last and first vertices.
    */
   this._addEditHandles = function (features, vertices, opts, isOpen) {
@@ -1290,16 +1291,16 @@ function continuousVerticesActions(m_this, s_actions, state, name, originalArgs)
  * @param {object} m_this The current annotation instance.
  * @param {geo.event} evt The action event.
  * @param {string} name The name of this annotation.
- * @returns {boolean|string} `true` to update the annotation, `'done'` if the
- *    annotation was completed (changed from create to done state),
- *    `'remove'` if the annotation should be removed, falsy to not update
- *    anything.
+ * @returns {boolean|string|undefined} `true` to update the annotation,
+ *    `'done'` if the annotation was completed (changed from create to done
+ *    state), `'remove'` if the annotation should be removed, falsy to not
+ *    update anything.
  */
 function continuousVerticesProcessAction(m_this, evt, name) {
   var layer = m_this.layer();
   if (m_this.state() !== annotationState.create || !layer ||
       evt.state.action !== geo_action['annotation_' + name]) {
-    return;
+    return undefined;
   }
   var cpp = layer.options('continuousPointProximity');
   var cpc = layer.options('continuousPointCollinearity');
@@ -1341,6 +1342,7 @@ function continuousVerticesProcessAction(m_this, evt, name) {
     }
     return update;
   }
+  return undefined;
 }
 
 /**

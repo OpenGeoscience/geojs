@@ -21,22 +21,22 @@ var vec4 = require('gl-vec4');
  *
  * The camera emits the following events when the view changes:
  *
- *   * {@link geo.event.camera.pan} when the camera is translated in the
+ *   {@link geo.event.camera.pan} when the camera is translated in the
  *       x/y plane
- *   * {@link geo.event.camera.zoom} when the camera is changed in a way
+ *   {@link geo.event.camera.zoom} when the camera is changed in a way
  *       that modifies the current zoom level
- *   * {@link geo.event.camera.view} when the visible bounds change for
+ *   {@link geo.event.camera.view} when the visible bounds change for
  *       any reason
- *   * {@link geo.event.camera.projection} when the projection type changes
- *   * {@link geo.event.camera.viewport} when the viewport changes
+ *   {@link geo.event.camera.projection} when the projection type changes
+ *   {@link geo.event.camera.viewport} when the viewport changes
  *
  * By convention, protected methods do not update the internal matrix state,
  * public methods do.  There are a few primary methods that are intended to
  * be used by external classes to mutate the internal state:
  *
- *   * bounds: Set the visible bounds (for initialization and zooming)
- *   * pan: Translate the camera in x/y by an offset (for panning)
- *   * viewFromCenterSizeRotation: set the camera view based on a center
+ *   bounds: Set the visible bounds (for initialization and zooming)
+ *   pan: Translate the camera in x/y by an offset (for panning)
+ *   viewFromCenterSizeRotation: set the camera view based on a center
  *        point, boundary size, and rotation angle.
  *
  * @class
@@ -167,10 +167,10 @@ var camera = function (spec) {
    * Getter/setter for the view bounds.
    *
    * @property {object} bounds The view bounds.
-   * @property {number} bounds.left
-   * @property {number} bounds.top
-   * @property {number} bounds.right
-   * @property {number} bounds.bottom
+   * @property {number} bounds.left The left view bounds.
+   * @property {number} bounds.top The top view bounds.
+   * @property {number} bounds.right The right view bounds.
+   * @property {number} bounds.bottom The bottom view bounds.
    * @name geo.camera#bounds
    */
   Object.defineProperty(this, 'bounds', {
@@ -351,10 +351,10 @@ var camera = function (spec) {
    * alignment is possible.
    *
    * @property {object} viewport The viewport in pixels.
-   * @property {number} viewport.width
-   * @property {number} viewport.height
-   * @property {number} viewport.top
-   * @property {number} viewport.left
+   * @property {number} viewport.width The viewport width in pixels.
+   * @property {number} viewport.height The viewport height in pixels.
+   * @property {number} viewport.top The viewport top in pixels.
+   * @property {number} viewport.left The viewport left in pixels.
    * @name geo.camera#viewport
    * @fires geo.event.camera.viewport
    */
@@ -699,12 +699,12 @@ var camera = function (spec) {
    * @param {object} offset The delta in world space coordinates.
    * @param {number} offset.x
    * @param {number} offset.y
-   * @param {number} [offset.z=0]
+   * @param {number} [offset.z]
    * @returns {this} Chainable.
    */
   this.pan = function (offset) {
     if (!offset.x && !offset.y && !offset.z) {
-      return;
+      return this;
     }
     this._translate([
       offset.x,
@@ -723,7 +723,7 @@ var camera = function (spec) {
    */
   this.zoom = function (zoom) {
     if (zoom === 1) {
-      return;
+      return this;
     }
     mat4.scale(this._view, this._view, [
       zoom,
@@ -739,12 +739,12 @@ var camera = function (spec) {
    *
    * @param {number} rotation Counter-clockwise rotation angle in radians.
    * @param {object} center Center of rotation in world space coordinates.
-   * @param {vec3} [axis=[0, 0, -1]] axis of rotation.
+   * @param {vec3} [axis] axis of rotation.
    * @returns {this} Chainable.
    */
   this._rotate = function (rotation, center, axis) {
     if (!rotation) {
-      return;
+      return this;
     }
     axis = axis || [0, 0, -1];
     if (!center) {
@@ -765,7 +765,7 @@ var camera = function (spec) {
    * elements using world coordinates directly inside DOM elements.  This
    * expects that the transform-origin is 0 0.
    *
-   * @param {string} [transform='display'] The transform to return.  One of
+   * @param {string} [transform] The transform to return.  One of
    *   `display` or `world`.
    * @returns {string} The css transform string.
    */

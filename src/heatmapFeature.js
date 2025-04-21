@@ -29,6 +29,7 @@ var util = require('./util');
  *   datapoint stands on its own.  If `'auto'`, bin data if there are more data
  *   points than there would be bins.  Using `true` or `auto` uses bins that
  *   are `max(Math.floor((radius + blurRadius) / 8), 3)`.
+ * @property {object} [style] A style for the heatmap.
  * @property {object} [style.color] An object where the keys are numbers from
  *   [0-1] and the values are {@link geo.geoColor}.  This is used to transform
  *   normalized intensity.

@@ -460,7 +460,7 @@ var trackFeature = function (arg) {
    *    set the named style to the specified value.  Otherwise, extend the
    *    current style with the values in the specified object.
    * @param {*} [arg2] If `arg1` is a string, the new value for that style.
-   * @param {string} [styleType='style'] The name of the style type, such as
+   * @param {string} [styleType] The name of the style type, such as
    *    `markerStyle`, `textStyle`, `pastStyle`, `currentStyle`, or
    *    `futureStyle`.
    * @returns {object|this} Either the entire style object, the value of a
@@ -746,7 +746,7 @@ var trackFeature = function (arg) {
    *    object with `outer` and optionally `inner` parameters.  All coordinates
    *    are in map interface gcs.
    * @param {object} [opts] Additional search options.
-   * @param {boolean} [opts.partial=false] If truthy, include tracks that are
+   * @param {boolean} [opts.partial] If truthy, include tracks that are
    *    partially in the polygon, otherwise only include tracks that are fully
    *    within the region.
    * @returns {object} An object with `index`: a list of track indices,

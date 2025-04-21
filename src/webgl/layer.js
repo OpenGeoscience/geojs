@@ -85,7 +85,7 @@ var webgl_layer = function () {
    * renderers for multiple layers, rerendering can be delayed.
    *
    * @param {geo.webgl.webglRenderer} newRenderer The renderer to move to.
-   * @param {boolean} [rerender=false] If truthy, rerender after the switch.
+   * @param {boolean} [rerender] If truthy, rerender after the switch.
    * @returns {this}
    * @memberof geo.webgl.layer
    */

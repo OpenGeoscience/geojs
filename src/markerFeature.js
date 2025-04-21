@@ -280,7 +280,7 @@ var markerFeature = function (arg) {
    * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
    *    object with `outer` and optionally `inner` parameters.
    * @param {object} [opts] Additional search options.
-   * @param {boolean} [opts.partial=false] If truthy, include markers that are
+   * @param {boolean} [opts.partial] If truthy, include markers that are
    *    partially in the polygon, otherwise only include markers that are fully
    *    within the region.  If 'center', only markers whose centers are inside
    *    the polygon are returned.

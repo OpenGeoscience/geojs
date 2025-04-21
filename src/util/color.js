@@ -175,9 +175,9 @@ var colorUtils = {
    *
    * @param {geo.geoColor} [color] Any valid color input.  If an invalid value
    *    or no value is supplied, the `defaultColor` is used.
-   * @param {number} [opacity=1] A value from [0-1].  This is multiplied with
+   * @param {number} [opacity] A value from [0-1].  This is multiplied with
    *    the opacity from `color`.
-   * @param {geo.geoColorObject} [defaultColor={r: 0, g: 0, b: 0}] The color
+   * @param {geo.geoColorObject} [defaultColor] The color
    *    to use if an invalid color is supplied.
    * @returns {geo.geoColorObject} An rgba color object.
    * @memberof geo.util
@@ -269,7 +269,8 @@ var colorUtils = {
  * standard, `rgb` and `rgba` are aliases of each other, as are `hsl` and
  * `hsla`.
  * @name cssColorConversions
- * @property cssColorConversions {geo.util.cssColorConversionRecord[]}
+ * @property {geo.util.cssColorConversionRecord[]} cssColorConversions A list
+ *   of conversion records.
  * @memberof geo.util
  */
 colorUtils.cssColorConversions = [{

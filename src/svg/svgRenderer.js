@@ -12,7 +12,7 @@ var renderer = require('../renderer');
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.
  * @param {HTMLElement} [arg.canvas] Canvas element associated with the
  *   renderer.
- * @param {boolean} [arg.widget=false] Set to `true` if this is a stand-alone
+ * @param {boolean} [arg.widget] Set to `true` if this is a stand-alone
  *   widget.  If it is not a widget, svg elements are wrapped in a parent
  *   group.
  * @param {HTMLElement} [arg.d3Parent] If specified, the parent for any
@@ -324,7 +324,7 @@ var svgRenderer = function (arg) {
    * Initialize.
    *
    * @param {object} arg The options used to create the renderer.
-   * @param {boolean} [arg.widget=false] Set to `true` if this is a stand-alone
+   * @param {boolean} [arg.widget] Set to `true` if this is a stand-alone
    *   widget.  If it is not a widget, svg elements are wrapped in a parent
    *   group.
    * @param {HTMLElement} [arg.d3Parent] If specified, the parent for any

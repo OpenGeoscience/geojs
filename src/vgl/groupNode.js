@@ -54,6 +54,7 @@ vgl.groupNode = function () {
         return true;
       }
     }
+    return false;
   };
 
   /**

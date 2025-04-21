@@ -366,7 +366,7 @@ var pointFeature = function (arg) {
    * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
    *    object with `outer` and optionally `inner` parameters.
    * @param {object} [opts] Additional search options.
-   * @param {boolean} [opts.partial=false] If truthy, include points that are
+   * @param {boolean} [opts.partial] If truthy, include points that are
    *    partially in the polygon, otherwise only include points that are fully
    *    within the region.  If 'center', only points whose centers are inside
    *    the polygon are returned.

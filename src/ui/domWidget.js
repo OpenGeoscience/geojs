@@ -10,7 +10,7 @@ var registerWidget = require('../registry').registerWidget;
  * @extends geo.gui.widget
  * @param {object} arg
  * @param {geo.widget} [parent] A parent widget for this widget.
- * @param {string} [el='div'] The type of DOM element to create.
+ * @param {string} [el] The type of DOM element to create.
  * @returns {geo.domWidget}
  */
 var domWidget = function (arg) {

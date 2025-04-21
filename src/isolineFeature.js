@@ -860,7 +860,7 @@ var isolineFeature = function (arg) {
  * The results of this are intended to be used as the value of the `rotation`
  * style.
  *
- * @param {string} [mode='higher'] The rotation mode.  `higher` orients the top
+ * @param {string} [mode] The rotation mode.  `higher` orients the top
  *   of the text to high values.  `lower` orients the top of the text to lower
  *   values.  `map` orients the top of the text so it is aligned to the isoline
  *   and biased toward the top of the map.  `screen` orients the top of the

@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 var webglRenderer = require('../webgl/webglRenderer');
 
 var _renderWindow, _supported;
@@ -11,7 +9,7 @@ module.exports = {};
  * state.  Use restoreWebglRenderer to unmock.  Call vgl.mockCounts() to get
  * the number of times different webGL functions have been called.
  *
- * @param {boolean} [supported=true] If false, then the webgl renderer will
+ * @param {boolean} [supported] If false, then the webgl renderer will
  *      indicate that this is an unsupported browser environment.
  * @alias geo.util.mockWebglRenderer
  */

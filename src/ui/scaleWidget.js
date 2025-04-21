@@ -326,9 +326,9 @@ inherit(scaleWidget, svgWidget);
  * entry is an array that must be in ascending order.  Use unicode in strings,
  * not html entities.  It makes it more reusable.
  * @name unitsTable
- * @property unitsTable {object} The key names are the names of unit systems,
+ * @property {object} unitsTable The key names are the names of unit systems,
  *    such as `si`.
- * @property unitsTable.unit {geo.gui.scaleWidget.unitTableRecord[]} A list of
+ * @property {geo.gui.scaleWidget.unitTableRecord[]} unitsTable.unit A list of
  *    units within the unit system from smallest to largest.
  * @memberof geo.gui.scaleWidget
  */
@@ -373,9 +373,9 @@ scaleWidget.unitsTable = {
  * meter.  Each entry is an array that must be in ascending order.  This table
  * can be passed to formatUnit.
  * @name areaUnitsTable
- * @property areaUnitsTable {object} The key names are the names of unit
+ * @property {object} areaUnitsTable The key names are the names of unit
  *    systems, such as `si`.
- * @property areaUnitsTable.unit {geo.gui.scaleWidget.unitTableRecord[]} A list
+ * @property {geo.gui.scaleWidget.unitTableRecord[]} areaUnitsTable.unit A list
  *    of units within the unit system from smallest to largest.
  * @memberof geo.gui.scaleWidget
  */
@@ -413,21 +413,21 @@ scaleWidget.areaUnitsTable = {
  * @param {number} val The value.  A length or area in base units.  With the
  *    default unit table, this is in meters.  With the `areaUnitsTable`, this
  *    is square meters.
- * @param {string|object[]} [unit='si'] The name of the unit system or a unit
+ * @param {string|object[]} [unit] The name of the unit system or a unit
  *    table.
- * @param {object} [table=unitTable] The table of the unit system.  Ignored if
+ * @param {object} [table] The table of the unit system.  Ignored if
  *    `unit` is a unit table.
- * @param {number} [digits=3] The minimum number of significant figures.
- * @returns {string} A formatted string or `undefined`.
+ * @param {number} [digits] The minimum number of significant figures.
+ * @returns {string?} A formatted string or `undefined`.
  */
 scaleWidget.formatUnit = function (val, unit, table, digits) {
   if (val === undefined || val === null) {
-    return;
+    return undefined;
   }
   if (!Array.isArray(unit)) {
     table = table || scaleWidget.unitsTable;
     if (!table || !table[unit || 'si']) {
-      return;
+      return undefined;
     }
     unit = table[unit || 'si'];
   }
@@ -441,7 +441,7 @@ scaleWidget.formatUnit = function (val, unit, table, digits) {
   val /= unit.scale;
   digits = Math.max(0, -Math.ceil(Math.log10(val)) + (digits === undefined || digits < 0 ? 3 : digits));
   if (digits > 10) {
-    return;
+    return undefined;
   }
   let result = val.toFixed(digits);
   if (digits) {

@@ -20,7 +20,7 @@ var m_timingData = {},
  * it finds.
  *
  * @param {...*} var_args Any number of arguments.
- * @returns {number} The first numeric argument, or `undefined` if there are no
+ * @returns {number?} The first numeric argument, or `undefined` if there are no
  *      numeric arguments.
  * @private
  */
@@ -31,6 +31,7 @@ function setNumeric() {
       return arguments[i];
     }
   }
+  return undefined;
 }
 
 /**
@@ -88,7 +89,7 @@ var util = {
    * @param {geo.point2D} vert0 Vertex 0 of the triangle.
    * @param {geo.point2D} vert1 Vertex 1 (x direction) of the triangle.
    * @param {geo.point2D} vert2 Vertex 2 (y direction) of the triangle.
-   * @returns {geo.point2D} The point in the triangle basis, or `undefined`
+   * @returns {geo.point2D?} The point in the triangle basis, or `undefined`
    *    if the triangle is degenerate.
    * @memberof geo.util
    */
@@ -103,6 +104,7 @@ var util = {
     if (det) {
       return {x: (x * d - y * b) / det, y: (x * -c + y * a) / det};
     }
+    return undefined;
   },
 
   /**
@@ -188,7 +190,7 @@ var util = {
    * Return a random string of length n || 8.  The string consists of
    * mixed-case ASCII alphanumerics.
    *
-   * @param {number} [n=8] The length of the string to return.
+   * @param {number} [n] The length of the string to return.
    * @returns {string} A string of random characters.
    * @memberof geo.util
    */
@@ -252,7 +254,7 @@ var util = {
    *
    * @param {number} start The start integer.
    * @param {number} end The end integer.
-   * @param {number} [step=1] The step.
+   * @param {number} [step] The step.
    * @returns {number[]} An array of integers.
    * @memberof geo.util
    */
@@ -331,10 +333,10 @@ var util = {
    * @param {geo.vgl.geometryData} geom The geometry to reference and modify.
    * @param {string} srcName The name of the source.
    * @param {number} len The number of elements for the array.
-   * @param {number} [allowLarger=0.2] If the existing buffer is larger than
+   * @param {number} [allowLarger] If the existing buffer is larger than
    *    requested, don't reallocate it unless it exceeds the size of
    *    `len * (1 + allowLarger)`.
-   * @param {number} [allocateLarger=0.1] If reallocating an existing buffer,
+   * @param {number} [allocateLarger] If reallocating an existing buffer,
    *    allocate `len * (1 + allocateLarger)` to reduce the need to reallocate
    *    on subsequent calls.  If this is the first allocation (the previous
    *    size was 0), `len` is allocated.
@@ -483,7 +485,7 @@ var util = {
    * @param {geo.actionRecord[]} actions A list of actions to compare to the
    *    inputs and modifiers.  The first action that matches will be
    *    returned.
-   * @returns {geo.actionRecord} A matching action or `undefined`.
+   * @returns {geo.actionRecord?} A matching action or `undefined`.
    * @memberof geo.util
    */
   actionMatch: function (inputs, modifiers, actions) {
@@ -512,6 +514,7 @@ var util = {
     })) {
       return matched;
     }
+    return undefined;
   },
 
   /**
@@ -918,7 +921,7 @@ var util = {
    *    minimum.
    * @param {number} [max] If specified, use this instead of calculating the
    *    maximum.
-   * @param {boolean} [limit=false] If truthy, if `min` is specified, the
+   * @param {boolean} [limit] If truthy, if `min` is specified, the
    *    returned `min` will be the larger of the specified value and the
    *    computed value, and if `max` is specified, the returned value will
    *    be the smaller of the specified value and the computed value.
@@ -1397,9 +1400,9 @@ var util = {
    *
    * @param {boolean} [stop] Falsy to start tracking, truthy to start tracking.
    * @param {boolean} [reset] If truthy, reset the statistics.
-   * @param {number} [threshold=15] If present, set the threshold in
+   * @param {number} [threshold] If present, set the threshold in
    *    milliseconds used in tracking slow callbacks.
-   * @param {number} [keep=200] If present, set the number of recent frame
+   * @param {number} [keep] If present, set the number of recent frame
    *    times to track.
    * @memberof geo.util
    */
