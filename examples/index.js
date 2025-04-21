@@ -22,7 +22,7 @@ require('codemirror/addon/fold/foldgutter');
 require('codemirror/addon/edit/matchbrackets');
 
 // Colorbrewer
-window.colorbrewer = require('colorbrewer').default;
+window.colorbrewer = require('colorbrewer/index.ts').default;
 
 // d3
 window.d3 = require('d3');

@@ -99,7 +99,7 @@ describe('geo.transform', function () {
     var server;
 
     beforeEach(function () {
-      server = sinon.fakeServer.create();
+      server = require('nise').fakeServer.create();
     });
 
     afterEach(function () {
