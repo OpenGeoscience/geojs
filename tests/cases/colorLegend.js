@@ -1,6 +1,6 @@
 var $ = require('jquery');
 var createMap = require('../test-utils').createMap;
-var colorbrewer = require('colorbrewer/index.js');
+var colorbrewer = require('colorbrewer/index.ts').default;
 
 describe('color legend', function () {
   'use strict';

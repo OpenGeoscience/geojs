@@ -1549,7 +1549,7 @@ describe('geo.tileLayer', function () {
       });
 
       it('invalid tile url', function (done) {
-        var server = sinon.fakeServer.create();
+        var server = require('nise').fakeServer.create();
         var spy = sinon.spy();
         sinon.stub(console, 'warn').callsFake(function () {});
 
@@ -1607,7 +1607,7 @@ describe('geo.tileLayer', function () {
       }
 
       beforeEach(function () {
-        server = sinon.fakeServer.create({respondImmediately: true});
+        server = require('nise').fakeServer.create({respondImmediately: true});
         sinon.stub(console, 'warn');
       });
       afterEach(function () {

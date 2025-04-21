@@ -148,8 +148,8 @@ describe('geo.tile', function () {
     });
 
     it('failure', function (done) {
-      // create a mocked sinon server instance that always responds with 404.
-      var server = sinon.fakeServer.create();
+      // create a mocked nise server instance that always responds with 404.
+      var server = require('nise').fakeServer.create();
 
       var t = geo.tile({
         index: {x: 0, y: 0},
