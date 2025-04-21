@@ -28,8 +28,8 @@ var sceneObject = require('./sceneObject');
  *   bounds.
  * @property {number} [zoom=4] Initial zoom.
  * @property {object} [center] Initial map center.
- * @property {number} center.x=0
- * @property {number} center.y=0
+ * @property {number} [center.x=0] Initial map center.
+ * @property {number} [center.y=0] Initial map center.
  * @property {number} [rotation=0] Initial clockwise rotation in radians.
  * @property {number} [width] The map width (default node width).
  * @property {number} [height] The map height (default node height).
@@ -176,7 +176,7 @@ var map = function (arg) {
    * Get/set the number of world space units per display pixel at the given
    * zoom level.
    *
-   * @param {number} [zoom=0] The target zoom level.
+   * @param {number} [zoom] The target zoom level.
    * @param {number?} [unit] If present, set the `unitsPerPixel` at the
    *   specified zoom level.  Otherwise return the current value.
    * @returns {number|this}
@@ -214,7 +214,7 @@ var map = function (arg) {
          * existing requestAnimationFrame.  By using a property of window,
          * tests can override this if needed. */
         if (queue.length && queue[0] !== m_animationQueue[0]) {
-          window['cancelAnimationFrame'](m_animationQueue[0]); // eslint-disable-line dot-notation
+          window['cancelAnimationFrame'](m_animationQueue[0]);
         }
         for (var i = queue.length ? 1 : 0; i < m_animationQueue.length; i += 1) {
           queue.push(m_animationQueue[i]);
@@ -1127,7 +1127,7 @@ var map = function (arg) {
    * @param {geo.geoPosition} [opts.zoomOrigin] An origin to use when zooming
    *    to a new zoom level.
    * @param {number} [opts.rotation] A new map rotation.
-   * @param {number} [opts.duration=1000] Transition duration in milliseconds.
+   * @param {number} [opts.duration] Transition duration in milliseconds.
    * @param {function} [opts.ease] Easing function for the transition.  This is
    *    in the style of a d3 easing function.
    * @param {function} [opts.interp] Function to use when interpolating
@@ -1143,7 +1143,7 @@ var map = function (arg) {
    *    a value based on what canceled a transition, `transition`: the current
    *    transition that just completed, `next`: a boolean if another transition
    *    follows immediately.
-   * @param {boolean} [opts.endClamp=true] If `false`, the last center change
+   * @param {boolean} [opts.endClamp] If `false`, the last center change
    *    will not clamp to the bounds and zoom values.
    * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
    *    the interface gcs, `null` to use the map gcs, or any other transform.
@@ -1726,8 +1726,8 @@ var map = function (arg) {
    * attribution notices into a single element.  By default, this method
    * is called on each of the following events:
    *
-   *   * {@link geo.event.layerAdd}
-   *   * {@link geo.event.layerRemove}
+   *   {@link geo.event.layerAdd}
+   *   {@link geo.event.layerRemove}
    *
    * In addition, layers should call this method when their own attribution
    * notices have changed.  Users, in general, should not need to call this.
@@ -1776,23 +1776,23 @@ var map = function (arg) {
    *    optional values of `layers`, `type`, `encoderOptions`, and additional
    *    values listed in the `opts` parameter (this last form allows a single
    *    argument for the function).
-   * @param {string} [type='image/png'] See {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
+   * @param {string} [type] See {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
    *    canvas.toDataURL}.  Use `'canvas'` to return the canvas element (this
    *    can be used to get the results as a blob, which can be faster for some
    *    operations but is not supported as widely).
    * @param {number} [encoderOptions] See {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
    *    canvas.toDataURL}.
    * @param {object} [opts] Additional screenshot options.
-   * @param {false|string|CanvasRenderingContext2D.fillStyle}
-   *    [opts.background='white'] If `false` or `null`, don't prefill the
-   *    background.  Otherwise, a css color or
-   *    `CanvasRenderingContext2D.fillStyle` to fill the initial canvas.  This
-   *    could match the background of the browser page, for instance.
-   * @param {boolean|'idle'} [opts.wait=false] If `'idle'`, wait for the map to
+   * @param {false|string|CanvasRenderingContext2D.fillStyle} [opts.background]
+   *    If `false` or `null`, don't prefill the background.  Otherwise, a css
+   *    color or `CanvasRenderingContext2D.fillStyle` to fill the initial
+   *    canvas.  This could match the background of the browser page, for
+   *    instance.  Default is 'white'.
+   * @param {boolean|'idle'} [opts.wait] If `'idle'`, wait for the map to
    *    be idle and one additional animation frame to occur.  If truthy, wait
    *    for an animation frame to occur.  Otherwise, take the screenshot as
    *    soon as possible.
-   * @param {boolean|null} [opts.attribution=null] If `null` or unspecified,
+   * @param {boolean|null} [opts.attribution] If `null` or unspecified,
    *    include the attribution only if all layers are used.  If false, never
    *    include the attribution.  If `true`, always include it.
    * @param {HTMLElement[]|string[]} [opts.html] A list of additional HTML
@@ -1951,11 +1951,11 @@ var map = function (arg) {
    * @param {function} callback Function to call during the animation frame.
    *    It is called with an animation epoch, exactly as
    *    `requestAnimationFrame`.
-   * @param {boolean|'remove'} [action=false] Falsy to only add the callback if
+   * @param {boolean|'remove'} [action] Falsy to only add the callback if
    *    it is not already scheduled.  `'remove'` to remove the callback (use
    *    this instead of `cancelAnimationFrame`).  Any other truthy value moves
    *    the callback to the end of the list.
-   * @returns {number} An integer as returned by
+   * @returns {number?} An integer as returned by
    *    `window.requestAnimationFrame`.
    */
   this.scheduleAnimationFrame = function (callback, action) {
@@ -1964,16 +1964,16 @@ var map = function (arg) {
        * explicitly using window.requestAnimationFrame, we prevent the
        * stripping of 'window' off of the reference and allow our tests to
        * override this if needed. */
-      m_animationQueue.push(window['requestAnimationFrame'](processAnimationFrame)); // eslint-disable-line dot-notation
+      m_animationQueue.push(window['requestAnimationFrame'](processAnimationFrame));
     }
     var pos = m_animationQueue.indexOf(callback, 1);
     if (pos >= 0) {
       if (!action) {
-        return;
+        return undefined;
       }
       m_animationQueue.splice(pos, 1);
       if (action === 'remove') {
-        return;
+        return undefined;
       }
     }
     m_animationQueue.push(callback);

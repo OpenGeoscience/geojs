@@ -45,6 +45,7 @@ var geo_event = require('./event');
  * Style specification for a feature.
  *
  * @typedef {object} geo.feature.styleSpec
+ * @property {object} The styyle.
  */
 
 /**
@@ -205,7 +206,7 @@ var feature = function (arg) {
    * @param {geo.geoPosition} lowerLeft Lower-left corner.
    * @param {geo.geoPosition} upperRight Upper-right corner.
    * @param {object} [opts] Additional search options.
-   * @param {boolean} [opts.partial=false] If truthy, include features that are
+   * @param {boolean} [opts.partial] If truthy, include features that are
    *    partially in the box, otherwise only include features that are fully
    *    within the region.
    * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
@@ -226,7 +227,7 @@ var feature = function (arg) {
    * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
    *    object with `outer` and optionally `inner` parameters.
    * @param {object} [opts] Additional search options.
-   * @param {boolean} [opts.partial=false] If truthy, include features that are
+   * @param {boolean} [opts.partial] If truthy, include features that are
    *    partially in the polygon, otherwise only include features that are
    *    fully within the region.
    * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
@@ -608,7 +609,7 @@ var feature = function (arg) {
    *    each arrays.
    * @param {array} styleArray If keyOrObject is a string, an array of values
    *    for the style.  If keyOrObject is an object, this parameter is ignored.
-   * @param {boolean} [refresh=false] `true` to redraw the feature when it has
+   * @param {boolean} [refresh] `true` to redraw the feature when it has
    *    been updated.  If an object with styles is passed, the redraw is only
    *    done once.
    * @returns {this} The feature instance.

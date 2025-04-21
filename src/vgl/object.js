@@ -5,7 +5,7 @@ var timestamp = require('../timestamp');
  * Create a new instance of class object.
  *
  * @class
- * @alias vgl.object.
+ * @alias vgl.object
  * @returns {vgl.object}
  */
 vgl.object = function () {

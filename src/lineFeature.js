@@ -289,7 +289,7 @@ var lineFeature = function (arg) {
    * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
    *    object with `outer` and optionally `inner` parameters.
    * @param {object} [opts] Additional search options.
-   * @param {boolean} [opts.partial=false] If truthy, include lines that are
+   * @param {boolean} [opts.partial] If truthy, include lines that are
    *    partially in the polygon, otherwise only include lines that are fully
    *    within the region.
    * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
@@ -418,9 +418,9 @@ var lineFeature = function (arg) {
    *    units.  A value of zero will only remove perfectly collinear points.
    *    If not specified, this is set to a half display pixel at the map's
    *    current zoom level.
-   * @param {function} [posFunc=this.style.get('position')] The function to
+   * @param {function} [posFunc] The function to
    *    get the position of each vertex.
-   * @param {function} [lineFunc=this.style.get('line')] The function to get
+   * @param {function} [lineFunc] The function to get
    *    each line.
    * @returns {this}
    */

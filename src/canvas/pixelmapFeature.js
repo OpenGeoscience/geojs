@@ -15,7 +15,7 @@ var util = require('../util');
  * @property {ImageData} imageData The context's image data.
  * @property {number[]} indices An array, one per pixel, of the index value in
  *    the image.  This decodes the pixel value to the corresponding integer.
- * @property number} area The number of pixels in the image.  This is
+ * @property {number} area The number of pixels in the image.  This is
  *    `width * height`.
  * @property {object[]} mappedColors This has one entry for each distinct index
  *    value.  Each entry has `first` and `last` with the first and last pixel
@@ -84,13 +84,13 @@ var canvas_pixelmapFeature = function (arg) {
    * if the pixelmap has already been prepared (it is invalidated by a change
    * in the image).
    *
-   * @returns {geo.pixelmapFeature.info}
+   * @returns {geo.pixelmapFeature.info?}
    */
   this._preparePixelmap = function () {
     var i, idx, pixelData;
 
     if (!util.isReadyImage(m_this.m_srcImage)) {
-      return;
+      return undefined;
     }
     m_this.m_info = {
       width: m_this.m_srcImage.naturalWidth,

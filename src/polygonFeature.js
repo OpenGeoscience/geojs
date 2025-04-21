@@ -103,10 +103,10 @@ var polygonFeature = function (arg) {
    * in the polygon.
    *
    * @private
-   * @param {object[]} [data=this.data()] The data to process.
-   * @param {function} [posFunc=this.style.get('position')] The function to
+   * @param {object[]} [data] The data to process.
+   * @param {function} [posFunc] The function to
    *    get the position of each vertex.
-   * @param {function} [polyFunc=this.style.get('polygon')] The function to
+   * @param {function} [polyFunc] The function to
    *    get each polygon.
    * @returns {geo.polygonObject[]} An array of polygon positions.  Each has
    *    `outer` and `inner` if it has any coordinates, or is `undefined`.
@@ -302,7 +302,7 @@ var polygonFeature = function (arg) {
    * @param {geo.polygonObject} poly A polygon as an array of coordinates or an
    *    object with `outer` and optionally `inner` parameters.
    * @param {object} [opts] Additional search options.
-   * @param {boolean} [opts.partial=false] If truthy, include polygons that are
+   * @param {boolean} [opts.partial] If truthy, include polygons that are
    *    partially in the polygon, otherwise only include polygons that are fully
    *    within the region.
    * @param {string|geo.transform|null} [gcs] Input gcs.  `undefined` to use
@@ -434,9 +434,9 @@ var polygonFeature = function (arg) {
    * Get an outer or inner loop of a polygon and return the necessary data to
    * use it for a closed polyline.
    *
-   * @param {object} item: the polygon.
-   * @param {number} itemIndex: the index of the polygon
-   * @param {Array} loop: the inner or outer loop.
+   * @param {object} item the polygon.
+   * @param {number} itemIndex the index of the polygon
+   * @param {Array} loop the inner or outer loop.
    * @returns {Array} the loop with the data necessary to send to the position
    *    function for each vertex.
    */
@@ -568,11 +568,11 @@ var polygonFeature = function (arg) {
    *    units.  A value of zero will only remove perfectly collinear points.
    *    If not specified, this is set to a half display pixel at the map's
    *    current zoom level.
-   * @param {function} [posFunc=this.style.get('position')] The function to
+   * @param {function} [posFunc] The function to
    *    get the position of each vertex.
-   * @param {function} [polyFunc=this.style.get('polygon')] The function to
+   * @param {function} [polyFunc] The function to
    *    get each polygon.
-   * @param {boolean} [returnData=false] If truthy, return the new data array
+   * @param {boolean} [returnData] If truthy, return the new data array
    *    rather than modifying the feature.
    * @returns {this|array}
    */

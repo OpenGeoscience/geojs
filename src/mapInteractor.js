@@ -40,7 +40,7 @@ var Mousetrap = require('mousetrap');
  *      up for that scale action to trigger.  If the value of the meta key is
  *      truthy, it must be down.  If `false`, it must be up.
  * @property {string[]} [keyboard.metakeyMouseEvents] A list of meta keys
- * *    that, when typed singly, trigger a repeat of the last mousemove or
+ * that, when typed singly, trigger a repeat of the last mousemove or
  *      actionmove event so that listeners can  update metakey information.
  * @property {boolean} [keyboard.focusHighlight=true] If truthy, when the map
  *      gains focus, a highlight style is shown around it.  This gives an
@@ -2176,7 +2176,7 @@ var mapInteractor = function (args) {
         simulated: true
       };
       m_keyHandler.trigger(keys, options.event);
-      return;
+      return m_this;
     }
 
     page = options.page || {};
@@ -2236,6 +2236,7 @@ var mapInteractor = function (args) {
     if (type.indexOf('.geojs') >= 0) {
       $(document).trigger(evt);
     }
+    return m_this;
   };
   this._connectEvents();
   return this;

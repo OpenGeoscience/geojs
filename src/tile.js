@@ -11,8 +11,8 @@ var $ = require('jquery');
  * @property {number} size.y Height (usually in pixels).
  * @property {object|string} url A url or jQuery ajax config object.
  * @property {object} [overlap] The size of overlap with neighboring tiles.
- * @property {number} overlap.x=0
- * @property {number} overlap.y=0
+ * @property {number} [overlap.x=0] Overlap in the x direction.
+ * @property {number} [overlap.y=0] Overlap in the y direction.
  */
 
 /**

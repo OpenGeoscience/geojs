@@ -308,11 +308,11 @@ var annotationLayer = function (arg) {
    *
    * @param {geo.event} evt The mouse move event.
    * @param {boolean} enable Truthy to select the handle, falsy to deselect it.
-   * @returns {this}
+   * @returns {this?}
    */
   this._selectEditHandle = function (evt, enable) {
     if (!evt.data || !evt.data.editHandle) {
-      return;
+      return undefined;
     }
     $.each(m_features[geo_annotation._editHandleFeatureLevel], function (type, feature) {
       feature.feature.modified();

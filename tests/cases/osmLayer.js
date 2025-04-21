@@ -33,7 +33,7 @@ describe('geo.core.osmLayer', function () {
    * @param mapinfo: an object that includes the map to test.
    * @param notekey: the key to use for the build note.
    */
-  function measure_performance(mapinfo, notekey) { // eslint-disable-line no-unused-vars
+  function measure_performance(mapinfo, notekey) {
     describe('measure performance ' + notekey, function () {
       it('measure performance', function (done) {
         map = mapinfo.map;

@@ -410,12 +410,12 @@ registry.registerAnnotation = function (name, func, features) {
  * @alias geo.createAnnotation
  * @param {string} name The annotation name
  * @param {object} options The options for the annotation.
- * @returns {object} the new annotation.
+ * @returns {object?} the new annotation.
  */
 registry.createAnnotation = function (name, options) {
   if (!annotations[name]) {
     console.warn('The ' + name + ' annotation is not registered');
-    return;
+    return undefined;
   }
   var annotation = annotations[name].func(options);
   return annotation;

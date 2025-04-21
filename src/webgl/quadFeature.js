@@ -508,7 +508,7 @@ var webgl_quadFeature = function (arg) {
    * @param {string} shaderType One of `image_vertex`, `image_fragment`,
    *   `color_vertex`, or `color_fragment`.
    * @param {string} shaderCode The shader program.
-   * @returns {this} The class instance on success, undefined in an unknown
+   * @returns {this?} The class instance on success, undefined in an unknown
    *    shaderType was specified.
    */
   this.setShader = function (shaderType, shaderCode) {
@@ -518,7 +518,7 @@ var webgl_quadFeature = function (arg) {
       case 'color_vertex': vertexShaderColor = shaderCode; break;
       case 'color_fragment': fragmentShaderColor = shaderCode; break;
       default:
-        return;
+        return undefined;
     }
     return m_this;
   };

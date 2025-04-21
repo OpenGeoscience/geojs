@@ -8,7 +8,7 @@
  * @alias geo.tileCache
  *
  * @param {object} [options] A configuration object for the cache.
- * @param {number} [options.size=64] The maximum number of tiles to store.
+ * @param {number} [options.size] The maximum number of tiles to store.
  */
 var tileCache = function (options) {
   if (!(this instanceof tileCache)) {

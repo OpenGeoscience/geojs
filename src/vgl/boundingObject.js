@@ -67,7 +67,7 @@ vgl.boundingObject = function () {
    */
   this.setBounds = function (minX, maxX, minY, maxY, minZ, maxZ) {
     if (!this.hasValidBounds([minX, maxX, minY, maxY, minZ, maxZ])) {
-      return;
+      return undefined;
     }
 
     m_bounds[0] = minX;

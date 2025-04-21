@@ -25,7 +25,7 @@ vgl.material = function () {
   /**
    * Return bin number for the material.
    *
-   * @default 100
+   * @default
    * @returns {number}
    */
   this.binNumber = function () {

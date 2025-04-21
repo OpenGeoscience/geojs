@@ -415,12 +415,12 @@ var tileLayer = function (arg) {
    * Returns undefined if the tile should not be cropped.
    *
    * @param {object} tile The tile to compute crop values for.
-   * @returns {object} Either `undefined` or an object with `x` and `y` values
+   * @returns {object?} Either `undefined` or an object with `x` and `y` values
    *      which is the size in pixels for the tile.
    */
   this.tileCropFromBounds = function (tile) {
     if (!m_this._options.tilesMaxBounds) {
-      return;
+      return undefined;
     }
     var level = tile.index.level,
         bounds = m_this._tileBounds(tile);
@@ -434,6 +434,7 @@ var tileLayer = function (arg) {
         y: Math.max(0, Math.min(m_maxBounds[level].y, bounds.bottom) - bounds.top)
       };
     }
+    return undefined;
   };
 
   /**
@@ -692,7 +693,7 @@ var tileLayer = function (arg) {
    * @param {boolean} [onlyIfChanged] If the set of tiles have not changed
    *     (even if their desired order has), return undefined instead of an
    *     array of tiles.
-   * @returns {geo.tile[]} An array of tile objects
+   * @returns {geo.tile[]?} An array of tile objects
    */
   this._getTiles = function (maxLevel, bounds, sorted, onlyIfChanged) {
     var i, j, tiles = [], index, nTilesLevel,
@@ -767,7 +768,7 @@ var tileLayer = function (arg) {
 
     if (onlyIfChanged) {
       if (!changed && tiles.length === m_lastTileSet.length) {
-        return;
+        return undefined;
       }
       m_lastTileSet.splice(0, m_lastTileSet.length);
       $.each(tiles, function (idx, tile) {
@@ -1204,11 +1205,11 @@ var tileLayer = function (arg) {
    * create the element if it doesn't already exist.
    *
    * @param {number} level The zoom level of the layer to fetch.
-   * @returns {HTMLElement} The layer's DOM element.
+   * @returns {HTMLElement?} The layer's DOM element.
    */
   this._getSubLayer = function (level) {
     if (!m_this.canvas()) {
-      return;
+      return undefined;
     }
     var node = m_this.canvas()
       .find('div[data-tile-layer=' + level.toFixed() + ']').get(0);

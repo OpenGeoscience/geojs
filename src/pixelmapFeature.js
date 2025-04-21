@@ -172,7 +172,7 @@ var pixelmapFeature = function (arg) {
    * Get the maximum index value from the pixelmap.  This is a value present in
    * the pixelmap.
    *
-   * @returns {number} The maximum index value.
+   * @returns {number?} The maximum index value.
    */
   this.maxIndex = function () {
     if (m_this.m_info) {
@@ -188,6 +188,7 @@ var pixelmapFeature = function (arg) {
       }
       return m_this.m_info.maxIndex;
     }
+    return undefined;
   };
 
   /**

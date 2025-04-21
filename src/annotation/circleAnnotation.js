@@ -15,7 +15,7 @@ const ellipseAnnotation = require('./ellipseAnnotation');
  * @extends geo.annotation
  *
  * @param {geo.circleAnnotation.spec?} [args] Options for the annotation.
- * @param {string} [annotationName='circle'] Override the annotation name.
+ * @param {string} [annotationName] Override the annotation name.
  */
 var circleAnnotation = function (args, annotationName) {
   'use strict';

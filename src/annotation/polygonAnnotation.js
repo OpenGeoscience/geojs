@@ -159,18 +159,19 @@ var polygonAnnotation = function (args) {
    * Handle a mouse move on this annotation.
    *
    * @param {geo.event} evt The mouse move event.
-   * @returns {boolean} Truthy to update the annotation, falsy to not
+   * @returns {boolean?} Truthy to update the annotation, falsy to not
    *    update anything.
    */
   this.mouseMove = function (evt) {
     if (m_this.state() !== annotationState.create) {
-      return;
+      return undefined;
     }
     var vertices = m_this.options('vertices');
     if (vertices.length) {
       vertices[vertices.length - 1] = evt.mapgcs;
       return true;
     }
+    return undefined;
   };
 
   /**
@@ -178,23 +179,23 @@ var polygonAnnotation = function (args) {
    * evt.handled should be set to `true` to prevent further processing.
    *
    * @param {geo.event} evt The mouse click event.
-   * @returns {boolean|string} `true` to update the annotation, `'done'` if
-   *    the annotation was completed (changed from create to done state),
-   *    `'remove'` if the annotation should be removed, falsy to not update
-   *    anything.
+   * @returns {boolean|string|undefined} `true` to update the annotation,
+   *    `'done'` if the annotation was completed (changed from create to done
+   *    state), `'remove'` if the annotation should be removed, falsy to not
+   *    update anything.
    */
   this.mouseClick = function (evt) {
     var layer = m_this.layer();
     if (m_this.state() !== annotationState.create || !layer) {
-      return;
+      return undefined;
     }
     var end = !!evt.buttonsDown.right, skip;
     if (!evt.buttonsDown.left && !evt.buttonsDown.right) {
-      return;
+      return undefined;
     }
     var vertices = m_this.options('vertices');
     if (evt.buttonsDown.right && !vertices.length) {
-      return;
+      return undefined;
     }
     evt.handled = true;
     if (evt.buttonsDown.left) {
@@ -303,13 +304,13 @@ var polygonAnnotation = function (args) {
    *
    * @param {string|geo.transform|null} [gcs] `undefined` to use the interface
    *    gcs, `null` to use the map gcs, or any other transform.
-   * @returns {array} An array of flattened coordinates in the interface gcs
+   * @returns {array?} An array of flattened coordinates in the interface gcs
    *    coordinate system.  `undefined` if this annotation is incomplete.
    */
   this._geojsonCoordinates = function (gcs) {
     var src = m_this.coordinates(gcs);
     if (!src || (!src.outer && src.length < 3) || m_this.state() === annotationState.create) {
-      return;
+      return undefined;
     }
     var coord = [];
     if (!src.outer) {

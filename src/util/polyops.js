@@ -26,7 +26,7 @@ var util = require('../util/common');
  * @property {number} [epsilon1] A precision value to use when computing the
  *   operation.  If not specified, this is computed from the range of values in
  *   ``poly1``.  It is used for processing ``poly1`` and the general operation.
- * @property {number} [epsilon1] A precision value to use when processing
+ * @property {number} [epsilon2] A precision value to use when processing
  *   ``poly2``.  If not specified, this is computed from the range of values in
  *   ``poly2``.
  * @property {string|object} [style] If specified, the preferred output style.

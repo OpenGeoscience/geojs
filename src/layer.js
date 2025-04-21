@@ -185,7 +185,7 @@ var layer = function (arg) {
    * Bring the layer above the given number of layers.  This will rotate the
    * current z-indices for this and the next `n` layers.
    *
-   * @param {number} [n=1] The number of positions to move.
+   * @param {number} [n] The number of positions to move.
    * @returns {this}
    */
   this.moveUp = function (n) {
@@ -232,7 +232,7 @@ var layer = function (arg) {
    * Bring the layer below the given number of layers.  This will rotate the
    * current z-indices for this and the previous `n` layers.
    *
-   * @param {number} [n=1] The number of positions to move.
+   * @param {number} [n] The number of positions to move.
    * @returns {this}
    */
   this.moveDown = function (n) {

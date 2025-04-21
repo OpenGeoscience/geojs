@@ -319,7 +319,7 @@ var checkedWebGL;
 webglRenderer.supported = function () {
   if (checkedWebGL === undefined) {
     /* This is extracted from what Modernizr uses. */
-    var canvas, ctx, exts; // eslint-disable-line no-unused-vars
+    var canvas, ctx, exts;
     try {
       canvas = document.createElement('canvas');
       /** @type {WebGLRenderingContext} */
