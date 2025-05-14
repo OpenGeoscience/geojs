@@ -1,0 +1,10 @@
+{
+  "title": "Flight tracking data",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "docJs": ["worker.js"],
+  "about": {
+    "text": "Recent flights from The OpenSky Network on an interactive map."
+  },
+  "disabled": true
+}
