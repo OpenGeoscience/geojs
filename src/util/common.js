@@ -553,9 +553,9 @@ var util = {
     var minLevel = Math.min(0, Math.floor(Math.log(Math.min(
           (mapW || tileWidth) / tileWidth,
           (mapH || tileHeight) / tileHeight)) / Math.log(2))),
-        maxLevel = Math.ceil(Math.log(Math.max(
+        maxLevel = Math.max(0, Math.ceil(Math.log(Math.max(
           width / tileWidth,
-          height / tileHeight)) / Math.log(2));
+          height / tileHeight)) / Math.log(2)));
     var mapParams = {
       node: node,
       ingcs: '+proj=longlat +axis=esu',
