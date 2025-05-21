@@ -997,7 +997,7 @@ var util = {
 
   /**
    * Recursively merge two objects.  This is intended to replace
-   * util.deepMerge(target, ...sources).
+   * $.extend(target, ...sources).
    *
    * @param {object} target target object to modify.
    * @param {object} sources object(s) to merge into the target.
