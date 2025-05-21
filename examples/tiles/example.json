@@ -1,0 +1,8 @@
+{
+  "title": "Tile layer with controllable options",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "This example provides controls for changing many options on tile layers.  The code and query parameters allow even more options to be adjusted."
+  }
+}
