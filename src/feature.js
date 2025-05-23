@@ -612,9 +612,11 @@ var feature = function (arg) {
    * @param {boolean} [refresh] `true` to redraw the feature when it has
    *    been updated.  If an object with styles is passed, the redraw is only
    *    done once.
+   * @param {number} [stride] If specified, the array should be sampled at this
+   *    spacing.
    * @returns {this} The feature instance.
    */
-  this.updateStyleFromArray = function (keyOrObject, styleArray, refresh) {
+  this.updateStyleFromArray = function (keyOrObject, styleArray, refresh, stride) {
     if (typeof keyOrObject !== 'string') {
       $.each(keyOrObject, function (key, value) {
         m_this.updateStyleFromArray(key, value);
@@ -632,18 +634,18 @@ var feature = function (arg) {
       if (m_this._subfeatureStyles[keyOrObject]) {
         if (styleArray.length && Array.isArray(styleArray[0])) {
           m_this.style(keyOrObject, function (v, j, d, i) {
-            var val = (styleArray[i] || [])[j];
+            var val = (styleArray[stride ? Math.floor(i / stride) : i] || [])[j];
             return val !== undefined ? val : fallback;
           });
         } else {
           m_this.style(keyOrObject, function (v, j, d, i) {
-            var val = styleArray[i];
+            var val = styleArray[stride ? Math.floor(i / stride) : i];
             return val !== undefined ? val : fallback;
           });
         }
       } else {
         m_this.style(keyOrObject, function (d, i) {
-          var val = styleArray[i];
+          var val = styleArray[stride ? Math.floor(i / stride) : i];
           return val !== undefined ? val : fallback;
         });
       }

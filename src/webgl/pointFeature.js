@@ -274,7 +274,7 @@ var webgl_pointFeature = function (arg) {
     }
     $.each(keyOrObject, function (key, styleArray) {
       if (m_this.visible() && m_actor && bufferedKeys[key] && !needsRefresh && !m_this.clustering()) {
-        var vpf, mapper, buffer, numPts, value, i, j, v, bpv;
+        var vpf, mapper, buffer, numPts, value, i, j, v, bpv, stride;
         bpv = bufferedKeys[key] === 'bool' ? 1 : bufferedKeys[key];
         numPts = m_this.data().length;
         mapper = m_actor.mapper();
@@ -283,6 +283,7 @@ var webgl_pointFeature = function (arg) {
         if (!buffer || !numPts || numPts * vpf * bpv !== buffer.length) {
           needsRefresh = true;
         } else {
+          stride = (vpf > 1) ? vpf : stride;
           switch (bufferedKeys[key]) {
             case 1:
               for (i = 0, v = 0; i < numPts; i += 1) {
@@ -326,7 +327,7 @@ var webgl_pointFeature = function (arg) {
         // don't allow modified to be adjusted if we don't need to refresh
         m_this.modified = () => {};
       }
-      s_updateStyleFromArray(key, styleArray, false);
+      s_updateStyleFromArray(key, styleArray, false, stride);
       m_this.modified = mod;
     });
     if (refresh) {
