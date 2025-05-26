@@ -1,0 +1,9 @@
+{
+  "title": "Reproject tiles",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "thumbquery": "gcs=ESRI%3A54009",
+  "about": {
+    "text": "This example shows how you can reproject tiles from one projection to another.  The source tiles are in Web Mercator (EPSG:3857), but can be drawn in many different projections."
+  }
+}
