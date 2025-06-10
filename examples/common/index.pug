@@ -15,36 +15,28 @@ html(lang="en")
   body
     if !hideNavbar
       // Add a navbar
-      nav.navbar.navbar-default(role="navigation")
-        .container-fluid
-          .navbar-header
-            button.navbar-toggle(type="button", data-toggle="collapse", data-target="gj-navbar-collapse")
-              span.sr-only Toggle navigation
-              span.icon-bar
-              span.icon-bar
-              span.icon-bar
+      nav.navbar.navbar-dark.bg-primary(role="navigation")
             a.navbar-brand(href="https://github.com/OpenGeoscience/geojs", target="gj-homepage") GeoJS
 
-          .collapse.navbar-collapse#gj-navbar-collapse
             block headerButtons
-            ul.nav.navbar-nav.navbar-right
+            ul.nav.navbar-nav.ml-auto.navbar-right
               block screenShot
-                li
-                  a.gj-screenshot-link(tabindex=0)
+                li.nav-item
+                  a.nav-link.gj-screenshot-link(tabindex=0)
                     | Screenshot
-                li.gj-screenshot-waiting
-                  a ...
-                li.gj-screenshot-result
-                  a.gj-screenshot-download(download='screenshot.png')
+                li.nav-item.gj-screenshot-waiting
+                  a.nav-link ...
+                li.nav-item.gj-screenshot-result
+                  a.nav-link.gj-screenshot-download(download='screenshot.png')
                     img
               block showSource
                 if docHTML
-                  li
-                    a.gj-show-source-link(href=docHTML, target="gj-docco")
+                  li.nav-item
+                    a.nav-link.gj-show-source-link(href=docHTML, target="gj-docco")
                       | Source
               if !about.hidden
-                li
-                  a.gj-show-about-link(href="#", data-toggle="modal", data-target="#about-modal")
+                li.nav-item
+                  a.nav-link.gj-show-about-link(href="#", data-toggle="modal", data-target="#about-modal")
                     | About
 
       if ! about.hidden

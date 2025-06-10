@@ -3,7 +3,7 @@ window.geo = require('../src/index');
 
 // bootstrap and themes
 require('bootstrap/dist/css/bootstrap.css');
-require('bootswatch/flatly/bootstrap.css');
+require('bootswatch/dist/flatly/bootstrap.css');
 require('bootstrap');
 
 // codemirror and plugins

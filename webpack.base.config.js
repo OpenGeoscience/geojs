@@ -62,6 +62,7 @@ module.exports = {
         loader: 'babel-loader',
         options: {
           cacheDirectory: true,
+          cacheCompression: false,
           presets: [['@babel/preset-env', {
             targets: 'defaults, PhantomJS 2.1'
           }]]

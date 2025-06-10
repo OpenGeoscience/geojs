@@ -88,21 +88,16 @@ html(lang="en")
   body(class=hideNavbar ? undefined : 'navbar')
     if !hideNavbar
       // Add a navbar
-      nav.navbar.navbar-default(role="navigation")
+      nav.navbar.navbar-dark.bg-primary(role="navigation")
         .container-fluid
           .navbar-header
-            button.navbar-toggle(type="button", data-toggle="collapse", data-target="gj-navbar-collapse")
-              span.sr-only Toggle navigation
-              span.icon-bar
-              span.icon-bar
-              span.icon-bar
             a.navbar-brand(href="https://github.com/OpenGeoscience/geojs", target="gj-homepage") GeoJS
 
-          .collapse.navbar-collapse#gj-navbar-collapse
+          .navbar-collapse#gj-navbar-collapse
             block headerButtons
             ul.nav.navbar-nav.navbar-right
               if !about.hidden
-                li
+                li.nav-item
                   a.gj-show-about-link(href="#", data-toggle="modal", data-target="#about-modal")
                     | About
 

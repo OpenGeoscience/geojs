@@ -2,7 +2,7 @@ extends ./common/index.pug
 
 mixin thumbnail(ex)
   .col-md-4
-    .thumbnail
+    .card.card-body
       a(href=ex.path + "/")
         img(src=ex.path + "/thumb.jpg", onerror="this.src='osm/thumb.jpg';")
         .caption
@@ -12,7 +12,7 @@ mixin thumbnail(ex)
               p= ex.about.text
 
 block prepend headerButtons
-  ul.nav.navbar-nav.navbar-right
+  ul.nav.navbar-nav.ml-auto
     li.dropdown
       a.dropdown-toggle(href="#", data-toggle="dropdown") Resources
         span.caret

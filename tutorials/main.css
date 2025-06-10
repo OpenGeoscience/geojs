@@ -2,12 +2,12 @@ html, body {
   overflow: auto;
 }
 
-.thumbnail {
+.card.card-body {
   position: relative;
   overflow: hidden;
 }
 
-.thumbnail .caption .description{
+.card.card-body .caption .description{
   position: absolute;
   top: 0px;
   right: 0px;
