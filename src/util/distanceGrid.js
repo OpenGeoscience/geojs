@@ -55,7 +55,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @copyright 2012, David Leaver
  */
 
-var $ = require('jquery');
 var L = {};
 L.Util = {
     // return unique ID of an object
@@ -181,7 +180,7 @@ DistanceGrid.prototype = {
 
     /* return the point coordinates contained in the structure */
     contents: function () {
-        return $.map(this._objectPoint, function (val) { return val; });
+        return Object.values(this._objectPoint);
     },
 
     _getCoord: function (x) {
