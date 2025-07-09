@@ -185,23 +185,26 @@ var pointFeature = function (arg) {
     // store the current zoom level privately
     m_lastZoom = z;
 
-    // get the raw data elements for the points at the current level
-    var data = m_clusterTree.points(z).map(function (d) {
-      return m_allData[d.index];
-    });
+    const points = m_clusterTree.points(z);
+    const clusters = m_clusterTree.clusters(z);
+    const data = new Array(points.length + clusters.length);
+    for (let pidx = 0; pidx < points.length; pidx += 1) {
+      data[pidx] = m_allData[points[pidx].index];
+    }
 
     // append the clusters at the current level
-    m_clusterTree.clusters(z).forEach(function (d) {
+    for (let cidx = 0, didx = points.length; cidx < clusters.length; cidx += 1, didx += 1) {
+      const d = clusters[cidx];
       // mark the datum as a cluster for accessor methods
       d.__cluster = true;
 
       // store all of the data objects for each point in the cluster as __data
-      d.__data = [];
-      d.obj.each(function (e) {
-        d.__data.push(m_allData[e.index]);
-      });
-      data.push(d);
-    });
+      d.__data = new Array(d.obj.length);
+      for (let idx = 0; idx < d.obj.length; idx += 1) {
+        d.__data[idx] = m_allData[d.obj[idx].index];
+      }
+      data[didx] = d;
+    }
 
     // prevent recomputing the clustering and set the new data array
     m_ignoreData = true;
