@@ -56,7 +56,9 @@ var feature = require('./feature');
  * @typedef {object} geo.pointFeature.clusteringSpec
  * @property {number} [radius=10] This is size in pixels that determines how
  *   close points need to be to each other to be clustered.
- * @property {number} [maxZoom=18] Never cluster above this zoom level.
+ * @property {number} [maxZoom=18] Never cluster above this zoom level.  For a
+ *   point feature associated with a layer and a map, this will default to the
+ *   map's zoomRange().max value.
  */
 
 /**
@@ -138,6 +140,10 @@ var pointFeature = function (arg) {
 
     // set clustering options to default if an options argument wasn't supplied
     var opts = m_clustering === true ? {radius: 10} : m_clustering;
+    if (!opts.maxZoom && this.layer() && this.layer().map()) {
+      opts = Object.assign({}, opts);
+      opts.maxZoom = this.layer().map().zoomRange().max;
+    }
 
     // generate the cluster tree from the raw data
     var position = m_this.position();

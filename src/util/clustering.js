@@ -3,8 +3,6 @@
  * hierarchically given an array of length scales (zoom levels).
  */
 
-var $ = require('jquery');
-
 /**
  * This class manages a group of nearby points that are clustered as a
  * single object for display purposes.  The class constructor is private
@@ -106,10 +104,10 @@ ClusterTree.prototype.each = function (func) {
  * @returns {geo.geoPosition} The 2-d coordinates of the center.
  */
 ClusterTree.prototype.coords = function () {
-  var i, center = {x: 0, y: 0};
   if (this._coord) {
     return this._coord;
   }
+  var i, center = {x: 0, y: 0};
   // first add up the points at the node
   for (i = 0; i < this._points.length; i += 1) {
     center.x += this._points[i].x;
@@ -122,10 +120,11 @@ ClusterTree.prototype.coords = function () {
     center.y += this._clusters[i].coords().y * this._clusters[i].count();
   }
 
-  return {
+  this._coord = {
     x: center.x / this.count(),
     y: center.y / this.count()
   };
+  return this._coord;
 };
 
 /**
@@ -202,9 +201,6 @@ C.prototype.addPoint = function (point) {
         }
       }
 
-      if (!parent) {
-        $.noop();
-      }
       // create a new cluster with these two points
       newCluster = new ClusterTree(this, zoom, [closest, point]);
       this._clusters[zoom].addObject(newCluster, newCluster.coords());
