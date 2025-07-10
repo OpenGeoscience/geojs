@@ -1,0 +1,8 @@
+{
+  "title": "Geospatial Video",
+  "hideNavbar": true,
+  "level": 1,
+  "about": {
+    "text": "Place a video quad on a map with the correct geospatial location.  This shows how to make a video quad and start it playing from a user action."
+  }
+}
