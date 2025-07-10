@@ -368,7 +368,7 @@ var webgl_markerFeature = function (arg) {
     if (!m_this._primitiveShapeAuto || m_this._primitiveShape !== markerFeature.primitiveShapes.sprite) {
       return;
     }
-    if (m_this._approximateMaxRadius(zoom) > webglRenderer._maxPointSize) {
+    if (m_this._approximateMaxRadius(zoom) * 2 > webglRenderer._maxPointSize) {
       m_this._primitiveShape = markerFeature.primitiveShapes.triangle;
       m_this.renderer().contextRenderer().removeActor(m_this.actors()[0]);
       m_this._init(true);
