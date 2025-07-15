@@ -55,7 +55,7 @@ module.exports = {
       test: /\.js$/,
       // include: [ path.resolve('src'), ],
       exclude: [
-        /node_modules\/(?!(kdbush|earcut)\/).*/,
+        /node_modules\/(?!(earcut|kdbush|proj4|wkt-parser)\/).*/,
         path.resolve('tests')
       ],
       use: [{
