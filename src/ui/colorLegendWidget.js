@@ -382,6 +382,42 @@ var colorLegendWidget = function (arg) {
   };
 
   /**
+   * Get/Set width.
+   *
+   * @param {number} [width] If not specified, return the current width.  If
+   *    specified, set a new width.
+   * @returns {this|number}
+   */
+  this.width = function (width) {
+    if (width === undefined) {
+      return m_width;
+    } else if (width !== m_width) {
+      m_width = width;
+      m_this._prepareCategories(m_categories);
+      m_this._draw();
+    }
+    return m_this;
+  };
+
+  /**
+   * Get/Set ticks.
+   *
+   * @param {number} [ticks] If not specified, return the current ticks.  If
+   *    specified, set a new ticks.
+   * @returns {this|number}
+   */
+  this.ticks = function (ticks) {
+    if (ticks === undefined) {
+      return m_ticks;
+    } else if (ticks !== m_ticks) {
+      m_ticks = ticks;
+      m_this._prepareCategories(m_categories);
+      m_this._draw();
+    }
+    return m_this;
+  };
+
+  /**
    * Show the popup based on current mouse event.
    * @param {d3.event} event The triggering d3 event.
    * @param {string} text content to be shown in the popup
