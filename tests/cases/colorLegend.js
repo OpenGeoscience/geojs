@@ -229,4 +229,17 @@ describe('color legend', function () {
     expect(Math.abs($(container).find('.color-legend-popup').text() - 320)).toBeLessThan(2);
     $(legends[1]).find('svg>rect')[0].dispatchEvent(mouseout);
   });
+
+  it('width and ticks', function () {
+    expect(legendWidget.width()).toBe(300);
+    expect(legendWidget.width(400)).toBe(legendWidget);
+    expect(legendWidget.width()).toBe(400);
+    expect(legendWidget.width(400)).toBe(legendWidget);
+    expect(legendWidget.width()).toBe(400);
+    expect(legendWidget.ticks()).toBe(6);
+    expect(legendWidget.ticks(8)).toBe(legendWidget);
+    expect(legendWidget.ticks()).toBe(8);
+    expect(legendWidget.ticks(8)).toBe(legendWidget);
+    expect(legendWidget.ticks()).toBe(8);
+  });
 });
