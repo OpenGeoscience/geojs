@@ -282,14 +282,15 @@ var webgl_markerFeature = function (arg) {
    */
   this.updateStyleFromArray = function (keyOrObject, styleArray, refresh) {
     var bufferedKeys = {
+      radius: 1,
       fillColor: 3,
       fillOpacity: 1,
-      radius: 1,
       strokeColor: 3,
       strokeOpacity: 1,
       strokeWidth: 1,
       symbolComputed: 1,
-      symbolValueComputed: 1
+      symbolValueComputed: 1,
+      rotation: 1
     };
     var needsRefresh, needsRender;
     if (typeof keyOrObject === 'string') {
@@ -298,12 +299,12 @@ var webgl_markerFeature = function (arg) {
       keyOrObject = obj;
     }
     $.each(keyOrObject, function (key, styleArray) {
+      var sbkey = key === 'symbolComputed' ? 'symbol' : key === 'symbolValueComputed' ? 'symbolValue' : key;
       if (m_this.visible() && m_actor && bufferedKeys[key] && !needsRefresh && !m_this.clustering()) {
-        var vpf, mapper, buffer, numPts, value, i, j, v, bpv, sbkey;
+        var vpf, mapper, buffer, numPts, value, i, j, v, bpv;
         bpv = bufferedKeys[key];
         numPts = m_this.data().length;
         mapper = m_actor.mapper();
-        sbkey = key === 'symbolComputed' ? 'symbol' : key === 'symbolValueComputed' ? 'symbolValue' : key;
         buffer = mapper.getSourceBuffer(sbkey);
         vpf = m_this.verticesPerFeature();
         if (!buffer || !numPts || numPts * vpf * bpv !== buffer.length) {
@@ -339,15 +340,13 @@ var webgl_markerFeature = function (arg) {
       } else {
         needsRefresh = true;
       }
-      if (key === sbkey) {
-        const mod = m_this.modified;
-        if (!needsRefresh) {
-          // don't allow modified to be adjusted if we don't need to refresh
-          m_this.modified = () => {};
-        }
-        s_updateStyleFromArray(key, styleArray, false);
-        m_this.modified = mod;
+      const mod = m_this.modified;
+      if (!needsRefresh && key === sbkey) {
+        // don't allow modified to be adjusted if we don't need to refresh
+        m_this.modified = () => {};
       }
+      s_updateStyleFromArray(key, styleArray, false);
+      m_this.modified = mod;
     });
     if (refresh) {
       if (m_this.visible() && needsRefresh) {
@@ -391,15 +390,15 @@ var webgl_markerFeature = function (arg) {
         geom = vgl.geometryData(),
         sourcePositions = vgl.sourceDataP3fv({name: 'pos'}),
         attr = {
-          radius: 1,
           fillColor: 3,
           fillOpacity: 1,
+          radius: 1,
+          rotation: 1,
           strokeColor: 3,
           strokeOpacity: 1,
           strokeWidth: 1,
           symbol: 1,
-          symbolValue: 1,
-          rotation: 1
+          symbolValue: 1
         },
         uniforms = {
           pixelWidth: vgl.GL.FLOAT,
