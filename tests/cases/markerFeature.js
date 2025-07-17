@@ -266,6 +266,16 @@ describe('geo.markerFeature', function () {
     waitForIt('next render gl E', function () {
       return vgl.mockCounts().bufferSubData >= (glCounts.bufferSubData || 0) + 8;
     });
+    it('updateStyleFromArray non-visible', function () {
+      var t = marker.timestamp();
+      marker.visible(false);
+      marker.updateStyleFromArray('radius', array1, true);
+      marker.visible(true);
+      expect(marker.timestamp()).toBeGreaterThan(t);
+    });
+    waitForIt('next render gl F', function () {
+      return vgl.mockCounts().bufferSubData >= (glCounts.bufferSubData || 0) + 8;
+    });
     it('_exit', function () {
       expect(marker.actors().length).toBe(1);
       layer.deleteFeature(marker);
