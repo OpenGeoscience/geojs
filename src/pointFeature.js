@@ -204,11 +204,6 @@ var pointFeature = function (arg) {
       // mark the datum as a cluster for accessor methods
       d.__cluster = true;
 
-      // store all of the data objects for each point in the cluster as __data
-      d.__data = new Array(d.obj.length);
-      for (let idx = 0; idx < d.obj.length; idx += 1) {
-        d.__data[idx] = m_allData[d.obj[idx].index];
-      }
       data[didx] = d;
     }
 
