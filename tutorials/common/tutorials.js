@@ -280,6 +280,7 @@ function start_keeper(alwaysKeep) {
       if (query.keep && alwaysKeep !== true) {
         newQuery.keep = query.keep;
       }
+      var guard = false;
       $('.codeblock').each(function () {
         var block = $(this),
             defaultSrc = $('textarea', block).attr('defaultvalue'),
@@ -295,8 +296,12 @@ function start_keeper(alwaysKeep) {
            * average length of the url by 6 percent. */
           comp = comp.replace(/\//g, '.').replace(/\+/g, '-').replace(/=/g, '_');
           newQuery[key] = comp;
+          guard = !(/[A-Za-z0-9]/.test(comp.slice(-1)));
         }
       });
+      if (guard) {
+        newQuery['_'] = '_';
+      }
       if (!inPop) {
         utils.setQuery(newQuery, true);
       }
