@@ -733,7 +733,6 @@ var feature = function (arg) {
     }
     if (m_visible !== val || direct) {
       m_visible = val;
-      m_this.modified();
       if (m_layer && m_layer.visible && !m_layer.visible()) {
         val = false;
       }

@@ -201,7 +201,7 @@ describe('geo.feature', function () {
       var modTime = feat.timestamp();
       expect(feat.visible(false)).toBe(feat);
       expect(feat.visible()).toBe(false);
-      expect(feat.timestamp()).toBeGreaterThan(modTime);
+      expect(feat.timestamp()).toBe(modTime);
 
       expect(feat.visible(true)).toBe(feat);
       var depFeat = geo.feature({layer: layer, renderer: layer.renderer()});
@@ -210,7 +210,7 @@ describe('geo.feature', function () {
       expect(feat.visible(false)).toBe(feat);
       expect(feat.visible()).toBe(false);
       expect(depFeat.visible()).toBe(false);
-      expect(depFeat.timestamp()).toBeGreaterThan(modTime);
+      expect(depFeat.timestamp()).toBe(modTime);
       feat.dependentFeatures([]);
       expect(feat.visible(true)).toBe(feat);
       expect(depFeat.visible()).toBe(false);
