@@ -23,6 +23,7 @@ var svg_object = function (arg) {
   var m_id = 'svg-' + uniqueID(),
       s_exit = this._exit,
       m_this = this,
+      s_visible = this.visible,
       s_draw = this.draw;
 
   this._svgid = function () {
@@ -57,6 +58,26 @@ var svg_object = function (arg) {
   this._exit = function () {
     m_this.renderer()._removeFeature(m_this._svgid());
     s_exit();
+  };
+
+  /**
+   * Get/Set the visibility of the feature.
+   *
+   * @param {boolean} [val] A boolean to change the visibility, or `undefined`
+   *    to return the visibility.
+   * @param {boolean} [direct] If `true`, when getting the visibility,
+   *    disregard the visibility of the parent layer, and when setting, refresh
+   *    the state regardless of whether it has changed or not.  Otherwise, the
+   *    functional visibility is returned, where both the feature and the layer
+   *    must be visible for a `true` result.
+   * @returns {boolean|this} Either the visibility (if getting) or the feature
+   *    (if setting).
+   */
+  this.visible = function (val, direct) {
+    if (val !== undefined && val !== s_visible(undefined, true) && m_this.renderer()) {
+      m_this.renderer()._scheduleUpdate();
+    }
+    return s_visible(val, direct);
   };
 
   return this;
