@@ -344,6 +344,11 @@ describe('geo.lineFeature', function () {
       expect(paths.eq(1).css('stroke-linejoin')).toBe('bevel');
       expect(paths.eq(2).css('stroke-linejoin')).toBe('round');
       expect(paths.eq(0).css('stroke-miterlimit')).toBe('5');
+      line.visible(false);
+      line.draw();
+      stepAnimationFrame();
+      expect(layer.node().find('path').length).toBe(9);
+      expect(layer.node().find('path').attr('visibility')).toBe('hidden');
       unmockAnimationFrame();
     });
   });

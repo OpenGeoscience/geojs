@@ -549,8 +549,15 @@ var svgRenderer = function (arg) {
   };
 
   /**
+   * Schedule an update in the next render frame.
+   */
+  this._scheduleUpdate = function () {
+    m_this.layer().map().scheduleAnimationFrame(m_this._renderFrame);
+  };
+
+  /**
    * Render all features that are marked as needing an update.  This should
-   * only be called duration an animation frame.
+   * only be called during an animation frame.
    */
   this._renderFrame = function () {
     var id;
@@ -564,6 +571,11 @@ var svgRenderer = function (arg) {
     for (id in ids) {
       if (ids.hasOwnProperty(id)) {
         m_this._renderFeature(id);
+      }
+    }
+    for (id in m_features) {
+      if (m_features.hasOwnProperty(id) && ids[id] === undefined) {
+        m_this.select(id).attr('visibility', !m_features[id].visible || m_features[id].visible() ? 'visible' : 'hidden');
       }
     }
   };
@@ -580,6 +592,7 @@ var svgRenderer = function (arg) {
     if (!m_features[id]) {
       return m_this;
     }
+    m_this.select(id).remove();
     var data = m_features[id].data,
         index = m_features[id].index,
         style = m_features[id].style,
@@ -598,7 +611,7 @@ var svgRenderer = function (arg) {
     rendersel.attr('class', classes.concat([id]).join(' '));
     setStyles(rendersel, style);
     if (visible) {
-      rendersel.style('visibility', visible() ? 'visible' : 'hidden');
+      rendersel.attr('visibility', visible() ? 'visible' : 'hidden');
     }
     if (entries.size() && m_features[id].sortByZ) {
       selection.sort(function (a, b) {
