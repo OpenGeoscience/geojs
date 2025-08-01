@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GeoJS QuadFeature with Random Texture</title>
+  <script src="dist/built/geo.js"></script>
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    // Define frame size for the texture
+    const frameWidth = 256;
+    const frameHeight = 256;
+
+    // Function to generate a random texture
+    function generateRandomTexture(width, height) {
+      const data = new Uint8Array(width * height * 4); // RGBA
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = Math.floor(Math.random() * 256);     // R
+        data[i + 1] = Math.floor(Math.random() * 256); // G
+        data[i + 2] = Math.floor(Math.random() * 256); // B
+        data[i + 3] = 255;                             // A
+      }
+      return {
+        data,
+        width,
+        height
+      };
+    }
+
+    function randomTextureToImage(texture) {
+      const { data, width, height } = texture;
+
+      // Create a canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      // Draw the texture data to the canvas
+      const ctx = canvas.getContext('2d');
+      const imageData = ctx.createImageData(width, height);
+      imageData.data.set(data);
+      ctx.putImageData(imageData, 0, 0);
+
+      // Create an image element from the canvas
+      const img = new Image();
+      img.src = canvas.toDataURL(); // Converts canvas to base64 PNG
+
+      return img;
+    }
+
+    const randomTexture = generateRandomTexture(frameWidth, frameHeight);
+
+    //const image = randomTextureToImage(randomTexture)
+    // Create the map
+    const map = geo.map({
+      node: '#map',
+      center: { x: -98, y: 39 }, // Rough center of contiguous U.S.
+      zoom: 3,
+      baselayer: null
+    });
+
+   // map.createLayer('osm');
+    const layer = map.createLayer('feature');
+    const geoCorners = {
+      ul: { x: -125, y: 50 }, // upper-left (NW)
+      ur: { x: -66, y: 50 },  // upper-right (NE)
+      ll: { x: -125, y: 24 }, // lower-left (SW)
+      lr: { x: -66, y: 24 }   // lower-right (SE)
+    };
+
+    // const imageUrl = 'image.jpg';
+    // const imageObj = new Image();
+    // imageObj.src = 'image.jpg'
+    // imageObj.crossOrigin = 'anonymouse'
+
+    // Define geo-coordinates where the image should be projected
+    const corners = {
+      ul: { x: -105, y: 45 }, // Upper-left
+      ur: { x: -95, y: 45 },  // Upper-right
+      ll: { x: -105, y: 35 }, // Lower-left
+      lr: { x: -95, y: 35 }   // Lower-right
+    };
+
+    // Create quad feature using local texture coordinates
+    layer.createFeature('quad')
+      .data([{
+        ul: corners.ul,
+        lr: corners.lr,
+        texture: randomTexture,
+      }])
+      .draw();
+
+    map.draw();
+  </script>
+</body>
+</html>
