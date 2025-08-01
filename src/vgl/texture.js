@@ -30,6 +30,7 @@ vgl.texture = function () {
   this.m_nearestPixel = false;
 
   this.m_image = null;
+  this.m_texture = null;
 
   var m_setupTimestamp = timestamp(),
       m_that = this;
@@ -64,7 +65,6 @@ vgl.texture = function () {
                                         vgl.GL.TEXTURE_WRAP_S, vgl.GL.CLAMP_TO_EDGE);
     renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
                                         vgl.GL.TEXTURE_WRAP_T, vgl.GL.CLAMP_TO_EDGE);
-
     if (this.m_image !== null) {
       renderState.m_context.pixelStorei(vgl.GL.UNPACK_ALIGNMENT, 1);
       renderState.m_context.pixelStorei(vgl.GL.UNPACK_FLIP_Y_WEBGL, true);
@@ -79,6 +79,16 @@ vgl.texture = function () {
       // FOR now support only 2D textures
       renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, this.m_internalFormat,
                                        this.m_pixelFormat, this.m_pixelDataType, this.m_image);
+    } else if (this.m_texture !== null) {
+      // Custom texture data object
+      renderState.m_context.pixelStorei(vgl.GL.UNPACK_ALIGNMENT, 1);
+      renderState.m_context.pixelStorei(vgl.GL.UNPACK_FLIP_Y_WEBGL, true);
+
+      this.updateDimensions();
+      this.computeInternalFormatUsingImage();
+      renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, this.m_internalFormat,
+                                       this.m_texture.width, this.m_texture.height, 0,
+                                       this.m_pixelFormat, this.m_pixelDataType, this.m_texture.data);
     } else {
       renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, this.m_internalFormat,
                                        this.m_width, this.m_height, 0, this.m_pixelFormat, this.m_pixelDataType, null);
@@ -122,6 +132,15 @@ vgl.texture = function () {
   };
 
   /**
+   * Get image used by the texture.
+   *
+   * @returns {vgl.image}
+   */
+  this.texture = function () {
+    return this.m_texture;
+  };
+
+  /**
    * Set image for the texture.
    *
    * @param {vgl.image} image
@@ -138,6 +157,16 @@ vgl.texture = function () {
     return false;
   };
 
+  this.setTexture = function (texture) {
+    if (texture !== null) {
+      this.m_texture = texture;
+      this.updateDimensions();
+      this.modified();
+      return true;
+    }
+
+    return false;
+  };
   /**
    * Get nearest pixel flag for the texture.
    *
@@ -226,6 +255,11 @@ vgl.texture = function () {
     if (this.m_image !== null) {
       this.m_width = this.m_image.width;
       this.m_height = this.m_image.height;
+      this.m_depth = 0; // Only 2D images are supported now
+    }
+    if (this.m_texture !== null) {
+      this.m_width = this.m_texture.width;
+      this.m_height = this.m_texture.height;
       this.m_depth = 0; // Only 2D images are supported now
     }
   };
