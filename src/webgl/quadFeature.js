@@ -283,9 +283,7 @@ var webgl_quadFeature = function (arg) {
       if (quad.imageTexture) {
         if (quad.imageTexture._texture) {
           quad.texture = quad.imageTexture._texture;
-          console.log('Texture already has a vgl _texture');
         } else {
-          console.log('Updating Texture by creating new VGL');
           texture = new vgl.texture();
           texture.setTexture(quad.imageTexture);
           let nearestPixel = m_this.nearestPixel();
@@ -306,7 +304,6 @@ var webgl_quadFeature = function (arg) {
           quad.texture = quad.image._texture;
         } else {
           texture = new vgl.texture();
-          console.log('Setting Quad Image');
           texture.setImage(quad.image);
           let nearestPixel = m_this.nearestPixel();
           if (nearestPixel !== undefined) {
@@ -408,9 +405,6 @@ var webgl_quadFeature = function (arg) {
         nearestPixel = curZoom >= nearestPixel;
       }
       m_quads.imgQuads.forEach((quad) => {
-        console.log(nearestPixel);
-        console.log(quad.texture.nearestPixel());
-        console.log(quad.texture.textureHandle());
         if ((quad.image || quad.imageTexture) && quad.texture && quad.texture.nearestPixel() !== nearestPixel && quad.texture.textureHandle()) {
           /* This could just be
            *   quad.texture.setNearestPixel(nearestPixel);

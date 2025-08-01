@@ -65,7 +65,6 @@ vgl.texture = function () {
                                         vgl.GL.TEXTURE_WRAP_S, vgl.GL.CLAMP_TO_EDGE);
     renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
                                         vgl.GL.TEXTURE_WRAP_T, vgl.GL.CLAMP_TO_EDGE);
-    console.log('Inside the setup vgl function');
     if (this.m_image !== null) {
       renderState.m_context.pixelStorei(vgl.GL.UNPACK_ALIGNMENT, 1);
       renderState.m_context.pixelStorei(vgl.GL.UNPACK_FLIP_Y_WEBGL, true);
@@ -78,13 +77,10 @@ vgl.texture = function () {
       // console.log('m_pixelDataType ' + this.m_pixelDataType);
 
       // FOR now support only 2D textures
-      console.log(this.m_image);
       renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, this.m_internalFormat,
                                        this.m_pixelFormat, this.m_pixelDataType, this.m_image);
     } else if (this.m_texture !== null) {
       // Custom texture data object
-      console.log('Rendering custom Texture with size ' + this.m_texture.width + 'and ' + this.m_texture.height);
-      console.log(this.m_texture.data);
       renderState.m_context.pixelStorei(vgl.GL.UNPACK_ALIGNMENT, 1);
       renderState.m_context.pixelStorei(vgl.GL.UNPACK_FLIP_Y_WEBGL, true);
 
