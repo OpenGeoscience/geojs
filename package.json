@@ -183,5 +183,5 @@
     "webgl",
     "svg"
   ],
-  "main": "geo.lean.js"
+  "main": "dist/built/geo.lean.js"
 }

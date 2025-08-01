@@ -275,25 +275,48 @@ var webgl_quadFeature = function (arg) {
     var texture;
 
     $.each(m_quads.imgQuads, function (idx, quad) {
-      if (!quad.image) {
+      if (!quad.image && !quad.imageTexture) {
         return;
       }
-      if (quad.image._texture) {
-        quad.texture = quad.image._texture;
-      } else {
-        texture = new vgl.texture();
-        texture.setImage(quad.image);
-        let nearestPixel = m_this.nearestPixel();
-        if (nearestPixel !== undefined) {
-          if (nearestPixel !== true && util.isNonNullFinite(nearestPixel)) {
-            const curZoom = m_this.layer().map().zoom();
-            nearestPixel = curZoom >= nearestPixel;
+
+      // Handle custom imageTexture (from texture property)
+      if (quad.imageTexture) {
+        if (quad.imageTexture._texture) {
+          quad.texture = quad.imageTexture._texture;
+        } else {
+          texture = new vgl.texture();
+          texture.setTexture(quad.imageTexture);
+          let nearestPixel = m_this.nearestPixel();
+          if (nearestPixel !== undefined) {
+            if (nearestPixel !== true && util.isNonNullFinite(nearestPixel)) {
+              const curZoom = m_this.layer().map().zoom();
+              nearestPixel = curZoom >= nearestPixel;
+            }
           }
+          if (nearestPixel) {
+            texture.setNearestPixel(true);
+          }
+          quad.texture = quad.imageTexture._texture = texture;
         }
-        if (nearestPixel) {
-          texture.setNearestPixel(true);
+      } else if (quad.image) {
+        // Handle regular image
+        if (quad.image._texture) {
+          quad.texture = quad.image._texture;
+        } else {
+          texture = new vgl.texture();
+          texture.setImage(quad.image);
+          let nearestPixel = m_this.nearestPixel();
+          if (nearestPixel !== undefined) {
+            if (nearestPixel !== true && util.isNonNullFinite(nearestPixel)) {
+              const curZoom = m_this.layer().map().zoom();
+              nearestPixel = curZoom >= nearestPixel;
+            }
+          }
+          if (nearestPixel) {
+            texture.setNearestPixel(true);
+          }
+          quad.texture = quad.image._texture = texture;
         }
-        quad.texture = quad.image._texture = texture;
       }
     });
   };
@@ -382,7 +405,7 @@ var webgl_quadFeature = function (arg) {
         nearestPixel = curZoom >= nearestPixel;
       }
       m_quads.imgQuads.forEach((quad) => {
-        if (quad.image && quad.texture && quad.texture.nearestPixel() !== nearestPixel && quad.texture.textureHandle()) {
+        if ((quad.image || quad.imageTexture) && quad.texture && quad.texture.nearestPixel() !== nearestPixel && quad.texture.textureHandle()) {
           /* This could just be
            *   quad.texture.setNearestPixel(nearestPixel);
            * but that needlessly redecodes the image.  Instead, just change the
@@ -404,18 +427,25 @@ var webgl_quadFeature = function (arg) {
     }
     context.bindBuffer(context.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
     $.each(m_quads.imgQuads, function (idx, quad) {
-      if (!quad.image) {
+      if (!quad.image && !quad.imageTexture) {
         return;
       }
       quad.texture.bind(renderState);
       // only check if the context is out of memory when using modestly large
       // textures.  The check is slow.
-      if (quad.image.width * quad.image.height > _memoryCheckLargestTested) {
+      if (quad.image && quad.image.width * quad.image.height > _memoryCheckLargestTested) {
         _memoryCheckLargestTested = quad.image.width * quad.image.height;
         if (context.getError() === context.OUT_OF_MEMORY) {
           console.log('Insufficient GPU memory for texture');
         }
       }
+      if (quad.imageTexture && quad.imageTexture.width * quad.imageTexture.height > _memoryCheckLargestTested) {
+        _memoryCheckLargestTested = quad.imageTexture.width * quad.imageTexture.height;
+        if (context.getError() === context.OUT_OF_MEMORY) {
+          console.log('Insufficient GPU memory for texture');
+        }
+      }
+
       if (quad.opacity !== opacity) {
         opacity = quad.opacity;
         context.uniform1fv(renderState.m_material.shaderProgram()
@@ -432,8 +462,14 @@ var webgl_quadFeature = function (arg) {
         context.uniform2fv(renderState.m_material.shaderProgram()
           .uniformLocation('crop'), new Float32Array([crop.x === undefined ? 1 : crop.x, crop.y === undefined ? 1 : crop.y]));
       }
-      w = quad.image.width;
-      h = quad.image.height;
+      if (quad.image) {
+        w = quad.image.width;
+        h = quad.image.height;
+      }
+      if (quad.imageTexture) {
+        w = quad.imageTexture.width;
+        h = quad.imageTexture.height;
+      }
       quadcropsrc = quad.crop || {left: 0, top: 0, right: w, bottom: h};
       if (!cropsrc || quadcropsrc.left !== cropsrc.left || quadcropsrc.top !== cropsrc.top || quadcropsrc.right !== cropsrc.right || quadcropsrc.bottom !== cropsrc.bottom || quadw !== w || quadh !== h) {
         cropsrc = quadcropsrc;
@@ -495,6 +531,9 @@ var webgl_quadFeature = function (arg) {
         if (quad.texture) {
           delete quad.texture;
           delete quad.image._texture;
+        }
+        if (quad.imageTexture) {
+          delete quad.imageTexture._texture;
         }
       });
       m_this._updateTextures();

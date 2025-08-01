@@ -588,6 +588,138 @@ describe('geo.quadFeature', function () {
       destroyMap();
       restoreWebglRenderer();
     });
+
+    it('texture data - RGB format', function () {
+      mockWebglRenderer();
+      var map, layer, quad;
+      map = createMap();
+      layer = map.createLayer('feature', {renderer: 'webgl'});
+      quad = geo.quadFeature.create(layer);
+
+      // Create RGB texture data (3 bytes per pixel)
+      var width = 64, height = 64;
+      var rgbData = new Uint8Array(width * height * 4);
+      
+      // Fill with a gradient pattern
+      for (var i = 0; i < rgbData.length; i += 4) {
+        var pixelIndex = i / 3;
+        var x = pixelIndex % width;
+        var y = Math.floor(pixelIndex / width);
+        rgbData[i] = Math.floor((x / width) * 255);     // R
+        rgbData[i + 1] = Math.floor((y / height) * 255); // G
+        rgbData[i + 2] = 128;                           // B
+        rgbData[i + 3] = 255;                           // A
+      }
+
+      var textureData = [{
+        ll: [-1, -1],
+        ur: [1, 1],
+        texture: {
+          data: rgbData,
+          width: width,
+          height: height
+        }
+      }];
+
+      quad.data(textureData);
+      map.draw();
+
+      var quads = quad._generateQuads();
+      expect(quads.imgQuads.length).toBe(1);
+      expect(quads.imgQuads[0].imageTexture).toBeDefined();
+      expect(quads.imgQuads[0].imageTexture.width).toBe(width);
+      expect(quads.imgQuads[0].imageTexture.height).toBe(height);
+      expect(quads.imgQuads[0].imageTexture.data).toBe(rgbData);
+
+      destroyMap();
+      restoreWebglRenderer();
+    });
+
+    it('texture data - Luminance format', function () {
+      mockWebglRenderer();
+      var map, layer, quad;
+      map = createMap();
+      layer = map.createLayer('feature', {renderer: 'webgl'});
+      quad = geo.quadFeature.create(layer);
+
+      var width = 32, height = 32;
+      var lumData = new Uint8Array(width * height);
+
+      // Fill with a checkerboard pattern
+      for (var i = 0; i < lumData.length; i++) {
+        var x = i % width;
+        var y = Math.floor(i / width);
+        lumData[i] = ((x + y) % 2) * 255;
+      }
+
+      var textureData = [{
+        ll: [-0.5, -0.5],
+        ur: [0.5, 0.5],
+        texture: {
+          data: lumData,
+          type: 'Luminance',
+          width: width,
+          height: height
+        }
+      }];
+
+      quad.data(textureData);
+      map.draw();
+
+      var quads = quad._generateQuads();
+      expect(quads.imgQuads.length).toBe(1);
+      expect(quads.imgQuads[0].imageTexture).toBeDefined();
+      expect(quads.imgQuads[0].imageTexture.data).toBe(lumData);
+
+      destroyMap();
+      restoreWebglRenderer();
+    });
+
+    it('texture data - LuminanceAlpha format', function () {
+      mockWebglRenderer();
+      var map, layer, quad;
+      map = createMap();
+      layer = map.createLayer('feature', {renderer: 'webgl'});
+      quad = geo.quadFeature.create(layer);
+
+      // Create LuminanceAlpha texture data (2 bytes per pixel)
+      var width = 16, height = 16;
+      var laData = new Uint8Array(width * height * 2);
+
+      // Fill with a radial gradient
+      for (var i = 0; i < laData.length; i += 2) {
+        var pixelIndex = i / 2;
+        var x = (pixelIndex % width) - width / 2;
+        var y = Math.floor(pixelIndex / width) - height / 2;
+        var distance = Math.sqrt(x * x + y * y);
+        var maxDistance = Math.sqrt((width / 2) * (width / 2) + (height / 2) * (height / 2));
+        var intensity = Math.floor((1 - distance / maxDistance) * 255);
+        laData[i] = intensity;     // Luminance
+        laData[i + 1] = 255;       // Alpha
+      }
+
+      var textureData = [{
+        ll: [-0.25, -0.25],
+        ur: [0.25, 0.25],
+        texture: {
+          data: laData,
+          type: 'LuminanceAlpha',
+          width: width,
+          height: height
+        }
+      }];
+
+      quad.data(textureData);
+      map.draw();
+
+      var quads = quad._generateQuads();
+      expect(quads.imgQuads.length).toBe(1);
+      expect(quads.imgQuads[0].imageTexture).toBeDefined();
+      expect(quads.imgQuads[0].imageTexture.data).toBe(laData);
+
+      destroyMap();
+      restoreWebglRenderer();
+    });
   });
 
   /* This is a basic integration test of geo.canvas.quadFeature. */
