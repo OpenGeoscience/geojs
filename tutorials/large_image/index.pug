@@ -1,0 +1,75 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Large Image
+    Large images can be displayed from a tile server.
+
+    Define some HTML with the divs for the map and an information box to show coordinates.
+
+  +codeblock('html', 1).
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <script type="text/javascript" src="../../built/geo.min.js"></script>
+    </head>
+    <body>
+      <div id="map"></div>
+      <div id="info"></div>
+    </body>
+    </html>
+
+  :markdown-it
+    Define some CSS to position the coordinates in the top right of the window.
+
+  +codeblock('css', 2).
+    html,body,#map {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+    #info {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: rgba(255,255,255,0.75);
+      padding: 2px;
+    }
+
+  :markdown-it
+    We wrap our code in async so we can use await.  We could have use a then
+    function instead.
+
+    Fetch information about the image from a server.  This includes the image's
+    size in pixels and tile size.
+
+    Once we have the image information, `pixelCoordinateParams` is used to get
+    some default parameters for the map and an osm tile layer.  These could be
+    modified if needed, such as to allow zooming in further.  We create a map
+    and layer with these parameters and the tile url.
+
+    We also bind the `mousemove` event to print pixel coordinates in the image
+    space.
+
+  +codeblock('javascript', 3, undefined, true)().
+    (async () => {
+      const imageServer = 'https://demo.kitware.com/histomicstk/api/v1';
+      const imageId = '5d5c07539114c049342b66fb';
+
+      const tileinfo = await fetch(
+        `${imageServer}/item/${imageId}/tiles`
+      ).then(response => response.json());
+      let params = geo.util.pixelCoordinateParams(
+        '#map', tileinfo.sizeX, tileinfo.sizeY, tileinfo.tileWidth, tileinfo.tileHeight);
+      const map = geo.map(params.map);
+      params.layer.url = `${imageServer}/item/${imageId}/tiles/zxy/{z}/{x}/{y}`;
+      const layer = map.createLayer('osm', params.layer);
+
+      map.geoOn(geo.event.mousemove, function (evt) {
+        $('#info').text('x: ' + evt.geo.x.toFixed(6) + ', y: ' + evt.geo.y.toFixed(6));
+      });
+
+      return null;
+    })();
