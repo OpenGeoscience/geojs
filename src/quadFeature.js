@@ -434,7 +434,20 @@ var quadFeature = function (arg) {
       }
       img = imgFunc.call(m_this, d, i);
       vid = img ? null : vidFunc.call(m_this, d, i);
-      if (img) {
+
+      // Check for texture data (Uint8Array with width/height) - WebGL only
+      if (d.texture && d.texture.data && d.texture.width && d.texture.height) {
+        // Create a custom image object for vgl.texture
+        var textureImage = {
+          width: d.texture.width,
+          height: d.texture.height,
+          type: d.texture.type || 'RGBA',
+          data: d.texture.data
+        };
+        quad.imageTexture = textureImage; // Store as imageTexture for WebGL
+        imgQuads.push(quad);
+        quadinfo.imgquad = quad;
+      } else if (img) {
         quadinfo.imageEntry = img;
         /* Handle image quads */
         image = m_this._objectListGet(m_images, img);
