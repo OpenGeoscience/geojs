@@ -72,9 +72,6 @@ vgl.texture = function () {
       this.updateDimensions();
       this.computeInternalFormatUsingImage();
 
-      // console.log('m_internalFormat ' + this.m_internalFormat);
-      // console.log('m_pixelFormat ' + this.m_pixelFormat);
-      // console.log('m_pixelDataType ' + this.m_pixelDataType);
 
       // FOR now support only 2D textures
       renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, this.m_internalFormat,
@@ -160,6 +157,16 @@ vgl.texture = function () {
   this.setTexture = function (texture) {
     if (texture !== null) {
       this.m_texture = texture;
+      if (texture.type === 'Luminance') {
+        this.m_internalFormat = vgl.GL.LUMINANCE;
+        this.m_pixelFormat = vgl.GL.LUMINANCE;
+      } else if (texture.type === 'LuminanceAlpha') {
+        this.m_internalFormat = vgl.GL.LUMINANCE_ALPHA;
+        this.m_pixelFormat = vgl.GL.LUMINANCE_ALPHA;
+      } else {
+        this.m_internalFormat = vgl.GL.RGBA;
+        this.m_pixelFormat = vgl.GL.RGBA;
+      }
       this.updateDimensions();
       this.modified();
       return true;
@@ -243,9 +250,11 @@ vgl.texture = function () {
     // };
 
     // TODO Fix this
-    this.m_internalFormat = vgl.GL.RGBA;
-    this.m_pixelFormat = vgl.GL.RGBA;
-    this.m_pixelDataType = vgl.GL.UNSIGNED_BYTE;
+    if (!this.m_internalFormat || !this.m_pixelFormat || !this.m_pixelDataType) {
+      this.m_internalFormat = vgl.GL.RGBA;
+      this.m_pixelFormat = vgl.GL.RGBA;
+      this.m_pixelDataType = vgl.GL.UNSIGNED_BYTE;
+    }
   };
 
   /**

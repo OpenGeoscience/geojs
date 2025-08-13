@@ -441,14 +441,13 @@ var quadFeature = function (arg) {
         var textureImage = {
           width: d.texture.width,
           height: d.texture.height,
+          type: d.texture.type || 'RGBA',
           data: d.texture.data
         };
         quad.imageTexture = textureImage; // Store as imageTexture for WebGL
         imgQuads.push(quad);
         quadinfo.imgquad = quad;
-      }
-
-      if (img) {
+      } else if (img) {
         quadinfo.imageEntry = img;
         /* Handle image quads */
         image = m_this._objectListGet(m_images, img);
