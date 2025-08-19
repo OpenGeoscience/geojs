@@ -596,10 +596,10 @@ describe('geo.quadFeature', function () {
       layer = map.createLayer('feature', {renderer: 'webgl'});
       quad = geo.quadFeature.create(layer);
 
-      // Create RGB texture data (3 bytes per pixel)
+      // Create RGB texture data (4 bytes per pixel)
       var width = 64, height = 64;
       var rgbData = new Uint8Array(width * height * 4);
-      
+
       // Fill with a gradient pattern
       for (var i = 0; i < rgbData.length; i += 4) {
         var pixelIndex = i / 3;
