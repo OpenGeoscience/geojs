@@ -163,7 +163,7 @@ vgl.texture = function () {
    *   width: width of the texture
    *   height: height of the texture
    * @returns {boolean}
-  */
+   */
   this.setTexture = function (texture) {
     if (texture !== null) {
       this.m_texture = texture;
