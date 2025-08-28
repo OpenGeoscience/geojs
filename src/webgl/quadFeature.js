@@ -278,13 +278,13 @@ var webgl_quadFeature = function (arg) {
       if (!source) {
         return;
       }
-  
+
       // use cached texture if it exists
       if (source._texture) {
         quad.texture = source._texture;
         return;
       }
-  
+
       // create a new texture
       const texture = new vgl.texture();
       if (quad.imageTexture) {
@@ -292,7 +292,7 @@ var webgl_quadFeature = function (arg) {
       } else {
         texture.setImage(source);
       }
-  
+
       // handle nearest pixel logic
       let nearestPixel = m_this.nearestPixel();
       if (nearestPixel !== undefined) {
@@ -304,9 +304,9 @@ var webgl_quadFeature = function (arg) {
       if (nearestPixel) {
         texture.setNearestPixel(true);
       }
-  
+
       quad.texture = source._texture = texture;
-    });  
+    });
   };
 
   /**
