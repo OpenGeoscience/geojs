@@ -82,7 +82,6 @@ vgl.texture = function () {
       renderState.m_context.pixelStorei(vgl.GL.UNPACK_FLIP_Y_WEBGL, true);
 
       this.updateDimensions();
-      this.computeInternalFormatUsingImage();
       renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, this.m_internalFormat,
                                        this.m_texture.width, this.m_texture.height, 0,
                                        this.m_pixelFormat, this.m_pixelDataType, this.m_texture.data);
@@ -260,11 +259,9 @@ vgl.texture = function () {
     // };
 
     // TODO Fix this
-    if (!this.m_internalFormat || !this.m_pixelFormat || !this.m_pixelDataType) {
-      this.m_internalFormat = vgl.GL.RGBA;
-      this.m_pixelFormat = vgl.GL.RGBA;
-      this.m_pixelDataType = vgl.GL.UNSIGNED_BYTE;
-    }
+    this.m_internalFormat = vgl.GL.RGBA;
+    this.m_pixelFormat = vgl.GL.RGBA;
+    this.m_pixelDataType = vgl.GL.UNSIGNED_BYTE;
   };
 
   /**

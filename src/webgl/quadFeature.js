@@ -525,12 +525,16 @@ var webgl_quadFeature = function (arg) {
     }
     m_imgposbuf = undefined;
     m_clrposbuf = undefined;
-    Object.keys(m_glBuffers).forEach(function (key) { delete m_glBuffers[key]; });
+    if (m_glBuffers) {
+      Object.keys(m_glBuffers).forEach(function (key) { delete m_glBuffers[key]; });
+    }
     if (m_quads && m_quads.imgQuads) {
       m_quads.imgQuads.forEach(function (quad) {
         if (quad.texture) {
           delete quad.texture;
-          delete quad.image._texture;
+          if (quad.image && quad.image._texture) {
+            delete quad.image._texture;
+          }
         }
         if (quad.imageTexture) {
           delete quad.imageTexture._texture;
