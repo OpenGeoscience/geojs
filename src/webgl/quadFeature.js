@@ -272,53 +272,41 @@ var webgl_quadFeature = function (arg) {
    * update them.
    */
   this._updateTextures = function () {
-    var texture;
-
     $.each(m_quads.imgQuads, function (idx, quad) {
-      if (!quad.image && !quad.imageTexture) {
+      // pick source (imageTexture has priority)
+      const source = quad.imageTexture || quad.image;
+      if (!source) {
         return;
       }
-
-      // Handle custom imageTexture (from texture property)
+  
+      // use cached texture if it exists
+      if (source._texture) {
+        quad.texture = source._texture;
+        return;
+      }
+  
+      // create a new texture
+      const texture = new vgl.texture();
       if (quad.imageTexture) {
-        if (quad.imageTexture._texture) {
-          quad.texture = quad.imageTexture._texture;
-        } else {
-          texture = new vgl.texture();
-          texture.setTexture(quad.imageTexture);
-          let nearestPixel = m_this.nearestPixel();
-          if (nearestPixel !== undefined) {
-            if (nearestPixel !== true && util.isNonNullFinite(nearestPixel)) {
-              const curZoom = m_this.layer().map().zoom();
-              nearestPixel = curZoom >= nearestPixel;
-            }
-          }
-          if (nearestPixel) {
-            texture.setNearestPixel(true);
-          }
-          quad.texture = quad.imageTexture._texture = texture;
-        }
-      } else if (quad.image) {
-        // Handle regular image
-        if (quad.image._texture) {
-          quad.texture = quad.image._texture;
-        } else {
-          texture = new vgl.texture();
-          texture.setImage(quad.image);
-          let nearestPixel = m_this.nearestPixel();
-          if (nearestPixel !== undefined) {
-            if (nearestPixel !== true && util.isNonNullFinite(nearestPixel)) {
-              const curZoom = m_this.layer().map().zoom();
-              nearestPixel = curZoom >= nearestPixel;
-            }
-          }
-          if (nearestPixel) {
-            texture.setNearestPixel(true);
-          }
-          quad.texture = quad.image._texture = texture;
+        texture.setTexture(source);
+      } else {
+        texture.setImage(source);
+      }
+  
+      // handle nearest pixel logic
+      let nearestPixel = m_this.nearestPixel();
+      if (nearestPixel !== undefined) {
+        if (nearestPixel !== true && util.isNonNullFinite(nearestPixel)) {
+          const curZoom = m_this.layer().map().zoom();
+          nearestPixel = curZoom >= nearestPixel;
         }
       }
-    });
+      if (nearestPixel) {
+        texture.setNearestPixel(true);
+      }
+  
+      quad.texture = source._texture = texture;
+    });  
   };
 
   /**
