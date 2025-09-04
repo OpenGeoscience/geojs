@@ -746,9 +746,15 @@ geo_event.annotation.state = 'geo_annotation_state';
  * @event geo.event.annotation.mode
  * @type {geo.event.base}
  * @property {string?} mode The new annotation mode.  This is one of the values
- *      from {@link geo.annotation.state}.
+ *      from {@link geo.annotationLayer.mode} or an annotation name.
  * @property {string?} oldMode The annotation mode before this change.  This is
+ *      one of the values from {@link geo.annotationLayer.mode} or an
+ *      annotation name.
+ * @property {string?} oldState If there was an active annotation before the
+ *      mode change, this is the annotation state before the change.  This is
  *      one of the values from {@link geo.annotation.state}.
+ * @property {string?} reason An optional string that was passed to the mode
+ *      change method.
  */
 geo_event.annotation.mode = 'geo_annotation_mode';
 
