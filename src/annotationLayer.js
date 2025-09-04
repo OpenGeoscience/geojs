@@ -678,10 +678,12 @@ var annotationLayer = function (arg) {
    *    edited or used.
    * @param {object} [options] Additional options to pass when creating an
    *    annotation.
+   * @param {string} [reason] An optional reason to pass to the
+   *    `geo.event.annotation.mode` event.
    * @returns {string|null|this} The current mode or the layer.
    * @fires geo.event.annotation.mode
    */
-  this.mode = function (arg, editAnnotation, options) {
+  this.mode = function (arg, editAnnotation, options, reason) {
     if (arg === undefined) {
       return m_mode;
     }
@@ -701,11 +703,13 @@ var annotationLayer = function (arg) {
         m_keyHandler = Mousetrap(mapNode[0]);
       }
       if (m_mode) {
-        m_keyHandler.bind('esc', function () { m_this.mode(null); });
+        m_keyHandler.bind('esc', function () { m_this.mode(null, undefined, undefined, 'escape'); });
       } else {
         m_keyHandler.unbind('esc');
       }
+      let oldState;
       if (m_this.currentAnnotation) {
+        oldState = m_this.currentAnnotation.state();
         switch (m_this.currentAnnotation.state()) {
           case geo_annotation.state.create:
             m_this.removeAnnotation(m_this.currentAnnotation);
@@ -754,7 +758,7 @@ var annotationLayer = function (arg) {
         });
       }
       m_this.geoTrigger(geo_event.annotation.mode, {
-        mode: m_mode, oldMode: oldMode});
+        mode: m_mode, oldMode: oldMode, oldState: oldState, reason: reason});
       if (oldMode === m_this.modes.edit || oldMode === m_this.modes.cursor) {
         m_this.modified();
       }
