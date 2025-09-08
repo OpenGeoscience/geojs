@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v5
       with:
         node-version: '20'
     - uses: browser-actions/setup-firefox@latest
@@ -71,7 +71,7 @@ jobs:
     steps:
     - uses: actions/checkout@v5
     # Don't pin version to test with the latest common version
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v5
       with:
         node-version: 'lts/*'
     - run: npm --version && node --version
@@ -110,7 +110,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v5
       with:
         node-version: 'lts/*'
     - run: sudo apt-get update
