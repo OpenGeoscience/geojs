@@ -37,7 +37,7 @@ For live examples visit [Github.io](https://opengeoscience.github.io/geojs/examp
 
 Documentation
 =============
-You can find more information on GeoJS installation and usage in our [Documentation](https://geojs.readthedocs.org/en/latest/index.html).
+You can find more information on GeoJS installation and usage in our [Documentation](https://opengeoscience.github.io/geojs).
 
 There are some additional resources:
 
