@@ -758,7 +758,6 @@ var annotationLayer = function (arg) {
           m_this.map().interactor().addAction(action);
         });
       }
-      console.log({mode: m_mode, oldMode, oldState, oldCoordinates, reason});
       m_this.geoTrigger(geo_event.annotation.mode, {
         mode: m_mode, oldMode, oldState, oldCoordinates, reason});
       if (oldMode === m_this.modes.edit || oldMode === m_this.modes.cursor) {
