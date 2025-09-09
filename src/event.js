@@ -753,6 +753,10 @@ geo_event.annotation.state = 'geo_annotation_state';
  * @property {string?} oldState If there was an active annotation before the
  *      mode change, this is the annotation state before the change.  This is
  *      one of the values from {@link geo.annotation.state}.
+ * @property {string?} oldCoordinates If there was an active annotation before
+ *      the mode change, these are the annotation's coordinates before the
+ *      change.  This will be an empty list if an annotation in create state
+ *      had not been started and a non-empty list if it is partially created.
  * @property {string?} reason An optional string that was passed to the mode
  *      change method.
  */

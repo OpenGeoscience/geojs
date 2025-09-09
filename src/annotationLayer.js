@@ -707,9 +707,10 @@ var annotationLayer = function (arg) {
       } else {
         m_keyHandler.unbind('esc');
       }
-      let oldState;
+      let oldState, oldCoordinates;
       if (m_this.currentAnnotation) {
         oldState = m_this.currentAnnotation.state();
+        oldCoordinates = m_this.currentAnnotation._copyOfCoordinates();
         switch (m_this.currentAnnotation.state()) {
           case geo_annotation.state.create:
             m_this.removeAnnotation(m_this.currentAnnotation);
@@ -757,8 +758,9 @@ var annotationLayer = function (arg) {
           m_this.map().interactor().addAction(action);
         });
       }
+      console.log({mode: m_mode, oldMode, oldState, oldCoordinates, reason});
       m_this.geoTrigger(geo_event.annotation.mode, {
-        mode: m_mode, oldMode: oldMode, oldState: oldState, reason: reason});
+        mode: m_mode, oldMode, oldState, oldCoordinates, reason});
       if (oldMode === m_this.modes.edit || oldMode === m_this.modes.cursor) {
         m_this.modified();
       }
