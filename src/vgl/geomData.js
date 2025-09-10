@@ -210,7 +210,7 @@ vgl.sourceData = function (arg) {
    */
   this.setData = function (data) {
     if (!(data instanceof Array) && !(data instanceof Float32Array)) {
-      console.log('[error] Requires array');
+      console.log('[error] Requires array');  // eslint-disable-line no-console
       return;
     }
     if (data instanceof Float32Array) {

@@ -189,7 +189,7 @@ function polygonOperationSeglist(op, epsilon, seglist) {
           segments.combined = segments.combined.filter(s => Math.abs(s.start[0] - s.end[0]) > epsilon || Math.abs(s.start[1] - s.end[1]) > epsilon);
           segments = PolyBool[op](segments);
         } else {
-          console.warn('Failed in polygon functions.');
+          console.warn('Failed in polygon functions.');  // eslint-disable-line no-console
         }
         segments.segments = segments.segments.filter(s => Math.abs(s.start[0] - s.end[0]) > epsilon || Math.abs(s.start[1] - s.end[1]) > epsilon);
       }

@@ -46,7 +46,7 @@ var featureLayer = function (arg) {
     if (newFeature) {
       m_this.addFeature(newFeature);
     } else {
-      console.warn('Layer renderer (' + m_this.rendererName() + ') does not support feature type "' + featureName + '"');
+      console.warn('Layer renderer (' + m_this.rendererName() + ') does not support feature type "' + featureName + '"');  // eslint-disable-line no-console
     }
     return newFeature;
   };

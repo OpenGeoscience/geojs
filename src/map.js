@@ -89,7 +89,7 @@ var map = function (arg) {
   arg = arg || {};
 
   if (arg.node === undefined || arg.node === null) {
-    console.warn('map creation requires a node');
+    console.warn('map creation requires a node');  // eslint-disable-line no-console
     return this;
   }
 
@@ -1925,7 +1925,7 @@ var map = function (arg) {
         try {
           result = result.toDataURL(type, encoderOptions);
         } catch (err) {
-          console.warn('Failed to convert screenshot to output', err);
+          console.warn('Failed to convert screenshot to output', err);  // eslint-disable-line no-console
           var failure = $.Deferred();
           failure.reject();
           return failure;
@@ -2069,7 +2069,7 @@ var map = function (arg) {
       try {
         queue[i].apply(m_this, arguments);
       } catch (err) {
-        console.error(err);
+        console.error(err);  // eslint-disable-line no-console
       }
     }
   }
@@ -2511,7 +2511,7 @@ map.create = function (spec) {
   /* If the spec is bad, we still end up with an object, but it won't have a
    * zoom function */
   if (!_map || !_map.zoom) {
-    console.warn('Could not create map.');
+    console.warn('Could not create map.');  // eslint-disable-line no-console
     return null;
   }
 

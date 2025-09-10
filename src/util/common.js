@@ -1183,7 +1183,7 @@ var util = {
           canvas.toDataURL();
           m_htmlToImageSupport = true;
         } catch (err) {
-          console.warn(
+          console.warn(  // eslint-disable-line no-console
             'This browser does not support converting HTML to an image via ' +
             'SVG foreignObject.  Some functionality will be limited.', err);
           m_htmlToImageSupport = false;
@@ -1282,7 +1282,7 @@ var util = {
         $.get(href).done(function (css) {
           util.dereferenceCssUrls(css, styleElem, styleDefer, undefined, href);
         }).fail(function (xhr, status, err) {
-          console.warn('Failed to dereference ' + href, status, err);
+          console.warn('Failed to dereference ' + href, status, err);  // eslint-disable-line no-console
           styleElem.remove();
           styleDefer.resolve();
         });
@@ -1310,7 +1310,7 @@ var util = {
           defer.resolve(img);
         };
         img.onerror = function () {
-          console.warn('Failed to render html to image');
+          console.warn('Failed to render html to image');  // eslint-disable-line no-console
           defer.reject();
         };
         // Firefox requires the HTML to be base64 encoded.  Chrome doesn't, but

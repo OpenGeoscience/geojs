@@ -53,7 +53,7 @@ vgl.viewer = function (canvas, options) {
     if (m_renderWindow !== null) {
       m_renderWindow._setup();
     } else {
-      console.log('[ERROR] No render window attached');
+      console.log('[ERROR] No render window attached');  // eslint-disable-line no-console
     }
   };
 
@@ -66,7 +66,7 @@ vgl.viewer = function (canvas, options) {
     if (m_renderWindow !== null) {
       m_renderWindow._cleanup(renderState);
     } else {
-      console.log('[ERROR] No render window attached');
+      console.log('[ERROR] No render window attached');  // eslint-disable-line no-console
     }
   };
 

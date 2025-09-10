@@ -106,7 +106,7 @@ var annotation = function (type, args) {
   if (m_id === undefined || (m_options.layer && m_options.layer.annotationById(m_id))) {
     annotationId += 1;
     if (m_id !== undefined) {
-      console.warn('Annotation id ' + m_id + ' is in use; using ' + annotationId + ' instead.');
+      console.warn('Annotation id ' + m_id + ' is in use; using ' + annotationId + ' instead.');  // eslint-disable-line no-console
     }
     m_id = annotationId;
   } else {

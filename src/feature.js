@@ -1039,17 +1039,17 @@ feature.create = function (layer, spec) {
 
   // Check arguments
   if (!(layer instanceof require('./layer'))) {
-    console.warn('Invalid layer');
+    console.warn('Invalid layer');  // eslint-disable-line no-console
     return null;
   }
   if (typeof spec !== 'object') {
-    console.warn('Invalid spec');
+    console.warn('Invalid spec');  // eslint-disable-line no-console
     return null;
   }
   var type = spec.type;
   var feature = layer.createFeature(type, spec);
   if (!feature) {
-    console.warn('Could not create feature type "' + type + '"');
+    console.warn('Could not create feature type "' + type + '"');  // eslint-disable-line no-console
     return null;
   }
 
