@@ -126,7 +126,7 @@ var transform = function (options) {
       result.matrix = mat;
       result.inverse = inv;
     } else {
-      console.warn('Affine transform is not invertable and will not be used: ' + value);
+      console.warn('Affine transform is not invertable and will not be used: ' + value);  // eslint-disable-line no-console
     }
     return result;
   }
@@ -260,13 +260,13 @@ var transform = function (options) {
   try {
     this.source(options.source);
   } catch (err) {
-    console.error('Can\'t use transform source: ' + options.source);
+    console.error('Can\'t use transform source: ' + options.source);  // eslint-disable-line no-console
     this.source('EPSG:4326');
   }
   try {
     this.target(options.target);
   } catch (err) {
-    console.error('Can\'t use transform target: ' + options.target);
+    console.error('Can\'t use transform target: ' + options.target);  // eslint-disable-line no-console
     this.target('EPSG:3857');
   }
 

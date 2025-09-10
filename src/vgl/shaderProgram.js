@@ -171,7 +171,7 @@ vgl.shaderProgram = function () {
     // If creating the shader program failed, alert
     if (!renderState.m_context.getProgramParameter(m_programHandle,
                                                    vgl.GL.LINK_STATUS)) {
-      console.log('[ERROR] Unable to initialize the shader program.');
+      console.log('[ERROR] Unable to initialize the shader program.');  // eslint-disable-line no-console
       return false;
     }
 
@@ -261,7 +261,7 @@ vgl.shaderProgram = function () {
 
     // link program
     if (!m_this.link(renderState)) {
-      console.log('[ERROR] Failed to link Program');
+      console.log('[ERROR] Failed to link Program');  // eslint-disable-line no-console
       m_this._cleanup(renderState);
     }
 

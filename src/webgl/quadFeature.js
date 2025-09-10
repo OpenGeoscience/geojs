@@ -413,7 +413,7 @@ var webgl_quadFeature = function (arg) {
       if (quad.image.width * quad.image.height > _memoryCheckLargestTested) {
         _memoryCheckLargestTested = quad.image.width * quad.image.height;
         if (context.getError() === context.OUT_OF_MEMORY) {
-          console.log('Insufficient GPU memory for texture');
+          console.log('Insufficient GPU memory for texture');  // eslint-disable-line no-console
         }
       }
       if (quad.opacity !== opacity) {

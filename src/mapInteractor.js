@@ -1344,7 +1344,7 @@ var mapInteractor = function (args) {
 
     if (!m_state.action) {
       // This shouldn't happen
-      console.log('WARNING: Invalid state in mapInteractor.');
+      console.log('WARNING: Invalid state in mapInteractor.');  // eslint-disable-line no-console
       return;
     }
 

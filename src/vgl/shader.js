@@ -107,9 +107,9 @@ vgl.shader = function (type) {
     // See if it compiled successfully
     if (!renderState.m_context.getShaderParameter(entry.shaderHandle,
                                                   vgl.GL.COMPILE_STATUS)) {
-      console.log('[ERROR] An error occurred compiling the shaders: ' +
+      console.log('[ERROR] An error occurred compiling the shaders: ' +  // eslint-disable-line no-console
                   renderState.m_context.getShaderInfoLog(entry.shaderHandle));
-      console.log(m_shaderSource);
+      console.log(m_shaderSource);  // eslint-disable-line no-console
       renderState.m_context.deleteShader(entry.shaderHandle);
       return null;
     }

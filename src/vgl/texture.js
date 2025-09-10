@@ -72,10 +72,6 @@ vgl.texture = function () {
       this.updateDimensions();
       this.computeInternalFormatUsingImage();
 
-      // console.log('m_internalFormat ' + this.m_internalFormat);
-      // console.log('m_pixelFormat ' + this.m_pixelFormat);
-      // console.log('m_pixelDataType ' + this.m_pixelDataType);
-
       // FOR now support only 2D textures
       renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, this.m_internalFormat,
                                        this.m_pixelFormat, this.m_pixelDataType, this.m_image);

@@ -696,13 +696,13 @@ layer.create = function (map, spec) {
   spec.renderer = checkRenderer(spec.renderer);
 
   if (!spec.renderer) {
-    console.warn('Invalid renderer');
+    console.warn('Invalid renderer');  // eslint-disable-line no-console
     return null;
   }
 
   var layer = map.createLayer(spec.type, spec);
   if (!layer) {
-    console.warn('Unable to create a layer');
+    console.warn('Unable to create a layer');  // eslint-disable-line no-console
     return null;
   }
 

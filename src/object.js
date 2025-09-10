@@ -144,7 +144,7 @@ var object = function () {
       return m_this;
     }
     if (!util.isFunction(handler)) {
-      console.warn('Handler for ' + event + ' is not a function', handler, m_this);
+      console.warn('Handler for ' + event + ' is not a function', handler, m_this);  // eslint-disable-line no-console
       return m_this;
     }
     if (!m_eventHandlers.hasOwnProperty(event)) {
@@ -223,7 +223,7 @@ var object = function () {
         try {
           handler.call(m_this, args);
         } catch (err) {
-          console.warn('Event handler for ' + event + ' threw an error', err);
+          console.warn('Event handler for ' + event + ' threw an error', err);  // eslint-disable-line no-console
         }
       });
     }

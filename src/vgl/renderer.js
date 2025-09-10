@@ -147,7 +147,6 @@ vgl.renderer = function (arg) {
       for (i = 0; i < m_this.m_renderPasses.length; i += 1) {
         if (m_this.m_renderPasses[i].render(renSt)) {
           // Stop the rendering if render pass returns false
-          console.log('returning');
           m_this.m_renderPasses[i].remove(renSt);
           return;
         }
@@ -261,8 +260,7 @@ vgl.renderer = function (arg) {
 
     // TODO move this code to camera
     if (x < 0 || y < 0 || width <= 0 || height <= 0) {
-      console.log('[error] Invalid position and resize values',
-                  x, y, width, height);
+      console.log('[error] Invalid position and resize values', x, y, width, height);  // eslint-disable-line no-console
       return;
     }
 

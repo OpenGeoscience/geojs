@@ -1151,8 +1151,7 @@ var annotationLayer = function (arg) {
                  * selected renderer.  Issue one warning only. */
                 var key = 'error_feature_' + type;
                 if (!m_this[key]) {
-                  console.warn('Cannot create a ' + type + ' feature for ' +
-                               'annotations.');
+                  console.warn('Cannot create a ' + type + ' feature for annotations.');  // eslint-disable-line no-console
                   m_this[key] = true;
                 }
                 return;

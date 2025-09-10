@@ -103,8 +103,7 @@ registry.checkRenderer = function (name, noFallback) {
     }
     var fallback = registry.checkRenderer(ren.fallback(), true);
     if (fallback !== false) {
-      console.warn(name + ' renderer is unavailable, using ' + fallback +
-                   ' renderer instead');
+      console.warn(name + ' renderer is unavailable, using ' + fallback + ' renderer instead');  // eslint-disable-line no-console
     }
     return fallback;
   }
@@ -166,8 +165,7 @@ registry.rendererForFeatures = function (featureList) {
       return renderer;
     }
   }
-  console.warn('There is no renderer available for the feature list "' +
-               (featureList || []).join(', ') + '".');
+  console.warn('There is no renderer available for the feature list "' + (featureList || []).join(', ') + '".');  // eslint-disable-line no-console
   return false;
 };
 
@@ -197,7 +195,7 @@ registry.registerFeature = function (category, name, func, capabilities) {
 
   var old = features[category][name];
   if (old) {
-    console.warn('The ' + category + '.' + name + ' feature is already registered');
+    console.warn('The ' + category + '.' + name + ' feature is already registered');  // eslint-disable-line no-console
   }
   features[category][name] = func;
   featureCapabilities[category][name] = capabilities;
@@ -255,7 +253,7 @@ registry.registerLayerAdjustment = function (category, name, func) {
 
   var old = rendererLayerAdjustments[category][name];
   if (old) {
-    console.warn('The ' + category + '.' + name + ' layer adjustment is already registered');
+    console.warn('The ' + category + '.' + name + ' layer adjustment is already registered');  // eslint-disable-line no-console
   }
   rendererLayerAdjustments[category][name] = func;
   return old;
@@ -349,7 +347,7 @@ registry.registerWidget = function (category, name, func) {
 
   var old = widgets[category][name];
   if (old) {
-    console.warn('The ' + category + '.' + name + ' widget is already registered');
+    console.warn('The ' + category + '.' + name + ' widget is already registered');  // eslint-disable-line no-console
   }
   widgets[category][name] = func;
   return old;
@@ -397,7 +395,7 @@ registry.createWidget = function (name, layer, arg) {
 registry.registerAnnotation = function (name, func, features) {
   var old = annotations[name];
   if (old) {
-    console.warn('The ' + name + ' annotation is already registered');
+    console.warn('The ' + name + ' annotation is already registered');  // eslint-disable-line no-console
   }
   annotations[name] = {func: func, features: features || {}};
   geo_action['annotation_' + name] = 'geo_annotation_' + name;
@@ -414,7 +412,7 @@ registry.registerAnnotation = function (name, func, features) {
  */
 registry.createAnnotation = function (name, options) {
   if (!annotations[name]) {
-    console.warn('The ' + name + ' annotation is not registered');
+    console.warn('The ' + name + ' annotation is not registered');  // eslint-disable-line no-console
     return undefined;
   }
   var annotation = annotations[name].func(options);

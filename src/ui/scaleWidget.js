@@ -225,7 +225,7 @@ var scaleWidget = function (arg) {
     pt2 = {x: pt1.x + (vert ? 0 : pixels), y: pt1.y + (vert ? pixels : 0)};
     dist = m_options.distance(map.displayToGcs(pt1, null), map.displayToGcs(pt2, null), map.gcs()) * m_options.scale;
     if (dist <= 0 || !isFinite(dist)) {
-      console.warn('The distance calculated for the scale is invalid: ' + dist);
+      console.warn('The distance calculated for the scale is invalid: ' + dist);  // eslint-disable-line no-console
       return;
     }
     value = m_this._scaleValue(dist, pixels);

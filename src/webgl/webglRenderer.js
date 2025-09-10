@@ -286,8 +286,7 @@ var webglRenderer = function (arg) {
 
     if (evt.geo && evt.geo._triggeredBy !== layer) {
       if (!vglRenderer || !vglRenderer.camera()) {
-        console.log('Parallel projection event triggered on unconnected VGL ' +
-                    'renderer.');
+        console.log('Parallel projection event triggered on unconnected VGL renderer.');  // eslint-disable-line no-console
         return;
       }
       camera = vglRenderer.camera();
@@ -338,7 +337,7 @@ webglRenderer.supported = function () {
       webglRenderer._maxPointSize = ctx.getParameter(ctx.ALIASED_POINT_SIZE_RANGE)[1];
       checkedWebGL = true;
     } catch (e) {
-      console.warn('No webGL support');
+      console.warn('No webGL support');  // eslint-disable-line no-console
       checkedWebGL = false;
     }
     canvas = undefined;

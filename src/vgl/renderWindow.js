@@ -154,7 +154,7 @@ vgl.renderWindow = function (canvas) {
 
     // If we don't have a GL context, give up now
     if (!m_context) {
-      console('[ERROR] Unable to initialize WebGL. Your browser may not support it.');
+      console.warn('[ERROR] Unable to initialize WebGL. Your browser may not support it.');  // eslint-disable-line no-console
     }
 
     return false;

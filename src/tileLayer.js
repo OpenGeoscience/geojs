@@ -794,7 +794,7 @@ var tileLayer = function (arg) {
       }
     }
     if (m_this.cache.size < tiles.length) {
-      console.log('Increasing cache size to ' + tiles.length);
+      console.log('Increasing cache size to ' + tiles.length);  // eslint-disable-line no-console
       m_this.cache.size = tiles.length;
     }
     /* Actually get the tiles. */
@@ -1002,7 +1002,7 @@ var tileLayer = function (arg) {
     // add an error handler
     tile.catch(function () {
       // May want to do something special here later
-      console.warn('Could not load tile at ' + tile.toString());
+      console.warn('Could not load tile at ' + tile.toString());  // eslint-disable-line no-console
       m_this._remove(tile);
     });
   };
@@ -1041,7 +1041,7 @@ var tileLayer = function (arg) {
          * being used; there is still some much rarer condition that can
          * cause it.  Log that it happened until we can figure out how to fix
          * the issue. */
-        console.log('No parent element to remove ' + tile.toString(), tile);
+        console.log('No parent element to remove ' + tile.toString(), tile);  // eslint-disable-line no-console
       }
       $(tile.image).remove();
     }
