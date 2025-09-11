@@ -419,16 +419,18 @@ var webgl_quadFeature = function (arg) {
         return;
       }
       quad.texture.bind(renderState);
+      if (quad.image) {
+        w = quad.image.width;
+        h = quad.image.height;
+      }
+      if (quad.imageTexture) {
+        w = quad.imageTexture.width;
+        h = quad.imageTexture.height;
+      }
       // only check if the context is out of memory when using modestly large
       // textures.  The check is slow.
-      if (quad.image && quad.image.width * quad.image.height > _memoryCheckLargestTested) {
-        _memoryCheckLargestTested = quad.image.width * quad.image.height;
-        if (context.getError() === context.OUT_OF_MEMORY) {
-          console.log('Insufficient GPU memory for texture');
-        }
-      }
-      if (quad.imageTexture && quad.imageTexture.width * quad.imageTexture.height > _memoryCheckLargestTested) {
-        _memoryCheckLargestTested = quad.imageTexture.width * quad.imageTexture.height;
+      if ((quad.image || quad.imageTexture) && w * h > _memoryCheckLargestTested) {
+        _memoryCheckLargestTested = w * h;
         if (context.getError() === context.OUT_OF_MEMORY) {
           console.log('Insufficient GPU memory for texture');
         }
@@ -449,14 +451,6 @@ var webgl_quadFeature = function (arg) {
         crop = quadcrop;
         context.uniform2fv(renderState.m_material.shaderProgram()
           .uniformLocation('crop'), new Float32Array([crop.x === undefined ? 1 : crop.x, crop.y === undefined ? 1 : crop.y]));
-      }
-      if (quad.image) {
-        w = quad.image.width;
-        h = quad.image.height;
-      }
-      if (quad.imageTexture) {
-        w = quad.imageTexture.width;
-        h = quad.imageTexture.height;
       }
       quadcropsrc = quad.crop || {left: 0, top: 0, right: w, bottom: h};
       if (!cropsrc || quadcropsrc.left !== cropsrc.left || quadcropsrc.top !== cropsrc.top || quadcropsrc.right !== cropsrc.right || quadcropsrc.bottom !== cropsrc.bottom || quadw !== w || quadh !== h) {
