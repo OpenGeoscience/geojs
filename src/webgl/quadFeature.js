@@ -571,6 +571,7 @@ capabilities[quadFeature.capabilities.imageFixedScale] = false;
 capabilities[quadFeature.capabilities.imageFull] = true;
 capabilities[quadFeature.capabilities.canvas] = false;
 capabilities[quadFeature.capabilities.video] = false;
+capabilities[quadFeature.capabilities.texture] = true;
 
 registerFeature('webgl', 'quad', webgl_quadFeature, capabilities);
 module.exports = webgl_quadFeature;
