@@ -589,7 +589,7 @@ describe('geo.quadFeature', function () {
       restoreWebglRenderer();
     });
 
-    it('texture data - RGB format', function () {
+    it('texture data - RGBA format', function () {
       mockWebglRenderer();
       var map, layer, quad;
       map = createMap();
@@ -598,24 +598,24 @@ describe('geo.quadFeature', function () {
 
       // Create RGB texture data (4 bytes per pixel)
       var width = 64, height = 64;
-      var rgbData = new Uint8Array(width * height * 4);
+      var rgbaData = new Uint8Array(width * height * 4);
 
       // Fill with a gradient pattern
-      for (var i = 0; i < rgbData.length; i += 4) {
-        var pixelIndex = i / 3;
+      for (var i = 0; i < rgbaData.length; i += 4) {
+        var pixelIndex = i / 4;
         var x = pixelIndex % width;
         var y = Math.floor(pixelIndex / width);
-        rgbData[i] = Math.floor((x / width) * 255);     // R
-        rgbData[i + 1] = Math.floor((y / height) * 255); // G
-        rgbData[i + 2] = 128;                           // B
-        rgbData[i + 3] = 255;                           // A
+        rgbaData[i] = Math.floor((x / width) * 255);      // R
+        rgbaData[i + 1] = Math.floor((y / height) * 255); // G
+        rgbaData[i + 2] = 128;                            // B
+        rgbaData[i + 3] = 255;                            // A
       }
 
       var textureData = [{
         ll: [-1, -1],
         ur: [1, 1],
         texture: {
-          data: rgbData,
+          data: rgbaData,
           width: width,
           height: height
         }
@@ -629,7 +629,7 @@ describe('geo.quadFeature', function () {
       expect(quads.imgQuads[0].imageTexture).toBeDefined();
       expect(quads.imgQuads[0].imageTexture.width).toBe(width);
       expect(quads.imgQuads[0].imageTexture.height).toBe(height);
-      expect(quads.imgQuads[0].imageTexture.data).toBe(rgbData);
+      expect(quads.imgQuads[0].imageTexture.data).toBe(rgbaData);
 
       destroyMap();
       restoreWebglRenderer();
