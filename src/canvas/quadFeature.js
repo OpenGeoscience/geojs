@@ -279,6 +279,7 @@ capabilities[quadFeature.capabilities.imageFixedScale] = true;
 capabilities[quadFeature.capabilities.imageFull] = false;
 capabilities[quadFeature.capabilities.canvas] = true;
 capabilities[quadFeature.capabilities.video] = true;
+capabilities[quadFeature.capabilities.texture] = false;
 
 registerFeature('canvas', 'quad', canvas_quadFeature, capabilities);
 module.exports = canvas_quadFeature;

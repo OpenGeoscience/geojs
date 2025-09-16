@@ -30,6 +30,7 @@ vgl.texture = function () {
   this.m_nearestPixel = false;
 
   this.m_image = null;
+  this.m_texture = null;
 
   var m_setupTimestamp = timestamp(),
       m_that = this;
@@ -75,6 +76,15 @@ vgl.texture = function () {
       // FOR now support only 2D textures
       renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, this.m_internalFormat,
                                        this.m_pixelFormat, this.m_pixelDataType, this.m_image);
+    } else if (this.m_texture !== null) {
+      // Custom texture data object
+      renderState.m_context.pixelStorei(vgl.GL.UNPACK_ALIGNMENT, 1);
+      renderState.m_context.pixelStorei(vgl.GL.UNPACK_FLIP_Y_WEBGL, true);
+
+      this.updateDimensions();
+      renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, this.m_internalFormat,
+                                       this.m_texture.width, this.m_texture.height, 0,
+                                       this.m_pixelFormat, this.m_pixelDataType, this.m_texture.data);
     } else {
       renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, this.m_internalFormat,
                                        this.m_width, this.m_height, 0, this.m_pixelFormat, this.m_pixelDataType, null);
@@ -118,6 +128,15 @@ vgl.texture = function () {
   };
 
   /**
+   * Get image used by the texture.
+   *
+   * @returns {vgl.image}
+   */
+  this.texture = function () {
+    return this.m_texture;
+  };
+
+  /**
    * Set image for the texture.
    *
    * @param {vgl.image} image
@@ -134,6 +153,36 @@ vgl.texture = function () {
     return false;
   };
 
+  /**
+   * Set Raw Texture data using Uint8Array
+   *
+   * @param {object} texture texture object to load.
+   * @param {string?} texture.type One of 'RGBA' | 'Luminance' | 'LuminanceAlpha'.
+   * @param {Uint8Array} texture.data Array representing the format based on the type
+   * @param {number} texture.width width of the texture
+   * @param {number} texture.height height of the texture
+   * @returns {boolean}
+   */
+  this.setTexture = function (texture) {
+    if (texture !== null) {
+      this.m_texture = texture;
+      if (texture.type === 'Luminance') {
+        this.m_internalFormat = vgl.GL.LUMINANCE;
+        this.m_pixelFormat = vgl.GL.LUMINANCE;
+      } else if (texture.type === 'LuminanceAlpha') {
+        this.m_internalFormat = vgl.GL.LUMINANCE_ALPHA;
+        this.m_pixelFormat = vgl.GL.LUMINANCE_ALPHA;
+      } else {
+        this.m_internalFormat = vgl.GL.RGBA;
+        this.m_pixelFormat = vgl.GL.RGBA;
+      }
+      this.updateDimensions();
+      this.modified();
+      return true;
+    }
+
+    return false;
+  };
   /**
    * Get nearest pixel flag for the texture.
    *
@@ -222,6 +271,11 @@ vgl.texture = function () {
     if (this.m_image !== null) {
       this.m_width = this.m_image.width;
       this.m_height = this.m_image.height;
+      this.m_depth = 0; // Only 2D images are supported now
+    }
+    if (this.m_texture !== null) {
+      this.m_width = this.m_texture.width;
+      this.m_height = this.m_texture.height;
       this.m_depth = 0; // Only 2D images are supported now
     }
   };
