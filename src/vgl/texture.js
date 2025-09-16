@@ -157,10 +157,10 @@ vgl.texture = function () {
    * Set Raw Texture data using Uint8Array
    *
    * @param {object} texture texture object to load.
-   *   type: 'RGB' | 'RGBA' | 'Luminance' | 'LuminanceAlpha'.
-   *   texture: Uint8Array representing the format based on the type
-   *   width: width of the texture
-   *   height: height of the texture
+   * @param {string?} texture.type One of 'RGBA' | 'Luminance' | 'LuminanceAlpha'.
+   * @param {Uint8Array} texture.data Array representing the format based on the type
+   * @param {number} texture.width width of the texture
+   * @param {number} texture.height height of the texture
    * @returns {boolean}
    */
   this.setTexture = function (texture) {
