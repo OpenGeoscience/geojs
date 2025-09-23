@@ -147,7 +147,7 @@ var webgl_lineFeature = function (arg) {
         miterLimit = m_this.style.get('miterLimit')(data),
         antialiasing = m_this.style.get('antialiasing')(data) || 0,
         uniformFunc = m_this.style.get('uniformLine'), uniformVal, uniform,
-        order = m_this.featureVertices(), orderk0, prevkey, nextkey, offkey,
+        order = m_this.featureVertices(), orderk0,
         orderLen = order.length,
         // webgl buffers; see _init for details
         posBuf, prevBuf, nextBuf, farBuf, flagsBuf,
@@ -348,24 +348,21 @@ var webgl_lineFeature = function (arg) {
               posBuf[dest3] = position[v1.pos];
               posBuf[dest3 + 1] = position[v1.pos + 1];
               posBuf[dest3 + 2] = 0; // position[v1.pos + 2];
-              prevkey = !orderk0 ? 'prev' : 'next';
-              nextkey = !orderk0 ? 'next' : 'prev';
-              prevBuf[dest3] = position[v1[prevkey]];
-              prevBuf[dest3 + 1] = position[v1[prevkey] + 1];
-              prevBuf[dest3 + 2] = 0; // position[v1[prevkey] + 2];
-              nextBuf[dest3] = position[v1[nextkey]];
-              nextBuf[dest3 + 1] = position[v1[nextkey] + 1];
-              nextBuf[dest3 + 2] = 0; // position[v1[nextkey] + 2];
-              farBuf[dest3] = position[v2[nextkey]];
-              farBuf[dest3 + 1] = position[v2[nextkey] + 1];
-              farBuf[dest3 + 2] = 0; // position[v2[nextkey] + 2];
+              prevBuf[dest3] = position[orderk0 ? v1.next : v1.prev];
+              prevBuf[dest3 + 1] = position[(orderk0 ? v1.next : v1.prev) + 1];
+              prevBuf[dest3 + 2] = 0; // position[(orderk0 ? v1.next : v1.prev) + 2];
+              nextBuf[dest3] = position[orderk0 ? v1.prev : v1.next];
+              nextBuf[dest3 + 1] = position[(orderk0 ? v1.prev : v1.next) + 1];
+              nextBuf[dest3 + 2] = 0; // position[(orderk0 ? v1.prev : v1.next) + 2];
+              farBuf[dest3] = position[orderk0 ? v2.prev : v2.next];
+              farBuf[dest3 + 1] = position[(orderk0 ? v2.prev : v2.next) + 1];
+              farBuf[dest3 + 2] = 0; // position[(orderk0 ? v2.prev : v2.next) + 2];
             }
             if (updateFlags) {
-              offkey = !orderk0 ? 'negStrokeOffset' : 'posStrokeOffset';
               flagsBuf[dest] = (order[k][3] +
                 v1.flags * flagsNearLineMult +
                 v2.flags * flagsFarLineMult +
-                v1[offkey] * flagsNearOffsetMult);
+                (orderk0 ? v1.posStrokeOffset : v1.negStrokeOffset) * flagsNearOffsetMult);
             }
             strokeWidthBuf[dest] = v1.strokeWidth;
             strokeColorBuf[dest3] = v1.strokeColor.r;
