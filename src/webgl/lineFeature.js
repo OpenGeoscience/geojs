@@ -147,6 +147,7 @@ var webgl_lineFeature = function (arg) {
         miterLimit = m_this.style.get('miterLimit')(data),
         antialiasing = m_this.style.get('antialiasing')(data) || 0,
         uniformFunc = m_this.style.get('uniformLine'), uniformVal, uniform,
+        drop, skipped,
         order = m_this.featureVertices(), orderk0,
         orderLen = order.length,
         // webgl buffers; see _init for details
@@ -216,10 +217,11 @@ var webgl_lineFeature = function (arg) {
       position = transform.transformCoordinates(target_gcs, map_gcs, position, 3);
       m_origin = new Float32Array(m_this.style.get('origin')(position));
       if (m_origin[0] || m_origin[1] || m_origin[2]) {
+        const o0 = m_origin[0], o1 = m_origin[1], o2 = m_origin[2];
         for (i = 0; i < position.length; i += 3) {
-          position[i] -= m_origin[0];
-          position[i + 1] -= m_origin[1];
-          position[i + 2] -= m_origin[2];
+          position[i] -= o0;
+          position[i + 1] -= o1;
+          position[i + 2] -= o2;
         }
       }
       m_modelViewUniform.setOrigin(m_origin);
@@ -265,11 +267,12 @@ var webgl_lineFeature = function (arg) {
         continue;
       }
       uniform = uniformVal === undefined ? uniformFunc(lineItem, i) : uniformVal;
+      drop = uniform === 'drop';
       d = data[i];
       closedVal = closed[i];
       firstPosIdx3 = posIdx3;
       maxj = lineItem.length + (closedVal === 2 ? 1 : 0);
-      let skipped = 0;
+      skipped = 0;
       for (j = 0; j < maxj; j += 1, posIdx3 += 3) {
         lidx = j;
         if (j === lineItem.length) {
@@ -330,14 +333,14 @@ var webgl_lineFeature = function (arg) {
         }
 
         if (j) {
-          if (uniform === 'drop' && j > 1 && position[vert[0].pos] === position[vert[1].pos] && position[vert[0].pos + 1] === position[vert[1].pos + 1]) {
+          if (drop && j > 1 && position[vert[0].pos] === position[vert[1].pos] && position[vert[0].pos + 1] === position[vert[1].pos + 1]) {
             skipped += 1;
             continue;
           }
           /* zero out the z position.  This can be changed if we handle it in
            * the shader. */
           for (k = 0; k < orderLen; k += 1, dest += 1, dest3 += 3) {
-            if (uniform === 'drop' && vert[0].strokeOpacity <= 0 && vert[1].strokeOpacity <= 0) {
+            if (drop && vert[0].strokeOpacity <= 0 && vert[1].strokeOpacity <= 0) {
               strokeOpacityBuf[dest] = -1;
               continue;
             }
