@@ -80,7 +80,7 @@ var webgl_polygonFeature = function (arg) {
         fillFunc, fillVal,
         uniformFunc, uniformVal, uniform,
         indices,
-        items = [],
+        items = [], itemsk, itemsktri,
         target_gcs = m_this.gcs(),
         map_gcs = m_this.layer().map().gcs(),
         numPts = 0,
@@ -185,11 +185,13 @@ var webgl_polygonFeature = function (arg) {
     color = fillColorVal;
     fill = fillVal;
     for (k = 0; k < items.length; k += 1) {
-      n = items[k].triangles.length;
-      vertices = items[k].vertices;
-      item = items[k].item;
-      itemIndex = items[k].itemIndex;
-      original = items[k].original;
+      itemsk = items[k];
+      itemsktri = itemsk.triangles;
+      n = itemsktri.length;
+      vertices = itemsk.vertices;
+      item = itemsk.item;
+      itemIndex = itemsk.itemIndex;
+      original = itemsk.original;
       uniform = uniformVal === undefined ? uniformFunc(item, itemIndex) : uniformVal;
       opacity = fillOpacityVal;
       if (uniform) {
@@ -206,9 +208,9 @@ var webgl_polygonFeature = function (arg) {
       if (!fill) {
         opacity = 0;
       }
-      if (uniform && onlyStyle && items[k].uniform && items[k].color &&
-          color.r === items[k].color.r && color.g === items[k].color.g &&
-          color.b === items[k].color.b && opacity === items[k].opacity) {
+      if (uniform && onlyStyle && itemsk.uniform && itemsk.color &&
+          color.r === itemsk.color.r && color.g === itemsk.color.g &&
+          color.b === itemsk.color.b && opacity === itemsk.opacity) {
         d += n;
         d3 += n * 3;
         continue;
@@ -220,7 +222,7 @@ var webgl_polygonFeature = function (arg) {
           fillColor[d3 + 2] = color.b;
           fillOpacity[d] = opacity;
         } else {
-          j = items[k].triangles[i] * 3;
+          j = itemsktri[i] * 3;
           if (!onlyStyle) {
             posBuf[d3] = vertices[j] - m_origin[0];
             posBuf[d3 + 1] = vertices[j + 1] - m_origin[1];
@@ -239,10 +241,10 @@ var webgl_polygonFeature = function (arg) {
           fillOpacity[d] = opacity;
         }
       }
-      if (uniform || items[k].uniform) {
-        items[k].uniform = uniform;
-        items[k].color = color;
-        items[k].opacity = opacity;
+      if (uniform || itemsk.uniform) {
+        itemsk.uniform = uniform;
+        itemsk.color = color;
+        itemsk.opacity = opacity;
       }
     }
     if (!onlyStyle) {
