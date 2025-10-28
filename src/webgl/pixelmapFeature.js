@@ -63,6 +63,9 @@ var webgl_pixelmapFeature = function (arg) {
           context.drawImage(img, x, y, 1, 1, 0, 0, 1, 1);
           const pixel = context.getImageData(0, 0, 1, 1).data;
           const idx = pixel[0] + pixel[1] * 256 + pixel[2] * 256 * 256;
+          if (idx === 16777215) {
+            continue;
+          }
           result = {
             index: [idx],
             found: [m_this.data()[idx]]
