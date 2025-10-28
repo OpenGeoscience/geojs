@@ -10,7 +10,8 @@ var util = require('./util');
  * @extends geo.feature.spec
  * @property {string|function|HTMLImageElement} [url] URL of a pixel map or an
  *   HTML Image element.  The rgb data is interpreted as an index of the form
- *   0xbbggrr.  The alpha channel is ignored.
+ *   0xbbggrr.  The alpha channel is ignored.  An index of 0xffffff is treated
+ *   as a no-data value for hit-tests.
  * @property {geo.geoColor|function} [color] The color that should be used
  *   for each data element.  Data elements correspond to the indices in the
  *   pixel map. If an index is larger than the number of data elements, it will
