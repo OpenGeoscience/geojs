@@ -16,15 +16,15 @@ var registerWidget = require('../registry').registerWidget;
  *
  * @typedef {geo.feature.styleSpec} geo.gui.legendWidget.styleSpec
  * @extends geo.feature.styleSpec
- * @property {boolean|function} [stroke=true] True to stroke legend.
- * @property {geo.geoColor|function} [strokeColor] Color to stroke each legend.
- * @property {number|function} [strokeOpacity=1] Opacity for each legend's
+ * @property {boolean|Function} [stroke=true] True to stroke legend.
+ * @property {geo.geoColor|Function} [strokeColor] Color to stroke each legend.
+ * @property {number|Function} [strokeOpacity=1] Opacity for each legend's
  *   stroke.  Opacity is on a [0-1] scale.
- * @property {number|function} [strokeWidth=1.5] The weight of the legend's
+ * @property {number|Function} [strokeWidth=1.5] The weight of the legend's
  *   stroke in pixels.
- * @property {boolean|function} [fill=true] True to fill legend.
- * @property {geo.geoColor|function} [fillColor] Color to fill each legend.
- * @property {number|function} [fillOpacity=1] Opacity for each legend.
+ * @property {boolean|Function} [fill=true] True to fill legend.
+ * @property {geo.geoColor|Function} [fillColor] Color to fill each legend.
+ * @property {number|Function} [fillOpacity=1] Opacity for each legend.
  *   Opacity is on a [0-1] scale.
  */
 

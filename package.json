@@ -48,7 +48,7 @@
     "docco": "^0.9.1",
     "eslint": "^9.25.0",
     "eslint-plugin-import": "^2.25.3",
-    "eslint-plugin-jsdoc": "^51.0.0",
+    "eslint-plugin-jsdoc": "^61.0.0",
     "eslint-plugin-n": "^17.17.0",
     "eslint-plugin-promise": "^7.2.1",
     "expose-loader": "^5.0.0",

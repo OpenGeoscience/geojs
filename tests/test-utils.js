@@ -20,7 +20,7 @@ module.exports.vgl = geo.vgl;
  * another it function.
  *
  * @param {string} desc a description of the task.
- * @param {function} testFunc a function that returns true when the
+ * @param {Function} testFunc a function that returns true when the
  *                            specification is complete.
  */
 module.exports.waitForIt = function waitForIt(desc, testFunc) {
@@ -166,7 +166,7 @@ module.exports.mockAnimationFrame = function (mockDate) {
    * stepAnimationFrame with a delta from when this was supposed to start to
    * test asynchronous animations.
    *
-   * @param {function} callback the function to call on an animation frame
+   * @param {Function} callback the function to call on an animation frame
    *                            interval.
    */
   function mockedRequestAnimationFrame(callback) {

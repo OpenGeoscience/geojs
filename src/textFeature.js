@@ -6,10 +6,10 @@ var feature = require('./feature');
  *
  * @typedef {geo.feature.spec} geo.textFeature.spec
  * @extends geo.feature.spec
- * @property {geo.geoPosition[]|function} [position] The position of each data
+ * @property {geo.geoPosition[]|Function} [position] The position of each data
  *   element.  Defaults to the `x`, `y`, and `z` properties of the data
  *   element.
- * @property {string[]|function} [text] The text of each data element.
+ * @property {string[]|Function} [text] The text of each data element.
  *   Defaults to the `text` property of the data element.
  * @property {geo.textFeature.styleSpec} [style] The style to apply to each
  *   data element.
@@ -20,55 +20,55 @@ var feature = require('./feature');
  *
  * @typedef {geo.feature.styleSpec} geo.textFeature.styleSpec
  * @extends geo.feature.styleSpec
- * @property {boolean|function} [visible=true] If falsy, don't show this data
+ * @property {boolean|Function} [visible=true] If falsy, don't show this data
  *    element.
- * @property {string|function} [font] A css font specification.  This is of the
+ * @property {string|Function} [font] A css font specification.  This is of the
  *    form `[style] [variant] [weight] [stretch] size[/line-height] family`.
  *    Individual font styles override this value if a style is specified in
  *    each.  See the individual font styles for details.
- * @property {string|function} [fontStyle='normal'] The font style.  One of
+ * @property {string|Function} [fontStyle='normal'] The font style.  One of
  *    `normal`, `italic`, or `oblique`.
- * @property {string|function} [fontVariant='normal'] The font variant.  This
+ * @property {string|Function} [fontVariant='normal'] The font variant.  This
  *    can have values such as `small-caps` or `slashed-zero`.
- * @property {string|function} [fontWeight='normal'] The font weight.  This may
+ * @property {string|Function} [fontWeight='normal'] The font weight.  This may
  *    be a numeric value where 400 is normal and 700 is bold, or a string such
  *    as `bold` or `lighter`.
- * @property {string|function} [fontStretch='normal'] The font stretch, such as
+ * @property {string|Function} [fontStretch='normal'] The font stretch, such as
  *    `condensed`.
- * @property {string|function} [fontSize='medium'] The font size.
- * @property {string|function} [lineHeight='normal'] The font line height.
- * @property {string|function} [fontFamily] The font family.
- * @property {string|function} [textAlign='center'] The horizontal text
+ * @property {string|Function} [fontSize='medium'] The font size.
+ * @property {string|Function} [lineHeight='normal'] The font line height.
+ * @property {string|Function} [fontFamily] The font family.
+ * @property {string|Function} [textAlign='center'] The horizontal text
  *    alignment.  One of `start`, `end`, `left`, `right`, or `center`.
- * @property {string|function} [textBaseline='middle'] The vertical text
+ * @property {string|Function} [textBaseline='middle'] The vertical text
  *    alignment.  One of `top`, `hanging`, `middle`, `alphabetic`,
  *    `ideographic`, or `bottom`.
- * @property {geo.geoColor|function} [color='black'] Text color.  May include
+ * @property {geo.geoColor|Function} [color='black'] Text color.  May include
  *    opacity.
- * @property {number|function} [textOpacity=1] The opacity of the text.  If the
+ * @property {number|Function} [textOpacity=1] The opacity of the text.  If the
  *    color includes opacity, this is combined with that value.
- * @property {number|function} [rotation=0] Text rotation in radians.
- * @property {boolean|function} [rotateWithMap=false] If truthy, rotate the
+ * @property {number|Function} [rotation=0] Text rotation in radians.
+ * @property {boolean|Function} [rotateWithMap=false] If truthy, rotate the
  *    text when the map rotates.  Otherwise, the text is always in the same
  *    orientation.
- * @property {number|function} [textScaled] If defined, the text is scaled when
+ * @property {number|Function} [textScaled] If defined, the text is scaled when
  *    the map zooms and this is the basis zoom for the fontSize.
- * @property {geo.screenPosition|function} [offset] Offset from the default
+ * @property {geo.screenPosition|Function} [offset] Offset from the default
  *    position for the text.  This is applied before rotation.
- * @property {geo.geoColor|function} [shadowColor='black'] Text shadow color.
+ * @property {geo.geoColor|Function} [shadowColor='black'] Text shadow color.
  *    May include opacity.
- * @property {geo.screenPosition|function} [shadowOffset] Offset for a text
+ * @property {geo.screenPosition|Function} [shadowOffset] Offset for a text
  *    shadow.  This is applied before rotation.
- * @property {number|null|function} [shadowBlur] If not null, add a text shadow
+ * @property {number|null|Function} [shadowBlur] If not null, add a text shadow
  *    with this much blur.
- * @property {boolean|function} [shadowRotate=false] If truthy, rotate the
+ * @property {boolean|Function} [shadowRotate=false] If truthy, rotate the
  *    shadow offset based on the text rotation (the `shadowOffset` is the
  *    offset if the text has a 0 rotation).
- * @property {geo.geoColor|function} [textStrokeColor='transparent'] Text
+ * @property {geo.geoColor|Function} [textStrokeColor='transparent'] Text
  *    stroke color.  May include opacity.
- * @property {geo.geoColor|function} [textStrokeWidth=0] Text stroke width in
+ * @property {geo.geoColor|Function} [textStrokeWidth=0] Text stroke width in
  *    pixels.
- * @property {number|function} [renderThreshold] If this is a positive number,
+ * @property {number|Function} [renderThreshold] If this is a positive number,
  *    text elements may not be rendered if their base position (before offset
  *    and font effects are applied) is more than this distance in pixels
  *    outside of the current viewport.  If it is known that such text elements
@@ -105,9 +105,9 @@ var textFeature = function (arg) {
   /**
    * Get/Set position.
    *
-   * @param {array|function} [val] If `undefined`, return the current position
+   * @param {array|Function} [val] If `undefined`, return the current position
    *    setting.  Otherwise, modify the current position setting.
-   * @returns {array|function|this} The current position or this feature.
+   * @returns {array|Function|this} The current position or this feature.
    */
   this.position = function (val) {
     if (val === undefined) {
@@ -123,9 +123,9 @@ var textFeature = function (arg) {
   /**
    * Get/Set text.
    *
-   * @param {array|function} [val] If `undefined`, return the current text
+   * @param {array|Function} [val] If `undefined`, return the current text
    *    setting.  Otherwise, modify the current text setting.
-   * @returns {array|function|this} The current text or this feature.
+   * @returns {array|Function|this} The current text or this feature.
    */
   this.text = function (val) {
     if (val === undefined) {

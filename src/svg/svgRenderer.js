@@ -69,10 +69,10 @@ var svgRenderer = function (arg) {
   /**
    * Meta functions for converting from geojs styles to d3.
    *
-   * @param {object|function} f The style value or function to convert.
-   * @param {function} [g] An optional function that returns a boolean; if it
+   * @param {object|Function} f The style value or function to convert.
+   * @param {Function} [g] An optional function that returns a boolean; if it
    *    returns false, the style is set to `'none'`.
-   * @returns {function} A function for converting styles.
+   * @returns {Function} A function for converting styles.
    */
   this._convertColor = function (f, g) {
     f = util.ensureFunction(f);
@@ -95,8 +95,8 @@ var svgRenderer = function (arg) {
    * Return a function for converting a size in pixels to an appropriate
    * d3 scale.
    *
-   * @param {object|function} f The style value or function to convert.
-   * @returns {function} A function for converting scale.
+   * @param {object|Function} f The style value or function to convert.
+   * @returns {Function} A function for converting scale.
    */
   this._convertScale = function (f) {
     f = util.ensureFunction(f);
@@ -487,7 +487,7 @@ var svgRenderer = function (arg) {
    * @param {object} arg
    * @param {string} arg.id A unique string identifying the feature.
    * @param {array} arg.data Array of data objects used in a d3 data method.
-   * @param {function} [arg.dataIndex] A function that returns a unique id for
+   * @param {Function} [arg.dataIndex] A function that returns a unique id for
    *    each data element.  This is passed to the data access function.
    * @param {object} arg.style An object with style values or functions.
    * @param {object} arg.attributes An object containing element attributes.

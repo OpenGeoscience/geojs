@@ -333,7 +333,7 @@ geo_event.keyaction = 'geo_keyaction';
  * @property {geo.geoPosition} center The target center.
  * @property {number} zoom The target zoom level.
  * @property {number} duration The duration of the transition in milliseconds.
- * @property {function} ease The easing function.
+ * @property {Function} ease The easing function.
  */
 geo_event.transitionstart = 'geo_transitionstart';
 
@@ -345,7 +345,7 @@ geo_event.transitionstart = 'geo_transitionstart';
  * @property {geo.geoPosition} center The target center.
  * @property {number} zoom The target zoom level.
  * @property {number} duration The duration of the transition in milliseconds.
- * @property {function} ease The easing function.
+ * @property {Function} ease The easing function.
  */
 geo_event.transitionend = 'geo_transitionend';
 
@@ -357,7 +357,7 @@ geo_event.transitionend = 'geo_transitionend';
  * @property {geo.geoPosition} center The target center.
  * @property {number} zoom The target zoom level.
  * @property {number} duration The duration of the transition in milliseconds.
- * @property {function} ease The easing function.
+ * @property {Function} ease The easing function.
  */
 geo_event.transitioncancel = 'geo_transitioncancel';
 

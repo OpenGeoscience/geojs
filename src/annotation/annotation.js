@@ -994,7 +994,7 @@ var annotation = function (type, args) {
    * Apply a map function of a geo.polygon.
    *
    * @param {geo.polygon} coord The polygon to apply the function to.
-   * @param {function} func The function to apply.
+   * @param {Function} func The function to apply.
    * @returns {array} The map results.
    */
   this._coordinatesMapFunc = function (coord, func) {
@@ -1255,7 +1255,7 @@ var annotation = function (type, args) {
  *
  * @private
  * @param {object} m_this The current annotation instance.
- * @param {function} s_actions The parent actions method.
+ * @param {Function} s_actions The parent actions method.
  * @param {string|undefined} state The state to return actions for.  Defaults
  *    to the current state.
  * @param {string} name The name of this annotation.
@@ -1357,7 +1357,7 @@ function continuousVerticesProcessAction(m_this, evt, name) {
  *   that it is twice as wide as tall, [2, 1/2] would allow it to be twice as
  *   wide or half as wide as it is tall.  Sizes (e.g., {width: 400, height:
  *   500}) snap to that size.
- * @returns {function} A function that can be passed to the mapIterator
+ * @returns {Function} A function that can be passed to the mapIterator
  *   selectionConstraint or to an annotation constraint function.
  */
 function constrainAspectRatio(ratio) {

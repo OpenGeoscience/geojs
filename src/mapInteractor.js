@@ -96,7 +96,7 @@ var Mousetrap = require('mousetrap');
  *      animation.
  * @property {number} [zoomAnimation.duration=500] The time it takes for the
  *      final zoom to be reached.
- * @property {function} [zoomAnimation.ease] The easing function for the zoom.
+ * @property {Function} [zoomAnimation.ease] The easing function for the zoom.
  *      The default is `(2 - t) * t`.
  */
 
@@ -1675,7 +1675,7 @@ var mapInteractor = function (args) {
    * Private wrapper around the map zoom method that is debounced to support
    * discrete zoom interactions.
    *
-   * @returns {function} A function to handle zooms that debounces such
+   * @returns {Function} A function to handle zooms that debounces such
    *    events.  This function is passed the zoom level and the mouse state.
    */
   function debounced_zoom() {
@@ -1782,7 +1782,7 @@ var mapInteractor = function (args) {
    * throttling map interactions.
    * @private
    *
-   * @returns {function} A function that takes a jQuery.Event for mouse wheel
+   * @returns {Function} A function that takes a jQuery.Event for mouse wheel
    *    actions.
    * @fires geo.event.actionwheel
    */

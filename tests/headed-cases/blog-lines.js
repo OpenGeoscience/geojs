@@ -11,7 +11,7 @@ describe('blog-lines example', function () {
   /* Check if all of the visible maps in the test window have some content.
    * This relies on the structure and internal functions of the example.
    *
-   * @param {function} callback: function to call when the page appears ready.
+   * @param {Function} callback: function to call when the page appears ready.
    */
   function ready(callback, second) {
     var missing;

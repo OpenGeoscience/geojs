@@ -12,7 +12,7 @@ module.exports = {};
  *    canvas.toDataURL().
  * @param {number} threshold: allowed difference between this image and the
  *    base image.
- * @param {function} callback: a function to call when complete.
+ * @param {Function} callback: a function to call when complete.
  * @returns {object} jquery ajax promise.
  */
 function compareImage(name, canvas, threshold, callback) {
@@ -75,8 +75,8 @@ module.exports.prepareIframeTest = function () {
  *    specified element.  If falsy, make a composite of all canvas elements.
  * @param {number} threshold: allowed difference between this image and the
  *    base image.
- * @param {function} doneFunc: a function to call when complete.  Optional.
- * @param {function} idleFunc: a function to call to ensure that the map is
+ * @param {Function} doneFunc: a function to call when complete.  Optional.
+ * @param {Function} idleFunc: a function to call to ensure that the map is
  *    idle.  No other tests or delays are supplied until this is called.  It
  *    is expected to take a callback function itself.
  * @param {number} delay: additional delay in milliseconds to wait after idle.

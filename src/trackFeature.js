@@ -8,10 +8,10 @@ var util = require('./util');
  *
  * @typedef {geo.feature.spec} geo.trackFeature.spec
  * @extends geo.feature.spec
- * @property {geo.geoPosition|function} [position] Position of the data.
+ * @property {geo.geoPosition|Function} [position] Position of the data.
  *   Default is (data).
- * @property {number|function} [time] Time of the data.  Default is `(data).t`.
- * @property {object|function} [track] Tracks from the data.  Default is
+ * @property {number|Function} [time] Time of the data.  Default is `(data).t`.
+ * @property {object|Function} [track] Tracks from the data.  Default is
  *   (data).  Typically, the data is an array of tracks, each of which is an
  *   array of points, each of which has a position and time.  The position and
  *   time functions are called for each point as `position(trackPoint,
@@ -24,7 +24,7 @@ var util = require('./util');
  *   `null`, this is the maximum time in any track.
  * @property {number} [duration=null] Duration between start and end times.
  *   Ignored if both start and end times are specified.
- * @property {number|function} [text] Text to use for the head of the track.
+ * @property {number|Function} [text] Text to use for the head of the track.
  *   If specified, the track head is rendered as text.  If `undefined` a marker
  *   is used instead.  If `null` or an empty string (`''`), neither a marker
  *   nor text is used.
@@ -103,7 +103,7 @@ var trackFeature = function (arg) {
    * Return a function for position of a dependent line feature.
    *
    * @param {string} key One of `past`, `current` or `future`.
-   * @returns {function} The position function.
+   * @returns {Function} The position function.
    */
   this._linePosition = function (key) {
     return function (d, i, l, j) {
@@ -531,11 +531,11 @@ var trackFeature = function (arg) {
   /**
    * Get/set track accessor.
    *
-   * @param {object|function} [val] If not specified, return the current track
+   * @param {object|Function} [val] If not specified, return the current track
    *    accessor.  If specified, use this for the track accessor and return
    *    `this`.  If a function is given, the function is passed `(dataElement,
    *    dataIndex)` and returns an array of vertex elements.
-   * @returns {object|function|this} The current track accessor or this feature.
+   * @returns {object|Function|this} The current track accessor or this feature.
    */
   this.track = function (val) {
     if (val === undefined) {
@@ -551,11 +551,11 @@ var trackFeature = function (arg) {
   /**
    * Get/Set position accessor.
    *
-   * @param {geo.geoPosition|function} [val] If not specified, return the
+   * @param {geo.geoPosition|Function} [val] If not specified, return the
    *    current position accessor.  If specified, use this for the position
    *    accessor and return `this`.  If a function is given, this is called
    *    with `(vertexElement, vertexIndex, dataElement, dataIndex)`.
-   * @returns {geo.geoPosition|function|this} The current position or this
+   * @returns {geo.geoPosition|Function|this} The current position or this
    *    feature.
    */
   this.position = function (val) {
@@ -576,7 +576,7 @@ var trackFeature = function (arg) {
    *    If specified, use this for the time accessor and return `this`.  If a
    *    function is given, this is called with `(vertexElement, vertexIndex,
    *    dataElement, dataIndex)`.
-   * @returns {number|function|this} The current time or this feature.
+   * @returns {number|Function|this} The current time or this feature.
    */
   this.time = function (val) {
     if (val === undefined) {

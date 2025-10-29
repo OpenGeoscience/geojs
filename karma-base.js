@@ -79,7 +79,7 @@ function getScreenImage(name, left, top, width, height) {
  * @param {string} image: a base64 encoded png image.
  * @param {number} threshold: allowed difference between this image and the
  *    base image.
- * @param {function} callback: a function to call when complete.
+ * @param {Function} callback: a function to call when complete.
  */
 function compareImage(name, image, threshold, callback) {
   var resemble = require('resemblejs');

@@ -22,7 +22,7 @@ const annotationActionOwner = require('./annotation').annotationActionOwner;
  *    finished rectangle.  This uses styles for {@link geo.polygonFeature}.
  * @property {geo.polygonFeature.styleSpec} [editStyle] The style to apply to a
  *    rectangle in edit mode.
- * @property {number|number[]|function} [constraint] If specified, an aspect
+ * @property {number|number[]|Function} [constraint] If specified, an aspect
  *    ratio or list of aspect ratios to constraint the rectangle to.  If a
  *    function, a selection constraint function to call to adjust the
  *    rectangle.

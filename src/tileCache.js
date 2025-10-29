@@ -110,7 +110,7 @@ var tileCache = function (options) {
    * Add a tile to the cache.
    *
    * @param {geo.tile} tile The tile to add.
-   * @param {function} removeFunc If specified and tiles must be purged from
+   * @param {Function} removeFunc If specified and tiles must be purged from
    *      the cache, call this function on each tile before purging.
    * @param {boolean} noPurge if true, don't purge tiles.
    */
@@ -131,7 +131,7 @@ var tileCache = function (options) {
   /**
    * Purge tiles from the cache if it is full.
    *
-   * @param {function} removeFunc If specified and tiles must be purged from
+   * @param {Function} removeFunc If specified and tiles must be purged from
    *      the cache, call this function on each tile before purging.
    */
   this.purge = function (removeFunc) {

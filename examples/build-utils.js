@@ -103,7 +103,7 @@ function writeYamlList(dir, filename, records) {
  *
  * @param {string} sourceFile The path of the javascript file being processed.
  * @param {string} outputPath The output directory.
- * @returns {function} A function to call from docco to fix the results.
+ * @returns {Function} A function to call from docco to fix the results.
  */
 function fixupDocco(sourceFile, outputPath) {
   return function () {

@@ -107,10 +107,10 @@ var geojsonReader = function (arg) {
    * @param {File|Blob|string|object} file This is either a `File` object, a
    *    `Blob` object, a string representation of a file, or an object
    *    representing data from a file.
-   * @param {function} done A callback function when the read is complete.
+   * @param {Function} done A callback function when the read is complete.
    *    This is called with `false` on error or the object that was read but
    *    not yet parsed.
-   * @param {function} [progress] A function which is passed `ProgressEvent`
+   * @param {Function} [progress] A function which is passed `ProgressEvent`
    *    information from a `FileReader`.  This includes `loaded` and `total`
    *    each with a number of bytes.
    */
@@ -273,7 +273,7 @@ var geojsonReader = function (arg) {
    *
    * @param {string} prop The property name.
    * @param {object} _default The default value.
-   * @returns {function} A style function for the property.
+   * @returns {Function} A style function for the property.
    */
   this._style = function (prop, _default) {
     var isColor = prop.toLowerCase().match(/color$/);
@@ -302,10 +302,10 @@ var geojsonReader = function (arg) {
    * @param {File|Blob|string|object} file This is either a `File` object, a
    *    `Blob` object, a string representation of a file, or an object
    *    representing data from a file.
-   * @param {function} [done] An optional callback function when the read is
+   * @param {Function} [done] An optional callback function when the read is
    *    complete.  This is called with `false` on error or a list of
    *    {@link geo.feature} on success.
-   * @param {function} [progress] A function which is passed `ProgressEvent`
+   * @param {Function} [progress] A function which is passed `ProgressEvent`
    *    information from a `FileReader`.  This includes `loaded` and `total`
    *    each with a number of bytes.
    * @returns {Promise} A `Promise` that resolves with a list of

@@ -43,16 +43,16 @@
  *    unspecified, callback will be executed one final time after the last
  *    throttled-function call. (After the throttled-function has not been
  *    called for `delay` milliseconds, the internal counter is reset)
- * @param {function} [callback] A function to be executed after `delay`
+ * @param {Function} [callback] A function to be executed after `delay`
  *    milliseconds. The `this` context and all arguments are passed through,
  *    as-is, to `callback` when the throttled-function is executed.
- * @param {function} [accumulator] A function to be executed (synchronously)
+ * @param {Function} [accumulator] A function to be executed (synchronously)
  *    during **each** call to the wrapped function.  Typically, this
  *    this method is used to accumulate values that the callback uses
  *    when it finally executes.
  * @param {boolean} [debounce_mode] See the `at_begin` parameter of the
  *    {@link geo.util.debounce} function.
- * @returns {function} The throttled version of `callback`.
+ * @returns {Function} The throttled version of `callback`.
  *
  * @example
  * var throttled = geo.util.throttle( delay, [ no_trailing, ] callback );
@@ -179,15 +179,15 @@ var throttle = function (delay, no_trailing, callback, accumulator, debounce_mod
  *    executed only at the first debounced-function call. (After the
  *    throttled-function has not been called for `delay` milliseconds, the
  *    internal counter is reset)
- * @param {function} callback A function to be executed after delay milliseconds.
+ * @param {Function} callback A function to be executed after delay milliseconds.
  *    The `this` context and all arguments are passed through, as-is, to
  *    `callback` when the debounced-function is executed.
- * @param {function} [accumulator] A function to be executed (synchronously)
+ * @param {Function} [accumulator] A function to be executed (synchronously)
  *    during **each** call to the wrapped function.  Typically, this
  *    this method is used to accumulate values that the callback uses
  *    when it finally executes.
  *
- * @returns {function} A new, debounced, function.
+ * @returns {Function} A new, debounced, function.
  *
  * @example
  * var debounced = geo.util.debounce( delay, [ at_begin, ] callback );

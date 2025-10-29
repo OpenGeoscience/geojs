@@ -20,7 +20,7 @@ var registry = {};
  * @alias geo.registerFileReader
  * @param {string} name Name of the reader to register.  If the name already
  *      exists, the class creation function is replaced.
- * @param {function} func Class creation function.
+ * @param {Function} func Class creation function.
  */
 registry.registerFileReader = function (name, func) {
   fileReaders[name] = func;
@@ -48,7 +48,7 @@ registry.createFileReader = function (name, opts) {
  * @alias geo.registerRenderer
  * @param {string} name Name of the renderer to register.  If the name already
  *      exists, the class creation function is replaced.
- * @param {function} func Class creation function.
+ * @param {Function} func Class creation function.
  */
 registry.registerRenderer = function (name, func) {
   renderers[name] = func;
@@ -175,7 +175,7 @@ registry.rendererForFeatures = function (featureList) {
  * @alias geo.registerFeature
  * @param {string} category The feature category -- this is the renderer name.
  * @param {string} name The feature name.
- * @param {function} func A function to call to create the feature.
+ * @param {Function} func A function to call to create the feature.
  * @param {object|undefined} capabilities A map of capabilities that this
  *      feature supports.  If the feature is implemented with different
  *      capabilities in multiple categories (renderers), then the feature
@@ -242,7 +242,7 @@ registry.createFeature = function (name, layer, renderer, arg) {
  *      the renderer name.
  * @param {string} name The name of the adjustment; this is commonly the layer
  *      type, or `'all'` for the base layer class.
- * @param {function} func The function to call when the adjustment is used.
+ * @param {Function} func The function to call when the adjustment is used.
  * @returns {object} if this layer adjustment replaces an existing one, this
  *      was the value that was replaced.  In this case, a warning is issued.
  */
@@ -284,7 +284,7 @@ registry.adjustLayerForRenderer = function (name, layer) {
  * @alias geo.registerLayer
  * @param {string} name Name of the layer to register.  If the name already
  *      exists, the class creation function is replaced.
- * @param {function} func Class creation function.
+ * @param {Function} func Class creation function.
  * @param {string[]} [defaultFeatures] An optional list of feature capabilities
  *      that are required to use this layer.
  */
@@ -336,7 +336,7 @@ registry.createLayer = function (name, map, arg) {
  * @param {string} category A category for this widget.  This is usually
  *      `'dom'`.
  * @param {string} name The name of the widget to register.
- * @param {function} func Class creation function.
+ * @param {Function} func Class creation function.
  * @returns {object} If this widget replaces an existing one, this was the
  *      value that was replaced.  In this case, a warning is issued.
  */
@@ -383,7 +383,7 @@ registry.createWidget = function (name, layer, arg) {
  *
  * @alias geo.registerAnnotation
  * @param {string} name The annotation name.
- * @param {function} func A function to call to create the annotation.
+ * @param {Function} func A function to call to create the annotation.
  * @param {object|undefined} features A map of features that are used by this
  *      annotation.  Each key is a feature that is used.  If the value is true,
  *      the that feature is always needed.  If a list, then it is the set of

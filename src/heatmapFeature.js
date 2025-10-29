@@ -8,9 +8,9 @@ var util = require('./util');
  *
  * @typedef {geo.feature.spec} geo.heatmapFeature.spec
  * @extends geo.feature.spec
- * @property {geo.geoPosition|function} [position] Position of the data.
+ * @property {geo.geoPosition|Function} [position] Position of the data.
  *   Default is (data).
- * @property {function} [intensity] Scalar value of each data point.  The
+ * @property {Function} [intensity] Scalar value of each data point.  The
  *   scalar value must be a positive real number and is used to compute the
  *   weight for each data point.
  * @property {number} [maxIntensity=null] Maximum intensity of the data.
@@ -179,11 +179,11 @@ var heatmapFeature = function (arg) {
   /**
    * Get/Set position accessor.
    *
-   * @param {geo.geoPosition|function} [val] If not specified, return the
+   * @param {geo.geoPosition|Function} [val] If not specified, return the
    *    current position accessor.  If specified, use this for the position
    *    accessor and return `this`.  If a function is given, this is called
    *    with `(dataElement, dataIndex)`.
-   * @returns {geo.geoPosition|function|this} The current position or this
+   * @returns {geo.geoPosition|Function|this} The current position or this
    *    feature.
    */
   this.position = function (val) {
@@ -210,9 +210,9 @@ var heatmapFeature = function (arg) {
   /**
    * Get/Set intensity.
    *
-   * @param {function} [val] If not specified, the current intensity accessor.
+   * @param {Function} [val] If not specified, the current intensity accessor.
    *    Otherwise, a function that returns the intensity of each data point.
-   * @returns {function|this}
+   * @returns {Function|this}
    */
   this.intensity = function (val) {
     if (val === undefined) {

@@ -9,7 +9,7 @@ var util = require('./util');
  * @extends geo.feature.spec
  * @property {geo.vectorFeature.styleSpec} [style] Style object with default
  *   style options.
- * @property {function|object} [origin={x: 0, y: 0, z: 0}] Origin accessor.
+ * @property {Function|object} [origin={x: 0, y: 0, z: 0}] Origin accessor.
  */
 
 /**
@@ -17,22 +17,22 @@ var util = require('./util');
  *
  * @typedef {geo.feature.styleSpec} geo.vectorFeature.styleSpec
  * @extends geo.feature.styleSpec
- * @property {geo.geoColor|function} [strokeColor] Color to stroke each vector.
- * @property {number|function} [strokeOpacity] Opacity for each vector.
+ * @property {geo.geoColor|Function} [strokeColor] Color to stroke each vector.
+ * @property {number|Function} [strokeOpacity] Opacity for each vector.
  *   Opacity is on a [0-1] scale.
- * @property {number|function} [strokeWidth] The weight of the vector stroke in
+ * @property {number|Function} [strokeWidth] The weight of the vector stroke in
  *   pixels.
- * @property {string|function} [originStyle='none'] The style at the origin of
+ * @property {string|Function} [originStyle='none'] The style at the origin of
  *   the vector.  One of the marker styles or `'none'`.  Marker styles are
  *   usually `'arrow'`, `'point'`, `'bar'`, and `'wedge'`.
- * @property {string|function} [endStyle='arrow'] The style at the far end of
+ * @property {string|Function} [endStyle='arrow'] The style at the far end of
  *   the vector.  One of the marker styles or `'none'`.  Marker styles are
  *   usually `'arrow'`, `'point'`, `'bar'`, and `'wedge'`.
- * @property {geo.geoPosition|function} [origin={x: 0, y: 0, z: 0}] The origin
+ * @property {geo.geoPosition|Function} [origin={x: 0, y: 0, z: 0}] The origin
  *   of the vector.  One end of the vector will be at this point.
- * @property {geo.geoPosition|function} [delta] The direction that the vector
+ * @property {geo.geoPosition|Function} [delta] The direction that the vector
  *   points in.  The length of the vector is dependent on this and the `scale`.
- * @property {number|function} [scale] The size of the vector relative to the
+ * @property {number|Function} [scale] The size of the vector relative to the
  *   delta.  If `null`, `undefined`, or `0`, this is `75 / <maximum length of
  *   any delta in x-y space>`.
  */
@@ -67,9 +67,9 @@ var vectorFeature = function (arg) {
    * Get or set the accessor for the origin of the vector.  This is the point
    * that the vector starts.
    *
-   * @param {geo.geoPosition|function} [val] The new origin if specified.  If
+   * @param {geo.geoPosition|Function} [val] The new origin if specified.  If
    *   not specified, return the current origin.
-   * @returns {geo.geoPosition|function|this} Either the current origin or
+   * @returns {geo.geoPosition|Function|this} Either the current origin or
    *   this feature.
    */
   this.origin = function (val) {
@@ -86,9 +86,9 @@ var vectorFeature = function (arg) {
    * Get or set the accessor for the displacement (coordinates) of the vector.
    * This is the direction of the vector.
    *
-   * @param {geo.geoPosition|function} [val] The new delta if specified.  If
+   * @param {geo.geoPosition|Function} [val] The new delta if specified.  If
    *   not specified, return the current delta.
-   * @returns {geo.geoPosition|function|this} Either the current delta or this
+   * @returns {geo.geoPosition|Function|this} Either the current delta or this
    *   feature.
    */
   this.delta = function (val) {

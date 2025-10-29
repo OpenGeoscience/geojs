@@ -14,7 +14,7 @@ var util = require('./util');
  * @property {number} [tileOverlap.y] Vertical overlap.
  * @property {number} [tileWidth=256] The tile width without overlap.
  * @property {number} [tileHeight=256] The tile height without overlap.
- * @property {function} [tilesAtZoom=null] A function that is given a zoom
+ * @property {Function} [tilesAtZoom=null] A function that is given a zoom
  *   level and returns `{x: (num), y: (num)}` with the number of tiles at that
  *   zoom level.
  * @property {number} [cacheSize=600] The maximum number of tiles to cache.
@@ -35,7 +35,7 @@ var util = require('./util');
  *   results in smoother transitions.
  * @property {boolean} [wrapX=true] Wrap in the x-direction.
  * @property {boolean} [wrapY=false] Wrap in the y-direction.
- * @property {string|function} [url=null] A function taking the current tile
+ * @property {string|Function} [url=null] A function taking the current tile
  *   indices `(x, y, level, subdomains)` and returning a URL or jquery ajax
  *   config to be passed to the {geo.tile} constructor.  Example:
  *   ```
@@ -58,13 +58,13 @@ var util = require('./util');
  *   tile loading animation to occur.  Only some renderers support this.
  * @property {string} [attribution] An attribution to display with the layer
  *   (accepts HTML).
- * @property {function} [tileRounding=Math.round] This function determines
+ * @property {Function} [tileRounding=Math.round] This function determines
  *   which tiles will be loaded when the map is at a non-integer zoom.  For
  *   example, `Math.floor`, will use tile level 2 when the map is at zoom 2.9.
- * @property {function} [tileOffset] This function takes a zoom level argument
+ * @property {Function} [tileOffset] This function takes a zoom level argument
  *   and returns, in units of pixels, the coordinates of the point (0, 0) at
  *   the given zoom level relative to the bottom left corner of the domain.
- * @property {function} [tilesMaxBounds=null] This function takes a zoom level
+ * @property {Function} [tilesMaxBounds=null] This function takes a zoom level
  *   argument and returns an object with `x` and `y` in pixels which is used to
  *   crop the last row and column of tiles.  Note that if tiles wrap, only
  *   complete tiles in the wrapping direction(s) are supported, and this max
@@ -124,7 +124,7 @@ function m_getTileSubdomain(x, y, z, subdomains) {
  *
  * @private
  * @param {string} base The tile format string
- * @returns {function} A conversion function.
+ * @returns {Function} A conversion function.
  */
 function m_tileUrlFromTemplate(base) {
   var xPattern = /\$?\{[xX]\}/g,
@@ -855,7 +855,7 @@ var tileLayer = function (arg) {
    * @param {object} center The center tile.
    * @param {number} center.x
    * @param {number} center.y
-   * @returns {function} A function accepted by `Array.prototype.sort`.
+   * @returns {Function} A function accepted by `Array.prototype.sort`.
    */
   this._loadMetric = function (center) {
     return function (a, b) {
@@ -1609,8 +1609,8 @@ var tileLayer = function (arg) {
    * Get or set the tile url string or function.  If changed, load the new
    * tiles.
    *
-   * @param {string|function} [url] The new tile url.
-   * @returns {string|function|this}
+   * @param {string|Function} [url] The new tile url.
+   * @returns {string|Function|this}
    */
   this.url = function (url) {
     if (url === undefined) {

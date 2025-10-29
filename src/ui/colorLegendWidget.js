@@ -268,7 +268,7 @@ var colorLegendWidget = function (arg) {
    * @param {number[]} steps discrete input scale domain for d3 scale
    * @param {object} colorScale d3 scale for transform input into color
    * @param {number} width width of the svg element in pixel
-   * @param {function} getValue function that transforms raw domain into desired discrete range
+   * @param {Function} getValue function that transforms raw domain into desired discrete range
    */
   this._renderDiscreteColors = function (svg, steps, colorScale, width, getValue) {
     svg.selectAll('rect')

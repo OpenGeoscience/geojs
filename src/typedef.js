@@ -214,7 +214,7 @@
  * @property {boolean} boundDocumentHandlers `true` if the mouse is down and
  *      being tracked.
  * @property {Date} [start] The time when the action started.
- * @property {function} [handler] A function to call on every animation from
+ * @property {Function} [handler] A function to call on every animation from
  *      while the action is occurring.
  * @property {geo.mouseState} [momentum] The mouse location when a momentum
  *      action starts.

@@ -71,7 +71,7 @@ module.exports = [
   }, {
     files: ['src/**/*.js'],
     plugins: {
-      jsdoc,
+      jsdoc, 'jsdoc-overrides': require('./jsdoc/linting')
     },
     rules: {
       'jsdoc/check-types': ['warn', {
@@ -88,9 +88,13 @@ module.exports = [
       'jsdoc/check-param-names': 'off',
       'jsdoc/check-tag-names': 'off',
       'jsdoc/no-undefined-types': 'off',
+      'jsdoc/reject-any-type': 'off',
+      'jsdoc/reject-function-type': 'off',
       'jsdoc/require-param-description': 'off',
       'jsdoc/require-returns-description': 'off',
       'jsdoc/tag-lines': 'off',
+      'jsdoc/valid-types': 'off',
+      'jsdoc-overrides/valid-types': 'warn',
       'no-console': 'error',
     }
   }, {
@@ -104,6 +108,7 @@ module.exports = [
       'jsdoc/no-defaults': 'off',
       'jsdoc/no-multi-asterisks': 'off',
       'jsdoc/no-undefined-types': 'off',
+      'jsdoc/reject-function-type': 'off',
       'jsdoc/require-jsdoc': 'off',
       'jsdoc/require-param': 'off',
       'jsdoc/require-param-description': 'off',

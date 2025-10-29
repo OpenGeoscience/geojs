@@ -8,12 +8,12 @@ var feature = require('./feature');
  * @extends geo.feature.spec
  * @property {geo.colorObject[]} [colorRange] Color lookup table.  Default is
  *   9-step color table.
- * @property {function} [scale] A scale converts a input domain into the
+ * @property {Function} [scale] A scale converts a input domain into the
  *   the colorRange.  Default is `d3.scaleQuantize()`.
- * @property {function} [geoId] Given a geometry feature, return an identifier.
- * @property {function} [scalarId] Given a scalar element, return an
+ * @property {Function} [geoId] Given a geometry feature, return an identifier.
+ * @property {Function} [scalarId] Given a scalar element, return an
  *   identifier.
- * @property {function} [scalarValue] Given a scalar element, return a numeric
+ * @property {Function} [scalarValue] Given a scalar element, return a numeric
  *   values.
  */
 
@@ -82,7 +82,7 @@ var choroplethFeature = function (arg) {
    * @param {object[]} [data] An array of objects that are passed to the
    *   `scalarId` and `scalarValue` functions to get the associated information
    *   for each scalar.
-   * @param {function} [aggregator] The aggregator aggregates the scalar when
+   * @param {Function} [aggregator] The aggregator aggregates the scalar when
    *   there are multiple values with the same id. The default is `d3.mean`.
    * @returns {object[]|this} Either the current scalar data or the feature
    *   instance.
@@ -165,7 +165,7 @@ var choroplethFeature = function (arg) {
    * @param {string} [key] If defined, return a function for the named
    *    property.  Otherwise, return an object with a function for all defined
    *    properties.
-   * @returns {function|object} Either a function for the named property or an
+   * @returns {Function|object} Either a function for the named property or an
    *    object with functions for all defined properties.
    */
   this.choropleth.get = function (key) {
@@ -228,7 +228,7 @@ var choroplethFeature = function (arg) {
   /**
    * Set a choropleth scale's domain and range.
    *
-   * @param {function} valueAccessor A function that can be passed to
+   * @param {Function} valueAccessor A function that can be passed to
    *    `d3.extent`.
    * @returns {this}
    */

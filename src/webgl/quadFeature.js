@@ -123,7 +123,7 @@ var webgl_quadFeature = function (arg) {
    * function.
    *
    * @private
-   * @param {function} renderFunc Our own render function.
+   * @param {Function} renderFunc Our own render function.
    * @returns {vgl.mapper} a vgl mapper object.
    */
   function getVGLMapper(renderFunc) {
