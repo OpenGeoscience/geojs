@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenGeoscience/geojs"
+    "url": "https://github.com/OpenGeoscience/geojs.git"
   },
   "dependencies": {
     "canvas": "^3.0.0",
