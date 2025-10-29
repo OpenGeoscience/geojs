@@ -1426,7 +1426,7 @@ var map = function (arg) {
     }
 
     return m_this.boundsFromZoomAndCenter(m_zoom, m_center, m_rotation, gcs,
-                                          true);
+                                          true, true);
   };
 
   /**
