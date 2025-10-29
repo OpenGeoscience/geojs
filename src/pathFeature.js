@@ -6,7 +6,7 @@ var feature = require('./feature');
  *
  * @typedef {geo.feature.spec} geo.pathFeature.spec
  * @extends {geo.feature.spec}
- * @property {geo.geoPosition|function} [position] Position of the data.
+ * @property {geo.geoPosition|Function} [position] Position of the data.
  *   Default is (data).
  */
 
@@ -19,12 +19,12 @@ var feature = require('./feature');
  *
  * @typedef {geo.feature.styleSpec} geo.pathFeature.styleSpec
  * @extends geo.feature.styleSpec
- * @property {boolean|function} [stroke=true] True to stroke the path.
- * @property {geo.geoColor|function} [strokeColor='white'] Color to stroke each
+ * @property {boolean|Function} [stroke=true] True to stroke the path.
+ * @property {geo.geoColor|Function} [strokeColor='white'] Color to stroke each
  *   path.
- * @property {number|function} [strokeOpacity=1] Opacity for each path's
+ * @property {number|Function} [strokeOpacity=1] Opacity for each path's
  *   stroke.  Opacity is on a [0-1] scale.
- * @property {number|function} [strokeWidth=1] The weight of the path's stroke
+ * @property {number|Function} [strokeWidth=1] The weight of the path's stroke
  *   in pixels.
  */
 
@@ -53,9 +53,9 @@ var pathFeature = function (arg) {
   /**
    * Get/Set position.
    *
-   * @param {function|geo.geoPosition} [val] If not specified, return the
+   * @param {Function|geo.geoPosition} [val] If not specified, return the
    *    position accessor.  Otherwise, change the position accessor.
-   * @returns {this|function}
+   * @returns {this|Function}
    */
   this.position = function (val) {
     if (val === undefined) {

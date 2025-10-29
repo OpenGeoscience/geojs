@@ -256,7 +256,7 @@ $(function () {
    *    cycle across lines.  Without that prefix, these are applied in a cycle
    *    across vertices.  If neither { or , are in the value, then the value is
    *    used as is, uniformly.
-   * @return {string|function} the style string or function.
+   * @return {string|Function} the style string or function.
    */
   function getStyle(key, value) {
     if (value === undefined || value === null || value === '') {

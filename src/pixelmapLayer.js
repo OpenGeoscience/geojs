@@ -10,7 +10,7 @@ var util = require('./util');
  *
  * @typedef {geo.tileLayer.spec} geo.pixelmapLayer.spec
  * @extends {geo.tileLayer.spec}
- * @property {geo.geoColor|function} [color] The color that should be used
+ * @property {geo.geoColor|Function} [color] The color that should be used
  *   for each data element.  Data elements correspond to the indices in the
  *   pixel map. If an index is larger than the number of data elements, it will
  *   be transparent.  If there is more data than there are indices, it is

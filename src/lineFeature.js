@@ -9,9 +9,9 @@ var util = require('./util');
  *
  * @typedef {geo.feature.spec} geo.lineFeature.spec
  * @extends geo.feature.spec
- * @property {geo.geoPosition|function} [position] Position of the data.
+ * @property {geo.geoPosition|Function} [position] Position of the data.
  *   Default is (data).
- * @property {object|function} [line] Lines from the data.  Default is (data).
+ * @property {object|Function} [line] Lines from the data.  Default is (data).
  *   Typically, the data is an array of lines, each of which is an array of
  *   points.  Only lines that have at least two points are rendered.  The
  *   position function is called for each point as `position(linePoint,
@@ -25,39 +25,39 @@ var util = require('./util');
  *
  * @typedef {geo.feature.styleSpec} geo.lineFeature.styleSpec
  * @extends geo.feature.styleSpec
- * @property {geo.geoColor|function} [strokeColor] Color to stroke each line.
+ * @property {geo.geoColor|Function} [strokeColor] Color to stroke each line.
  *   The color can vary by point.
- * @property {number|function} [strokeOpacity] Opacity for each line stroke.
+ * @property {number|Function} [strokeOpacity] Opacity for each line stroke.
  *   The opacity can vary by point.  Opacity is on a [0-1] scale.
- * @property {number|function} [strokeWidth] The weight of the line stroke in
+ * @property {number|Function} [strokeWidth] The weight of the line stroke in
  *   pixels.  The width can vary by point.
- * @property {number|function} [strokeOffset] This is a value from -1 (left) to
+ * @property {number|Function} [strokeOffset] This is a value from -1 (left) to
  *   1 (right), with 0 being centered.  This can vary by point.
- * @property {string|function} [lineCap='butt'] One of 'butt', 'square', or
+ * @property {string|Function} [lineCap='butt'] One of 'butt', 'square', or
  *   'round'.  This can vary by point.
- * @property {string|function} [lineJoin='miter'] One of 'miter', 'bevel',
+ * @property {string|Function} [lineJoin='miter'] One of 'miter', 'bevel',
  *   'round', or 'miter-clip'.  This can vary by point.
- * @property {boolean|function} [closed=false] If true and the renderer
+ * @property {boolean|Function} [closed=false] If true and the renderer
  *   supports it, connect the first and last points of a line if the line has
  *   more than two points.  This applies per line (if a function, it is called
  *   with `(lineEntry, lineEntryIndex)`.
- * @property {number|function} [miterLimit=10] For lines of more than two
+ * @property {number|Function} [miterLimit=10] For lines of more than two
  *   segments that are mitered, if the miter length exceeds the `strokeWidth`
  *   divided by the sine of half the angle between segments, then a bevel join
  *   is used instead.  This is a single value that applies to all lines.  If a
  *   function, it is called with `(data)`.
- * @property {boolean|string|function} [uniformLine=false] Boolean indicating
+ * @property {boolean|string|Function} [uniformLine=false] Boolean indicating
  *   if each line has a uniform style (uniform stroke color, opacity, and
  *   width).  Can vary by line.  A value of `'drop'` will modify rendered
  *   vertex order by dropping duplicates and setting later values to zero
  *   opacity.  This can be faster but makes it so updating the style array
  *   can no longer be used.
- * @property {number|function} [antialiasing] Antialiasing distance in pixels.
+ * @property {number|Function} [antialiasing] Antialiasing distance in pixels.
  *   Values must be non-negative.  A value greater than 1 will produce a
  *   visible gradient.  This is a single value that applies to all lines.
- * @property {string|function} [debug] If 'debug', render lines in debug mode.
+ * @property {string|Function} [debug] If 'debug', render lines in debug mode.
  *   This is a single value that applies to all lines.
- * @property {number[]|function} [origin] Origin in map gcs coordinates used
+ * @property {number[]|Function} [origin] Origin in map gcs coordinates used
  *   for to ensure high precision drawing in this location.  When called as a
  *   function, this is passed the vertex positions as a single continuous array
  *   in map gcs coordinates.  It defaults to the first line's first vertex's
@@ -103,11 +103,11 @@ var lineFeature = function (arg) {
   /**
    * Get/set line accessor.
    *
-   * @param {object|function} [val] If not specified, return the current line
+   * @param {object|Function} [val] If not specified, return the current line
    *    accessor.  If specified, use this for the line accessor and return
    *    `this`.  If a function is given, the function is passed `(dataElement,
    *    dataIndex)` and returns an array of vertex elements.
-   * @returns {object|function|this} The current line accessor or this feature.
+   * @returns {object|Function|this} The current line accessor or this feature.
    */
   this.line = function (val) {
     if (val === undefined) {
@@ -123,11 +123,11 @@ var lineFeature = function (arg) {
   /**
    * Get/Set position accessor.
    *
-   * @param {geo.geoPosition|function} [val] If not specified, return the
+   * @param {geo.geoPosition|Function} [val] If not specified, return the
    *    current position accessor.  If specified, use this for the position
    *    accessor and return `this`.  If a function is given, this is called
    *    with `(vertexElement, vertexIndex, dataElement, dataIndex)`.
-   * @returns {geo.geoPosition|function|this} The current position or this
+   * @returns {geo.geoPosition|Function|this} The current position or this
    *    feature.
    */
   this.position = function (val) {
@@ -418,9 +418,9 @@ var lineFeature = function (arg) {
    *    units.  A value of zero will only remove perfectly collinear points.
    *    If not specified, this is set to a half display pixel at the map's
    *    current zoom level.
-   * @param {function} [posFunc] The function to
+   * @param {Function} [posFunc] The function to
    *    get the position of each vertex.
-   * @param {function} [lineFunc] The function to get
+   * @param {Function} [lineFunc] The function to get
    *    each line.
    * @returns {this}
    */

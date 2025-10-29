@@ -62,7 +62,7 @@ colorName = colorName.__esModule ? colorName.default : colorName;
  * @property {string} name The name of the color conversion.
  * @property {RegExp} regex A regex that, if it matches the color string, will
  *      cause the process function to be invoked.
- * @property {function} process A function that takes (`color`, `match`) with
+ * @property {Function} process A function that takes (`color`, `match`) with
  *      the original color string and the results of matching the regex using
  *      the regex's `exec` function.  It outputs a {@link geo.geoColorObject}
  *      color object or the original color string if there is still a parsing

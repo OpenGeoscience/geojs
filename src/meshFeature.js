@@ -180,7 +180,7 @@ var meshFeature = function (arg) {
    * @instance
    * @param {string|undefined} key The name of the mesh key or `undefined` to
    *    return an object with all keys as functions.
-   * @returns {object|function} A function related to the key, or an object
+   * @returns {object|Function} A function related to the key, or an object
    *    with all mesh keys, each of which is a function.
    */
   this.mesh.get = function (key) {
@@ -200,9 +200,9 @@ var meshFeature = function (arg) {
    * Get/Set position accessor.  This is identical to getting or setting the
    * `position` style.
    *
-   * @param {array|function} [val] If specified, set the position style.  If
+   * @param {array|Function} [val] If specified, set the position style.  If
    *    `undefined`, return the current value.
-   * @returns {array|function|this} Either the position style or this.
+   * @returns {array|Function|this} Either the position style or this.
    */
   this.position = function (val) {
     if (val === undefined) {

@@ -7,7 +7,7 @@ var pointFeature = require('./pointFeature');
  *
  * @typedef {geo.feature.spec} geo.markerFeature.spec
  * @extends geo.feature.spec
- * @property {geo.geoPosition|function} [position] Position of the data.
+ * @property {geo.geoPosition|Function} [position] Position of the data.
  *   Default is (data).
  * @property {geo.markerFeature.styleSpec} [style] Style object with default
  *   style options.
@@ -18,40 +18,40 @@ var pointFeature = require('./pointFeature');
  *
  * @typedef {geo.feature.styleSpec} geo.markerFeature.styleSpec
  * @extends geo.feature.styleSpec
- * @property {number|function} [radius=5] Radius of each marker in pixels.
+ * @property {number|Function} [radius=5] Radius of each marker in pixels.
  *   This includes the stroke width if `strokeOffset` is -1, excludes it if
  *   `strokeOffset` is 1, and includes half the stroke width if `strokeOffset`
  *    is 0.  Note that is `radiusIncludesStroke` is `false`, this never
  *   includes the stroke width.
- * @property {geo.geoColor|function} [strokeColor] Color to stroke each marker.
- * @property {number|function} [strokeOpacity=1] Opacity for each marker's
+ * @property {geo.geoColor|Function} [strokeColor] Color to stroke each marker.
+ * @property {number|Function} [strokeOpacity=1] Opacity for each marker's
  *   stroke.  Opacity is on a [0-1] scale.  Set this or `strokeWidth` to zero
  *   to not have a stroke.
- * @property {number|function} [strokeWidth=1.25] The weight of the marker's
+ * @property {number|Function} [strokeWidth=1.25] The weight of the marker's
  *   stroke in pixels.  Set this or `strokeOpacity` to zero to not have a
  *   stroke.
- * @property {number|function} [strokeOffset=-1] The position of the stroke
+ * @property {number|Function} [strokeOffset=-1] The position of the stroke
  *   compared to the radius.  This can only be -1, 0, or 1 (the sign of the
  *   value is used).
- * @property {boolean|function} [radiusIncludesStroke=true] If truthy or
+ * @property {boolean|Function} [radiusIncludesStroke=true] If truthy or
  *   undefined, the `radius` includes the `strokeWidth` based on the
  *   `strokeOffset`.  If defined and falsy, the radius does not include the
  *   `strokeWidth`.
- * @property {geo.geoColor|function} [fillColor] Color to fill each marker.
- * @property {number|function} [fillOpacity=1] Opacity for each marker.
+ * @property {geo.geoColor|Function} [fillColor] Color to fill each marker.
+ * @property {number|Function} [fillOpacity=1] Opacity for each marker.
  *   Opacity is on a [0-1] scale.  Set to zero to have no fill.
- * @property {number|function} [symbol=0] One of the predefined symbol numbers.
+ * @property {number|Function} [symbol=0] One of the predefined symbol numbers.
  *   This is one of `geo.markerFeature.symbols`.
- * @property {number|number[]|function} [symbolValue=0] A value the affects the
+ * @property {number|number[]|Function} [symbolValue=0] A value the affects the
  *   appearance of the symbol.  Some symbols can take an array of numbers.
- * @property {number|function} [rotation=0] The rotation of the symbol in
+ * @property {number|Function} [rotation=0] The rotation of the symbol in
  *   clockwise radians.
- * @property {geo.markerFeature.scaleMode|function} [scaleWithZoom='none'] This
+ * @property {geo.markerFeature.scaleMode|Function} [scaleWithZoom='none'] This
  *   determines if the fill, stroke, or both scale with zoom.  If set, the
  *   values for radius and strokeWidth are the values at zoom-level zero.
- * @property {boolean|function} [rotateWithMap=false] If truthy, rotate symbols
+ * @property {boolean|Function} [rotateWithMap=false] If truthy, rotate symbols
  *   with the map.  If falsy, symbol orientation is absolute.
- * @property {number[]|function} [origin] Origin in map gcs coordinates used
+ * @property {number[]|Function} [origin] Origin in map gcs coordinates used
  *   to ensure high precision drawing in this location.  When called as a
  *   function, this is passed the maker positions as a single continuous array
  *   in map gcs coordinates.  It defaults to the first marker's position.

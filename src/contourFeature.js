@@ -19,17 +19,17 @@ var meshFeature = require('./meshFeature');
  *
  * @typedef {geo.feature.styleSpec} geo.contourFeature.styleSpec
  * @extends geo.feature.styleSpec
- * @property {geo.geoPosition|function} [position=data] The position of each
+ * @property {geo.geoPosition|Function} [position=data] The position of each
  *    data element.  This defaults to just using `x`, `y`, and `z` properties
  *    of the data element itself.  The position is in the feature's gcs
  *    coordinates.
- * @property {number|function} [value=data.z] The value of each data element.
+ * @property {number|Function} [value=data.z] The value of each data element.
  *    This defaults to the `z` property of the data elements.  If the value of
  *    a grid point is `null` or `undefined`, the point and elements that use
  *    that point won't be included in the results.
- * @property {number|function} [opacity=1] The opacity for the whole feature on
+ * @property {number|Function} [opacity=1] The opacity for the whole feature on
  *    a scale of 0 to 1.
- * @property {number[]|function} [origin] Origin in map gcs coordinates used
+ * @property {number[]|Function} [origin] Origin in map gcs coordinates used
  *   for to ensure high precision drawing in this location.  When called as a
  *   function, this is passed the vertex positions as a single continuous array
  *   in map gcs coordinates.  It defaults to the first vertex used in the

@@ -563,7 +563,7 @@ var feature = function (arg) {
    * @instance
    * @param {string} [key] If defined, return a function for the named style.
    *    Otherwise, return an object with a function for all defined styles.
-   * @returns {function|object} Either a function for the named style or an
+   * @returns {Function|object} Either a function for the named style or an
    *    object with functions for all defined styles.
    */
   this.style.get = function (key) {
@@ -965,7 +965,7 @@ var feature = function (arg) {
    *
    * @param {string} event An event from {@link geo.event} or a user-defined
    *   value.
-   * @param {function} handler A function that is called when `event` is
+   * @param {Function} handler A function that is called when `event` is
    *   triggered.  The function is passed a {@link geo.event} object.
    * @returns {this}
    */

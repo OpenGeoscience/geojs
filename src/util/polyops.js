@@ -493,7 +493,7 @@ function generalOperationProcess(op, poly1, poly2, opts) {
  * @private
  * @param {string} op The operation to handle.  One of union, intersect,
  *    difference, or xor.
- * @returns {function} a function for the polygons.
+ * @returns {Function} a function for the polygons.
  */
 function generalOperation(op) {
   return (poly1, poly2, opts) => generalOperationProcess(op, poly1, poly2, opts);

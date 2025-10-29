@@ -21,7 +21,7 @@ describe('webglContour', function () {
    *    url: the url to load.  Defaults to oahu.json.
    *    range: one of false, true, 'nonlinear', or 'iso'.  Default false.
    *    stepped: boolean, default true.
-   * @param {function} done: function to call when the test is complete.
+   * @param {Function} done: function to call when the test is complete.
    */
   function testContour(imageName, opts, done) {
     var mapOptions = {center: {x: -157.965, y: 21.482}, zoom: 10};

@@ -163,7 +163,7 @@ var util = {
    * Otherwise, return a function that returns the argument.
    *
    * @param {object} f An object that might be a function.
-   * @returns {function} A function.  Either `f` or a function that returns
+   * @returns {Function} A function.  Either `f` or a function that returns
    *    `f`.
    * @memberof geo.util
    */

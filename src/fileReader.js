@@ -66,10 +66,10 @@ var fileReader = function (arg) {
    * @param {File|Blob|string|object} file This is either a `File` object, a
    *    `Blob` object, a string representation of a file, or an object
    *    representing data from a file.
-   * @param {function} [done] An optional callback function when the read is
+   * @param {Function} [done] An optional callback function when the read is
    *    complete.  This is called with `false` on error or the object that was
    *    read and parsed by the reader.
-   * @param {function} [progress] A function which is passed `ProgressEvent`
+   * @param {Function} [progress] A function which is passed `ProgressEvent`
    *    information from a `FileReader`.  This includes `loaded` and `total`
    *    each with a number of bytes.
    * @returns {Promise} A `Promise` that resolves with object parsed by the
@@ -89,9 +89,9 @@ var fileReader = function (arg) {
   /**
    * Return a `FileReader` with handlers attached.
    *
-   * @param {function} done A callback that receives either the string read
+   * @param {Function} done A callback that receives either the string read
    *    from the file or a `DOMException` with an error.
-   * @param {function} [progress] A function which is passed `ProgressEvent`
+   * @param {Function} [progress] A function which is passed `ProgressEvent`
    *    information from a `FileReader`.  This includes `loaded` and `total`
    *    each with a number of bytes.
    * @returns {FileReader} The `FileReader` with done and progress handles
@@ -113,9 +113,9 @@ var fileReader = function (arg) {
    * when finished or an error object if unsuccessful.
    *
    * @param {File|Blob} file A `File` or `Blob` object to read.
-   * @param {function} done A callback that receives either the string read
+   * @param {Function} done A callback that receives either the string read
    *    from the file or a `DOMException` with an error.
-   * @param {function} [progress] A function which is passed `ProgressEvent`
+   * @param {Function} [progress] A function which is passed `ProgressEvent`
    *    information from a `FileReader`.  This includes `loaded` and `total`
    *    each with a number of bytes.
    */

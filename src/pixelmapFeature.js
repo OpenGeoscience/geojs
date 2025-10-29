@@ -8,16 +8,16 @@ var util = require('./util');
  *
  * @typedef {geo.feature.spec} geo.pixelmapFeature.spec
  * @extends geo.feature.spec
- * @property {string|function|HTMLImageElement} [url] URL of a pixel map or an
+ * @property {string|Function|HTMLImageElement} [url] URL of a pixel map or an
  *   HTML Image element.  The rgb data is interpreted as an index of the form
  *   0xbbggrr.  The alpha channel is ignored.  An index of 0xffffff is treated
  *   as a no-data value for hit-tests.
- * @property {geo.geoColor|function} [color] The color that should be used
+ * @property {geo.geoColor|Function} [color] The color that should be used
  *   for each data element.  Data elements correspond to the indices in the
  *   pixel map. If an index is larger than the number of data elements, it will
  *   be transparent.  If there is more data than there are indices, it is
  *   ignored.
- * @property {geo.geoPosition|function} [position] Position of the image.
+ * @property {geo.geoPosition|Function} [position] Position of the image.
  *   Default is (data).  The position is an Object which specifies the corners
  *   of the quad: ll, lr, ur, ul.  At least two opposite corners must be
  *   specified.  The corners do not have to physically correspond to the order
@@ -62,11 +62,11 @@ var pixelmapFeature = function (arg) {
   /**
    * Get/Set position accessor.
    *
-   * @param {geo.geoPosition|function} [val] If not specified, return the
+   * @param {geo.geoPosition|Function} [val] If not specified, return the
    *    current position accessor.  If specified, use this for the position
    *    accessor and return `this`.  See {@link geo.quadFeature.position} for
    *    for details on this position.
-   * @returns {geo.geoPosition|function|this}
+   * @returns {geo.geoPosition|Function|this}
    */
   this.position = function (val) {
     if (val === undefined) {
@@ -82,10 +82,10 @@ var pixelmapFeature = function (arg) {
   /**
    * Get/Set url accessor.
    *
-   * @param {string|function} [val] If not specified, return the current url
+   * @param {string|Function} [val] If not specified, return the current url
    *    accessor.  If specified, use this for the url accessor and return
    *    `this`.
-   * @returns {string|function|this}
+   * @returns {string|Function|this}
    */
   this.url = function (val) {
     if (val === undefined) {
@@ -102,9 +102,9 @@ var pixelmapFeature = function (arg) {
   /**
    * Get/Set color accessor.
    *
-   * @param {geo.geoColor|function} [val] The new color map accessor or
+   * @param {geo.geoColor|Function} [val] The new color map accessor or
    *    `undefined` to get the current accessor.
-   * @returns {geo.geoColor|function|this}
+   * @returns {geo.geoColor|Function|this}
    */
   this.color = function (val) {
     if (val === undefined) {

@@ -11,7 +11,7 @@ var $ = require('jquery');
  *   high number can increase memory.  Ideally, it should reflect the number of
  *   items that are kept in memory elsewhere.  If `needed` is `null`, this is
  *   ignored.
- * @property {function} [needed=null] If set, this function is passed a
+ * @property {Function} [needed=null] If set, this function is passed a
  *   Deferred object and must return a truthy value if the object is still
  *   needed.
  */
@@ -134,7 +134,7 @@ var fetchQueue = function (options) {
    * Add a Deferred object to the queue.
    *
    * @param {jQuery.Deferred} defer Deferred object to add to the queue.
-   * @param {function} callback A function to call when the item's turn is
+   * @param {Function} callback A function to call when the item's turn is
    *  granted.
    * @param {boolean} atEnd If falsy, add the item to the front of the queue
    *  if batching is turned off or at the end of the current batch if it is

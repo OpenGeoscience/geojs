@@ -29,7 +29,7 @@ require('./scaleWidget.styl');
  * @property {string|geo.gui.scaleWidget.unit[]} [units='si'] One of either
  *   `'si'` or `'miles'` or an array of units in ascending order.  See the
  *   `UnitsTable` for examples.
- * @property {function} [distance] The function used to compute the length of
+ * @property {Function} [distance] The function used to compute the length of
  *   the scale bar.  This defaults to `transform.sphericalDistance` for all
  *   maps except those with a gcs of `'+proj=longlat +axis=enu'`, where
  *   `math.sqrt(util.distance2dSquared(pt1, pt2))` is used instead.

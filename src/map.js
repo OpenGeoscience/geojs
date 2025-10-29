@@ -38,7 +38,7 @@ var sceneObject = require('./sceneObject');
  * @property {number} [max=16] Maximum zoom level.
  * @property {boolean} [discreteZoom=false] If `true`, only allow integer zoom
  *   levels.  `false` for any zoom level.
- * @property {boolean|function} [allowRotation=true] `false` prevents rotation,
+ * @property {boolean|Function} [allowRotation=true] `false` prevents rotation,
  *   `true` allows any rotation.  If a function, the function is called with a
  *   rotation (angle in radians) and returns a valid rotation.  This can be
  *   used to constrain the rotation to a range or specific values.
@@ -305,12 +305,12 @@ var map = function (arg) {
    * Get/set the `allowRotation` setting.  If changed, adjust the map as
    * needed.
    *
-   * @param {boolean|function} [allowRotation] The new `allowRotation` value.
+   * @param {boolean|Function} [allowRotation] The new `allowRotation` value.
    *    `false` prevents rotation, `true` allows any rotation.  If a function,
    *    the function is called with a rotation (angle in radians) and returns a
    *    valid rotation (this can be used to constrain the rotation to a range
    *    or to specific values).
-   * @returns {boolean|function|this}
+   * @returns {boolean|Function|this}
    */
   this.allowRotation = function (allowRotation) {
     if (allowRotation === undefined) {
@@ -1128,16 +1128,16 @@ var map = function (arg) {
    *    to a new zoom level.
    * @param {number} [opts.rotation] A new map rotation.
    * @param {number} [opts.duration] Transition duration in milliseconds.
-   * @param {function} [opts.ease] Easing function for the transition.  This is
+   * @param {Function} [opts.ease] Easing function for the transition.  This is
    *    in the style of a d3 easing function.
-   * @param {function} [opts.interp] Function to use when interpolating
+   * @param {Function} [opts.interp] Function to use when interpolating
    *    between values.  This gets passed two arrays, the start and end values
    *    for [`x`, `y`, `z` or `zoom`, `rotation`], and returns a function that,
    *    when passed a time value returns an array of the interpolated [`x`,
    *    `y`, `z` or `zoom`, `rotation`] values.
    * @param {boolean} [opts.zCoord] If `true`, convert zoom values to z values
    *    for interpolation.
-   * @param {function} [opts.done] If specified, call this function when a
+   * @param {Function} [opts.done] If specified, call this function when a
    *    transition completes.  The function is called with an object that
    *    contains `cancel`: a boolean if the transition was canceled, `source`:
    *    a value based on what canceled a transition, `transition`: the current
@@ -1187,7 +1187,7 @@ var map = function (arg) {
      *
      * @param {array} p0 An array of numbers to interpolate from.
      * @param {array} p1 An array of numbers to interpolate to.
-     * @returns {function} A function that, given `t`, returns an array of
+     * @returns {Function} A function that, given `t`, returns an array of
      *      interpolated values.
      * @private
      */
@@ -1948,7 +1948,7 @@ var map = function (arg) {
    * callbacks will be called in a single time slice, providing better
    * synchronization.
    *
-   * @param {function} callback Function to call during the animation frame.
+   * @param {Function} callback Function to call during the animation frame.
    *    It is called with an animation epoch, exactly as
    *    `requestAnimationFrame`.
    * @param {boolean|'remove'} [action] Falsy to only add the callback if

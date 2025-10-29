@@ -104,10 +104,10 @@ var svg_vectorFeature = function (arg) {
    * Add marker styles for vector arrows.
    *
    * @param {object[]} data The vector data array.
-   * @param {function} stroke The stroke accessor.
-   * @param {function} opacity The opacity accessor.
-   * @param {function} originStyle The marker style for the vector head.
-   * @param {function} endStyle The marker style for the vector tail.
+   * @param {Function} stroke The stroke accessor.
+   * @param {Function} opacity The opacity accessor.
+   * @param {Function} originStyle The marker style for the vector head.
+   * @param {Function} endStyle The marker style for the vector tail.
    */
   function updateMarkers(data, stroke, opacity, originStyle, endStyle) {
     //this allows for multiple vectorFeature in a layer

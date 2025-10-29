@@ -245,7 +245,7 @@ function updateSelect() {
  * @param {string|number|undefined} defaultValue: the value to return if the
  *      specified value is null, undefined, or the empty string.
  * @param {boolean} isString: if falsy, convert values to floats.
- * @returns {string|number|function}: a converted value.
+ * @returns {string|number|Function}: a converted value.
  */
 function getStyleParam(val, defaultValue, isString) {
   'use strict';

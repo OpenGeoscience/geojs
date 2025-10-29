@@ -30,7 +30,7 @@ var object = function () {
    * resolved.  If there are no outstanding promises, this is invoked
    * synchronously.
    *
-   * @param {function} handler A function taking no arguments.
+   * @param {Function} handler A function taking no arguments.
    * @returns {this}
    */
   this.onIdle = function (handler) {
@@ -132,7 +132,7 @@ var object = function () {
    *
    * @param {string} event An event from {@link geo.event} or a user-defined
    *   value.
-   * @param {function} handler A function that is called when `event` is
+   * @param {Function} handler A function that is called when `event` is
    *   triggered.  The function is passed a {@link geo.event} object.
    * @returns {this}
    */
@@ -160,9 +160,9 @@ var object = function () {
    *
    * @param {string} event An event from {@link geo.event} or a user-defined
    *   value.
-   * @param {function} handler A function that is called when `event` is
+   * @param {Function} handler A function that is called when `event` is
    *   triggered.  The function is passed a {@link geo.event} object.
-   * @returns {function} The actual bound handler.  This is a wrapper around
+   * @returns {Function} The actual bound handler.  This is a wrapper around
    *   the handler that was passed to the function.
    */
   this.geoOnce = function (event, handler) {
@@ -178,7 +178,7 @@ var object = function () {
    * Report if an event handler is bound to this object.
    *
    * @param {string|string[]} event An event or list of events to check.
-   * @param {function} [handler] A function that might be bound.  If
+   * @param {Function} [handler] A function that might be bound.  If
    *   `undefined`, this will report `true` if there is any handler for the
    *   specified event.
    * @returns {boolean} true if any of the specified events are bound to the

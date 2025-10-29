@@ -6,7 +6,7 @@ var feature = require('./feature');
  *
  * @typedef {geo.feature.spec} geo.pointFeature.spec
  * @extends geo.feature.spec
- * @property {geo.geoPosition|function} [position] Position of the data.
+ * @property {geo.geoPosition|Function} [position] Position of the data.
  *   Default is (data).
  * @property {geo.pointFeature.styleSpec} [style] Style object with default
  *   style options.
@@ -32,19 +32,19 @@ var feature = require('./feature');
  *
  * @typedef {geo.feature.styleSpec} geo.pointFeature.styleSpec
  * @extends geo.feature.styleSpec
- * @property {number|function} [radius=5] Radius of each point in pixels.  This
+ * @property {number|Function} [radius=5] Radius of each point in pixels.  This
  *   is the fill radius inside of the stroke.
- * @property {boolean|function} [stroke=true] True to stroke point.
- * @property {geo.geoColor|function} [strokeColor] Color to stroke each point.
- * @property {number|function} [strokeOpacity=1] Opacity for each point's
+ * @property {boolean|Function} [stroke=true] True to stroke point.
+ * @property {geo.geoColor|Function} [strokeColor] Color to stroke each point.
+ * @property {number|Function} [strokeOpacity=1] Opacity for each point's
  *   stroke.  Opacity is on a [0-1] scale.
- * @property {number|function} [strokeWidth=1.25] The weight of the point's
+ * @property {number|Function} [strokeWidth=1.25] The weight of the point's
  *   stroke in pixels.
- * @property {boolean|function} [fill=true] True to fill point.
- * @property {geo.geoColor|function} [fillColor] Color to fill each point.
- * @property {number|function} [fillOpacity=1] Opacity for each point.  Opacity
+ * @property {boolean|Function} [fill=true] True to fill point.
+ * @property {geo.geoColor|Function} [fillColor] Color to fill each point.
+ * @property {number|Function} [fillOpacity=1] Opacity for each point.  Opacity
  *   is on a [0-1] scale.
- * @property {number[]|function} [origin] Origin in map gcs coordinates used
+ * @property {number[]|Function} [origin] Origin in map gcs coordinates used
  *   for to ensure high precision drawing in this location.  When called as a
  *   function, this is passed the point positions as a single continuous array
  *   in map gcs coordinates.  It defaults to the first point's position.
@@ -215,11 +215,11 @@ var pointFeature = function (arg) {
   /**
    * Get/Set position.
    *
-   * @param {function|geo.geoPosition} [val] If not specified, return the
+   * @param {Function|geo.geoPosition} [val] If not specified, return the
    *    position accessor, which is guaranteed to be a function.  If specified,
    *    wrap the value in an function that handles clustering if it is enabled
    *    and set the position accessor to that function.
-   * @returns {this|function}
+   * @returns {this|Function}
    */
   this.position = function (val) {
     if (val === undefined) {

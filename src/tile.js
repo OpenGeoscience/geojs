@@ -135,7 +135,7 @@ var tile = function (spec) {
   /**
    * Add a method to be called with the data when the ajax fails.
    *
-   * @param {function} method The rejection handler.
+   * @param {Function} method The rejection handler.
    * @returns {this}
    */
   this.catch = function (method) {

@@ -24,29 +24,29 @@ var util = require('./util');
  * @extends geo.feature.styleSpec
  * @extends geo.textFeature.styleSpec
  * @extends geo.lineFeature.styleSpec
- * @property {geo.geoPosition|function} [position=data] The position of each
+ * @property {geo.geoPosition|Function} [position=data] The position of each
  *    data element.  This defaults to just using `x`, `y`, and `z` properties
  *    of the data element itself.  The position is in the feature's gcs
  *    coordinates.
- * @property {number|function} [value=data.z] The value of each data element.
+ * @property {number|Function} [value=data.z] The value of each data element.
  *    This defaults to the `z` property of the data elements.  If the value of
  *    a grid point is `null` or `undefined`, the point and elements that use
  *    that point won't be included in the results.
- * @property {geo.geoColor|function} [strokeColor='black'] Color to stroke each
+ * @property {geo.geoColor|Function} [strokeColor='black'] Color to stroke each
  *    line.
- * @property {number|function} [strokeWidth] The weight of the line stroke in
+ * @property {number|Function} [strokeWidth] The weight of the line stroke in
  *    pixels.  This defaults to the line value's level + 0.5.
- * @property {boolean|function} [rotateWithMap=true] Rotate label text when the
+ * @property {boolean|Function} [rotateWithMap=true] Rotate label text when the
  *    map rotates.
- * @property {number|function} [rotation] Text rotation in radians.  This
+ * @property {number|Function} [rotation] Text rotation in radians.  This
  *    defaults to the label oriented so that top of the text is toward the
  *    higher value.  There is a utility function that can be used for common
  *    rotation preferences.  See {@link geo.isolineFeature#rotationFunction}.
  *    For instance, `rotation=geo.isolineFeature.rotationFunction('map')`.
- * @property {string|function} [fontSize='12px'] The font size.
- * @property {geo.geoColor|function} [textStrokeColor='white'] Text
+ * @property {string|Function} [fontSize='12px'] The font size.
+ * @property {geo.geoColor|Function} [textStrokeColor='white'] Text
  *    stroke color.  This adds contrast between the label and the isoline.
- * @property {geo.geoColor|function} [textStrokeWidth=2] Text stroke width in
+ * @property {geo.geoColor|Function} [textStrokeWidth=2] Text stroke width in
  *    pixels.
  */
 
@@ -74,27 +74,27 @@ var util = require('./util');
  *    used to style lines distinctly.  Most isolines will be level 0.  If
  *    `levels` is an array of [`n0`, `n1`, ...], every `n0`th line will be
  *    level 1, every `n0 * n1`th line will be level 2, etc.
- * @property {boolean|function} [label] Truthy if a label should be shown for a
+ * @property {boolean|Function} [label] Truthy if a label should be shown for a
  *    isoline value.  If a function, this is called with
  *    `(geo.isolineFeature.valueEntry, index)`.  This defaults to
  *    `valueEntry.level >= 1`.
- * @property {string|function} [labelText] Text for a label.  If a function,
+ * @property {string|Function} [labelText] Text for a label.  If a function,
  *    this is called with `(geo.isolineFeature.valueEntry, index)`.  This
  *    defaults to `valueEntry.value`.
- * @property {number|function} [labelSpacing=200] Minimum distance between
+ * @property {number|Function} [labelSpacing=200] Minimum distance between
  *    labels on an isoline in screen pixels.  If a function, this is called
  *    with `(geo.isolineFeature.valueEntry, index)`.
- * @property {number|function} [labelOffset=0] Offset for labels along an
+ * @property {number|Function} [labelOffset=0] Offset for labels along an
  *    isoline relative to where they would be placed by default on a scale of
  *    [-0.5, 0.5].  +/- 1 would move the text to the next repeated occurrence
  *    of the label.  If a function, this is called with
  *    `(geo.isolineFeature.valueEntry, index)`.
- * @property {number|function} [labelViewport=10000] If the main position of a
+ * @property {number|Function} [labelViewport=10000] If the main position of a
  *    label would be further than this many pixels from the current viewport,
  *    don't create it.  This prevents creating an excessive number of labels
  *    when zoomed in, but requires regenerating labels occasionally when
  *    panning.  If <= 0, all labels are generated regardless of location.
- * @property {boolean|function} [labelAutoUpdate=true] If truthy, when the map
+ * @property {boolean|Function} [labelAutoUpdate=true] If truthy, when the map
  *    is panned (including zoom, rotation, etc.), periodically regenerate
  *    labels.  This uses an internal function that has a threshold based on a
  *    fixed change in zoom, size, and other parameters.  Set `labelAutoUpdate`
@@ -867,7 +867,7 @@ var isolineFeature = function (arg) {
  *   text so it is aligned to the isoline and biased toward the top of the
  *   display screen.
  * @param {geo.map} [map] The parent map.  Required for `screen` mode.
- * @returns {function} A function for the rotation style.
+ * @returns {Function} A function for the rotation style.
  */
 isolineFeature.rotationFunction = function (mode, map) {
   var functionList = {

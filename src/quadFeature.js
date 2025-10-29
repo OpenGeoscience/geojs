@@ -28,7 +28,7 @@ var feature = require('./feature');
  *
  * @typedef {geo.feature.spec} geo.quadFeature.spec
  * @extends geo.feature.spec
- * @property {geo.quadFeature.position|function} [position] Position of the
+ * @property {geo.quadFeature.position|Function} [position] Position of the
  *   quad.  Default is (data).  The position specifies the corners of the quad:
  *   ll, lr, ur, ul.  At least two opposite corners must be specified.   The
  *   corners do not have to physically correspond to the order specified, but
@@ -58,27 +58,27 @@ var feature = require('./feature');
  *
  * @typedef {geo.feature.styleSpec} geo.quadFeature.styleSpec
  * @extends geo.feature.styleSpec
- * @property {geo.geoColor|function} [color] Color for quads without images.
+ * @property {geo.geoColor|Function} [color] Color for quads without images.
  *   Default is white (`{r: 1, g: 1, b: 1}`).
- * @property {number|function} [opacity=1] Opacity for the quads.
- * @property {number|function} [depth=0] Default z-coordinate for positions
+ * @property {number|Function} [opacity=1] Opacity for the quads.
+ * @property {number|Function} [depth=0] Default z-coordinate for positions
  *   that don't explicitly specify one.
- * @property {boolean|function} [drawOnAsyncResourceLoaded=true] Redraw quads
+ * @property {boolean|Function} [drawOnAsyncResourceLoaded=true] Redraw quads
  *   when images or videos are loaded after initial render.
- * @property {Image|string|function} [image] Image for each data item.  If
+ * @property {Image|string|Function} [image] Image for each data item.  If
  *   falsy and `video` is also falsy, the quad is a solid color.  Default is
  *   (data).image.
- * @property {HTMLVideoElement|string|function} [video] Video for each data
+ * @property {HTMLVideoElement|string|Function} [video] Video for each data
  *   item.  If falsy and `image` is also falsy, the quad is a solid color.
  *   Default is (data).video.
- * @property {boolean|function} [delayRenderWhenSeeking=true] If any video has a
+ * @property {boolean|Function} [delayRenderWhenSeeking=true] If any video has a
  *   truthy value and is seeking, delaying rendering the entire feature.  This
  *   prevents blinking when seeking a playing video, but may cause stuttering
  *   when there are multiple videos.
- * @property {geo.geoColor|function} [previewColor=null] If specified, a color
+ * @property {geo.geoColor|Function} [previewColor=null] If specified, a color
  *   to show on image and video quads while waiting for the image or video to
  *   load.
- * @property {Image|string|function} [previewImage=null] If specified, an image
+ * @property {Image|string|Function} [previewImage=null] If specified, an image
  *   to show on image quads while waiting for the quad-specific image to load.
  *   This will only be shown if it (the preview image) is already loaded.
  */
@@ -258,7 +258,7 @@ var quadFeature = function (arg) {
    * Get/Set position.
    *
    * @memberof geo.quadFeature
-   * @param {object|function} [val] Object or function that returns the
+   * @param {object|Function} [val] Object or function that returns the
    *    position of each quad.  `undefined` to get the current position value.
    * @returns {geo.quadFeature|this}
    */
@@ -278,9 +278,9 @@ var quadFeature = function (arg) {
    * complete information for the quad.  This generates missing corners and z
    * values.
    *
-   * @param {function} posFunc A function to call to get the position of a data
+   * @param {Function} posFunc A function to call to get the position of a data
    *   item.  It is passed (d, i).
-   * @param {function} depthFunc A function to call to get the z-value of a
+   * @param {Function} depthFunc A function to call to get the z-value of a
    *   data item.  It is passed (d, i).
    * @param {object} d A data item.  Used to fetch position and possibly depth.
    * @param {number} i The index within the data.  Used to fetch position and

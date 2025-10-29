@@ -82,7 +82,7 @@ ClusterTree.prototype.count = function () {
  * arguments to arguments the point object and the zoom level:
  * `func.call(this, point, zoom)`.
  *
- * @param {function} func The function to call.
+ * @param {Function} func The function to call.
  */
 ClusterTree.prototype.each = function (func) {
   var i;

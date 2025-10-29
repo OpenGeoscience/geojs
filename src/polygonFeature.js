@@ -7,9 +7,9 @@ var transform = require('./transform');
  *
  * @typedef {geo.feature.spec} geo.polygonFeature.spec
  * @extends geo.feature.spec
- * @property {geo.geoPosition|function} [position] Position of the data.
+ * @property {geo.geoPosition|Function} [position] Position of the data.
  *   Default is (data).
- * @property {geo.polygon|function} [polygon] Polygons from the data.  Default
+ * @property {geo.polygon|Function} [polygon] Polygons from the data.  Default
  *   (data).
  * @property {geo.polygonFeature.styleSpec} [style] Style object with default
  *   style options.
@@ -20,17 +20,17 @@ var transform = require('./transform');
  *
  * @typedef {geo.lineFeature.styleSpec} geo.polygonFeature.styleSpec
  * @extends geo.lineFeature.styleSpec
- * @property {boolean|function} [fill=true] True to fill polygon.
- * @property {geo.geoColor|function} [fillColor] Color to fill each polygon.
+ * @property {boolean|Function} [fill=true] True to fill polygon.
+ * @property {geo.geoColor|Function} [fillColor] Color to fill each polygon.
  *   The color can vary by vertex.
- * @property {number|function} [fillOpacity] Opacity for each polygon.  The
+ * @property {number|Function} [fillOpacity] Opacity for each polygon.  The
  *   opacity can vary by vertex.  Opacity is on a [0-1] scale.
- * @property {boolean|function} [stroke=false] True to stroke polygon.
- * @property {boolean|function} [uniformPolygon=false] Boolean indicating if
+ * @property {boolean|Function} [stroke=false] True to stroke polygon.
+ * @property {boolean|Function} [uniformPolygon=false] Boolean indicating if
  *   each polygon has a uniform style (uniform fill color, fill opacity, stroke
  *   color, and stroke opacity).  Can vary by polygon.
- * @property {boolean|function} [closed=true] Ignored.  Always `true`.
- * @property {number[]|function} [origin] Origin in map gcs coordinates used
+ * @property {boolean|Function} [closed=true] Ignored.  Always `true`.
+ * @property {number[]|Function} [origin] Origin in map gcs coordinates used
  *   for to ensure high precision drawing in this location.  When called as a
  *   function, this is passed an array of items, each of which has a vertices
  *   property that is a single continuous array in map gcs coordinates.  It
@@ -104,9 +104,9 @@ var polygonFeature = function (arg) {
    *
    * @private
    * @param {object[]} [data] The data to process.
-   * @param {function} [posFunc] The function to
+   * @param {Function} [posFunc] The function to
    *    get the position of each vertex.
-   * @param {function} [polyFunc] The function to
+   * @param {Function} [polyFunc] The function to
    *    get each polygon.
    * @returns {geo.polygonObject[]} An array of polygon positions.  Each has
    *    `outer` and `inner` if it has any coordinates, or is `undefined`.
@@ -194,7 +194,7 @@ var polygonFeature = function (arg) {
    *    the stroke.  This should be m_this.style(<name of style>) and not
    *    m_this.style.get(<name of style>), as the result is more efficient if
    *    the style is not a function.
-   * @returns {object|function} A style that can be used for the stroke.
+   * @returns {object|Function} A style that can be used for the stroke.
    * @private
    */
   function linePolyStyle(styleValue) {
@@ -210,11 +210,11 @@ var polygonFeature = function (arg) {
   /**
    * Get/set polygon accessor.
    *
-   * @param {object|function} [val] If not specified, return the current
+   * @param {object|Function} [val] If not specified, return the current
    *    polygon accessor.  If specified, use this for the polygon accessor and
    *    return `this`.  If a function is given, the function is passed
    *    `(dataElement, dataIndex)` and returns a {@link geo.polygon}.
-   * @returns {object|function|this} The current polygon accessor or this
+   * @returns {object|Function|this} The current polygon accessor or this
    *    feature.
    */
   this.polygon = function (val) {
@@ -232,7 +232,7 @@ var polygonFeature = function (arg) {
   /**
    * Get/Set position accessor.
    *
-   * @param {geo.geoPosition|function} [val] If not specified, return the
+   * @param {geo.geoPosition|Function} [val] If not specified, return the
    *    current position accessor.  If specified, use this for the position
    *    accessor and return `this`.  If a function is given, this is called
    *    with `(vertexElement, vertexIndex, dataElement, dataIndex)`.
@@ -569,9 +569,9 @@ var polygonFeature = function (arg) {
    *    units.  A value of zero will only remove perfectly collinear points.
    *    If not specified, this is set to a half display pixel at the map's
    *    current zoom level.
-   * @param {function} [posFunc] The function to
+   * @param {Function} [posFunc] The function to
    *    get the position of each vertex.
-   * @param {function} [polyFunc] The function to
+   * @param {Function} [polyFunc] The function to
    *    get each polygon.
    * @param {boolean} [returnData] If truthy, return the new data array
    *    rather than modifying the feature.
