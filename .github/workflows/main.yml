@@ -119,15 +119,23 @@ jobs:
         registry-url: 'https://registry.npmjs.org'
     - run: sudo apt-get update
     - run: sudo apt-get install --yes --no-install-recommends optipng imagemagick build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev liblzma-dev
-    - run: npm ci
     - name: Import artifacts
       uses: actions/download-artifact@v6
       with:
         name: dist
         path: dist
+    - name: Copy built artifacts into package root (skip rebuild)
+      run: |
+        if [ -d "dist/built" ]; then
+          cp -a dist/built/. .
+        else
+          echo "ERROR: dist/built not found; aborting publish"
+          exit 1
+        fi
     - name: Install semantic-release
       run: npm install semantic-release --no-save
     - name: Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_CONFIG_IGNORE_SCRIPTS: 'true'
       run: npx semantic-release
