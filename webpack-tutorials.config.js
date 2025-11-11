@@ -1,5 +1,5 @@
 const WebpackStringReplacer = require('webpack-string-replacer');
-var TerserPlugin = require('terser-webpack-plugin');
+const { SwcMinifyWebpackPlugin } = require('swc-minify-webpack-plugin');
 
 var path = require('path');
 
@@ -50,10 +50,7 @@ module.exports = {
   },
   optimization: {
     minimizer: [
-      new TerserPlugin({
-        extractComments: false,
-        parallel: true
-      })
+      new SwcMinifyWebpackPlugin()
     ]
   },
   module: {
