@@ -44,6 +44,7 @@ var canvas_pixelmapFeature = function (arg) {
   object.call(this);
 
   var m_quadFeature,
+      m_quadFeatureInit,
       s_exit = this._exit,
       m_this = this;
 
@@ -59,21 +60,25 @@ var canvas_pixelmapFeature = function (arg) {
    *    feature indices that are located at the specified point.
    */
   this.pointSearch = function (geo, gcs) {
-    if (m_quadFeature && m_this.m_info) {
+    if (m_quadFeature) {
       var result = m_quadFeature.pointSearch(geo, gcs);
-      if (result.index.length === 1 && result.extra && result.extra[result.index[0]].basis) {
-        var basis = result.extra[result.index[0]].basis, x, y, idx;
-        x = Math.floor(basis.x * m_this.m_info.width);
-        y = Math.floor(basis.y * m_this.m_info.height);
-        if (x >= 0 && x < m_this.m_info.width &&
+      if (m_this.m_info) {
+        if (result.index.length === 1 && result.extra && result.extra[result.index[0]].basis) {
+          var basis = result.extra[result.index[0]].basis, x, y, idx;
+          x = Math.floor(basis.x * m_this.m_info.width);
+          y = Math.floor(basis.y * m_this.m_info.height);
+          if (x >= 0 && x < m_this.m_info.width &&
             y >= 0 && y < m_this.m_info.height) {
-          idx = m_this.m_info.indices[y * m_this.m_info.width + x];
-          result = {
-            index: [idx],
-            found: [m_this.data()[idx]]
-          };
-          return result;
+            idx = m_this.m_info.indices[y * m_this.m_info.width + x];
+            result = {
+              index: [idx],
+              found: [m_this.data()[idx]]
+            };
+            return result;
+          }
         }
+      } else {
+        return this._pointSearchProcess(result);
       }
     }
     return {index: [], found: []};
@@ -84,41 +89,47 @@ var canvas_pixelmapFeature = function (arg) {
    * if the pixelmap has already been prepared (it is invalidated by a change
    * in the image).
    *
+   * @param {object} [quad] A quad to use as the base instead of the class
+   *    instance.
    * @returns {geo.pixelmapFeature.info?}
    */
-  this._preparePixelmap = function () {
+  this._preparePixelmap = function (quad) {
+    const base = quad || m_this;
+    if (quad && quad.m_info) {
+      return quad.m_info;
+    }
     var i, idx, pixelData;
 
-    if (!util.isReadyImage(m_this.m_srcImage)) {
+    if (!util.isReadyImage(base.m_srcImage)) {
       return undefined;
     }
-    m_this.m_info = {
-      width: m_this.m_srcImage.naturalWidth,
-      height: m_this.m_srcImage.naturalHeight,
+    base.m_info = {
+      width: base.m_srcImage.naturalWidth,
+      height: base.m_srcImage.naturalHeight,
       canvas: document.createElement('canvas')
     };
 
-    m_this.m_info.canvas.width = m_this.m_info.width;
-    m_this.m_info.canvas.height = m_this.m_info.height;
-    m_this.m_info.context = m_this.m_info.canvas.getContext('2d');
+    base.m_info.canvas.width = base.m_info.width;
+    base.m_info.canvas.height = base.m_info.height;
+    base.m_info.context = base.m_info.canvas.getContext('2d');
 
-    m_this.m_info.context.drawImage(m_this.m_srcImage, 0, 0);
-    m_this.m_info.imageData = m_this.m_info.context.getImageData(
-      0, 0, m_this.m_info.canvas.width, m_this.m_info.canvas.height);
-    pixelData = m_this.m_info.imageData.data;
-    m_this.m_info.indices = new Array(pixelData.length / 4);
-    m_this.m_info.area = pixelData.length / 4;
+    base.m_info.context.drawImage(base.m_srcImage, 0, 0);
+    base.m_info.imageData = base.m_info.context.getImageData(
+      0, 0, base.m_info.canvas.width, base.m_info.canvas.height);
+    pixelData = base.m_info.imageData.data;
+    base.m_info.indices = new Array(pixelData.length / 4);
+    base.m_info.area = pixelData.length / 4;
 
-    m_this.m_info.mappedColors = {};
+    base.m_info.mappedColors = {};
     for (i = 0; i < pixelData.length; i += 4) {
       idx = pixelData[i] + (pixelData[i + 1] << 8) + (pixelData[i + 2] << 16);
-      m_this.m_info.indices[i / 4] = idx;
-      if (!m_this.m_info.mappedColors[idx]) {
-        m_this.m_info.mappedColors[idx] = {first: i / 4};
+      base.m_info.indices[i / 4] = idx;
+      if (!base.m_info.mappedColors[idx]) {
+        base.m_info.mappedColors[idx] = {first: i / 4};
       }
-      m_this.m_info.mappedColors[idx].last = i / 4;
+      base.m_info.mappedColors[idx].last = i / 4;
     }
-    return m_this.m_info;
+    return base.m_info;
   };
 
   /**
@@ -127,23 +138,43 @@ var canvas_pixelmapFeature = function (arg) {
    * these colors, then draw the resultant image as a quad.
    *
    * @fires geo.event.pixelmap.prepared
+   * @param {object} [quad] A quad to use as the base instead of the class
+   *    instance.
    */
-  this._computePixelmap = function () {
+  this._computePixelmap = function (quad) {
+    const base = quad || m_this;
     var data = m_this.data() || [],
         colorFunc = m_this.style.get('color'),
         i, idx, lastidx, color, pixelData, indices, mappedColors,
         updateFirst, updateLast = -1, update, prepared;
 
-    if (!m_this.m_info) {
+    if (!m_quadFeatureInit && m_quadFeature && !quad) {
+      m_quadFeature._hookRenderImageQuads = (quads) => {
+        quads.forEach((quad) => {
+          if (!quad.m_srcImage) {
+            quad.m_srcImage = quad.image;
+            m_this._computePixelmap(quad);
+            quad.image = quad.m_info.context.canvas;
+            quad._build = m_this.buildTime().timestamp();
+          } else if (m_this.buildTime().timestamp() > quad._build) {
+            m_this._computePixelmap(quad);
+            quad.image = quad.m_info.context.canvas;
+            quad._build = m_this.buildTime().timestamp();
+          }
+        });
+      };
+      m_quadFeatureInit = true;
+    }
+    if (!base.m_info) {
       m_this.indexModified(undefined, 'clear');
-      if (!m_this._preparePixelmap()) {
+      if (!m_this._preparePixelmap(quad)) {
         return;
       }
       prepared = true;
     }
     m_this.indexModified(undefined, 'clear');
-    mappedColors = m_this.m_info.mappedColors;
-    updateFirst = m_this.m_info.area;
+    mappedColors = base.m_info.mappedColors;
+    updateFirst = base.m_info.area;
     for (idx in mappedColors) {
       if (mappedColors.hasOwnProperty(idx)) {
         color = colorFunc(data[idx], +idx) || {};
@@ -171,8 +202,8 @@ var canvas_pixelmapFeature = function (arg) {
       return;
     }
     /* Update only the extent that has changed */
-    pixelData = m_this.m_info.imageData.data;
-    indices = m_this.m_info.indices;
+    pixelData = base.m_info.imageData.data;
+    indices = base.m_info.indices;
     for (i = updateFirst; i <= updateLast; i += 1) {
       idx = indices[i];
       if (idx !== lastidx) {
@@ -188,10 +219,13 @@ var canvas_pixelmapFeature = function (arg) {
       }
     }
     /* Place the updated area into the canvas */
-    m_this.m_info.context.putImageData(
-      m_this.m_info.imageData, 0, 0, 0, Math.floor(updateFirst / m_this.m_info.width),
-      m_this.m_info.width, Math.ceil((updateLast + 1) / m_this.m_info.width));
+    base.m_info.context.putImageData(
+      base.m_info.imageData, 0, 0, 0, Math.floor(updateFirst / base.m_info.width),
+      base.m_info.width, Math.ceil((updateLast + 1) / base.m_info.width));
 
+    if (quad) {
+      return;
+    }
     /* If we haven't made a quad feature, make one now.  The quad feature needs
      * to have the canvas capability. */
     if (!m_quadFeature) {
@@ -206,6 +240,7 @@ var canvas_pixelmapFeature = function (arg) {
         position: m_this.style.get('position')})
       .data([{}])
       .draw();
+      m_quadFeatureInit = true;
     }
     /* If we prepared the pixelmap and rendered it, send a prepared event */
     if (prepared) {
@@ -230,6 +265,9 @@ var canvas_pixelmapFeature = function (arg) {
     return m_this;
   };
 
+  if (arg.quadFeature) {
+    m_quadFeature = arg.quadFeature;
+  }
   this._init(arg);
   return this;
 };
@@ -237,5 +275,8 @@ var canvas_pixelmapFeature = function (arg) {
 inherit(canvas_pixelmapFeature, pixelmapFeature);
 
 // Now register it
-registerFeature('canvas', 'pixelmap', canvas_pixelmapFeature);
+var capabilities = {};
+capabilities[pixelmapFeature.capabilities.lookup] = true;
+
+registerFeature('canvas', 'pixelmap', canvas_pixelmapFeature, capabilities);
 module.exports = canvas_pixelmapFeature;
