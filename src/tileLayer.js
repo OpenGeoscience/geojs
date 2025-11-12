@@ -718,6 +718,9 @@ var tileLayer = function (arg) {
       nTilesLevel = m_this.tilesAtZoom(level);
 
       if (!m_this._options.wrapX) {
+        if (start.x >= nTilesLevel.x || end.x < 0) {
+          continue;
+        }
         start.x = Math.min(Math.max(start.x, 0), nTilesLevel.x - 1);
         end.x = Math.min(Math.max(end.x, 0), nTilesLevel.x - 1);
         if (level === minLevel && m_this._options.keepLower) {
@@ -726,6 +729,9 @@ var tileLayer = function (arg) {
         }
       }
       if (!m_this._options.wrapY) {
+        if (start.y > nTilesLevel.y || end.y < 0) {
+          continue;
+        }
         start.y = Math.min(Math.max(start.y, 0), nTilesLevel.y - 1);
         end.y = Math.min(Math.max(end.y, 0), nTilesLevel.y - 1);
         if (level === minLevel && m_this._options.keepLower) {
@@ -1022,6 +1028,16 @@ var tileLayer = function (arg) {
     }
 
     delete m_this._activeTiles[hash];
+    if (m_lastTileSet && tile.index) {
+      const index = tile.index;
+      for (let idx = m_lastTileSet.length - 1; idx >= 0; idx -= 1) {
+        const lastTile = m_lastTileSet[idx];
+        if (lastTile.level === index.level && lastTile.x === index.x && lastTile.y === index.y && lastTile.reference === index.reference) {
+          m_lastTileSet.splice(idx, 1);
+          break;
+        }
+      }
+    }
     return value;
   };
 
