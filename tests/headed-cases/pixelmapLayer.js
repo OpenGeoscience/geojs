@@ -19,9 +19,30 @@ describe('canvasPixelmapLayer', function () {
    *
    * @param {object} layerParams Optional layer parameters.
    */
-  function createPixelmap(layerParams) {
-    var params = geo.util.pixelCoordinateParams('#map', 4096, 4096, 2048, 2048);
+  function createPixelmap(layerParams, limitedArea) {
+    var params = geo.util.pixelCoordinateParams(
+      '#map', limitedArea ? 32768 : 4096, limitedArea ? 32768 : 4096,
+      2048, 2048);
     params.layer.url = '/data/pixelmap_{z}_{x}_{y}.png';
+    params.layer.keepLower = false;
+    if (limitedArea) {
+      params.layer.minLevel = 3;
+      params.layer.url = (x, y, z) => `../../data/pixelmap_${z - 3}_${y}_${x}.png`;
+      params.layer.tilesMaxBounds = (level) => {
+        var scale = Math.pow(2, params.layer.maxLevel - level);
+        return {
+          x: Math.floor(4096 / scale),
+          y: Math.floor(4096 / scale)
+        };
+      };
+      params.layer.tilesAtZoom = (level) => {
+        var scale = Math.pow(2, params.layer.maxLevel - level);
+        return {
+          x: Math.ceil(2 / scale),
+          y: Math.ceil(2 / scale)
+        };
+      };
+    }
     params.layer.data = new Array(5112).fill(0);
     params.layer.style = {
       color: (d, i) => {
@@ -41,6 +62,10 @@ describe('canvasPixelmapLayer', function () {
     }
     params.layer.renderer = 'canvas';
     map = geo.map(params.map);
+    if (limitedArea) {
+      map.zoom(2);
+      map.center({x: 30000, y: 30000});
+    }
     layer = map.createLayer('pixelmap', params.layer);
     map.draw();
   }
@@ -115,6 +140,18 @@ describe('canvasPixelmapLayer', function () {
       expect(layer instanceof geo.pixelmapLayer).toBe(true);
       expect(layer.features().length).toBe(2);
       done();
+    });
+  });
+  it('limitedArea', function (done) {
+    createPixelmap(undefined, true);
+    map.onIdle(() => {
+      map.center({x: 0, y: 0});
+      map.onIdle(() => {
+        expect(layer instanceof geo.pixelmapLayer).toBe(true);
+        expect(layer.features().length).toBe(2);
+        map.center({x: 30000, y: 0});
+        map.onIdle(done);
+      });
     });
   });
 });
