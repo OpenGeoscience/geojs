@@ -146,6 +146,9 @@ var canvas_quadFeature = function (arg) {
       }
       context2d.imageSmoothingEnabled = !nearestPixel;
     }
+    if (m_this._hookRenderImageQuads) {
+      m_this._hookRenderImageQuads(m_quads.imgQuads);
+    }
     $.each([m_quads.imgQuads, m_quads.vidQuads], function (listidx, quadlist) {
       if (!quadlist) {
         return;
