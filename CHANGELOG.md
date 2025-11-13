@@ -1,5 +1,209 @@
 # GeoJS Change Log
 
+
+## Version 1.16.1
+
+### Bug Fixes
+
+- Fix rendering tiles that started off-map ([#1422](../../pull/1422))
+
+
+## Version 1.16.0
+
+### Features
+
+- Support tiled pixelmaps with the canvas renderer ([#1421](../../pull/1421))
+
+
+## Version 1.15.6
+
+### Bug Fixes
+
+- Fix return bounds in certain clamping conditions ([#1416](../../pull/1416))
+
+
+## Version 1.15.5
+
+### Bug Fixes
+
+- Support 255,255,255 in pixelmaps as a no-data value ([#1415](../../pull/1415))
+
+
+## Version 1.15.4
+
+### Performance Improvements
+
+- Minor improvements in webgl polygon creation ([#1409](../../pull/1409))
+
+
+## Version 1.15.3
+
+### Performance Improvements
+
+- Minor improvements in webgl line creation ([#1408](../../pull/1408))
+
+
+## Version 1.15.2
+
+### Performance Improvements
+
+- Specify dynamic draw for polygon strokes in webgl ([#1407](../../pull/1407))
+
+
+## Version 1.15.1
+
+### Performance Improvements
+
+- Do no use string keys during line generation ([#1406](../../pull/1406))
+
+
+## Version 1.15.0
+
+### Features
+
+- Quad Texture Support ([#1393](../../pull/1393))
+
+
+## Version 1.14.15
+
+### Bug Fixes
+
+- Remove a debug command ([#1401](../../pull/1401))
+
+
+## Version 1.14.14
+
+### Performance Improvements
+
+- Add more information to annotation mode change events ([#1400](../../pull/1400))
+
+
+## Version 1.14.13
+
+### Performance Improvements
+
+- Add more information to annotation mode change events ([#1397](../../pull/1397))
+
+
+## Version 1.14.12
+
+### Bug Fixes
+
+- Toggling visibility of an svg feature did nothing ([#1391](../../pull/1391))
+
+### Performance Improvements
+
+- Do not update the feature modified time when changing visibility ([#1392](../../pull/1392))
+
+
+## Version 1.14.11
+
+### Bug Fixes
+
+- updateStyleFromArray was wrong for markers ([#1387](../../pull/1387))
+
+
+## Version 1.14.10
+
+### Bug Fixes
+
+- Expose width and ticks accessors on the colorLegendWidget ([#1386](../../pull/1386))
+
+
+## Version 1.14.9
+
+### Bug Fixes
+
+- Fix builds to support older browsers ([#1385](../../pull/1385))
+
+
+## Version 1.14.8
+
+### Bug Fixes
+
+- Fix a potential issue with auto primitiveShape in markers ([#1384](../../pull/1384))
+
+
+## Version 1.14.7
+
+### Performance Improvements
+
+- Reduce some clustering computation ([#1383](../../pull/1383))
+
+
+## Version 1.14.6
+
+### Performance Improvements
+
+- Speed up cluster zoom transition ([#1381](../../pull/1381))
+
+
+## Version 1.14.5
+
+### Bug Fixes
+
+- Do not let tile layers have a negative max level ([#1376](../../pull/1376))
+
+
+## Version 1.14.4
+
+### Bug Fixes
+
+- Change modifier keys for wheel actions ([#1372](../../pull/1372))
+
+
+## Version 1.14.3
+
+### Bug Fixes
+
+- Fix layer parameters for images smaller than tiles ([#1370](../../pull/1370))
+
+
+## Version 1.14.2
+
+### Bug Fixes
+
+- Don't generate quadFeature events if they are beyond a crop zone ([#1369](../../pull/1369))
+
+
+## Version 1.14.1
+
+### Bug Fixes
+
+- When lines reverse on themselves, mitering could be wrong ([#1365](../../pull/1365))
+
+
+## Version 1.14.0
+
+### Features
+
+- Add a zoomAndCenter method ([#1360](../../pull/1360))
+
+
+## Version 1.13.1
+
+### Bug Fixes
+
+- Fix pixelmap parameters for images smaller than tiles ([#1359](../../pull/1359))
+
+
+## Version 1.13.0
+
+### Features
+
+- Add a map.corners() utility function ([#1354](../../pull/1354))
+
+### Performance Improvements
+
+- Speed up hit tests for points and markers ([#1355](../../pull/1355))
+
+
+## Version 1.12.11
+
+### Bug Fixes
+
+- Update epsg.io calls ([#1353](../../pull/1353))
+
 ## Version 1.12.10
 
 ### Performance Improvements
