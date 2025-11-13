@@ -6,7 +6,7 @@
 default_stages: [pre-commit, pre-push]
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
   - id: check-added-large-files
   - id: check-ast
@@ -55,7 +55,7 @@ repos:
       - --skip
       - examples/sld/index.pug,package-lock.json,examples/reprojection/proj.json,website/themes/agency/source/vendor/jquery/jquery.min.js,examples/reprojection/capitals.json,website/themes/agency/source/vendor/jquery/jquery.js
 - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
-  rev: v9.22.0
+  rev: v9.23.0
   hooks:
   - id: commitlint
     language_version: "22.10.0"
