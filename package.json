@@ -30,7 +30,7 @@
     "@egjs/hammerjs": "^2.0.8",
     "d3": "^7.8.5",
     "glslang-validator-prebuilt-predownloaded": "^0.0.2",
-    "vtk.js": "<32.10.0 || >32.10.0"
+    "vtk.js": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.17.0",
@@ -40,8 +40,8 @@
     "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
     "babel-loader": "^10.0.0",
     "babel-plugin-istanbul": "^7.0.0",
-    "bootstrap": "^3.4.1",
-    "bootswatch": "^3.4.1",
+    "bootstrap": "^5.0.0",
+    "bootswatch": "^5.0.0",
     "codemirror": "^5.65.0",
     "colorbrewer": "^1.6.0",
     "css-loader": "^7.1.0",
@@ -86,6 +86,7 @@
     "serve-index": "^1.9.1",
     "shader-loader": "git+https://github.com/Makio64/shader-loader",
     "sinon": "^21.0.0",
+    "startbootstrap-agency": "^7.0.12",
     "style-loader": "^4.0.0",
     "stylelint": "<16.3.0 || >16.3.0",
     "stylelint-stylus": "^1.0.0",

@@ -1,4 +1,4 @@
-/* globals $, d3, geo, utils */
+/* globals $, d3, geo, utils, bootstrap */
 
 // Run after the DOM loads
 $(function () {
@@ -101,7 +101,7 @@ $(function () {
       var modal = $(
         '<div class="modal fade"><div class="modal-dialog">' +
         '<div class="modal-content"><div class="modal-header">' +
-        '<button type="button" class="close" data-dismiss="modal">&times;' +
+        '<button type="button" class="close" data-bs-dismiss="modal">&times;' +
         '</button><h4 class="modal-title">Test Results</h4></div>' +
         '<div class="modal-body"/></div></div></div>'
       );
@@ -115,7 +115,7 @@ $(function () {
       };
       $('.modal-body', modal).append($('<div/>').text(
         JSON.stringify(report, undefined, 2)));
-      modal.modal();
+      new bootstrap.Modal(modal[0]).show();
     }, maxrepeat * list.length * 2250);
   });
 });

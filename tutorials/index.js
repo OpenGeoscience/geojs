@@ -2,9 +2,10 @@ require('../src/vendor');
 window.geo = require('../src/index');
 
 // bootstrap and themes
-require('bootstrap/dist/css/bootstrap.css');
-require('bootswatch/flatly/bootstrap.css');
-require('bootstrap');
+require('../website/legacycss/bootstrap3.min.css');
+require('../website/legacycss/bootswatch_flatly3.min.css');
+require('@fontsource/lato');
+window.bootstrap = require('bootstrap/dist/js/bootstrap.bundle');
 
 // codemirror and plugins
 window.jsonlint = require('jsonlint-mod');

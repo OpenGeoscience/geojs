@@ -1,4 +1,4 @@
-/* globals $, geo, utils */
+/* globals $, geo, utils, bootstrap */
 
 // This is extensively based on the Annotation example.
 
@@ -697,7 +697,7 @@ function show_edit_dialog(id) {
   dlg.one('shown.bs.modal', function () {
     $('[option="name"]', dlg).focus();
   });
-  dlg.modal();
+  new bootstrap.Modal(dlg[0]).show();
 }
 
 /**

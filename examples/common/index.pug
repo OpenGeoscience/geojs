@@ -18,7 +18,7 @@ html(lang="en")
       nav.navbar.navbar-default(role="navigation")
         .container-fluid
           .navbar-header
-            button.navbar-toggle(type="button", data-toggle="collapse", data-target="gj-navbar-collapse")
+            button.navbar-toggle(type="button", data-bs-toggle="collapse", data-bs-target="gj-navbar-collapse")
               span.sr-only Toggle navigation
               span.icon-bar
               span.icon-bar
@@ -44,7 +44,7 @@ html(lang="en")
                       | Source
               if !about.hidden
                 li
-                  a.gj-show-about-link(href="#", data-toggle="modal", data-target="#about-modal")
+                  a.gj-show-about-link(href="#", data-bs-toggle="modal", data-bs-target="#about-modal")
                     | About
 
       if ! about.hidden
@@ -58,7 +58,7 @@ html(lang="en")
                 p.text-left !{about.text}
                 p.text-right © Kitware, Inc.
               .modal-footer
-                button.btn.btn-primary(data-dismiss="modal", data-target="#about-modal") Close
+                button.btn.btn-primary(data-bs-dismiss="modal") Close
 
     // Add the default main content element
     block mainContent
