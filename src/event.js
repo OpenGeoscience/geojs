@@ -764,7 +764,7 @@ geo_event.annotation.mode = 'geo_annotation_mode';
 
 /**
  * Triggered when an annotation can be combined via a boolean operation (union,
- * intersect, difference, xor).
+ * intersect, difference, xor, cut).
  *
  * @event geo.event.annotation.boolean
  * @type {geo.event.base}

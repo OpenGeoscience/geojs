@@ -343,7 +343,8 @@ lineAnnotation.defaults = Object.assign({}, annotation.defaults, {
     closed: false,
     lineCap: 'butt',
     lineJoin: 'miter'
-  }
+  },
+  allowBooleanOperations: ['annotation-cut']
 });
 
 var lineRequiredFeatures = {};
