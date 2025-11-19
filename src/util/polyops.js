@@ -1,4 +1,5 @@
-var PolyBool = require('polybooljs');
+const { PolyBool, GeometryEpsilon } = require('@velipso/polybool');
+const polybool = new PolyBool();
 var geo_map = require('../map');
 var util = require('../util/common');
 
@@ -106,7 +107,7 @@ function seglistToPolygonList(seglist) {
   const borders = []; // polygons in format needed for util.pointInPolygon
   const regions = []; // polygons in end result format
   const parents = []; // list of parents of each polygon
-  seglist.forEach((s) => PolyBool.polygon(s).regions.forEach((r) => {
+  seglist.forEach((s) => polybool.polygon(s).regions.forEach((r) => {
     const border = r.map((pt) => ({x: pt[0], y: pt[1]}));
     if (border.length < 3) {
       return;
@@ -162,7 +163,7 @@ function seglistToPolygonList(seglist) {
  */
 function polygonOperationSeglist(op, epsilon, seglist) {
   op = 'select' + op.charAt(0).toUpperCase() + op.slice(1);
-  PolyBool.epsilon(epsilon);
+  const polyboolEps1 = new PolyBool(new GeometryEpsilon(epsilon));
 
   while (seglist.length > 1) {
     const newlist = [];
@@ -172,26 +173,19 @@ function polygonOperationSeglist(op, epsilon, seglist) {
       if (i + half < seglist.length) {
         let nextseg = seglist[i + half];
         try {
-          segments = PolyBool.combine(segments, nextseg);
+          segments = polyboolEps1.combine(segments, nextseg);
         } catch (err) {
-          segments = PolyBool.segments(PolyBool.polygon(segments));
-          nextseg = PolyBool.segments(PolyBool.polygon(nextseg));
+          segments = polyboolEps1.segments(polyboolEps1.polygon(segments));
+          nextseg = polyboolEps1.segments(polyboolEps1.polygon(nextseg));
           for (let j = 20; j >= 6; j -= 1) {
-            PolyBool.epsilon(Math.pow(0.1, j));
+            const polyboolEps2 = new PolyBool(new GeometryEpsilon(Math.pow(0.1, j)));
             try {
-              segments = PolyBool.combine(segments, nextseg);
+              segments = polyboolEps2.combine(segments, nextseg);
               break;
             } catch (err) {}
           }
-          PolyBool.epsilon(epsilon);
         }
-        if (segments.combined) {
-          segments.combined = segments.combined.filter(s => Math.abs(s.start[0] - s.end[0]) > epsilon || Math.abs(s.start[1] - s.end[1]) > epsilon);
-          segments = PolyBool[op](segments);
-        } else {
-          console.warn('Failed in polygon functions.');  // eslint-disable-line no-console
-        }
-        segments.segments = segments.segments.filter(s => Math.abs(s.start[0] - s.end[0]) > epsilon || Math.abs(s.start[1] - s.end[1]) > epsilon);
+        segments = polyboolEps1[op](segments);
       }
       newlist.push(segments);
     }
@@ -463,8 +457,8 @@ function generalOperationProcess(op, poly1, poly2, opts) {
   if (ingcs2 && gcs && ingcs2 !== gcs) {
     poly2 = poly2.map((p) => p.map((h) => transform.transformCoordinates(ingcs2, gcs, h)));
   }
-  let seglist1 = poly1.map(p => PolyBool.segments({regions: p}));
-  let seglist2 = poly2.map(p => PolyBool.segments({regions: p}));
+  let seglist1 = poly1.map(p => polybool.segments({regions: p}));
+  let seglist2 = poly2.map(p => polybool.segments({regions: p}));
   seglist1 = polygonOperationSeglist(opts.innerOperation || 'union', mode1.epsilon, seglist1);
   seglist2 = polygonOperationSeglist(opts.innerOperation || 'union', mode2.epsilon, seglist2);
   let seglist = seglist1;

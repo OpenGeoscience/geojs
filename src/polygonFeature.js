@@ -122,11 +122,11 @@ var polygonFeature = function (arg) {
       if (!poly) {
         return undefined;
       }
-      var outer, inner, range, coord, j, x, y, mapouter, mapinner, maprange;
+      var outer, inner, range, coord,  x, y, mapouter, mapinner, maprange;
 
       coord = poly.outer || (Array.isArray(poly) ? poly : []);
       outer = new Array(coord.length);
-      for (j = 0; j < coord.length; j += 1) {
+      for (let j = 0; j < coord.length; j += 1) {
         outer[j] = posFunc.call(m_this, coord[j], j, d, i);
         x = outer[j].x;
         y = outer[j].y;
@@ -142,14 +142,14 @@ var polygonFeature = function (arg) {
       inner = (poly.inner || []).map(function (hole) {
         coord = hole || [];
         var trans = new Array(coord.length);
-        for (j = 0; j < coord.length; j += 1) {
+        for (let j = 0; j < coord.length; j += 1) {
           trans[j] = posFunc.call(m_this, coord[j], j, d, i);
         }
         return trans;
       });
       mapouter = transform.transformCoordinates(fcs, mapgcs, outer);
       mapinner = inner.map(part => transform.transformCoordinates(fcs, mapgcs, part));
-      for (j = 0; j < mapouter.length; j += 1) {
+      for (let j = 0; j < mapouter.length; j += 1) {
         x = mapouter[j].x;
         y = mapouter[j].y;
         if (!j) {
