@@ -52,11 +52,13 @@ module.exports = {
   },
   module: {
     rules: [{
-      test: /\.js$/,
-      // include: [ path.resolve('src'), ],
-      exclude: [
-        /node_modules\/(?!(earcut|kdbush|proj4|wkt-parser)\/).*/,
-        path.resolve('tests')
+      test: /\.(js|cjs)$/,
+      include: [
+        path.resolve('src'),
+        /node_modules\/earcut/,
+        /node_modules\/kdbush/,
+        /node_modules\/wkt-parser/,
+        /node_modules\/@velipso\/polybool/
       ],
       use: [{
         loader: 'babel-loader',
