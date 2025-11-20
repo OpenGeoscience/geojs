@@ -392,7 +392,7 @@ var polygonFeature = function (arg) {
             extra[lineFound.index[idx]] = {partial: false};
           }
           if (lineFound.extra[lineFound.index[idx]].partial) {
-            extra[lineData[0][3]].partial = true;
+            extra[lineFound.index[idx]].partial = true;
           }
         }
       });
