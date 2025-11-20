@@ -86,7 +86,6 @@
     "serve-index": "^1.9.1",
     "shader-loader": "git+https://github.com/Makio64/shader-loader",
     "sinon": "^21.0.0",
-    "startbootstrap-agency": "^7.0.12",
     "style-loader": "^4.0.0",
     "stylelint": "<16.3.0 || >16.3.0",
     "stylelint-stylus": "^1.0.0",
