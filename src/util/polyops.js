@@ -74,6 +74,7 @@ const AlternateOpNames = {
   '&': 'intersect',
   mul: 'intersect',
   multiply: 'intersect',
+  intersection: 'intersect',
   x: 'xor',
   '^': 'xor'
 };

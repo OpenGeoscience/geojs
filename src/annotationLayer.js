@@ -7,6 +7,7 @@ var transform = require('./transform');
 var $ = require('jquery');
 var Mousetrap = require('mousetrap');
 var textFeature = require('./textFeature');
+const lineAnnotation = require('./annotation/lineAnnotation');
 
 /**
  * Object specification for an annotation layer.
@@ -223,7 +224,7 @@ var annotationLayer = function (arg) {
    */
   this._handleBooleanOperation = function () {
     const op = m_this.currentBooleanOperation();
-    if (!op || !m_this.currentAnnotation || !m_this.currentAnnotation.toPolygonList) {
+    if (!op || !m_this.currentAnnotation || (op !== 'cut' && !m_this.currentAnnotation.toPolygonList) || (op === 'cut' && !(m_this.currentAnnotation instanceof lineAnnotation))) {
       return;
     }
     const newAnnot = m_this.currentAnnotation;
@@ -235,9 +236,151 @@ var annotationLayer = function (arg) {
       };
       m_this.geoTrigger(geo_event.annotation.boolean, evt);
       if (evt.cancel !== false) {
-        util.polyops[op](m_this, newAnnot.toPolygonList(), {correspond: {}, keepAnnotations: 'exact', style: m_this});
+        if (op !== 'cut') {
+          util.polyops[op](m_this, newAnnot.toPolygonList(), {correspond: {}, keepAnnotations: 'exact', style: m_this});
+        } else {
+          m_this.cutOperation(newAnnot);
+        }
       }
     }
+  };
+
+  this._extendLine = function (p1, p2, bbox) {
+    const dx = p2[0] - p1[0];
+    const dy = p2[1] - p1[1];
+    if (!dx && !dy) {
+      return p1;
+    }
+    let best;
+    let t = ((dx > 0 ? bbox.min.x : bbox.max.x) - p1[0]) / (dx || 1);
+    if (t < 0) {
+      const y = p1[1] + t * dy;
+      if (y >= bbox.min.y && y <= bbox.max.y) {
+        best = [dx > 0 ? bbox.min.x : bbox.max.x, y];
+      }
+    }
+    t = ((dy > 0 ? bbox.min.y : bbox.max.y) - p1[1]) / (dy || 1);
+    if (t < 0) {
+      const x = p1[0] + t * dx;
+      if (x >= bbox.min.x && x <= bbox.max.x && (!best || t < (bbox.min.x - p1[0]) / dx)) {
+        best = [x, dy > 0 ? bbox.min.y : bbox.max.y];
+      }
+    }
+    return best;
+  };
+
+  /**
+   * Given a cut line, cut existing polygons and lines.
+   *
+   * @param {geo.annotation} cutLine The line to use to cut the existing
+   *    annotations.
+   */
+  this.cutOperation = function (cutLine) {
+    const cutPts = cutLine.coordinates(null).map((p) => [p.x, p.y]);
+    let range;
+    for (let p = 0; p < cutPts.length; p += 1) {
+      const x = cutPts[p][0];
+      const y = cutPts[p][1];
+      if (!p) {
+        range = {min: {x: x, y: y}, max: {x: x, y: y}};
+      }
+      if (x < range.min.x) { range.min.x = x; }
+      if (y < range.min.y) { range.min.y = y; }
+      if (x > range.max.x) { range.max.x = x; }
+      if (y > range.max.y) { range.max.y = y; }
+    }
+    const polylist = m_this.toPolygonList();
+    for (let poly = 0; poly < polylist.length; poly += 1) {
+      for (let h = 0; h < polylist[poly].length; h += 1) {
+        for (let p = 0; p < polylist[poly][h].length; p += 1) {
+          const x = polylist[poly][h][p][0];
+          const y = polylist[poly][h][p][1];
+          if (x < range.min.x) { range.min.x = x; }
+          if (y < range.min.y) { range.min.y = y; }
+          if (x > range.max.x) { range.max.x = x; }
+          if (y > range.max.y) { range.max.y = y; }
+        }
+      }
+    }
+    m_this.annotations().forEach((annot) => {
+      if (annot instanceof lineAnnotation) {
+        const pts = annot.coordinates(null);
+        for (let p = 0; p < pts.length; p += 1) {
+          const x = pts[p].x;
+          const y = pts[p].y;
+          if (x < range.min.x) { range.min.x = x; }
+          if (y < range.min.y) { range.min.y = y; }
+          if (x > range.max.x) { range.max.x = x; }
+          if (y > range.max.y) { range.max.y = y; }
+        }
+      }
+    });
+    if (range === undefined || range.min.x === range.max.x || range.min.y === range.max.y) {
+      return;
+    }
+    // expand the range so that all polygons and lines, including our cut line
+    // are guaranteed to be inside the bounding box.
+    range = {min: {
+      x: range.min.x - (range.max.x - range.min.x) * 0.01,
+      y: range.min.y - (range.max.y - range.min.y) * 0.01
+    },
+    max: {
+      x: range.max.x + (range.max.x - range.min.x) * 0.01,
+      y: range.max.y + (range.max.y - range.min.y) * 0.01
+    }};
+    // we convert our line annotation so it expands past our bounding box, then
+    // close it on the left / top.  Our polygons will be the set that is cut
+    // and the set that is union with this.
+    cutPts[0] = m_this._extendLine(cutPts[0], cutPts[1], range);
+    cutPts[cutPts.length - 1] = m_this._extendLine(cutPts[cutPts.length - 1], cutPts[cutPts.length - 2], range);
+    const cutPoly = cutPts.slice();
+    const corners = [[range.min.x, range.min.y], [range.max.x, range.min.y], [range.max.x, range.max.y], [range.min.x, range.max.y]];
+    const n = cutPoly.length - 1;
+    const idx0 = cutPoly[n][0] === range.min.x ? 0 : (cutPoly[n][1] === range.min.y ? 1 : (cutPoly[n][0] === range.max.x ? 2 : 3));
+    const idx1 = cutPoly[0][0] === range.min.x ? 0 : (cutPoly[0][1] === range.min.y ? 1 : (cutPoly[0][0] === range.max.x ? 2 : 3));
+    for (let idx = idx0; idx % 4 !== idx1; idx += 1) {
+      cutPoly.push(corners[idx % 4]);
+    }
+    // mimic some of what is done in fromPolygonList because we need both sides
+    // of the cut.
+    let diffPoly;
+    const annot = m_this.annotations();
+    const diff = {poly2: [[cutPoly]], correspond: {}, keepAnnotations: 'exact', style: {fromPolygonList: (poly, opts) => { diffPoly = poly; }}};
+    diff.poly1 = m_this.toPolygonList(diff);
+    util.polyops.difference(diff);
+    util.polyops.intersect(m_this, [[cutPoly]], {correspond: {}, keepAnnotations: 'exact', style: m_this});
+    const indices = (diff.annotationIndices || {})[m_this.id()];
+    const correspond = diff.correspond.poly1;
+    const exact = diff.correspond.exact1;
+    diffPoly.forEach((p, idx) => {
+      p = p.map((h) => h.map((pt) => ({x: pt[0], y: pt[1]})));
+      const result = {
+        vertices: p.length === 1 ? p[0] : {outer: p[0], inner: p.slice(1)}
+      };
+      for (let i = 0; i < correspond.length; i += 1) {
+        if (correspond[i] && correspond[i].indexOf(idx) >= 0) {
+          const orig = annot[indices[i]];
+          if (exact[i] && exact[i].indexOf(idx) >= 0) {
+            m_this.addAnnotation(orig, m_this.map().gcs(), false);
+            return;
+          }
+          ['name', 'description', 'label'].forEach((k) => {
+            if (orig[k](undefined, true)) {
+              result[k] = orig[k](undefined, true);
+            }
+          });
+          Object.entries(orig.options()).forEach(([key, value]) => {
+            if (['showLabel', 'style'].indexOf(key) >= 0 || key.endsWith('Style')) {
+              result[key] = value;
+            }
+          });
+          m_this.addAnnotation(registry.createAnnotation('polygon', result), m_this.map().gcs(), false);
+          return;
+        }
+      }
+      m_this.addAnnotation(registry.createAnnotation('polygon', result), m_this.map().gcs(), false);
+    });
+    // Add cutting lines here
   };
 
   /**
@@ -271,16 +414,22 @@ var annotationLayer = function (arg) {
    * @param {geo.event} evt The mouse move or click event.
    */
   this._handleMouseMoveModifiers = function (evt) {
-    if (m_this.mode() !== m_this.modes.edit && m_this.currentAnnotation.options('allowBooleanOperations') && (m_this.currentAnnotation._coordinates().length < 2 || m_this.mode() === m_this.modes.cursor)) {
+    const ops = m_this.currentAnnotation.options('allowBooleanOperations');
+    if (m_this.mode() !== m_this.modes.edit && ops && (m_this.currentAnnotation._coordinates().length < 2 || m_this.mode() === m_this.modes.cursor)) {
       if (evt.modifiers) {
         const mod = (evt.modifiers.shift ? 's' : '') + (evt.modifiers.ctrl ? 'c' : '') + (evt.modifiers.meta || evt.modifiers.alt ? 'a' : '');
-        if (m_this._currentBooleanClass === m_this._booleanClasses[mod]) {
+        if (mod === '' && !m_this._currentBooleanClass) {
           return;
         }
-        m_this._currentBooleanClass = m_this._booleanClasses[mod];
+        const op = Object.keys(m_this._booleanClasses).find((op) =>
+          m_this._booleanClasses[op] === mod && (ops === true || ops.includes(op)));
+        if (m_this._currentBooleanClass === op) {
+          return;
+        }
+        m_this._currentBooleanClass = op;
         const mapNode = m_this.map().node();
-        Object.values(m_this._booleanClasses).forEach((c) => {
-          mapNode.toggleClass(c, m_this._booleanClasses[mod] === c);
+        Object.keys(m_this._booleanClasses).forEach((c) => {
+          mapNode.toggleClass(c, op === c);
         });
       }
     }
@@ -655,13 +804,14 @@ var annotationLayer = function (arg) {
     cursor: 'cursor'
   };
 
-  /* Keys are short-hand for preferred event modifiers.  Values are classes to
-   * apply to the map node. */
+  /* Keys are classes to apply to the map node.  Values are short-hand for
+   * preferred event modifiers. */
   this._booleanClasses = {
-    s: 'annotation-union',
-    sc: 'annotation-intersect',
-    c: 'annotation-difference',
-    sa: 'annotation-xor'
+    'annotation-union': 's',
+    'annotation-intersect': 'sc',
+    'annotation-difference': 'c',
+    'annotation-xor': 'sa',
+    'annotation-cut': 'c'
   };
 
   /**
@@ -696,7 +846,7 @@ var annotationLayer = function (arg) {
       m_mode = arg;
       mapNode.toggleClass('annotation-input', !!(m_mode && m_mode !== m_this.modes.edit && m_mode !== m_this.modes.cursor));
       if (!m_mode || m_mode === m_this.modes.edit) {
-        Object.values(m_this._booleanClasses).forEach((c) => mapNode.toggleClass(c, false));
+        Object.keys(m_this._booleanClasses).forEach((c) => mapNode.toggleClass(c, false));
         m_this._currentBooleanClass = undefined;
       }
       if (!m_keyHandler) {

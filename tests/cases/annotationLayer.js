@@ -122,6 +122,33 @@ describe('geo.annotationLayer', function () {
       expect(layer.annotations()[0]).toBe(poly);
       expect(layer.annotations()[1]).toBe(rect);
     });
+    it('Test boolean operations.', function () {
+      var map = createMap();
+      var layer = map.createLayer('annotation', {
+        features: ['polygon', 'line', 'point']
+      });
+      var rect1 = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: [{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]});
+      var rect2 = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: [{x: 5, y: 1}, {x: 15, y: 1}, {x: 15, y: 8}, {x: 5, y: 8}]});
+      var rect3 = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: [{x: 20, y: 2}, {x: 30, y: 2}, {x: 30, y: 8}, {x: 20, y: 8}]});
+      var line1 = geo.annotation.lineAnnotation({
+        layer: layer,
+        vertices: [{x: 3, y: 3}, {x: 5, y: 3}]});
+      var line2 = geo.annotation.lineAnnotation({
+        layer: layer,
+        vertices: [{x: 3, y: 3}, {x: 3, y: 5}]});
+      expect(layer.annotations().length).toBe(0);
+      layer.addMultipleAnnotations([rect1, rect2, rect3, line1, line2]);
+      layer.cutOperation(line1);
+      expect(layer.annotations().length).toBe(6);
+      layer.cutOperation(line2);
+      expect(layer.annotations().length).toBe(5);
+    });
   });
   describe('Public utility functions', function () {
     var map, layer,
@@ -388,6 +415,9 @@ describe('geo.annotationLayer', function () {
       expect(events.click).not.toBe(undefined);
       expect(layer.mode(null)).toBe(layer);
       expect(layer.mode()).toBe(null);
+    });
+    it('currentBooleanOperation', function () {
+      expect(layer.currentBooleanOperation()).toBe(undefined);
     });
   });
   describe('Private utility functions', function () {
