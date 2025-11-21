@@ -38,6 +38,7 @@
     "@babel/preset-env": "^7.16.5",
     "@fontsource/lato": "^5.1.1",
     "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
+    "acorn": "^8.15.0",
     "babel-loader": "^10.0.0",
     "babel-plugin-istanbul": "^7.0.0",
     "bootstrap": "^5.0.0",
@@ -108,7 +109,7 @@
       "glob": "^13.0.0"
     },
     "vtk.js": {
-        "xmlbuilder2": "^4.0.0"
+      "xmlbuilder2": "^4.0.0"
     }
   },
   "release": {
@@ -176,6 +177,7 @@
     "setup-website": "cd website && npm install",
     "build-website": "npm-run-all ci-build ci-build-website",
     "ci-build-website": "cp -a dist/built/. website/source/built && bash -c '(npm run build-website-examples & npm run build-website-tutorials & wait -n && wait -n)' && cd dist && cp -ar data ../website/source/. && rm -rf ../website/source/data/tiles && rm -rf ../website/source/data/tiles.tgz && rm -rf ../website/source/data/base-images && rm -rf ../website/source/data/base-images.tgz && cp -ar apidocs/. ../website/source/apidocs && cd ../website && npm install && rm -f db.json && npx hexo generate",
+    "validate-es5": "node -e \"const fs=require('fs'),acorn=require('acorn');fs.readdirSync('dist/built').forEach(f=>{if(f.match(/^geo\\\\.lean.*\\.js$/)){try{acorn.parse(fs.readFileSync('dist/built/'+f,'utf8'),{ecmaVersion:5})}catch(e){console.error('ES5 syntax error in dist/built/'+f+':',e.message);process.exit(1)}}});console.log('All files in dist/built pass ES5 syntax check.')\"",
     "prepublishOnly": "npm run build && cp dist/built/*.js .",
     "semantic-release": "semantic-release"
   },

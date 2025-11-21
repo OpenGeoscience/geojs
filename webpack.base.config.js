@@ -55,10 +55,12 @@ module.exports = {
       test: /\.(js|cjs)$/,
       include: [
         path.resolve('src'),
+        /node_modules\/@velipso\/polybool/,
+        /node_modules\/color-name/,
         /node_modules\/earcut/,
         /node_modules\/kdbush/,
-        /node_modules\/wkt-parser/,
-        /node_modules\/@velipso\/polybool/
+        /node_modules\/proj4/,
+        /node_modules\/wkt-parser/
       ],
       use: [{
         loader: 'babel-loader',
