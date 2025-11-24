@@ -44,8 +44,7 @@ var geo_event = require('./event');
 /**
  * Style specification for a feature.
  *
- * @typedef {object} geo.feature.styleSpec
- * @property {object} The styyle.
+ * @typedef {*} geo.feature.styleSpec
  */
 
 /**
