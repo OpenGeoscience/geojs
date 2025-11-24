@@ -256,14 +256,42 @@ vec2 rotationalSymmetry(vec2 pos, int repetitions) {
   return vec2(cos(ang), sin(ang)) * length(pos);
 }
 
-void markerFeatureFragment(vec2 pos) {
+float markerFeatureFragment(vec3 posAndSpacing) {
+  vec2 pos = posAndSpacing.xy;
+  float spacing = posAndSpacing.z;
+  // square lattice
+  if (spacing > 0.0) {
+    pos.x = mod(pos.x + spacing * 0.5, spacing) - spacing * 0.5;
+    pos.y = mod(pos.y + spacing * 0.5, spacing) - spacing * 0.5;
+  }
+  // triangular lattice
+  if (spacing < 0.0) {
+    spacing = spacing * -1.0;
+    float cz = (2.0 * pos.y) / (sqrt(3.0) * spacing);
+    float cx = pos.x / spacing - 0.5 * cz;
+    float cy = -cx - cz;
+    float rx = floor(cx + 0.5);
+    float ry = floor(cy + 0.5);
+    float rz = floor(cz + 0.5);
+    float dx = abs(rx - cx);
+    float dy = abs(ry - cy);
+    float dz = abs(rz - cz);
+    if (dx > dy && dx > dz) {
+      rx = -ry - rz;
+    } else if (dy > dz) {
+      ry = -rx - rz;
+    } else {
+      rz = -rx - ry;
+    }
+    vec2 center = vec2(spacing * (rx + 0.5 * rz), (sqrt(3.0) * spacing * 0.5) * rz);
+    pos = pos - center;
+  }
   // rad is a value in pixels from the edge of the symbol where negative is
   // inside the shape
   float rad = length(pos.xy) - radiusVar;
   // never allow points outside of the main radius
   if (rad > 0.0) {
-    discard;
-    return;
+    return 0.0;
   }
   // apply clockwise rotation
   if (rotationVar != 0.0) {
@@ -309,8 +337,7 @@ void markerFeatureFragment(vec2 pos) {
   }
 
   if (rad >= 0.0) {
-    discard;
-    return;
+    return 0.0;
   }
   // If there is no stroke, the fill region should transition to nothing
   if (strokeColorVar.a == 0.0 || strokeWidthVar <= 0.0) {
@@ -326,13 +353,19 @@ void markerFeatureFragment(vec2 pos) {
   } else {
     fillColor = fillColorVar;
   }
+  float alpha = 1.0;
   if (rad <= endStep) {
     float step = smoothstep(endStep - antialiasDist, endStep, rad);
     vec4 color = mix(fillColor, strokeColor, step);
     float step2 = smoothstep(-antialiasDist, 0.0, rad);
     gl_FragColor = mix(color, vec4(color.rgb, 0.0), step2);
+    if (color.a > 0.0)
+      alpha = gl_FragColor.a / color.a;
   } else {
     float step = smoothstep(-antialiasDist, 0.0, rad);
     gl_FragColor = mix(strokeColor, vec4(strokeColor.rgb, 0.0), step);
+    if (strokeColor.a > 0.0)
+      alpha = gl_FragColor.a / strokeColor.a;
   }
+  return alpha;
 }

@@ -16,6 +16,45 @@ var transform = require('./transform');
  */
 
 /**
+ * Style specification for a polygon pattern.
+ *
+ * @typedef {geo.polygonPattern} geo.polygonPattern
+ * @property {geo.geoColor} [fillColor] RGBA fill color.  Default is polygon
+ *   strokeColor and strokeOpacity.
+ * @property {geo.geoColor} [strokeColor] RGBA stroke color.  Default is
+ *   polygon fillColor and fillOpacity.
+ * @property {number} [strokeWidth=1.25] The weight of the pattern marker's
+ *   stroke in pixels.  Set this or A on strokeFill to zero to not have a
+ *   stroke.
+ * @property {number} [strokeOffset=-1] The position of the stroke compared to
+ *   the pattern radius.  This can only be -1, 0, or 1 (the sign of the value
+ *   is used).
+ * @property {boolean} [radiusIncludesStroke=true] If truthy or undefined, the
+ *   `radius` includes the `strokeWidth` based on the `strokeOffset`.  If
+ *   defined and falsy, the radius does not include the `strokeWidth`.
+ * @property {number} [symbol=0] One of the predefined symbol numbers.  This is
+ *   one of `geo.markerFeature.symbols`.
+ * @property {number|number[]} [symbolValue=0] A value the affects the
+ *   appearance of the symbol.  Some symbols can take an array of numbers.
+ * @property {number} [rotation=0] The rotation of the symbol in clockwise
+ *   radians.
+ * @property {geo.markerFeature.scaleMode} [scaleWithZoom='none'] This
+ *   determines if the fill, stroke, or both scale with zoom.  If set, the
+ *   values for radius and strokeWidth are the values at zoom-level zero.
+ * @property {boolean} [rotateWithMap=false] If truthy, rotate symbols with the
+ *   map.  If falsy, symbol orientation is absolute.
+ * @property {number} [radius=6.25] Radius of each marker in pixels.   This
+ *   includes the stroke width if `strokeOffset` is -1, excludes it if
+ *   `strokeOffset` is 1, and includes half the stroke width if `strokeOffset`
+ *   is 0.  Note that is `radiusIncludesStroke` is `false`, this never
+ *   includes the stroke width.
+ * @property {number} [spacing=20] Spacing in pixels between pattern symbols;
+ *   scaled if either radius or strokeWidth is scaled.  If positive, patterns
+ *   are on a square grid.  If negative, patterns are on a triangular grid.
+ * @property {number[]} [origin=[0, 0]] Origin of the pattern.
+ */
+
+/**
  * Style specification for a polygon feature.
  *
  * @typedef {geo.lineFeature.styleSpec} geo.polygonFeature.styleSpec
@@ -35,6 +74,9 @@ var transform = require('./transform');
  *   function, this is passed an array of items, each of which has a vertices
  *   property that is a single continuous array in map gcs coordinates.  It
  *   defaults to the first polygon's first vertex's position.
+ * @property {geo.polygonPattern|Function} [pattern] Pattern to apply to each
+ *   polygon.  Each polygon can be distinct, but the pattern is uniform across
+ *   any one polygon.
  */
 
 /**

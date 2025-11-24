@@ -25,8 +25,11 @@ var webgl_polygonFeature = function (arg) {
   var transform = require('../transform');
   var util = require('../util');
   var object = require('./object');
+  var markerFeature = require('../markerFeature');
   var fragmentShader = require('./polygonFeature.frag');
+  var fragmentPatternShader = require('./polygonPatternFeature.frag');
   var vertexShader = require('./polygonFeature.vert');
+  var vertexPatternShader = require('./polygonPatternFeature.vert');
 
   object.call(this);
 
@@ -35,11 +38,11 @@ var webgl_polygonFeature = function (arg) {
    */
   var m_this = this,
       s_exit = this._exit,
-      m_actor = vgl.actor(),
-      m_mapper = vgl.mapper(),
-      m_material = vgl.material(),
+      m_actor = null,
+      m_mapper = null,
       m_geometry,
       m_origin,
+      m_uniforms,
       m_modelViewUniform,
       s_init = this._init,
       s_update = this._update,
@@ -48,14 +51,69 @@ var webgl_polygonFeature = function (arg) {
 
   function createVertexShader() {
     var shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
-    shader.setShaderSource(vertexShader);
+    if (!m_this._hasPatterns) {
+      shader.setShaderSource(vertexShader);
+    } else {
+      shader.setShaderSource(vertexPatternShader);
+    }
     return shader;
   }
 
   function createFragmentShader() {
     var shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
-    shader.setShaderSource(fragmentShader);
+    if (!m_this._hasPatterns) {
+      shader.setShaderSource(fragmentShader);
+    } else {
+      shader.setShaderSource(fragmentPatternShader);
+    }
     return shader;
+  }
+
+  function _resolvePattern(val, func, d, idx, v0) {
+    if (!val && func === undefined) {
+      return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    }
+    const pattern = Array(16);
+    let fillColor, strokeColor;
+    if (val === undefined) {
+      val = func(d, idx);
+    }
+    if (val.fillColor === undefined) {
+      fillColor = util.convertColor(m_this.style.get('strokeColor')(v0, 0, d, idx));
+      fillColor.a = m_this.style.get('strokeOpacity')(v0, 0, d, idx);
+    } else {
+      fillColor = util.convertColor(val.fillColor);
+    }
+    pattern[0] = fillColor.r;
+    pattern[1] = fillColor.g;
+    pattern[2] = fillColor.b;
+    pattern[3] = fillColor.a;
+    if (val.strokeColor === undefined) {
+      strokeColor = util.convertColor(m_this.style.get('fillColor')(v0, 0, d, idx));
+      strokeColor.a = m_this.style.get('fillOpacity')(v0, 0, d, idx);
+    } else {
+      strokeColor = util.convertColor(val.strokeColor);
+    }
+    pattern[4] = strokeColor.r;
+    pattern[5] = strokeColor.g;
+    pattern[6] = strokeColor.b;
+    pattern[7] = strokeColor.a;
+    pattern[8] = val.strokeWidth === undefined ? 1.25 : val.strokeWidth;
+    pattern[9] = val.radius === undefined ? 6.25 : val.radius;
+    let scaleWithZoom = val.scaleWithZoom === undefined ? markerFeature.scaleMode.none : val.scaleWithZoom;
+    scaleWithZoom = markerFeature.scaleMode[scaleWithZoom] || scaleWithZoom;
+    const strokeOffset = val.strokeOffset === undefined || val.strokeOffset < 0 ? -1 : (val.strokeOffset > 0 ? 1 : 0);
+    pattern[10] = scaleWithZoom + (!val.rotateWithMap ? 4 : 0) + ((val.radiusIncludeStroke ? strokeOffset : 1) + 1) * 16 + (val.symbol || 0) * 64;
+    if (val.symbol && val.symbolValue && val.symbol >= markerFeature.symbols.arrow && val.symbol < markerFeature.symbols.arrow + markerFeature.symbols.arrowMax) {
+      pattern[11] = util.packFloats(val.symbolValue || 0);
+    } else {
+      pattern[11] = val.symbolValue || 0;
+    }
+    pattern[12] = val.rotation || 0;
+    pattern[13] = val.spacing === undefined ? 20 : val.spacing;
+    pattern[14] = val.origin === undefined ? 0 : val.origin[0];
+    pattern[15] = val.origin === undefined ? 0 : val.origin[1];
+    return pattern;
   }
 
   /**
@@ -78,13 +136,16 @@ var webgl_polygonFeature = function (arg) {
         fillColor, fillColorFunc, fillColorVal,
         fillOpacity, fillOpacityFunc, fillOpacityVal,
         fillFunc, fillVal,
+        patternFunc, patternVal, pattern,
+        patternFillColor, patternStrokeColor,
+        patternSymbolProps, patternPositionProps,
         uniformFunc, uniformVal, uniform,
         indices,
         items = [], itemsk, itemsktri,
         target_gcs = m_this.gcs(),
         map_gcs = m_this.layer().map().gcs(),
         numPts = 0,
-        geom = m_mapper.geometryData(),
+        geom,
         color, opacity, fill, d, d3, vertices, i, j, k, n,
         record, item, itemIndex, original;
 
@@ -96,6 +157,14 @@ var webgl_polygonFeature = function (arg) {
     fillVal = util.isFunction(m_this.style('fill')) ? undefined : fillFunc();
     uniformFunc = m_this.style.get('uniformPolygon');
     uniformVal = util.isFunction(m_this.style('uniformPolygon')) ? undefined : uniformFunc();
+    patternFunc = m_this.style.get('pattern');
+    patternVal = util.isFunction(m_this.style('pattern')) ? undefined : (patternFunc() || null);
+    if (patternVal !== null && m_this._hasPatterns !== true) {
+      m_this.renderer().contextRenderer().removeActor(m_actor);
+      m_actor = null;
+      m_this._init(true);
+    }
+    geom = m_mapper.geometryData();
 
     if (!onlyStyle) {
       posFunc = m_this.style.get('position');
@@ -184,6 +253,12 @@ var webgl_polygonFeature = function (arg) {
     d = d3 = 0;
     color = fillColorVal;
     fill = fillVal;
+    if (m_this._hasPatterns) {
+      patternFillColor = util.getGeomBuffer(geom, 'patternFillColor', numPts * 4);
+      patternStrokeColor = util.getGeomBuffer(geom, 'patternStrokeColor', numPts * 4);
+      patternSymbolProps = util.getGeomBuffer(geom, 'patternSymbolProps', numPts * 4);
+      patternPositionProps = util.getGeomBuffer(geom, 'patternPositionProps', numPts * 4);
+    }
     for (k = 0; k < items.length; k += 1) {
       itemsk = items[k];
       itemsktri = itemsk.triangles;
@@ -207,6 +282,11 @@ var webgl_polygonFeature = function (arg) {
       }
       if (!fill) {
         opacity = 0;
+      }
+      if (m_this._hasPatterns) {
+        if ((pattern === undefined && patternVal) || patternVal === undefined) {
+          pattern = _resolvePattern(patternVal, patternFunc, item, itemIndex, vertices[0]);
+        }
       }
       if (uniform && onlyStyle && itemsk.uniform && itemsk.color &&
           color.r === itemsk.color.r && color.g === itemsk.color.g &&
@@ -240,6 +320,24 @@ var webgl_polygonFeature = function (arg) {
           }
           fillOpacity[d] = opacity;
         }
+        if (m_this._hasPatterns) {
+          patternFillColor[d * 4] = pattern[0];
+          patternFillColor[d * 4 + 1] = pattern[1];
+          patternFillColor[d * 4 + 2] = pattern[2];
+          patternFillColor[d * 4 + 3] = pattern[3];
+          patternStrokeColor[d * 4] = pattern[4];
+          patternStrokeColor[d * 4 + 1] = pattern[5];
+          patternStrokeColor[d * 4 + 2] = pattern[6];
+          patternStrokeColor[d * 4 + 3] = pattern[7];
+          patternSymbolProps[d * 4] = pattern[8];
+          patternSymbolProps[d * 4 + 1] = pattern[9];
+          patternSymbolProps[d * 4 + 2] = pattern[10];
+          patternSymbolProps[d * 4 + 3] = pattern[11];
+          patternPositionProps[d * 4] = pattern[12];
+          patternPositionProps[d * 4 + 1] = pattern[13];
+          patternPositionProps[d * 4 + 2] = pattern[14];
+          patternPositionProps[d * 4 + 3] = pattern[15];
+        }
       }
       if (uniform || itemsk.uniform) {
         itemsk.uniform = uniform;
@@ -254,6 +352,12 @@ var webgl_polygonFeature = function (arg) {
     } else {
       m_mapper.updateSourceBuffer('fillOpacity');
       m_mapper.updateSourceBuffer('fillColor');
+      if (m_this._hasPatterns) {
+        m_mapper.updateSourceBuffer('patternFillColor');
+        m_mapper.updateSourceBuffer('patternStrokeColor');
+        m_mapper.updateSourceBuffer('patternSymbolProps');
+        m_mapper.updateSourceBuffer('patternPositionProps');
+      }
     }
   }
 
@@ -264,6 +368,7 @@ var webgl_polygonFeature = function (arg) {
    *    feature.
    */
   this._init = function (arg) {
+    m_this._hasPatterns = (arg === true);
     var prog = vgl.shaderProgram(),
         posAttr = vgl.vertexAttribute('pos'),
         fillColorAttr = vgl.vertexAttribute('fillColor'),
@@ -278,28 +383,65 @@ var webgl_polygonFeature = function (arg) {
           3, vgl.vertexAttributeKeysIndexed.Two, {name: 'fillColor'}),
         sourceFillOpacity = vgl.sourceDataAnyfv(
           1, vgl.vertexAttributeKeysIndexed.Three, {name: 'fillOpacity'}),
-        trianglePrimitive = vgl.triangles();
+        trianglePrimitive = vgl.triangles(),
+        mat = vgl.material();
     m_modelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix');
 
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
     prog.addVertexAttribute(fillColorAttr, vgl.vertexAttributeKeysIndexed.Two);
     prog.addVertexAttribute(fillOpacityAttr, vgl.vertexAttributeKeysIndexed.Three);
-
+    if (m_this._hasPatterns) {
+      var patternFillColorAttr = vgl.vertexAttribute('patternFillColor'),
+          patternStrokeColorAttr = vgl.vertexAttribute('patternStrokeColor'),
+          patternSymbolPropsAttr = vgl.vertexAttribute('patternSymbolProps'),
+          patternPositionPropsAttr = vgl.vertexAttribute('patternPositionProps');
+      prog.addVertexAttribute(patternFillColorAttr, vgl.vertexAttributeKeysIndexed.Four);
+      prog.addVertexAttribute(patternStrokeColorAttr, vgl.vertexAttributeKeysIndexed.Five);
+      prog.addVertexAttribute(patternSymbolPropsAttr, vgl.vertexAttributeKeysIndexed.Six);
+      prog.addVertexAttribute(patternPositionPropsAttr, vgl.vertexAttributeKeysIndexed.Seven);
+    }
     prog.addUniform(m_modelViewUniform);
     prog.addUniform(projectionUniform);
 
     prog.addShader(fragmentShader);
     prog.addShader(vertexShader);
 
-    m_material.addAttribute(prog);
-    m_material.addAttribute(blend);
+    mat.addAttribute(prog);
+    mat.addAttribute(blend);
 
-    m_actor.setMaterial(m_material);
+    m_mapper = vgl.mapper();
+    m_actor = vgl.actor();
+    m_actor.setMaterial(mat);
     m_actor.setMapper(m_mapper);
 
     geom.addSource(sourcePositions);
     geom.addSource(sourceFillColor);
     geom.addSource(sourceFillOpacity);
+    if (m_this._hasPatterns) {
+      var uniforms = {
+        pixelWidth: vgl.GL.FLOAT,
+        aspect: vgl.GL.FLOAT,
+        zoom: vgl.GL.FLOAT,
+        rotationUniform: vgl.GL.FLOAT
+      };
+      m_uniforms = {};
+      Object.keys(uniforms).forEach((key) => {
+        m_uniforms[key] = new vgl.uniform(uniforms[key], key);
+        prog.addUniform(m_uniforms[key]);
+      });
+      var sourcePatternFillColor = vgl.sourceDataAnyfv(
+            4, vgl.vertexAttributeKeysIndexed.Four, {name: 'patternFillColor'}),
+          sourcePatternStrokeColor = vgl.sourceDataAnyfv(
+            4, vgl.vertexAttributeKeysIndexed.Five, {name: 'patternStrokeColor'}),
+          sourcePatternSymbolProps = vgl.sourceDataAnyfv(
+            4, vgl.vertexAttributeKeysIndexed.Six, {name: 'patternSymbolProps'}),
+          sourcePatternPositionProps = vgl.sourceDataAnyfv(
+            4, vgl.vertexAttributeKeysIndexed.Seven, {name: 'patternPositionProps'});
+      geom.addSource(sourcePatternFillColor);
+      geom.addSource(sourcePatternStrokeColor);
+      geom.addSource(sourcePatternSymbolProps);
+      geom.addSource(sourcePatternPositionProps);
+    }
     geom.addPrimitive(trianglePrimitive);
     /* We don't need vgl to compute bounds, so make the geo.computeBounds just
      * set them to 0. */
@@ -308,7 +450,9 @@ var webgl_polygonFeature = function (arg) {
     };
     m_mapper.setGeometryData(geom);
 
-    s_init.call(m_this, arg);
+    if (arg !== true) {
+      s_init.call(m_this, arg);
+    }
   };
 
   /**
@@ -359,6 +503,13 @@ var webgl_polygonFeature = function (arg) {
       m_this._build();
     }
 
+    if (m_this._hasPatterns) {
+      // Update uniforms
+      m_uniforms.pixelWidth.set(2.0 / m_this.renderer().width());
+      m_uniforms.aspect.set(m_this.renderer().width() / m_this.renderer().height());
+      m_uniforms.zoom.set(m_this.renderer().map().zoom());
+      m_uniforms.rotationUniform.set(m_this.renderer().map().rotation());
+    }
     m_actor.setVisible(m_this.visible());
     m_actor.material().setBinNumber(m_this.bin());
     m_this.updateTime().modified();
@@ -373,6 +524,8 @@ var webgl_polygonFeature = function (arg) {
       m_updateAnimFrameRef = null;
     }
     m_this.renderer().contextRenderer().removeActor(m_actor);
+    m_actor = null;
+    m_uniforms = {};
     s_exit();
   };
 

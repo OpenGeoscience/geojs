@@ -1506,6 +1506,27 @@ var util = {
     return d;
   },
 
+  /**
+   * Pack an array of three numbers and one boolean into a single float.  Each
+   * numerical value is either undefined or on the scale of [0, 1] and is
+   * mapped to an integer range of [0, 250].
+   *
+   * @param {number|number[]} value A single value or an array of up to four
+   *    values where the first three values are numbers and the last is a
+   *    boolean.
+   * @returns {number} A packed number.
+   */
+  packFloats: function (value) {
+    if (!value.length) {
+      return value === undefined ? 0 : Math.floor(Math.abs(value) * 250) + 1;
+    }
+    return (
+      (value[0] === undefined ? 0 : Math.floor(Math.abs(value[0]) * 250) + 1) +
+      (value[1] === undefined ? 0 : Math.floor(Math.abs(value[1]) * 250) + 1) * 252 +
+      (value[2] === undefined ? 0 : Math.floor(Math.abs(value[2]) * 250) + 1) * 252 * 252
+    ) * (value[3] ? -1 : 1);
+  },
+
   ///////////////////////////////////////////////////////////////////////////
   /*
    * Utility member properties.

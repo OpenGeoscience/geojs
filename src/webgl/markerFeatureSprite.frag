@@ -10,5 +10,6 @@ void main(void) {
     discard;
   // for sprites, convert the position to [-radius,radius],[-radius,radius]
   vec2 pos = (gl_PointCoord.xy - 0.5) * 2.0 * radiusVar;
-  markerFeatureFragment(pos);
+  if (markerFeatureFragment(vec3(pos, 0.0)) == 0.0)
+    discard;
 }

@@ -62,6 +62,24 @@ describe('geo.polygonFeature', function () {
       return d.uniformPolygon !== undefined ? d.uniformPolygon : false;
     }
   };
+  var patternStyle = function (d, idx, poly, polyidx) {
+    stylesVisited.push({style: 'pattern', params: [d, idx, poly, polyidx]});
+    return {
+      fillColor: '#0000FF40',
+      strokeColor: '#FFFF00C0',
+      strokeWidth: 1.25 / 16,
+      strokeOffset: 1,
+      radiusIncludesStroke: true,
+      symbol: geo.markerFeature.symbols.star5,
+      symbolValue: 0.6,
+      rotation: -Math.PI / 2,
+      scaleWithZoom: geo.markerFeature.scaleMode.all,
+      rotateWithMap: false,
+      radius: 30.25 / 32,
+      spacing: -70 / 32,
+      origin: [0, 0],
+    };
+  };
 
   describe('create', function () {
     it('create function', function () {
@@ -439,6 +457,16 @@ describe('geo.polygonFeature', function () {
       return vgl.mockCounts().bufferSubData >= (glCounts.bufferSubData || 0) + 1 &&
              buildTime !== polygons.buildTime().timestamp();
     });
+    it('update to a pattern style', function () {
+      polygons.style('pattern', patternStyle);
+      glCounts = $.extend({}, vgl.mockCounts());
+      buildTime = polygons.buildTime().timestamp();
+      polygons.draw();
+    });
+    waitForIt('next render gl E', function () {
+      return vgl.mockCounts().bufferSubData >= (glCounts.bufferSubData || 0) + 1 &&
+             buildTime !== polygons.buildTime().timestamp();
+    });
     it('poor data', function () {
       polygons.data([undefined, testPolygons[1]]);
       polygons.style('fill', true);
@@ -446,7 +474,7 @@ describe('geo.polygonFeature', function () {
       buildTime = polygons.buildTime().timestamp();
       polygons.draw();
     });
-    waitForIt('next render gl E', function () {
+    waitForIt('next render gl F', function () {
       return vgl.mockCounts().bufferData >= (glCounts.bufferData || 0) + 1 &&
              buildTime !== polygons.buildTime().timestamp();
     });
