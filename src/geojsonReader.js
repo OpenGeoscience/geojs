@@ -68,6 +68,7 @@ var geojsonReader = function (arg) {
           strokeWidth: 2,
           strokeOpacity: 1,
           uniformPolygon: true,
+          pattern: undefined,
           ...arg.polygonStyle
         }
       };

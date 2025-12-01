@@ -78,6 +78,9 @@ var webgl_polygonFeature = function (arg) {
     if (val === undefined) {
       val = func(d, idx);
     }
+    if (!val) {
+      return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    }
     if (val.fillColor === undefined) {
       fillColor = util.convertColor(m_this.style.get('strokeColor')(v0, 0, d, idx));
       fillColor.a = m_this.style.get('strokeOpacity')(v0, 0, d, idx);
