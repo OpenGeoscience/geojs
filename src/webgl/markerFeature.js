@@ -75,27 +75,6 @@ var webgl_markerFeature = function (arg) {
   }
 
   /**
-   * Pack an array of three numbers and one boolean into a single float.  Each
-   * numerical value is either undefined or on the scale of [0, 1] and is
-   * mapped to an integer range of [0, 250].
-   *
-   * @param {number|number[]} value A single value or an array of up to four
-   *    values where the first three values are numbers and the last is a
-   *    boolean.
-   * @returns {number} A packed number.
-   */
-  function packFloats(value) {
-    if (!value.length) {
-      return value === undefined ? 0 : Math.floor(Math.abs(value) * 250) + 1;
-    }
-    return (
-      (value[0] === undefined ? 0 : Math.floor(Math.abs(value[0]) * 250) + 1) +
-      (value[1] === undefined ? 0 : Math.floor(Math.abs(value[1]) * 250) + 1) * 252 +
-      (value[2] === undefined ? 0 : Math.floor(Math.abs(value[2]) * 250) + 1) * 252 * 252
-    ) * (value[3] ? -1 : 1);
-  }
-
-  /**
    * Create and style the data needed to render the markers.
    *
     @param {boolean} [onlyStyle] if true, use the existing geometry and just
@@ -195,7 +174,7 @@ var webgl_markerFeature = function (arg) {
         ((Math.sign(styleVal.radiusIncludesStroke !== undefined && styleVal.radiusIncludesStroke ? styleVal.strokeOffset : 1) + 1) * 16) +
         styleVal.symbol * 64);
       if (styleVal.symbolValue && styleVal.symbol >= markerFeature.symbols.arrow && styleVal.symbol < markerFeature.symbols.arrow + markerFeature.symbols.arrowMax) {
-        styleVal.symbolValue = packFloats(styleVal.symbolValue);
+        styleVal.symbolValue = util.packFloats(styleVal.symbolValue);
       }
       for (j = 0; j < vpf; j += 1, ivpf += 1, ivpf3 += 3) {
         if (!onlyStyle) {

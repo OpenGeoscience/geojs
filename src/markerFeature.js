@@ -18,7 +18,7 @@ var pointFeature = require('./pointFeature');
  *
  * @typedef {geo.feature.styleSpec} geo.markerFeature.styleSpec
  * @extends geo.feature.styleSpec
- * @property {number|Function} [radius=5] Radius of each marker in pixels.
+ * @property {number|Function} [radius=6.25] Radius of each marker in pixels.
  *   This includes the stroke width if `strokeOffset` is -1, excludes it if
  *   `strokeOffset` is 1, and includes half the stroke width if `strokeOffset`
  *    is 0.  Note that is `radiusIncludesStroke` is `false`, this never
