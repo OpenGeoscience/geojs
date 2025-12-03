@@ -224,7 +224,7 @@ var annotationLayer = function (arg) {
    */
   this._handleBooleanOperation = function () {
     const op = m_this.currentBooleanOperation();
-    if (!op || !m_this.currentAnnotation || (op !== 'cut' && !m_this.currentAnnotation.toPolygonList) || (op === 'cut' && !(m_this.currentAnnotation instanceof lineAnnotation))) {
+    if (!op || !m_this.currentAnnotation || (!m_this.currentAnnotation.toPolygonList && (op !== 'cut' || !(m_this.currentAnnotation instanceof lineAnnotation)))) {
       return;
     }
     const newAnnot = m_this.currentAnnotation;
@@ -245,6 +245,16 @@ var annotationLayer = function (arg) {
     }
   };
 
+  /**
+   * Given a line defined by two points, extend the first point to intersect a
+   * bounding box.
+   *
+   * @param {number[]} p1 A 2-coordinate point.
+   * @param {number[]} p2 A 2-coordinate point.
+   * @param {object} bbox A bounding box consisting on min and max, each of
+   *    which has x and y.
+   * @returns {number[]} A 2-coordinate point.
+   */
   this._extendLine = function (p1, p2, bbox) {
     const dx = p2[0] - p1[0];
     const dy = p2[1] - p1[1];
@@ -270,12 +280,12 @@ var annotationLayer = function (arg) {
   };
 
   /**
-   * Given a cut line, cut existing polygons and lines.
+   * Convert a line annotation to a polygonList.
    *
-   * @param {geo.annotation} cutLine The line to use to cut the existing
-   *    annotations.
+   * @param {geo.annotation} cutLine The line to convert.
+   * @returns {geo.polygonList} A list of polygons.
    */
-  this.cutOperation = function (cutLine) {
+  this._cutLineToPoly = function (cutLine) {
     const cutPts = cutLine.coordinates(null).map((p) => [p.x, p.y]);
     let range;
     for (let p = 0; p < cutPts.length; p += 1) {
@@ -316,7 +326,7 @@ var annotationLayer = function (arg) {
       }
     });
     if (range === undefined || range.min.x === range.max.x || range.min.y === range.max.y) {
-      return;
+      return [];
     }
     // expand the range so that all polygons and lines, including our cut line
     // are guaranteed to be inside the bounding box.
@@ -341,14 +351,30 @@ var annotationLayer = function (arg) {
     for (let idx = idx0; idx % 4 !== idx1; idx += 1) {
       cutPoly.push(corners[idx % 4]);
     }
+    return [[cutPoly]];
+  };
+
+  /**
+   * Given a cut line or polygon, cut existing polygons and lines.
+   *
+   * @param {geo.annotation} cutLineOrPoly The line or polygon to use to cut
+   *    the existing annotations.
+   */
+  this.cutOperation = function (cutLineOrPoly) {
+    let cutPoly;
+    if (cutLineOrPoly instanceof lineAnnotation) {
+      cutPoly = this._cutLineToPoly(cutLineOrPoly);
+    } else {
+      cutPoly = cutLineOrPoly.toPolygonList();
+    }
     // mimic some of what is done in fromPolygonList because we need both sides
     // of the cut.
     let diffPoly;
     const annot = m_this.annotations();
-    const diff = {poly2: [[cutPoly]], correspond: {}, keepAnnotations: 'exact', style: {fromPolygonList: (poly, opts) => { diffPoly = poly; }}};
+    const diff = {poly2: cutPoly, correspond: {}, keepAnnotations: 'exact', style: {fromPolygonList: (poly, opts) => { diffPoly = poly; }}};
     diff.poly1 = m_this.toPolygonList(diff);
     util.polyops.difference(diff);
-    util.polyops.intersect(m_this, [[cutPoly]], {correspond: {}, keepAnnotations: 'exact', style: m_this});
+    util.polyops.intersect(m_this, cutPoly, {correspond: {}, keepAnnotations: 'exact', style: m_this});
     const indices = (diff.annotationIndices || {})[m_this.id()];
     const correspond = diff.correspond.poly1;
     const exact = diff.correspond.exact1;
@@ -422,7 +448,7 @@ var annotationLayer = function (arg) {
           return;
         }
         const op = Object.keys(m_this._booleanClasses).find((op) =>
-          m_this._booleanClasses[op] === mod && (ops === true || ops.includes(op)));
+          m_this._booleanClasses[op].includes(mod) && (ops === true || ops.includes(op)));
         if (m_this._currentBooleanClass === op) {
           return;
         }
@@ -807,11 +833,11 @@ var annotationLayer = function (arg) {
   /* Keys are classes to apply to the map node.  Values are short-hand for
    * preferred event modifiers. */
   this._booleanClasses = {
-    'annotation-union': 's',
-    'annotation-intersect': 'sc',
-    'annotation-difference': 'c',
-    'annotation-xor': 'sa',
-    'annotation-cut': 'c'
+    'annotation-union': ['s'],
+    'annotation-intersect': ['sc'],
+    'annotation-difference': ['c'],
+    'annotation-xor': ['sa'],
+    'annotation-cut': ['c', 'ca']
   };
 
   /**
