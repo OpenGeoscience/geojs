@@ -148,6 +148,8 @@ describe('geo.annotationLayer', function () {
       expect(layer.annotations().length).toBe(6);
       layer.cutOperation(line2);
       expect(layer.annotations().length).toBe(5);
+      layer.cutOperation(rect2);
+      expect(layer.annotations().length).toBe(5);
     });
   });
   describe('Public utility functions', function () {
