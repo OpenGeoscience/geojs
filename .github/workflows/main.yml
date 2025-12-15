@@ -99,7 +99,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Import artifacts
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: website
         path: website/public
@@ -121,7 +121,7 @@ jobs:
     - run: sudo apt-get update
     - run: sudo apt-get install --yes --no-install-recommends optipng imagemagick build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev liblzma-dev
     - name: Import artifacts
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: dist
         path: dist
