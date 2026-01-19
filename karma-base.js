@@ -72,33 +72,30 @@ function getScreenImage(name, left, top, width, height) {
 }
 
 /* Compare an image to a base image.  If it violates a threshold, save the
- * image and a diff between it and the base image.  Returns the resemble
- * results.
+ * image.
  *
  * @param {string} name: base name for the image.
  * @param {string} image: a base64 encoded png image.
  * @param {number} threshold: allowed difference between this image and the
  *    base image.
- * @param {Function} callback: a function to call when complete.
+ * @param {Function} callback: a function to call when complete with the
+ *    direct comparison results.
  */
 function compareImage(name, image, threshold, callback) {
-  var resemble = require('resemblejs');
-  var src = path.resolve('dist/data/base-images', name + '.png');
+  const looksSame = require('looks-same');
+  let src = path.resolve('dist/data/base-images', name + '.png');
   if (!fs.existsSync(src)) {
     src = path.resolve(image_path, name + '.png');
   }
-  var refImage = Buffer.from(fs.readFileSync(src)).toString('base64');
-  refImage = 'data:image/png;base64,' + refImage;
-  resemble(image)
-    .compareTo(refImage)
-    .ignoreAntialiasing()
-    .onComplete(function (results) {
-      console.log('Image comparison: ' + name + ', delta: ' +
-                  Number(results.misMatchPercentage) * 0.01);
-      var passed = (Number(results.misMatchPercentage) <= threshold * 100);
+  const refImageBuf = Buffer.from(fs.readFileSync(src));
+  const refImage = 'data:image/png;base64,' + refImageBuf.toString('base64');
+  const imageBuf = Buffer.from(image.replace(/^data:image\/png;base64,/, ''), 'base64');
+  looksSame(imageBuf, refImageBuf, {ignoreAntialiasing: true, threshold: threshold})
+    .then(function (results) {
+      console.log('Image comparison: ' + name + ', equal: ' + results.equal);
+      var passed = results.equal;
       saveImage(name + '-base', refImage, !passed);
       saveImage(name + '-test', image, !passed);
-      saveImage(name + '-diff', results.getImageDataUrl(), !passed);
       results.passed = passed;
       if (callback) {
         callback(results);

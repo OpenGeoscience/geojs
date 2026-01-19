@@ -1,4 +1,3 @@
-// var resemble = require('resemblejs');
 var $ = require('jquery');
 
 module.exports = {};
