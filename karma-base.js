@@ -180,7 +180,8 @@ var ChromeFlags = [
   '--force-color-profile=srgb',  // for consistent tests
   '--disable-background-networking',
   '--disable-component-extensions-with-background-pages',
-  '--translate-script-url=""'
+  '--translate-script-url=""',
+  '--enable-unsafe-swiftshader'
 ];
 
 /* By default, when Firefox starts it makes many connections to sites like
