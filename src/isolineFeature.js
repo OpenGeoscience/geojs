@@ -706,17 +706,14 @@ var isolineFeature = function (arg) {
         m_this.dependentFeatures([m_lineFeature]);
       }
       var style = m_this.style();
-      m_lineFeature.data(m_isolines.lines).style({
-        antialiasing: style.antialiasing,
-        lineCap: style.lineCap,
-        lineJoin: style.lineJoin,
-        miterLimit: style.miterLimit,
-        strokeWidth: style.strokeWidth,
-        strokeStyle: style.strokeStyle,
-        strokeColor: style.strokeColor,
-        strokeOffset: style.strokeOffset,
-        strokeOpacity: style.strokeOpacity
-      });
+      m_lineFeature.data(m_isolines.lines).style([
+        'antialiasing', 'lineCap', 'lineJoin', 'miterLimit', 'strokeWidth',
+        'strokeStyle', 'strokeColor', 'strokeOffset', 'strokeOpacity'].reduce((acc, key) => {
+        if (key in style) {
+          acc[key] = style[key];
+        }
+        return acc;
+      }, {}));
       if (m_isolines.hasLabels) {
         if (!m_labelFeature) {
           if (!(registry.registries.features[m_this.layer().rendererName()] || {}).text) {
