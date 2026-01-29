@@ -1,0 +1,8 @@
+{
+  "title": "Using animated transitions",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "Using animations to transition between points on a map."
+  }
+}
