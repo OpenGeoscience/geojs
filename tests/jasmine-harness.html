@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>GeoJS Tests</title>
+  <link rel="stylesheet" href="/node_modules/jasmine-core/lib/jasmine-core/jasmine.css">
+  <style>
+    /* Ensure the map div can be created */
+    body { margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+  <script src="/node_modules/jasmine-core/lib/jasmine-core/jasmine.js"></script>
+  <script src="/node_modules/jasmine-core/lib/jasmine-core/jasmine-html.js"></script>
+  <script src="/node_modules/jasmine-core/lib/jasmine-core/boot0.js"></script>
+  <script src="/node_modules/jasmine-core/lib/jasmine-core/boot1.js"></script>
+  <script src="/node_modules/sinon/pkg/sinon.js"></script>
+  <script>
+    // Configure jasmine before tests load
+    jasmine.getEnv().configure({
+      random: false,
+      autoCleanClosures: false
+    });
+
+    // Override the default timeout
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
+  </script>
+  <script>
+    // Signal mechanism for Playwright to know when tests are done
+    window.__jasmineResults = null;
+    window.__jasmineDone = false;
+
+    // Add a custom reporter that collects results
+    var resultReporter = {
+      specs: [],
+      failures: [],
+      totalSpecs: 0,
+      failedSpecs: 0,
+      passedSpecs: 0,
+      skippedSpecs: 0,
+
+      specDone: function(result) {
+        this.totalSpecs++;
+        if (result.status === 'failed') {
+          this.failedSpecs++;
+          this.failures.push({
+            fullName: result.fullName,
+            failedExpectations: result.failedExpectations.map(function(e) {
+              return { message: e.message, stack: e.stack };
+            })
+          });
+        } else if (result.status === 'passed') {
+          this.passedSpecs++;
+        } else {
+          this.skippedSpecs++;
+        }
+        this.specs.push({
+          fullName: result.fullName,
+          status: result.status,
+          failedExpectations: (result.failedExpectations || []).map(function(e) {
+            return { message: e.message, stack: e.stack };
+          })
+        });
+      },
+
+      jasmineDone: function(summary) {
+        window.__jasmineResults = {
+          totalSpecs: this.totalSpecs,
+          failedSpecs: this.failedSpecs,
+          passedSpecs: this.passedSpecs,
+          skippedSpecs: this.skippedSpecs,
+          failures: this.failures,
+          overallStatus: summary.overallStatus
+        };
+        window.__jasmineDone = true;
+      }
+    };
+
+    jasmine.getEnv().addReporter(resultReporter);
+  </script>
+  <!-- The webpack-bundled test file -->
+  <script src="/test-bundle/test-bundle.js"></script>
+</body>
+</html>

@@ -37,6 +37,7 @@
     "@babel/plugin-proposal-class-properties": "^7.16.5",
     "@babel/preset-env": "^7.16.5",
     "@fontsource/lato": "^5.1.1",
+    "@playwright/test": "^1.52.0",
     "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
     "acorn": "^8.15.0",
     "babel-loader": "^10.0.0",
@@ -58,22 +59,15 @@
     "glob": "^13.0.0",
     "globals": "^17.0.0",
     "imports-loader": "^5.0.0",
+    "istanbul-lib-coverage": "^3.2.0",
+    "istanbul-lib-report": "^3.0.1",
+    "istanbul-reports": "^3.1.6",
     "jasmine-core": "^5.0.0",
     "js-yaml": "^4.1.0",
     "jsdoc": "^4.0.0",
     "jsdoc-autoprivate": "0.0.1",
     "jsonlint-mod": "^1.7.6",
     "jstransformer-markdown-it": "^3.0.0",
-    "karma": "^6.3.15",
-    "karma-chrome-launcher": "^3.1.0",
-    "karma-coverage": "^2.1.1",
-    "karma-firefox-launcher": "^2.1.2",
-    "karma-jasmine": "^5.0.0",
-    "karma-jasmine-html-reporter": "^2.0.0",
-    "karma-sinon": "^1.0.5",
-    "karma-sourcemap-loader": "^0.4.0",
-    "karma-spec-reporter": "^0.0.36",
-    "karma-webpack": "^5.0.0",
     "looks-same": "^10.0.1",
     "neostandard": "^0.12.1",
     "nib": "^1.1.2",
@@ -102,14 +96,64 @@
     "webpack-string-replacer": "^0.0.20"
   },
   "overrides": {
+    "jstransformer-markdown-it": {
+        "markdown-it": "^14.0.0"
+    },
     "npm-run-all": {
-      "cross-spawn": "^7.0.5"
+      "cross-spawn": "^7.0.5",
+      "minimatch": "^10.2.1"
     },
     "stylus": {
-      "glob": "^13.0.0"
+      "glob": "^13.0.0",
+      "minimatch": "^10.2.1"
     },
     "vtk.js": {
       "xmlbuilder2": "^4.0.0"
+    },
+    "@typescript-eslint/parser": {
+      "minimatch": "^10.2.1"
+    },
+    "@typescript-eslint/eslint-plugin": {
+      "minimatch": "^10.2.1"
+    },
+    "@typescript-eslint/type-utils": {
+      "minimatch": "^10.2.1"
+    },
+    "@typescript-eslint/utils": {
+      "minimatch": "^10.2.1"
+    },
+    "@stylistic/eslint-plugin": {
+      "minimatch": "^10.2.1"
+    },
+    "eslint-plugin-import": {
+      "minimatch": "^10.2.1"
+    },
+    "eslint-plugin-react": {
+      "minimatch": "^10.2.1"
+    },
+    "eslint-plugin-promise": {
+      "minimatch": "^10.2.1"
+    },
+    "neostandard": {
+      "minimatch": "^10.2.1"
+    },
+    "eslint": {
+      "minimatch": "^10.2.1"
+    },
+    "glob": {
+      "minimatch": "^10.2.1"
+    },
+    "rimraf": {
+      "minimatch": "^10.2.1"
+    },
+    "test-exclude": {
+      "minimatch": "^10.2.1"
+    },
+    "babel-plugin-istanbul": {
+      "minimatch": "^10.2.1"
+    },
+    "pug-lint": {
+      "minimatch": "^10.2.1"
     }
   },
   "release": {
@@ -155,22 +199,22 @@
     "puglint": "pug-lint src examples",
     "stylelint": "stylelint **/*.styl",
     "glsllint": "chmod +x node_modules/glslang-validator-prebuilt-predownloaded/bin/glslangValidator.linux; find . \\( -name '*.frag' \\) -exec sh -c 'for n; do python scripts/preprocess_glsl.py \"$n\" | node_modules/glslang-validator-prebuilt-predownloaded/bin/glslangValidator.linux --stdin -S frag || exit 1; done' sh {} \\+ && find . \\( -name '*.vert' \\) -exec sh -c 'for n; do python scripts/preprocess_glsl.py \"$n\" | node_modules/glslang-validator-prebuilt-predownloaded/bin/glslangValidator.linux --stdin -S vert || exit 1; done' sh {} \\+",
-    "test-headless": "GEOJS_TEST_CASE=tests/test-unit.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch,FirefoxHeadlessTouch",
-    "test-headless-all": "GEOJS_TEST_CASE=tests/test-unit.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch,FirefoxHeadlessTouch",
-    "test-headed": "GEOJS_TEST_CASE=tests/test-headed.js karma start karma-cov.conf.js --single-run --browsers ChromeFull",
-    "tets-headed-all": "GEOJS_TEST_CASE=tests/test-headed.js karma start karma-cov.conf.js --single-run --browsers ChromeFull,FirefoxWithProxy",
-    "test-headed-xvfb": "GEOJS_TEST_CASE=tests/test-headed.js xvfb-run -s '-ac -screen 0 1280x1024x24' karma start karma-cov.conf.js --single-run --browsers ChromeFull",
-    "test-webglheadless": "GEOJS_TEST_CASE=tests/test-gl.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch",
-    "test-webglheadless-all": "GEOJS_TEST_CASE=tests/test-gl.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch,FirefoxHeadlessTouch",
-    "test-tutorials": "GEOJS_TEST_CASE=tests/tutorials.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch",
-    "test-tutorialsci-all": "GEOJS_TEST_CASE=tests/tutorials.js karma start karma-cov.conf.js --single-run --browsers ChromeHeadlessTouch,FirefoxHeadlessTouch",
+    "test-headless": "GEOJS_TEST_CASE=tests/test-unit.js GEOJS_COVERAGE=true GEOJS_BROWSERS=chromium,firefox node tests/run-tests.js",
+    "test-headless-all": "GEOJS_TEST_CASE=tests/test-unit.js GEOJS_COVERAGE=true GEOJS_BROWSERS=chromium,firefox node tests/run-tests.js",
+    "test-headed": "GEOJS_TEST_CASE=tests/test-headed.js GEOJS_COVERAGE=true GEOJS_BROWSERS=chromium-headed node tests/run-tests.js",
+    "tets-headed-all": "GEOJS_TEST_CASE=tests/test-headed.js GEOJS_COVERAGE=true GEOJS_BROWSERS=chromium-headed,firefox-headed node tests/run-tests.js",
+    "test-headed-xvfb": "GEOJS_TEST_CASE=tests/test-headed.js GEOJS_COVERAGE=true GEOJS_BROWSERS=chromium-headed xvfb-run -s '-ac -screen 0 1280x1024x24' node tests/run-tests.js",
+    "test-webglheadless": "GEOJS_TEST_CASE=tests/test-gl.js GEOJS_COVERAGE=true GEOJS_BROWSERS=chromium node tests/run-tests.js",
+    "test-webglheadless-all": "GEOJS_TEST_CASE=tests/test-gl.js GEOJS_COVERAGE=true GEOJS_BROWSERS=chromium,firefox node tests/run-tests.js",
+    "test-tutorials": "GEOJS_TEST_CASE=tests/tutorials.js GEOJS_COVERAGE=true GEOJS_BROWSERS=chromium node tests/run-tests.js",
+    "test-tutorialsci-all": "GEOJS_TEST_CASE=tests/tutorials.js GEOJS_COVERAGE=true GEOJS_BROWSERS=chromium,firefox node tests/run-tests.js",
     "get-data-files": "node scripts/datastore.js dist/data",
     "ci-clean": "git clean -fxd dist -e dist/data jsdoc/tmpl jsdoc/static images lcov",
     "ci": "npm-run-all ci-build ci-test",
     "ci-build": "npm-run-all -c -p build-full build-lean docs get-data-files lint puglint glsllint stylelint build-examples build-tutorials",
     "ci-test": "npm-run-all test-headless test-webglheadless test-headed test-tutorials",
     "ci-xvfb": "npm-run-all ci-clean ci-build && TEST_SAVE_IMAGE='all' xvfb-run -s '-ac -screen 0 1280x1024x24' npm run ci-test",
-    "start": "karma start karma.conf.js",
+    "start": "GEOJS_TEST_CASE=tests/all.js node tests/run-tests.js",
     "examples": "npm-run-all -p build-examples build-tutorials && node ./tests/runners/server.js --host \"${HOST-}\" --port ${PORT-8082} --dist",
     "docs": "jsdoc --pedantic -d dist/apidocs -r src package.json -c jsdoc.conf.json",
     "website": "cd website && npx hexo server",
@@ -178,6 +222,7 @@
     "build-website": "npm-run-all ci-build ci-build-website",
     "ci-build-website": "cp -a dist/built/. website/source/built && bash -c '(npm run build-website-examples & npm run build-website-tutorials & wait -n && wait -n)' && cd dist && cp -ar data ../website/source/. && rm -rf ../website/source/data/tiles && rm -rf ../website/source/data/tiles.tgz && rm -rf ../website/source/data/base-images && rm -rf ../website/source/data/base-images.tgz && cp -ar apidocs/. ../website/source/apidocs && cd ../website && npm install && rm -f db.json && npx hexo generate",
     "validate-es5": "node -e \"const fs=require('fs'),acorn=require('acorn');fs.readdirSync('dist/built').forEach(f=>{if(f.match(/^geo\\\\.lean.*\\.js$/)){try{acorn.parse(fs.readFileSync('dist/built/'+f,'utf8'),{ecmaVersion:5})}catch(e){console.error('ES5 syntax error in dist/built/'+f+':',e.message);process.exit(1)}}});console.log('All files in dist/built pass ES5 syntax check.')\"",
+    "install-test-browsers": "npx playwright install chromium firefox",
     "prepublishOnly": "npm run build && cp dist/built/*.js .",
     "semantic-release": "semantic-release"
   },
