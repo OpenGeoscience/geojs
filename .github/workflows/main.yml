@@ -32,6 +32,7 @@ jobs:
     - run: firefox --version
     - run: google-chrome --version
     - run: npm ci
+    - run: npm run install-test-browsers
     - run: npm run setup-website
     - run: npm run ci-xvfb
     - run: npm run validate-es5
@@ -89,6 +90,7 @@ jobs:
     # Delete the package-lock to test with the latest libraries allowed
     - run: rm package-lock.json
     - run: npm install
+    - run: npm run install-test-browsers
     - run: npm audit --audit-level high
     - run: npm run setup-website
     - run: npm run ci-xvfb

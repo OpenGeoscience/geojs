@@ -98,7 +98,7 @@ module.exports = [
       'no-console': 'error',
     }
   }, {
-    files: ['tutorials/**', 'examples/**', 'tests/**', 'scripts/**', 'plugins/**', 'karma*.*', 'jsdoc/**'],
+    files: ['tutorials/**', 'examples/**', 'tests/**', 'scripts/**', 'plugins/**', 'jsdoc/**'],
     rules: {
       'jsdoc/check-param-names': 'off',
       'jsdoc/check-tag-names': 'off',
