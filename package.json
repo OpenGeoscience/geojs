@@ -50,7 +50,7 @@
     "docco": "^0.9.1",
     "eslint": "^9.25.0",
     "eslint-plugin-import": "^2.25.3",
-    "eslint-plugin-jsdoc": "^61.0.0",
+    "eslint-plugin-jsdoc": "^62.0.0",
     "eslint-plugin-n": "^17.17.0",
     "eslint-plugin-promise": "^7.2.1",
     "expose-loader": "^5.0.0",
@@ -99,61 +99,8 @@
     "jstransformer-markdown-it": {
         "markdown-it": "^14.0.0"
     },
-    "npm-run-all": {
-      "cross-spawn": "^7.0.5",
-      "minimatch": "^10.2.1"
-    },
-    "stylus": {
-      "glob": "^13.0.0",
-      "minimatch": "^10.2.1"
-    },
     "vtk.js": {
       "xmlbuilder2": "^4.0.0"
-    },
-    "@typescript-eslint/parser": {
-      "minimatch": "^10.2.1"
-    },
-    "@typescript-eslint/eslint-plugin": {
-      "minimatch": "^10.2.1"
-    },
-    "@typescript-eslint/type-utils": {
-      "minimatch": "^10.2.1"
-    },
-    "@typescript-eslint/utils": {
-      "minimatch": "^10.2.1"
-    },
-    "@stylistic/eslint-plugin": {
-      "minimatch": "^10.2.1"
-    },
-    "eslint-plugin-import": {
-      "minimatch": "^10.2.1"
-    },
-    "eslint-plugin-react": {
-      "minimatch": "^10.2.1"
-    },
-    "eslint-plugin-promise": {
-      "minimatch": "^10.2.1"
-    },
-    "neostandard": {
-      "minimatch": "^10.2.1"
-    },
-    "eslint": {
-      "minimatch": "^10.2.1"
-    },
-    "glob": {
-      "minimatch": "^10.2.1"
-    },
-    "rimraf": {
-      "minimatch": "^10.2.1"
-    },
-    "test-exclude": {
-      "minimatch": "^10.2.1"
-    },
-    "babel-plugin-istanbul": {
-      "minimatch": "^10.2.1"
-    },
-    "pug-lint": {
-      "minimatch": "^10.2.1"
     }
   },
   "release": {

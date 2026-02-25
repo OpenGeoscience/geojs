@@ -30,6 +30,9 @@
     window.__jasmineResults = null;
     window.__jasmineDone = false;
 
+    // Track suite nesting depth for indented logging
+    var __suiteDepth = 0;
+
     // Add a custom reporter that collects results
     var resultReporter = {
       specs: [],
@@ -38,6 +41,27 @@
       failedSpecs: 0,
       passedSpecs: 0,
       skippedSpecs: 0,
+
+      suiteStarted: function(result) {
+        var indent = '';
+        for (var i = 0; i < __suiteDepth; i++) {
+          indent += '  ';
+        }
+        console.log(indent + 'describe: ' + result.description);
+        __suiteDepth++;
+      },
+
+      suiteDone: function(result) {
+        __suiteDepth--;
+      },
+
+      specStarted: function(result) {
+        var indent = '';
+        for (var i = 0; i < __suiteDepth; i++) {
+          indent += '  ';
+        }
+        console.log(indent + 'it: ' + result.description);
+      },
 
       specDone: function(result) {
         this.totalSpecs++;
