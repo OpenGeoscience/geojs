@@ -46,7 +46,7 @@ describe('geo.core.osmLayer', function () {
           done: () => done()
         });
       });
-      it('next animation', function (done) {
+      it('next animation 1', function (done) {
         map.transition({
           center: {x: 37.6167, y: 55.7500},
           duration: 500,
@@ -56,7 +56,7 @@ describe('geo.core.osmLayer', function () {
           done: () => done()
         });
       });
-      it('next animation', function (done) {
+      it('next animation 2', function (done) {
         map.transition({
           center: {x: 28.9550, y: 41.0136},
           duration: 500,
@@ -80,7 +80,7 @@ describe('geo.core.osmLayer', function () {
           done: () => done()
         });
       });
-      it('next animation', function (done) {
+      it('next animation 3', function (done) {
         map.transition({
           center: {x: 37.6167, y: 55.7500},
           duration: 500,
@@ -90,7 +90,7 @@ describe('geo.core.osmLayer', function () {
           done: () => done()
         });
       });
-      it('next animation', function (done) {
+      it('next animation 4', function (done) {
         map.transition({
           center: {x: 19.0514, y: 47.4925},
           rotation: Math.PI * 2,
@@ -256,7 +256,7 @@ describe('geo.core.osmLayer', function () {
        */
       var angles = {0: 21, 180: 21};
       $.each(angles, function (angle, numTiles) {
-        it('null default', function () {
+        it(`null default ${angle}`, function () {
           map = create_map();
           if (angle) {
             map.rotation(parseFloat(angle) * Math.PI / 180);
@@ -264,10 +264,10 @@ describe('geo.core.osmLayer', function () {
           layer = map.createLayer('osm', {renderer: null, url: '/testdata/white.jpg'});
           expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
         });
-        waitForIt('null tiles to load', function () {
+        waitForIt(`null tiles to load ${angle}`, function () {
           return $('[tile-reference]').length === numTiles;
         });
-        it('check null tiles and switch to svg', function () {
+        it(`check null tiles and switch to svg ${angle}`, function () {
           positions = {};
           $.each($('[tile-reference]'), function () {
             var ref = $(this).attr('tile-reference').split('_').slice(0, 3).join('_');
@@ -277,10 +277,10 @@ describe('geo.core.osmLayer', function () {
           layer = map.createLayer('osm', {renderer: 'svg', url: '/testdata/white.jpg'});
           expect(map.node().find('[data-tile-layer="0"]').length).toBe(0);
         });
-        waitForIt('svg tiles to load', function () {
+        waitForIt(`svg tiles to load ${angle}`, function () {
           return $('image[reference]').length === numTiles;
         });
-        it('compare tile offsets at angle ' + angle, function () {
+        it(`compare tile offsets at angle ${angle}`, function () {
           $.each($('image[reference]'), function () {
             var ref = $(this).attr('reference').split('_').slice(0, 3).join('_');
             /* Only check the top level */
@@ -291,7 +291,7 @@ describe('geo.core.osmLayer', function () {
             }
           });
         });
-        it('destroy', destroy_map);
+        it(`destroy ${angle}`, destroy_map);
       });
     });
   });
@@ -405,7 +405,7 @@ describe('geo.core.osmLayer', function () {
       layer.baseQuad = undefined;
       expect(layer.baseQuad).toBe(undefined);
     });
-    it('destroy', destroy_map);
+    it('destroy 2', destroy_map);
   });
 
   describe('geo.webgl.osmLayer', function () {
@@ -474,7 +474,7 @@ describe('geo.core.osmLayer', function () {
     waitForIt('map to draw after visible true', function () {
       return Object.keys(layer.activeTiles).length === 25;
     });
-    it('destroy', destroy_map);
+    it('destroy 2', destroy_map);
   });
 
   describe('osmLayer', function () {

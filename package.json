@@ -62,7 +62,7 @@
     "istanbul-lib-coverage": "^3.2.0",
     "istanbul-lib-report": "^3.0.1",
     "istanbul-reports": "^3.1.6",
-    "jasmine-core": "^5.0.0",
+    "jasmine-core": "^6.1.0",
     "js-yaml": "^4.1.0",
     "jsdoc": "^4.0.0",
     "jsdoc-autoprivate": "0.0.1",

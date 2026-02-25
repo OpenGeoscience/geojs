@@ -8,6 +8,8 @@ var geo = require('../src');
 
 module.exports = {};
 
+const _waitCounts = {};
+
 /**
  * Provides a uniform entry point into the geojs library.
  */
@@ -25,7 +27,13 @@ module.exports.vgl = geo.vgl;
  */
 module.exports.waitForIt = function waitForIt(desc, testFunc) {
   'use strict';
-  it('wait for ' + desc, function (done) {
+  if (!_waitCounts[desc]) {
+    _waitCounts[desc] = 1;
+  } else {
+    _waitCounts[desc] += 1;
+  }
+  const countStr = _waitCounts[desc] === 1 ? '' : ` ${_waitCounts[desc]}`;
+  it(`wait for ${desc}${countStr}`, function (done) {
     var interval;
     interval = setInterval(function () {
       if (testFunc()) {
@@ -35,7 +43,7 @@ module.exports.waitForIt = function waitForIt(desc, testFunc) {
       }
     }, 10);
   });
-  it('done waiting for ' + desc, function () {
+  it(`done waiting for ${desc}${countStr}`, function () {
     expect(!!(testFunc ? testFunc() : true)).toBe(true);
   });
 };
