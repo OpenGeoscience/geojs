@@ -1,0 +1,9 @@
+{
+  "title": "Raw layer interface",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "This example demonstrates drawing directly into GeoJS layers without using the feature API.  Layers come in two flavors, fixed and moving.  Fixed layers remain in a fixed screen position, while moving layers remain fixed relative to the map.  In addition, you may choose to rescale one or more properties in moving layers."
+  },
+  "disabled": true
+}

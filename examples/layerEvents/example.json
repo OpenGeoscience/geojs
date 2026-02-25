@@ -1,0 +1,9 @@
+{
+  "title": "DOM events in layers",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "This example shows how native DOM events can be used within layers.  SVG elements placed inside the layer will only receive mouse events when they are inside the top layer.  The elements inside the current top layer can choose to block certain events to override the default mouse interaction."
+  },
+  "disabled": true
+}

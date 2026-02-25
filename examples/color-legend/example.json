@@ -1,0 +1,8 @@
+{
+  "title": "Color legends",
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "This example shows how to create a discrete or continuous color legends."
+  },
+  "disabled": false
+}

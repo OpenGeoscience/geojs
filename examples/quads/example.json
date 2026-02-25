@@ -1,0 +1,8 @@
+{
+  "title": "Quad features",
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "This example shows how to add dynamic quads to a map."
+  },
+  "disabled": true
+}

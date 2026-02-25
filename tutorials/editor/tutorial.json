@@ -1,0 +1,10 @@
+{
+  "title": "Editor",
+  "hideNavbar": true,
+  "level": 10,
+  "order": 0,
+  "tutorialJs": ["editor.js"],
+  "about": {
+    "text": "Edit and save work in URL."
+  }
+}

@@ -1,0 +1,59 @@
+extends ../common/index.pug
+
+block append mainContent
+  #controls
+    .form-group(title="The data set to plot.")
+      label(for="dataset") Data Set
+      select#dataset(param-name="dataset", placeholder="Activity")
+        option(value="adderall", url="AdderallCities2015.csv", title="9555 points") Adderall
+        option(value="cities", url="cities.csv", title="30101 points") U.S. Cities
+        option(value="earthquakes", url="earthquakes.json", title="1.3 million points") Earthquakes
+      span#points-loaded
+    .form-group(title="Number of points.  Leave blank for the entire original data set.  If a smaller number, only a subset of points will be shown.  If a larger number, some of the data will be duplicated with random offsets.")
+      label(for="points") Number of Points
+      input#points(type="number", min="1", step="100")
+      span#points-shown
+    .form-group.style-list
+      label Styles to animate:
+    .form-group.style-list
+      span
+        label(for="fill") Fill
+        input#fill(type="checkbox", placeholder="false")
+      span
+        label(for="fillColor") Fill Color
+        input#fillColor(type="checkbox", placeholder="false")
+      span
+        label(for="fillOpacity") Fill Opacity
+        input#fillOpacity(type="checkbox", placeholder="true", checked="checked")
+      span
+        label(for="radius") Radius
+        input#radius(type="checkbox", placeholder="true", checked="checked")
+      span
+        label(for="stroke") Stroke
+        input#stroke(type="checkbox", placeholder="false")
+      span
+        label(for="strokeColor") Stroke Color
+        input#strokeColor(type="checkbox", placeholder="false")
+      span
+        label(for="strokeOpacity") Stroke Opacity
+        input#strokeOpacity(type="checkbox", placeholder="true", checked="checked")
+      span
+        label(for="strokeWidth") Stroke Width
+        input#strokeWidth(type="checkbox", placeholder="true", checked="checked")
+    .form-group
+      button#play Play
+      button#pause Pause
+      button#stop Stop
+    .form-group
+      span.timing-group
+        span Framerate&nbsp;
+        span#timing-framerate 0
+        span &nbsp;fps
+      span.timing-group
+        span Avg. Proc.&nbsp;
+        span#timing-generate 0
+        span &nbsp;ms
+      span.timing-group
+        span Avg. Update&nbsp;
+        span#timing-update 0
+        span &nbsp;ms

@@ -1,0 +1,9 @@
+{
+  "title": "Map Widgets",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js", "chart.js"],
+  "about": {
+    "text": "This example shows how the widgets API can be used to place elements on top of the map."
+  },
+  "disabled": false
+}

@@ -1,0 +1,7 @@
+{
+  "title": "Polygon features",
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "This example shows how to add polygons to a map."
+  }
+}

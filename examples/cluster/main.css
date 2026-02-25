@@ -1,0 +1,42 @@
+#controls {
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: absolute;
+  left: 10px;
+  top: 80px;
+  z-index: 1;
+  border-radius: 5px;
+  border: 1px solid grey;
+  box-shadow: 1px 1px 3px black;
+  opacity: 0.5;
+  transition: opacity 250ms ease;
+  background: #CCC;
+  color: black;
+  padding: 4px;
+  font-size: 14px;
+  max-height: calc(100% - 100px);
+  min-width: 310px;
+}
+#controls:hover {
+  opacity: 1;
+}
+#controls .form-group {
+  margin-bottom: 0;
+}
+#controls label {
+  min-width: 120px;
+}
+#controls #points {
+  width: 100px;
+}
+#controls #points-loaded,#controls #points-shown {
+  display: inline-block;
+  font-size: 11px;
+  padding-left: 5px;
+}
+#controls table input {
+  width: 55px;
+}
+#controls table th {
+  text-align: center;
+}

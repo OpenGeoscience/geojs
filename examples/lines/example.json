@@ -1,0 +1,9 @@
+{
+  "title": "Line Feature",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "thumbquery": "lines=250000&lineCap=round&strokeWidth=%7B%22residential%22%3A1%2C%22service%22%3A0.25%2C%22other%22%3A3%7D",
+  "about": {
+    "text": "This example shows the variations that are available for line features."
+  }
+}

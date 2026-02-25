@@ -1,0 +1,102 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Single Video
+    The "map" can contain a single video.  This allows panning, zooming, and rotating the video.  Additionally, other feature can be placed on top of the video.
+
+  +codeblock('javascript', 1)(htmlvideo=true).
+    // the pixelCoordinateParams function creates the parameters necessary for
+    // showing an image or video in pixel coordinates rather than in a map
+    // projection.  The size of the video is needed for this.
+    var videoWidth = 640, videoHeight = 360;
+    var params = geo.util.pixelCoordinateParams('#map', videoWidth, videoHeight);
+    // by default, the video cannot be zoomed any closer than one video pixel
+    // to one display pixel.  We can change this to allow zooming in on the
+    // video.
+    params.map.max += 3;  // allow zooming up to 8x
+    // create a map with the pixel-space parameters
+    var map = geo.map(params.map);
+    // create a feature layer to place a video quad
+    var layer = map.createLayer('feature', {
+      features: ['quad.video']
+    });
+    // create a quad feature with just the video.  The quads corners are just
+    // the dimensions of the video.
+    var quads = layer.createFeature('quad');
+    quads.data([{
+      ul: {x: 0, y: 0},
+      lr: {x: videoWidth, y: videoHeight},
+      video: '../../data/earthquakes-video.webm'
+    }]);
+    quads.draw();
+  +codeblock_test('map has a single feature layer', [
+      'map.layers().length === 1',
+      'map.layers()[0] instanceof geo.featureLayer',
+      'map.layers()[0].features().length === 1',
+      'map.layers()[0].features()[0] instanceof geo.quadFeature'
+      ])
+
+  :markdown-it
+    Start or stop the video when the user clicks.  The video may not be loaded
+    yet, so make sure we do nothing in that case.
+
+  +codeblock('javascript', 2, undefined, true).
+    map.node().on('click.tutorial', function () {
+      // get the HTML Video Element of the first (and only) quad
+      var video = quads.video(0);
+      if (!video) {
+        // the video isn't loaded yet, so do nothing
+        return;
+      }
+      // toggle play/pause
+      if (video.paused) {
+        // always loop the video
+        video.loop = true;
+        video.play();
+      } else {
+        video.pause();
+      }
+    });
+  //- no tests for this code block.
+
+  :markdown-it
+    Add another layer with a polygon feature that will appear on top of the
+    video.  These polygons don't have any meaning; they are just to demonstrate
+    that the video is visible beneath them.
+
+  +codeblock('javascript', 3)(webgl=true).
+    var polygonLayer = map.createLayer('feature', {
+      features: ['polygon']
+    });
+    // create a polygon feature
+    var polygons = polygonLayer.createFeature('polygon');
+    // set the data to two polygons
+    polygons.data([[
+      {x:  60, y: 10},
+      {x: 100, y: 10},
+      {x: 120, y: 44.64},
+      {x: 100, y: 79.28},
+      {x:  60, y: 79.28},
+      {x:  40, y: 44.64},
+      {x:  60, y: 10}
+    ], [
+      {x: 600, y: 300},
+      {x: 620, y: 330},
+      {x: 580, y: 330}
+    ]]);
+    polygons.style({
+      stroke: true,
+      strokeColor: 'black',
+      strokeWidth: 2,
+      fillColor: 'yellow',
+      fillOpacity: 0.2
+    });
+    polygons.draw();
+  +codeblock_test('map has two feature layers', [
+      'map.layers().length === 2',
+      'map.layers()[0] instanceof geo.featureLayer',
+      'map.layers()[1] instanceof geo.featureLayer',
+      'map.layers()[1].features().length >= 1',
+      'map.layers()[1].features()[0] instanceof geo.polygonFeature'
+      ])
