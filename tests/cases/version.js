@@ -5,7 +5,7 @@ describe('geo.version', function () {
   });
 });
 
-describe('geo.version', function () {
+describe('geo.sha', function () {
   var geo = require('../test-utils').geo;
   it('Git SHA is defined', function () {
     expect(geo.sha).toMatch(/^[0-9a-f]{8,}$/);

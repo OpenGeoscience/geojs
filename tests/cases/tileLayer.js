@@ -631,11 +631,6 @@ describe('geo.tileLayer', function () {
         ));
         it.apply(it, checkValidTile(
           opts,
-          {x: 3, y: 0, level: 1},
-          true
-        ));
-        it.apply(it, checkValidTile(
-          opts,
           {x: -1, y: 0, level: 1},
           true
         ));

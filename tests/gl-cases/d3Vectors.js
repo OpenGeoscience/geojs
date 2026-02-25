@@ -1,4 +1,4 @@
-describe('svgLines', function () {
+describe('d3Vectors', function () {
   var imageTest = require('../image-test');
   var common = require('../test-common');
   var geo = require('../test-utils').geo;
