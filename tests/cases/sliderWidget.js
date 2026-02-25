@@ -1,7 +1,7 @@
 var geo = require('../test-utils').geo;
 var createMap = require('../test-utils').createMap;
 
-xdescribe('zoom slider', function () {
+describe('zoom slider', function () {
   'use strict';
 
   var d3 = require('d3');
