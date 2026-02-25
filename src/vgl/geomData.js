@@ -35,7 +35,7 @@ vgl.primitive = function () {
    * @returns {number} The number of indices.
    */
   this.numberOfIndices = function () {
-    return m_indices.length;
+    return m_indices === null ? 0 : m_indices.length;
   };
 
   /*
