@@ -1,7 +1,11 @@
 {
   "title": "Hurricane tracking data",
-  "exampleCss": ["main.css"],
-  "exampleJs": ["main.js"],
+  "exampleCss": [
+    "main.css"
+  ],
+  "exampleJs": [
+    "main.js"
+  ],
   "level": 0,
   "order": 0,
   "about": {

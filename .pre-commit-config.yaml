@@ -30,6 +30,11 @@ repos:
   - id: forbid-new-submodules
   - id: mixed-line-ending
   - id: trailing-whitespace
+  - id: pretty-format-json
+    args:
+      - '--autofix'
+      - '--no-sort-keys'
+    exclude: (package-lock|capitals|proj|states|data)\.json
 - repo: https://github.com/pre-commit/pygrep-hooks
   rev: v1.10.0
   hooks:
