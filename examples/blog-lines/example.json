@@ -1,8 +1,12 @@
 {
   "title": "Blog entry on line drawing",
   "hideNavbar": true,
-  "exampleCss": ["main.css"],
-  "exampleJs": ["main.js"],
+  "exampleCss": [
+    "main.css"
+  ],
+  "exampleJs": [
+    "main.js"
+  ],
   "about": {
     "text": "This is used to show comparisons for the blog post on lines."
   },
