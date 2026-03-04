@@ -88,7 +88,7 @@ describe('examples', function () {
               } catch (err) { }
               if (idle) {
                 exampleWindow.clearInterval(interval);
-                if (!ex$.isFunction(idle)) {
+                if (typeof idle !== 'function') {
                   idle = idle.then || idle.done;
                 }
                 idle(function () {

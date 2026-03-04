@@ -1004,7 +1004,7 @@ var map = function (arg) {
       throw new Error('Map require DIV node');
     }
 
-    if (m_node.data('data-geojs-map') && $.isFunction(m_node.data('data-geojs-map').exit)) {
+    if (m_node.data('data-geojs-map') && typeof m_node.data('data-geojs-map').exit === 'function') {
       m_node.data('data-geojs-map').exit();
     }
     m_node.addClass('geojs-map');

@@ -380,7 +380,7 @@ var util = {
     var action, i;
     for (i = 0; i < actions.length; i += 1) {
       action = actions[i];
-      if ($.type(action.input) === 'string') {
+      if (typeof action.input === 'string') {
         var actionEvents = {};
         actionEvents[action.input] = true;
         action.input = actionEvents;
@@ -388,7 +388,7 @@ var util = {
       if (!action.modifiers) {
         action.modifiers = {};
       }
-      if ($.type(action.modifiers) === 'string') {
+      if (typeof action.modifiers === 'string') {
         var actionModifiers = {};
         actionModifiers[action.modifiers] = true;
         action.modifiers = actionModifiers;
@@ -913,6 +913,17 @@ var util = {
   },
 
   /**
+   * Replicate jQuery 3's isNumeric function.
+   *
+   * @param {*} n Value to test
+   * @returns {boolean} True if the value is a finite number or a numeric
+   *    string.
+   */
+  isNumeric: function (n) {
+    return (typeof n === 'number' || typeof n === 'string') && !isNaN(n - parseFloat(n));
+  },
+
+  /**
    * Given an array, return the minimum and maximum values within the array.
    * If a numeric value is specified for one or the other, return that instead.
    *
@@ -930,7 +941,7 @@ var util = {
    * @memberof geo.util
    */
   getMinMaxValues: function (values, min, max, limit) {
-    if (values.length && (limit || !$.isNumeric(min) || !$.isNumeric(max))) {
+    if (values.length && (limit || !util.isNumeric(min) || !util.isNumeric(max))) {
       var minValue = values[0],
           maxValue = values[0],
           value, i;
@@ -939,10 +950,10 @@ var util = {
         if (value < minValue) { minValue = value; }
         if (value > maxValue) { maxValue = value; }
       }
-      if (!$.isNumeric(min) || (limit && minValue > min)) {
+      if (!util.isNumeric(min) || (limit && minValue > min)) {
         min = minValue;
       }
-      if (!$.isNumeric(max) || (limit && maxValue < max)) {
+      if (!util.isNumeric(max) || (limit && maxValue < max)) {
         max = maxValue;
       }
     }

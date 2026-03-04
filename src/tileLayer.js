@@ -205,7 +205,7 @@ var tileLayer = function (arg) {
     //      (math.ceil(min(w, h) / (ts*2**l)) + 1) for l in range(ml)])
     arg.cacheSize = arg.keepLower ? 600 : 200;
   }
-  if ($.type(arg.subdomains) === 'string') {
+  if (typeof arg.subdomains === 'string') {
     arg.subdomains = arg.subdomains.split('');
   }
   /* We used to call the url option baseUrl.  If a baseUrl is specified, use
@@ -219,7 +219,7 @@ var tileLayer = function (arg) {
   }
   /* Save the original url so that we can return it if asked */
   arg.originalUrl = arg.url;
-  if ($.type(arg.url) === 'string') {
+  if (typeof arg.url === 'string') {
     arg.url = m_tileUrlFromTemplate(arg.url);
   }
 
@@ -1636,7 +1636,7 @@ var tileLayer = function (arg) {
       return m_this;
     }
     m_this._options.originalUrl = url;
-    if ($.type(url) === 'string') {
+    if (typeof url === 'string') {
       url = m_tileUrlFromTemplate(url);
     }
     m_this._options.url = url;
@@ -1657,7 +1657,7 @@ var tileLayer = function (arg) {
       return m_this._options.subdomains;
     }
     if (subdomains) {
-      if ($.type(subdomains) === 'string') {
+      if (typeof subdomains === 'string') {
         if (subdomains.indexOf(',') >= 0) {
           subdomains = subdomains.split(',');
         } else {

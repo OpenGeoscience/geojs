@@ -60,7 +60,7 @@ describe('tutorials', function () {
                 var defer = tut$.Deferred();
                 deferreds.push(defer);
                 var idle = targetWindow.eval(idleFunc);
-                if (!tut$.isFunction(idle)) {
+                if (typeof idle !== 'function') {
                   idle = idle.then || idle.done;
                 }
                 idle(function () {

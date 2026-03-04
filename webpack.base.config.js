@@ -31,7 +31,6 @@ module.exports = {
   },
   resolve: {
     alias: {
-      jquery: 'jquery/dist/jquery',
       proj4: 'proj4/lib',
       hammerjs: '@egjs/hammerjs/dist/hammer.js',
       mousetrap: 'mousetrap/mousetrap.js'
@@ -58,6 +57,7 @@ module.exports = {
         /node_modules\/@velipso\/polybool/,
         /node_modules\/color-name/,
         /node_modules\/earcut/,
+        /node_modules\/jquery/,
         /node_modules\/kdbush/,
         /node_modules\/proj4/,
         /node_modules\/wkt-parser/
