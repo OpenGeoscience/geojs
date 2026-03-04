@@ -13,7 +13,7 @@
     cursor auto
     font 11px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif
     z-index 1001
-    background rgba(255,255,255,0.7)
+    background rgb(255 255 255 / 70%)
     clear both
     display block
     pointer-events auto
@@ -23,7 +23,8 @@
 
   .canvas-canvas
     display block
-    transform-origin 0px 0px
+    transform-origin 0 0
+
   .webgl-canvas
     display block
 
@@ -34,65 +35,76 @@
     left 0
     top 0
     pointer-events none
+
     &.active:not(.hidden)
       > *
         pointer-events auto
+
     &.hidden
       display none
+
     &.hidden[renderer="webgl"]
       display inherit
 
   .geo-tile-layer
-    transform-origin 0px 0px
+    transform-origin 0 0
     line-height 0
     font-size 0
 
   &.annotation-input
     cursor crosshair
+
     &.annotation-intersect
       cursor embedurl("./css/cursor-crosshair-intersect.svg") 12 12,crosshair
+
     &.annotation-difference
       cursor embedurl("./css/cursor-crosshair-difference.svg") 12 12,crosshair
+
     &.annotation-union
       cursor embedurl("./css/cursor-crosshair-union.svg") 12 12,crosshair
+
     &.annotation-xor
       cursor embedurl("./css/cursor-crosshair-xor.svg") 12 12,crosshair
+
     &.annotation-cut
       cursor embedurl("./css/cursor-crosshair-cut.svg") 12 12,crosshair
 
   &.annotation-cursor
     cursor crosshair
+
     &.annotation-intersect
       cursor embedurl("./css/cursor-crosshair-intersect.svg") 12 12,crosshair
+
     &.annotation-difference
       cursor embedurl("./css/cursor-crosshair-difference.svg") 12 12,crosshair
+
     &.annotation-union
       cursor embedurl("./css/cursor-crosshair-union.svg") 12 12,crosshair
+
     &.annotation-xor
       cursor embedurl("./css/cursor-crosshair-xor.svg") 12 12,crosshair
 
   &.highlight-focus
-    &:after
+    &::after
       content ""
       display block
       position absolute
       box-sizing border-box
-      left 0px
-      top 0px
-      right 0px
-      bottom 0px
+      inset 0
       // Highlight is technically a css2 color.  We may need to specify it
       // explicitly.  #3B66A6 seems close
       border 3px solid Highlight
       opacity 1
       transition opacity 0s
       visibility hidden
-    &:focus:after
+
+    &:focus::after
       visibility visible
       transition opacity 2.5s ease-in
       opacity 0
 
 .geo-tile-container
   position absolute
+
   &.crop
     overflow hidden
