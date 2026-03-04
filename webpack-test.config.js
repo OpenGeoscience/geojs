@@ -1,3 +1,4 @@
+var webpack = require('webpack');
 var webpack_config = require('./webpack.base.config');
 var path = require('path');
 var test_case = process.env.GEOJS_TEST_CASE || 'tests/all.js';
@@ -40,6 +41,10 @@ var config = {
   resolve: webpack_config.resolve,
   plugins: webpack_config.plugins.slice()
 };
+// This is needed as of nise 6.1.3
+config.plugins.push(new webpack.ProvidePlugin({
+  process: 'process/browser'
+}));
 
 /* If coverage is requested, add istanbul instrumentation */
 if (process.env.GEOJS_COVERAGE === 'true') {
