@@ -272,7 +272,7 @@ module.exports.getQuery = function () {
  * It should be done if the webgl renderer was mocked before it is restored.
  */
 function destroyMap() {
-  if ($('#map').data('data-geojs-map') && $.isFunction($('#map').data('data-geojs-map').exit)) {
+  if ($('#map').data('data-geojs-map') && typeof $('#map').data('data-geojs-map').exit === 'function') {
     $('#map').data('data-geojs-map').exit();
   }
   $('#map').remove();
