@@ -37,7 +37,7 @@ jobs:
     - run: npm run ci-xvfb
     - run: npm run validate-es5
     - run: npm run ci-build-website
-    - uses: codecov/codecov-action@v5
+    - uses: codecov/codecov-action@v6
       with:
         fail_ci_if_error: false
         verbose: true
