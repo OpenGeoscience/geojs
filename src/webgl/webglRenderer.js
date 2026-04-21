@@ -93,7 +93,7 @@ var webglRenderer = function (arg) {
     m_contextRenderer = m_viewer.renderWindow().activeRenderer();
     m_contextRenderer.setResetScene(false);
     canvas.get(0).addEventListener('webglcontextlost', (evt) => evt.preventDefault(), false);
-    canvas.get(0).addEventListener('webglcontextrestored', () => m_viewer.renderWindow()._init(), false);
+    canvas.get(0).addEventListener('webglcontextrestored', () => m_viewer.renderWindow()._setup(), false);
 
     if (m_viewer.renderWindow().renderers().length > 0) {
       m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
