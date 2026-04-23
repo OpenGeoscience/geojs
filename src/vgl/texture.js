@@ -33,6 +33,7 @@ vgl.texture = function () {
   this.m_texture = null;
 
   var m_setupTimestamp = timestamp(),
+      m_setupContext = null,
       m_that = this;
 
   function activateTextureUnit(renderState) {
@@ -52,8 +53,11 @@ vgl.texture = function () {
     // Activate the texture unit first
     activateTextureUnit(renderState);
 
-    renderState.m_context.deleteTexture(this.m_textureHandle);
+    if (this.m_textureHandle && m_setupContext === renderState.m_context) {
+      renderState.m_context.deleteTexture(this.m_textureHandle);
+    }
     this.m_textureHandle = renderState.m_context.createTexture();
+    m_setupContext = renderState.m_context;
     renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, this.m_textureHandle);
     renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
                                         vgl.GL.TEXTURE_MIN_FILTER,
@@ -101,7 +105,9 @@ vgl.texture = function () {
    */
   this.bind = function (renderState) {
     // TODO Call setup via material setup
-    if (this.getMTime() > m_setupTimestamp.getMTime()) {
+    if (renderState.m_contextChanged ||
+        m_setupContext !== renderState.m_context ||
+        this.getMTime() > m_setupTimestamp.getMTime()) {
       this.setup(renderState);
     }
 
@@ -287,6 +293,16 @@ vgl.texture = function () {
    */
   this.textureHandle = function () {
     return this.m_textureHandle;
+  };
+
+  /**
+   * Return true if the texture handle belongs to the specified context.
+   *
+   * @param {WebGLRenderingContext} context A candidate GL context.
+   * @returns {boolean} True if the texture has been setup for the context.
+   */
+  this.hasContext = function (context) {
+    return !!this.m_textureHandle && m_setupContext === context;
   };
 
   return this;

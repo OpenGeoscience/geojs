@@ -20,6 +20,7 @@ vgl.shaderProgram = function () {
 
   var m_this = this,
       m_programHandle = 0,
+      m_programContext = null,
       m_compileTimestamp = timestamp(),
       m_bindTimestamp = timestamp(),
       m_shaders = [],
@@ -27,6 +28,22 @@ vgl.shaderProgram = function () {
       m_vertexAttributes = {},
       m_uniformNameToLocation = {},
       m_vertexAttributeNameToLocation = {};
+
+  function hasContextChanged(renderState) {
+    return m_programContext !== renderState.m_context ||
+      renderState.m_contextChanged;
+  }
+
+  function clearLocationCaches() {
+    m_uniformNameToLocation = {};
+    m_vertexAttributeNameToLocation = {};
+  }
+
+  function resetProgramState() {
+    m_programHandle = 0;
+    m_programContext = null;
+    clearLocationCaches();
+  }
 
   /**
    * Query uniform location in the program.
@@ -184,7 +201,7 @@ vgl.shaderProgram = function () {
    * @param {vgl.renderState} renderState
    */
   this.use = function (renderState) {
-    renderState.m_context.useProgram(m_programHandle);
+    renderState.m_context.useProgram(m_programHandle || null);
   };
 
   /**
@@ -193,8 +210,13 @@ vgl.shaderProgram = function () {
    * @param {vgl.renderState} renderState
    */
   this._setup = function (renderState) {
+    if (m_programHandle && hasContextChanged(renderState)) {
+      // A restored/replaced context invalidates all cached program state.
+      resetProgramState();
+    }
     if (m_programHandle === 0) {
       m_programHandle = renderState.m_context.createProgram();
+      m_programContext = renderState.m_context;
     }
   };
 
@@ -215,10 +237,11 @@ vgl.shaderProgram = function () {
    * @param {vgl.renderState} renderState
    */
   this.deleteProgram = function (renderState) {
-    if (m_programHandle) {
+    if (m_programHandle && renderState &&
+        m_programContext === renderState.m_context) {
       renderState.m_context.deleteProgram(m_programHandle);
     }
-    m_programHandle = 0;
+    resetProgramState();
   };
 
   /**
@@ -229,8 +252,14 @@ vgl.shaderProgram = function () {
   this.deleteVertexAndFragment = function (renderState) {
     var i;
     for (i = 0; i < m_shaders.length; i += 1) {
+      if (renderState && renderState.m_contextChanged) {
+        // After context loss there is nothing to detach/delete in GL.
+        m_shaders[i].removeContext(renderState);
+        continue;
+      }
       if (m_shaders[i].shaderHandle(renderState)) {
-        renderState.m_context.detachShader(m_programHandle, m_shaders[i].shaderHandle(renderState));
+        renderState.m_context.detachShader(
+          m_programHandle, m_shaders[i].shaderHandle(renderState));
       }
       renderState.m_context.deleteShader(m_shaders[i].shaderHandle(renderState));
       m_shaders[i].removeContext(renderState);
@@ -241,15 +270,20 @@ vgl.shaderProgram = function () {
    * Compile and link a shader.
    *
    * @param {vgl.renderState} renderState
+   * @returns {boolean} True if the program was compiled and linked successfully, false otherwise.
    */
   this.compileAndLink = function (renderState) {
     var i;
-
-    if (m_compileTimestamp.getMTime() >= this.getMTime()) {
-      return;
-    }
+    // Rebuild if timestamps are stale or we switched GL contexts.
+    var contextChanged = hasContextChanged(renderState) || !m_programHandle;
 
     m_this._setup(renderState);
+
+    if (!contextChanged && m_compileTimestamp.getMTime() >= this.getMTime()) {
+      return !!m_programHandle;
+    }
+
+    clearLocationCaches();
 
     // Compile shaders
     for (i = 0; i < m_shaders.length; i += 1) {
@@ -263,9 +297,11 @@ vgl.shaderProgram = function () {
     if (!m_this.link(renderState)) {
       console.log('[ERROR] Failed to link Program');  // eslint-disable-line no-console
       m_this._cleanup(renderState);
+      return false;
     }
 
     m_compileTimestamp.modified();
+    return true;
   };
 
   /**
@@ -275,16 +311,24 @@ vgl.shaderProgram = function () {
    */
   this.bind = function (renderState) {
     var i = 0;
+    var needBind = renderState.m_contextChanged ||
+      m_bindTimestamp.getMTime() < m_this.getMTime() ||
+      m_programContext !== renderState.m_context;
 
-    if (m_bindTimestamp.getMTime() < m_this.getMTime()) {
+    if (needBind) {
 
       // Compile shaders
-      m_this.compileAndLink(renderState);
+      if (!m_this.compileAndLink(renderState)) {
+        return;
+      }
 
       m_this.use(renderState);
       m_this.bindUniforms(renderState);
       m_bindTimestamp.modified();
     } else {
+      if (!m_programHandle) {
+        return;
+      }
       m_this.use(renderState);
     }
 

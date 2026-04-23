@@ -38,8 +38,12 @@ vgl.mapper = function (arg) {
    */
   this.deleteVertexBufferObjects = function (renderState) {
     var i;
+    if (renderState && renderState.m_contextChanged) {
+      // The old context is already gone, so deleting its buffers is invalid.
+      return;
+    }
     var context = m_context;
-    if (renderState) {
+    if (renderState && !m_context) {
       context = renderState.m_context;
     }
     if (context) {

@@ -34,6 +34,7 @@ var webglRenderer = function (arg) {
       m_contextRenderer = null,
       m_viewer = null,
       m_lastZoom,
+      m_contextLost = false,
       m_updateCamera = false,
       s_init = this._init,
       s_exit = this._exit;
@@ -92,8 +93,22 @@ var webglRenderer = function (arg) {
     m_viewer.init();
     m_contextRenderer = m_viewer.renderWindow().activeRenderer();
     m_contextRenderer.setResetScene(false);
-    canvas.get(0).addEventListener('webglcontextlost', (evt) => evt.preventDefault(), false);
-    canvas.get(0).addEventListener('webglcontextrestored', () => m_viewer.renderWindow()._init(), false);
+    canvas.get(0).addEventListener('webglcontextlost', function (evt) {
+      m_contextLost = true;
+      evt.preventDefault();
+    }, false);
+    canvas.get(0).addEventListener('webglcontextrestored', function () {
+      if (!m_viewer) {
+        return;
+      }
+      m_contextLost = false;
+      // Reinitialize GL objects, then force a camera sync before redraw.
+      // While the context is lost and restored it could be the same context,
+      // so we need to force a context change for gpu resources to be re-created.
+      m_viewer.renderWindow()._setup(undefined, true);
+      m_updateCamera = true;
+      m_this._render();
+    }, false);
 
     if (m_viewer.renderWindow().renderers().length > 0) {
       m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
@@ -154,6 +169,9 @@ var webglRenderer = function (arg) {
    */
   this._renderFrame = function () {
     if (m_viewer) {
+      if (m_contextLost) {
+        return;
+      }
       if (m_updateCamera) {
         m_updateCamera = false;
         m_this._updateRendererCamera();

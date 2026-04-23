@@ -55,9 +55,12 @@ var webgl_quadFeature = function (arg) {
         newbuf = false;
 
     if (m_quads.imgQuads.length) {
+      if (renderState.m_contextChanged) {
+        m_glBuffers.imgQuadsPosition = null;
+      }
       if (!m_imgposbuf || m_imgposbuf.length < m_quads.imgQuads.length * 12 ||
           !m_glBuffers.imgQuadsPosition) {
-        if (m_glBuffers.imgQuadsPosition) {
+        if (m_glBuffers.imgQuadsPosition && !renderState.m_contextChanged) {
           context.deleteBuffer(m_glBuffers.imgQuadsPosition);
         }
         m_glBuffers.imgQuadsPosition = context.createBuffer();
@@ -93,9 +96,12 @@ var webgl_quadFeature = function (arg) {
         newbuf = false;
 
     if (m_quads.clrQuads.length) {
+      if (renderState.m_contextChanged) {
+        m_glBuffers.clrQuadsPosition = null;
+      }
       if (!m_clrposbuf || m_clrposbuf.length < m_quads.clrQuads.length * 12 ||
           !m_glBuffers.clrQuadsPosition) {
-        if (m_glBuffers.clrQuadsPosition) {
+        if (m_glBuffers.clrQuadsPosition && !renderState.m_contextChanged) {
           context.deleteBuffer(m_glBuffers.clrQuadsPosition);
         }
         m_glBuffers.clrQuadsPosition = context.createBuffer();
@@ -393,7 +399,10 @@ var webgl_quadFeature = function (arg) {
         nearestPixel = curZoom >= nearestPixel;
       }
       m_quads.imgQuads.forEach((quad) => {
-        if ((quad.image || quad.imageTexture) && quad.texture && quad.texture.nearestPixel() !== nearestPixel && quad.texture.textureHandle()) {
+        if ((quad.image || quad.imageTexture) && quad.texture &&
+            quad.texture.nearestPixel() !== nearestPixel &&
+            quad.texture.textureHandle() &&
+            quad.texture.hasContext(renderState.m_context)) {
           /* This could just be
            *   quad.texture.setNearestPixel(nearestPixel);
            * but that needlessly redecodes the image.  Instead, just change the
