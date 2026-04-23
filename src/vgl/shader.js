@@ -95,11 +95,14 @@ vgl.shader = function (type) {
    */
   this.compile = function (renderState) {
     var entry = this._getContextEntry(renderState);
-    if (this.getMTime() < entry.compileTimestamp.getMTime()) {
+    if (!renderState.m_contextChanged &&
+        this.getMTime() < entry.compileTimestamp.getMTime()) {
       return entry.shaderHandle;
     }
 
-    renderState.m_context.deleteShader(entry.shaderHandle);
+    if (!renderState.m_contextChanged) {
+      renderState.m_context.deleteShader(entry.shaderHandle);
+    }
     entry.shaderHandle = renderState.m_context.createShader(m_shaderType);
     renderState.m_context.shaderSource(entry.shaderHandle, m_shaderSource);
     renderState.m_context.compileShader(entry.shaderHandle);

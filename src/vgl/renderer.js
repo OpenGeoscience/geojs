@@ -129,6 +129,15 @@ vgl.renderer = function (arg) {
   };
 
   /**
+   * Mark that the GL context changed and cached GL resources need to be
+   * recreated on the next render pass.
+   */
+  this._contextChanged = function () {
+    m_this.m_contextChanged = true;
+    m_this.modified();
+  };
+
+  /**
    * Render the scene.
    */
   this.render = function () {

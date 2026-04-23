@@ -129,6 +129,7 @@ vgl.renderWindow = function (canvas) {
    * @returns {boolean}
    */
   this._setup = function (renderState) {
+    var oldContext = m_context;
     m_context = null;
 
     try {
@@ -136,10 +137,14 @@ vgl.renderWindow = function (canvas) {
       // experimental.
       m_context = m_canvas.getContext('webgl') ||
             m_canvas.getContext('experimental-webgl');
+      var didContextChange = !!oldContext && oldContext !== m_context;
 
       // Set width and height of renderers if not set already
       var i;
       for (i = 0; i < m_renderers.length; i += 1) {
+        if (didContextChange && m_renderers[i]._contextChanged) {
+          m_renderers[i]._contextChanged();
+        }
         if ((m_renderers[i].width() > m_width) ||
             m_renderers[i].width() === 0 ||
             (m_renderers[i].height() > m_height) ||

@@ -93,7 +93,15 @@ var webglRenderer = function (arg) {
     m_contextRenderer = m_viewer.renderWindow().activeRenderer();
     m_contextRenderer.setResetScene(false);
     canvas.get(0).addEventListener('webglcontextlost', (evt) => evt.preventDefault(), false);
-    canvas.get(0).addEventListener('webglcontextrestored', () => m_viewer.renderWindow()._setup(), false);
+    canvas.get(0).addEventListener('webglcontextrestored', function () {
+      if (!m_viewer) {
+        return;
+      }
+      // Reinitialize GL objects, then force a camera sync before redraw.
+      m_viewer.renderWindow()._setup();
+      m_updateCamera = true;
+      m_this._render();
+    }, false);
 
     if (m_viewer.renderWindow().renderers().length > 0) {
       m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
