@@ -270,6 +270,7 @@ vgl.shaderProgram = function () {
    * Compile and link a shader.
    *
    * @param {vgl.renderState} renderState
+   * @returns {boolean} True if the program was compiled and linked successfully, false otherwise.
    */
   this.compileAndLink = function (renderState) {
     var i;
