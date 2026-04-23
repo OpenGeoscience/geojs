@@ -126,9 +126,11 @@ vgl.renderWindow = function (canvas) {
    * Create the window.
    *
    * @param {vgl.renderState} renderState
+   * @param {boolean} forceContextChanged
+   *   If true, force a context change even if the context is the same as the old context.
    * @returns {boolean}
    */
-  this._setup = function (renderState) {
+  this._setup = function (renderState, forceContextChanged) {
     var oldContext = m_context;
     m_context = null;
 
@@ -138,6 +140,9 @@ vgl.renderWindow = function (canvas) {
       m_context = m_canvas.getContext('webgl') ||
             m_canvas.getContext('experimental-webgl');
       var didContextChange = !!oldContext && oldContext !== m_context;
+      if (forceContextChanged) {
+        didContextChange = true;
+      }
 
       // Set width and height of renderers if not set already
       var i;
