@@ -1,0 +1,9 @@
+{
+  "title": "Map Scale",
+  "hideNavbar": true,
+  "level": 0,
+  "order": 4,
+  "about": {
+    "text": "Show scale on a map using a variety of options."
+  }
+}

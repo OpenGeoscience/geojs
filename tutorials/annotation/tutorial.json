@@ -1,0 +1,10 @@
+{
+  "title": "Annotations",
+  "hideNavbar": true,
+  "level": 0,
+  "tutorialCss": [],
+  "tutorialJs": [],
+  "about": {
+    "text": "Draw different annotations, optionally setting the aspect ratio for rectangles and ellipses"
+  }
+}

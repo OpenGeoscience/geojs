@@ -1,0 +1,70 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Simple Map
+    We need a little bit of html to import the geojs library and to create a div to show our map:
+
+  +codeblock('html', 1).
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <script type="text/javascript" src="../../built/geo.min.js"></script>
+    </head>
+    <body>
+      <div id="map"></div>
+    </body>
+    </html>
+
+  :markdown-it
+    Some CSS will make our map fill the page:
+
+  +codeblock('css', 2).
+    html,body,#map{
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+
+  :markdown-it
+    And some javascript to ask for a map and place the default map tiles on it:
+
+  +codeblock('javascript', 3, undefined, true).
+    var map = geo.map({
+      node: "#map"
+    });
+    map.createLayer('osm');
+  +codeblock_test('map has one layer',
+      'map.layers().length === 1')
+  +codeblock_test('first layer is an osmLayer',
+      'map.layers()[0] instanceof geo.osmLayer')
+  +codeblock_test('zoom is 4',
+      'map.zoom() === 4')
+
+  :markdown-it
+    Move the map to Kensington Gardens, London and zoom in.
+
+  +codeblock('javascript', 4).
+    map.center({x: -0.1704, y: 51.5047}).zoom(14);
+  +codeblock_test('zoom is 14',
+      'map.zoom() === 14'
+      )
+
+  :markdown-it
+    We could have started the map at this location by adding the center and
+    zoom parameters to the initial ``map()`` call:
+
+  +codeblock('javascript', 5, 2, false, 'Step 3-B').
+    var map = geo.map({
+      node: "#map",
+      center: {x: -0.1704, y: 51.5047},
+      zoom: 14
+    });
+    map.createLayer('osm');
+  +codeblock_test('map has one osm layer and zoom is 14', [
+      'map.layers().length === 1',
+      'map.layers()[0] instanceof geo.osmLayer',
+      'map.zoom() === 14'
+      ])

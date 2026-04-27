@@ -1,0 +1,250 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>GeoJS - Isolines</title>
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+
+
+    <!-- Custom Fonts -->
+    
+<link rel="stylesheet" href="../../vendor/font-awesome/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+    <!-- Theme CSS -->
+    
+<link rel="stylesheet" href="../../css/agency.css">
+
+    
+<link rel="stylesheet" href="../../css/main.css">
+
+    
+<link rel="stylesheet" href="../../css/highlight.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js" integrity="sha384-0s5Pv64cNZJieYFkXYOTId2HMA2Lfb6q2nAcx2n0RTLUnCAoTTsS0nKEO27XyKcY" crossorigin="anonymous"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js" integrity="sha384-ZoaMbDF+4LeFxg6WdScQ9nnR1QC2MIRxA1O9KWEXQwns1G8UNyIEZIQidzb0T1fo" crossorigin="anonymous"></script>
+    <![endif]-->
+
+    <!-- jQuery -->
+    
+<script src="../../vendor/jquery/jquery.min.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    
+<script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+
+    <link rel="apple-touch-icon" sizes="57x57" href="../../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="../../favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body id="page-top" class="index">
+    <!-- Navigation -->
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top affix">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span><i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="../../index.html"><img class="navbar-logo" src="../../images/logo_transparent.png" /></a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="">
+                        <a href="../../">Welcome</a>
+                    </li>
+                    <li class=" active ">
+                        <a href="../">Tutorials</a>
+                    </li>
+                    <li class="">
+                        <a href="../../examples/">Examples</a>
+                    </li>
+                    <li>
+                        <a href="../../apidocs/">API Docs</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/OpenGeoscience/geojs">GitHub</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <div class="content-wrapper">
+        <link rel="stylesheet" href="../../css/tutorial.css">
+<script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
+<div class="page tutorial">
+    <!-- include tutorial sources--><!-- Include tutorial specific files--><script type="text/javascript">$(start_tutorial);
+
+</script><!-- Add the default main content element--><div id="maincontent"><div id="tutorial"><h1>Tutorial - Isolines</h1>
+<p>Given data on a mesh or grid, plot isolines (lines of constant value).</p>
+<p>First, we create a base map tile layer for reference and load some grid data.
+The data is grid data describing geospatial point elevation, a record of z value -9999 means there is no land data.
+Load the data asynchronously, and use a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises">promise</a> when ready.</p>
+<div class="codeblock" format="javascript" step="1" stepname="Step 1" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">var map = geo.map({
+  node: "#map",
+  center: {
+    x: -157.965,
+    y: 21.482
+  },
+  zoom: 11
+});
+// create a tile layer with a low opacity so the isolines are easier to see
+map.createLayer('osm', {opacity: 0.5});
+// load some data and store in in a variable we can access.  Add the
+// promise for this load to the map's idle handler, allowing map.onIdle()
+// to be used when everything is ready.  We could have also created the
+// isoline feature in the `then` function.
+var data;
+map.addPromise($.get('../../data/oahu-medium.json').then(function (loadedData) {
+  data = loadedData;
+}));
+</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 1</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><p>Once the data is loaded, create an isoline feature with default options.</p>
+<div class="codeblock" format="javascript" step="2" parentstep="1" initial="true" stepname="Step 2" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">var layer, iso;
+map.onIdle(function () {
+  // create a feature layer for the isoline
+  layer = map.createLayer('feature', {features: ['isoline']});
+  iso = layer.createFeature('isoline', {
+    isoline: {
+      gridWidth: data.gridWidth,
+      gridHeight: data.gridHeight,
+      x0: data.x0,
+      y0: data.y0,
+      dx: data.dx,
+      dy: data.dy
+    },
+    style: {
+      // return null for values that shouldn't be used.
+      value: function (d) { return d > -9999 ? d : null; },
+    }
+  }).data(data.values).draw();
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 2</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="isoline feature exists" data-tests="[&quot;map.layers().length === 2&quot;,&quot;map.layers()[1].features()[0] instanceof geo.isolineFeature&quot;,&quot;iso.data().length === 110010&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>The spacing between isolines can be set in a variety of ways.  By default, a &quot;nice&quot; interval is chosen to have approximately <code>count</code> lines, where <code>count</code> equals 15.  This number can be changed, but if it is only changed a little, the same isolines will still be shown since they round to even values.</p>
+<div class="codeblock" format="javascript" step="30" parentstep="2" stepname="Step 3-A" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">map.onIdle(function () {
+  iso.isoline('count', 10).draw();
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 3-A</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="isoline count" data-tests="[&quot;map.layers()[1].features()[0]._createIsolines().values.length === 13&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>If the count is changed enough, a different number of isolines will be shown.</p>
+<div class="codeblock" format="javascript" step="31" parentstep="2" stepname="Step 3-B" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">map.onIdle(function () {
+  iso.isoline('count', 8).draw();
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 3-B</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="isoline count" data-tests="[&quot;map.layers()[1].features()[0]._createIsolines().values.length === 7&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>You can disable rounding to even values.  In this case, there specified count will be exact.  Since the isoline values are no longer round numbers, it is useful to limit the precision shown on the text labels.</p>
+<div class="codeblock" format="javascript" step="32" parentstep="2" stepname="Step 3-C" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">map.onIdle(function () {
+  iso.isoline({
+    count: 20,
+    autofit: false,
+    labelText: function (value) {
+      return value.value.toFixed(2);
+    }
+  }).draw();
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 3-C</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="isoline autofit false" data-tests="[&quot;map.layers()[1].features()[0]._createIsolines().values.length === 20&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>You can specify a spacing in the units used for the isoline values.  In this example, this is the altitude in meters.</p>
+<div class="codeblock" format="javascript" step="33" parentstep="2" stepname="Step 3-D" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">map.onIdle(function () {
+  iso.isoline('spacing', 125).draw();
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 3-D</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="isoline spacing" data-tests="[&quot;map.layers()[1].features()[0]._createIsolines().values.length === 10&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>You can also specify exactly which values should have isolines and which ones should be more significant.</p>
+<div class="codeblock" format="javascript" step="34" parentstep="2" stepname="Step 3-E" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">map.onIdle(function () {
+  iso.isoline('values', [
+    {value: 10, level: 0},  // level 0 is the least significant
+    {value: 25, level: 0},
+    {value: 50, level: 1},
+    {value: 75, level: 0},
+    {value: 100, level: 1},
+    {value: 250, level: 1},
+    {value: 500, level: 2},
+    {value: 750, level: 1},
+    {value: 1000, level: 2},
+    {value: 1125, level: 1}
+  ]).draw();
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 3-E</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="isoline values" data-tests="[&quot;map.layers()[1].features()[0]._createIsolines().values.length === 10&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>The label text spacing can be changed so that there or more or fewer labels per line.  The spacing is the minimum distance between labels in pixels.  Labels are placed uniformly along an isoline, so the labels could be further apart to make them even.</p>
+<div class="codeblock" format="javascript" step="40" parentstep="30" stepname="Step 4-A" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">map.onIdle(function () {
+  iso.isoline('labelSpacing', 125).draw();
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 4-A</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="isoline label spacing" data-tests="[&quot;iso.isoline.get(\&quot;labelSpacing\&quot;)({}) === 125&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>Labels can be added to any of the isolines and have different spacing per line.</p>
+<div class="codeblock" format="javascript" step="41" parentstep="30" stepname="Step 4-B" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">map.onIdle(function () {
+  iso.isoline({
+    label: function (value) {
+      // labels will be on darker lines or every other line
+      return value.level > 0 || !(value.position % 2);
+    },
+    labelSpacing: function (value) {
+      // labels on darker lines are twice as common as on faint lines.
+      return value.level > 0 ? 125 : 250
+    }}).draw();
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 4-B</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="isoline label spacing" data-tests="[&quot;iso.isoline.get(\&quot;labelSpacing\&quot;)({level: 0}) === 250&quot;,&quot;iso.isoline.get(\&quot;labelSpacing\&quot;)({level: 1}) === 125&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>The label text can be modified to include the units.  The data has altitude in meters.</p>
+<div class="codeblock" format="javascript" step="50" parentstep="40" stepname="Step 5-A" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">map.onIdle(function () {
+  iso.isoline('labelText', function (value) {
+       return value.value + ' m';
+     }).draw();
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 5-A</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="isoline text includes units" data-tests="[&quot;iso.isoline.get(\&quot;labelText\&quot;)({value: 0}) === \&quot;0 m\&quot;&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>Although the data has altitude in meters, it can be converted to different units.  For instance, we can convert it to statute (U.S. Survey) feet and change the label text appropriately.</p>
+<div class="codeblock" format="javascript" step="51" parentstep="40" stepname="Step 5-B" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">map.onIdle(function () {
+  iso.style('value', function (d) {
+       return d > -9999 ? d * 3937 / 1200 : null;
+     })
+     .isoline('labelText', function (value) {
+       return value.value + ' ft';
+     }).draw();
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 5-B</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="isoline text include ft" data-tests="[&quot;iso.isoline.get(\&quot;labelText\&quot;)({value: 0}) === \&quot;0 ft\&quot;&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>By defaults, labels are shown so that the top of the text is toward higher values.  The <code>geo.isolineFeature.rotationFunction</code> can be used to choose other orientations.  The available modes are:</p>
+<ul>
+<li><code>higher</code>: the top of the label text is toward higher values.  This is the default.</li>
+<li><code>lower</code>: the top of the label text is toward lower values.</li>
+<li><code>map</code>: the top of the label text is toward the top of the map.</li>
+<li><code>screen</code>: the top of the label text is toward the top of the display screen.</li>
+</ul>
+<p>The map has to be rotated to see the difference between <code>screen</code> and <code>map</code> modes.</p>
+<div class="codeblock" format="javascript" step="60" parentstep="50" stepname="Step 6" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">// change this to try out different rotation modes.
+var rotationMode = 'screen';
+map.onIdle(function () {
+  iso.style('rotation', geo.isolineFeature.rotationFunction(rotationMode, map))
+     .draw();
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 6</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="isoline text rotation" data-tests="[&quot;iso.style.get(\&quot;rotation\&quot;)({rotation: 2}) === 2 + Math.PI&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div></div><iframe id="workframe"></iframe></div>
+</div>
+
+    </div>
+    
+    <!-- Theme JavaScript -->
+    
+<script src="../../js/agency.js"></script>
+
+
+</body>
+
+</html>

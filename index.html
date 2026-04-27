@@ -1,0 +1,265 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>GeoJS - Welcome</title>
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+
+
+    <!-- Custom Fonts -->
+    
+<link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+    <!-- Theme CSS -->
+    
+<link rel="stylesheet" href="css/agency.css">
+
+    
+<link rel="stylesheet" href="css/main.css">
+
+    
+<link rel="stylesheet" href="css/highlight.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js" integrity="sha384-0s5Pv64cNZJieYFkXYOTId2HMA2Lfb6q2nAcx2n0RTLUnCAoTTsS0nKEO27XyKcY" crossorigin="anonymous"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js" integrity="sha384-ZoaMbDF+4LeFxg6WdScQ9nnR1QC2MIRxA1O9KWEXQwns1G8UNyIEZIQidzb0T1fo" crossorigin="anonymous"></script>
+    <![endif]-->
+
+    <!-- jQuery -->
+    
+<script src="vendor/jquery/jquery.min.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    
+<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+
+
+    <link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body id="page-top" class="index">
+    <!-- Navigation -->
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span><i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="index.html"><img class="navbar-logo" src="images/logo_transparent.png" /></a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class=" active ">
+                        <a href="">Welcome</a>
+                    </li>
+                    <li class="">
+                        <a href="tutorials/">Tutorials</a>
+                    </li>
+                    <li class="">
+                        <a href="examples/">Examples</a>
+                    </li>
+                    <li>
+                        <a href="apidocs/">API Docs</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/OpenGeoscience/geojs">GitHub</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <div class="content-wrapper">
+        <script type="text/javascript" src="js/logo-zoom.js"></script>
+<link rel="stylesheet" href="css/logo-zoom.css">
+<div class="page welcome">
+    <section class="header">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6 col-sm-offset-3">
+                    <img class="logo" src="images/logo_256.png" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-8 col-sm-offset-2 description">
+                    <p class="text-muted">
+                        GeoJS is a javascript library for visualizing geospatial data in a browser. Its flexible API provides users with the ability to combine multiple visualizations drawn in WebGL, canvas, and SVG into a single dynamic map.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="highlight">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>Highlights</h1>
+                </div>
+            </div>
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <div class="highlight-icon choropleth">
+                    </div>
+                    <h4 class="service-heading">Vector Layer</h4>
+                    <p class="text-muted">GeoJS can combine multiple layers of different data types: map tiles, choropleth polygons, vector layers, and more.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="highlight-icon contour">
+                    </div>
+                    <h4 class="service-heading">Responsive Design</h4>
+                    <p class="text-muted">GeoJS can handle interactions with large quantities of data, whether it is a million line segments or a grid of scalar values.  The visualization is interactive, and can be animated, too.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="highlight-icon heatmap">
+                    </div>
+                    <h4 class="service-heading">Infovis</h4>
+                    <p class="text-muted">There are built-in features for many common information visualization methods: heatmaps, pixelmaps, vectors, text labels, contour plots, graphs, plus the usual points, lines, and polygons.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="get-started">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>Get started</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1">
+                    <div class="col-md-6 col-sm-12">
+                        <a href="tutorials"><h3><i class="fa fa-graduation-cap"></i> Tutorials</h3></a>
+                        <p class="text-muted">How-to lessons ranging from simple to complex.</p>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <a href="examples"><h3><i class="fa fa-star-o"></i> Examples</h3></a>
+                        <p class="text-muted">Examples, some with real-world data and some just to show off features.</p>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <a href="https://github.com/OpenGeoscience/geojs/blob/master/README.md#documentation"><h3><i class="fa fa-book"></i> Documentation</h3></a>
+                        <p class="text-muted">Guides for users and developers, plus how to build and contribute to GeoJS.</p>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <a href="download"><h3><i class="fa fa-download"></i> Download</h3></a>
+                        <p class="text-muted">Get a local copy of GeoJS or refer to it via a CDN.</p><p>&nbsp;</p>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <a href="apidocs"><h3><i class="fa fa-code"></i> API Docs</h3></a>
+                        <p class="text-muted">Full documentation of the GeoJS API</p>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <a href="https://github.com/OpenGeoscience/geojs"><h3><i class="fa fa-github"></i> Github</h3></a>
+                        <p class="text-muted">GeoJS is open source.  Contributions and requests are welcome.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="get-involved">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>Get involved</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1">
+                    <p>
+                        Primarily developed by <a href="https://www.kitware.com">Kitware</a> and
+<a href="https://epidemico.com/">Epidemico</a>. GeoJS is developed under Apache License 2.0.
+                    </p>
+                    <p>
+                        GeoJS is developed to meet needs of developers and domain-specific researchers, and we are always open for collaboration. <br />
+                    </p>
+                    <p>
+                        We would love to get your feedback and bug reports. Please send us an email at
+<a href="https://public.kitware.com/mailman/listinfo/geojs-developers">geojs-developers</a>
+for questions related to feature requests, roadmap or in-depth
+technical discussions. Use <a href="https://public.kitware.com/mailman/listinfo/geojs-users">geojs-users</a>
+if you have general questions or bug reports on GeoJS.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+    </div>
+    
+    <footer class="">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-3">
+                    <ul class="list-inline social-buttons">
+                        <li><a href="https://github.com/OpenGeoscience/geojs"><i class="fa fa-github"></i></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-sm-6">
+                    <span class="copyright">Licensed under the <a href="https://github.com/OpenGeoscience/geojs/blob/master/LICENSE">Apache License 2.0</a></span>
+                </div>
+                <div class="col-md-3">
+                    <ul class="list-inline quicklinks">
+                        <li><a href="https://www.kitware.com">Kitware</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Theme JavaScript -->
+    
+<script src="js/agency.js"></script>
+
+
+</body>
+
+</html>

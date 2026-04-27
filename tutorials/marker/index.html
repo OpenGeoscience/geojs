@@ -1,0 +1,252 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>GeoJS - Markers</title>
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+
+
+    <!-- Custom Fonts -->
+    
+<link rel="stylesheet" href="../../vendor/font-awesome/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+    <!-- Theme CSS -->
+    
+<link rel="stylesheet" href="../../css/agency.css">
+
+    
+<link rel="stylesheet" href="../../css/main.css">
+
+    
+<link rel="stylesheet" href="../../css/highlight.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js" integrity="sha384-0s5Pv64cNZJieYFkXYOTId2HMA2Lfb6q2nAcx2n0RTLUnCAoTTsS0nKEO27XyKcY" crossorigin="anonymous"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js" integrity="sha384-ZoaMbDF+4LeFxg6WdScQ9nnR1QC2MIRxA1O9KWEXQwns1G8UNyIEZIQidzb0T1fo" crossorigin="anonymous"></script>
+    <![endif]-->
+
+    <!-- jQuery -->
+    
+<script src="../../vendor/jquery/jquery.min.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    
+<script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+
+    <link rel="apple-touch-icon" sizes="57x57" href="../../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="../../favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body id="page-top" class="index">
+    <!-- Navigation -->
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top affix">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span><i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="../../index.html"><img class="navbar-logo" src="../../images/logo_transparent.png" /></a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="">
+                        <a href="../../">Welcome</a>
+                    </li>
+                    <li class=" active ">
+                        <a href="../">Tutorials</a>
+                    </li>
+                    <li class="">
+                        <a href="../../examples/">Examples</a>
+                    </li>
+                    <li>
+                        <a href="../../apidocs/">API Docs</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/OpenGeoscience/geojs">GitHub</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <div class="content-wrapper">
+        <link rel="stylesheet" href="../../css/tutorial.css">
+<script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
+<div class="page tutorial">
+    <!-- include tutorial sources--><!-- Include tutorial specific files--><script type="text/javascript">$(start_tutorial);
+
+</script><!-- Add the default main content element--><div id="maincontent"><div id="tutorial"><h1>Tutorial - Markers</h1>
+<p>Create a map with a tile layer, define some data, and create a feature layer.</p>
+<div class="codeblock" format="javascript" step="1" stepname="Step 1" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">var map = geo.map({
+  node: "#map",
+  center: { x: -97.67, y: 31.80 },
+  zoom: 4
+});
+map.createLayer('osm');
+
+var cities = [
+  {lon: -74.0059413, lat: 40.7127837, name: "New York", population: 8405837},
+  {lon: -118.2436849, lat: 34.0522342, name: "Los Angeles", population: 3884307},
+  {lon: -87.6297982, lat: 41.8781136, name: "Chicago", population: 2718782},
+  {lon: -95.3698028, lat: 29.7604267, name: "Houston", population: 2195914},
+  {lon: -75.1652215, lat: 39.9525839, name: "Philadelphia", population: 1553165},
+  {lon: -112.0740373, lat: 33.4483771, name: "Phoenix", population: 1513367}
+];
+
+var layer = map.createLayer('feature', {features: ['marker']});
+
+</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 1</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><p>Create a marker feature and set the data.  The default marker feature looks just line a point feature -- circles with borders.</p>
+<div class="codeblock" webgl="webgl" format="javascript" step="2" parentstep="1" stepname="Step 2" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">var feature = layer.createFeature('marker')
+  .data(cities)
+  .position(function (city) {
+    return {
+      x: city.lon,
+      y: city.lat
+    };
+  })
+  .draw();
+</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 2</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="map has a feature layer with six markers" data-tests="[&quot;map.layers().length === 2&quot;,&quot;map.layers()[1] instanceof geo.featureLayer&quot;,&quot;map.layers()[1].features()[0] instanceof geo.markerFeature&quot;,&quot;map.layers()[1].features()[0].data().length === 6&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>Markers have many different symbols and style options:</p>
+<ul>
+<li><code>symbol</code>: the symbol shape, enumerated in <code>geo.markerFeature.symbols</code>.  This includes <code>ellipse</code>, <code>triangle</code> (isosceles triangles), <code>rectangle</code>, <code>oval</code>, and <code>drop</code>.  There are symmetric repeating patterns such as <code>cross4</code>, <code>flower6</code>, <code>star5</code>, <code>jack6</code>, and <code>drop8</code>, where the number is the rotational symmetry from 2 to 16.</li>
+<li><code>symbolValue</code>: a number that modifies how the symbol appears, usually in the range of [0, 1].  This is often the ratio of the minor axis of the symbol to its major axis.  For <code>triangle</code>, it is the length of the base side compared to the identical sides.</li>
+<li><code>rotation</code>: the rotation in radians.</li>
+<li><code>rotateWithMap</code>: a boolean; if true, the symbol rotates when the map is rotated.  If false, it remains in the same orientation on the screen.</li>
+<li><code>radius</code>: in pixels.  Depending on <code>strokeOffset</code> and <code>radiusIncludesStroke</code>, this can include half or all of the stroke width.</li>
+<li><code>radiusIncludesStroke</code>: if truthy or undefined, the <code>radius</code> includes the <code>strokeWidth</code> based on the <code>strokeOffset</code>.  If defined and falsy, the radius does not include the <code>strokeWidth</code>; set this to <code>false</code> if <code>scaleWithZoom</code> is set to <code>&quot;fill&quot;</code>.</li>
+<li><code>strokeWidth</code>: the width of the stroke around the symbol in pixels.</li>
+<li><code>strokeOffset</code>: the position of the stroke compared to the radius.  This can only be -1 (inside), 0 (centered at the radius), or 1 (outside).</li>
+<li><code>scaleWithZoom</code>: one of the values defined in <code>geo.markerFeature.scaleModes</code>.  If <code>none</code>, the symbols remains the same size when the map is zoomed.  This can also be <code>fill</code>, <code>stroke</code>, or <code>all</code>, in which case the symbol will change size when the map is zoomed.  If scaling with zoom, the <code>radius</code> and <code>strokeWidth</code> are in pixels at zoom level 0.</li>
+<li><code>fillColor</code></li>
+<li><code>fillOpacity</code></li>
+<li><code>strokeColor</code></li>
+<li><code>strokeOpacity</code>:</li>
+</ul>
+<div class="codeblock" format="javascript" step="3" parentstep="2" initial="true" stepname="Step 3" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">feature.style({
+  symbol: geo.markerFeature.symbols.drop,
+  symbolValue: 1 / 3,
+  rotation: -Math.PI / 2,
+  radius: 30,
+  strokeWidth: 5,
+  strokeColor: 'blue',
+  fillColor: 'yellow',
+  rotateWithMap: false
+})
+.draw();
+</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 3</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><p>When scaling a marker with the map, the radius and stroke width are the values at zoom level 0.</p>
+<div class="codeblock" format="javascript" step="4" parentstep="3" stepname="Step 4" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">feature.style({
+  symbol: geo.markerFeature.symbols.star5,
+  symbolValue: Math.sin(Math.PI / 5),
+  radius: 1,
+  strokeWidth: 0.1,
+  scaleWithZoom: geo.markerFeature.scaleMode.all,
+  rotateWithMap: true
+})
+.draw();
+</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 4</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><p>Markers are drawn efficiently, even if they all have different styles.  This creates a large sample of symbols, each with a different style.</p>
+<div class="codeblock" format="javascript" step="5" parentstep="4" stepname="Step 5" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">let count = 1000, markers = [];
+
+for (let i = 0; i < count; i += 1) {
+  let symbol = Math.floor(Math.random() * geo.markerFeature.symbols.length);
+  let symbolValue = Math.random();
+  if (symbol === geo.markerFeature.symbols.triangle) {
+    // triangles use a larger range than most symbols
+    symbolValue *= 2;
+  } else if (symbol &gt;= geo.markerFeature.symbols.arrow && symbol < geo.markerFeature.symbols.arrow + geo.markerFeature.symbols.arrowMax) {
+    // arrow symbols can take an array to specify their shape
+    symbolValue = [
+      Math.random(),
+      Math.random(),
+      Math.random() > 0.1 ? Math.random() : 0,
+      Math.random() &gt;= 0.5
+    ];
+    if (symbol &gt;= geo.markerFeature.symbols.arrowBase) {
+      symbolValue[0] /= 2;
+      symbolValue[1] /= 2;
+      symbolValue[2] /= 2;
+    }
+  }
+  markers.push({
+    x: Math.random() * 50 - 120,
+    y: Math.random() * 40 + 10,
+    radius: Math.random() * 30 + 5,
+    strokeWidth: Math.random() > 0.1 ? Math.random() * 5 : 0,
+    symbol: symbol,
+    symbolValue: symbolValue,
+    fillColor: {r: Math.random(), g: Math.random(), b: Math.random()},
+    fillOpacity: Math.random(),
+    strokeColor: {r: Math.random(), g: Math.random(), b: Math.random()},
+    strokeOpacity: 0.5 + Math.random() * 0.5,
+    rotation: Math.random() * Math.PI * 2
+  });
+}
+feature.data(markers).position(d => d).style({
+  radius: d => d.radius,
+  strokeWidth: d => d.strokeWidth,
+  symbol: d => d.symbol,
+  symbolValue: d => d.symbolValue,
+  fillColor: d => d.fillColor,
+  fillOpacity: d => d.fillOpacity,
+  strokeColor: d => d.strokeColor,
+  strokeOpacity: d => d.strokeOpacity,
+  rotation: d => d.rotation,
+  scaleWithZoom: geo.markerFeature.scaleMode.none,
+  rotateWithMap: true
+}).draw();</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 5</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div></div><iframe id="workframe"></iframe></div>
+</div>
+
+    </div>
+    
+    <!-- Theme JavaScript -->
+    
+<script src="../../js/agency.js"></script>
+
+
+</body>
+
+</html>
