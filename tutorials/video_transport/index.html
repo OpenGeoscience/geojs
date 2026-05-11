@@ -1,0 +1,328 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>GeoJS - Video with Transport Controls</title>
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+
+
+    <!-- Custom Fonts -->
+    
+<link rel="stylesheet" href="../../vendor/font-awesome/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+    <!-- Theme CSS -->
+    
+<link rel="stylesheet" href="../../css/agency.css">
+
+    
+<link rel="stylesheet" href="../../css/main.css">
+
+    
+<link rel="stylesheet" href="../../css/highlight.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js" integrity="sha384-0s5Pv64cNZJieYFkXYOTId2HMA2Lfb6q2nAcx2n0RTLUnCAoTTsS0nKEO27XyKcY" crossorigin="anonymous"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js" integrity="sha384-ZoaMbDF+4LeFxg6WdScQ9nnR1QC2MIRxA1O9KWEXQwns1G8UNyIEZIQidzb0T1fo" crossorigin="anonymous"></script>
+    <![endif]-->
+
+    <!-- jQuery -->
+    
+<script src="../../vendor/jquery/jquery.min.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    
+<script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+
+    <link rel="apple-touch-icon" sizes="57x57" href="../../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="../../favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body id="page-top" class="index">
+    <!-- Navigation -->
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top affix">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span><i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="../../index.html"><img class="navbar-logo" src="../../images/logo_transparent.png" /></a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="">
+                        <a href="../../">Welcome</a>
+                    </li>
+                    <li class=" active ">
+                        <a href="../">Tutorials</a>
+                    </li>
+                    <li class="">
+                        <a href="../../examples/">Examples</a>
+                    </li>
+                    <li>
+                        <a href="../../apidocs/">API Docs</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/OpenGeoscience/geojs">GitHub</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <div class="content-wrapper">
+        <link rel="stylesheet" href="../../css/tutorial.css">
+<script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
+<div class="page tutorial">
+    <!-- include tutorial sources--><!-- Include tutorial specific files--><script type="text/javascript">$(start_tutorial);
+
+</script><!-- Add the default main content element--><div id="maincontent"><div id="tutorial"><h1>Tutorial - Video with Transport</h1>
+<p>A video can be played at different rates.</p>
+<p>Define some HTML with the divs for the map and the transport controls.</p>
+<div class="codeblock" format="html" step="1" stepname="Step 1" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="../../built/geo.min.js"></script>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="controls">
+    <img id="rewind" src="media-rewind.png"/>
+    <img id="back" src="media-back.png"/>
+    <img id="pause" src="media-pause.png"/>
+    <img id="play" src="media-play.png"/>
+    <img id="step" src="media-step.png"/>
+    <img id="ff" src="media-ff.png"/>
+    <input id="scrubber" type="range" min="0" value="0"/>
+    <span id="frame" class="info">Frame 0</span>
+    <span id="speed" class="info">1x</span>
+  </div>
+</body>
+</html>
+</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 1</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><p>In addition to CSS to have the map fill the page, also style the transport
+controls.</p>
+<div class="codeblock" format="css" step="2" parentstep="1" stepname="Step 2" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">html,body,#map {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+#controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  user-select: none;
+}
+#controls img {
+  width: 20px;
+  height: 20px;
+}
+#controls input {
+  display: block;
+}
+#controls span.info {
+  border: 1px solid black;
+  background: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  font-family: monospace;
+  display: inline-block;
+}
+#controls span#frame {
+  width: 90px;
+}
+#controls span#speed {
+  width: 50px;
+}</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 2</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><p>We load the video first so we can get its size and duration.  It isn't
+possible to get the framerate, so we have to specify that.</p>
+<div class="codeblock" htmlvideo="htmlvideo" format="javascript" step="3" parentstep="2" stepname="Step 3" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">var videoFPS = 30;
+var videoSrc = '../../data/earthquakes-video.webm';
+
+// define some global variables for later use
+var map, layers, quads, rate = 1, reverse;
+var video = document.createElement('video');
+video.loop = true;
+video.src = videoSrc;
+$(video).on('loadeddata', function () {
+  var params = geo.util.pixelCoordinateParams('#map', video.videoWidth, video.videoHeight);
+  params.map.max += 3;  // allow zooming up to 8x
+  params.map.zoom = 1;  // start slightly zoomed in
+  // create a map
+  map = geo.map(params.map);
+  // create a feature layer to place a video quad
+  layer = map.createLayer('feature', {
+    features: ['quad.video']
+  });
+  // create a quad feature with just the video.  The quads corners are just
+  // the dimensions of the video.
+  quads = layer.createFeature('quad').data([{
+    ul: {x: 0, y: 0},
+    lr: {x: video.videoWidth, y: video.videoHeight},
+    video: video
+  }]).draw();
+  // set the range of the scrubber to the duration of the video
+  $('#scrubber').attr({step: 1.0/videoFPS, max: video.duration-1.0/videoFPS});
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 3</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="map has a single feature layer" data-tests="[&quot;map.layers().length === 1&quot;,&quot;map.layers()[0] instanceof geo.featureLayer&quot;,&quot;map.layers()[0].features().length === 1&quot;,&quot;map.layers()[0].features()[0] instanceof geo.quadFeature&quot;]" data-idleFuncs="[&quot;waitForLoadAndMap = function (done) {\n  if (video.HAVE_CURRENT_DATA !== undefined &amp;&amp; video.readyState &gt;= video.HAVE_CURRENT_DATA) {\n    map.onIdle(done);\n  } else {\n    $(video).on(\&quot;loadeddata\&quot;, function () {\n      map.onIdle(done);\n    });\n  }\n}&quot;]"></div><p>Set up handling of the transport controls.  Reverse speeds are complicated
+because HTML video doesn't support them natively.</p>
+<div class="codeblock" format="javascript" step="4" parentstep="3" initial="true" stepname="Step 4" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">// when the scrubber moves, seek the video
+$('#scrubber').on('change input', function (evt) {
+  video.currentTime = $('#scrubber').val();
+});
+// when the video's time updates, update the frame information and scrubber
+$(video).on('timeupdate', function () {
+  $('#frame').text('Frame ' + Math.round(video.currentTime * videoFPS));
+  $('#scrubber').val(Math.round(video.currentTime * videoFPS) / videoFPS);
+});
+
+/* Playing in reverse isn't supported in html5 video, so on each animation frame, if
+ * the video is not actively seeking, calculate where the video should be based on
+ * when we started playing backwards and seek to this position.
+ */
+function next_reverse_frame() {
+  if (rate &gt;= 0 || !reverse) {
+    return;
+  }
+  if (!video.seeking) {
+    var position = reverse.startPosition + (Date.now() - reverse.startTime) * 0.001 * rate;
+    // adjust the position so that it is within the video duration
+    position = (position % video.duration + video.duration) % video.duration;
+    // round to the nearest frame.  We add a small amount to ensure that rounding errors
+    // don't cause stuttering
+    position = (Math.round(position * videoFPS) + 0.1) / videoFPS;
+    video.currentTime = position;
+    quads.draw();
+  }
+  map.scheduleAnimationFrame(next_reverse_frame);
+}
+
+/* Ask to play in reverse.
+ * @params {number} newRate the new rate; -1 is the video's original speed but
+ *   backwards, -2 is twice as fast.
+ */
+function play_reverse(newRate) {
+  if (newRate &gt;= 0) {
+    return;
+  }
+  rate = newRate;
+  // show the selected speed
+  $('#speed').text((rate &lt;= -1 ? rate : '-1/' + Math.round(-1/rate)) + 'x');
+  // record where the video currently is; we use the animation from loop to
+  // calculate which frame should be shown.
+  reverse = {
+    startTime: Date.now(),
+    startPosition: video.currentTime
+  }
+  video.pause();
+  map.scheduleAnimationFrame(next_reverse_frame);
+}
+
+// handle the transport buttons
+$('#controls img').click(function (evt) {
+  switch ($(evt.target).attr('id')) {
+    case 'back':
+      if (!video.paused || reverse) {
+        // if playing or playing in reverse, play in reverse; slow down the play rate
+        // if clicked repeatedly
+        play_reverse((rate < 0 && rate > -1) ? (rate < -1./24 ? rate / 2 : rate) : -1/2);
+        break;
+      }
+      // if paused, back up one frame
+      video.currentTime = (video.currentTime + video.duration - 1.0/videoFPS) % video.duration;
+      break;
+    case 'ff':
+      // fast-forward.  Double the speed each time this is clicked
+      if (video.paused || reverse) {
+        video.playbackRate = rate = 2;
+      } else {
+        video.playbackRate = rate = (rate &lt;= 1 ? 2 : (rate < 32 ? rate * 2 : rate));
+      }
+      video.play();
+      reverse = false;
+      $('#speed').text(rate + 'x');
+      break;
+    case 'pause':
+      video.pause();
+      reverse = false;
+      rate = 1;
+      $('#speed').text('1x');
+      break;
+    case 'play':
+      video.playbackRate = rate = 1;
+      video.play();
+      reverse = false;
+      $('#speed').text('1x');
+      break;
+    case 'rewind':
+      // double the reverse speed each time this is clicked
+      play_reverse(rate &gt;= -0.75 ? -1 : (rate > -32 ? rate * 2 : rate));
+      break;
+    case 'step':
+      if (!video.paused || reverse) {
+        // if playing, slow down the play rate if clicked repeatedly
+        video.playbackRate = rate = (rate > 0 && rate < 1) ? (rate > 1./24 ? rate / 2 : rate) : 1/2;
+        video.play();
+        reverse = false;
+        $('#speed').text('1/' + Math.round(1/rate) + 'x');
+      }
+      // if paused, advance one frame
+      video.currentTime = (video.currentTime + 1.0/videoFPS) % video.duration;
+      break;
+  }
+});</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 4</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div></div><iframe id="workframe"></iframe></div>
+</div>
+
+    </div>
+    
+    <!-- Theme JavaScript -->
+    
+<script src="../../js/agency.js"></script>
+
+
+</body>
+
+</html>

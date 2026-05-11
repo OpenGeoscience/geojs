@@ -1,0 +1,8 @@
+{
+  "title": "Large Image",
+  "hideNavbar": true,
+  "level": 1,
+  "about": {
+    "text": "Show a large image from a tile server."
+  }
+}
