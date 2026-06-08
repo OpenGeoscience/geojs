@@ -388,9 +388,9 @@ describe('geo.transform', function () {
         {x: -71.0693514, y: 42.3541165},
         {x: -73.9680804, y: 40.7791472},
         'EPSG:4326',
-        '+proj=longlat +ellps=clrk66 +datum=NAD27 +no_defs',
+        '+proj=longlat +ellps=clrk66 +datum=North_American_Datum_1927 +no_defs',
         {a: 6378206.4, b: 6356583.8}
-      ).distance).toBeCloseTo(298394.412);
+      ).distance).toBeCloseTo(298399.892);
     });
   });
 
@@ -424,9 +424,9 @@ describe('geo.transform', function () {
         {x: -71.0693514, y: 42.3541165},
         {x: -73.9680804, y: 40.7791472},
         'EPSG:4326',
-        '+proj=longlat +ellps=clrk66 +datum=NAD27 +no_defs',
+        '+proj=longlat +ellps=clrk66 +datum=North_American_Datum_1927 +no_defs',
         {a: 6378206.4, b: 6356583.8}
-      )).toBeCloseTo(298340.559);
+      )).toBeCloseTo(298346.079);
     });
   });
 
