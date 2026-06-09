@@ -1,0 +1,112 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Annotations
+    Draw different annotations, optionally setting the aspect ratio for rectangles and ellipses.
+
+    Define some HTML with the divs for the map and controls.
+
+  +codeblock('html', 1).
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <script type="text/javascript" src="../../built/geo.min.js"></script>
+    </head>
+    <body>
+      <div id="map"></div>
+      <div id="controls">
+        Annotation <select id="mode">
+        <option id="rectangle">Rectangle</option>
+        <option id="square">Square</option>
+        <option id="ellipse">Ellipse</option>
+        <option id="circle">Circle</option>
+        <option id="polygon">Polygon</option>
+        <option id="line">Line</option>
+        <option id="point">Point</option>
+        </select>
+        Aspect Ratio <input id="aspect" size="3"></input>
+        <button id="draw">Draw</button>
+      </div>
+    </body>
+    </html>
+
+  :markdown-it
+    Define some CSS to position the controls at the top of the window.
+
+  +codeblock('css', 2).
+    html,body,#map{
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      z-index: 100;
+    }
+    #controls select,#controls input {
+      margin-left: 5px;
+      margin-right: 10px;
+    }
+    #draw.drawing {
+      background: #aaf;
+    }
+
+  :markdown-it
+    Create a map, center it in an interesting area, and create an annotation layer.  The annotation layer specifies `clickToEdit` which allows clicking on an existing annotation to modify it.
+
+  +codeblock('javascript', 3).
+    var map = geo.map({
+      node: "#map",
+      center: {x: -1.1, y: 50.8},
+      zoom: 11
+    });
+    var layer = map.createLayer('osm');
+    var annotLayer = map.createLayer('annotation', {
+      clickToEdit: true
+    });
+    map.draw();
+
+  :markdown-it
+    When the you click the Draw button, if it is not currently selected, switch to drawing the currently selected annotation style.  If already drawing an annotation, cancel the drawing.
+
+    For rectangles and ellipses, use the aspect ratio input field to constrain the aspect ratio.  Numbers greater than 1 will be wider than tall; numbers between 0 and 1 will be taller than wide.  You can enter a comma-separated list of aspect ratios to snap to the closest value.
+
+  +codeblock('javascript', 4, undefined, true)().
+    $('#draw').on('click', () => {
+      if ($('#draw').hasClass('drawing')) {
+        // turn off drawing an annotation
+        annotLayer.mode(null);
+        $('#draw').removeClass('drawing');
+      } else {
+        // mode is the type of anntoation to draw
+        var mode = $('#mode option:selected').attr('id');
+        var opts = {};
+        if (mode === 'rectangle' || mode === 'ellipse') {
+          // if specified, set the aspect ratio constraint to a list of values
+          var aspect = $('#aspect').val().trim();
+          if (aspect) {
+            opts.constraint = aspect.split(',').map((v) => parseFloat(v));
+          }
+        }
+        // switch to drawing mode
+        annotLayer.mode(mode, undefined, opts);
+        $('#draw').addClass('drawing');
+        // when finished, turn off the button style so it is obvious
+        annotLayer.geoOnce(geo.event.annotation.mode, () => {
+          $('#draw').removeClass('drawing');
+        });
+      }
+    });
+
+  +codeblock_test('map has an annotation layer', [
+    'map.layers().length === 2',
+    'map.layers()[1] instanceof geo.annotationLayer',
+    ])
