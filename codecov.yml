@@ -6,8 +6,7 @@ coverage:
     project:
       default:
         threshold: 0.3
-    # This applies to the changed code.  We allow it to be much less covered
-    # than the main code, since we use the project threshold for that.
+    # This applies to the changed code.
     patch:
       default:
         threshold: 25
