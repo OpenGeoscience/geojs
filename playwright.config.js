@@ -78,6 +78,7 @@ module.exports = defineConfig({
       name: 'chromium',
       use: {
         browserName: 'chromium',
+        trace: 'on-first-api',
         headless: true,
         launchOptions: {
           args: ChromeFlags
@@ -89,6 +90,7 @@ module.exports = defineConfig({
       name: 'chromium-headed',
       use: {
         browserName: 'chromium',
+        trace: 'on-first-api',
         headless: false,
         launchOptions: {
           args: ChromeHeadedFlags.concat([
@@ -103,6 +105,7 @@ module.exports = defineConfig({
       name: 'firefox',
       use: {
         browserName: 'firefox',
+        trace: 'on-first-api',
         headless: true,
         hasTouch: true,
         launchOptions: {
@@ -114,6 +117,7 @@ module.exports = defineConfig({
       name: 'firefox-headed',
       use: {
         browserName: 'firefox',
+        trace: 'on-first-api',
         headless: false,
         hasTouch: true,
         launchOptions: {
