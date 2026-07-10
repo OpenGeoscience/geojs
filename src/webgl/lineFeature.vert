@@ -29,6 +29,7 @@ const float PI = 3.14159265358979323846264;
 
 vec4 viewCoord(vec3 c) {
   vec4 result = projectionMatrix * modelViewMatrix * vec4(c.xyz, 1.0);
+  result.z = 0.0;  /* Ignore z coordinates */
   if (result.w != 0.0)  result = result / result.w;
   return result;
 }
