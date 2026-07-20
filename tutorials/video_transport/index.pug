@@ -1,0 +1,231 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Video with Transport
+    A video can be played at different rates.
+
+    Define some HTML with the divs for the map and the transport controls.
+
+  +codeblock('html', 1).
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <script type="text/javascript" src="../../built/geo.min.js"></script>
+    </head>
+    <body>
+      <div id="map"></div>
+      <div id="controls">
+        <img id="rewind" src="media-rewind.png"/>
+        <img id="back" src="media-back.png"/>
+        <img id="pause" src="media-pause.png"/>
+        <img id="play" src="media-play.png"/>
+        <img id="step" src="media-step.png"/>
+        <img id="ff" src="media-ff.png"/>
+        <input id="scrubber" type="range" min="0" value="0"/>
+        <span id="frame" class="info">Frame 0</span>
+        <span id="speed" class="info">1x</span>
+      </div>
+    </body>
+    </html>
+
+  :markdown-it
+    In addition to CSS to have the map fill the page, also style the transport
+    controls.
+
+  +codeblock('css', 2).
+    html,body,#map {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      user-select: none;
+    }
+    #controls img {
+      width: 20px;
+      height: 20px;
+    }
+    #controls input {
+      display: block;
+    }
+    #controls span.info {
+      border: 1px solid black;
+      background: rgba(255, 255, 255, 0.5);
+      text-align: center;
+      font-family: monospace;
+      display: inline-block;
+    }
+    #controls span#frame {
+      width: 90px;
+    }
+    #controls span#speed {
+      width: 50px;
+    }
+  :markdown-it
+    We load the video first so we can get its size and duration.  It isn't
+    possible to get the framerate, so we have to specify that.
+
+  +codeblock('javascript', 3)(htmlvideo=true).
+    var videoFPS = 30;
+    var videoSrc = '../../data/earthquakes-video.webm';
+
+    // define some global variables for later use
+    var map, layers, quads, rate = 1, reverse;
+    var video = document.createElement('video');
+    video.loop = true;
+    video.src = videoSrc;
+    $(video).on('loadeddata', function () {
+      var params = geo.util.pixelCoordinateParams('#map', video.videoWidth, video.videoHeight);
+      params.map.max += 3;  // allow zooming up to 8x
+      params.map.zoom = 1;  // start slightly zoomed in
+      // create a map
+      map = geo.map(params.map);
+      // create a feature layer to place a video quad
+      layer = map.createLayer('feature', {
+        features: ['quad.video']
+      });
+      // create a quad feature with just the video.  The quads corners are just
+      // the dimensions of the video.
+      quads = layer.createFeature('quad').data([{
+        ul: {x: 0, y: 0},
+        lr: {x: video.videoWidth, y: video.videoHeight},
+        video: video
+      }]).draw();
+      // set the range of the scrubber to the duration of the video
+      $('#scrubber').attr({step: 1.0/videoFPS, max: video.duration-1.0/videoFPS});
+    });
+  //- our idle function for tests must wait for the video to be loaded and then
+    the map to be idle
+  +codeblock_test('map has a single feature layer', [
+      'map.layers().length === 1',
+      'map.layers()[0] instanceof geo.featureLayer',
+      'map.layers()[0].features().length === 1',
+      'map.layers()[0].features()[0] instanceof geo.quadFeature'
+      ], [
+      'waitForLoadAndMap = function (done) {\n' +
+      '  if (video.HAVE_CURRENT_DATA !== undefined && video.readyState >= video.HAVE_CURRENT_DATA) {\n' +
+      '    map.onIdle(done);\n' +
+      '  } else {\n' +
+      '    $(video).on("loadeddata", function () {\n' +
+      '      map.onIdle(done);\n' +
+      '    });\n' +
+      '  }\n' +
+      '}'
+      ])
+
+  :markdown-it
+    Set up handling of the transport controls.  Reverse speeds are complicated
+    because HTML video doesn't support them natively.
+
+  +codeblock('javascript', 4, undefined, true).
+    // when the scrubber moves, seek the video
+    $('#scrubber').on('change input', function (evt) {
+      video.currentTime = $('#scrubber').val();
+    });
+    // when the video's time updates, update the frame information and scrubber
+    $(video).on('timeupdate', function () {
+      $('#frame').text('Frame ' + Math.round(video.currentTime * videoFPS));
+      $('#scrubber').val(Math.round(video.currentTime * videoFPS) / videoFPS);
+    });
+
+    /* Playing in reverse isn't supported in html5 video, so on each animation frame, if
+     * the video is not actively seeking, calculate where the video should be based on
+     * when we started playing backwards and seek to this position.
+     */
+    function next_reverse_frame() {
+      if (rate >= 0 || !reverse) {
+        return;
+      }
+      if (!video.seeking) {
+        var position = reverse.startPosition + (Date.now() - reverse.startTime) * 0.001 * rate;
+        // adjust the position so that it is within the video duration
+        position = (position % video.duration + video.duration) % video.duration;
+        // round to the nearest frame.  We add a small amount to ensure that rounding errors
+        // don't cause stuttering
+        position = (Math.round(position * videoFPS) + 0.1) / videoFPS;
+        video.currentTime = position;
+        quads.draw();
+      }
+      map.scheduleAnimationFrame(next_reverse_frame);
+    }
+
+    /* Ask to play in reverse.
+     * @params {number} newRate the new rate; -1 is the video's original speed but
+     *   backwards, -2 is twice as fast.
+     */
+    function play_reverse(newRate) {
+      if (newRate >= 0) {
+        return;
+      }
+      rate = newRate;
+      // show the selected speed
+      $('#speed').text((rate <= -1 ? rate : '-1/' + Math.round(-1/rate)) + 'x');
+      // record where the video currently is; we use the animation from loop to
+      // calculate which frame should be shown.
+      reverse = {
+        startTime: Date.now(),
+        startPosition: video.currentTime
+      }
+      video.pause();
+      map.scheduleAnimationFrame(next_reverse_frame);
+    }
+
+    // handle the transport buttons
+    $('#controls img').click(function (evt) {
+      switch ($(evt.target).attr('id')) {
+        case 'back':
+          if (!video.paused || reverse) {
+            // if playing or playing in reverse, play in reverse; slow down the play rate
+            // if clicked repeatedly
+            play_reverse((rate < 0 && rate > -1) ? (rate < -1./24 ? rate / 2 : rate) : -1/2);
+            break;
+          }
+          // if paused, back up one frame
+          video.currentTime = (video.currentTime + video.duration - 1.0/videoFPS) % video.duration;
+          break;
+        case 'ff':
+          // fast-forward.  Double the speed each time this is clicked
+          if (video.paused || reverse) {
+            video.playbackRate = rate = 2;
+          } else {
+            video.playbackRate = rate = (rate <= 1 ? 2 : (rate < 32 ? rate * 2 : rate));
+          }
+          video.play();
+          reverse = false;
+          $('#speed').text(rate + 'x');
+          break;
+        case 'pause':
+          video.pause();
+          reverse = false;
+          rate = 1;
+          $('#speed').text('1x');
+          break;
+        case 'play':
+          video.playbackRate = rate = 1;
+          video.play();
+          reverse = false;
+          $('#speed').text('1x');
+          break;
+        case 'rewind':
+          // double the reverse speed each time this is clicked
+          play_reverse(rate >= -0.75 ? -1 : (rate > -32 ? rate * 2 : rate));
+          break;
+        case 'step':
+          if (!video.paused || reverse) {
+            // if playing, slow down the play rate if clicked repeatedly
+            video.playbackRate = rate = (rate > 0 && rate < 1) ? (rate > 1./24 ? rate / 2 : rate) : 1/2;
+            video.play();
+            reverse = false;
+            $('#speed').text('1/' + Math.round(1/rate) + 'x');
+          }
+          // if paused, advance one frame
+          video.currentTime = (video.currentTime + 1.0/videoFPS) % video.duration;
+          break;
+      }
+    });

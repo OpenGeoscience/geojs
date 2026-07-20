@@ -1,0 +1,271 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>GeoJS - Tiled Pixelmap</title>
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+
+
+    <!-- Custom Fonts -->
+    
+<link rel="stylesheet" href="../../vendor/font-awesome/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+    <!-- Theme CSS -->
+    
+<link rel="stylesheet" href="../../css/agency.css">
+
+    
+<link rel="stylesheet" href="../../css/main.css">
+
+    
+<link rel="stylesheet" href="../../css/highlight.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js" integrity="sha384-0s5Pv64cNZJieYFkXYOTId2HMA2Lfb6q2nAcx2n0RTLUnCAoTTsS0nKEO27XyKcY" crossorigin="anonymous"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js" integrity="sha384-ZoaMbDF+4LeFxg6WdScQ9nnR1QC2MIRxA1O9KWEXQwns1G8UNyIEZIQidzb0T1fo" crossorigin="anonymous"></script>
+    <![endif]-->
+
+    <!-- jQuery -->
+    
+<script src="../../vendor/jquery/jquery.min.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    
+<script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+
+    <link rel="apple-touch-icon" sizes="57x57" href="../../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="../../favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body id="page-top" class="index">
+    <!-- Navigation -->
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top affix">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span><i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="../../index.html"><img class="navbar-logo" src="../../images/logo_transparent.png" /></a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="">
+                        <a href="../../">Welcome</a>
+                    </li>
+                    <li class=" active ">
+                        <a href="../">Tutorials</a>
+                    </li>
+                    <li class="">
+                        <a href="../../examples/">Examples</a>
+                    </li>
+                    <li>
+                        <a href="../../apidocs/">API Docs</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/OpenGeoscience/geojs">GitHub</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <div class="content-wrapper">
+        <link rel="stylesheet" href="../../css/tutorial.css">
+<script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
+<div class="page tutorial">
+    <!-- include tutorial sources--><!-- Include tutorial specific files--><script type="text/javascript">$(start_tutorial);
+
+</script><!-- Add the default main content element--><div id="maincontent"><div id="tutorial"><h1>Tutorial - Tiled Pixelmap</h1>
+<p>A pixelmap is a way of representing categorical data.  It uses a lossless
+image where, instead of the pixels representing colors, they represent
+category indices.  This is usually compactly represented as a integer split
+across the red, green, and blue channels, where the category index is
+computed as <code>(red value) + (green value * 256) + (blue value * 65536)</code>.</p>
+<p>For large datasets, a single image might be too large to display at once.
+Much like tile layers used for maps and large images, a pixelmap can also
+be rendered from a tiled image using the <code>pixelmapLayer</code>.  The
+<code>pixelmapLayer</code> is essentially a hybrid between a tile image layer and a
+pixelmap feature.</p>
+<p>First, let's create our map in the appropriate image coordinates for our
+pixelmap tile image.</p>
+<div class="codeblock" format="javascript" step="1" parentstep="parentstep" stepname="Step 1" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">// We happen to know that our data is an image that is 4096 x 4096 and is
+// divided into tiles that are 2048 x 2048.  Get paraemters for a map and
+// tile layer with appropriate values.
+var params = geo.util.pixelCoordinateParams(
+  '#map', 4096, 4096, 2048, 2048);
+// Now create the map
+map = geo.map(params.map);
+</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 1</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><p>We can use some of the parameters generated by
+<code>geo.util.pixelCoordinateParams</code> for the pixelmap tile layer.  We need to
+modify the url to find the image tiles, create an appropriate data array
+with the categorical data, and determine how to map colors to the
+categories.</p>
+<p>Our categorical image data was generated from a small portion of a
+histology image using a superpixel algorithm.  After dividing the source
+image into superpixels, the edge of each superpixel was located and set as
+a separate index value.  These happen to always have an index value one
+greater than the superpixel itself (so the main superpixels are indices
+0, 2, 4, ..., and the corresponding edges are indices 1, 3, 5, ...).  This
+data set happens to have 5112 distinct index values.  We start with a data
+array of all zeroes.</p>
+<div class="codeblock" format="javascript" step="2" parentstep="1" initial="true" stepname="Step 2" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">// modify the suggest layer parameters
+params.layer.url = '../../data/pixelmap_{z}_{y}_{x}.png';
+// if we use transparency, we don't want to keep lower tile levels -- they
+// will show through
+params.layer.keepLower = false;
+// start with data that is all zeroes
+params.layer.data = new Array(5112).fill(0);
+// color our edges yellow and just cycle through red, green, and blue for
+// the superpixels
+params.layer.style = {
+  color: (d, i) => {
+    if (i % 2) {
+      return 'yellow';
+    }
+    i = Math.floor(i / 2);
+    switch (i % 3) {
+      case 0: return 'red';
+      case 1: return 'green';
+      case 2: return 'blue';
+    }
+  }
+};
+// create our pixelmap layer and draw it
+var pixelmap = map.createLayer('pixelmap', params.layer).draw();
+</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 2</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><p>It is more useful to allow the user to modify the data.  Change our
+coloring so that superpixels start transparent with yellow edges and cycle
+through red, green, and blue as they are selected.</p>
+<p>When changing a value in the data array, we need to inform the pixelmap
+that it is changed.  This could be done a variety of ways:</p>
+<ul>
+<li>
+<p><code>pixelmap.data(data)</code> - this marks the entire data set as changed and
+will require recomputing the most values.</p>
+</li>
+<li>
+<p><code>pixelmap.modified()</code> - this states that the style has changed in some
+way, but without more specificifity, all of the colors are rechecked.</p>
+</li>
+<li>
+<p><code>pixelmap.indexModified(lowIndex, highIndex)</code> - this states that only a
+small number of indicies' colors have changed, allowing the most
+efficient update.</p>
+</li>
+</ul>
+<div class="codeblock" format="javascript" step="3" parentstep="2" stepname="Step 3" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">pixelmap.style('color', (d, i) => {
+  switch (d) {
+    case 1: return i % 2 ? '#ff0000': '#ff000080';
+    case 2: return i % 2 ? '#008000': '#00800080';
+    case 3: return i % 2 ? '#0000ff': '#0000ff80';
+    default: return i % 2 ? '#ffff00' : '#00000000';
+  }
+}).draw();
+pixelmap.geoOn(geo.event.feature.mouseclick, function (evt) {
+  // ignore clicks with a shift; this prevents conflicting interaction in
+  // the next step
+  if (evt.mouse.modifiers.shift) {
+    return;
+  }
+  // use the index of the superpixel rather than its border, regardless of
+  // which was clicked.
+  var index = evt.index - evt.index % 2;
+  var data = pixelmap.data();
+  // change the value of the superpixel and its border
+  data[index] = data[index + 1] = (data[index] + 1) % 4;
+  // since we changed the data directly, tell the layer that it has been
+  // modified and to redraw.  Use `indexModified` for efficiency.
+  pixelmap.indexModified(index, index + 1).draw();
+});
+</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 3</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><p>We might want to make it easier for a user to set many superpixels to the
+same state at once.  If the user holds down shift, then the color that the
+first superpixel that is clicked on is applied to any superpixel entered
+until the mouse button is released.  By using shift, the core pan feature
+isn't affected.</p>
+<div class="codeblock" format="javascript" step="4" parentstep="3" stepname="Step 4" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">// disable the default action for left mouse button + shift
+map.interactor().removeAction(geo.geo_action.zoomselect);
+// if the mouse moves, decide whether we should handle it
+var newValue = undefined;
+function onOver(evt) {
+  // for movement, if shift or the left button aren't down, stop setting values
+  if (!evt.mouse.modifiers.shift || !evt.mouse.buttons.left) {
+     newValue = undefined;
+     return;
+  }
+  // determine which superpixel to modify
+  var index = evt.index - evt.index % 2;
+  var data = pixelmap.data();
+  // if we just started a movement with shift, update the value and record it
+  if (newValue === undefined || evt.event === geo.event.feature.mousedown) {
+    data[index] = data[index + 1] = (data[index] + 1) % 4;
+    newValue = data[index];
+    pixelmap.indexModified(index, index + 1).draw();
+  }
+  // if we are moving and things have changed, update
+  if (data[index] !== newValue) {
+    data[index] = data[index + 1] = newValue;
+    pixelmap.indexModified(index, index + 1).draw();
+  }
+}
+// An alternative would be to bind on mousemove instead of mousedown and
+// mouseover and leave the click handler; this requires movement to start
+// setting values, whereas mousedown doesn't require mouse movement.
+pixelmap.geoOn(geo.event.feature.mousedown, onOver);
+pixelmap.geoOn(geo.event.feature.mouseover, onOver);</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 4</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div></div><iframe id="workframe"></iframe></div>
+</div>
+
+    </div>
+    
+    <!-- Theme JavaScript -->
+    
+<script src="../../js/agency.js"></script>
+
+
+</body>
+
+</html>

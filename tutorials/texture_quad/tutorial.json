@@ -1,0 +1,10 @@
+{
+  "title": "Texture Quads",
+  "hideNavbar": true,
+  "level": 1,
+  "tutorialCss": [],
+  "tutorialJs": [],
+  "about": {
+    "text": "Use data arrays as the texture of a quad."
+  }
+}
