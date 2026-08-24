@@ -22,10 +22,14 @@ const annotationActionOwner = require('./annotation').annotationActionOwner;
  *    finished rectangle.  This uses styles for {@link geo.polygonFeature}.
  * @property {geo.polygonFeature.styleSpec} [editStyle] The style to apply to a
  *    rectangle in edit mode.
- * @property {number|number[]|Function} [constraint] If specified, an aspect
- *    ratio or list of aspect ratios to constraint the rectangle to.  If a
- *    function, a selection constraint function to call to adjust the
- *    rectangle.
+ * @property {number|geo.geoSize|Array.<number|geo.geoSize>|Function} [constraint]
+ *    If specified, an aspect ratio, a fixed size, or a list of allowed aspect ratios and sizes to
+ *    constrain the rectangle to. A number (or a list of numbers) is an aspect ratio - the
+ *    rectangle is resized as it is drawn, with the initial click point fixed as one corner. A size
+ *    (e.g., `{width: 20, height: 10}`) instead fixes the rectangle's dimensions - since there is
+ *    no remaining degree of freedom to resize, dragging translates the whole rectangle so that the
+ *    current mouse position is one of its corners, rather than resizing it. If a function, a
+ *    selection constraint function to call to adjust the rectangle.
  */
 
 /**
