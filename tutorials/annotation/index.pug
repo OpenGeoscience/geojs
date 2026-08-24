@@ -3,7 +3,7 @@ extends ../common/index.pug
 block mainTutorial
   :markdown-it
     # Tutorial - Annotations
-    Draw different annotations, optionally setting the aspect ratio for rectangles and ellipses.
+    Draw different annotations, optionally setting the aspect ratio or a fixed size for rectangles and ellipses.
 
     Define some HTML with the divs for the map and controls.
 
@@ -26,6 +26,7 @@ block mainTutorial
         <option id="point">Point</option>
         </select>
         Aspect Ratio <input id="aspect" size="3"></input>
+        Fixed Size (w,h) <input id="fixedsize" size="7"></input>
         <button id="draw">Draw</button>
       </div>
     </body>
@@ -94,6 +95,47 @@ block mainTutorial
           var aspect = $('#aspect').val().trim();
           if (aspect) {
             opts.constraint = aspect.split(',').map((v) => parseFloat(v));
+          }
+        }
+        // switch to drawing mode
+        annotLayer.mode(mode, undefined, opts);
+        $('#draw').addClass('drawing');
+        // when finished, turn off the button style so it is obvious
+        annotLayer.geoOnce(geo.event.annotation.mode, () => {
+          $('#draw').removeClass('drawing');
+        });
+      }
+    });
+
+  :markdown-it
+    Rectangles and ellipses can also be constrained to a *fixed size* rather than an aspect ratio, using the "Fixed Size" field. `square` and `circle` always use a fixed aspect ratio of 1 and cannot be given a fixed size, so the field only applies to `rectangle` and `ellipse`.
+
+    Unlike an aspect-ratio constraint, a fixed-size shape has no remaining degree of freedom to resize as you drag - it is always exactly the size you specify. Because of this, dragging *moves* the shape instead of resizing it: the current mouse position becomes the rectangle's corner, and the rest of the rectangle extends from there in a fixed direction, so it translates smoothly with the cursor.
+
+  +codeblock('javascript', 5, 3).
+    $('#draw').on('click', () => {
+      if ($('#draw').hasClass('drawing')) {
+        // turn off drawing an annotation
+        annotLayer.mode(null);
+        $('#draw').removeClass('drawing');
+      } else {
+        // mode is the type of anntoation to draw
+        var mode = $('#mode option:selected').attr('id');
+        var opts = {};
+        if (mode === 'rectangle' || mode === 'ellipse') {
+          // if specified, a fixed width and height (comma-separated) take
+          // precedence over the aspect ratio
+          var fixedsize = $('#fixedsize').val().trim();
+          if (fixedsize) {
+            var size = fixedsize.split(',').map((v) => parseFloat(v));
+            opts.constraint = {width: size[0], height: size.length > 1 ? size[1] : size[0]};
+          } else {
+            // otherwise, if specified, set the aspect ratio constraint to a
+            // list of values
+            var aspect = $('#aspect').val().trim();
+            if (aspect) {
+              opts.constraint = aspect.split(',').map((v) => parseFloat(v));
+            }
           }
         }
         // switch to drawing mode
