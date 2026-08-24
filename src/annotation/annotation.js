@@ -1459,6 +1459,7 @@ function constrainAspectRatio(ratio) {
     } else {
       /* Not in edit vertex or edge mode */
       const area = Math.abs((pos.x - origin.x) * (pos.y - origin.y));
+      let anchor = origin;
       ratios.forEach((ratio) => {
         let width, height;
         if (ratio.width) {
@@ -1468,18 +1469,30 @@ function constrainAspectRatio(ratio) {
           width = (area * ratio) ** 0.5;
           height = width / ratio;
         }
-        const adjusted = {
+        const originAnchored = {
           x: origin.x + Math.sign(pos.x - origin.x) * width,
           y: origin.y + Math.sign(pos.y - origin.y) * height
         };
-        const score = (adjusted.x - pos.x) ** 2 + (adjusted.y - pos.y) ** 2;
+        const score = (originAnchored.x - pos.x) ** 2 + (originAnchored.y - pos.y) ** 2;
         if (best === undefined || score < best) {
           best = score;
-          newpos = adjusted;
+          if (ratio.width) {
+            /* Fixed-size shapes have no remaining degree of freedom to resize. The mouse
+             * position becomes the box's corner. As the mouse moves, that corner tracks the
+             * mouse, translating the whole fixed-size shape along with it. */
+            anchor = pos;
+            newpos = {
+              x: pos.x + width,
+              y: pos.y + height
+            };
+          } else {
+            anchor = origin;
+            newpos = originAnchored;
+          }
         }
       });
-      corners[0].y = corners[1].y = origin.y;
-      corners[0].x = corners[3].x = origin.x;
+      corners[0].y = corners[1].y = anchor.y;
+      corners[0].x = corners[3].x = anchor.x;
       corners[1].x = corners[2].x = newpos.x;
       corners[2].y = corners[3].y = newpos.y;
     }

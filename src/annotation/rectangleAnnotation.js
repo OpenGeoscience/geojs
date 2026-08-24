@@ -55,7 +55,9 @@ var rectangleAnnotation = function (args, annotationName) {
 
   var m_this = this,
       s_actions = this.actions,
-      s_processEditAction = this.processEditAction;
+      s_processEditAction = this.processEditAction,
+      // The original click location that started the current draw.
+      m_origin = null;
 
   /**
    * Return actions needed for the specified state of this annotation.
@@ -234,7 +236,8 @@ var rectangleAnnotation = function (args, annotationName) {
     corners[1] = map.displayToGcs(c1, null);
     corners[3] = map.displayToGcs(c3, null);
     if (this._selectionConstraint) {
-      this._selectionConstraint(evt.mapgcs, corners[0], corners);
+      // Use the origin recorded at the start of the draw.
+      this._selectionConstraint(evt.mapgcs, m_origin || corners[0], corners);
     }
   };
 
@@ -291,6 +294,7 @@ var rectangleAnnotation = function (args, annotationName) {
       return 'done';
     }
     if (evt.buttonsDown.left) {
+      m_origin = Object.assign({}, evt.mapgcs);
       corners.push(Object.assign({}, evt.mapgcs));
       corners.push(Object.assign({}, evt.mapgcs));
       corners.push(Object.assign({}, evt.mapgcs));

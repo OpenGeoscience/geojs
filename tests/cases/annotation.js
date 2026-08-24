@@ -1709,6 +1709,18 @@ describe('geo.annotation', function () {
         'vertex', [0, -Math.PI / 2, Math.PI, Math.PI / 2], 0);
       expect(result.corners).toEqual([{x: 10, y: 20}, {x: 30, y: 20}, {x: 30, y: 10}, {x: 10, y: 10}]);
     });
+    it('multiple fixed sizes picks the closest match', function () {
+      // With multiple fixed sizes in the list, the one closest to the actual drag distance
+      // must be chosen, not simply the first fixed-size entry.
+      const func = geo.annotation.constrainAspectRatio([
+        {width: 100, height: 100}, {width: 10, height: 10}]);
+
+      let result;
+      result = func({x: 11, y: 11}, {x: 0, y: 0});
+      expect(result.pos).toEqual({x: 21, y: 21});
+      result = func({x: 95, y: 95}, {x: 0, y: 0});
+      expect(result.pos).toEqual({x: 195, y: 195});
+    });
   });
 
   describe('annotation registry', function () {
