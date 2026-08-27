@@ -28,7 +28,7 @@ const annotationActionOwner = require('./annotation').annotationActionOwner;
  *    rectangle is resized as it is drawn, with the initial click point fixed as one corner. A size
  *    (e.g., `{width: 20, height: 10}`) instead fixes the rectangle's dimensions - since there is
  *    no remaining degree of freedom to resize, dragging translates the whole rectangle so that the
- *    current mouse position is one of its corners, rather than resizing it. If a function, a
+ *    current mouse position is its upper-left corner, rather than resizing it. If a function, a
  *    selection constraint function to call to adjust the rectangle.
  */
 
