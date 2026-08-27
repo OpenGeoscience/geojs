@@ -303,6 +303,8 @@ var rectangleAnnotation = function (args, annotationName) {
       corners.push(Object.assign({}, evt.mapgcs));
       corners.push(Object.assign({}, evt.mapgcs));
       corners.push(Object.assign({}, evt.mapgcs));
+      // Apply the constraint immediately so fixed-size shapes show right away.
+      m_this._setCornersFromMouse(corners, evt);
       return true;
     }
     return undefined;
