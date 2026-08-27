@@ -1477,14 +1477,16 @@ function constrainAspectRatio(ratio) {
         if (best === undefined || score < best) {
           best = score;
           if (ratio.width) {
-            /* Fixed-size shapes have no remaining degree of freedom to resize. The mouse
-             * position becomes the box's upper-left corner. As the mouse moves, that corner
-             * tracks the mouse, translating the whole fixed-size shape along with it.  Map gcs
-             * has y increasing upwards, so extending to the lower-right subtracts the height. */
-            anchor = pos;
+            /* Fixed-size shapes have no remaining degree of freedom to resize. The box is
+             * centered on the mouse position, so as the mouse moves the whole fixed-size shape
+             * translates along with it.*/
+            anchor = {
+              x: pos.x - width / 2,
+              y: pos.y + height / 2
+            };
             newpos = {
-              x: pos.x + width,
-              y: pos.y - height
+              x: pos.x + width / 2,
+              y: pos.y - height / 2
             };
           } else {
             anchor = origin;
