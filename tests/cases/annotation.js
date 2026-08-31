@@ -1708,29 +1708,28 @@ describe('geo.annotation', function () {
       const func = geo.annotation.constrainAspectRatio({width: 20, height: 10});
 
       let result;
-      // A fixed-size shape anchors at the current mouse position (not origin) and always extends
-      // in the same direction, so it translates with the cursor instead of flipping across
-      // quadrants.
+      // A fixed-size shape is centered on the current mouse position (not the origin), so it
+      // translates with the cursor instead of flipping across quadrants.
       result = func(
         {x: 40, y: 5},
         {x: 0, y: 0});
-      expect(result.pos).toEqual({x: 60, y: 15});
-      expect(result.corners).toEqual([{x: 40, y: 5}, {x: 60, y: 5}, {x: 60, y: 15}, {x: 40, y: 15}]);
+      expect(result.pos).toEqual({x: 50, y: 0});
+      expect(result.corners).toEqual([{x: 30, y: 10}, {x: 50, y: 10}, {x: 50, y: 0}, {x: 30, y: 0}]);
       result = func(
         {x: 40, y: 5},
         {x: 0, y: 0},
         [{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]);
-      expect(result.pos).toEqual({x: 60, y: 15});
+      expect(result.pos).toEqual({x: 50, y: 0});
       result = func(
         {x: 5, y: 40},
         {x: 0, y: 0},
         [{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]);
-      expect(result.pos).toEqual({x: 25, y: 50});
+      expect(result.pos).toEqual({x: 15, y: 35});
       // Moving the mouse to the opposite side of origin must not flip the extension direction.
       result = func(
         {x: -40, y: -5},
         {x: 0, y: 0});
-      expect(result.pos).toEqual({x: -20, y: 5});
+      expect(result.pos).toEqual({x: -30, y: -10});
       result = func(
         {x: 0, y: 0},
         {x: 0, y: 0},
@@ -1752,9 +1751,9 @@ describe('geo.annotation', function () {
 
       let result;
       result = func({x: 11, y: 11}, {x: 0, y: 0});
-      expect(result.pos).toEqual({x: 21, y: 21});
+      expect(result.pos).toEqual({x: 16, y: 6});
       result = func({x: 95, y: 95}, {x: 0, y: 0});
-      expect(result.pos).toEqual({x: 195, y: 195});
+      expect(result.pos).toEqual({x: 145, y: 45});
     });
   });
 

@@ -110,7 +110,7 @@ block mainTutorial
   :markdown-it
     Rectangles and ellipses can also be constrained to a *fixed size* rather than an aspect ratio, using the "Fixed Size" field. `square` and `circle` always use a fixed aspect ratio of 1 and cannot be given a fixed size, so the field only applies to `rectangle` and `ellipse`.
 
-    Unlike an aspect-ratio constraint, a fixed-size shape has no remaining degree of freedom to resize as you drag - it is always exactly the size you specify. Because of this, dragging *moves* the shape instead of resizing it: the current mouse position becomes the rectangle's corner, and the rest of the rectangle extends from there in a fixed direction, so it translates smoothly with the cursor.
+    Unlike an aspect-ratio constraint, a fixed-size shape has no remaining degree of freedom to resize as you drag - it is always exactly the size you specify. Because of this, dragging *moves* the shape instead of resizing it: the rectangle stays centered on the current mouse position, so it translates smoothly with the cursor.
 
   +codeblock('javascript', 5, 3).
     $('#draw').on('click', () => {
