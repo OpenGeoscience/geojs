@@ -1358,20 +1358,10 @@ function continuousVerticesProcessAction(m_this, evt, name) {
  *   wide or half as wide as it is tall.  Sizes (e.g., {width: 400, height:
  *   500}) snap to that size.
  * @returns {Function} A function that can be passed to the mapIterator
- *   selectionConstraint or to an annotation constraint function.  If any sizes
- *   are given, the returned function is stateful: it remembers where the
- *   fixed-size box was left so that the box only moves once the mouse reaches
- *   its edge.  That state is reset whenever the origin changes, so build a
- *   separate function per shape being drawn rather than sharing one.
+ *   selectionConstraint or to an annotation constraint function.
  */
 function constrainAspectRatio(ratio) {
   const ratios = Array.isArray(ratio) ? ratio : [ratio];
-  /* A fixed-size box lags the mouse: it holds still while the mouse is inside it and is only
-   * pushed along once the mouse reaches an edge.  That is path-dependent, so the center of the
-   * last box is remembered here.  It is reset whenever a new action begins, which is detected by
-   * a change of origin.  Each annotation builds its own constraint function, so this state is
-   * scoped to a single shape being drawn. */
-  let lastOrigin, lastCenter;
 
   /**
    * Constrain a mouse action or annotation action to a list of aspect ratios.
@@ -1470,12 +1460,6 @@ function constrainAspectRatio(ratio) {
       /* Not in edit vertex or edge mode */
       const area = Math.abs((pos.x - origin.x) * (pos.y - origin.y));
       let anchor = origin;
-      if (!lastOrigin || lastOrigin.x !== origin.x || lastOrigin.y !== origin.y) {
-        lastOrigin = {x: origin.x, y: origin.y};
-        lastCenter = {x: origin.x, y: origin.y};
-      }
-      /* Only the winning ratio's center may be committed, so hold it aside until the loop ends. */
-      let bestCenter;
       ratios.forEach((ratio) => {
         let width, height;
         if (ratio.width) {
@@ -1493,38 +1477,23 @@ function constrainAspectRatio(ratio) {
         if (best === undefined || score < best) {
           best = score;
           if (ratio.width) {
-            /* Fixed-size shapes have no remaining degree of freedom to resize, so dragging moves
-             * the box rather than resizing it.  It starts centered on the origin and only gives
-             * way once the mouse reaches an edge: clamping the previous center to within half a
-             * box of the mouse leaves it untouched while the mouse is inside, and otherwise
-             * pushes it just far enough to keep the mouse on the edge.  Each axis is clamped
-             * independently, so moving the mouse off the right edge slides the box sideways
-             * without disturbing it vertically. */
-            const center = {
-              x: Math.min(Math.max(lastCenter.x, pos.x - width / 2), pos.x + width / 2),
-              y: Math.min(Math.max(lastCenter.y, pos.y - height / 2), pos.y + height / 2)
-            };
-            bestCenter = center;
-            /* `anchor` is the upper-left corner and `newpos` the lower-right; map gcs has y
-             * increasing upwards, so the upper corner is the larger y. */
+            /* Fixed-size shapes have no remaining degree of freedom to resize. The box is
+             * centered on the mouse position, so as the mouse moves the whole fixed-size shape
+             * translates along with it.*/
             anchor = {
-              x: center.x - width / 2,
-              y: center.y + height / 2
+              x: pos.x - width / 2,
+              y: pos.y + height / 2
             };
             newpos = {
-              x: center.x + width / 2,
-              y: center.y - height / 2
+              x: pos.x + width / 2,
+              y: pos.y - height / 2
             };
           } else {
-            bestCenter = undefined;
             anchor = origin;
             newpos = originAnchored;
           }
         }
       });
-      if (bestCenter) {
-        lastCenter = bestCenter;
-      }
       corners[0].y = corners[1].y = anchor.y;
       corners[0].x = corners[3].x = anchor.x;
       corners[1].x = corners[2].x = newpos.x;

@@ -27,10 +27,9 @@ const annotationActionOwner = require('./annotation').annotationActionOwner;
  *    constrain the rectangle to. A number (or a list of numbers) is an aspect ratio - the
  *    rectangle is resized as it is drawn, with the initial click point fixed as one corner. A size
  *    (e.g., `{width: 20, height: 10}`) instead fixes the rectangle's dimensions - since there is
- *    no remaining degree of freedom to resize, dragging translates the whole rectangle rather
- *    than resizing it: it starts centered on the initial click and then stays put while the
- *    mouse moves inside it, only being pushed along once the mouse reaches one of its edges. If
- *    a function, a selection constraint function to call to adjust the rectangle.
+ *    no remaining degree of freedom to resize, dragging translates the whole rectangle so that it
+ *    stays centered on the current mouse position, rather than resizing it. If a function, a
+ *    selection constraint function to call to adjust the rectangle.
  */
 
 /**
