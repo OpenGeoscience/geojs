@@ -1,0 +1,8 @@
+{
+  "title": "Single Video",
+  "hideNavbar": true,
+  "level": 1,
+  "about": {
+    "text": "Fill the complete extent of the map with a single video.  Draw a polygon on it."
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "title": "Video with Transport Controls",
+  "hideNavbar": true,
+  "level": 1,
+  "about": {
+    "text": "Show a video with controls for playback speed and frame."
+  }
+}

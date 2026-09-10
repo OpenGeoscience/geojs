@@ -1,0 +1,9 @@
+{
+  "title": "Feature legends",
+  "exampleJs": [
+    "main.js"
+  ],
+  "about": {
+    "text": "This example shows how to create a legend to describe feature styles on a map."
+  }
+}

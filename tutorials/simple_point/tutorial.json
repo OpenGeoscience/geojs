@@ -1,0 +1,11 @@
+{
+  "title": "Simple Point",
+  "hideNavbar": true,
+  "level": 0,
+  "order": 0,
+  "tutorialCss": [],
+  "tutorialJs": [],
+  "about": {
+    "text": "Add points to a map"
+  }
+}
