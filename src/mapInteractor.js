@@ -3,6 +3,10 @@ var object = require('./object');
 var util = require('./util');
 var Mousetrap = require('mousetrap');
 
+/* A rectangle's corners array must have at least this many points before its
+ * first corner can be trusted as a valid anchor point. */
+var MIN_ANCHOR_CORNERS = 3;
+
 /**
  * Map Interactor specification.
  *
@@ -989,9 +993,15 @@ var mapInteractor = function (args) {
         display = {}, gcs = {};
 
     let mousexy = mouse.map;
+    let anchorxy = origin.map;
     if (m_state.actionRecord && util.isFunction(m_state.actionRecord.selectionConstraint)) {
       const constraint = m_state.actionRecord.selectionConstraint(mouse.mapgcs, origin.mapgcs);
-      mousexy = constraint ? map.gcsToDisplay(constraint.pos, null) : mousexy;
+      if (constraint) {
+        mousexy = map.gcsToDisplay(constraint.pos, null);
+        if (constraint.corners && constraint.corners.length >= MIN_ANCHOR_CORNERS) {
+          anchorxy = map.gcsToDisplay(constraint.corners[0], null);
+        }
+      }
     } else if (mouse.modifiers.shift) {
       const width =  Math.abs((mousexy.x - origin.map.x) * (mousexy.y - origin.map.y)) ** 0.5;
       mousexy = {
@@ -1001,13 +1011,13 @@ var mapInteractor = function (args) {
     }
     // Get the display coordinates
     display.upperLeft = {
-      x: Math.min(origin.map.x, mousexy.x),
-      y: Math.min(origin.map.y, mousexy.y)
+      x: Math.min(anchorxy.x, mousexy.x),
+      y: Math.min(anchorxy.y, mousexy.y)
     };
 
     display.lowerRight = {
-      x: Math.max(origin.map.x, mousexy.x),
-      y: Math.max(origin.map.y, mousexy.y)
+      x: Math.max(anchorxy.x, mousexy.x),
+      y: Math.max(anchorxy.y, mousexy.y)
     };
 
     display.upperRight = {

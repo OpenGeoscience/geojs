@@ -652,6 +652,52 @@ describe('mapInteractor', function () {
     expect(clickTriggered).toBe(1);
   });
 
+  it('Test _getSelection uses the selectionConstraint anchor corner', function () {
+    var map = mockedMap('#mapNode1'),
+        selection;
+
+    // A selectionConstraint that mimics a fixed-size annotation: the anchor corner always tracks
+    // the current mouse position, and the opposite corner is a constant offset away.
+    var interactor = geo.mapInteractor({
+      map: map,
+      actions: [{
+        action: geo.geo_action.select,
+        input: 'left',
+        selectionRectangle: geo.event.select,
+        selectionConstraint: function (pos) {
+          return {
+            pos: {x: pos.x + 10, y: pos.y + 5},
+            corners: [
+              {x: pos.x, y: pos.y},
+              {x: pos.x + 10, y: pos.y},
+              {x: pos.x + 10, y: pos.y + 5},
+              {x: pos.x, y: pos.y + 5}
+            ]
+          };
+        }
+      }],
+      throttle: false
+    });
+    map.geoOn(geo.event.select, function (evt) {
+      selection = evt;
+    });
+
+    interactor.simulateEvent(
+      'mousedown', {map: {x: 20, y: 20}, button: 'left'}
+    );
+    interactor.simulateEvent(
+      'mousemove.geojs', {map: {x: 50, y: 50}, button: 'left'}
+    );
+    interactor.simulateEvent(
+      'mouseup.geojs', {map: {x: 50, y: 50}, button: 'left'}
+    );
+
+    // The selection box should be anchored at the current mouse position, not at the original
+    // mousedown point.
+    expect(selection.display.upperLeft).toEqual({x: 50, y: 50});
+    expect(selection.display.lowerRight).toEqual({x: 60, y: 55});
+  });
+
   describe('pause state', function () {
     it('defaults', function () {
       expect(geo.mapInteractor().pause()).toBe(false);
