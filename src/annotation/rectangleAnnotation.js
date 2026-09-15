@@ -22,10 +22,14 @@ const annotationActionOwner = require('./annotation').annotationActionOwner;
  *    finished rectangle.  This uses styles for {@link geo.polygonFeature}.
  * @property {geo.polygonFeature.styleSpec} [editStyle] The style to apply to a
  *    rectangle in edit mode.
- * @property {number|number[]|Function} [constraint] If specified, an aspect
- *    ratio or list of aspect ratios to constraint the rectangle to.  If a
- *    function, a selection constraint function to call to adjust the
- *    rectangle.
+ * @property {number|geo.geoSize|Array.<number|geo.geoSize>|Function} [constraint]
+ *    If specified, an aspect ratio, a fixed size, or a list of allowed aspect ratios and sizes to
+ *    constrain the rectangle to. A number (or a list of numbers) is an aspect ratio - the
+ *    rectangle is resized as it is drawn, with the initial click point fixed as one corner. A size
+ *    (e.g., `{width: 20, height: 10}`) instead fixes the rectangle's dimensions - since there is
+ *    no remaining degree of freedom to resize, dragging translates the whole rectangle so that it
+ *    stays centered on the current mouse position, rather than resizing it. If a function, a
+ *    selection constraint function to call to adjust the rectangle.
  */
 
 /**
@@ -55,7 +59,9 @@ var rectangleAnnotation = function (args, annotationName) {
 
   var m_this = this,
       s_actions = this.actions,
-      s_processEditAction = this.processEditAction;
+      s_processEditAction = this.processEditAction,
+      // The original click location that started the current draw.
+      m_origin = null;
 
   /**
    * Return actions needed for the specified state of this annotation.
@@ -234,7 +240,8 @@ var rectangleAnnotation = function (args, annotationName) {
     corners[1] = map.displayToGcs(c1, null);
     corners[3] = map.displayToGcs(c3, null);
     if (this._selectionConstraint) {
-      this._selectionConstraint(evt.mapgcs, corners[0], corners);
+      // Use the origin recorded at the start of the draw.
+      this._selectionConstraint(evt.mapgcs, m_origin || corners[0], corners);
     }
   };
 
@@ -291,10 +298,13 @@ var rectangleAnnotation = function (args, annotationName) {
       return 'done';
     }
     if (evt.buttonsDown.left) {
+      m_origin = Object.assign({}, evt.mapgcs);
       corners.push(Object.assign({}, evt.mapgcs));
       corners.push(Object.assign({}, evt.mapgcs));
       corners.push(Object.assign({}, evt.mapgcs));
       corners.push(Object.assign({}, evt.mapgcs));
+      // Apply the constraint immediately so fixed-size shapes show right away.
+      m_this._setCornersFromMouse(corners, evt);
       return true;
     }
     return undefined;

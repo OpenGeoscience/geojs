@@ -928,6 +928,32 @@ describe('geo.annotation', function () {
     });
   });
 
+  describe('geo.annotation.rectangleAnnotation with mixed aspect ratio and fixed size', function () {
+    it('does not let a fixed-size selection drift the origin used for later aspect-ratio checks', function () {
+      var map = createMap();
+      var layer = map.createLayer('annotation', {annotations: ['rectangle']});
+      var ann = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        constraint: [2, {width: 10, height: 10}]
+      });
+      ann.state(geo.annotation.state.create);
+      // First click establishes the true origin at (0, 0).
+      ann.mouseClick({
+        buttonsDown: {left: true},
+        time: Date.now(),
+        map: {x: 0, y: 0},
+        mapgcs: {x: 0, y: 0}
+      });
+      ann.mouseMove({mapgcs: {x: 11, y: 9}});
+      ann.mouseMove({mapgcs: {x: 40, y: 20}});
+      var corners = ann.options('corners');
+      expect([corners[0].x, corners[0].y]).toEqual([0, 0]);
+      expect([corners[1].x, corners[1].y]).toEqual([40, 0]);
+      expect([corners[2].x, corners[2].y]).toEqual([40, 20]);
+      expect([corners[3].x, corners[3].y]).toEqual([0, 20]);
+    });
+  });
+
   describe('geo.annotation.polygonAnnotation', function () {
     var vertices = [{x: 30, y: 0}, {x: 50, y: 0}, {x: 40, y: 20}, {x: 30, y: 10}];
     var vertices2 = [{x: 30, y: 10}, {x: 50, y: 10}, {x: 40, y: 30}];
@@ -1682,20 +1708,28 @@ describe('geo.annotation', function () {
       const func = geo.annotation.constrainAspectRatio({width: 20, height: 10});
 
       let result;
+      // A fixed-size shape is centered on the current mouse position (not the origin), so it
+      // translates with the cursor instead of flipping across quadrants.
       result = func(
         {x: 40, y: 5},
         {x: 0, y: 0});
-      expect(result.pos).toEqual({x: 20, y: 10});
+      expect(result.pos).toEqual({x: 50, y: 0});
+      expect(result.corners).toEqual([{x: 30, y: 10}, {x: 50, y: 10}, {x: 50, y: 0}, {x: 30, y: 0}]);
       result = func(
         {x: 40, y: 5},
         {x: 0, y: 0},
         [{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]);
-      expect(result.pos).toEqual({x: 20, y: 10});
+      expect(result.pos).toEqual({x: 50, y: 0});
       result = func(
         {x: 5, y: 40},
         {x: 0, y: 0},
         [{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]);
-      expect(result.pos).toEqual({x: 20, y: 10});
+      expect(result.pos).toEqual({x: 15, y: 35});
+      // Moving the mouse to the opposite side of origin must not flip the extension direction.
+      result = func(
+        {x: -40, y: -5},
+        {x: 0, y: 0});
+      expect(result.pos).toEqual({x: -30, y: -10});
       result = func(
         {x: 0, y: 0},
         {x: 0, y: 0},
@@ -1708,6 +1742,18 @@ describe('geo.annotation', function () {
         [{x: -10, y: 5}, {x: 30, y: 5}, {x: 30, y: 10}, {x: -10, y: 10}],
         'vertex', [0, -Math.PI / 2, Math.PI, Math.PI / 2], 0);
       expect(result.corners).toEqual([{x: 10, y: 20}, {x: 30, y: 20}, {x: 30, y: 10}, {x: 10, y: 10}]);
+    });
+    it('multiple fixed sizes picks the closest match', function () {
+      // With multiple fixed sizes in the list, the one closest to the actual drag distance
+      // must be chosen, not simply the first fixed-size entry.
+      const func = geo.annotation.constrainAspectRatio([
+        {width: 100, height: 100}, {width: 10, height: 10}]);
+
+      let result;
+      result = func({x: 11, y: 11}, {x: 0, y: 0});
+      expect(result.pos).toEqual({x: 16, y: 6});
+      result = func({x: 95, y: 95}, {x: 0, y: 0});
+      expect(result.pos).toEqual({x: 145, y: 45});
     });
   });
 
