@@ -1,0 +1,53 @@
+extends ../common/index.pug
+
+block append mainContent
+  #controls
+    .form-group(title="Number of lines segments.  Leave blank for a small default value.")
+      label(for="lines") Number of Lines
+      input#lines(type="number", min="1", step="100")
+      span#lines-shown
+    .form-group(title="Stroke Color (any css color).  A comma-separated list will cycle through the listed colors.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to colors, with undefined values using the 'other' entry.")
+      label(for="strokeColor") strokeColor
+      input#strokeColor(placeholder="black")
+    .form-group(title="Stroke Opacity (a number in the range [0, 1]).  A comma-separated list will cycle through the listed opacities.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to opacities, with undefined values using the 'other' entry.")
+      label(for="strokeOpacity") strokeOpacity
+      input#strokeOpacity(placeholder="1")
+    .form-group(title="Stroke Width (a positive number).  A comma-separated list will cycle through the listed widths.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to widths, with undefined values using the 'other' entry.")
+      label(for="strokeWidth") strokeWidth
+      input#strokeWidth(placeholder="2")
+    .form-group(title="Stroke Offset (a number in the range [-1, 1]).  A comma-separated list will cycle through the listed offsets.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to offsets, with undefined values using the 'other' entry.")
+      label(for="strokeOffset") strokeOffset
+      input#strokeOffset(placeholder="0")
+    .form-group(title="Line Cap (one of 'butt', 'round', or 'square').  A comma-separated list will cycle through the listed line caps.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to line caps, with undefined values using the 'other' entry.")
+      label(for="lineCap") lineCap
+      input#lineCap(placeholder="butt")
+    .form-group(title="Line Join (one of 'miter', 'bevel', 'round', or 'miter-clip').  A comma-separated list will cycle through the listed line joins.  line:(comma-separate list) will cycle through by line.  A JSON dictionary will map road categories to line joins, with undefined values using the 'other' entry.")
+      label(for="lineJoin") lineJoin
+      input#lineJoin(placeholder="miter")
+    .form-group(title="Miter Limit (a positive number).  Any miter whose length relative to the stroke with longer than this value will either be beveled or clipped.")
+      label(for="miterLimit") miterLimit
+      input#miterLimit(placeholder="10")
+    .form-group(title="Antialiasing (a non-negative number).  Edges of lines will be antialiased by this many pixels.  Values larger than 2 tend to make things blurry.")
+      label(for="antialiasing") antialiasing
+      input#antialiasing(placeholder="2")
+    .form-group(title="Show road names and categories on hover.")
+      label(for="hovertext") Info on Hover
+      input#hovertext(type="checkbox", placeholder="false")
+    .form-group(title="Show an OSM map underneath the lines.")
+      label(for="showmap") Show Map
+      input#showmap(type="checkbox", placeholder="true", checked="checked")
+    .form-group(title="Reduce line complexity based on zoom level.")
+      label(for="simplify") Simplify Lines
+      input#simplify(type="checkbox", placeholder="false")
+      input#simplify_tolerance(placeholder="0.5", title="Maximum change in pixels at the current zoom level")
+      span#simple-lines-shown
+    .form-group(title="When simplification is turned on, update it when zooming the map.")
+      label(for="resimplify") Zoom Resimplifies
+      input#resimplify(type="checkbox", placeholder="false")
+      input#resimplify_delay(placeholder="500", title="Delay in milliseconds before resimplifying lines after a change in zoom level")
+    .form-group
+      .shortlabel Presets
+      button.preset(strokeColor='{"residential":"blue","service":"green","other":"black"}', strokeWidth='{"residential":4,"service":1,"other":8}', lineCap='round', showmap='true', title='Properties based on road category') Categories
+      button.preset(strokeColor='', strokeWidth='{"residential":1,"service":0.25,"other":3}', lineCap='round', lineJoin='', miterLimit='', showmap='false', title='Thin lines based on road category') Thin
+      button.preset(strokeColor='line:red,orange,yellow,green,blue,indigo,violet', strokeWidth='line:1,2,4,8,16', lineCap='line:butt,round,square', lineJoin='line:miter,bevel,round,miter-clip', miterLimit=4, title='Properties varied by line') Lines
+      button.preset(strokeColor='red,orange,yellow,green,blue,indigo,violet', strokeWidth='1,2,4,8,16', lineCap='butt,round,square', lineJoin='miter,bevel,round,miter-clip', miterLimit=4, title='Properties varied by line segment') Segments

@@ -1,0 +1,15 @@
+extends ../common/index.pug
+
+block append mainContent
+  #controls
+    .form-group(title="The data set to plot.")
+      label(for="dataset") Data Set
+      select#dataset(param-name="dataset", placeholder="Activity")
+        option(value="adderall", url="AdderallCities2015.csv", title="9555 points") Adderall
+        option(value="cities", url="cities.csv", title="30101 points") U.S. Cities
+        option(value="earthquakes", url="earthquakes.json", title="1.3 million points") Earthquakes
+      span#points-loaded
+    .form-group(title="Number of points.  Leave blank for the entire original data set.  If a smaller number, only a subset of points will be shown.  If a larger number, some of the data will be duplicated with random offsets.")
+      label(for="points") Number of Points
+      input#points(type="number", min="1", step="100")
+      span#points-shown

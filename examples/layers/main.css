@@ -1,0 +1,40 @@
+rect.description {
+  stroke: black;
+  stroke-width: 1px;
+  fill: none;
+}
+
+svg text {
+  font-family: source-sans-pro, Source Sans Pro, Helvetica, sans-serif;
+  stroke: none;
+}
+
+g.fixed-layer {
+  fill: seagreen;
+  stroke: seagreen;
+}
+
+g.scaled-moving-layer {
+  fill: firebrick;
+  stroke: firebrick;
+}
+
+g.unscaled-moving-layer {
+  fill: steelblue;
+  stroke: steelblue;
+}
+
+g.layer rect {
+  stroke: black;
+  fill-opacity: 50%;
+}
+
+g.layer circle {
+  fill-opacity: 75%;
+  stroke: black;
+}
+
+g.layer path {
+  fill: none;
+  stroke-width: 3;
+}

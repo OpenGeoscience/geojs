@@ -1,0 +1,8 @@
+{
+  "title": "Multiple Frame Large Image",
+  "hideNavbar": true,
+  "level": 1,
+  "about": {
+    "text": "Use two layers to form an A/B buffer when switching between frames of a large image from a tile server."
+  }
+}

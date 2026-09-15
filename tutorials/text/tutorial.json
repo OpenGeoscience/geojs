@@ -1,0 +1,9 @@
+{
+  "title": "Text and Points",
+  "hideNavbar": true,
+  "level": 0,
+  "thumbquery": "initial=4",
+  "about": {
+    "text": "Add text labels and points to a map"
+  }
+}

@@ -1,0 +1,38 @@
+extends ../common/index.pug
+
+block append mainContent
+  #controls
+
+    .form-group(title="Base URL")
+      label(for="baseurl") Base URL
+      input#baseurl(placeholder="https://demo.boundlessgeo.com/geoserver/ows")
+
+    .form-group(title="Layer Name")
+      label(for="name") Layer Name
+      input#name(placeholder="usgs:ned")
+
+    .form-group(title="Projection")
+      label(for="projection") Projection
+      input#projection(placeholder="EPSG:3785")
+
+    .form-group(title="Select a color palette.")
+      label(for="palette") Color Palette
+      select#palette(placeholder="YlGn")
+
+    .form-group(title="Select number of colors.")
+      label(for="color-count") Number of colors
+      select#color-count(param-name="color-count")
+
+    .form-group(title="Discrete or continuous colors.")
+      label(for="palette-type") Palette Type
+      select#palette-type(placeholder="continuous")
+        option(value="continuous") Continuous
+        option(value="discrete") Discrete
+
+    .form-group(title="Minimum value for your data")
+      label(for="min") Minimum
+      input#min(placeholder="0")
+
+    .form-group(title="Maximum value for your data.")
+      label(for="max") Maximum
+      input#max(placeholder="300")

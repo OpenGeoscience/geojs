@@ -1,0 +1,187 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Multiple Frame Large Image
+    When switching between tile sets, using two layers can result in a smooth transition.  This is demonstrated with a multiple frame large image.
+
+    Define some HTML with the divs for the map and controls.
+
+  +codeblock('html', 1).
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <script type="text/javascript" src="../../built/geo.min.js"></script>
+    </head>
+    <body>
+      <div id="map"></div>
+      <div id="controls">
+        Frame <input id="frame" type="range" min="0" max="3" value="0"></input>
+      </div>
+    </body>
+    </html>
+
+  :markdown-it
+    Define some CSS to position the controls at the top of the window.
+
+  +codeblock('css', 2).
+    html,body,#map {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      z-index: 1;
+    }
+
+  :markdown-it
+    Create a map with two tile layers and switch between them when changing the
+    frame control.
+
+    Fetch information about the image from a server.  This includes the image's
+    size in pixels, the tile size, and the number of frames.
+
+    We create two layers and swap between them when the frame control is
+    changed.
+
+  +codeblock('javascript', 3, undefined, true)().
+    const imageServer = 'https://demo.kitware.com/histomicstk/api/v1';
+    const imageId = '60e6135c25f89bfa9369f2c9';
+
+    let map, layerA, layerB, tileinfo, baseUrl, nextframe, updating;
+
+    const framectl = document.getElementById('frame');
+
+    function setFrame(frame) {
+      // set the tooltip to tell what frame we are on
+      framectl.setAttribute('title', `${parseInt(frame, 10) + 1} of ${tileinfo.frames.length}`);
+      // if we are currently showing the asked for frame or are already loading
+      // another frame, only set the frame we want to be on and return
+      nextFrame = frame;
+      if (frame === layerA._frame || updating) {
+        return;
+      }
+      updating = true;
+      // wait until all current tiles are loaded before loading more
+      layerA.onIdle(() => {
+        // load the new frame in the background layer
+        if (frame !== layerB._frame) {
+          layerB._frame = frame;
+          layerB.url(`${baseUrl}${frame}`);
+        }
+        layerB.onIdle(() => {
+          // once everything is loaded, check if we still need to swap layers
+          updating = false;
+          // the top layer is what we want so we don't have to do anything.
+          if (layerA._frame === nextFrame) {
+            return;
+          }
+          // if the bottom layer is not what we want, don't swap it out.  You
+          // might want to anyway -- should a rapid change of the frame slider
+          // (e.g., 1 -> 2 -> 3) show the middle frame?
+          if (layerB._frame === nextFrame) {
+            layerA.moveDown();
+            let tempLayer = layerA;
+            layerA = layerB;
+            layerB = tempLayer;
+          }
+          // if we aren't showing the desired frame, ask to load it
+          if (layerA._frame !== nextFrame) {
+            setFrame(nextFrame);
+          }
+        });
+      });
+    };
+
+    // fetch information about our image.  It contains the image size, tile
+    // size, and a list of frames
+    let promise = fetch(
+      `${imageServer}/item/${imageId}/tiles`
+    ).then(response => response.json()).then(response => {
+      // we store several values in variables in the upper scope so that the
+      // setFrame function can access them.
+      tileinfo = response;
+      // get appropriate parameters to make a map and layers in pixel space
+      let params = geo.util.pixelCoordinateParams(
+        '#map', tileinfo.sizeX, tileinfo.sizeY, tileinfo.tileWidth, tileinfo.tileHeight);
+      map = geo.map(params.map);
+      // our server can send different tiles by changing the frame parameter
+      baseUrl = `${imageServer}/item/${imageId}/tiles/zxy/{z}/{x}/{y}?frame=`;
+      // don't auto share the renderer.  We don't want a blink when we swap
+      // which layer is on top.
+      params.layer.autoshareRenderer = false;
+      // create a background layer for loading new frames; start it with white
+      // tiles
+      params.layer.url = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVQI12P4DwABAQEAG7buVgAAAABJRU5ErkJggg==';
+      layerB = map.createLayer('osm', params.layer);
+      // create a foreground layer for the current frame
+      params.layer.url = `${baseUrl}0`;
+      // have the layers share a fetch queue.  Since both tile layers are from
+      // the same server, this prevents requests from getting backlogged.
+      params.layer.queue = layerB.queue;
+      layerA = map.createLayer('osm', params.layer);
+      layerA._frame = 0;
+      // adjust the frame slider and listen to changes
+      framectl.setAttribute('max', tileinfo.frames.length - 1);
+      framectl.addEventListener('input', (event) => {
+        setFrame(event.target.value);
+      });
+      framectl.setAttribute('title', `1 of ${tileinfo.frames.length}`);
+      // if we wanted to run more code after everything is loaded, we could
+      // add something like
+      //   promise.then(map => map.onIdle(() => { <more code> }));
+      // in the next tutorial block
+      return map;
+    });
+
+  :markdown-it
+    As a contrasting example, if only one layer is used the image will blink
+    when the frame is changed.
+
+  +codeblock('javascript', 4, 2, false, 'Step 3-B')().
+    const imageServer = 'https://demo.kitware.com/histomicstk/api/v1';
+    const imageId = '60e6135c25f89bfa9369f2c9';
+
+    let map, layer, tileinfo, baseUrl;
+
+    const framectl = document.getElementById('frame');
+
+    function setFrame(frame) {
+      // set the tooltip to tell what frame we are on
+      framectl.setAttribute('title', `${parseInt(frame, 10) + 1} of ${tileinfo.frames.length}`);
+      // just change the url of our tile layer
+      layer.url(`${baseUrl}${frame}`);
+    };
+
+    // fetch information about our image.  It contains the image size, tile
+    // size, and a list of frames
+    let promise = fetch(
+      `${imageServer}/item/${imageId}/tiles`
+    ).then(response => response.json()).then(response => {
+      // we store several values in variables in the upper scope so that the
+      // setFrame function can access them.
+      tileinfo = response;
+      // get appropriate parameters to make a map and layers in pixel space
+      let params = geo.util.pixelCoordinateParams(
+        '#map', tileinfo.sizeX, tileinfo.sizeY, tileinfo.tileWidth, tileinfo.tileHeight);
+      map = geo.map(params.map);
+      // our server can send different tiles by changing the frame parameter
+      baseUrl = `${imageServer}/item/${imageId}/tiles/zxy/{z}/{x}/{y}?frame=`;
+      params.layer.url = `${baseUrl}0`;
+      layer = map.createLayer('osm', params.layer);
+      // adjust the frame slider and listen to changes
+      framectl.setAttribute('max', tileinfo.frames.length - 1);
+      framectl.addEventListener('input', (event) => {
+        setFrame(event.target.value);
+      });
+      framectl.setAttribute('title', `1 of ${tileinfo.frames.length}`);
+      return map;
+    });
