@@ -1,0 +1,211 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>GeoJS - Text and Points</title>
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+
+
+    <!-- Custom Fonts -->
+    
+<link rel="stylesheet" href="../../vendor/font-awesome/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+    <!-- Theme CSS -->
+    
+<link rel="stylesheet" href="../../css/agency.css">
+
+    
+<link rel="stylesheet" href="../../css/main.css">
+
+    
+<link rel="stylesheet" href="../../css/highlight.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js" integrity="sha384-0s5Pv64cNZJieYFkXYOTId2HMA2Lfb6q2nAcx2n0RTLUnCAoTTsS0nKEO27XyKcY" crossorigin="anonymous"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js" integrity="sha384-ZoaMbDF+4LeFxg6WdScQ9nnR1QC2MIRxA1O9KWEXQwns1G8UNyIEZIQidzb0T1fo" crossorigin="anonymous"></script>
+    <![endif]-->
+
+    <!-- jQuery -->
+    
+<script src="../../vendor/jquery/jquery.min.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    
+<script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+
+    <link rel="apple-touch-icon" sizes="57x57" href="../../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="../../favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body id="page-top" class="index">
+    <!-- Navigation -->
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top affix">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span><i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="../../index.html"><img class="navbar-logo" src="../../images/logo_transparent.png" /></a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="">
+                        <a href="../../">Welcome</a>
+                    </li>
+                    <li class=" active ">
+                        <a href="../">Tutorials</a>
+                    </li>
+                    <li class="">
+                        <a href="../../examples/">Examples</a>
+                    </li>
+                    <li>
+                        <a href="../../apidocs/">API Docs</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/OpenGeoscience/geojs">GitHub</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <div class="content-wrapper">
+        <link rel="stylesheet" href="../../css/tutorial.css">
+<script type="text/javascript" src="../bundle.js" charset="UTF-8"></script>
+<div class="page tutorial">
+    <!-- include tutorial sources--><!-- Include tutorial specific files--><script type="text/javascript">$(start_tutorial);
+
+</script><!-- Add the default main content element--><div id="maincontent"><div id="tutorial"><h1>Tutorial - Text and Points</h1>
+<p>Create a map and define some data.  Create a feature layer for the points
+and add the points to it.</p>
+<div class="codeblock" format="javascript" step="1" stepname="Step 1" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">var map = geo.map({
+  node: "#map",
+  center: { x: -97.67, y: 31.80 },
+  zoom: 4
+});
+map.createLayer('osm');
+
+var cities = [
+  {lon: -74.0059413, lat: 40.7127837, name: "New York", population: 8405837},
+  {lon: -118.2436849, lat: 34.0522342, name: "Los Angeles", population: 3884307},
+  {lon: -87.6297982, lat: 41.8781136, name: "Chicago", population: 2718782},
+  {lon: -95.3698028, lat: 29.7604267, name: "Houston", population: 2195914},
+  {lon: -75.1652215, lat: 39.9525839, name: "Philadelphia", population: 1553165},
+  {lon: -112.0740373, lat: 33.4483771, name: "Phoenix", population: 1513367}
+];
+
+var pointLayer = map.createLayer('feature', {features: ['point']});
+var pointFeature = pointLayer.createFeature('point')
+  .data(cities)
+  .position(function (city) {
+    return {
+      x: city.lon,
+      y: city.lat
+    };
+  })
+  .draw();
+</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 1</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><p>Create another layer for the text feature.  We need a separate layer as the
+text feature won't use the same renderer as the point feature.</p>
+<p>Add a text feature to the layer.</p>
+<div class="codeblock" format="javascript" step="2" parentstep="1" initial="true" stepname="Step 2" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">var textLayer = map.createLayer('feature', {features: ['text']});
+var textFeature = textLayer.createFeature('text')
+  .data(cities)
+  .position(function (city) {
+    return {
+      x: city.lon,
+      y: city.lat
+    };
+  })
+  .text(function (city) {
+    return city.name;
+  })
+  .draw();</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 2</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="text feature exists" data-tests="[&quot;map.layers()[2].features()[0] instanceof geo.textFeature&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>Many text styles can be changed, including adding an offset so the text
+won't overlap the points.</p>
+<div class="codeblock" format="javascript" step="3" parentstep="2" stepname="Step 3" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">textFeature.style({
+  fontSize: '20px',
+  fontFamily: 'serif',
+  textAlign: 'left',
+  textBaseline: 'middle',
+  color: 'blue',
+  offset: {x: 10, y: 0}
+}).draw();</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 3</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div><div class="codeblock_test" data-description="text color changed" data-tests="[&quot;map.layers()[2].features()[0].style().color === \&quot;blue\&quot;&quot;]" data-idleFuncs="[&quot;map.onIdle&quot;]"></div><p>Multiline and word-wrapping aren't directly supported, but can be simulated
+by adding additional text features.</p>
+<p>This also shows that the text value can be set as a style property.</p>
+<div class="codeblock" format="javascript" step="4" parentstep="3" stepname="Step 4" target="workframe"><div class="codeblock_entry"><textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">textLayer.createFeature('text')
+  .data(cities)
+  .position(function (city) {
+    return {
+      x: city.lon,
+      y: city.lat
+    };
+  })
+  .style({
+    text: function (city) {
+      return city.population;
+    },
+    fontSize: '16px',
+    fontFamily: 'serif',
+    textAlign: 'left',
+    textBaseline: 'middle',
+    color: 'green',
+    offset: {x: 10, y: 16}
+  })
+  .draw();</textarea></div><div class="codeblock_controls"><div class="codeblock_step">Step 4</div><div class="codeblock_active">Active</div><div class="codeblock_inactive">Inactive</div><button class="codeblock_run btn btn-primary btn-sm">Run</button><button class="codeblock_reset btn btn-link btn-sm">Reset</button></div></div></div><iframe id="workframe"></iframe></div>
+</div>
+
+    </div>
+    
+    <!-- Theme JavaScript -->
+    
+<script src="../../js/agency.js"></script>
+
+
+</body>
+
+</html>
