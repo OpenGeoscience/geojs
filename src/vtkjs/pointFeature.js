@@ -132,7 +132,7 @@ var vtkjs_pointFeature = function (arg) {
       }
     }
 
-    m_pointSet.getPoints().setData(position, 3);
+    m_pointSet.getPoints().setData(new Float32Array(position), 3);
 
     // Attach fields
     m_pointSet.getPointData().addArray(vtkDataArray.newInstance({name: 'color', values: m_colorArray, numberOfComponents: 4}));
@@ -156,7 +156,8 @@ var vtkjs_pointFeature = function (arg) {
 
       const scalingFactor = m_this.layer().map().unitsPerPixel(m_this.layer().map().zoom());
       const dataArray = m_pointSet.getPointData().getArray('diam');
-      const newScaleArray = dataArray.getData().map((v, i) => radFunc(data[i], i) * scalingFactor * 2);
+      let newScaleArray = dataArray.getData().map((v, i) => radFunc(data[i], i) * scalingFactor * 2);
+      newScaleArray = newScaleArray instanceof Float32Array ? newScaleArray : new Float32Array(newScaleArray);
 
       dataArray.setData(newScaleArray);
       m_pointSet.modified();
