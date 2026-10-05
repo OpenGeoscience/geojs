@@ -1,0 +1,10 @@
+{
+  "title": "Contour Map",
+  "hideNavbar": true,
+  "level": 1,
+  "tutorialCss": [],
+  "tutorialJs": [],
+  "about": {
+    "text": "Plot grid data as a color contour."
+  }
+}

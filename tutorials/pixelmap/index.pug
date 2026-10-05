@@ -1,0 +1,93 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Pixelmap
+
+    A pixelmap is a way of representing categorical data.  It uses a lossless
+    image where, instead of the pixels representing colors, they represent
+    category indices.  This is usually compactly represented as a integer split
+    across the red, green, and blue channels, where the category index is
+    computed as `(red value) + (green value * 256) + (blue value * 65536)`.
+
+    As with other features in GeoJS, the image can either be geospatial, in
+    pixel coordinates, or in an arbitrary space.  For this tutorial, a map of
+    the United States is used where the categories are the individual states.
+
+    First, let's create our map and add a base map and a feature layer that
+    supports a pixelmap feature.
+
+  +codeblock('javascript', 1).
+    var map = geo.map({
+      node: '#map',
+      center: {x: -98.58333, y: 39.83333},
+      zoom: 4,
+    });
+    map.createLayer('osm');
+    var layer = map.createLayer('feature', {
+      features: ['pixelmap'],
+      opacity: 0.65  // let the base map show through
+    });
+
+  :markdown-it
+    Then load some data.  In addition to a PNG with an image with the category
+    data, there is a sample JSON file which lists the categories.  We load the
+    category data asynchronously, and use [promise chain](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises)
+    to chain up the following steps.
+  +codeblock('javascript', 2, 1).
+    var promise = Promise.resolve($.ajax({
+      url: '../../examples/pixelmap/pixelmap.json'
+    }));
+
+  :markdown-it
+    Once the data is loaded, we create the pixelmap feature.
+
+  +codeblock('javascript', 3, 2, true).
+    var pixelmap;
+    promise.then(function (data) {
+      pixelmap = layer.createFeature('pixelmap', {
+        url: '../../examples/pixelmap/pixelmap.png',
+        position: {ul: {x: -180, y: 71.471178}, lr: {x: -60, y: 13.759032}},
+        color: function (d, idx) {
+          // Always set index 0 to transparent.  Other indices are set based on
+          // the data value
+          var color = {r: 0, g: 0, b: 0, a: 0};
+          if (idx && d && d.value) {
+            color = d.value === 'R' ? 'red' : 'blue';
+          }
+          return color;
+        }
+      });
+      pixelmap.data(data);
+      pixelmap.draw();
+    });
+
+  :markdown-it
+    We can dynamically change our data based on where the user clicks.  When
+    the user left clicks, cycle through three states.  A right click clears the
+    state.
+
+  +codeblock('javascript', 4, 3).
+    // once again, wait don't do this unless the data is loaded
+    promise.then(function (data) {
+      pixelmap.geoOn(geo.event.feature.mouseclick, function (evt) {
+        var data = pixelmap.data();
+        if (!data) {
+          return;
+        }
+        if (data[evt.index] === undefined) {
+          data[evt.index] = {};
+        }
+        var val = data[evt.index].value;
+        if (evt.mouse.buttonsDown.left) {
+          var cycle = {D: 'R', R: '', '': 'D'};
+          val = cycle[cycle[val] !== undefined ? val : ''];
+        } else if (evt.mouse.buttonsDown.right) {
+          val = '';
+        }
+        if (val !== data[evt.index].value) {
+          data[evt.index].value = val;
+          pixelmap.data(data).draw();
+        }
+      });
+    });

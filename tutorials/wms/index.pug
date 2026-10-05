@@ -1,0 +1,67 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Using a WMS Tile Source
+    When a tile layer is added to a map, the tiles can be loaded based on a templated URL or based on a URL returned from a function.  When using a WMS tile server, often the request must be made in a specific coordinate system.  The bounds of each tile can be requested, converted to the WMS coordinate system, and then sent as part of the URL.
+
+  +codeblock('javascript', 1, undefined, true).
+    // The default map projection is Web Mercator.  We need to ask the WMS
+    // server to use this coordinate system.
+    var projection = 'EPSG:3857';
+
+    var map = geo.map({
+      node: "#map",
+      zoom: 4,
+      // start centered on the continental US
+      center: {x: -98.0, y: 39.5}
+    });
+    // place a base tile layer on the map
+    map.createLayer('osm');
+
+    // define a function that, given a tile location, returns a URL with
+    // appropriate parameters for a WMS server
+    function getWMSURL(x, y, zoom) {
+      // get data from NOAA
+      var service = 'conus';
+      var observation = 'conus_bref_qcd';
+      var baseUrl = 'https://opengeo.ncep.noaa.gov/geoserver/' + service + '/' + observation + '/ows';
+      // Get the bounding box of the tile in the desired projection
+      var bb = this.gcsTileBounds({x: x, y: y, level: zoom}, projection);
+      // Set the WMS server parameters
+      var params = {
+        SERVICE: 'WMS',
+        VERSION: '1.3.0',
+        REQUEST: 'GetMap',
+        LAYERS: observation,
+        STYLES: '',
+        BBOX: bb.left + ',' + bb.bottom + ',' + bb.right + ',' + bb.top,
+        WIDTH: 256,
+        HEIGHT: 256,
+        FORMAT: 'image/png',
+        TRANSPARENT: true,
+        SRS: projection,
+        TILED: true
+      };
+      // construct the url for a tile.  We can use jQuery's $.param function.
+      var url =  baseUrl + '?' + $.param(params);
+      return url;
+    }
+
+    // create a tile layer with the WMS data
+    map.createLayer('osm', {
+      attribution: 'Data from <a href="https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Observations/">NOAA</a>',
+      // the tiles are transparent, so don't keep the lower level ones; they
+      // would build up
+      keepLower: false,
+      // the map tile URL is generated from a function
+      url: getWMSURL
+    });
+  +codeblock_test('map has two osm layers, one from a WMS server', [
+      'map.layers().length === 2',
+      'map.layers()[0] instanceof geo.osmLayer',
+      'map.layers()[1] instanceof geo.osmLayer',
+      'geo.util.isFunction(map.layers()[1].url())',
+      /* Test that the WMS server responds with a PNG */
+      '$.ajax({url: getWMSURL.call(map.layers()[1], 3, 6, 4), dataFilter: function (resp) { return resp.substr(1, 3) == "PNG"; }})'
+      ])
