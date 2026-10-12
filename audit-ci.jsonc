@@ -1,0 +1,21 @@
+{
+  "$schema": "https://github.com/IBM/audit-ci/raw/main/docs/schema.json",
+  // CI (`.github/workflows/main.yml`) runs `npx audit-ci@^7 --config audit-ci.jsonc`,
+  // which fails on high or critical advisories, matching the previous
+  // `npm audit --audit-level high` gate. The local `npm run audit` script adds
+  // `--low` on top of this config, so locally every advisory of any severity
+  // fails unless it is allowlisted here.
+  "high": true,
+  "allowlist": [
+    // False positive: sprintf-js raises an exception for unbounded precision
+    // specifiers instead of expanding them; the maintainers will not change
+    // this behavior. https://github.com/advisories/GHSA-hp3w-g68c-fv3c
+    // (npm advisory 1241202). Remove this entry if the advisory is retracted.
+    "GHSA-hp3w-g68c-fv3c",
+    // False positive: the reported uncontrolled resource consumption requires
+    // application code that misuses the library; geojs does not expose such
+    // usage. https://github.com/advisories/GHSA-vfj7-8cjw-p6xm
+    // (npm advisory 1240992). Remove this entry if the advisory is retracted.
+    "GHSA-vfj7-8cjw-p6xm"
+  ]
+}
