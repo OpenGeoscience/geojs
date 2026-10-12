@@ -91,7 +91,8 @@ jobs:
     - run: rm package-lock.json
     - run: npm install
     - run: npm run install-test-browsers
-    - run: npm audit --audit-level high
+    # Security audit with allowlisted false positives (audit-ci.jsonc)
+    - run: npx --yes audit-ci@^7 --config audit-ci.jsonc --report-type summary
     - run: npm run setup-website
     - run: npm run ci-xvfb
     - run: npm run ci-build-website

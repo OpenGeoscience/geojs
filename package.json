@@ -146,6 +146,7 @@
     "build-tutorials": "node tutorials/build.js && webpack --config webpack-tutorials.config.js",
     "build-website-tutorials": "node tutorials/build-website.js && webpack --config webpack-website-tutorials.config.js",
     "lint": "eslint --cache . --max-warnings=0 && stylelint **/*.styl",
+    "audit": "npx --yes audit-ci@^7 --config audit-ci.jsonc --low --report-type summary",
     "format": "eslint --cache --fix . && stylelint **/*.styl --fix",
     "puglint": "pug-lint src examples",
     "stylelint": "stylelint **/*.styl",
