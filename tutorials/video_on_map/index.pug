@@ -1,0 +1,69 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Geospatial Video
+    A quad feature can include a video.  If this video corresponds to a geospeatial location, it can be placed on a map with the appropriate coordinates and played when a user clicks on the map.
+
+  +codeblock('javascript', 1).
+    var map = geo.map({
+      node: '#map',
+      // start centered near California
+      center: {x: -115, y: 36},
+      zoom: 6
+    });
+    // place a base tile layer on the map
+    map.createLayer('osm');
+  +codeblock_test('map has an osm layer', [
+      'map.layers().length === 1',
+      'map.layers()[0] instanceof geo.osmLayer'
+      ])
+
+  :markdown-it
+    The video requires a feature layer that supports video quads.
+
+  +codeblock('javascript', 2)(htmlvideo=true).
+    var layer = map.createLayer('feature', {
+      features: ['quad.video']
+    });
+    // create a quad feature
+    var quads = layer.createFeature('quad');
+    // set the data to a single entry
+    quads.data([{
+      // the corners were determined by the creator of the video
+      ul: {x: -129.0625, y: 42.13468456089552},
+      lr: {x: -100.9375, y: 29.348416310781797},
+      // specify a url for the video source
+      video: '../../data/earthquakes-video.webm'
+    }]);
+    quads.draw();
+  +codeblock_test('map has an osm layer and a feature layer', [
+      'map.layers().length === 2',
+      'map.layers()[0] instanceof geo.osmLayer',
+      'map.layers()[1] instanceof geo.featureLayer',
+      'map.layers()[1].features().length === 1',
+      'map.layers()[1].features()[0] instanceof geo.quadFeature'
+      ])
+
+  :markdown-it
+    Start or stop the video when the user clicks.  The video may not be loaded
+    yet, so make sure we do nothing in that case.
+
+  +codeblock('javascript', 3, undefined, true).
+    $('#map').on('click.tutorial', function () {
+      // get the HTML Video Element of the first (and only) quad
+      var video = quads.video(0);
+      if (!video) {
+        // the video isn't loaded yet, so do nothing
+        return;
+      }
+      // toggle play/pause
+      if (video.paused) {
+        // always loop the video
+        video.loop = true;
+        video.play();
+      } else {
+        video.pause();
+      }
+    });
+  //- no tests for this code block.
