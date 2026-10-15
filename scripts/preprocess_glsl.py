@@ -7,11 +7,15 @@ import sys
 
 
 def readSource(source):
+    base_dir = os.path.abspath(os.path.dirname(source))
     data = open(source).read()
     parts = re.split('(\\$[-.\\w]+)', data)
     for idx, chunk in enumerate(parts):
         if chunk.startswith('$') and len(chunk) > 1:
-            parts[idx] = readSource(os.path.join(os.path.dirname(source), chunk[1:] + '.glsl'))
+            filepath = os.path.abspath(os.path.join(base_dir, chunk[1:] + '.glsl'))
+            if not filepath.startswith(base_dir + os.sep):
+                raise ValueError('Invalid include path: ' + chunk)
+            parts[idx] = readSource(filepath)
     return ''.join(parts)
 
 
