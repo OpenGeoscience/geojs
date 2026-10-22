@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-1">&#x00a7;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/* globals utils */</span>
+
+<span class="hljs-keyword">var</span> map = geo.<span class="hljs-title function_">map</span>({
+  <span class="hljs-attr">node</span>: <span class="hljs-string">&#x27;#map&#x27;</span>,
+  <span class="hljs-attr">center</span>: {
+    <span class="hljs-attr">x</span>: -<span class="hljs-number">98</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-number">39</span>
+  },
+  <span class="hljs-attr">zoom</span>: <span class="hljs-number">3</span>
+});
+<span class="hljs-keyword">var</span> layer, pointFeature, points, datapoints;
+<span class="hljs-keyword">var</span> datarows; <span class="hljs-comment">// eslint-disable-line no-unused-vars</span>
+
+<span class="hljs-keyword">var</span> query = utils.<span class="hljs-title function_">getQuery</span>();
+
+$.<span class="hljs-title function_">each</span>(query, <span class="hljs-keyword">function</span> (<span class="hljs-params">key, value</span>) {
+  <span class="hljs-keyword">var</span> ctlvalue, ctlkey = key;
+  <span class="hljs-keyword">switch</span> (key) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;dataset&#x27;</span>:
+      ctlvalue = value ? value : <span class="hljs-string">&#x27;adderall&#x27;</span>;
+      <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;points&#x27;</span>:
+      <span class="hljs-keyword">if</span> (value.<span class="hljs-property">length</span>) {
+        points = ctlvalue = <span class="hljs-built_in">parseInt</span>(value, <span class="hljs-number">10</span>);
+      }
+      <span class="hljs-keyword">break</span>;
+  }
+  <span class="hljs-keyword">if</span> (ctlvalue !== <span class="hljs-literal">undefined</span>) {
+    $(<span class="hljs-string">&#x27;#&#x27;</span> + ctlkey).<span class="hljs-title function_">val</span>(ctlvalue);
+  }
+});
+
+<span class="hljs-comment">/**
+ * Based on the current controls, fetch a data set and show it as a clustered
+ * points.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">fetch_data</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">var</span> dataset = $(<span class="hljs-string">&#x27;#dataset&#x27;</span>).<span class="hljs-title function_">val</span>(),
+      url = <span class="hljs-string">&#x27;../../data/&#x27;</span> + $(<span class="hljs-string">&#x27;#dataset option:selected&#x27;</span>).<span class="hljs-title function_">attr</span>(<span class="hljs-string">&#x27;url&#x27;</span>);
+  $.<span class="hljs-title function_">ajax</span>(url, {
+    <span class="hljs-attr">success</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) {
+      <span class="hljs-keyword">var</span> rows;
+      <span class="hljs-keyword">switch</span> (dataset) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;adderall&#x27;</span>:
+          rows = resp.<span class="hljs-title function_">split</span>(<span class="hljs-regexp">/\r\n|\n|\r/</span>);
+          rows.<span class="hljs-title function_">splice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+          rows = rows.<span class="hljs-title function_">map</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params">r</span>) {
+            <span class="hljs-keyword">var</span> fields = r.<span class="hljs-title function_">split</span>(<span class="hljs-string">&#x27;,&#x27;</span>);
+            <span class="hljs-keyword">return</span> [fields[<span class="hljs-number">12</span>], fields[<span class="hljs-number">24</span>], fields[<span class="hljs-number">25</span>]].<span class="hljs-title function_">map</span>(<span class="hljs-built_in">parseFloat</span>);
+          });
+          <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;cities&#x27;</span>:
+          rows = resp.<span class="hljs-title function_">split</span>(<span class="hljs-regexp">/\r\n|\n|\r/</span>);
+          rows.<span class="hljs-title function_">splice</span>(rows.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>, <span class="hljs-number">1</span>);
+          rows = rows.<span class="hljs-title function_">map</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params">r</span>) {
+            <span class="hljs-keyword">var</span> fields = r.<span class="hljs-title function_">split</span>(<span class="hljs-string">&#x27;&quot;,&quot;&#x27;</span>);
+            <span class="hljs-keyword">return</span> [<span class="hljs-string">&#x27;&#x27;</span> + fields[<span class="hljs-number">0</span>].<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/(^\s+|\s+$|^&quot;|&quot;$)/g</span>, <span class="hljs-string">&#x27;&#x27;</span>).<span class="hljs-property">length</span>, fields[<span class="hljs-number">2</span>].<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/(^\s+|\s+$|^&quot;|&quot;$)/g</span>, <span class="hljs-string">&#x27;&#x27;</span>), fields[<span class="hljs-number">3</span>].<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/(^\s+|\s+$|^&quot;|&quot;$)/g</span>, <span class="hljs-string">&#x27;&#x27;</span>)].<span class="hljs-title function_">map</span>(<span class="hljs-built_in">parseFloat</span>);
+          });
+          <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;earthquakes&#x27;</span>:
+          rows = resp;
+          <span class="hljs-keyword">break</span>;
+      }
+      datapoints = rows;
+      <span class="hljs-keyword">var</span> text = <span class="hljs-string">&#x27;Loaded: &#x27;</span> + datapoints.<span class="hljs-property">length</span>;
+      $(<span class="hljs-string">&#x27;#points-loaded&#x27;</span>).<span class="hljs-title function_">text</span>(text).<span class="hljs-title function_">attr</span>(<span class="hljs-string">&#x27;title&#x27;</span>, text);
+      <span class="hljs-title function_">show_points</span>(datapoints);
+    }
+  });
+}
+
+<span class="hljs-comment">/* Given a set of datapoints, optionally truncate or expand it, then show it
+ * as clustered points.
+ *
+ * @param {array} datapoints an array of points to show.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">show_points</span>(<span class="hljs-params">datapoints</span>) {
+  datarows = <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">var</span> rows = datapoints;
+  <span class="hljs-keyword">var</span> maxrows = <span class="hljs-built_in">parseInt</span>(points, <span class="hljs-number">10</span>) || rows.<span class="hljs-property">length</span>;
+  <span class="hljs-keyword">if</span> (rows.<span class="hljs-property">length</span> &gt; maxrows) {
+    rows = rows.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, maxrows);
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (rows.<span class="hljs-property">length</span> &lt; maxrows) {
+    rows = rows.<span class="hljs-title function_">slice</span>();
+    <span class="hljs-keyword">while</span> (rows.<span class="hljs-property">length</span> &lt; maxrows) {
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = rows.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span> &amp;&amp; rows.<span class="hljs-property">length</span> &lt; maxrows; i -= <span class="hljs-number">1</span>) {
+        rows.<span class="hljs-title function_">push</span>([
+          rows[i][<span class="hljs-number">0</span>] + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>,
+          rows[i][<span class="hljs-number">1</span>] + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>,
+          rows[i][<span class="hljs-number">2</span>] + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>]);
+      }
+    }
+  }
+  pointFeature.<span class="hljs-title function_">data</span>(rows);
+  datarows = rows;
+  pointFeature.<span class="hljs-title function_">draw</span>();
+  <span class="hljs-keyword">var</span> text = <span class="hljs-string">&#x27;Shown: &#x27;</span> + rows.<span class="hljs-property">length</span>;
+  $(<span class="hljs-string">&#x27;#points-shown&#x27;</span>).<span class="hljs-title function_">text</span>(text).<span class="hljs-title function_">attr</span>(<span class="hljs-string">&#x27;title&#x27;</span>, text);
+}
+
+<span class="hljs-comment">/**
+ * Handle changes to our controls.
+ *
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">object</span>} evt jquery evt that triggered this call.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">change_controls</span>(<span class="hljs-params">evt</span>) {
+  <span class="hljs-keyword">var</span> ctl = $(evt.<span class="hljs-property">target</span>),
+      param = ctl.<span class="hljs-title function_">attr</span>(<span class="hljs-string">&#x27;id&#x27;</span>),
+      value = ctl.<span class="hljs-title function_">val</span>();
+  <span class="hljs-keyword">if</span> (ctl.<span class="hljs-title function_">is</span>(<span class="hljs-string">&#x27;[type=&quot;checkbox&quot;]&#x27;</span>)) {
+    value = ctl.<span class="hljs-title function_">is</span>(<span class="hljs-string">&#x27;:checked&#x27;</span>) ? <span class="hljs-string">&#x27;true&#x27;</span> : <span class="hljs-string">&#x27;false&#x27;</span>;
+  }
+  <span class="hljs-keyword">if</span> (value === <span class="hljs-string">&#x27;&#x27;</span> &amp;&amp; ctl.<span class="hljs-title function_">attr</span>(<span class="hljs-string">&#x27;placeholder&#x27;</span>)) {
+    value = ctl.<span class="hljs-title function_">attr</span>(<span class="hljs-string">&#x27;placeholder&#x27;</span>);
+  }
+  <span class="hljs-keyword">if</span> (!param || value === query[param]) {
+    <span class="hljs-keyword">return</span>;
+  }
+  <span class="hljs-keyword">if</span> (ctl.<span class="hljs-title function_">closest</span>(<span class="hljs-string">&#x27;table.gradient&#x27;</span>).<span class="hljs-property">length</span>) {
+    param = <span class="hljs-string">&#x27;gradient&#x27;</span>;
+  }
+  <span class="hljs-keyword">switch</span> (param) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;dataset&#x27;</span>:
+      <span class="hljs-title function_">fetch_data</span>();
+      <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;points&#x27;</span>:
+      points = <span class="hljs-built_in">parseInt</span>(value);
+      <span class="hljs-title function_">show_points</span>(datapoints);
+      <span class="hljs-keyword">break</span>;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-2">&#x00a7;</a>
+              </div>
+              <p>update the url to reflect the changes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  query[param] = value;
+  <span class="hljs-keyword">if</span> (value === <span class="hljs-string">&#x27;&#x27;</span> || (ctl.<span class="hljs-title function_">attr</span>(<span class="hljs-string">&#x27;placeholder&#x27;</span>) &amp;&amp;
+      value === ctl.<span class="hljs-title function_">attr</span>(<span class="hljs-string">&#x27;placeholder&#x27;</span>))) {
+    <span class="hljs-keyword">delete</span> query[param];
+  }
+  utils.<span class="hljs-title function_">setQuery</span>(query);
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">injectStyle</span>(<span class="hljs-params">feature, property, clusterStyle</span>) {
+  <span class="hljs-keyword">var</span> styleFunc = feature.<span class="hljs-property">style</span>.<span class="hljs-title function_">get</span>(property);
+  feature.<span class="hljs-title function_">style</span>(property, <span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) {
+    <span class="hljs-keyword">if</span> (d.<span class="hljs-property">__cluster</span>) {
+      <span class="hljs-keyword">return</span> clusterStyle;
+    }
+    <span class="hljs-keyword">return</span> styleFunc.<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">arguments</span>);
+  });
+}
+
+map.<span class="hljs-title function_">createLayer</span>(<span class="hljs-string">&#x27;osm&#x27;</span>);
+layer = map.<span class="hljs-title function_">createLayer</span>(<span class="hljs-string">&#x27;feature&#x27;</span>, {
+  <span class="hljs-attr">renderer</span>: query.<span class="hljs-property">renderer</span> ? (query.<span class="hljs-property">renderer</span> === <span class="hljs-string">&#x27;html&#x27;</span> ? <span class="hljs-literal">null</span> : query.<span class="hljs-property">renderer</span>) : <span class="hljs-literal">undefined</span>,
+  <span class="hljs-attr">features</span>: query.<span class="hljs-property">renderer</span> ? <span class="hljs-literal">undefined</span> : [<span class="hljs-string">&#x27;point&#x27;</span>]
+});
+pointFeature = layer.<span class="hljs-title function_">createFeature</span>(<span class="hljs-string">&#x27;point&#x27;</span>, {})
+  .<span class="hljs-title function_">position</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) {
+    <span class="hljs-keyword">return</span> {<span class="hljs-attr">x</span>: d[<span class="hljs-number">2</span>], <span class="hljs-attr">y</span>: d[<span class="hljs-number">1</span>]};
+  });
+<span class="hljs-title function_">injectStyle</span>(pointFeature, <span class="hljs-string">&#x27;radius&#x27;</span>, <span class="hljs-number">10</span>);
+<span class="hljs-title function_">injectStyle</span>(pointFeature, <span class="hljs-string">&#x27;stroke&#x27;</span>, <span class="hljs-literal">true</span>);
+<span class="hljs-title function_">injectStyle</span>(pointFeature, <span class="hljs-string">&#x27;fill&#x27;</span>, <span class="hljs-literal">true</span>);
+<span class="hljs-title function_">injectStyle</span>(pointFeature, <span class="hljs-string">&#x27;strokeColor&#x27;</span>, <span class="hljs-string">&#x27;black&#x27;</span>);
+<span class="hljs-title function_">injectStyle</span>(pointFeature, <span class="hljs-string">&#x27;fillColor&#x27;</span>, <span class="hljs-string">&#x27;black&#x27;</span>);
+<span class="hljs-title function_">injectStyle</span>(pointFeature, <span class="hljs-string">&#x27;strokeOpacity&#x27;</span>, <span class="hljs-number">1</span>);
+<span class="hljs-title function_">injectStyle</span>(pointFeature, <span class="hljs-string">&#x27;strokeWidth&#x27;</span>, <span class="hljs-number">1</span>);
+<span class="hljs-title function_">injectStyle</span>(pointFeature, <span class="hljs-string">&#x27;fillOpacity&#x27;</span>, <span class="hljs-number">0.5</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-3">&#x00a7;</a>
+              </div>
+              <p>Setting the cluster radius to the cluster point style radius is usually
+a good value.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>pointFeature.<span class="hljs-title function_">clustering</span>({<span class="hljs-attr">radius</span>: <span class="hljs-number">10</span>});
+
+<span class="hljs-title function_">fetch_data</span>();
+$(<span class="hljs-string">&#x27;#controls&#x27;</span>).<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;change&#x27;</span>, change_controls);</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
