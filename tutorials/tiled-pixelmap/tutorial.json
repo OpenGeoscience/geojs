@@ -1,0 +1,10 @@
+{
+  "title": "Tiled Pixelmap",
+  "hideNavbar": true,
+  "level": 1,
+  "tutorialCss": [],
+  "tutorialJs": [],
+  "about": {
+    "text": "Render large categorical data via a tiled pixelmap."
+  }
+}

@@ -1,0 +1,104 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Text and Points
+    Create a map and define some data.  Create a feature layer for the points
+    and add the points to it.
+
+  +codeblock('javascript', 1).
+    var map = geo.map({
+      node: "#map",
+      center: { x: -97.67, y: 31.80 },
+      zoom: 4
+    });
+    map.createLayer('osm');
+
+    var cities = [
+      {lon: -74.0059413, lat: 40.7127837, name: "New York", population: 8405837},
+      {lon: -118.2436849, lat: 34.0522342, name: "Los Angeles", population: 3884307},
+      {lon: -87.6297982, lat: 41.8781136, name: "Chicago", population: 2718782},
+      {lon: -95.3698028, lat: 29.7604267, name: "Houston", population: 2195914},
+      {lon: -75.1652215, lat: 39.9525839, name: "Philadelphia", population: 1553165},
+      {lon: -112.0740373, lat: 33.4483771, name: "Phoenix", population: 1513367}
+    ];
+
+    var pointLayer = map.createLayer('feature', {features: ['point']});
+    var pointFeature = pointLayer.createFeature('point')
+      .data(cities)
+      .position(function (city) {
+        return {
+          x: city.lon,
+          y: city.lat
+        };
+      })
+      .draw();
+
+  :markdown-it
+    Create another layer for the text feature.  We need a separate layer as the
+    text feature won't use the same renderer as the point feature.
+
+    Add a text feature to the layer.
+
+  +codeblock('javascript', 2, undefined, true).
+    var textLayer = map.createLayer('feature', {features: ['text']});
+    var textFeature = textLayer.createFeature('text')
+      .data(cities)
+      .position(function (city) {
+        return {
+          x: city.lon,
+          y: city.lat
+        };
+      })
+      .text(function (city) {
+        return city.name;
+      })
+      .draw();
+  +codeblock_test('text feature exists', [
+    'map.layers()[2].features()[0] instanceof geo.textFeature',
+    ])
+
+  :markdown-it
+    Many text styles can be changed, including adding an offset so the text
+    won't overlap the points.
+
+  +codeblock('javascript', 3).
+    textFeature.style({
+      fontSize: '20px',
+      fontFamily: 'serif',
+      textAlign: 'left',
+      textBaseline: 'middle',
+      color: 'blue',
+      offset: {x: 10, y: 0}
+    }).draw();
+  +codeblock_test('text color changed', [
+    'map.layers()[2].features()[0].style().color === "blue"',
+    ])
+
+  :markdown-it
+    Multiline and word-wrapping aren't directly supported, but can be simulated
+    by adding additional text features.
+
+    This also shows that the text value can be set as a style property.
+
+  +codeblock('javascript', 4).
+    textLayer.createFeature('text')
+      .data(cities)
+      .position(function (city) {
+        return {
+          x: city.lon,
+          y: city.lat
+        };
+      })
+      .style({
+        text: function (city) {
+          return city.population;
+        },
+        fontSize: '16px',
+        fontFamily: 'serif',
+        textAlign: 'left',
+        textBaseline: 'middle',
+        color: 'green',
+        offset: {x: 10, y: 16}
+      })
+      .draw();
