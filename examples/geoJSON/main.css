@@ -1,0 +1,20 @@
+.CodeMirror {
+  position: absolute !important;
+  left: 10px;
+  top: 80px;
+  width: calc(50% - 10px);
+  height: calc(87% - 80px) !important;
+  z-index: 50;
+  border-radius: 5px;
+  border: 1px solid grey;
+  box-shadow: 1px 1px 3px black;
+  opacity: 0.5;
+  transition: opacity 250ms ease;
+}
+.CodeMirror-focused {
+  opacity: 1.0;
+}
+
+.CodeMirror:hover {
+  opacity: 1.0;
+}

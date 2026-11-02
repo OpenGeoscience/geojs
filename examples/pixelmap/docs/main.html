@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-1">&#x00a7;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/* globals utils */</span>
+
+<span class="hljs-keyword">var</span> debug = {};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-2">&#x00a7;</a>
+              </div>
+              <p>Run after the DOM loads</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+  <span class="hljs-string">&#x27;use strict&#x27;</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-3">&#x00a7;</a>
+              </div>
+              <p>Get the query parameters and set controls appropriately.  The query takes:
+  map: the png file used for the pixel map.
+  json: the json file for the starting state.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> query = utils.<span class="hljs-title function_">getQuery</span>();
+  <span class="hljs-keyword">var</span> pixelmapUrl = query.<span class="hljs-property">map</span> || <span class="hljs-string">&#x27;pixelmap.png&#x27;</span>;
+  <span class="hljs-keyword">var</span> pixelmapJSON = query.<span class="hljs-property">json</span> === <span class="hljs-literal">undefined</span> ? <span class="hljs-string">&#x27;pixelmap.json&#x27;</span> : query.<span class="hljs-property">json</span>;
+  <span class="hljs-keyword">var</span> map, mapParams, osm, osmParams, layer, pixelmap, pixelmapParams;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-4">&#x00a7;</a>
+              </div>
+              <p>Center the map on the United States</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  mapParams = {
+    <span class="hljs-attr">node</span>: <span class="hljs-string">&#x27;#map&#x27;</span>,
+    <span class="hljs-attr">center</span>: {<span class="hljs-attr">x</span>: -<span class="hljs-number">98.58333</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">39.83333</span>},
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">4</span>,
+    <span class="hljs-attr">discreteZoom</span>: <span class="hljs-literal">false</span>
+  };
+  map = geo.<span class="hljs-title function_">map</span>(mapParams);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-5">&#x00a7;</a>
+              </div>
+              <p>Add a tile layer to the map</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  osm = map.<span class="hljs-title function_">createLayer</span>(<span class="hljs-string">&#x27;osm&#x27;</span>, osmParams);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-6">&#x00a7;</a>
+              </div>
+              <p>Create a feature layer that supports the pixelmap feature.  This can be
+overridden to use a specific renderer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  layer = map.<span class="hljs-title function_">createLayer</span>(<span class="hljs-string">&#x27;feature&#x27;</span>, {
+    <span class="hljs-attr">renderer</span>: query.<span class="hljs-property">renderer</span> ? (query.<span class="hljs-property">renderer</span> === <span class="hljs-string">&#x27;html&#x27;</span> ? <span class="hljs-literal">null</span> : query.<span class="hljs-property">renderer</span>) : <span class="hljs-literal">undefined</span>,
+    <span class="hljs-attr">features</span>: query.<span class="hljs-property">renderer</span> ? <span class="hljs-literal">undefined</span> : [<span class="hljs-string">&#x27;pixelmap&#x27;</span>],
+    <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.65</span>
+  });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-7">&#x00a7;</a>
+              </div>
+              <p>Our default pixelmap covers a known geographic region</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  pixelmapParams = {
+    <span class="hljs-attr">selectionAPI</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">url</span>: pixelmapUrl,
+    <span class="hljs-attr">position</span>: {<span class="hljs-attr">ul</span>: {<span class="hljs-attr">x</span>: -<span class="hljs-number">180</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">71.471178</span>}, <span class="hljs-attr">lr</span>: {<span class="hljs-attr">x</span>: -<span class="hljs-number">60</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">13.759032</span>}},
+    <span class="hljs-attr">color</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">d, idx</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-8">&#x00a7;</a>
+              </div>
+              <p>Always set index 0 to transparent.  Other indices are set based on
+the data value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> color = {<span class="hljs-attr">r</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">g</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">0</span>};
+      <span class="hljs-keyword">if</span> (idx &amp;&amp; d &amp;&amp; d.<span class="hljs-property">value</span>) {
+        color = d.<span class="hljs-property">value</span> === <span class="hljs-string">&#x27;R&#x27;</span> ? <span class="hljs-string">&#x27;red&#x27;</span> : <span class="hljs-string">&#x27;blue&#x27;</span>;
+      }
+      <span class="hljs-keyword">return</span> color;
+    }
+  };
+  pixelmap = layer.<span class="hljs-title function_">createFeature</span>(<span class="hljs-string">&#x27;pixelmap&#x27;</span>, pixelmapParams);
+  layer.<span class="hljs-title function_">draw</span>();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-9">&#x00a7;</a>
+              </div>
+              <p>When the user left clicks, cycle through three states.  A right click
+clears the state.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  pixelmap.<span class="hljs-title function_">geoOn</span>(geo.<span class="hljs-property">event</span>.<span class="hljs-property">feature</span>.<span class="hljs-property">mouseclick</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) {
+    <span class="hljs-keyword">var</span> data = pixelmap.<span class="hljs-title function_">data</span>();
+    <span class="hljs-keyword">if</span> (!data) {
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">if</span> (data[evt.<span class="hljs-property">index</span>] === <span class="hljs-literal">undefined</span>) {
+      data[evt.<span class="hljs-property">index</span>] = {};
+    }
+    <span class="hljs-keyword">var</span> val = data[evt.<span class="hljs-property">index</span>].<span class="hljs-property">value</span>;
+    <span class="hljs-keyword">if</span> (evt.<span class="hljs-property">mouse</span>.<span class="hljs-property">buttonsDown</span>.<span class="hljs-property">left</span>) {
+      <span class="hljs-keyword">var</span> cycle = {<span class="hljs-attr">D</span>: <span class="hljs-string">&#x27;R&#x27;</span>, <span class="hljs-attr">R</span>: <span class="hljs-string">&#x27;&#x27;</span>, <span class="hljs-string">&#x27;&#x27;</span>: <span class="hljs-string">&#x27;D&#x27;</span>};
+      val = cycle[cycle[val] !== <span class="hljs-literal">undefined</span> ? val : <span class="hljs-string">&#x27;&#x27;</span>];
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (evt.<span class="hljs-property">mouse</span>.<span class="hljs-property">buttonsDown</span>.<span class="hljs-property">right</span>) {
+      val = <span class="hljs-string">&#x27;&#x27;</span>;
+    }
+    <span class="hljs-keyword">if</span> (val !== data[evt.<span class="hljs-property">index</span>].<span class="hljs-property">value</span>) {
+      data[evt.<span class="hljs-property">index</span>].<span class="hljs-property">value</span> = val;
+      pixelmap.<span class="hljs-title function_">data</span>(data).<span class="hljs-title function_">draw</span>();
+    }
+  });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-10">&#x00a7;</a>
+              </div>
+              <p>Load the JSON file</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span> (pixelmapJSON) {
+    $.<span class="hljs-title function_">ajax</span>({<span class="hljs-attr">url</span>: pixelmapJSON}).<span class="hljs-title function_">done</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) {
+      pixelmap.<span class="hljs-title function_">data</span>(resp);
+      pixelmap.<span class="hljs-title function_">draw</span>();
+    });
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="sswrap ">
+                <a class="ss" href="#section-11">&#x00a7;</a>
+              </div>
+              <p>Expose some internal to make it easier to play with the example from the
+browser console.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  debug.<span class="hljs-property">map</span> = map;
+  debug.<span class="hljs-property">mapParams</span> = mapParams;
+  debug.<span class="hljs-property">osm</span> = osm;
+  debug.<span class="hljs-property">osmParams</span> = osmParams;
+  debug.<span class="hljs-property">layer</span> = layer;
+  debug.<span class="hljs-property">pixelmap</span> = pixelmap;
+  debug.<span class="hljs-property">pixelmapParams</span> = pixelmapParams;
+});</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

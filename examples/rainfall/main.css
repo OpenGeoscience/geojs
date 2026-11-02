@@ -1,0 +1,30 @@
+#controls {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  user-select: none;
+  z-index: 10;
+}
+#controls img {
+  width: 20px;
+  height: 20px;
+}
+#controls input {
+  display: block;
+}
+#controls span.info {
+  border: 1px solid black;
+  background: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  font-family: monospace;
+  display: inline-block;
+}
+#controls span#info {
+  width: 70px;
+}
+#tooltip {
+  text-shadow: -1px -1px 0 rgba(255, 255, 255, 0.5), 1px -1px 0 rgba(255, 255, 255, 0.5), -1px 1px 0 rgba(255, 255, 255, 0.5), 1px 1px 0 rgba(255, 255, 255, 0.5);
+  margin-left: 15px;
+  font-weight: bold;
+  color: black;
+}
