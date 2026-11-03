@@ -39,9 +39,9 @@ for line in list.split('\n'):
     except Exception:
         pass
     print(tile)
-    os.system('curl -s -o ' + path + ' ' + url)
+    subprocess.run(['curl', '-s', '-o', path, url])
     PIL.Image.open(path)
 os.chdir('dist/data/tiles')
 os.unlink('../tiles.tgz')
-os.system('tar -zcvf ../tiles.tgz *')
+subprocess.run(['tar', '-zcvf', '../tiles.tgz'] + os.listdir('.'))
 os.chdir('../../..')
