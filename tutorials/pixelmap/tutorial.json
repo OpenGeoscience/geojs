@@ -1,0 +1,10 @@
+{
+  "title": "Pixelmap",
+  "hideNavbar": true,
+  "level": 1,
+  "tutorialCss": [],
+  "tutorialJs": [],
+  "about": {
+    "text": "Render categorical data via a pixelmap."
+  }
+}

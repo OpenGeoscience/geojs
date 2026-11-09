@@ -1,0 +1,204 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Isolines
+    Given data on a mesh or grid, plot isolines (lines of constant value).
+
+    First, we create a base map tile layer for reference and load some grid data.
+    The data is grid data describing geospatial point elevation, a record of z value -9999 means there is no land data.
+    Load the data asynchronously, and use a [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) when ready.
+
+  +codeblock('javascript', 1).
+    var map = geo.map({
+      node: "#map",
+      center: {
+        x: -157.965,
+        y: 21.482
+      },
+      zoom: 11
+    });
+    // create a tile layer with a low opacity so the isolines are easier to see
+    map.createLayer('osm', {opacity: 0.5});
+    // load some data and store in in a variable we can access.  Add the
+    // promise for this load to the map's idle handler, allowing map.onIdle()
+    // to be used when everything is ready.  We could have also created the
+    // isoline feature in the `then` function.
+    var data;
+    map.addPromise($.get('../../data/oahu-medium.json').then(function (loadedData) {
+      data = loadedData;
+    }));
+
+  :markdown-it
+    Once the data is loaded, create an isoline feature with default options.
+
+  +codeblock('javascript', 2, undefined, true).
+    var layer, iso;
+    map.onIdle(function () {
+      // create a feature layer for the isoline
+      layer = map.createLayer('feature', {features: ['isoline']});
+      iso = layer.createFeature('isoline', {
+        isoline: {
+          gridWidth: data.gridWidth,
+          gridHeight: data.gridHeight,
+          x0: data.x0,
+          y0: data.y0,
+          dx: data.dx,
+          dy: data.dy
+        },
+        style: {
+          // return null for values that shouldn't be used.
+          value: function (d) { return d > -9999 ? d : null; },
+        }
+      }).data(data.values).draw();
+    });
+  +codeblock_test('isoline feature exists', [
+    'map.layers().length === 2',
+    'map.layers()[1].features()[0] instanceof geo.isolineFeature',
+    'iso.data().length === 110010'
+    ])
+
+  :markdown-it
+    The spacing between isolines can be set in a variety of ways.  By default, a "nice" interval is chosen to have approximately `count` lines, where `count` equals 15.  This number can be changed, but if it is only changed a little, the same isolines will still be shown since they round to even values.
+  +codeblock('javascript', 30, 2, false, 'Step 3-A').
+    map.onIdle(function () {
+      iso.isoline('count', 10).draw();
+    });
+  +codeblock_test('isoline count', [
+    'map.layers()[1].features()[0]._createIsolines().values.length === 13'
+    ])
+
+  :markdown-it
+    If the count is changed enough, a different number of isolines will be shown.
+  +codeblock('javascript', 31, 2, false, 'Step 3-B').
+    map.onIdle(function () {
+      iso.isoline('count', 8).draw();
+    });
+  +codeblock_test('isoline count', [
+    'map.layers()[1].features()[0]._createIsolines().values.length === 7'
+    ])
+
+  :markdown-it
+    You can disable rounding to even values.  In this case, there specified count will be exact.  Since the isoline values are no longer round numbers, it is useful to limit the precision shown on the text labels.
+  +codeblock('javascript', 32, 2, false, 'Step 3-C').
+    map.onIdle(function () {
+      iso.isoline({
+        count: 20,
+        autofit: false,
+        labelText: function (value) {
+          return value.value.toFixed(2);
+        }
+      }).draw();
+    });
+  +codeblock_test('isoline autofit false', [
+    'map.layers()[1].features()[0]._createIsolines().values.length === 20'
+    ])
+
+  :markdown-it
+    You can specify a spacing in the units used for the isoline values.  In this example, this is the altitude in meters.
+  +codeblock('javascript', 33, 2, false, 'Step 3-D').
+    map.onIdle(function () {
+      iso.isoline('spacing', 125).draw();
+    });
+  +codeblock_test('isoline spacing', [
+    'map.layers()[1].features()[0]._createIsolines().values.length === 10'
+    ])
+
+  :markdown-it
+    You can also specify exactly which values should have isolines and which ones should be more significant.
+  +codeblock('javascript', 34, 2, false, 'Step 3-E').
+    map.onIdle(function () {
+      iso.isoline('values', [
+        {value: 10, level: 0},  // level 0 is the least significant
+        {value: 25, level: 0},
+        {value: 50, level: 1},
+        {value: 75, level: 0},
+        {value: 100, level: 1},
+        {value: 250, level: 1},
+        {value: 500, level: 2},
+        {value: 750, level: 1},
+        {value: 1000, level: 2},
+        {value: 1125, level: 1}
+      ]).draw();
+    });
+  +codeblock_test('isoline values', [
+    'map.layers()[1].features()[0]._createIsolines().values.length === 10'
+    ])
+
+  :markdown-it
+    The label text spacing can be changed so that there or more or fewer labels per line.  The spacing is the minimum distance between labels in pixels.  Labels are placed uniformly along an isoline, so the labels could be further apart to make them even.
+  +codeblock('javascript', 40, 30, false, 'Step 4-A').
+    map.onIdle(function () {
+      iso.isoline('labelSpacing', 125).draw();
+    });
+  +codeblock_test('isoline label spacing', [
+    'iso.isoline.get("labelSpacing")({}) === 125'
+    ])
+
+  :markdown-it
+    Labels can be added to any of the isolines and have different spacing per line.
+  +codeblock('javascript', 41, 30, false, 'Step 4-B').
+    map.onIdle(function () {
+      iso.isoline({
+        label: function (value) {
+          // labels will be on darker lines or every other line
+          return value.level > 0 || !(value.position % 2);
+        },
+        labelSpacing: function (value) {
+          // labels on darker lines are twice as common as on faint lines.
+          return value.level > 0 ? 125 : 250
+        }}).draw();
+    });
+  +codeblock_test('isoline label spacing', [
+    'iso.isoline.get("labelSpacing")({level: 0}) === 250',
+    'iso.isoline.get("labelSpacing")({level: 1}) === 125'
+    ])
+
+  :markdown-it
+    The label text can be modified to include the units.  The data has altitude in meters.
+  +codeblock('javascript', 50, 40, false, 'Step 5-A').
+    map.onIdle(function () {
+      iso.isoline('labelText', function (value) {
+           return value.value + ' m';
+         }).draw();
+    });
+  +codeblock_test('isoline text includes units', [
+    'iso.isoline.get("labelText")({value: 0}) === "0 m"'
+    ])
+
+  :markdown-it
+    Although the data has altitude in meters, it can be converted to different units.  For instance, we can convert it to statute (U.S. Survey) feet and change the label text appropriately.
+
+  +codeblock('javascript', 51, 40, false, 'Step 5-B').
+    map.onIdle(function () {
+      iso.style('value', function (d) {
+           return d > -9999 ? d * 3937 / 1200 : null;
+         })
+         .isoline('labelText', function (value) {
+           return value.value + ' ft';
+         }).draw();
+    });
+  +codeblock_test('isoline text include ft', [
+    'iso.isoline.get("labelText")({value: 0}) === "0 ft"'
+    ])
+
+  :markdown-it
+    By defaults, labels are shown so that the top of the text is toward higher values.  The `geo.isolineFeature.rotationFunction` can be used to choose other orientations.  The available modes are:
+
+    - `higher`: the top of the label text is toward higher values.  This is the default.
+    - `lower`: the top of the label text is toward lower values.
+    - `map`: the top of the label text is toward the top of the map.
+    - `screen`: the top of the label text is toward the top of the display screen.
+
+    The map has to be rotated to see the difference between `screen` and `map` modes.
+
+  +codeblock('javascript', 60, 50, false, 'Step 6').
+    // change this to try out different rotation modes.
+    var rotationMode = 'screen';
+    map.onIdle(function () {
+      iso.style('rotation', geo.isolineFeature.rotationFunction(rotationMode, map))
+         .draw();
+    });
+  +codeblock_test('isoline text rotation', [
+    'iso.style.get("rotation")({rotation: 2}) === 2 + Math.PI'
+    ])

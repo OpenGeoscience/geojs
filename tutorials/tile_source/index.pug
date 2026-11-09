@@ -1,0 +1,54 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Changing Tile Source
+    When a map is created with the default map tile layer, it defaults to using tiles from [openstreetmap.org]().
+
+  +codeblock('javascript', 1, undefined, true).
+    var map = geo.map({
+      node: "#map"
+    });
+    var layer = map.createLayer('osm');
+  +codeblock_test('map has one osm layer from openstreetmap.org', [
+      'map.layers().length === 1',
+      'map.layers()[0] instanceof geo.osmLayer',
+      'layer.url().match(/openstreetmap/)'
+      ])
+
+  :markdown-it
+    You can use a different tile source by changing the URL used by the tile layer.  You should also set the attribution.
+
+  +codeblock('javascript', 2).
+    layer.url('https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}')
+    layer.attribution(
+      'Tile data from <a href="https://basemap.nationalmap.gov/">USGS</a>')
+  +codeblock_test('url is from nationamap.gov',
+      'layer.url().match(/nationalmap/)'
+      )
+
+  :markdown-it
+    We could have initially created the layer with a different tile server:
+
+  +codeblock('javascript', 3, null, false, 'Step 1-B').
+    var map = geo.map({
+      node: "#map"
+    });
+    var layer = map.createLayer('osm', {
+      url: 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}',
+      attribution: 'Tile data from <a href="https://basemap.nationalmap.gov/">USGS</a>'
+    });
+  +codeblock_test('map has one osm layer from nationalmap', [
+      'map.layers().length === 1',
+      'map.layers()[0] instanceof geo.osmLayer',
+      'layer.url().match(/nationalmap/)'
+      ])
+
+  :markdown-it
+    There are also predefined sources.  See `Object.keys(geo.osmLayer.tileSources)` for a list of sources.
+
+  +codeblock('javascript', 4, null, false, 'Step 1-C').
+    var map = geo.map({
+      node: "#map"
+    });
+    var layer = map.createLayer('osm', {source: 'osm'});

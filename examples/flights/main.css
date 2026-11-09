@@ -1,0 +1,7 @@
+#map.dark {
+  background: black;
+}
+.dark .geo-attribution {
+  background: none;
+  color: white;
+}

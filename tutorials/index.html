@@ -1,0 +1,453 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>GeoJS - Tutorials</title>
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+
+
+    <!-- Custom Fonts -->
+    
+<link rel="stylesheet" href="../vendor/font-awesome/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+    <!-- Theme CSS -->
+    
+<link rel="stylesheet" href="../css/agency.css">
+
+    
+<link rel="stylesheet" href="../css/main.css">
+
+    
+<link rel="stylesheet" href="../css/highlight.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js" integrity="sha384-0s5Pv64cNZJieYFkXYOTId2HMA2Lfb6q2nAcx2n0RTLUnCAoTTsS0nKEO27XyKcY" crossorigin="anonymous"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js" integrity="sha384-ZoaMbDF+4LeFxg6WdScQ9nnR1QC2MIRxA1O9KWEXQwns1G8UNyIEZIQidzb0T1fo" crossorigin="anonymous"></script>
+    <![endif]-->
+
+    <!-- jQuery -->
+    
+<script src="../vendor/jquery/jquery.min.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    
+<script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+
+    <link rel="apple-touch-icon" sizes="57x57" href="../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="../favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body id="page-top" class="index">
+    <!-- Navigation -->
+    <nav id="mainNav" class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span><i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="../index.html"><img class="navbar-logo" src="../images/logo_transparent.png" /></a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="">
+                        <a href="../">Welcome</a>
+                    </li>
+                    <li class=" active ">
+                        <a href="">Tutorials</a>
+                    </li>
+                    <li class="">
+                        <a href="../examples/">Examples</a>
+                    </li>
+                    <li>
+                        <a href="../apidocs/">API Docs</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/OpenGeoscience/geojs">GitHub</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <div class="content-wrapper">
+        <div class="container page tutorials">
+    <div class="row">
+        <div class="col-md-12">
+            <section>
+                <h2>Tutorials</h2>
+                <p class="text-muted">It is easy to get started with GeoJS.  There is also an extensive API with numerous options for more sophisticated visualizations, too.  See the tutorials below.</p>
+                <p class="text-muted">The <a href="basic">Simple Map tutorial</a> is a good place to begin.  It contains the bare-minimum html, css, and javascript to draw a map.</p>
+            </section>
+            <div class="row">
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="basic/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="basic/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Make a simple map.  Includes HTML, CSS, and Javascript.</div>
+                        <h4><a class="portfolio-link" title='Simple Map' href="basic">Simple Map</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="simple_point/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="simple_point/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Add points to a map</div>
+                        <h4><a class="portfolio-link" title='Simple Point' href="simple_point">Simple Point</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="choropleth/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="choropleth/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Create a choropleth map, set the colors used, and add a legend.</div>
+                        <h4><a class="portfolio-link" title='Choropleth' href="choropleth">Choropleth</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="scale/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="scale/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Show scale on a map using a variety of options.</div>
+                        <h4><a class="portfolio-link" title='Map Scale' href="scale">Map Scale</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="annotation/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="annotation/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Draw different annotations, optionally setting the aspect ratio for rectangles and ellipses</div>
+                        <h4><a class="portfolio-link" title='Annotations' href="annotation">Annotations</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="tile_source/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="tile_source/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Make a simple map and change the tile source.</div>
+                        <h4><a class="portfolio-link" title='Changing Tile Source' href="tile_source">Changing Tile Source</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="lines/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="lines/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Place lines with different styles in a geospatial context.</div>
+                        <h4><a class="portfolio-link" title='Lines' href="lines">Lines</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="marker/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="marker/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Use markers with different styles.</div>
+                        <h4><a class="portfolio-link" title='Markers' href="marker">Markers</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="text/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="text/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Add text labels and points to a map</div>
+                        <h4><a class="portfolio-link" title='Text and Points' href="text">Text and Points</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="tracks/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="tracks/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Track features are much like line features with a time value per vertex.  A start and end time can be specified.</div>
+                        <h4><a class="portfolio-link" title='Tracks' href="tracks">Tracks</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="wms/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="wms/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Make a map with a custom function for getting tiles from a WMS server.  This also shows how to get tile bounds in different coordinates.</div>
+                        <h4><a class="portfolio-link" title='Using a WMS Tile Source' href="wms">Using a WMS Tile Source</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="contour/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="contour/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Plot grid data as a color contour.</div>
+                        <h4><a class="portfolio-link" title='Contour Map' href="contour">Contour Map</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="video_on_map/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="video_on_map/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Place a video quad on a map with the correct geospatial location.  This shows how to make a video quad and start it playing from a user action.</div>
+                        <h4><a class="portfolio-link" title='Geospatial Video' href="video_on_map">Geospatial Video</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="grid/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="grid/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Plot grid data where each grid element is a solid color.</div>
+                        <h4><a class="portfolio-link" title='Grid Data' href="grid">Grid Data</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="isoline/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="isoline/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Draw isolines based on scalar grid values.</div>
+                        <h4><a class="portfolio-link" title='Isolines' href="isoline">Isolines</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="large_image/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="large_image/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Show a large image from a tile server.</div>
+                        <h4><a class="portfolio-link" title='Large Image' href="large_image">Large Image</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="multiframe/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="multiframe/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Use two layers to form an A/B buffer when switching between frames of a large image from a tile server.</div>
+                        <h4><a class="portfolio-link" title='Multiple Frame Large Image' href="multiframe">Multiple Frame Large Image</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="pixelmap/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="pixelmap/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Render categorical data via a pixelmap.</div>
+                        <h4><a class="portfolio-link" title='Pixelmap' href="pixelmap">Pixelmap</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="video_single/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="video_single/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Fill the complete extent of the map with a single video.  Draw a polygon on it.</div>
+                        <h4><a class="portfolio-link" title='Single Video' href="video_single">Single Video</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="texture_quad/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="texture_quad/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Use data arrays as the texture of a quad.</div>
+                        <h4><a class="portfolio-link" title='Texture Quads' href="texture_quad">Texture Quads</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="tiled-pixelmap/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="tiled-pixelmap/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Render large categorical data via a tiled pixelmap.</div>
+                        <h4><a class="portfolio-link" title='Tiled Pixelmap' href="tiled-pixelmap">Tiled Pixelmap</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="video_transport/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="video_transport/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Show a video with controls for playback speed and frame.</div>
+                        <h4><a class="portfolio-link" title='Video with Transport Controls' href="video_transport">Video with Transport Controls</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="editor/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="editor/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Edit and save work in URL.</div>
+                        <h4><a class="portfolio-link" title='Editor' href="editor">Editor</a></h4>
+                    </div>
+                </div>
+            
+                <div class="col-md-3 col-sm-4 portfolio-item">
+                    <a class="portfolio-link" href="editor3/">
+                        <div class="portfolio-hover">
+                        </div>
+                        <img class="img-responsive" src="editor3/thumb.jpg">
+                    </a>
+                    <div class="portfolio-caption">
+                        <div class="description text-muted">Edit and save work in URL.  Edit the HTML to try different versions of GeoJS.</div>
+                        <h4><a class="portfolio-link" title='Editor with HTML and CSS' href="editor3">Editor with HTML and CSS</a></h4>
+                    </div>
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+    
+    <footer class="">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-3">
+                    <ul class="list-inline social-buttons">
+                        <li><a href="https://github.com/OpenGeoscience/geojs"><i class="fa fa-github"></i></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-sm-6">
+                    <span class="copyright">Licensed under the <a href="https://github.com/OpenGeoscience/geojs/blob/master/LICENSE">Apache License 2.0</a></span>
+                </div>
+                <div class="col-md-3">
+                    <ul class="list-inline quicklinks">
+                        <li><a href="https://www.kitware.com">Kitware</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Theme JavaScript -->
+    
+<script src="../js/agency.js"></script>
+
+
+</body>
+
+</html>

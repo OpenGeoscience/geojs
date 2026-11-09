@@ -1,0 +1,8 @@
+{
+  "title": "Isolines",
+  "hideNavbar": true,
+  "level": 1,
+  "about": {
+    "text": "Draw isolines based on scalar grid values."
+  }
+}

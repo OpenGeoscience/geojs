@@ -1,0 +1,11 @@
+{
+  "title": "Choropleth",
+  "hideNavbar": true,
+  "level": 0,
+  "order": 3,
+  "tutorialCss": [],
+  "tutorialJs": [],
+  "about": {
+    "text": "Create a choropleth map, set the colors used, and add a legend."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "title": "Grid Data",
+  "hideNavbar": true,
+  "level": 1,
+  "tutorialCss": [],
+  "tutorialJs": [],
+  "about": {
+    "text": "Plot grid data where each grid element is a solid color."
+  }
+}
