@@ -170,6 +170,12 @@ var mapInteractor = function (args) {
       // were present when the mouse down event occurred.
       m_clickMaybe = false,
       m_clickMaybeTimeout,
+      // mouse over the map node
+      m_mouseInside = false,
+      // the map whose pan, zoom, and rotate events are bound
+      m_boundMap = null,
+      // mouse update is scheduled after the map changed
+      m_mapChangePending = false,
       m_callZoom = function () {};
 
   // Helper method to calculate the speed from a velocity
@@ -756,6 +762,12 @@ var mapInteractor = function (args) {
     $node.on('mousemove.geojs', m_this._handleMouseMove);
     $node.on('mousedown.geojs', m_this._handleMouseDown);
     $node.on('mouseup.geojs', m_this._handleMouseUp);
+    $node.on('mouseleave.geojs', m_this._handleMouseLeave);
+    // when the map changes under a stationary mouse, update the mouse
+    m_boundMap = m_options.map;
+    m_boundMap.geoOn(
+      [geo_event.pan, geo_event.zoom, geo_event.rotate],
+      m_this._handleMapChange);
     // Disable dragging images and such
     $node.on('dragstart', function () { return false; });
     if (usedInputs.right) {
@@ -854,6 +866,17 @@ var mapInteractor = function (args) {
       $node.off('.geojs');
       $node = null;
     }
+    if (m_boundMap) {
+      m_boundMap.geoOff(
+        [geo_event.pan, geo_event.zoom, geo_event.rotate],
+        m_this._handleMapChange);
+      if (m_mapChangePending) {
+        m_boundMap.scheduleAnimationFrame(m_this._mapChangeMouseMove, 'remove');
+        m_mapChangePending = false;
+      }
+      m_boundMap = null;
+    }
+    m_mouseInside = false;
     m_this._handleMouseWheel = function () {};
     m_callZoom = function () {};
 
@@ -1232,11 +1255,56 @@ var mapInteractor = function (args) {
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
+    m_mouseInside = true;
 
     if (m_clickMaybe) {
       return;
     }
 
+    m_this.map().geoTrigger(geo_event.mousemove, m_this.mouse());
+  };
+
+  /**
+   * Handle the mouse leaving the map node.
+   */
+  this._handleMouseLeave = function () {
+    m_mouseInside = false;
+  };
+
+  /**
+   * Handle the map panning, zooming, or rotating.  If the mouse is over the
+   * map and no mouse action is in progress, schedule an update of the mouse
+   * position so that features under a stationary mouse are updated (for
+   * instance, during momentum or animated transitions).
+   */
+  this._handleMapChange = function () {
+    if (!m_mouseInside || m_paused || !m_boundMap || m_mapChangePending) {
+      return;
+    }
+    m_mapChangePending = true;
+    m_boundMap.scheduleAnimationFrame(m_this._mapChangeMouseMove);
+  };
+
+  /**
+   * Recompute the geo position of a stationary mouse after the map has
+   * changed and fire a mousemove event.  This is not done while a mouse action
+   * is in progress or while a click may be occurring.
+   *
+   * @fires geo.event.mousemove
+   */
+  this._mapChangeMouseMove = function () {
+    m_mapChangePending = false;
+    if (!m_mouseInside || m_paused || m_clickMaybe ||
+        m_state.boundDocumentHandlers || !m_this.map()) {
+      return;
+    }
+    try {
+      m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
+      m_mouse.mapgcs = m_this.map().displayToGcs(m_mouse.map, null);
+    } catch (e) {
+      // catch georeferencing problems and move on
+      return;
+    }
     m_this.map().geoTrigger(geo_event.mousemove, m_this.mouse());
   };
 
