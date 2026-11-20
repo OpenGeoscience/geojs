@@ -6,16 +6,5 @@
   // `--low` on top of this config, so locally every advisory of any severity
   // fails unless it is allowlisted here.
   "high": true,
-  "allowlist": [
-    // False positive: sprintf-js raises an exception for unbounded precision
-    // specifiers instead of expanding them; the maintainers will not change
-    // this behavior. https://github.com/advisories/GHSA-hp3w-g68c-fv3c
-    // (npm advisory 1241202). Remove this entry if the advisory is retracted.
-    "GHSA-hp3w-g68c-fv3c",
-    // False positive: the reported uncontrolled resource consumption requires
-    // application code that misuses the library; geojs does not expose such
-    // usage. https://github.com/advisories/GHSA-vfj7-8cjw-p6xm
-    // (npm advisory 1240992). Remove this entry if the advisory is retracted.
-    "GHSA-vfj7-8cjw-p6xm"
-  ]
+  "allowlist": []
 }
