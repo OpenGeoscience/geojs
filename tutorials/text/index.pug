@@ -76,8 +76,8 @@ block mainTutorial
     ])
 
   :markdown-it
-    Multiline and word-wrapping aren't directly supported, but can be simulated
-    by adding additional text features.
+    Different parts of a label can have different styles by adding additional
+    text features.
 
     This also shows that the text value can be set as a style property.
 
@@ -102,3 +102,85 @@ block mainTutorial
         offset: {x: 10, y: 16}
       })
       .draw();
+
+  :markdown-it
+    Text can have multiple lines by including line breaks.  Each line is
+    aligned separately, and the baseline determines how the lines are placed as
+    a group; here, they are centered on the position.  The line height of the
+    font sets the spacing between lines.  Word-wrapping isn't directly
+    supported.
+
+    Without a position or text function, the `x`, `y`, and `text` properties
+    of the data are used.
+
+  +codeblock('javascript', 5).
+    var titleFeature = textLayer.createFeature('text')
+      .data([{
+        x: -97.67,
+        y: 46,
+        text: 'Largest cities\nin the United States\nby population'
+      }])
+      .style({
+        font: '24px/30px sans-serif',
+        textAlign: 'center',
+        textBaseline: 'middle'
+      })
+      .draw();
+  +codeblock_test('multiline text exists', [
+    'map.layers()[2].features().length === 3',
+    'map.layers()[2].features()[2].data()[0].text.split("\\n").length === 3'
+    ])
+
+  :markdown-it
+    Text can respond to mouse events.  Turn on the selection API for the text
+    feature and bind to its events.  Here, the name of a city is shown in bold
+    with an asterisk while the mouse is over it, and clicking on a name
+    adds the city to or removes it from a list below the map.
+
+    The text is located based on its width and the height of its font, taking
+    alignment, offset, rotation, and scale into account.  This is the area the
+    text occupies, not just the drawn parts of the letters.  For multiline
+    text, each line is located separately, so the space next to a short line
+    isn't part of the text.  The same computation is used by `pointSearch`,
+    `boxSearch`, and `polygonSearch`, which can be called directly.
+
+  +codeblock('javascript', 6).
+    var hovered = null, selected = [];
+
+    var info = document.createElement('div');
+    info.style.cssText = 'position: absolute; left: 10px; bottom: 10px; ' +
+      'padding: 4px 8px; background: white; border: 1px solid black;';
+    info.textContent = 'Click on city names to select them';
+    map.node().append(info);
+
+    textFeature
+      .text(function (city) {
+        return city.name + (city === hovered ? ' *' : '');
+      })
+      .style('fontWeight', function (city) {
+        return city === hovered ? 'bold' : 'normal';
+      })
+      .selectionAPI(true)
+      .geoOn(geo.event.feature.mouseover, function (evt) {
+        hovered = evt.data;
+        textFeature.modified().draw();
+      })
+      .geoOn(geo.event.feature.mouseout, function (evt) {
+        hovered = null;
+        textFeature.modified().draw();
+      })
+      .geoOn(geo.event.feature.mouseclick, function (evt) {
+        if (selected.indexOf(evt.data.name) >= 0) {
+          selected.splice(selected.indexOf(evt.data.name), 1);
+        } else {
+          selected.push(evt.data.name);
+        }
+        info.textContent = 'Selected: ' + (selected.join(', ') || 'none');
+      })
+      .draw();
+  +codeblock_test('text can be searched', [
+    'map.layers()[2].features()[0].selectionAPI() === true',
+    'map.layers()[2].features()[0].pointSearch({x: -118.2436849, y: 34.0522342}).found.length === 0',
+    'map.layers()[2].features()[0].pointSearch(map.displayToGcs({x: map.gcsToDisplay({x: -118.2436849, y: 34.0522342}).x + 30, y: map.gcsToDisplay({x: -118.2436849, y: 34.0522342}).y})).found[0].name === "Los Angeles"',
+    'map.layers()[2].features()[0].boxSearch({x: -130, y: 20}, {x: -60, y: 50}).found.length === 6'
+    ])

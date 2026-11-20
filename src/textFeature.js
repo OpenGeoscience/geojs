@@ -10,7 +10,8 @@ var feature = require('./feature');
  *   element.  Defaults to the `x`, `y`, and `z` properties of the data
  *   element.
  * @property {string[]|Function} [text] The text of each data element.
- *   Defaults to the `text` property of the data element.
+ *   Defaults to the `text` property of the data element.  Line breaks in the
+ *   text start new lines; there is no automatic word wrapping.
  * @property {geo.textFeature.styleSpec} [style] The style to apply to each
  *   data element.
  */
@@ -37,12 +38,17 @@ var feature = require('./feature');
  *    `condensed`.
  * @property {string|Function} [fontSize='medium'] The font size.
  * @property {string|Function} [lineHeight='normal'] The font line height.
+ *    If this is in pixels or is a percentage and the font size is in pixels,
+ *    it is the spacing of the lines of multiline text.  Otherwise, the
+ *    spacing is the height of the font.
  * @property {string|Function} [fontFamily] The font family.
  * @property {string|Function} [textAlign='center'] The horizontal text
  *    alignment.  One of `start`, `end`, `left`, `right`, or `center`.
  * @property {string|Function} [textBaseline='middle'] The vertical text
  *    alignment.  One of `top`, `hanging`, `middle`, `alphabetic`,
- *    `ideographic`, or `bottom`.
+ *    `ideographic`, or `bottom`.  For multiline text, `top` and `hanging`
+ *    place the first line at the text position, `middle` centers the lines,
+ *    and the other values place the last line at the position.
  * @property {geo.geoColor|Function} [color='black'] Text color.  May include
  *    opacity.
  * @property {number|Function} [textOpacity=1] The opacity of the text.  If the
