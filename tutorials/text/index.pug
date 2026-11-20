@@ -1,0 +1,186 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Text and Points
+    Create a map and define some data.  Create a feature layer for the points
+    and add the points to it.
+
+  +codeblock('javascript', 1).
+    var map = geo.map({
+      node: "#map",
+      center: { x: -97.67, y: 31.80 },
+      zoom: 4
+    });
+    map.createLayer('osm');
+
+    var cities = [
+      {lon: -74.0059413, lat: 40.7127837, name: "New York", population: 8405837},
+      {lon: -118.2436849, lat: 34.0522342, name: "Los Angeles", population: 3884307},
+      {lon: -87.6297982, lat: 41.8781136, name: "Chicago", population: 2718782},
+      {lon: -95.3698028, lat: 29.7604267, name: "Houston", population: 2195914},
+      {lon: -75.1652215, lat: 39.9525839, name: "Philadelphia", population: 1553165},
+      {lon: -112.0740373, lat: 33.4483771, name: "Phoenix", population: 1513367}
+    ];
+
+    var pointLayer = map.createLayer('feature', {features: ['point']});
+    var pointFeature = pointLayer.createFeature('point')
+      .data(cities)
+      .position(function (city) {
+        return {
+          x: city.lon,
+          y: city.lat
+        };
+      })
+      .draw();
+
+  :markdown-it
+    Create another layer for the text feature.  We need a separate layer as the
+    text feature won't use the same renderer as the point feature.
+
+    Add a text feature to the layer.
+
+  +codeblock('javascript', 2, undefined, true).
+    var textLayer = map.createLayer('feature', {features: ['text']});
+    var textFeature = textLayer.createFeature('text')
+      .data(cities)
+      .position(function (city) {
+        return {
+          x: city.lon,
+          y: city.lat
+        };
+      })
+      .text(function (city) {
+        return city.name;
+      })
+      .draw();
+  +codeblock_test('text feature exists', [
+    'map.layers()[2].features()[0] instanceof geo.textFeature',
+    ])
+
+  :markdown-it
+    Many text styles can be changed, including adding an offset so the text
+    won't overlap the points.
+
+  +codeblock('javascript', 3).
+    textFeature.style({
+      fontSize: '20px',
+      fontFamily: 'serif',
+      textAlign: 'left',
+      textBaseline: 'middle',
+      color: 'blue',
+      offset: {x: 10, y: 0}
+    }).draw();
+  +codeblock_test('text color changed', [
+    'map.layers()[2].features()[0].style().color === "blue"',
+    ])
+
+  :markdown-it
+    Different parts of a label can have different styles by adding additional
+    text features.
+
+    This also shows that the text value can be set as a style property.
+
+  +codeblock('javascript', 4).
+    textLayer.createFeature('text')
+      .data(cities)
+      .position(function (city) {
+        return {
+          x: city.lon,
+          y: city.lat
+        };
+      })
+      .style({
+        text: function (city) {
+          return city.population;
+        },
+        fontSize: '16px',
+        fontFamily: 'serif',
+        textAlign: 'left',
+        textBaseline: 'middle',
+        color: 'green',
+        offset: {x: 10, y: 16}
+      })
+      .draw();
+
+  :markdown-it
+    Text can have multiple lines by including line breaks.  Each line is
+    aligned separately, and the baseline determines how the lines are placed as
+    a group; here, they are centered on the position.  The line height of the
+    font sets the spacing between lines.  Word-wrapping isn't directly
+    supported.
+
+    Without a position or text function, the `x`, `y`, and `text` properties
+    of the data are used.
+
+  +codeblock('javascript', 5).
+    var titleFeature = textLayer.createFeature('text')
+      .data([{
+        x: -97.67,
+        y: 46,
+        text: 'Largest cities\nin the United States\nby population'
+      }])
+      .style({
+        font: '24px/30px sans-serif',
+        textAlign: 'center',
+        textBaseline: 'middle'
+      })
+      .draw();
+  +codeblock_test('multiline text exists', [
+    'map.layers()[2].features().length === 3',
+    'map.layers()[2].features()[2].data()[0].text.split("\\n").length === 3'
+    ])
+
+  :markdown-it
+    Text can respond to mouse events.  Turn on the selection API for the text
+    feature and bind to its events.  Here, the name of a city is shown in bold
+    with an asterisk while the mouse is over it, and clicking on a name
+    adds the city to or removes it from a list below the map.
+
+    The text is located based on its width and the height of its font, taking
+    alignment, offset, rotation, and scale into account.  This is the area the
+    text occupies, not just the drawn parts of the letters.  For multiline
+    text, each line is located separately, so the space next to a short line
+    isn't part of the text.  The same computation is used by `pointSearch`,
+    `boxSearch`, and `polygonSearch`, which can be called directly.
+
+  +codeblock('javascript', 6).
+    var hovered = null, selected = [];
+
+    var info = document.createElement('div');
+    info.style.cssText = 'position: absolute; left: 10px; bottom: 10px; ' +
+      'padding: 4px 8px; background: white; border: 1px solid black;';
+    info.textContent = 'Click on city names to select them';
+    map.node().append(info);
+
+    textFeature
+      .text(function (city) {
+        return city.name + (city === hovered ? ' *' : '');
+      })
+      .style('fontWeight', function (city) {
+        return city === hovered ? 'bold' : 'normal';
+      })
+      .selectionAPI(true)
+      .geoOn(geo.event.feature.mouseover, function (evt) {
+        hovered = evt.data;
+        textFeature.modified().draw();
+      })
+      .geoOn(geo.event.feature.mouseout, function (evt) {
+        hovered = null;
+        textFeature.modified().draw();
+      })
+      .geoOn(geo.event.feature.mouseclick, function (evt) {
+        if (selected.indexOf(evt.data.name) >= 0) {
+          selected.splice(selected.indexOf(evt.data.name), 1);
+        } else {
+          selected.push(evt.data.name);
+        }
+        info.textContent = 'Selected: ' + (selected.join(', ') || 'none');
+      })
+      .draw();
+  +codeblock_test('text can be searched', [
+    'map.layers()[2].features()[0].selectionAPI() === true',
+    'map.layers()[2].features()[0].pointSearch({x: -118.2436849, y: 34.0522342}).found.length === 0',
+    'map.layers()[2].features()[0].pointSearch(map.displayToGcs({x: map.gcsToDisplay({x: -118.2436849, y: 34.0522342}).x + 30, y: map.gcsToDisplay({x: -118.2436849, y: 34.0522342}).y})).found[0].name === "Los Angeles"',
+    'map.layers()[2].features()[0].boxSearch({x: -130, y: 20}, {x: -60, y: 50}).found.length === 6'
+    ])

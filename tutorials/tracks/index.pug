@@ -1,0 +1,167 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Tracks
+    Track features are like line features with a time value at each vertex.
+
+    We'll use a few custom controls and styles in this tutorials.  These are
+    set up first.
+
+  +codeblock('html', 1).
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <script type="text/javascript" src="../../built/geo.min.js"></script>
+    </head>
+    <body>
+      <div id="map"></div>
+      <div id="controls" class="hidden">
+        <span>Start</span><input id="start" type="range" min="0" value="0"/>
+        <span>End</span><input id="end" type="range" min="0" value="0"/>
+      </div>
+    </body>
+    </html>
+
+  +codeblock('css', 2).
+    html,body,#map{
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      user-select: none;
+      display: flex;
+      align-items: center;
+    }
+    #controls span {
+      padding: 5px;
+    }
+    #controls.hidden {
+      display: none;
+    }
+
+  :markdown-it
+
+    Create a map and a feature layer.
+
+  +codeblock('javascript', 3).
+    var map = geo.map({
+      node: "#map",
+      center: {x: -73.7781, y: 40.6413},
+      zoom: 10
+    });
+    // create a layer that supports drawing line features
+    var layer = map.createLayer('feature', {features: ['line']});
+
+  :markdown-it
+    Specify some data.
+
+    A track feature is an array of data elements, each of which has a list of
+    vertices.
+
+    If a time is not specified on a vertex, the index of the vertex is used.
+
+  +codeblock('javascript', 4).
+    var trackData = [
+      [{id:'alpha',  t:0.0,x:-73.7679,y:40.6445},{t:6.0,x:-73.6959,y:40.6744},{t:12.0,x:-73.6244,y:40.6367},{t:18.0,x:-73.5793,y:40.567},{t:22.0,x:-73.5464,y:40.5183}],
+      [{id:'beta',   t:0.0,x:-73.7676,y:40.645},{t:4.0,x:-73.7403,y:40.6678},{t:9.0,x:-73.678,y:40.6712},{t:13.0,x:-73.6119,y:40.6741},{t:17.0,x:-73.5412,y:40.676}],
+      [{id:'gamma',  t:0.0,x:-73.7651,y:40.6488},{t:6.0,x:-73.7059,y:40.6517},{t:12.0,x:-73.6242,y:40.6181},{t:18.0,x:-73.5493,y:40.5618},{t:24.0,x:-73.4698,y:40.5002}],
+      [{id:'delta',  t:0.0,x:-73.7615,y:40.6527},{t:7.0,x:-73.6772,y:40.6735},{t:13.1,x:-73.5788,y:40.678},{t:19.1,x:-73.4699,y:40.6828},{t:25.1,x:-73.4303,y:40.7493},{t:27.1,x:-73.445,y:40.7747}],
+      [{id:'epsilon',t:0.0,x:-73.7856,y:40.6222},{t:3.0,x:-73.753,y:40.6585},{t:6.0,x:-73.7097,y:40.6633},{t:8.0,x:-73.6924,y:40.6641},{t:12.0,x:-73.6165,y:40.6667},{t:13.0,x:-73.6074,y:40.6673}],
+      [{id:'zeta',   t:0.0,x:-73.7591,y:40.6563},{t:6.0,x:-73.6847,y:40.6672},{t:12.0,x:-73.597,y:40.6897},{t:18.0,x:-73.5229,y:40.7398},{t:24.0,x:-73.4897,y:40.8127},{t:25.0,x:-73.4926,y:40.8215}],
+      [{id:'eta',    t:0.0,x:-73.7555,y:40.6593},{t:8.0,x:-73.6495,y:40.6708},{t:16.1,x:-73.5306,y:40.7073},{t:23.1,x:-73.5107,y:40.7884},{t:31.1,x:-73.5582,y:40.8988},{t:33.1,x:-73.5762,y:40.9285}],
+      [{id:'theta',  t:0.0,x:-73.8287,y:40.6524},{t:8.1,x:-73.9031,y:40.6026},{t:15.1,x:-73.9611,y:40.5312},{t:23.1,x:-74.0295,y:40.4473},{t:30.1,x:-74.1117,y:40.3775},{t:31.1,x:-74.1319,y:40.3686}],
+      [{id:'iota',   t:0.0,x:-73.8586,y:40.7728},{t:3.0,x:-73.8424,y:40.7564},{t:6.0,x:-73.8285,y:40.738},{t:9.0,x:-73.7938,y:40.7451},{t:12.0,x:-73.7738,y:40.7722},{t:13.0,x:-73.7667,y:40.783}],
+      [{id:'kappa',  t:0.0,x:-73.8709,y:40.7786},{t:5.0,x:-73.8384,y:40.7523},{t:10.0,x:-73.7904,y:40.7354},{t:14.0,x:-73.7561,y:40.7696},{t:18.0,x:-73.7631,y:40.8134},{t:22.0,x:-73.8214,y:40.8257}]
+    ];
+
+  :markdown-it
+    Create the track feature.  By default, the entirety of each track is shown.
+
+  +codeblock('javascript', 5, undefined, true).
+    var track = layer.createFeature('track')
+      // set the data to our example data
+      .data(trackData)
+      // set some style to our lines
+      .style({
+        strokeWidth: 4,
+        strokeColor: 'black'
+      })
+      .markerStyle({
+        symbol: geo.markerFeature.symbols.arrow,
+        symbolValue: [1, 1, 0, true],
+        radius: 15
+      });
+    // draw the feature
+    track.draw();
+  +codeblock_test('map has a feature layer with ten tracks', [
+      'map.layers().length === 1',
+      'map.layers()[0] instanceof geo.featureLayer',
+      'map.layers()[0].features()[0] instanceof geo.trackFeature',
+      'map.layers()[0].features()[0].data().length === 10'
+      ])
+
+  :markdown-it
+    Highlight a particular time range.
+
+    The track feature has a start time, end time, and duration.  Parts of the
+    track before the start time are styled with the `pastStyle`, those after
+    the end time are styled with the `futureStyle`, and those between the
+    start and end with the `presentStyle`.  The head of the track is at the
+    end time and can either have a marker or text styled with `markerStyle`
+    and `textStyle`.
+
+  +codeblock('javascript', 6).
+    track.startTime(5).endTime(20).draw();
+
+  :markdown-it
+    Hide future parts of the track.
+
+    If the end time is after the end of the track, hide the marker, too.
+
+  +codeblock('javascript', 7).
+    track.futureStyle('strokeOpacity', 0).draw();
+    track.markerStyle({
+      radius: (d) => track.timeRange().end <= d[d.length - 1].t ? 15 : 0
+    }).draw();
+
+  :markdown-it
+    Use text instead of a marker.
+
+  +codeblock('javascript', 8).
+    track.style('text', (d) => d[0].id).draw();
+    // we can style the text
+    track.textStyle('color', 'blue').draw();
+
+  :markdown-it
+    We can add controls to dynamically adjust the track times and to show
+    other information.
+
+    If you adjust the start time to a point after the end time, the specified
+    start time is ignored.  Instead, the minimum value for the time range is
+    used.
+
+  +codeblock('javascript', 9).
+    var startctl = document.getElementById('start'),
+        endctl = document.getElementById('end');
+    startctl.setAttribute('max', track.timeRange().maximum);
+    startctl.setAttribute('min', track.timeRange().minimum);
+    startctl.setAttribute('value', track.timeRange().startTime);
+    endctl.setAttribute('min', track.timeRange().minimum);
+    endctl.setAttribute('max', track.timeRange().maximum);
+    endctl.setAttribute('value', track.timeRange().endTime);
+
+    startctl.addEventListener('input', (event) => {
+      track.startTime(event.target.value).draw();
+    });
+    endctl.addEventListener('input', (event) => {
+      track.endTime(event.target.value).draw();
+    });
+    // show the controls
+    document.getElementById('controls').classList.remove('hidden');

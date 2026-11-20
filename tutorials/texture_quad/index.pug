@@ -1,0 +1,85 @@
+extends ../common/index.pug
+
+block mainTutorial
+  :markdown-it
+    # Tutorial - Texture Quads
+    The "map" can contain quads that are set via textures rather than images or videos.
+
+  +codeblock('javascript', 1, undefined, true).
+    // the pixelCoordinateParams function creates the parameters necessary for
+    // showing an image, video, or texture in pixel coordinates rather than in
+    // a map projection.  This is the conceptual size of the map space
+    var mapWidth = 720, mapHeight = 360;
+    var params = geo.util.pixelCoordinateParams('#map', mapWidth, mapHeight);
+    params.map.max += 3;  // allow zooming up to 8x beyond the pixel space specified
+    // create a map with the pixel-space parameters
+    var map = geo.map(params.map);
+    // create a feature layer to place some texture quads
+    var layer = map.createLayer('feature', {
+      features: ['quad.texture']
+    });
+
+    var width = 72, height = 72;
+    var lumData = new Uint8Array(width * height);
+    // Fill with a checkerboard pattern
+    for (var i = 0; i < lumData.length; i++) {
+        var x = i % width;
+        var y = Math.floor(i / width);
+        lumData[i] = ((x + y) % 2) * 255;
+    }
+    // make an rgba texture, too
+    var rgbaData = new Uint8Array(width * height * 4);
+    for (var i = 0; i < rgbaData.length; i++) {
+        var x = Math.floor((i % (width * 4)) / 4);
+        var y = Math.floor(i / (width * 4));
+        // make five colors of stripes, each 4 pixels wide
+        var stripe = Math.floor((x + y) / 4) % 5;
+        switch (i % 4) {
+          case 0:
+            rgbaData[i] = (stripe === 1 || stripe === 4) * 255;
+            break;
+          case 1:
+            rgbaData[i] = (stripe === 2 || stripe === 4) * 255;
+            break;
+          case 2:
+            rgbaData[i] = (stripe === 3 || stripe === 4) * 255;
+            break;
+          case 3:
+            // full alpha
+            rgbaData[i] = 255;
+            break;
+        }
+
+    }
+
+    var textureData = [{
+        ul: [0, 0],
+        lr: [mapWidth, mapHeight],
+        texture: {
+            data: lumData,
+            type: 'Luminance',
+            width: width,
+            height: height
+        }
+    }, {
+        ul: [mapWidth / 2, 0],
+        lr: [mapWidth, mapHeight],
+        texture: {
+            data: rgbaData,
+            type: 'RGBA',
+            width: width,
+            height: height
+        }
+    }];
+
+    // create a quad feature with the textures.
+    var quads = layer.createFeature('quad');
+    quads.data(textureData);
+    quads.draw();
+
+  +codeblock_test('map has a single feature layer', [
+      'map.layers().length === 1',
+      'map.layers()[0] instanceof geo.featureLayer',
+      'map.layers()[0].features().length === 1',
+      'map.layers()[0].features()[0] instanceof geo.quadFeature'
+      ])

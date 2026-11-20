@@ -1,0 +1,31 @@
+.layer-toggle {
+  position: absolute;
+  top: 90px;
+  right: 30px;
+  width: 200px;
+  z-index: 1002;
+}
+
+.top-layer-overlay {
+  fill: yellow;
+  fill-opacity: 0.05;
+}
+
+rect.background {
+  fill: white;
+  fill-opacity: 100%;
+  display: none;
+}
+
+svg text {
+  font-family: source-sans-pro, Source Sans Pro, Helvetica, sans-serif;
+  stroke: none;
+  font-size: 26px;
+}
+
+rect.evt-box {
+  stroke: black;
+  stroke-width: 2px;
+  stroke-opacity: 100%;
+  fill-opacity: 25%;
+}
