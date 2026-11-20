@@ -22,7 +22,6 @@ var feature = require('./feature');
  *   then it will switch to `triangle`.  The computation for `auto` uses some
  *   time, so using a specific primitive could be faster.
  * @property {boolean} [dynamicDraw=false] For the webgl renderer, if this is
- *   truthy, webgl source buffers can be modified and updated directly.
  *   truthy, webgl source buffers can be modified and updated directly.  This
  *   is not strictly necessary, as it is just a recommendation for the GPU.
  */
