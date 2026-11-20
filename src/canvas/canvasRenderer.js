@@ -6,7 +6,7 @@ var renderer = require('../renderer');
  * Create a new instance of class canvasRenderer.
  *
  * @class
- * @alias geo.canvas.renderer
+ * @alias geo.canvas.canvasRenderer
  * @extends geo.renderer
  * @param {object} arg Options for the renderer.
  * @param {geo.layer} [arg.layer] Layer associated with the renderer.
