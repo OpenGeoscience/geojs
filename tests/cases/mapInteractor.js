@@ -1759,6 +1759,89 @@ describe('mapInteractor', function () {
         'mousemove', {map: {x: 47, y: 57}});
       expect(lastmap).toEqual({x: 47, y: 57});
     });
+    it('Test mousemove when the map changes under the mouse', function () {
+      var moves = [];
+
+      mockAnimationFrame();
+      map.geoOn(geo.event.mousemove, function (evt) {
+        moves.push(evt);
+      });
+      // the mouse hasn't entered the map, so map changes don't fire events
+      map.pan({x: 10, y: 0});
+      stepAnimationFrame();
+      expect(moves.length).toBe(0);
+      interactor.simulateEvent('mousemove', {map: {x: 100, y: 100}});
+      expect(moves.length).toBe(1);
+      var geo1 = moves[0].geo;
+      // multiple changes in one frame result in one event
+      map.pan({x: 10, y: 0});
+      map.pan({x: 10, y: 0});
+      expect(moves.length).toBe(1);
+      stepAnimationFrame();
+      expect(moves.length).toBe(2);
+      expect(moves[1].map).toEqual({x: 100, y: 100});
+      expect(moves[1].geo).toEqual(map.displayToGcs({x: 100, y: 100}));
+      expect(moves[1].geo.x).not.toBeCloseTo(geo1.x, 6);
+      expect(interactor.mouse().geo).toEqual(moves[1].geo);
+      // zoom and rotate also fire events
+      map.zoom(3);
+      stepAnimationFrame();
+      expect(moves.length).toBe(3);
+      map.rotation(0.5);
+      stepAnimationFrame();
+      expect(moves.length).toBe(4);
+      // no events while paused
+      interactor.pause(true);
+      map.pan({x: 10, y: 0});
+      stepAnimationFrame();
+      expect(moves.length).toBe(4);
+      interactor.pause(false);
+      // no events while a mouse action is in progress
+      interactor.simulateEvent(
+        'mousedown', {map: {x: 100, y: 100}, button: 'left'});
+      interactor.simulateEvent(
+        'mousemove', {map: {x: 120, y: 100}, button: 'left'});
+      stepAnimationFrame();
+      interactor.simulateEvent(
+        'mouseup.geojs', {map: {x: 120, y: 100}, button: 'left'});
+      interactor.cancel(geo.geo_action.momentum);
+      var count = moves.length;
+      // after the action, map changes fire events
+      map.pan({x: 10, y: 0});
+      stepAnimationFrame();
+      expect(moves.length).toBe(count + 1);
+      // no events after the mouse leaves the map
+      interactor.simulateEvent('mouseleave', {map: {x: 120, y: 100}});
+      map.pan({x: 10, y: 0});
+      stepAnimationFrame();
+      expect(moves.length).toBe(count + 1);
+      unmockAnimationFrame();
+    });
+    it('Test feature mouseover when the map pans under the mouse', function () {
+      var over = 0, out = 0;
+
+      mockAnimationFrame();
+      var layer = map.createLayer('feature', {renderer: 'svg'});
+      var point = layer.createFeature('point', {selectionAPI: true})
+        .data([map.displayToGcs({x: 300, y: 250})])
+        .style('radius', 5)
+        .geoOn(geo.event.feature.mouseover, function () { over += 1; })
+        .geoOn(geo.event.feature.mouseout, function () { out += 1; });
+      point.draw();
+      interactor.simulateEvent('mousemove', {map: {x: 250, y: 250}});
+      expect(over).toBe(0);
+      // pan the point under the stationary mouse
+      map.pan({x: -50, y: 0});
+      stepAnimationFrame();
+      expect(over).toBe(1);
+      expect(out).toBe(0);
+      // and pan it away again
+      map.pan({x: 50, y: 0});
+      stepAnimationFrame();
+      expect(over).toBe(1);
+      expect(out).toBe(1);
+      unmockAnimationFrame();
+    });
   });
 
   it('Test keyboard interaction and event and propagation', function () {
